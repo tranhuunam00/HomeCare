@@ -16,20 +16,44 @@ import { UploadOutlined } from "@ant-design/icons";
 import ImageUploader from "./_UploadImage";
 
 const terms = [
-  { short: "NE", full: "Not Evaluate" },
-  { short: "NA", full: "Not Available" },
-  { short: "TP", full: "Time Point" },
-  { short: "BL", full: "Baseline" },
-  { short: "SLD", full: "Sum of Longest Diameter" },
-  { short: "BLD", full: "Baseline Sum Diameter" },
-  { short: "SPD", full: "Sum of Perpendicular Diameter" },
-  { short: "Nadir", full: "Nadir" },
-  { short: "TL", full: "Target Lesions" },
-  { short: "NTL", full: "None Target Lesions" },
-  { short: "CR", full: "Complete Response" },
-  { short: "PR", full: "Partial Response" },
-  { short: "PD", full: "Progressive Disease" },
-  { short: "SD", full: "Stable Disease" },
+  { short: "NE", full: "Not Evaluate", noidung: "Không đánh giá được" },
+  { short: "NA", full: "Not Available", noidung: "Không đánh giá" },
+  {
+    short: "TP",
+    full: "Time Point",
+    noidung: "Thời điểm theo dõi sau điều trị",
+  },
+  { short: "BL", full: "Baseline", noidung: "Trước điều trị" },
+  {
+    short: "SLD",
+    full: "Sum of Longest Diameter",
+    noidung: "Tổng kích thước của các tổn thương trục dài",
+  },
+  {
+    short: "BLD",
+    full: "Baseline Sum Diameter",
+    noidung: "Tổng kích thước của các tổn thương ở thời điểm Baseline",
+  },
+  {
+    short: "SPD",
+    full: "Sum of Perpendicular Diameter",
+    noidung: "Tổng kích thước trục ngắn",
+  },
+  {
+    short: "Nadir",
+    full: "Nadir",
+    noidung: "Giá trị SLD nhỏ nhất trước thời điểm đánh giá",
+  },
+  { short: "TL", full: "Target Lesions", noidung: "Tổn thương đích" },
+  {
+    short: "NTL",
+    full: "None Target Lesions",
+    noidung: "Tổn thương không đích",
+  },
+  { short: "CR", full: "Complete Response", noidung: "Đáp ứng hoàn toàn" },
+  { short: "PR", full: "Partial Response", noidung: "Đáp ứng một phần" },
+  { short: "PD", full: "Progressive Disease", noidung: "Bệnh tiến triển" },
+  { short: "SD", full: "Stable Disease", noidung: "Bệnh ổn định" },
 ];
 const columns = [
   {
@@ -44,20 +68,29 @@ const columns = [
   {
     title: "Nội dung",
     dataIndex: "noidung",
-    render: (text, record, index) => (
-      <Input.TextArea
-        value={text}
-        autoSize={{ minRows: 2, maxRows: 5 }}
-        onChange={(e) => record.onChange(index, e.target.value)}
-      />
-    ),
+    render: (text, record, index) => {
+      return record.noidung;
+    },
     width: 200, // px
   },
+
+  // {
+  //   title: "Nội dung",
+  //   dataIndex: "noidung",
+  //   render: (text, record, index) => (
+  //     <Input.TextArea
+  //       value={text}
+  //       autoSize={{ minRows: 2, maxRows: 5 }}
+  //       onChange={(e) => record.onChange(index, e.target.value)}
+  //     />
+  //   ),
+  //   width: 200, // px
+  // },
 ].flat();
 
 const GuildLine = ({ title }) => {
   const [data, setData] = useState(
-    terms.map((t) => ({ stt: t.full, noidung: "" }))
+    terms.map((t) => ({ stt: t.full, noidung: t.noidung }))
   );
 
   const [imageUrl, setImageUrl] = useState(null);

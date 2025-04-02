@@ -27,6 +27,7 @@ const columns = [
     render: (text, record, index) => (
       <Input
         value={text}
+        type="text"
         onChange={(e) => record.onChange(index, "location", e.target.value)}
       />
     ),
@@ -140,7 +141,11 @@ const TargetLesionsTable = ({ title }) => {
   ]);
   const onChange = (rowIndex, key, value) => {
     const newData = [...data];
-    newData[rowIndex][key] = +value || 0;
+    if (key !== "location") {
+      newData[rowIndex][key] = +value || 0;
+    } else {
+      newData[rowIndex][key] = value;
+    }
     setData(newData);
   };
 
@@ -163,11 +168,11 @@ const TargetLesionsTable = ({ title }) => {
   const parsedData = data.map((item) => ({
     ...item,
     baseline: Number(item.baseline) || 0,
-    tp1: Number(item.tp1) || 0,
-    tp2: Number(item.tp2) || 0,
-    tp3: Number(item.tp3) || 0,
-    tp4: Number(item.tp4) || 0,
-    tp5: Number(item.tp5) || 0,
+    tp1: Number(item.tp1) || "",
+    tp2: Number(item.tp2) || "",
+    tp3: Number(item.tp3) || "",
+    tp4: Number(item.tp4) || "",
+    tp5: Number(item.tp5) || "",
     onChange,
   }));
 
@@ -178,28 +183,32 @@ const TargetLesionsTable = ({ title }) => {
     const dates = Object.keys(dataDate[0]).filter((key) => {
       return dataDate[0][key] && new Date(dataDate[0][key]) < endDate && key;
     });
+
     if (dates.length == 0) return 0;
     if (dates.length == 1)
       return Number(data.reduce((acc, row) => acc + row[dates[0]], 0)) || 0;
-    return (
-      Number(
-        data.reduce((acc, row) => acc + row[dates[dates.length - 2]], 0)
-      ) || 0
+
+    const values = dates.map(
+      (date) => Number(data.reduce((acc, row) => acc + row[date], 0)) || 0
     );
+    values.pop();
+
+    return Math.min(...values);
   };
 
   const sumSLD = (tp) => parsedData.reduce((acc, row) => acc + row[tp], 0);
 
+  console.log(sumSLD("tp5"));
   const parsedDataTotal = [
     {
       location: "Tổng SLD (mm):",
       baseline:
-        Number(data.reduce((acc, row) => acc + row["baseline"], 0)) || 0,
-      tp1: Number(data.reduce((acc, row) => acc + row["tp1"], 0)) || 0,
-      tp2: Number(data.reduce((acc, row) => acc + row["tp2"], 0)) || 0,
-      tp3: Number(data.reduce((acc, row) => acc + row["tp3"], 0)) || 0,
-      tp4: Number(data.reduce((acc, row) => acc + row["tp4"], 0)) || 0,
-      tp5: Number(data.reduce((acc, row) => acc + row["tp5"], 0)) || 0,
+        Number(data.reduce((acc, row) => acc + row["baseline"], 0)) || "",
+      tp1: Number(data.reduce((acc, row) => acc + row["tp1"], 0)) || "",
+      tp2: Number(data.reduce((acc, row) => acc + row["tp2"], 0)) || "",
+      tp3: Number(data.reduce((acc, row) => acc + row["tp3"], 0)) || "",
+      tp4: Number(data.reduce((acc, row) => acc + row["tp4"], 0)) || "",
+      tp5: Number(data.reduce((acc, row) => acc + row["tp5"], 0)) || "",
     },
     {
       location: "Nadir (mm):",
@@ -208,31 +217,57 @@ const TargetLesionsTable = ({ title }) => {
     {
       location: "Thay đổi SLD:",
       baseline: "",
-      tp1: (sumSLD("tp1") - sumSLD("baseline")) / sumSLD("baseline"),
-      tp2: (sumSLD("tp2") - sumSLD("baseline")) / sumSLD("baseline"),
-      tp3: (sumSLD("tp3") - sumSLD("baseline")) / sumSLD("baseline"),
-      tp4: (sumSLD("tp4") - sumSLD("baseline")) / sumSLD("baseline"),
-      tp5: (sumSLD("tp5") - sumSLD("baseline")) / sumSLD("baseline"),
+      tp1:
+        sumSLD("tp1") != 0
+          ? (sumSLD("tp1") - sumSLD("baseline")) / sumSLD("baseline")
+          : "",
+      tp2:
+        sumSLD("tp2") != 0
+          ? (sumSLD("tp2") - sumSLD("baseline")) / sumSLD("baseline")
+          : "",
+      tp3:
+        sumSLD("tp3") != 0
+          ? (sumSLD("tp3") - sumSLD("baseline")) / sumSLD("baseline")
+          : "",
+      tp4:
+        sumSLD("tp4") != 0
+          ? (sumSLD("tp4") - sumSLD("baseline")) / sumSLD("baseline")
+          : "",
+      tp5:
+        sumSLD("tp5") != 0
+          ? (sumSLD("tp5") - sumSLD("baseline")) / sumSLD("baseline")
+          : "",
     },
     {
       location: "Thay đổi Nadir:",
       baseline: "",
       tp1:
-        (sumSLD("tp1") - getNadir(data, dataDate)) / getNadir(data, dataDate),
+        sumSLD("tp1") != 0
+          ? (sumSLD("tp1") - getNadir(data, dataDate)) /
+            getNadir(data, dataDate)
+          : "",
       tp2:
-        (sumSLD("tp2") - getNadir(data, dataDate)) / getNadir(data, dataDate),
+        sumSLD("tp2") != 0
+          ? (sumSLD("tp2") - getNadir(data, dataDate)) /
+            getNadir(data, dataDate)
+          : "",
       tp3:
-        (sumSLD("tp3") - getNadir(data, dataDate)) / getNadir(data, dataDate),
+        sumSLD("tp3") != 0
+          ? (sumSLD("tp3") - getNadir(data, dataDate)) /
+            getNadir(data, dataDate)
+          : "",
       tp4:
-        (sumSLD("tp4") - getNadir(data, dataDate)) / getNadir(data, dataDate),
+        sumSLD("tp4") != 0
+          ? (sumSLD("tp4") - getNadir(data, dataDate)) /
+            getNadir(data, dataDate)
+          : "",
       tp5:
-        (sumSLD("tp5") - getNadir(data, dataDate)) / getNadir(data, dataDate),
+        sumSLD("tp5") != 0
+          ? (sumSLD("tp5") - getNadir(data, dataDate)) /
+            getNadir(data, dataDate)
+          : "",
     },
   ];
-
-  const nadir = Math.min(
-    ...["tp1", "tp2", "tp3", "tp4"].map(sumSLD).filter((v) => v > 0)
-  );
 
   const chartData = useMemo(
     () =>
@@ -267,18 +302,6 @@ const TargetLesionsTable = ({ title }) => {
         pagination={false}
         bordered
       />
-
-      <Row style={{ marginTop: 16 }} gutter={16}>
-        <Col span={6}>
-          <Text strong>Tổng SLD (Baseline):</Text> {sumSLD("baseline")} mm
-        </Col>
-        <Col span={6}>
-          <Text strong>Tổng SLD (TP1):</Text> {sumSLD("tp1")} mm
-        </Col>
-        <Col span={6}>
-          <Text strong>Tổng SLD (TP2):</Text> {sumSLD("tp2")} mm
-        </Col>
-      </Row>
 
       <Row style={{ marginTop: 8 }}>
         <Col span={24}>
