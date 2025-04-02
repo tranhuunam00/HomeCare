@@ -10,6 +10,7 @@ import {
   Tooltip,
   ReferenceLine,
 } from "recharts";
+import TextArea from "antd/es/input/TextArea";
 
 const { Title, Text } = Typography;
 
@@ -95,7 +96,7 @@ const columnsDate = [
   })),
 ].flat();
 
-const TargetLesionsTable = () => {
+const TargetLesionsTable = ({ title }) => {
   const [data, setData] = useState([
     {
       location: "RUL3",
@@ -144,12 +145,10 @@ const TargetLesionsTable = () => {
   };
 
   const onChangeDate = (rowIndex, key, value) => {
-    console.log("rowIndex, key, value", rowIndex, key, value);
     const newData = [...dataDate];
     newData[rowIndex][key] = value;
     setDataDate(newData);
   };
-  console.log("dataDate", dataDate);
   const parsedDataDate = dataDate.map((item) => ({
     ...item,
     baseline: item.baseline,
@@ -173,22 +172,24 @@ const TargetLesionsTable = () => {
   }));
 
   const getNadir = (data, dataDate) => {
-    const startDate = new Date();
-    startDate.setHours(0);
-    startDate.setMinutes(0);
+    const endDate = new Date();
+    endDate.setHours(23);
+    endDate.setMinutes(59);
     const dates = Object.keys(dataDate[0]).filter((key) => {
-      return dataDate[0][key] && new Date(dataDate[0][key]) < startDate && key;
+      return dataDate[0][key] && new Date(dataDate[0][key]) < endDate && key;
     });
     if (dates.length == 0) return 0;
     if (dates.length == 1)
       return Number(data.reduce((acc, row) => acc + row[dates[0]], 0)) || 0;
-    console.log(dates[dates.length - 1]);
     return (
       Number(
         data.reduce((acc, row) => acc + row[dates[dates.length - 2]], 0)
       ) || 0
     );
   };
+
+  const sumSLD = (tp) => parsedData.reduce((acc, row) => acc + row[tp], 0);
+
   const parsedDataTotal = [
     {
       location: "Tổng SLD (mm):",
@@ -204,32 +205,35 @@ const TargetLesionsTable = () => {
       location: "Nadir (mm):",
       baseline: getNadir(data, dataDate),
     },
+    {
+      location: "Thay đổi SLD:",
+      baseline: "",
+      tp1: (sumSLD("tp1") - sumSLD("baseline")) / sumSLD("baseline"),
+      tp2: (sumSLD("tp2") - sumSLD("baseline")) / sumSLD("baseline"),
+      tp3: (sumSLD("tp3") - sumSLD("baseline")) / sumSLD("baseline"),
+      tp4: (sumSLD("tp4") - sumSLD("baseline")) / sumSLD("baseline"),
+      tp5: (sumSLD("tp5") - sumSLD("baseline")) / sumSLD("baseline"),
+    },
+    {
+      location: "Thay đổi Nadir:",
+      baseline: "",
+      tp1:
+        (sumSLD("tp1") - getNadir(data, dataDate)) / getNadir(data, dataDate),
+      tp2:
+        (sumSLD("tp2") - getNadir(data, dataDate)) / getNadir(data, dataDate),
+      tp3:
+        (sumSLD("tp3") - getNadir(data, dataDate)) / getNadir(data, dataDate),
+      tp4:
+        (sumSLD("tp4") - getNadir(data, dataDate)) / getNadir(data, dataDate),
+      tp5:
+        (sumSLD("tp5") - getNadir(data, dataDate)) / getNadir(data, dataDate),
+    },
   ];
 
-  const sumSLD = (tp) => parsedData.reduce((acc, row) => acc + row[tp], 0);
   const nadir = Math.min(
     ...["tp1", "tp2", "tp3", "tp4"].map(sumSLD).filter((v) => v > 0)
   );
 
-  const changeSLD = ((sumSLD("tp2") - sumSLD("tp1")) / sumSLD("tp1")) * 100;
-  const changeFromNadir = ((sumSLD("tp2") - nadir) / nadir) * 100;
-
-  const responseAssessment = (() => {
-    if (!isFinite(changeFromNadir)) return "";
-    if (changeFromNadir >= 20) return "PD";
-    if (changeSLD <= -30) return "PR";
-    return "SD";
-  })();
-
-  console.log(
-    " Object.keys(parsedDataTotal)",
-    Object.keys(parsedDataTotal[0])
-      .filter((key) => key != "location")
-      .map((key) => ({
-        date: dataDate[key],
-        sld: parsedDataTotal[0][key],
-      }))
-  );
   const chartData = useMemo(
     () =>
       Object.keys(parsedDataTotal[0])
@@ -244,7 +248,7 @@ const TargetLesionsTable = () => {
 
   return (
     <div style={{ padding: 24 }}>
-      <Title level={4}>TỔN THƯƠNG ĐÍCH (TARGET LESIONS)</Title>
+      <Title level={4}>{title}</Title>
       <Table
         columns={columnsDate}
         dataSource={parsedDataDate}
@@ -276,29 +280,10 @@ const TargetLesionsTable = () => {
         </Col>
       </Row>
 
-      <Row style={{ marginTop: 8 }} gutter={16}>
-        <Col span={8}>
-          <Text strong>Nadir:</Text> {nadir} mm
-        </Col>
-        <Col span={8}>
-          <Text>
-            Thay đổi SLD:{" "}
-            {isFinite(changeSLD) ? `${changeSLD.toFixed(0)}%` : "N/A"}
-          </Text>
-        </Col>
-        <Col span={8}>
-          <Text>
-            Thay đổi Nadir:{" "}
-            {isFinite(changeFromNadir)
-              ? `${changeFromNadir.toFixed(0)}%`
-              : "N/A"}
-          </Text>
-        </Col>
-      </Row>
-
       <Row style={{ marginTop: 8 }}>
         <Col span={24}>
-          <Text strong>Đánh giá đáp ứng:</Text> {responseAssessment}
+          <Text strong>Đánh giá đáp ứng:</Text>
+          <TextArea />
         </Col>
       </Row>
 
@@ -313,7 +298,7 @@ const TargetLesionsTable = () => {
       >
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="date" />
-        <YAxis domain={[50, 140]} />
+        <YAxis domain={[50, 200]} />
         <Tooltip />
         <ReferenceLine
           y={sumSLD("baseline") * 0.7}
@@ -326,7 +311,7 @@ const TargetLesionsTable = () => {
           strokeDasharray="3 3"
         />
         <ReferenceLine
-          y={nadir * 1.2}
+          y={Math.floor(getNadir(data, dataDate) * 1.2)}
           stroke="red"
           label={{
             value: "PD: +20% from nadir",

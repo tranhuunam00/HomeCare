@@ -10,6 +10,7 @@ import {
   Typography,
 } from "antd";
 import TargetLesionsTable from "./_TargetLesionsTable";
+import GuildLine from "./_guildline";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -17,9 +18,7 @@ const { TextArea } = Input;
 const PatientForm = () => {
   const [form] = Form.useForm();
 
-  const onFinish = (values) => {
-    console.log("Form Values:", values);
-  };
+  const onFinish = (values) => {};
 
   return (
     <Form
@@ -133,7 +132,19 @@ export default function Template() {
         RECIST 1.1
       </h2>
       <PatientForm />
-      <TargetLesionsTable />
+      <GuildLine
+        title={
+          "Minh họa các phân thùy gan và một số viết tắt, quy ước của RECIST 1.1"
+        }
+      />
+      <TargetLesionsTable title={"TỔN THƯƠNG ĐÍCH (TARGET LESIONS)"} />
+
+      <TargetLesionsTable
+        title={"NGOÀI TỔN THƯƠNG ĐÍCH (NON-TARGET LESIONS)"}
+      />
+
+      <TargetLesionsTable title={"TỔN THƯƠNG MỚI"} />
+
       <Link to="/">Quay lại Trang chủ</Link>
     </div>
   );
