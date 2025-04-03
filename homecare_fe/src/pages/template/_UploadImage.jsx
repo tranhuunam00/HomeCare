@@ -12,7 +12,7 @@ const ImageUploader = () => {
   };
 
   return (
-    <div className="p-4">
+    <div className="p-4 no-print">
       <div className="mb-4">
         <h3 className="font-semibold mb-2">Chọn ảnh mới:</h3>
         <input type="file" accept="image/*" onChange={handleImageChange} />

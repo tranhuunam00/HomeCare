@@ -122,8 +122,8 @@ const PatientForm = () => {
         <Input />
       </Form.Item>
 
-      <Form.Item>
-        <Button type="primary" htmlType="submit">
+      <Form.Item className="no-print">
+        <Button type="primary" htmlType="submit" className="no-print">
           Gửi thông tin
         </Button>
       </Form.Item>
@@ -132,48 +132,42 @@ const PatientForm = () => {
 };
 
 export default function Template() {
-  const [previewVisible, setPreviewVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const printRef = useRef(null);
+
   const generatePDF = async () => {
-    // const reportContainer = document.getElementById("report-container");
-    const element = printRef.current;
-    if (!element) {
-      return;
-    }
+    setLoading(true);
 
     // Thêm CSS cho in ấn
     const style = `
-      
-        .no-print {
-          display: none !important;
-        }
-        .print-section {
-          page-break-inside: avoid;
-          margin-bottom: 20px;
-        }
-        table {
-          page-break-inside: avoid;
-        }
-        .ant-table {
-          page-break-inside: avoid;
-        }
-        .ant-table-tbody {
-          page-break-inside: avoid;
-        }
-        .ant-table-row {
-          page-break-inside: avoid;
-        }
-        button, .ant-btn {
-          display: none !important;
-        }
-        /* Ẩn các form control không cần thiết khi in */
-        .ant-form-item-control-input-content .ant-picker-suffix,
-        .ant-form-item-control-input-content .ant-select-arrow,
-        .ant-form-item-control-input-content .ant-input-number-handler-wrap {
-          display: none !important;
-        }
-      
+      .no-print {
+        display: none !important;
+      }
+      .print-section {
+        page-break-inside: avoid;
+        margin-bottom: 20px;
+      }
+      table {
+        page-break-inside: avoid;
+      }
+      .ant-table {
+        page-break-inside: avoid;
+      }
+      .ant-table-tbody {
+        page-break-inside: avoid;
+      }
+      .ant-table-row {
+        page-break-inside: avoid;
+      }
+      button, .ant-btn {
+        display: none !important;
+      }
+      /* Ẩn các form control không cần thiết khi in */
+      .ant-form-item-control-input-content .ant-picker-suffix,
+      .ant-form-item-control-input-content .ant-select-arrow,
+      .ant-form-item-control-input-content .ant-input-number-handler-wrap {
+        display: none !important;
+      }
     `;
 
     const styleTag = document.createElement("style");
@@ -183,42 +177,37 @@ export default function Template() {
     // Đợi một chút để đảm bảo các style đã được áp dụng
     await new Promise((resolve) => setTimeout(resolve, 100));
 
-    // Sử dụng html2canvas để chuyển đổi HTML thành canvas
-    const canvas = await html2canvas(element, {
-      scale: 0.8, // Tăng độ phân giải
-      useCORS: true, // Cho phép tải hình ảnh từ miền khác
-    });
-
-    const imgData = canvas.toDataURL("image/png");
+    const sections = document.querySelectorAll(".print-section");
     const pdf = new jsPDF({
       orientation: "portrait",
-      unit: "px",
+      unit: "mm",
       format: "a4",
     });
 
-    // Thêm hình ảnh vào PDF
-    // const imgWidth = 190; // Kích thước hình ảnh trong PDF
-    // const pageHeight = pdf.internal.pageSize.height;
-    // const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    const margin = 10;
+    const pdfWidth = pdf.internal.pageSize.getWidth() - margin * 2;
 
-    let position = 0;
-    const imgProperties = pdf.getImageProperties(imgData);
-    const pdfWith = pdf.internal.pageSize.getWidth();
+    for (let i = 0; i < sections.length; i++) {
+      const section = sections[i];
+      const canvas = await html2canvas(section, {
+        scale: 1.5,
+        useCORS: true,
+      });
 
-    const pdfHeight = (imgProperties.height * pdfWith) / imgProperties.width;
-    let heightLeft = pdfHeight;
-    // Thêm hình ảnh vào PDF và xử lý nhiều trang nếu cần
-    while (heightLeft >= 0) {
-      pdf.addImage(imgData, "PNG", 0, 0, pdfWith, pdfHeight);
-      heightLeft -= pageHeight;
-      position -= pageHeight; // Di chuyển xuống trang tiếp theo
-      if (heightLeft >= 0) {
-        pdf.addPage(); // Thêm trang mới nếu cần
+      const imgData = canvas.toDataURL("image/jpeg", 0.7);
+      const imgProperties = pdf.getImageProperties(imgData);
+      const imgWidth = pdfWidth;
+      const imgHeight = (imgProperties.height * imgWidth) / imgProperties.width;
+
+      pdf.addImage(imgData, "JPEG", margin, margin, imgWidth, imgHeight);
+
+      if (i < sections.length - 1) {
+        pdf.addPage();
       }
     }
 
-    // Lưu PDF
     pdf.save("ketqua_recist.pdf");
+    setLoading(false);
 
     // Xóa bỏ style đã thêm
     document.head.removeChild(styleTag);
@@ -226,7 +215,7 @@ export default function Template() {
 
   return (
     <div>
-      <div className="no-print">
+      <div>
         <Space
           style={{
             marginBottom: 16,
@@ -235,8 +224,13 @@ export default function Template() {
           }}
         >
           <Link to="/">Quay lại Trang chủ</Link>
-          <Button type="primary" onClick={generatePDF} loading={loading}>
-            {loading ? "Đang tạo PDF..." : "Xuất PDF"}
+          <Button
+            type="primary"
+            onClick={generatePDF}
+            loading={loading}
+            disabled={loading}
+          >
+            {loading ? "Đang xuất file PDF..." : "Xuất PDF"}
           </Button>
         </Space>
       </div>
