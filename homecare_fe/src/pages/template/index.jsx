@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom";
-
+import { data, Link } from "react-router-dom";
+import html2pdf from "html2pdf.js";
 import {
   Form,
   Input,
@@ -8,9 +8,16 @@ import {
   Select,
   Button,
   Typography,
+  Space,
+  Modal,
 } from "antd";
 import TargetLesionsTable from "./_TargetLesionsTable";
 import GuildLine from "./_guildline";
+import OtherAssessmentTable from "./OtherAssessmentTable.jsx";
+import ConclusionTable from "./ConclusionTable.jsx";
+import { useRef, useState } from "react";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -125,27 +132,165 @@ const PatientForm = () => {
 };
 
 export default function Template() {
+  const [previewVisible, setPreviewVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const printRef = useRef(null);
+  const generatePDF = async () => {
+    // const reportContainer = document.getElementById("report-container");
+    const element = printRef.current;
+    if (!element) {
+      return;
+    }
+
+    // Thêm CSS cho in ấn
+    const style = `
+      
+        .no-print {
+          display: none !important;
+        }
+        .print-section {
+          page-break-inside: avoid;
+          margin-bottom: 20px;
+        }
+        table {
+          page-break-inside: avoid;
+        }
+        .ant-table {
+          page-break-inside: avoid;
+        }
+        .ant-table-tbody {
+          page-break-inside: avoid;
+        }
+        .ant-table-row {
+          page-break-inside: avoid;
+        }
+        button, .ant-btn {
+          display: none !important;
+        }
+        /* Ẩn các form control không cần thiết khi in */
+        .ant-form-item-control-input-content .ant-picker-suffix,
+        .ant-form-item-control-input-content .ant-select-arrow,
+        .ant-form-item-control-input-content .ant-input-number-handler-wrap {
+          display: none !important;
+        }
+      
+    `;
+
+    const styleTag = document.createElement("style");
+    styleTag.innerHTML = style;
+    document.head.appendChild(styleTag);
+
+    // Đợi một chút để đảm bảo các style đã được áp dụng
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    // Sử dụng html2canvas để chuyển đổi HTML thành canvas
+    const canvas = await html2canvas(element, {
+      scale: 0.8, // Tăng độ phân giải
+      useCORS: true, // Cho phép tải hình ảnh từ miền khác
+    });
+
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "px",
+      format: "a4",
+    });
+
+    // Thêm hình ảnh vào PDF
+    // const imgWidth = 190; // Kích thước hình ảnh trong PDF
+    // const pageHeight = pdf.internal.pageSize.height;
+    // const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    let position = 0;
+    const imgProperties = pdf.getImageProperties(imgData);
+    const pdfWith = pdf.internal.pageSize.getWidth();
+
+    const pdfHeight = (imgProperties.height * pdfWith) / imgProperties.width;
+    let heightLeft = pdfHeight;
+    // Thêm hình ảnh vào PDF và xử lý nhiều trang nếu cần
+    while (heightLeft >= 0) {
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWith, pdfHeight);
+      heightLeft -= pageHeight;
+      position -= pageHeight; // Di chuyển xuống trang tiếp theo
+      if (heightLeft >= 0) {
+        pdf.addPage(); // Thêm trang mới nếu cần
+      }
+    }
+
+    // Lưu PDF
+    pdf.save("ketqua_recist.pdf");
+
+    // Xóa bỏ style đã thêm
+    document.head.removeChild(styleTag);
+  };
+
   return (
     <div>
-      <h2>
-        KẾT QUẢ PHÂN TÍCH DỮ LIỆU CHỤP CẮT LỚP VI TÍNH ĐÁNH GIÁ THEO TIÊU CHUẨN
-        RECIST 1.1
-      </h2>
-      <PatientForm />
-      <GuildLine
-        title={
-          "Minh họa các phân thùy gan và một số viết tắt, quy ước của RECIST 1.1"
-        }
-      />
-      <TargetLesionsTable title={"TỔN THƯƠNG ĐÍCH (TARGET LESIONS)"} />
+      <div className="no-print">
+        <Space
+          style={{
+            marginBottom: 16,
+            justifyContent: "space-between",
+            width: "100%",
+          }}
+        >
+          <Link to="/">Quay lại Trang chủ</Link>
+          <Button type="primary" onClick={generatePDF} loading={loading}>
+            {loading ? "Đang tạo PDF..." : "Xuất PDF"}
+          </Button>
+        </Space>
+      </div>
 
-      <TargetLesionsTable
-        title={"NGOÀI TỔN THƯƠNG ĐÍCH (NON-TARGET LESIONS)"}
-      />
+      <div
+        ref={printRef}
+        id="report-container"
+        style={{
+          maxWidth: "1100px",
+          margin: "0 auto",
+          padding: "20px",
+        }}
+      >
+        {/* Thông tin bệnh nhân */}
+        <div className="print-section">
+          <h2 style={{ textAlign: "center", marginBottom: "20px" }}>
+            KẾT QUẢ PHÂN TÍCH DỮ LIỆU CHỤP CẮT LỚP VI TÍNH ĐÁNH GIÁ THEO TIÊU
+            CHUẨN RECIST 1.1
+          </h2>
+          <PatientForm />
+        </div>
 
-      <TargetLesionsTable title={"TỔN THƯƠNG MỚI"} />
+        {/* Hướng dẫn RECIST */}
+        <div className="print-section">
+          <GuildLine
+            title={
+              "Minh họa các phân thùy gan và một số viết tắt, quy ước của RECIST 1.1"
+            }
+          />
+        </div>
 
-      <Link to="/">Quay lại Trang chủ</Link>
+        {/* Các bảng tổn thương */}
+        <div className="print-section">
+          <TargetLesionsTable title={"TỔN THƯƠNG ĐÍCH (TARGET LESIONS)"} />
+        </div>
+
+        <div className="print-section">
+          <TargetLesionsTable
+            title={"NGOÀI TỔN THƯƠNG ĐÍCH (NON-TARGET LESIONS)"}
+          />
+        </div>
+
+        <div className="print-section">
+          <TargetLesionsTable title={"TỔN THƯƠNG MỚI"} />
+        </div>
+
+        <div className="print-section">
+          <OtherAssessmentTable title={"ĐÁNH GIÁ KHÁC"} />
+        </div>
+
+        <div className="print-section">
+          <ConclusionTable />
+        </div>
+      </div>
     </div>
   );
 }
