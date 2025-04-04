@@ -34,6 +34,7 @@ const OtherAssessmentTable = ({ title }) => {
       tp5: "",
     },
     {
+      key: "dongMachGan",
       structure: "Động mạch gan",
       baseline: "",
       tp1: "",
@@ -43,6 +44,7 @@ const OtherAssessmentTable = ({ title }) => {
       tp5: "",
     },
     {
+      key: "duongMatTrongGan",
       structure: "Đường mật trong gan",
       baseline: "",
       tp1: "",
@@ -52,6 +54,7 @@ const OtherAssessmentTable = ({ title }) => {
       tp5: "",
     },
     {
+      key: "duongMatNgoaiGan",
       structure: "Đường mật ngoài gan",
       baseline: "",
       tp1: "",
@@ -61,6 +64,7 @@ const OtherAssessmentTable = ({ title }) => {
       tp5: "",
     },
     {
+      key: "tuiMat",
       structure: "Túi mật",
       baseline: "",
       tp1: "",
@@ -70,6 +74,7 @@ const OtherAssessmentTable = ({ title }) => {
       tp5: "",
     },
     {
+      key: "lach",
       structure: "Lách",
       baseline: "",
       tp1: "",
@@ -79,6 +84,7 @@ const OtherAssessmentTable = ({ title }) => {
       tp5: "",
     },
     {
+      key: "tuy",
       structure: "Tụy",
       baseline: "",
       tp1: "",
@@ -88,6 +94,7 @@ const OtherAssessmentTable = ({ title }) => {
       tp5: "",
     },
     {
+      key: "tuyenThuongThanPhai",
       structure: "Tuyến thượng thận phải",
       baseline: "",
       tp1: "",
@@ -97,6 +104,7 @@ const OtherAssessmentTable = ({ title }) => {
       tp5: "",
     },
     {
+      key: "tuyenThuongThanTrai",
       structure: "Tuyến thượng thận trái",
       baseline: "",
       tp1: "",
@@ -167,7 +175,7 @@ const OtherAssessmentTable = ({ title }) => {
         return (
           <Input
             type="number"
-            value={text}
+            value={record[tp.key]}
             onChange={(e) => {
               const value = e.target.value;
               if (value === "" || /^\d*\.?\d*$/.test(value)) {

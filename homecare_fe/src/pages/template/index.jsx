@@ -1,5 +1,4 @@
-import { data, Link } from "react-router-dom";
-import html2pdf from "html2pdf.js";
+import { Link } from "react-router-dom";
 import {
   Form,
   Input,
@@ -9,7 +8,6 @@ import {
   Button,
   Typography,
   Space,
-  Modal,
 } from "antd";
 import TargetLesionsTable from "./_TargetLesionsTable";
 import GuildLine from "./_guildline";
@@ -26,7 +24,9 @@ const { TextArea } = Input;
 const PatientForm = () => {
   const [form] = Form.useForm();
 
-  const onFinish = (values) => {};
+  const onFinish = (values) => {
+    // Xử lý dữ liệu khi gửi biểu mẫu
+  };
 
   return (
     <Form
@@ -39,90 +39,13 @@ const PatientForm = () => {
       style={{ maxWidth: "100%" }}
     >
       <Title level={4}>THÔNG TIN BỆNH NHÂN</Title>
-      <Form.Item label="Họ và tên" name="name" rules={[{ required: true }]}>
-        <Input />
-      </Form.Item>
-      <Form.Item label="Ngày sinh" name="dob">
-        <DatePicker />
-      </Form.Item>
-      <Form.Item label="Giới tính" name="gender">
-        <Radio.Group>
-          <Radio value="Nam">Nam</Radio>
-          <Radio value="Nữ">Nữ</Radio>
-        </Radio.Group>
-      </Form.Item>
-      <Form.Item label="PID" name="pid">
-        <Input type="number" />
-      </Form.Item>
-      <Form.Item label="SID" name="sid">
-        <Input type="number" />
-      </Form.Item>
-      <Form.Item label="Điện thoại" name="phone">
-        <Input />
-      </Form.Item>
-      <Form.Item label="Email" name="email">
-        <Input />
-      </Form.Item>
-      <Form.Item label="Địa chỉ" name="address">
-        <Input.TextArea rows={3} />
-      </Form.Item>
-
+      {renderPatientInfoFields()}
       <Title level={4}>THÔNG TIN LÂM SÀNG</Title>
-      <Form.Item label="Triệu chứng chính" name="symptom">
-        <TextArea />
-      </Form.Item>
-      <Form.Item label="Thời gian diễn biến" name="duration">
-        <Select>
-          <Select.Option value="<1 tuần">&lt; 1 tuần</Select.Option>
-          <Select.Option value="<1 tháng">&lt; 1 tháng</Select.Option>
-          <Select.Option value="<3 tháng">&lt; 3 tháng</Select.Option>
-          <Select.Option value=">3 tháng">&gt; 3 tháng</Select.Option>
-        </Select>
-      </Form.Item>
-      <Form.Item label="Chẩn đoán xác định" name="diagnosis">
-        <Input />
-      </Form.Item>
-      <Form.Item label="Phương pháp điều trị" name="treatment">
-        <Input />
-      </Form.Item>
-      <Form.Item label="Ngày bắt đầu điều trị" name="treatmentStart">
-        <DatePicker />
-      </Form.Item>
-
+      {renderClinicalInfoFields()}
       <Title level={4}>THÔNG TIN BÁC SỸ CHỈ ĐỊNH</Title>
-      <Form.Item label="Bác sỹ chỉ định" name="doctor">
-        <Input />
-      </Form.Item>
-      <Form.Item label="Điện thoại bác sỹ" name="doctorPhone">
-        <Input />
-      </Form.Item>
-
+      {renderDoctorInfoFields()}
       <Title level={4}>THÔNG TIN YÊU CẦU</Title>
-      <Form.Item label="Yêu cầu">
-        <p>
-          Đánh giá đáp ứng điều trị u gan trên phim chụp cắt lớp vi tính (MSCT)
-          theo tiêu chuẩn RECIST1.1
-        </p>
-      </Form.Item>
-      <Form.Item label="Ngày thực hiện" name="executionDate">
-        <DatePicker />
-      </Form.Item>
-      <Form.Item label="Nơi thực hiện" name="location">
-        <Input />
-      </Form.Item>
-      <Form.Item label="Bộ phận thăm khám" name="department">
-        <Input />
-      </Form.Item>
-      <Form.Item label="Tiêm thuốc đối quang" name="contrast">
-        <Radio.Group>
-          <Radio value="Có">Có</Radio>
-          <Radio value="Không">Không</Radio>
-        </Radio.Group>
-      </Form.Item>
-      <Form.Item label="Kỹ thuật kèm theo" name="technique">
-        <Input />
-      </Form.Item>
-
+      {renderRequestInfoFields()}
       <Form.Item className="no-print">
         <Button type="primary" htmlType="submit" className="no-print">
           Gửi thông tin
@@ -131,6 +54,107 @@ const PatientForm = () => {
     </Form>
   );
 };
+
+// Hàm để render các trường thông tin bệnh nhân
+const renderPatientInfoFields = () => (
+  <>
+    <Form.Item label="Họ và tên" name="name" rules={[{ required: true }]}>
+      <Input />
+    </Form.Item>
+    <Form.Item label="Ngày sinh" name="dob">
+      <DatePicker />
+    </Form.Item>
+    <Form.Item label="Giới tính" name="gender">
+      <Radio.Group>
+        <Radio value="Nam">Nam</Radio>
+        <Radio value="Nữ">Nữ</Radio>
+      </Radio.Group>
+    </Form.Item>
+    <Form.Item label="PID" name="pid">
+      <Input type="number" />
+    </Form.Item>
+    <Form.Item label="SID" name="sid">
+      <Input type="number" />
+    </Form.Item>
+    <Form.Item label="Điện thoại" name="phone">
+      <Input />
+    </Form.Item>
+    <Form.Item label="Email" name="email">
+      <Input />
+    </Form.Item>
+    <Form.Item label="Địa chỉ" name="address">
+      <Input.TextArea rows={3} />
+    </Form.Item>
+  </>
+);
+
+// Hàm để render các trường thông tin lâm sàng
+const renderClinicalInfoFields = () => (
+  <>
+    <Form.Item label="Triệu chứng chính" name="symptom">
+      <TextArea />
+    </Form.Item>
+    <Form.Item label="Thời gian diễn biến" name="duration">
+      <Select>
+        <Select.Option value="<1 tuần">&lt; 1 tuần</Select.Option>
+        <Select.Option value="<1 tháng">&lt; 1 tháng</Select.Option>
+        <Select.Option value="<3 tháng">&lt; 3 tháng</Select.Option>
+        <Select.Option value=">3 tháng">&gt; 3 tháng</Select.Option>
+      </Select>
+    </Form.Item>
+    <Form.Item label="Chẩn đoán xác định" name="diagnosis">
+      <Input />
+    </Form.Item>
+    <Form.Item label="Phương pháp điều trị" name="treatment">
+      <Input />
+    </Form.Item>
+    <Form.Item label="Ngày bắt đầu điều trị" name="treatmentStart">
+      <DatePicker />
+    </Form.Item>
+  </>
+);
+
+// Hàm để render các trường thông tin bác sĩ chỉ định
+const renderDoctorInfoFields = () => (
+  <>
+    <Form.Item label="Bác sỹ chỉ định" name="doctor">
+      <Input />
+    </Form.Item>
+    <Form.Item label="Điện thoại bác sỹ" name="doctorPhone">
+      <Input />
+    </Form.Item>
+  </>
+);
+
+// Hàm để render các trường thông tin yêu cầu
+const renderRequestInfoFields = () => (
+  <>
+    <Form.Item label="Yêu cầu">
+      <p>
+        Đánh giá đáp ứng điều trị u gan trên phim chụp cắt lớp vi tính (MSCT)
+        theo tiêu chuẩn RECIST1.1
+      </p>
+    </Form.Item>
+    <Form.Item label="Ngày thực hiện" name="executionDate">
+      <DatePicker />
+    </Form.Item>
+    <Form.Item label="Nơi thực hiện" name="location">
+      <Input />
+    </Form.Item>
+    <Form.Item label="Bộ phận thăm khám" name="department">
+      <Input />
+    </Form.Item>
+    <Form.Item label="Tiêm thuốc đối quang" name="contrast">
+      <Radio.Group>
+        <Radio value="Có">Có</Radio>
+        <Radio value="Không">Không</Radio>
+      </Radio.Group>
+    </Form.Item>
+    <Form.Item label="Kỹ thuật kèm theo" name="technique">
+      <Input />
+    </Form.Item>
+  </>
+);
 
 export default function Template() {
   const [loading, setLoading] = useState(false);
