@@ -123,10 +123,10 @@ const GuildLine = ({ title }) => {
     <div style={{ padding: 24 }}>
       <Title level={4}>{title}</Title>
       <Row style={{ display: "flex", justifyContent: "space-evenly" }}>
-        <Col>
+        <Col className="no-print">
           <ImageUploader />
         </Col>
-        <Col>
+        <Col className="no-print">
           <ImageUploader />
         </Col>
       </Row>
