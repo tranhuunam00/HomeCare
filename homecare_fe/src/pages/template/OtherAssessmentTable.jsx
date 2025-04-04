@@ -132,6 +132,7 @@ const OtherAssessmentTable = ({ title }) => {
   };
 
   const handleValueChange = (rowKey, timePoint, value) => {
+    console.log("rowKey, timePoint, value", rowKey, timePoint, value);
     setTableData((prev) =>
       prev.map((row) =>
         row.key === rowKey ? { ...row, [timePoint]: value } : row
