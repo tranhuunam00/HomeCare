@@ -36,7 +36,7 @@ const PatientForm = () => {
       wrapperCol={{ span: 20 }}
       labelAlign="left"
       onFinish={onFinish}
-      style={{ maxWidth: 900 }}
+      style={{ maxWidth: "100%" }}
     >
       <Title level={4}>THÔNG TIN BỆNH NHÂN</Title>
       <Form.Item label="Họ và tên" name="name" rules={[{ required: true }]}>
@@ -191,11 +191,11 @@ export default function Template() {
     for (let i = 0; i < sections.length; i++) {
       const section = sections[i];
       const canvas = await html2canvas(section, {
-        scale: 1.5,
+        scale: 2,
         useCORS: true,
       });
 
-      const imgData = canvas.toDataURL("image/jpeg", 0.7);
+      const imgData = canvas.toDataURL("image/jpeg", 1);
       const imgProperties = pdf.getImageProperties(imgData);
       const imgWidth = pdfWidth;
       const imgHeight = (imgProperties.height * imgWidth) / imgProperties.width;
