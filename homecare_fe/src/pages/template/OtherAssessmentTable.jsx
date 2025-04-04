@@ -34,7 +34,7 @@ const OtherAssessmentTable = ({ title }) => {
       tp5: "",
     },
     {
-      key: "dmgan",
+      key: "dongMachGan",
       structure: "Động mạch gan",
       baseline: "",
       tp1: "",
@@ -44,7 +44,7 @@ const OtherAssessmentTable = ({ title }) => {
       tp5: "",
     },
     {
-      key: "dmtg",
+      key: "duongMatTrongGan",
       structure: "Đường mật trong gan",
       baseline: "",
       tp1: "",
@@ -54,7 +54,7 @@ const OtherAssessmentTable = ({ title }) => {
       tp5: "",
     },
     {
-      key: "dmng",
+      key: "duongMatNgoaiGan",
       structure: "Đường mật ngoài gan",
       baseline: "",
       tp1: "",
@@ -64,7 +64,7 @@ const OtherAssessmentTable = ({ title }) => {
       tp5: "",
     },
     {
-      key: "tuimat",
+      key: "tuiMat",
       structure: "Túi mật",
       baseline: "",
       tp1: "",
@@ -94,7 +94,7 @@ const OtherAssessmentTable = ({ title }) => {
       tp5: "",
     },
     {
-      key: "Tuyến thượng thận phải",
+      key: "tuyenThuongThanPhai",
       structure: "Tuyến thượng thận phải",
       baseline: "",
       tp1: "",
@@ -104,8 +104,7 @@ const OtherAssessmentTable = ({ title }) => {
       tp5: "",
     },
     {
-      key: "Tuyến thượng thận trái",
-
+      key: "tuyenThuongThanTrai",
       structure: "Tuyến thượng thận trái",
       baseline: "",
       tp1: "",
@@ -177,7 +176,7 @@ const OtherAssessmentTable = ({ title }) => {
         return (
           <Input
             type="number"
-            value={text}
+            value={record[tp.key]}
             onChange={(e) => {
               const value = e.target.value;
               if (value === "" || /^\d*\.?\d*$/.test(value)) {
