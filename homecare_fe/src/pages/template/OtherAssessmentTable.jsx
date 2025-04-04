@@ -34,6 +34,7 @@ const OtherAssessmentTable = ({ title }) => {
       tp5: "",
     },
     {
+      key: "dmgan",
       structure: "Động mạch gan",
       baseline: "",
       tp1: "",
@@ -43,6 +44,7 @@ const OtherAssessmentTable = ({ title }) => {
       tp5: "",
     },
     {
+      key: "dmtg",
       structure: "Đường mật trong gan",
       baseline: "",
       tp1: "",
@@ -52,6 +54,7 @@ const OtherAssessmentTable = ({ title }) => {
       tp5: "",
     },
     {
+      key: "dmng",
       structure: "Đường mật ngoài gan",
       baseline: "",
       tp1: "",
@@ -61,6 +64,7 @@ const OtherAssessmentTable = ({ title }) => {
       tp5: "",
     },
     {
+      key: "tuimat",
       structure: "Túi mật",
       baseline: "",
       tp1: "",
@@ -70,6 +74,7 @@ const OtherAssessmentTable = ({ title }) => {
       tp5: "",
     },
     {
+      key: "lach",
       structure: "Lách",
       baseline: "",
       tp1: "",
@@ -79,6 +84,7 @@ const OtherAssessmentTable = ({ title }) => {
       tp5: "",
     },
     {
+      key: "tuy",
       structure: "Tụy",
       baseline: "",
       tp1: "",
@@ -88,6 +94,7 @@ const OtherAssessmentTable = ({ title }) => {
       tp5: "",
     },
     {
+      key: "Tuyến thượng thận phải",
       structure: "Tuyến thượng thận phải",
       baseline: "",
       tp1: "",
@@ -97,6 +104,8 @@ const OtherAssessmentTable = ({ title }) => {
       tp5: "",
     },
     {
+      key: "Tuyến thượng thận trái",
+
       structure: "Tuyến thượng thận trái",
       baseline: "",
       tp1: "",
@@ -124,6 +133,7 @@ const OtherAssessmentTable = ({ title }) => {
   };
 
   const handleValueChange = (rowKey, timePoint, value) => {
+    console.log("rowKey, timePoint, value", rowKey, timePoint, value);
     setTableData((prev) =>
       prev.map((row) =>
         row.key === rowKey ? { ...row, [timePoint]: value } : row
