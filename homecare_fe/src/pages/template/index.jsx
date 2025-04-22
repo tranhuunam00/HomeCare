@@ -15,17 +15,25 @@ import TargetLesionsTable from "./_TargetLesionsTable";
 import GuildLine from "./_guildline";
 import OtherAssessmentTable from "./OtherAssessmentTable.jsx";
 import ConclusionTable from "./ConclusionTable.jsx";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import ImageGallery from "./ImageGallery";
 import ExaminationResults from "./ExaminationResults";
+import { Header } from "./Header.jsx";
 
 const { Title } = Typography;
 const { TextArea } = Input;
 
 const PatientForm = () => {
   const [form] = Form.useForm();
+
+  // Đặt giá trị mặc định cho form
+  useEffect(() => {
+    form.setFieldsValue({
+      contrast: "Có",
+    });
+  }, []);
 
   const onFinish = (values) => {};
 
@@ -40,6 +48,7 @@ const PatientForm = () => {
     color: "white",
     padding: "5px 10px",
     margin: "0 0 10px 0",
+    textAlign: "left",
   };
 
   return (
@@ -89,116 +98,115 @@ const PatientForm = () => {
       {/* THÔNG TIN LÂM SÀNG */}
       <div style={formStyle}>
         <h3 style={titleStyle}>THÔNG TIN LÂM SÀNG</h3>
-        <Form.Item label="Triệu chứng chính" name="symptom">
-          <Input placeholder="Mệt mỏi, đau bụng vùng gan" />
-        </Form.Item>
-        <Form.Item label="Thời gian diễn biến" name="duration">
-          <Input placeholder="1 tháng" />
-        </Form.Item>
-        <Form.Item label="Chẩn đoán xác định" name="diagnosis">
-          <Input placeholder="K gan phải (HCC)" />
-        </Form.Item>
-        <Form.Item label="Phương pháp điều trị" name="treatment">
-          <Input placeholder="Phẫu thuật cắt gan" />
-        </Form.Item>
-        <Form.Item label="Ngày bắt đầu điều trị" name="treatmentStart">
-          <DatePicker format="DD/MM/YYYY" />
-        </Form.Item>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "200px 1fr", // Cố định cột đầu 200px
+            gap: "8px",
+            rowGap: "8px",
+          }}
+        >
+          <div style={{ textAlign: "left" }}>Triệu chứng chính:</div>
+          <Form.Item name="symptom" style={{ margin: 0 }}>
+            <Input placeholder="Mệt mỏi, đau bụng vùng gan" />
+          </Form.Item>
+
+          <div style={{ textAlign: "left" }}>Thời gian diễn biến:</div>
+          <Form.Item name="duration" style={{ margin: 0 }}>
+            <Input placeholder="1 tháng" />
+          </Form.Item>
+
+          <div style={{ textAlign: "left" }}>Chẩn đoán xác định:</div>
+          <Form.Item name="diagnosis" style={{ margin: 0 }}>
+            <Input placeholder="K gan phải (HCC)" />
+          </Form.Item>
+
+          <div style={{ textAlign: "left" }}>Phương pháp điều trị:</div>
+          <Form.Item name="treatment" style={{ margin: 0 }}>
+            <Input placeholder="Phẫu thuật cắt gan" />
+          </Form.Item>
+
+          <div style={{ textAlign: "left" }}>Ngày bắt đầu điều trị:</div>
+          <Form.Item name="treatmentStart" style={{ margin: 0 }}>
+            <DatePicker format="DD/MM/YYYY" style={{ width: "100%" }} />
+          </Form.Item>
+        </div>
       </div>
 
       {/* THÔNG TIN BÁC SĨ CHỈ ĐỊNH */}
       <div style={formStyle}>
         <h3 style={titleStyle}>THÔNG TIN BÁC SĨ CHỈ ĐỊNH</h3>
-        <Form.Item label="Bác sĩ chỉ định" name="doctor">
-          <Input placeholder="PGS.TS.TRỊNH VĂN Q" />
-        </Form.Item>
-        <Form.Item label="Điện thoại" name="doctorPhone">
-          <Input />
-        </Form.Item>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "200px 1fr",
+            gap: "8px",
+            rowGap: "8px",
+          }}
+        >
+          <div style={{ textAlign: "left" }}>Bác sĩ chỉ định:</div>
+          <Form.Item name="doctor" style={{ margin: 0 }}>
+            <Input placeholder="PGS.TS.TRỊNH VĂN Q" />
+          </Form.Item>
+
+          <div style={{ textAlign: "left" }}>Điện thoại:</div>
+          <Form.Item name="doctorPhone" style={{ margin: 0 }}>
+            <Input />
+          </Form.Item>
+        </div>
       </div>
 
       {/* THÔNG TIN YÊU CẦU */}
       <div style={formStyle}>
         <h3 style={titleStyle}>THÔNG TIN YÊU CẦU</h3>
-        <Form.Item label="Yêu cầu">
-          <Input.TextArea
-            value="Đánh giá đáp ứng điều trị u gan trên phim chụp cắt lớp vi tính (MSCT) theo tiêu chuẩn RECIST 1.1"
-            readOnly
-          />
-        </Form.Item>
-        <Form.Item label="Ngày thực hiện" name="executionDate">
-          <DatePicker format="DD/MM/YYYY" />
-        </Form.Item>
-        <Form.Item label="Nơi thực hiện" name="location">
-          <Input />
-        </Form.Item>
-        <Form.Item label="Bộ phận thăm khám" name="department">
-          <Input placeholder="Chụp cắt lớp vi tính gan và ổ bụng" />
-        </Form.Item>
-        <Form.Item label="Tiêm thuốc đối quang" name="contrast">
-          <Radio.Group>
-            <Radio value="Có">Có</Radio>
-            <Radio value="Không">Không</Radio>
-          </Radio.Group>
-        </Form.Item>
-        <Form.Item label="Kỹ thuật tạo ảnh" name="technique">
-          <div>
-            <p>Trước tiêm thuốc cản quang, độ dày lớp cắt 1.5mm</p>
-            <p>Sau tiêm thuốc cản quang, độ dày lớp cắt 1.5mm</p>
-            <p>Xử lý tái tạo ảnh: MPR, VRT</p>
-          </div>
-        </Form.Item>
-      </div>
-    </div>
-  );
-};
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "200px 1fr",
+            gap: "8px",
+            rowGap: "8px",
+          }}
+        >
+          <div style={{ textAlign: "left" }}>Yêu cầu:</div>
+          <Form.Item style={{ margin: 0 }}>
+            <Input.TextArea
+              value="Đánh giá đáp ứng điều trị u gan trên phim chụp cắt lớp vi tính (MSCT) theo tiêu chuẩn RECIST 1.1"
+              readOnly
+            />
+          </Form.Item>
 
-// Thêm component Header mới
-const Header = () => {
-  return (
-    <div className="print-section" style={{ marginBottom: "20px" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "60px" }}>
-        <div style={{ width: "100px" }}>
-          <img
-            src="../../../public/logo_home_care.jpg"
-            alt="HomeCare Logo"
-            style={{ width: "100%" }}
-          />
-        </div>
-        <div style={{ flex: 1 }}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "flex-start",
-            }}
-          >
+          <div style={{ textAlign: "left" }}>Ngày thực hiện:</div>
+          <Form.Item name="executionDate" style={{ margin: 0 }}>
+            <DatePicker format="DD/MM/YYYY" style={{ width: "100%" }} />
+          </Form.Item>
+
+          <div style={{ textAlign: "left" }}>Nơi thực hiện:</div>
+          <Form.Item name="location" style={{ margin: 0 }}>
+            <Input />
+          </Form.Item>
+
+          <div style={{ textAlign: "left" }}>Bộ phận thăm khám:</div>
+          <Form.Item name="department" style={{ margin: 0 }}>
+            <Input placeholder="Chụp cắt lớp vi tính gan và ổ bụng" />
+          </Form.Item>
+
+          <div style={{ textAlign: "left" }}>Tiêm thuốc đối quang:</div>
+          <Form.Item name="contrast" style={{ margin: 0, textAlign: "left" }}>
+            <Radio.Group>
+              <Radio value="Có">Có</Radio>
+              <Radio value="Không">Không</Radio>
+            </Radio.Group>
+          </Form.Item>
+
+          <div style={{ textAlign: "left" }}>Kỹ thuật tạo ảnh:</div>
+          <Form.Item name="technique" style={{ margin: 0, textAlign: "left" }}>
             <div>
-              <h2 style={{ margin: 0 }}>PHÒNG KHÁM BÁC SĨ GIA ĐÌNH HOMECARE</h2>
-              <ul
-                style={{
-                  listStyle: "none",
-                  padding: 0,
-                  margin: "10px 0",
-                }}
-              >
-                <li>- Khám chữa bệnh từ xa</li>
-                <li>- Tư vấn kết quả y khoa theo yêu cầu</li>
-                <li>- Bệnh viện trực tuyến tại nhà</li>
-              </ul>
+              <p>Trước tiêm thuốc cản quang, độ dày lớp cắt 1.5mm</p>
+              <p>Sau tiêm thuốc cản quang, độ dày lớp cắt 1.5mm</p>
+              <p>Xử lý tái tạo ảnh: MPR, VRT</p>
             </div>
-            <div style={{ textAlign: "right" }}>
-              <p style={{ margin: "0 0 5px 0" }}>THÔNG TIN LIÊN HỆ</p>
-              <p style={{ margin: "0 0 5px 0" }}>Tele: 0969268000</p>
-              <a
-                href="http://www.home-care.vn"
-                style={{ display: "block", margin: "0 0 5px 0" }}
-              >
-                www.home-care.vn
-              </a>
-              <a href="mailto:daogroupltd@gmail.com">daogroupltd@gmail.com</a>
-            </div>
-          </div>
+          </Form.Item>
         </div>
       </div>
     </div>
@@ -392,22 +400,29 @@ export default function Template() {
 
         {/* Các bảng tổn thương */}
         <div className="print-section">
-          <TargetLesionsTable title={"TỔN THƯƠNG ĐÍCH (TARGET LESIONS)"} />
+          <TargetLesionsTable
+            title={"TỔN THƯƠNG ĐÍCH (TARGET LESIONS)"}
+            name_chart={"Đồ thị minh họa thay đổi tổn thương đích"}
+          />
         </div>
 
         <div className="print-section">
           <TargetLesionsTable
             title={"NGOÀI TỔN THƯƠNG ĐÍCH (NON-TARGET LESIONS)"}
+            name_chart={"Đồ thị minh họa thay đổi tổn thương ngoài đích"}
           />
         </div>
 
         <div className="print-section">
-          <TargetLesionsTable title={"TỔN THƯƠNG MỚI"} />
+          <TargetLesionsTable
+            title={"TỔN THƯƠNG MỚI"}
+            name_chart={"Đồ thị minh họa thay đổi tổn thương mới"}
+          />
         </div>
-
-        <div className="print-section">
+        {/* Ẩn đánh giá khác */}
+        {/* <div className="print-section">
           <OtherAssessmentTable title={"ĐÁNH GIÁ KHÁC"} />
-        </div>
+        </div> */}
 
         <div className="print-section">
           <ConclusionTable />

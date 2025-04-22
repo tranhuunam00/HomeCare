@@ -1,57 +1,134 @@
-import React from "react";
-import { Typography, Table } from "antd";
+import React, { useState } from "react";
+import { Typography, Table, Input } from "antd";
 
 const { Title } = Typography;
 
 const ExaminationResults = () => {
-  // Dữ liệu kết quả thăm khám
-  const examResults = [
-    { organ: "Gan phải", result: "Không thấy hình ảnh bất thường" },
-    { organ: "Gan trái", result: "Không thấy hình ảnh bất thường" },
-    { organ: "Tĩnh mạch cửa", result: "Không thấy hình ảnh bất thường" },
-    { organ: "Tĩnh mạch gan", result: "Không thấy hình ảnh bất thường" },
-    { organ: "Động mạch gan", result: "Không thấy hình ảnh bất thường" },
-    { organ: "Đường mật trong gan", result: "Không thấy hình ảnh bất thường" },
-    { organ: "Đường mật ngoài gan", result: "Không thấy hình ảnh bất thường" },
-    { organ: "Túi mật", result: "Không thấy hình ảnh bất thường" },
-    { organ: "Lách", result: "Không thấy hình ảnh bất thường" },
-    { organ: "Tụy", result: "Không thấy hình ảnh bất thường" },
+  // State để lưu trữ dữ liệu có thể chỉnh sửa
+  const [examResults, setExamResults] = useState([
+    {
+      organ: "Gan phải",
+      description: "Không thấy hình ảnh bất thường",
+      key: "1",
+    },
+    {
+      organ: "Gan trái",
+      description: "Không thấy hình ảnh bất thường",
+      key: "2",
+    },
+    {
+      organ: "Tĩnh mạch cửa",
+      description: "Không thấy hình ảnh bất thường",
+      key: "3",
+    },
+    {
+      organ: "Tĩnh mạch gan",
+      description: "Không thấy hình ảnh bất thường",
+      key: "4",
+    },
+    {
+      organ: "Động mạch gan",
+      description: "Không thấy hình ảnh bất thường",
+      key: "5",
+    },
+    {
+      organ: "Đường mật trong gan",
+      description: "Không thấy hình ảnh bất thường",
+      key: "6",
+    },
+    {
+      organ: "Đường mật ngoài gan",
+      description: "Không thấy hình ảnh bất thường",
+      key: "7",
+    },
+    {
+      organ: "Túi mật",
+      description: "Không thấy hình ảnh bất thường",
+      key: "8",
+    },
+    { organ: "Lách", description: "Không thấy hình ảnh bất thường", key: "9" },
+    { organ: "Tụy", description: "Không thấy hình ảnh bất thường", key: "10" },
     {
       organ: "Tuyến thượng thận phải",
-      result: "Không thấy hình ảnh bất thường",
+      description: "Không thấy hình ảnh bất thường",
+      key: "11",
     },
     {
       organ: "Tuyến thượng thận trái",
-      result: "Không thấy hình ảnh bất thường",
+      description: "Không thấy hình ảnh bất thường",
+      key: "12",
     },
     {
-      organ: "Thận - niệu quản phải",
-      result: "Không thấy hình ảnh bất thường",
+      organ: "Thận – niệu quản phải",
+      description: "Không thấy hình ảnh bất thường",
+      key: "13",
     },
     {
-      organ: "Thận - niệu quản trái",
-      result: "Không thấy hình ảnh bất thường",
+      organ: "Thận – niệu quản trái",
+      description: "Không thấy hình ảnh bất thường",
+      key: "14",
     },
-    { organ: "Bàng quang", result: "Không thấy hình ảnh bất thường" },
-    { organ: "Dạ dày", result: "Không thấy hình ảnh bất thường" },
-    { organ: "Ruột non", result: "Không thấy hình ảnh bất thường" },
-    { organ: "Đại tràng", result: "Không thấy hình ảnh bất thường" },
-    { organ: "Phúc mạc", result: "Không thấy hình ảnh bất thường" },
-    { organ: "Sau phúc mạc", result: "Không thấy hình ảnh bất thường" },
-    { organ: "Dịch ổ bụng", result: "Không thấy hình ảnh bất thường" },
-    { organ: "Khác", result: "Không thấy hình ảnh bất thường" },
-  ];
+    {
+      organ: "Bàng quang",
+      description: "Không thấy hình ảnh bất thường",
+      key: "15",
+    },
+    {
+      organ: "Dạ dày",
+      description: "Không thấy hình ảnh bất thường",
+      key: "16",
+    },
+    {
+      organ: "Ruột non",
+      description: "Không thấy hình ảnh bất thường",
+      key: "17",
+    },
+    {
+      organ: "Đại tràng",
+      description: "Không thấy hình ảnh bất thường",
+      key: "18",
+    },
+    {
+      organ: "Phúc mạc",
+      description: "Không thấy hình ảnh bất thường",
+      key: "19",
+    },
+    {
+      organ: "Sau phúc mạc",
+      description: "Không thấy hình ảnh bất thường",
+      key: "20",
+    },
+    {
+      organ: "Dịch ổ bụng",
+      description: "Không thấy hình ảnh bất thường",
+      key: "21",
+    },
+    { organ: "Khác", description: "", key: "22" },
+  ]);
 
   const columns = [
     {
-      title: "",
+      title: "Tổn thương",
       dataIndex: "organ",
-      width: "30%",
+      key: "organ",
+      width: "200px",
     },
     {
-      title: "",
-      dataIndex: "result",
-      width: "70%",
+      title: "Mô tả",
+      dataIndex: "description",
+      key: "description",
+      render: (text, record, index) => (
+        <Input
+          value={text}
+          onChange={(e) => {
+            const newData = [...examResults];
+            newData[index].description = e.target.value;
+            setExamResults(newData);
+          }}
+          autoSize={{ minRows: 2, maxRows: 6 }}
+          placeholder="Nhập mô tả chi tiết..."
+        />
+      ),
     },
   ];
 
