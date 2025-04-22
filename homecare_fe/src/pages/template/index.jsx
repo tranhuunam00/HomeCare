@@ -19,6 +19,7 @@ import { useRef, useState } from "react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import ImageGallery from "./ImageGallery";
+import ExaminationResults from "./ExaminationResults";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -28,107 +29,127 @@ const PatientForm = () => {
 
   const onFinish = (values) => {};
 
+  const formStyle = {
+    backgroundColor: "#F0F8FF", // Màu nền xanh nhạt
+    padding: "10px",
+    marginBottom: "15px",
+  };
+
+  const titleStyle = {
+    backgroundColor: "#4682B4", // Màu nền xanh đậm
+    color: "white",
+    padding: "5px 10px",
+    margin: "0 0 10px 0",
+  };
+
   return (
-    <Form
-      form={form}
-      layout="horizontal"
-      labelCol={{ span: 4 }}
-      wrapperCol={{ span: 20 }}
-      labelAlign="left"
-      onFinish={onFinish}
-      style={{ maxWidth: 900 }}
-    >
-      <Title level={4}>THÔNG TIN BỆNH NHÂN</Title>
-      <Form.Item label="Họ và tên" name="name" rules={[{ required: true }]}>
-        <Input />
-      </Form.Item>
-      <Form.Item label="Ngày sinh" name="dob">
-        <DatePicker />
-      </Form.Item>
-      <Form.Item label="Giới tính" name="gender">
-        <Radio.Group>
-          <Radio value="Nam">Nam</Radio>
-          <Radio value="Nữ">Nữ</Radio>
-        </Radio.Group>
-      </Form.Item>
-      <Form.Item label="PID" name="pid">
-        <Input type="number" />
-      </Form.Item>
-      <Form.Item label="SID" name="sid">
-        <Input type="number" />
-      </Form.Item>
-      <Form.Item label="Điện thoại" name="phone">
-        <Input />
-      </Form.Item>
-      <Form.Item label="Email" name="email">
-        <Input />
-      </Form.Item>
-      <Form.Item label="Địa chỉ" name="address">
-        <Input.TextArea rows={3} />
-      </Form.Item>
+    <div>
+      {/* THÔNG TIN BỆNH NHÂN */}
+      <div style={formStyle}>
+        <h3 style={titleStyle}>THÔNG TIN BỆNH NHÂN</h3>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "10px",
+          }}
+        >
+          <Form.Item label="Họ và tên" name="name">
+            <Input placeholder="NGUYỄN VĂN A" />
+          </Form.Item>
+          <Form.Item label="Giới tính" name="gender">
+            <Radio.Group>
+              <Radio value="Nam">NAM</Radio>
+              <Radio value="Nữ">NỮ</Radio>
+            </Radio.Group>
+          </Form.Item>
+          <Form.Item label="Ngày sinh" name="dob">
+            <DatePicker format="DD/MM/YYYY" />
+          </Form.Item>
+          <Form.Item label="Điện thoại" name="phone">
+            <Input />
+          </Form.Item>
+          <div style={{ display: "flex", gap: "10px" }}>
+            <Form.Item label="PID" name="pid" style={{ flex: 1 }}>
+              <Input />
+            </Form.Item>
+            <Form.Item label="SID" name="sid" style={{ flex: 1 }}>
+              <Input />
+            </Form.Item>
+          </div>
+          <Form.Item label="Email" name="email">
+            <Input />
+          </Form.Item>
+        </div>
+        <Form.Item label="Địa chỉ" name="address">
+          <Input />
+        </Form.Item>
+      </div>
 
-      <Title level={4}>THÔNG TIN LÂM SÀNG</Title>
-      <Form.Item label="Triệu chứng chính" name="symptom">
-        <TextArea />
-      </Form.Item>
-      <Form.Item label="Thời gian diễn biến" name="duration">
-        <Select>
-          <Select.Option value="<1 tuần">&lt; 1 tuần</Select.Option>
-          <Select.Option value="<1 tháng">&lt; 1 tháng</Select.Option>
-          <Select.Option value="<3 tháng">&lt; 3 tháng</Select.Option>
-          <Select.Option value=">3 tháng">&gt; 3 tháng</Select.Option>
-        </Select>
-      </Form.Item>
-      <Form.Item label="Chẩn đoán xác định" name="diagnosis">
-        <Input />
-      </Form.Item>
-      <Form.Item label="Phương pháp điều trị" name="treatment">
-        <Input />
-      </Form.Item>
-      <Form.Item label="Ngày bắt đầu điều trị" name="treatmentStart">
-        <DatePicker />
-      </Form.Item>
+      {/* THÔNG TIN LÂM SÀNG */}
+      <div style={formStyle}>
+        <h3 style={titleStyle}>THÔNG TIN LÂM SÀNG</h3>
+        <Form.Item label="Triệu chứng chính" name="symptom">
+          <Input placeholder="Mệt mỏi, đau bụng vùng gan" />
+        </Form.Item>
+        <Form.Item label="Thời gian diễn biến" name="duration">
+          <Input placeholder="1 tháng" />
+        </Form.Item>
+        <Form.Item label="Chẩn đoán xác định" name="diagnosis">
+          <Input placeholder="K gan phải (HCC)" />
+        </Form.Item>
+        <Form.Item label="Phương pháp điều trị" name="treatment">
+          <Input placeholder="Phẫu thuật cắt gan" />
+        </Form.Item>
+        <Form.Item label="Ngày bắt đầu điều trị" name="treatmentStart">
+          <DatePicker format="DD/MM/YYYY" />
+        </Form.Item>
+      </div>
 
-      <Title level={4}>THÔNG TIN BÁC SỸ CHỈ ĐỊNH</Title>
-      <Form.Item label="Bác sỹ chỉ định" name="doctor">
-        <Input />
-      </Form.Item>
-      <Form.Item label="Điện thoại bác sỹ" name="doctorPhone">
-        <Input />
-      </Form.Item>
+      {/* THÔNG TIN BÁC SĨ CHỈ ĐỊNH */}
+      <div style={formStyle}>
+        <h3 style={titleStyle}>THÔNG TIN BÁC SĨ CHỈ ĐỊNH</h3>
+        <Form.Item label="Bác sĩ chỉ định" name="doctor">
+          <Input placeholder="PGS.TS.TRỊNH VĂN Q" />
+        </Form.Item>
+        <Form.Item label="Điện thoại" name="doctorPhone">
+          <Input />
+        </Form.Item>
+      </div>
 
-      <Title level={4}>THÔNG TIN YÊU CẦU</Title>
-      <Form.Item label="Yêu cầu">
-        <p>
-          Đánh giá đáp ứng điều trị u gan trên phim chụp cắt lớp vi tính (MSCT)
-          theo tiêu chuẩn RECIST1.1
-        </p>
-      </Form.Item>
-      <Form.Item label="Ngày thực hiện" name="executionDate">
-        <DatePicker />
-      </Form.Item>
-      <Form.Item label="Nơi thực hiện" name="location">
-        <Input />
-      </Form.Item>
-      <Form.Item label="Bộ phận thăm khám" name="department">
-        <Input />
-      </Form.Item>
-      <Form.Item label="Tiêm thuốc đối quang" name="contrast">
-        <Radio.Group>
-          <Radio value="Có">Có</Radio>
-          <Radio value="Không">Không</Radio>
-        </Radio.Group>
-      </Form.Item>
-      <Form.Item label="Kỹ thuật kèm theo" name="technique">
-        <Input />
-      </Form.Item>
-
-      <Form.Item className="no-print">
-        <Button type="primary" htmlType="submit" className="no-print">
-          Gửi thông tin
-        </Button>
-      </Form.Item>
-    </Form>
+      {/* THÔNG TIN YÊU CẦU */}
+      <div style={formStyle}>
+        <h3 style={titleStyle}>THÔNG TIN YÊU CẦU</h3>
+        <Form.Item label="Yêu cầu">
+          <Input.TextArea
+            value="Đánh giá đáp ứng điều trị u gan trên phim chụp cắt lớp vi tính (MSCT) theo tiêu chuẩn RECIST 1.1"
+            readOnly
+          />
+        </Form.Item>
+        <Form.Item label="Ngày thực hiện" name="executionDate">
+          <DatePicker format="DD/MM/YYYY" />
+        </Form.Item>
+        <Form.Item label="Nơi thực hiện" name="location">
+          <Input />
+        </Form.Item>
+        <Form.Item label="Bộ phận thăm khám" name="department">
+          <Input placeholder="Chụp cắt lớp vi tính gan và ổ bụng" />
+        </Form.Item>
+        <Form.Item label="Tiêm thuốc đối quang" name="contrast">
+          <Radio.Group>
+            <Radio value="Có">Có</Radio>
+            <Radio value="Không">Không</Radio>
+          </Radio.Group>
+        </Form.Item>
+        <Form.Item label="Kỹ thuật tạo ảnh" name="technique">
+          <div>
+            <p>Trước tiêm thuốc cản quang, độ dày lớp cắt 1.5mm</p>
+            <p>Sau tiêm thuốc cản quang, độ dày lớp cắt 1.5mm</p>
+            <p>Xử lý tái tạo ảnh: MPR, VRT</p>
+          </div>
+        </Form.Item>
+      </div>
+    </div>
   );
 };
 
@@ -136,7 +157,7 @@ const PatientForm = () => {
 const Header = () => {
   return (
     <div className="print-section" style={{ marginBottom: "20px" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "60px" }}>
         <div style={{ width: "100px" }}>
           <img
             src="../../../public/logo_home_care.jpg"
@@ -359,9 +380,14 @@ export default function Template() {
         <div className="print-section">
           <GuildLine
             title={
-              "Minh họa các phân thùy gan và một số viết tắt, quy ước của RECIST 1.1"
+              "Chú thích minh họa các phân thùy gan và một số viết tắt, quy ước của RECIST 1.1"
             }
           />
+        </div>
+
+        {/* Thêm component ExaminationResults */}
+        <div className="print-section">
+          <ExaminationResults />
         </div>
 
         {/* Các bảng tổn thương */}
