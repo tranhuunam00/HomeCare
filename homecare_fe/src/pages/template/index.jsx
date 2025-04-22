@@ -132,6 +132,58 @@ const PatientForm = () => {
   );
 };
 
+// Thêm component Header mới
+const Header = () => {
+  return (
+    <div className="print-section" style={{ marginBottom: "20px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+        <div style={{ width: "100px" }}>
+          <img
+            src="../../../public/logo_home_care.jpg"
+            alt="HomeCare Logo"
+            style={{ width: "100%" }}
+          />
+        </div>
+        <div style={{ flex: 1 }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+            }}
+          >
+            <div>
+              <h2 style={{ margin: 0 }}>PHÒNG KHÁM BÁC SĨ GIA ĐÌNH HOMECARE</h2>
+              <ul
+                style={{
+                  listStyle: "none",
+                  padding: 0,
+                  margin: "10px 0",
+                }}
+              >
+                <li>- Khám chữa bệnh từ xa</li>
+                <li>- Tư vấn kết quả y khoa theo yêu cầu</li>
+                <li>- Bệnh viện trực tuyến tại nhà</li>
+              </ul>
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <p style={{ margin: "0 0 5px 0" }}>THÔNG TIN LIÊN HỆ</p>
+              <p style={{ margin: "0 0 5px 0" }}>Tele: 0969268000</p>
+              <a
+                href="http://www.home-care.vn"
+                style={{ display: "block", margin: "0 0 5px 0" }}
+              >
+                www.home-care.vn
+              </a>
+              <a href="mailto:daogroupltd@gmail.com">daogroupltd@gmail.com</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function Template() {
   const [loading, setLoading] = useState(false);
   const printRef = useRef(null);
@@ -286,11 +338,19 @@ export default function Template() {
           padding: "20px",
         }}
       >
+        {/* Thêm Header vào đây */}
+        <Header />
+
         {/* Thông tin bệnh nhân */}
         <div className="print-section">
-          <h2 style={{ textAlign: "center", marginBottom: "20px" }}>
-            KẾT QUẢ PHÂN TÍCH DỮ LIỆU CHỤP CẮT LỚP VI TÍNH ĐÁNH GIÁ THEO TIÊU
-            CHUẨN RECIST 1.1
+          <h2
+            style={{
+              textAlign: "center",
+              marginBottom: "20px",
+              color: "#0000FF",
+            }}
+          >
+            KẾT QUẢ CHỤP CẮT LỚP VI TÍNH MSCT REPORT
           </h2>
           <PatientForm />
         </div>
