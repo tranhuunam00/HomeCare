@@ -283,7 +283,9 @@ const TargetLesionsTable = ({ title, name_chart }) => {
 
   return (
     <div style={{ padding: 24 }}>
-      <Title level={4}>{title}</Title>
+      <Title level={4} style={{ textAlign: "left", color: "#1890ff" }}>
+        {title}
+      </Title>
       <Table
         columns={columnsDate}
         dataSource={parsedDataDate}

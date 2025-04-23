@@ -161,7 +161,7 @@ const ExaminationResults = () => {
   };
 
   return (
-    <div style={{ padding: 24 }} className="print-section">
+    <div style={{ padding: 24 }}>
       <style>
         {Object.entries(customTableStyles)
           .map(([selector, styles]) => {
@@ -172,7 +172,10 @@ const ExaminationResults = () => {
           .join("\n")}
       </style>
 
-      <Title level={4} style={{ marginBottom: 16, color: "#1890ff" }}>
+      <Title
+        level={4}
+        style={{ marginBottom: 16, color: "#1890ff", textAlign: "left" }}
+      >
         KẾT QUẢ THĂM KHÁM GẦN NHẤT
       </Title>
 

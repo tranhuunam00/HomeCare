@@ -66,8 +66,6 @@ const ConclusionTable = () => {
     <div style={{ marginBottom: 8 }}>
       <div
         style={{
-          backgroundColor: "#BAD7E9",
-          padding: "8px",
           marginBottom: "16px",
           display: "flex",
           alignItems: "center",
@@ -79,6 +77,7 @@ const ConclusionTable = () => {
             margin: 0,
             textAlign: "left",
             width: "100%",
+            color: "#1890ff",
           }}
         >
           {title}
@@ -109,8 +108,6 @@ const ConclusionTable = () => {
     <div style={{ marginBottom: 24, marginTop: 16 }}>
       <div
         style={{
-          backgroundColor: "#BAD7E9",
-          padding: "8px",
           marginBottom: "16px",
           display: "flex",
           alignItems: "center",
@@ -122,6 +119,7 @@ const ConclusionTable = () => {
             margin: 0,
             textAlign: "left",
             width: "100%",
+            color: "#1890ff",
           }}
         >
           BÁC SỸ ĐỌC KẾT QUẢ

@@ -25,13 +25,18 @@ const { TextArea } = Input;
 
 const PatientForm = () => {
   const [form] = Form.useForm();
+  const [gender, setGender] = useState(1);
+  const [contrast, setContrast] = useState(1);
 
-  // Đặt giá trị mặc định cho form
-  useEffect(() => {
-    form.setFieldsValue({
-      contrast: "Có",
-    });
-  }, []);
+  const handleGenderChange = (e) => {
+    console.log("Giới tính đã thay đổi:", e.target.value);
+    setGender(e.target.value);
+  };
+
+  const handleContrastChange = (e) => {
+    console.log("Tiêm thuốc đối quang đã thay đổi:", e.target.value);
+    setContrast(e.target.value);
+  };
 
   const onFinish = (values) => {};
 
@@ -50,36 +55,38 @@ const PatientForm = () => {
   };
 
   return (
-    <div>
-      {/* THÔNG TIN BỆNH NHÂN */}
-      <div style={formStyle}>
-        <h3 style={titleStyle}>THÔNG TIN BỆNH NHÂN</h3>
-        {renderPatientInfoFields()}
-      </div>
+    <Form form={form} onFinish={onFinish}>
+      <div>
+        {/* THÔNG TIN BỆNH NHÂN */}
+        <div style={formStyle}>
+          <h3 style={titleStyle}>THÔNG TIN BỆNH NHÂN</h3>
+          {renderPatientInfoFields({ gender, handleGenderChange })}
+        </div>
 
-      {/* THÔNG TIN LÂM SÀNG */}
-      <div style={formStyle}>
-        <h3 style={titleStyle}>THÔNG TIN LÂM SÀNG</h3>
-        {renderClinicalInfoFields()}
-      </div>
+        {/* THÔNG TIN LÂM SÀNG */}
+        <div style={formStyle}>
+          <h3 style={titleStyle}>THÔNG TIN LÂM SÀNG</h3>
+          {renderClinicalInfoFields()}
+        </div>
 
-      {/* THÔNG TIN BÁC SĨ CHỈ ĐỊNH */}
-      <div style={formStyle}>
-        <h3 style={titleStyle}>THÔNG TIN BÁC SĨ CHỈ ĐỊNH</h3>
-        {renderDoctorInfoFields()}
-      </div>
+        {/* THÔNG TIN BÁC SĨ CHỈ ĐỊNH */}
+        <div style={formStyle}>
+          <h3 style={titleStyle}>THÔNG TIN BÁC SĨ CHỈ ĐỊNH</h3>
+          {renderDoctorInfoFields()}
+        </div>
 
-      {/* THÔNG TIN YÊU CẦU */}
-      <div style={formStyle}>
-        <h3 style={titleStyle}>THÔNG TIN YÊU CẦU</h3>
-        {renderRequestInfoFields()}
+        {/* THÔNG TIN YÊU CẦU */}
+        <div style={formStyle}>
+          <h3 style={titleStyle}>THÔNG TIN YÊU CẦU</h3>
+          {renderRequestInfoFields({ contrast, handleContrastChange })}
+        </div>
       </div>
-    </div>
+    </Form>
   );
 };
 
 // Hàm để render các trường thông tin bệnh nhân
-const renderPatientInfoFields = () => (
+const renderPatientInfoFields = ({ gender, handleGenderChange }) => (
   <>
     <div
       style={{
@@ -91,13 +98,23 @@ const renderPatientInfoFields = () => (
       <Form.Item label="Họ và tên" name="name" rules={[{ required: true }]}>
         <Input placeholder="NGUYỄN VĂN A" />
       </Form.Item>
-      <Form.Item label="Giới tính" name="gender">
-        <Radio.Group>
-          <Radio value="Nam">NAM</Radio>
-          <Radio value="Nữ">NỮ</Radio>
-        </Radio.Group>
+      <Form.Item
+        label="Giới tính"
+        name="gender"
+        rules={[{ required: true, message: "Vui lòng chọn giới tính" }]}
+        style={{ textAlign: "left" }}
+      >
+        <Radio.Group
+          name="gender_radio"
+          value={gender}
+          onChange={handleGenderChange}
+          options={[
+            { value: 1, label: "Nam" },
+            { value: 2, label: "Nữ" },
+          ]}
+        />
       </Form.Item>
-      <Form.Item label="Ngày sinh" name="dob">
+      <Form.Item label="Ngày sinh" name="dob" style={{ textAlign: "left" }}>
         <DatePicker format="DD/MM/YYYY" />
       </Form.Item>
       <Form.Item label="Điện thoại" name="phone">
@@ -185,7 +202,7 @@ const renderDoctorInfoFields = () => (
 );
 
 // Hàm để render các trường thông tin yêu cầu
-const renderRequestInfoFields = () => (
+const renderRequestInfoFields = ({ contrast, handleContrastChange }) => (
   <>
     <div
       style={{
@@ -220,10 +237,15 @@ const renderRequestInfoFields = () => (
 
       <div style={{ textAlign: "left" }}>Tiêm thuốc đối quang:</div>
       <Form.Item name="contrast" style={{ margin: 0, textAlign: "left" }}>
-        <Radio.Group>
-          <Radio value="Có">Có</Radio>
-          <Radio value="Không">Không</Radio>
-        </Radio.Group>
+        <Radio.Group
+          name="contrast_radio"
+          value={contrast}
+          onChange={handleContrastChange}
+          options={[
+            { value: 1, label: "Có" },
+            { value: 2, label: "Không" },
+          ]}
+        />
       </Form.Item>
 
       <div style={{ textAlign: "left" }}>Kỹ thuật tạo ảnh:</div>
@@ -392,11 +414,10 @@ export default function Template() {
           padding: "20px",
         }}
       >
-        {/* Thêm Header vào đây */}
-        <Header />
-
         {/* Thông tin bệnh nhân */}
         <div className="print-section">
+          {/* Thêm Header vào đây */}
+          <Header />
           <h2
             style={{
               textAlign: "center",
@@ -422,9 +443,27 @@ export default function Template() {
         <div className="print-section">
           <ExaminationResults />
         </div>
-
         {/* Các bảng tổn thương */}
         <div className="print-section">
+          <div
+            style={{
+              paddingLeft: "24px",
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <Title
+              level={4}
+              style={{
+                margin: 0,
+                textAlign: "left",
+                width: "100%",
+                color: "#1890ff",
+              }}
+            >
+              KẾT QUẢ PHÂN TÍCH THEO TIÊU CHUẨN RESCIST 1.1
+            </Title>
+          </div>
           <TargetLesionsTable
             title={"TỔN THƯƠNG ĐÍCH (TARGET LESIONS)"}
             name_chart={"Đồ thị minh họa thay đổi tổn thương đích"}

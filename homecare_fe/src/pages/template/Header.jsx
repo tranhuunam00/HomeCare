@@ -1,7 +1,7 @@
 // Thêm component Header mới
 export const Header = () => {
   return (
-    <div className="print-section" style={{ marginBottom: "20px" }}>
+    <div style={{ marginBottom: "20px" }}>
       <div style={{ display: "flex", alignItems: "center", gap: "60px" }}>
         <div style={{ width: "100px" }}>
           <img
