@@ -5,7 +5,7 @@ export const Header = () => {
       <div style={{ display: "flex", alignItems: "center", gap: "60px" }}>
         <div style={{ width: "100px" }}>
           <img
-            src="../../../public/logo_home_care.jpg"
+            src="/logo_home_care.jpg"
             alt="HomeCare Logo"
             style={{ width: "100%" }}
           />
