@@ -1,24 +1,28 @@
 import React, { useState } from "react";
 import "./ImageGallery.css"; // Đảm bảo bạn có file CSS để định dạng
 
-const ImageGallery = ({ images }) => {
-  const [selectedImages, setSelectedImages] = useState(images); // Trạng thái để lưu trữ hình ảnh đã chọn
-  const [captions, setCaptions] = useState(images.map(() => "Chú thích ảnh"));
+const ImageGallery = () => {
+  const [images, setImages] = useState([]);
+  const [captions, setCaptions] = useState([]);
 
-  const handleImageClick = (index) => {
+  const handleAddImage = (index) => {
     const input = document.createElement("input");
     input.type = "file";
     input.accept = "image/*";
     input.onchange = (e) => {
       const file = e.target.files[0];
-      console.log("file ", file);
       if (file) {
         const newImage = URL.createObjectURL(file);
-        console.log("newImage ", newImage);
-        const newImages = [...selectedImages];
-        newImages[index] = { src: newImage, alt: file.name }; // Cập nhật hình ảnh đã chọn
-        setSelectedImages(newImages);
-        console.log("selectedImages ", selectedImages);
+        if (index !== undefined) {
+          // Cập nhật ảnh tại vị trí index
+          const newImages = [...images];
+          newImages[index] = { src: newImage, alt: file.name };
+          setImages(newImages);
+        } else {
+          // Thêm ảnh mới
+          setImages([...images, { src: newImage, alt: file.name }]);
+          setCaptions([...captions, "Chú thích ảnh"]);
+        }
       }
     };
     input.click();
@@ -30,30 +34,115 @@ const ImageGallery = ({ images }) => {
     setCaptions(newCaptions);
   };
 
+  const renderAddImageButton = (isFirst = false) => (
+    <div
+      className="add-image-button"
+      onClick={() => handleAddImage()}
+      style={{
+        width: "300px",
+        height: "300px",
+        border: "2px dashed #ccc",
+        borderRadius: "8px",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        cursor: "pointer",
+        margin: "10px",
+      }}
+    >
+      <div
+        style={{
+          width: "50px",
+          height: "50px",
+          backgroundColor: "#4CAF50",
+          borderRadius: "50%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          marginBottom: "10px",
+        }}
+      >
+        <span style={{ color: "white", fontSize: "24px" }}>↑</span>
+      </div>
+      <div>Thêm ảnh</div>
+    </div>
+  );
+
   return (
     <div className="image-gallery">
-      <div className="gallery-title" style={{ textAlign: "left" }}>
+      <div
+        className="gallery-title"
+        style={{ textAlign: "left", marginBottom: "20px" }}
+      >
         HÌNH ẢNH MINH HỌA
       </div>
-      <div className="gallery-images">
-        {selectedImages.map((image, index) => (
-          <div className="image-container" key={index}>
-            <div
-              className="image-item"
-              key={index}
-              onClick={() => handleImageClick(index)}
-            >
-              <img src={image.src} alt={image.alt} />
-            </div>
-            <div className="image-caption">
-              <input
-                value={captions[index]}
-                onChange={(e) => handleCaptionChange(index, e.target.value)}
-                style={{ textAlign: "center", border: "none", fontSize: 16 }}
-              />
-            </div>
-          </div>
-        ))}
+      <div
+        className="gallery-images"
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "30px",
+          alignItems: "center",
+          justifyContent: "flex-start",
+          padding: "20px",
+        }}
+      >
+        {images.length === 0 ? (
+          renderAddImageButton(true)
+        ) : (
+          <>
+            {images.map((image, index) => (
+              <div
+                className="image-container"
+                key={index}
+                style={{
+                  width: "300px",
+                  margin: "0",
+                }}
+              >
+                <div
+                  className="image-item"
+                  onClick={() => handleAddImage(index)}
+                  style={{
+                    width: "100%",
+                    height: "300px",
+                    overflow: "hidden",
+                    borderRadius: "8px",
+                    marginBottom: "10px",
+                    border: "1px solid #ddd",
+                  }}
+                >
+                  <img
+                    src={image.src}
+                    alt={image.alt}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                </div>
+                <div className="image-caption">
+                  <textarea
+                    value={captions[index]}
+                    onChange={(e) => handleCaptionChange(index, e.target.value)}
+                    rows={7}
+                    style={{
+                      width: "100%",
+                      padding: "8px",
+                      border: "1px solid #ddd",
+                      borderRadius: "4px",
+                      fontSize: "14px",
+                      resize: "none",
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
+            {renderAddImageButton()}
+          </>
+        )}
       </div>
     </div>
   );
