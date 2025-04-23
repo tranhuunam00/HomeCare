@@ -355,41 +355,80 @@ export default function Template() {
   };
 
   // Dữ liệu hình ảnh mẫu
+  // const images = [
+  //   {
+  //     src: "https://cdn.pixabay.com/photo/2023/12/29/18/23/daisy-8476666_1280.jpg",
+  //     alt: "Hình ảnh 1",
+  //   },
+  //   {
+  //     src: "https://photo.znews.vn/w660/Uploaded/mdf_eioxrd/2021_07_06/2.jpg",
+  //     alt: "Hình ảnh 2",
+  //   },
+  //   {
+  //     src: "https://d1hjkbq40fs2x4.cloudfront.net/2016-01-31/files/1045-2.jpg",
+  //     alt: "Hình ảnh 3",
+  //   },
+  //   {
+  //     src: "https://images2.thanhnien.vn/zoom/700_438/528068263637045248/2024/1/26/e093e9cfc9027d6a142358d24d2ee350-65a11ac2af785880-17061562929701875684912-37-0-587-880-crop-1706239860681642023140.jpg",
+  //     alt: "Hình ảnh 4",
+  //   },
+  //   {
+  //     src: "https://file3.qdnd.vn/data/images/0/2023/05/03/vuhuyen/khanhphan.jpg",
+  //     alt: "Hình ảnh 5",
+  //   },
+  //   {
+  //     src: "https://d1hjkbq40fs2x4.cloudfront.net/2017-08-21/files/landscape-photography_1645.jpg",
+  //     alt: "Hình ảnh 6",
+  //   },
+  //   {
+  //     src: "https://vcdn1-dulich.vnecdn.net/2021/07/16/1-1626437591.jpg?w=460&h=0&q=100&dpr=1&fit=crop&s=wkxNSU_JeGofMu90v5u03g",
+  //     alt: "Hình ảnh 7",
+  //   },
+  //   {
+  //     src: "https://hoinhabaobacgiang.vn/Includes/NewsImg/1_2024/29736_7-1-1626444923.jpg",
+  //     alt: "Hình ảnh 8",
+  //   },
+  //   {
+  //     src: "https://images.pexels.com/photos/986733/pexels-photo-986733.jpeg?cs=srgb&dl=pexels-nickoloui-986733.jpg&fm=jpg",
+  //     alt: "Hình ảnh 9",
+  //   },
+  //   // Thêm nhiều hình ảnh nếu cần
+  // ];
   const images = [
     {
-      src: "https://cdn.pixabay.com/photo/2023/12/29/18/23/daisy-8476666_1280.jpg",
+      src: "/cloud-computing.png",
       alt: "Hình ảnh 1",
     },
     {
-      src: "https://photo.znews.vn/w660/Uploaded/mdf_eioxrd/2021_07_06/2.jpg",
+      src: "/cloud-computing.png",
       alt: "Hình ảnh 2",
     },
     {
-      src: "https://d1hjkbq40fs2x4.cloudfront.net/2016-01-31/files/1045-2.jpg",
+      src: "/cloud-computing.png",
       alt: "Hình ảnh 3",
     },
     {
-      src: "https://images2.thanhnien.vn/zoom/700_438/528068263637045248/2024/1/26/e093e9cfc9027d6a142358d24d2ee350-65a11ac2af785880-17061562929701875684912-37-0-587-880-crop-1706239860681642023140.jpg",
+      src: "/cloud-computing.png",
       alt: "Hình ảnh 4",
     },
     {
-      src: "https://file3.qdnd.vn/data/images/0/2023/05/03/vuhuyen/khanhphan.jpg",
+      src: "/cloud-computing.png",
       alt: "Hình ảnh 5",
     },
     {
-      src: "https://d1hjkbq40fs2x4.cloudfront.net/2017-08-21/files/landscape-photography_1645.jpg",
+      src: "/cloud-computing.png",
       alt: "Hình ảnh 6",
     },
     {
-      src: "https://vcdn1-dulich.vnecdn.net/2021/07/16/1-1626437591.jpg?w=460&h=0&q=100&dpr=1&fit=crop&s=wkxNSU_JeGofMu90v5u03g",
+      src: "/cloud-computing.png",
       alt: "Hình ảnh 7",
     },
     {
-      src: "https://hoinhabaobacgiang.vn/Includes/NewsImg/1_2024/29736_7-1-1626444923.jpg",
+      src: "/cloud-computing.png",
       alt: "Hình ảnh 8",
     },
     {
-      src: "https://images.pexels.com/photos/986733/pexels-photo-986733.jpeg?cs=srgb&dl=pexels-nickoloui-986733.jpg&fm=jpg",
+      src: "/cloud-computing.png",
       alt: "Hình ảnh 9",
     },
     // Thêm nhiều hình ảnh nếu cần

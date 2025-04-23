@@ -3,6 +3,7 @@ import "./ImageGallery.css"; // Đảm bảo bạn có file CSS để định d�
 
 const ImageGallery = ({ images }) => {
   const [selectedImages, setSelectedImages] = useState(images); // Trạng thái để lưu trữ hình ảnh đã chọn
+  const [captions, setCaptions] = useState(images.map(() => "Chú thích ảnh"));
 
   const handleImageClick = (index) => {
     const input = document.createElement("input");
@@ -23,6 +24,12 @@ const ImageGallery = ({ images }) => {
     input.click();
   };
 
+  const handleCaptionChange = (index, value) => {
+    const newCaptions = [...captions];
+    newCaptions[index] = value;
+    setCaptions(newCaptions);
+  };
+
   return (
     <div className="image-gallery">
       <div className="gallery-title" style={{ textAlign: "left" }}>
@@ -40,7 +47,8 @@ const ImageGallery = ({ images }) => {
             </div>
             <div className="image-caption">
               <input
-                value={"Chú thích ảnh"}
+                value={captions[index]}
+                onChange={(e) => handleCaptionChange(index, e.target.value)}
                 style={{ textAlign: "center", border: "none", fontSize: 16 }}
               />
             </div>

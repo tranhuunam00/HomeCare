@@ -34,8 +34,9 @@
   border: 1px solid #d1d1d1; /* Đường viền cho hình ảnh */
   border-radius: 5px; /* Bo góc cho hình ảnh */
   background-color: #e6f7ff; /* Màu nền cho hình ảnh */
-  height: 400px; /* Chiều cao cố định cho hình ảnh */
+  height: 300px; /* Chiều cao cố định cho hình ảnh */
   width: 300px;
+  padding: 10px;
 }
 
 .image-item img {
