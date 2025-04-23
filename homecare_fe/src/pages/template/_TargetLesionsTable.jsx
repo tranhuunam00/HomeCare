@@ -97,7 +97,7 @@ const columnsDate = [
   })),
 ].flat();
 
-const TargetLesionsTable = ({ title }) => {
+const TargetLesionsTable = ({ title, name_chart }) => {
   const [data, setData] = useState([
     {
       location: "RUL3",
@@ -283,7 +283,9 @@ const TargetLesionsTable = ({ title }) => {
 
   return (
     <div style={{ padding: 24 }}>
-      <Title level={4}>{title}</Title>
+      <Title level={4} style={{ textAlign: "left", color: "#1890ff" }}>
+        {title}
+      </Title>
       <Table
         columns={columnsDate}
         dataSource={parsedDataDate}
@@ -303,16 +305,14 @@ const TargetLesionsTable = ({ title }) => {
         bordered
       />
 
-      <Row style={{ marginTop: 8 }}>
-        <Col span={24}>
+      <Row style={{ marginTop: 8, marginBottom: 20 }}>
+        <Col span={6}>
           <Text strong>Đánh giá đáp ứng:</Text>
+        </Col>
+        <Col span={18}>
           <TextArea />
         </Col>
       </Row>
-
-      <Title level={5} style={{ marginTop: 24 }}>
-        Đồ thị minh hoạ thay đổi SLD
-      </Title>
       <LineChart
         width={700}
         height={300}
@@ -345,6 +345,9 @@ const TargetLesionsTable = ({ title }) => {
         />
         <Line type="monotone" dataKey="sld" stroke="#8884d8" dot={{ r: 4 }} />
       </LineChart>
+      <Title level={5} style={{ marginTop: 24 }}>
+        {name_chart}
+      </Title>
     </div>
   );
 };

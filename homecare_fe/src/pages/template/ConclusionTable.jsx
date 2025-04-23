@@ -66,19 +66,27 @@ const ConclusionTable = () => {
     <div style={{ marginBottom: 8 }}>
       <div
         style={{
-          backgroundColor: "#BAD7E9",
-          padding: "8px",
           marginBottom: "16px",
+          display: "flex",
+          alignItems: "center",
         }}
       >
-        <Title level={5} style={{ margin: 0 }}>
+        <Title
+          level={5}
+          style={{
+            margin: 0,
+            textAlign: "left",
+            width: "100%",
+            color: "#1890ff",
+          }}
+        >
           {title}
         </Title>
       </div>
       {data.map((item, index) => (
-        <Row key={index} style={{ marginBottom: 8 }}>
+        <Row key={index} style={{ marginBottom: 8, textAlign: "left" }}>
           <Col span={8}>
-            <Text>{item.label}</Text>
+            <Text style={{ textAlign: "left" }}>{item.label}</Text>
           </Col>
           <Col span={16}>
             <TextArea
@@ -100,12 +108,20 @@ const ConclusionTable = () => {
     <div style={{ marginBottom: 24, marginTop: 16 }}>
       <div
         style={{
-          backgroundColor: "#BAD7E9",
-          padding: "8px",
           marginBottom: "16px",
+          display: "flex",
+          alignItems: "center",
         }}
       >
-        <Title level={5} style={{ margin: 0 }}>
+        <Title
+          level={5}
+          style={{
+            margin: 0,
+            textAlign: "left",
+            width: "100%",
+            color: "#1890ff",
+          }}
+        >
           BÁC SỸ ĐỌC KẾT QUẢ
         </Title>
       </div>
@@ -157,7 +173,7 @@ const ConclusionTable = () => {
   return (
     <div style={{ padding: 24 }}>
       {renderSection("KẾT LUẬN", conclusionData, setConclusionData)}
-      <Row style={{ marginBottom: 16 }}>
+      <Row style={{ marginBottom: 16, textAlign: "left" }}>
         <Col span={8}>
           <Text>Đáp ứng RECIST:</Text>
         </Col>
