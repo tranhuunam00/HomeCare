@@ -85,14 +85,14 @@ const GuildLine = ({ title }) => {
       <Row gutter={24} style={{ marginBottom: 24 }}>
         <Col span={12}>
           <img
-            src="../../../public/liver-segments.jpg" // Đường dẫn đến hình ảnh gan
+            src="/liver-segments.jpg" // Đường dẫn đến hình ảnh gan
             alt="Phân thùy gan"
             style={{ width: "100%", height: "auto" }}
           />
         </Col>
         <Col span={12}>
           <img
-            src="../../../public/recist-chart.jpg" // Đường dẫn đến biểu đồ RECIST
+            src="/recist-chart.jpg" // Đường dẫn đến biểu đồ RECIST
             alt="Biểu đồ RECIST"
             style={{ width: "100%", height: "auto" }}
           />
