@@ -288,9 +288,6 @@ export default function Template() {
       .ant-table-row {
         page-break-inside: avoid;
       }
-      // button, .ant-btn {
-      //   display: none !important;
-      // }
       /* Ẩn các form control không cần thiết khi in */
       .ant-form-item-control-input-content .ant-picker-suffix,
       .ant-form-item-control-input-content .ant-select-arrow,
@@ -328,7 +325,22 @@ export default function Template() {
       const imgWidth = pdfWidth;
       const imgHeight = (imgProperties.height * imgWidth) / imgProperties.width;
 
+      // Thêm nội dung vào trang
       pdf.addImage(imgData, "JPEG", margin, margin, imgWidth, imgHeight);
+
+      // Thêm số trang
+      const pageCount = pdf.internal.getNumberOfPages();
+      for (let j = 1; j <= pageCount; j++) {
+        pdf.setPage(j);
+        pdf.setFontSize(10);
+        pdf.setTextColor("#A9A9A9");
+        pdf.text(
+          `${j} / ${sections.length}`,
+          pdf.internal.pageSize.getWidth() / 2,
+          pdf.internal.pageSize.getHeight() - 10,
+          { align: "center" }
+        );
+      }
 
       if (i < sections.length - 1) {
         pdf.addPage();
