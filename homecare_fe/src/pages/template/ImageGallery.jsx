@@ -1,14 +1,41 @@
-import React from "react";
+import React, { useState } from "react";
 import "./ImageGallery.css"; // Đảm bảo bạn có file CSS để định dạng
 
 const ImageGallery = ({ images }) => {
+  const [selectedImages, setSelectedImages] = useState(images); // Trạng thái để lưu trữ hình ảnh đã chọn
+
+  const handleImageClick = (index) => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      console.log("file ", file);
+      if (file) {
+        const newImage = URL.createObjectURL(file);
+        console.log("newImage ", newImage);
+        const newImages = [...selectedImages];
+        newImages[index] = { src: newImage, alt: file.name }; // Cập nhật hình ảnh đã chọn
+        setSelectedImages(newImages);
+        console.log("selectedImages ", selectedImages);
+      }
+    };
+    input.click();
+  };
+
   return (
     <div className="image-gallery">
-      <div className="gallery-title">HÌNH ẢNH MINH HỌA</div>
+      <div className="gallery-title" style={{ textAlign: "left" }}>
+        HÌNH ẢNH MINH HỌA
+      </div>
       <div className="gallery-images">
-        {images.map((image, index) => (
+        {selectedImages.map((image, index) => (
           <div className="image-container" key={index}>
-            <div className="image-item">
+            <div
+              className="image-item"
+              key={index}
+              onClick={() => handleImageClick(index)}
+            >
               <img src={image.src} alt={image.alt} />
             </div>
             <div className="image-caption">
