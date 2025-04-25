@@ -4,24 +4,26 @@ import {
   Input,
   DatePicker,
   Radio,
-  Select,
   Button,
   Typography,
   Space,
 } from "antd";
-import TargetLesionsTable from "./_TargetLesionsTable";
+
 import GuildLine from "./_guildline";
-import OtherAssessmentTable from "./OtherAssessmentTable.jsx";
+
 import ConclusionTable from "./ConclusionTable.jsx";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState } from "react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import ImageGallery from "./ImageGallery";
 import ExaminationResults from "./ExaminationResults";
 import { Header } from "./Header.jsx";
+import TargetLesionsDateTable from "./_TargetLesionsDateTable.jsx";
+import TargetLesionsMainTable from "./_TargetLesionsMainTable.jsx";
+import TargetLesionsTotalTable from "./_TargetLesionsTotalTable.jsx";
+import TargetLesionsChart from "./_TargetLesionsChart.jsx";
 
 const { Title } = Typography;
-const { TextArea } = Input;
 
 const PatientForm = () => {
   const [form] = Form.useForm();
@@ -264,6 +266,123 @@ export default function Template() {
   const [loading, setLoading] = useState(false);
   const printRef = useRef(null);
 
+  // State cho dữ liệu bảng tổn thương đích
+  const [targetData, setTargetData] = useState([
+    {
+      location: "RUL3",
+      baseline: 52,
+      tp1: 45,
+      tp2: 25,
+      tp3: "",
+      tp4: "",
+      tp5: "",
+    },
+    {
+      location: "RML5",
+      baseline: 45,
+      tp1: 41,
+      tp2: 20,
+      tp3: "",
+      tp4: "",
+      tp5: "",
+    },
+    {
+      location: "LLL10",
+      baseline: 32,
+      tp1: 32,
+      tp2: 14,
+      tp3: "",
+      tp4: "",
+      tp5: "",
+    },
+  ]);
+
+  // State cho dữ liệu bảng tổn thương ngoài đích
+  const [nonTargetData, setNonTargetData] = useState([
+    {
+      location: "RUL3",
+      baseline: 52,
+      tp1: 45,
+      tp2: 25,
+      tp3: "",
+      tp4: "",
+      tp5: "",
+    },
+    {
+      location: "RML5",
+      baseline: 45,
+      tp1: 41,
+      tp2: 20,
+      tp3: "",
+      tp4: "",
+      tp5: "",
+    },
+  ]);
+
+  // State cho dữ liệu bảng tổn thương mới
+  const [newLesionData, setNewLesionData] = useState([
+    {
+      location: "RUL3",
+      baseline: 52,
+      tp1: 45,
+      tp2: 25,
+      tp3: "",
+      tp4: "",
+      tp5: "",
+    },
+  ]);
+
+  const [dataDate, setDataDate] = useState([
+    {
+      location: "",
+      baseline: "2024-01-01",
+      tp1: "2024-05-01",
+      tp2: "2025-01-01",
+      tp3: "",
+      tp4: "",
+      tp5: "",
+    },
+  ]);
+
+  // Hàm xử lý thay đổi dữ liệu cho tổn thương đích
+  const onTargetChange = (rowIndex, key, value) => {
+    const newData = [...targetData];
+    if (key !== "location") {
+      newData[rowIndex][key] = +value || 0;
+    } else {
+      newData[rowIndex][key] = value;
+    }
+    setTargetData(newData);
+  };
+
+  // Hàm xử lý thay đổi dữ liệu cho tổn thương ngoài đích
+  const onNonTargetChange = (rowIndex, key, value) => {
+    const newData = [...nonTargetData];
+    if (key !== "location") {
+      newData[rowIndex][key] = +value || 0;
+    } else {
+      newData[rowIndex][key] = value;
+    }
+    setNonTargetData(newData);
+  };
+
+  // Hàm xử lý thay đổi dữ liệu cho tổn thương mới
+  const onNewChange = (rowIndex, key, value) => {
+    const updatedData = [...newLesionData];
+    if (key !== "location") {
+      updatedData[rowIndex][key] = value === "" ? "" : +value || 0;
+    } else {
+      updatedData[rowIndex][key] = value;
+    }
+    setNewLesionData(updatedData);
+  };
+
+  const onChangeDate = (rowIndex, key, value) => {
+    const newData = [...dataDate];
+    newData[rowIndex][key] = value;
+    setDataDate(newData);
+  };
+
   const generatePDF = async () => {
     setLoading(true);
 
@@ -354,86 +473,6 @@ export default function Template() {
     document.head.removeChild(styleTag);
   };
 
-  // Dữ liệu hình ảnh mẫu
-  // const images = [
-  //   {
-  //     src: "https://cdn.pixabay.com/photo/2023/12/29/18/23/daisy-8476666_1280.jpg",
-  //     alt: "Hình ảnh 1",
-  //   },
-  //   {
-  //     src: "https://photo.znews.vn/w660/Uploaded/mdf_eioxrd/2021_07_06/2.jpg",
-  //     alt: "Hình ảnh 2",
-  //   },
-  //   {
-  //     src: "https://d1hjkbq40fs2x4.cloudfront.net/2016-01-31/files/1045-2.jpg",
-  //     alt: "Hình ảnh 3",
-  //   },
-  //   {
-  //     src: "https://images2.thanhnien.vn/zoom/700_438/528068263637045248/2024/1/26/e093e9cfc9027d6a142358d24d2ee350-65a11ac2af785880-17061562929701875684912-37-0-587-880-crop-1706239860681642023140.jpg",
-  //     alt: "Hình ảnh 4",
-  //   },
-  //   {
-  //     src: "https://file3.qdnd.vn/data/images/0/2023/05/03/vuhuyen/khanhphan.jpg",
-  //     alt: "Hình ảnh 5",
-  //   },
-  //   {
-  //     src: "https://d1hjkbq40fs2x4.cloudfront.net/2017-08-21/files/landscape-photography_1645.jpg",
-  //     alt: "Hình ảnh 6",
-  //   },
-  //   {
-  //     src: "https://vcdn1-dulich.vnecdn.net/2021/07/16/1-1626437591.jpg?w=460&h=0&q=100&dpr=1&fit=crop&s=wkxNSU_JeGofMu90v5u03g",
-  //     alt: "Hình ảnh 7",
-  //   },
-  //   {
-  //     src: "https://hoinhabaobacgiang.vn/Includes/NewsImg/1_2024/29736_7-1-1626444923.jpg",
-  //     alt: "Hình ảnh 8",
-  //   },
-  //   {
-  //     src: "https://images.pexels.com/photos/986733/pexels-photo-986733.jpeg?cs=srgb&dl=pexels-nickoloui-986733.jpg&fm=jpg",
-  //     alt: "Hình ảnh 9",
-  //   },
-  //   // Thêm nhiều hình ảnh nếu cần
-  // ];
-  const images = [
-    {
-      src: "/cloud-computing.png",
-      alt: "Hình ảnh 1",
-    },
-    {
-      src: "/cloud-computing.png",
-      alt: "Hình ảnh 2",
-    },
-    {
-      src: "/cloud-computing.png",
-      alt: "Hình ảnh 3",
-    },
-    {
-      src: "/cloud-computing.png",
-      alt: "Hình ảnh 4",
-    },
-    {
-      src: "/cloud-computing.png",
-      alt: "Hình ảnh 5",
-    },
-    {
-      src: "/cloud-computing.png",
-      alt: "Hình ảnh 6",
-    },
-    {
-      src: "/cloud-computing.png",
-      alt: "Hình ảnh 7",
-    },
-    {
-      src: "/cloud-computing.png",
-      alt: "Hình ảnh 8",
-    },
-    {
-      src: "/cloud-computing.png",
-      alt: "Hình ảnh 9",
-    },
-    // Thêm nhiều hình ảnh nếu cần
-  ];
-
   return (
     <div>
       <div>
@@ -515,36 +554,89 @@ export default function Template() {
               KẾT QUẢ PHÂN TÍCH THEO TIÊU CHUẨN RESCIST 1.1
             </Title>
           </div>
-          <TargetLesionsTable
-            title={"TỔN THƯƠNG ĐÍCH (TARGET LESIONS)"}
-            name_chart={"Đồ thị minh họa thay đổi tổn thương đích"}
-          />
-        </div>
 
-        <div className="print-section">
-          <TargetLesionsTable
-            title={"NGOÀI TỔN THƯƠNG ĐÍCH (NON-TARGET LESIONS)"}
-            name_chart={"Đồ thị minh họa thay đổi tổn thương ngoài đích"}
-          />
-        </div>
+          {/* Bảng ngày tháng chung */}
+          <div style={{ marginBottom: "24px" }}>
+            <TargetLesionsDateTable
+              dataDate={dataDate}
+              onChangeDate={onChangeDate}
+            />
+          </div>
 
-        <div className="print-section">
-          <TargetLesionsTable
-            title={"TỔN THƯƠNG MỚI"}
-            name_chart={"Đồ thị minh họa thay đổi tổn thương mới"}
-          />
+          {/* Bảng tổn thương đích */}
+          <div style={{ marginBottom: "24px" }}>
+            <Title level={4} style={{ textAlign: "left", color: "#1890ff" }}>
+              TỔN THƯƠNG ĐÍCH (TARGET LESIONS)
+            </Title>
+            <TargetLesionsMainTable
+              data={targetData}
+              onChange={onTargetChange}
+            />
+            <TargetLesionsTotalTable
+              data={targetData}
+              dataDate={dataDate}
+              onChange={onTargetChange}
+            />
+          </div>
+
+          {/* Bảng tổn thương ngoài đích */}
+          <div style={{ marginBottom: "24px" }}>
+            <Title level={4} style={{ textAlign: "left", color: "#1890ff" }}>
+              NGOÀI TỔN THƯƠNG ĐÍCH (NON-TARGET LESIONS)
+            </Title>
+            <TargetLesionsMainTable
+              data={nonTargetData}
+              onChange={onNonTargetChange}
+            />
+            <TargetLesionsTotalTable
+              data={nonTargetData}
+              dataDate={dataDate}
+              onChange={onNonTargetChange}
+            />
+          </div>
+
+          {/* Bảng tổn thương mới */}
+          <div style={{ marginBottom: "24px" }}>
+            <Title level={4} style={{ textAlign: "left", color: "#1890ff" }}>
+              TỔN THƯƠNG MỚI
+            </Title>
+            <TargetLesionsMainTable
+              data={newLesionData}
+              onChange={onNewChange}
+            />
+            <TargetLesionsTotalTable
+              data={newLesionData}
+              dataDate={dataDate}
+              onChange={onNewChange}
+            />
+          </div>
+
+          {/* Các biểu đồ */}
+          <div style={{ marginTop: "48px" }}>
+            <TargetLesionsChart
+              data={targetData}
+              dataDate={dataDate}
+              name_chart={"Đồ thị minh họa thay đổi tổn thương đích"}
+            />
+            <TargetLesionsChart
+              data={nonTargetData}
+              dataDate={dataDate}
+              name_chart={"Đồ thị minh họa thay đổi tổn thương ngoài đích"}
+            />
+            <TargetLesionsChart
+              data={newLesionData}
+              dataDate={dataDate}
+              name_chart={"Đồ thị minh họa thay đổi tổn thương mới"}
+            />
+          </div>
         </div>
-        {/* Ẩn đánh giá khác */}
-        {/* <div className="print-section">
-          <OtherAssessmentTable title={"ĐÁNH GIÁ KHÁC"} />
-        </div> */}
 
         <div className="print-section">
           <ConclusionTable />
         </div>
 
         <div className="print-section">
-          <ImageGallery images={images} />
+          <ImageGallery />
         </div>
       </div>
     </div>
