@@ -19,7 +19,9 @@ export const Header = () => {
             }}
           >
             <div>
-              <h2 style={{ margin: 0 }}>PHÒNG KHÁM BÁC SĨ GIA ĐÌNH HOMECARE</h2>
+              <h2 style={{ margin: 0 }} className="name_title">
+                PHÒNG KHÁM BÁC SĨ GIA ĐÌNH HOMECARE
+              </h2>
               <div style={{ display: "flex", justifyContent: "flex-start" }}>
                 <ul
                   style={{

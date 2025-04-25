@@ -78,7 +78,7 @@ const PatientForm = () => {
         </div>
 
         {/* THÔNG TIN YÊU CẦU */}
-        <div style={formStyle}>
+        <div style={formStyle} className="print-section">
           <h3 style={titleStyle}>THÔNG TIN YÊU CẦU</h3>
           {renderRequestInfoFields({ contrast, handleContrastChange })}
         </div>
@@ -386,32 +386,97 @@ export default function Template() {
   const generatePDF = async () => {
     setLoading(true);
 
+    // Lưu title cũ
+    const oldTitle = document.title;
+
+    // Đặt tên mới cho file PDF
+    document.title = `RECIST_Report_${new Date()
+      .toLocaleDateString("vi-VN")
+      .replace(/\//g, "_")}`;
+
     // Thêm CSS cho in ấn
     const style = `
-      .no-print {
-        display: none !important;
+      @page {
+        size: A4;
+        margin: 15mm;
       }
-      .print-section {
-        page-break-inside: avoid;
-        margin-bottom: 20px;
-      }
-      table {
-        page-break-inside: avoid;
-      }
-      .ant-table {
-        page-break-inside: avoid;
-      }
-      .ant-table-tbody {
-        page-break-inside: avoid;
-      }
-      .ant-table-row {
-        page-break-inside: avoid;
-      }
-      /* Ẩn các form control không cần thiết khi in */
-      .ant-form-item-control-input-content .ant-picker-suffix,
-      .ant-form-item-control-input-content .ant-select-arrow,
-      .ant-form-item-control-input-content .ant-input-number-handler-wrap {
-        display: none !important;
+      @media print {
+        @page {
+          margin: 0;
+        }
+        html {
+          height: 100vh;
+        }
+        body {
+          height: 100vh;
+          margin: 0 !important;
+          padding: 0 !important;
+          overflow: hidden !important;
+        }
+        /* Ẩn tất cả extension và thanh công cụ */
+        #browser-extension-hide,
+        #browser-action-hide,
+        #page-action-hide,
+        #nav-bar-hide,
+        #toolbar-hide,
+        #chrome-extension-hide,
+        .chrome-extension,
+        .browser-action,
+        .page-action {
+          display: none !important;
+          visibility: hidden !important;
+        }
+        /* Ẩn tất cả nội dung khác */
+        body * {
+          visibility: hidden;
+        }
+        /* Chỉ hiển thị nội dung cần in */
+        #report-container, 
+        #report-container * {
+          visibility: visible;
+        }
+        #report-container {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+          background-color: white !important;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+          margin: 0;
+          padding: 15mm;
+          box-sizing: border-box;
+        }
+        .no-print {
+          display: none !important;
+        }
+        .print-section {
+          page-break-inside: avoid;
+          margin-bottom: 20px;
+          margin-top: 20px;
+        }
+        table {
+          page-break-inside: avoid;
+        }
+        .ant-table {
+          page-break-inside: avoid;
+        }
+        .ant-table-tbody {
+          page-break-inside: avoid;
+        }
+        .ant-table-row {
+          page-break-inside: avoid;
+        }
+        /* Ẩn các form control không cần thiết khi in */
+        .ant-form-item-control-input-content .ant-picker-suffix,
+        .ant-form-item-control-input-content .ant-select-arrow,
+        .ant-form-item-control-input-content .ant-input-number-handler-wrap {
+          display: none !important;
+        }
+        .name_title {
+          font-size: 16px;
+          font-weight: bold;
+        }
       }
     `;
 
@@ -420,57 +485,17 @@ export default function Template() {
     document.head.appendChild(styleTag);
 
     // Đợi một chút để đảm bảo các style đã được áp dụng
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
-    const sections = document.querySelectorAll(".print-section");
-    const pdf = new jsPDF({
-      orientation: "portrait",
-      unit: "mm",
-      format: "a4",
-    });
+    // Gọi hàm in của trình duyệt
+    window.print();
 
-    const margin = 10;
-    const pdfWidth = pdf.internal.pageSize.getWidth() - margin * 2;
+    // Khôi phục lại title cũ
+    document.title = oldTitle;
 
-    for (let i = 0; i < sections.length; i++) {
-      const section = sections[i];
-      const canvas = await html2canvas(section, {
-        scale: 2,
-        useCORS: true,
-      });
-
-      const imgData = canvas.toDataURL("image/jpeg", 1);
-      const imgProperties = pdf.getImageProperties(imgData);
-      const imgWidth = pdfWidth;
-      const imgHeight = (imgProperties.height * imgWidth) / imgProperties.width;
-
-      // Thêm nội dung vào trang
-      pdf.addImage(imgData, "JPEG", margin, margin, imgWidth, imgHeight);
-
-      // Thêm số trang
-      const pageCount = pdf.internal.getNumberOfPages();
-      for (let j = 1; j <= pageCount; j++) {
-        pdf.setPage(j);
-        pdf.setFontSize(10);
-        pdf.setTextColor("#A9A9A9");
-        pdf.text(
-          `${j} / ${sections.length}`,
-          pdf.internal.pageSize.getWidth() / 2,
-          pdf.internal.pageSize.getHeight() - 10,
-          { align: "center" }
-        );
-      }
-
-      if (i < sections.length - 1) {
-        pdf.addPage();
-      }
-    }
-
-    pdf.save("ketqua_recist.pdf");
-    setLoading(false);
-
-    // Xóa bỏ style đã thêm
+    // Xóa style sau khi in xong
     document.head.removeChild(styleTag);
+    setLoading(false);
   };
 
   return (
@@ -556,7 +581,7 @@ export default function Template() {
           </div>
 
           {/* Bảng ngày tháng chung */}
-          <div style={{ marginBottom: "24px" }}>
+          <div style={{ marginBottom: "24px" }} className="no-print">
             <TargetLesionsDateTable
               dataDate={dataDate}
               onChangeDate={onChangeDate}
@@ -596,7 +621,7 @@ export default function Template() {
           </div>
 
           {/* Bảng tổn thương mới */}
-          <div style={{ marginBottom: "24px" }}>
+          <div style={{ marginBottom: "24px" }} className="print-section">
             <Title level={4} style={{ textAlign: "left", color: "#1890ff" }}>
               TỔN THƯƠNG MỚI
             </Title>
@@ -610,31 +635,30 @@ export default function Template() {
               onChange={onNewChange}
             />
           </div>
-
-          {/* Các biểu đồ */}
-          <div style={{ marginTop: "48px" }}>
-            <TargetLesionsChart
-              data={targetData}
-              dataDate={dataDate}
-              name_chart={"Đồ thị minh họa thay đổi tổn thương đích"}
-            />
-            <TargetLesionsChart
-              data={nonTargetData}
-              dataDate={dataDate}
-              name_chart={"Đồ thị minh họa thay đổi tổn thương ngoài đích"}
-            />
-            <TargetLesionsChart
-              data={newLesionData}
-              dataDate={dataDate}
-              name_chart={"Đồ thị minh họa thay đổi tổn thương mới"}
-            />
-          </div>
         </div>
 
         <div className="print-section">
           <ConclusionTable />
         </div>
 
+        {/* Các biểu đồ */}
+        <div style={{ marginTop: "48px" }} className="print-section">
+          <TargetLesionsChart
+            data={targetData}
+            dataDate={dataDate}
+            name_chart={"Đồ thị minh họa thay đổi tổn thương đích"}
+          />
+          <TargetLesionsChart
+            data={nonTargetData}
+            dataDate={dataDate}
+            name_chart={"Đồ thị minh họa thay đổi tổn thương ngoài đích"}
+          />
+          <TargetLesionsChart
+            data={newLesionData}
+            dataDate={dataDate}
+            name_chart={"Đồ thị minh họa thay đổi tổn thương mới"}
+          />
+        </div>
         <div className="print-section">
           <ImageGallery />
         </div>
