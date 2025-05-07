@@ -18,10 +18,14 @@ import html2canvas from "html2canvas";
 import ImageGallery from "./ImageGallery";
 import ExaminationResults from "./ExaminationResults";
 import { Header } from "./Header.jsx";
+<<<<<<< HEAD
 import TargetLesionsDateTable from "./_TargetLesionsDateTable.jsx";
 import TargetLesionsMainTable from "./_TargetLesionsMainTable.jsx";
 import TargetLesionsTotalTable from "./_TargetLesionsTotalTable.jsx";
 import TargetLesionsChart from "./_TargetLesionsChart.jsx";
+=======
+import TargetLesionsTable2 from "./_TargetLesionsTable2.jsx";
+>>>>>>> origin/main
 
 const { Title } = Typography;
 
@@ -554,6 +558,14 @@ export default function Template() {
               KẾT QUẢ PHÂN TÍCH THEO TIÊU CHUẨN RESCIST 1.1
             </Title>
           </div>
+<<<<<<< HEAD
+=======
+          <TargetLesionsTable2
+            title={"TỔN THƯƠNG ĐÍCH (TARGET LESIONS)"}
+            name_chart={"Đồ thị minh họa thay đổi tổn thương đích"}
+          />
+        </div>
+>>>>>>> origin/main
 
           {/* Bảng ngày tháng chung */}
           <div style={{ marginBottom: "24px" }}>
