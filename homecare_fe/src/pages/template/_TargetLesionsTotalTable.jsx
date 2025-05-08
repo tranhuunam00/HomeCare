@@ -1,8 +1,32 @@
 import React, { useState } from "react";
-import { Table, Input } from "antd";
+import { Table, Input, Select } from "antd";
 import "./_TargetLesionsTotalTable.css";
 
 const { TextArea } = Input;
+const { Option } = Select;
+
+const responseOptions = [
+  {
+    value: "CR",
+    label:
+      "CR - Complete Response: Bệnh thoái triển hoàn toàn: không còn thấy (< 10mm đối với hạch) và không có tổn thương mới",
+  },
+  {
+    value: "PR",
+    label:
+      "PR - Partial Response: Bệnh thoái triển một phần: SLD giảm tối thiểu 30% so với BLD và không có tổn thương mới",
+  },
+  {
+    value: "PD",
+    label:
+      "PD - Progressive Disease: Bệnh tiến triển: có tổn thương mới hoặc SLD tăng tối thiểu 20% (hoặc 5mm) so với NADIR",
+  },
+  {
+    value: "SD",
+    label:
+      "SD - Stable Disease: Bệnh ổn định: không đủ tiêu chuẩn của PR và PD",
+  },
+];
 
 const columnsTotal = [
   {
@@ -32,12 +56,20 @@ const columnsTotal = [
         if (index === 0) {
           return {
             children: (
-              <TextArea
+              <Select
                 value={record.response}
-                onChange={(e) => record.onResponseChange(e.target.value)}
-                autoSize={{ minRows: 2 }}
+                onChange={record.onResponseChange}
                 style={{ width: "100%" }}
-              />
+                placeholder="Chọn đánh giá đáp ứng"
+                showSearch
+                optionFilterProp="label"
+              >
+                {responseOptions.map((opt) => (
+                  <Option key={opt.value} value={opt.value} label={opt.label}>
+                    {opt.label}
+                  </Option>
+                ))}
+              </Select>
             ),
             props: {
               colSpan: 6,
