@@ -19,7 +19,6 @@ import html2canvas from "html2canvas";
 import ImageGallery from "./ImageGallery";
 import ExaminationResults from "./ExaminationResults";
 import { Header } from "./Header.jsx";
-import TargetLesionsTable2 from "./_TargetLesionsTable2.jsx";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -516,7 +515,7 @@ export default function Template() {
               KẾT QUẢ PHÂN TÍCH THEO TIÊU CHUẨN RESCIST 1.1
             </Title>
           </div>
-          <TargetLesionsTable2
+          <TargetLesionsTable
             title={"TỔN THƯƠNG ĐÍCH (TARGET LESIONS)"}
             name_chart={"Đồ thị minh họa thay đổi tổn thương đích"}
           />
