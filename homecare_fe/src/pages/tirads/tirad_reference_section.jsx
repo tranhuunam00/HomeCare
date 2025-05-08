@@ -5,53 +5,49 @@ const TiradsReferenceSection = () => {
   return (
     <div className="tirads-reference">
       <div className="tirads-description">
-        <h2>What does TIRADS stand for?</h2>
+        <h2>TIRADS là gì?</h2>
         <p>
-          TIRADS (Thyroid Imaging Reporting and Data System) is a 5-point
-          scoring system for thyroid nodules on ultrasound, developed by the{" "}
-          <a href="https://www.acr.org/">American College of Radiology</a>. It
-          helps to decide if a thyroid nodule is benign or malignant by
-          combining multiple features on ultrasound.
+          TIRADS (Thyroid Imaging Reporting and Data System) là hệ thống chấm
+          điểm 5 mức cho các nhân giáp trên siêu âm, được phát triển bởi{" "}
+          <a href="https://www.acr.org/">Hiệp hội X-quang Hoa Kỳ (ACR)</a>. Hệ
+          thống này giúp xác định nhân giáp là lành tính hay ác tính bằng cách
+          kết hợp nhiều đặc điểm trên hình ảnh siêu âm.
         </p>
 
-        <h3>
-          How to calculate TIRADS score for thyroid nodules using this
-          Calculator?
-        </h3>
+        <h3>Cách tính điểm TIRADS cho nhân giáp bằng công cụ này</h3>
         <ul className="tirads-description-list left-align">
           <li>
-            Step #1: Perform the ultrasound as per the guidelines. Read the{" "}
+            Bước #1: Thực hiện siêu âm theo đúng hướng dẫn. Đọc kỹ{" "}
             <a href="https://pubs.rsna.org/doi/pdf/10.1148/radiol.12120637">
               whitepaper
             </a>{" "}
-            and the simplified{" "}
+            và{" "}
             <a href="https://www.acr.org/-/media/ACR/Files/Clinical-Resources/TIRADS/TIRADS_White_Paper.pdf">
-              TIRADS article
+              bài viết TIRADS
             </a>{" "}
-            thoroughly. You can use the{" "}
+            rút gọn. Có thể sử dụng{" "}
             <a href="https://www.acr.org/-/media/ACR/Files/Clinical-Resources/TIRADS/Worksheet.pdf">
-              sonographer’s worksheet
+              phiếu ghi chú cho kỹ thuật viên siêu âm
             </a>{" "}
-            to document all the findings.
+            để ghi lại các đặc điểm.
           </li>
           <li>
-            Step #2: Select the appropriate categories in the tirads calculator
-            above.
+            Bước #2: Chọn các đặc điểm phù hợp trong bảng tính TIRADS ở trên.
           </li>
           <li>
-            Step #3: Check the total score and recommendations per the thyroid
-            chart at the bottom of the <a href="#">TI-RADS</a> calculator.
+            Bước #3: Kiểm tra tổng điểm và khuyến nghị theo bảng phân loại
+            TIRADS ở cuối công cụ.
           </li>
           <li>
-            Step #4: Use the{" "}
+            Bước #4: Sử dụng{" "}
             <a href="https://www.acr.org/-/media/ACR/Files/Clinical-Resources/TIRADS/Template.docx">
-              ultrasound reporting template
+              mẫu báo cáo siêu âm
             </a>{" "}
-            to generate the report.
+            để tạo báo cáo.
           </li>
           <li>
-            Step #5: Suggest recommendations for follow-up ultrasound or Fine
-            Needle Aspiration Cytology (FNAC) depending on the TIRADS category.
+            Bước #5: Đề xuất theo dõi siêu âm định kỳ hoặc chọc hút tế bào bằng
+            kim nhỏ (FNAC) tùy theo phân loại TIRADS.
           </li>
         </ul>
       </div>
