@@ -4,6 +4,7 @@ import html2canvas from "html2canvas";
 export async function exportPDF({
   selector = ".print-section",
   fileName = "ketqua_recist.pdf",
+  type = "pdf", // "pdf" hoặc "print"
 }) {
   // Thêm CSS cho in ấn
   const style = `
@@ -41,6 +42,13 @@ export async function exportPDF({
   // Đợi một chút để đảm bảo các style đã được áp dụng
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
+  if (type === "print") {
+    window.print();
+    document.head.removeChild(styleTag);
+    return;
+  }
+
+  // Kiểu PDF như cũ
   const sections = document.querySelectorAll(selector);
   const pdf = new jsPDF({
     orientation: "portrait",

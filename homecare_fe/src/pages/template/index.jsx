@@ -296,7 +296,7 @@ const renderRequestInfoFields = ({
               <Input.TextArea
                 value={techniqueContent}
                 onChange={(e) => setTechniqueContent(e.target.value)}
-                style={{ marginBottom: "8px" }}
+                style={{ marginBottom: "8px", fontSize: "18px" }}
                 rows={4}
               />
               <div style={{ textAlign: "right" }}>
@@ -314,7 +314,13 @@ const renderRequestInfoFields = ({
             </>
           ) : (
             <>
-              <div style={{ whiteSpace: "pre-line", paddingRight: "30px" }}>
+              <div
+                style={{
+                  whiteSpace: "pre-line",
+                  paddingRight: "30px",
+                  fontSize: "18px",
+                }}
+              >
                 {techniqueContent}
               </div>
               <Button
@@ -542,7 +548,14 @@ export default function Template() {
     await exportPDF({
       selector: ".print-section",
       fileName: "ketqua_recist.pdf",
+      type: "pdf",
     });
+    setLoading(false);
+  };
+
+  const handlePrint = async () => {
+    setLoading(true);
+    await exportPDF({ selector: ".print-section", type: "print" });
     setLoading(false);
   };
 
@@ -557,14 +570,19 @@ export default function Template() {
           }}
         >
           <Link to="/">Quay lại Trang chủ</Link>
-          <Button
-            type="primary"
-            onClick={handleExportPDF}
-            loading={loading}
-            disabled={loading}
-          >
-            {loading ? "Đang xuất file PDF..." : "Xuất PDF"}
-          </Button>
+          <div style={{ display: "flex", gap: 8 }}>
+            <Button
+              type="primary"
+              onClick={handleExportPDF}
+              loading={loading}
+              disabled={loading}
+            >
+              {loading ? "Đang xuất file PDF..." : "Xuất PDF"}
+            </Button>
+            <Button onClick={handlePrint} loading={loading} disabled={loading}>
+              In trình duyệt
+            </Button>
+          </div>
         </Space>
       </div>
 

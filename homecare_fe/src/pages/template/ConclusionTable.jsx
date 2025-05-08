@@ -102,7 +102,9 @@ const ConclusionTable = () => {
       {data.map((item, index) => (
         <Row key={index} style={{ marginBottom: 8, textAlign: "left" }}>
           <Col span={8}>
-            <Text style={{ textAlign: "left" }}>{item.label}</Text>
+            <Text style={{ textAlign: "left", fontSize: "18px" }}>
+              {item.label}
+            </Text>
           </Col>
           <Col span={16}>
             <TextArea
@@ -189,7 +191,7 @@ const ConclusionTable = () => {
       {renderSection("KẾT LUẬN", conclusionData, setConclusionData)}
       <Row style={{ marginBottom: 16, textAlign: "left" }}>
         <Col span={8}>
-          <Text>Đáp ứng RECIST:</Text>
+          <Text style={{ fontSize: "18px" }}>Đáp ứng RECIST:</Text>
         </Col>
         <Col span={16}>
           <Select

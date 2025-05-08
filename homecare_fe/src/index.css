@@ -28,11 +28,17 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  font-size: 18px;
+  line-height: 1.7;
 }
 
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
+}
+
+h4, h5, strong, b {
+  font-size: 19px !important;
 }
 
 button {
@@ -68,4 +74,22 @@ button:focus-visible {
 }
 .ant-table-row-level-0 .ant-table-cell {
   padding: 0 !important;
+}
+
+.ant-table,
+.ant-table th,
+.ant-table td {
+  font-size: 17px;
+}
+
+.ant-btn, .ant-input, .ant-select, .ant-radio-wrapper, .ant-picker {
+  font-size: 17px;
+}
+
+.ant-form-item-label > label, .ant-form-item-label, label, .ant-radio-wrapper {
+  font-size: 18px !important;
+}
+
+div[style*="text-align: left"], div[style*="textAlign: left"], td:first-child, th {
+  font-size: 18px !important;
 }
