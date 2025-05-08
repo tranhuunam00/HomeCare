@@ -343,11 +343,11 @@ export default function Template() {
   const [targetData, setTargetData] = useState([
     {
       location: "",
-      baseline: "",
-      tp1: "",
-      tp2: "",
-      tp3: "",
-      tp4: "",
+      baseline: 0,
+      tp1: 0,
+      tp2: 0,
+      tp3: 0,
+      tp4: 0,
     },
   ]);
 
@@ -355,11 +355,11 @@ export default function Template() {
   const [nonTargetData, setNonTargetData] = useState([
     {
       location: "",
-      baseline: "",
-      tp1: "",
-      tp2: "",
-      tp3: "",
-      tp4: "",
+      baseline: 0,
+      tp1: 0,
+      tp2: 0,
+      tp3: 0,
+      tp4: 0,
     },
   ]);
 
@@ -367,11 +367,11 @@ export default function Template() {
   const [newLesionData, setNewLesionData] = useState([
     {
       location: "",
-      baseline: "",
-      tp1: "",
-      tp2: "",
-      tp3: "",
-      tp4: "",
+      baseline: 0,
+      tp1: 0,
+      tp2: 0,
+      tp3: 0,
+      tp4: 0,
     },
   ]);
 
@@ -397,11 +397,11 @@ export default function Template() {
       ...targetData,
       {
         location: "",
-        baseline: "",
-        tp1: "",
-        tp2: "",
-        tp3: "",
-        tp4: "",
+        baseline: 0,
+        tp1: 0,
+        tp2: 0,
+        tp3: 0,
+        tp4: 0,
       },
     ]);
   };
@@ -412,11 +412,11 @@ export default function Template() {
       ...nonTargetData,
       {
         location: "",
-        baseline: "",
-        tp1: "",
-        tp2: "",
-        tp3: "",
-        tp4: "",
+        baseline: 0,
+        tp1: 0,
+        tp2: 0,
+        tp3: 0,
+        tp4: 0,
       },
     ]);
   };
@@ -427,11 +427,11 @@ export default function Template() {
       ...newLesionData,
       {
         location: "",
-        baseline: "",
-        tp1: "",
-        tp2: "",
-        tp3: "",
-        tp4: "",
+        baseline: 0,
+        tp1: 0,
+        tp2: 0,
+        tp3: 0,
+        tp4: 0,
       },
     ]);
   };
@@ -494,6 +494,46 @@ export default function Template() {
     const newData = [...newLesionData];
     newData.splice(index, 1);
     setNewLesionData(newData);
+  };
+
+  // Hàm reset dữ liệu về 0 cho bảng tổn thương đích
+  const onResetTarget = () => {
+    setTargetData(
+      targetData.map((row) => ({
+        ...row,
+        baseline: 0,
+        tp1: 0,
+        tp2: 0,
+        tp3: 0,
+        tp4: 0,
+      }))
+    );
+  };
+  // Hàm reset dữ liệu về 0 cho bảng tổn thương ngoài đích
+  const onResetNonTarget = () => {
+    setNonTargetData(
+      nonTargetData.map((row) => ({
+        ...row,
+        baseline: 0,
+        tp1: 0,
+        tp2: 0,
+        tp3: 0,
+        tp4: 0,
+      }))
+    );
+  };
+  // Hàm reset dữ liệu về 0 cho bảng tổn thương mới
+  const onResetNew = () => {
+    setNewLesionData(
+      newLesionData.map((row) => ({
+        ...row,
+        baseline: 0,
+        tp1: 0,
+        tp2: 0,
+        tp3: 0,
+        tp4: 0,
+      }))
+    );
   };
 
   const generatePDF = async () => {
@@ -687,6 +727,7 @@ export default function Template() {
               onAddRow={onAddTargetRow}
               onDeleteRow={onDeleteTargetRow}
               dataDate={dataDate}
+              onReset={onResetTarget}
             />
             <TargetLesionsTotalTable
               data={targetData}
@@ -706,6 +747,7 @@ export default function Template() {
               onAddRow={onAddNonTargetRow}
               onDeleteRow={onDeleteNonTargetRow}
               dataDate={dataDate}
+              onReset={onResetNonTarget}
             />
             <TargetLesionsTotalTable
               data={nonTargetData}
@@ -725,6 +767,7 @@ export default function Template() {
               onAddRow={onAddNewRow}
               onDeleteRow={onDeleteNewRow}
               dataDate={dataDate}
+              onReset={onResetNew}
             />
             <TargetLesionsTotalTable
               data={newLesionData}

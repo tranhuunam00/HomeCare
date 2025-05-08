@@ -1,6 +1,10 @@
 import React from "react";
 import { Table, Input, Button } from "antd";
-import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
+import {
+  PlusOutlined,
+  DeleteOutlined,
+  ReloadOutlined,
+} from "@ant-design/icons";
 import "./_TargetLesionsMainTable.css";
 
 const columnsFn = (dataDate) =>
@@ -68,14 +72,15 @@ const TargetLesionsMainTable = ({
   onAddRow,
   onDeleteRow,
   dataDate,
+  onReset,
 }) => {
   const parsedData = data.map((item, index) => ({
     ...item,
-    baseline: Number(item.baseline) || "",
-    tp1: Number(item.tp1) || "",
-    tp2: Number(item.tp2) || "",
-    tp3: Number(item.tp3) || "",
-    tp4: Number(item.tp4) || "",
+    baseline: Number(item.baseline) || 0,
+    tp1: Number(item.tp1) || 0,
+    tp2: Number(item.tp2) || 0,
+    tp3: Number(item.tp3) || 0,
+    tp4: Number(item.tp4) || 0,
     onChange,
     onDelete: onDeleteRow,
     isLastRow: data.length === 1,
@@ -83,6 +88,16 @@ const TargetLesionsMainTable = ({
 
   return (
     <div>
+      <div
+        style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}
+      >
+        <Button
+          onClick={onReset}
+          type="default"
+          size="small"
+          icon={<ReloadOutlined />}
+        />
+      </div>
       <Table
         columns={columnsFn(dataDate)}
         dataSource={parsedData.map((item, index) => ({ ...item, key: index }))}
