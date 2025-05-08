@@ -2,7 +2,7 @@ import "./App.css";
 import Home from "./pages/home";
 import Template from "./pages/template";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import TiradPage from "./pages/TIRADS";
+import TiradPage from "./pages/tirads";
 
 function App() {
   return (
