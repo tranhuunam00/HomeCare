@@ -9,6 +9,7 @@ const columnsTotal = [
     title: "",
     dataIndex: "location",
     width: 150,
+    align: "center",
     render: (text, record) => {
       if (record.isTextArea) {
         return {
@@ -25,6 +26,7 @@ const columnsTotal = [
     title: "",
     dataIndex: key,
     width: 100,
+    align: "center",
     render: (text, record, rowIndex) => {
       if (record.isTextArea) {
         if (index === 0) {
@@ -48,13 +50,13 @@ const columnsTotal = [
           },
         };
       }
-      return (
-        <Input
-          type="number"
-          value={text}
-          onChange={(e) => record.onChange(rowIndex, key, e.target.value)}
-        />
-      );
+      if (
+        record.location === "Thay đổi SLD:" ||
+        record.location === "Thay đổi Nadir:"
+      ) {
+        return text !== "" ? <span>{text}%</span> : <span></span>;
+      }
+      return <span>{text}</span>;
     },
   })),
 ].flat();
@@ -88,11 +90,11 @@ const TargetLesionsTotalTable = ({ data, dataDate, onChange }) => {
     {
       location: "Tổng SLD (mm):",
       baseline:
-        Number(data.reduce((acc, row) => acc + row["baseline"], 0)) || "",
-      tp1: Number(data.reduce((acc, row) => acc + row["tp1"], 0)) || "",
-      tp2: Number(data.reduce((acc, row) => acc + row["tp2"], 0)) || "",
-      tp3: Number(data.reduce((acc, row) => acc + row["tp3"], 0)) || "",
-      tp4: Number(data.reduce((acc, row) => acc + row["tp4"], 0)) || "",
+        Number(data.reduce((acc, row) => acc + row["baseline"], 0)) || 0,
+      tp1: Number(data.reduce((acc, row) => acc + row["tp1"], 0)) || 0,
+      tp2: Number(data.reduce((acc, row) => acc + row["tp2"], 0)) || 0,
+      tp3: Number(data.reduce((acc, row) => acc + row["tp3"], 0)) || 0,
+      tp4: Number(data.reduce((acc, row) => acc + row["tp4"], 0)) || 0,
     },
     {
       location: "Nadir (mm):",
@@ -102,44 +104,68 @@ const TargetLesionsTotalTable = ({ data, dataDate, onChange }) => {
       location: "Thay đổi SLD:",
       baseline: "",
       tp1:
-        sumSLD("tp1") != 0
-          ? (sumSLD("tp1") - sumSLD("baseline")) / sumSLD("baseline")
+        sumSLD("tp1") !== 0
+          ? (
+              ((sumSLD("tp1") - sumSLD("baseline")) / sumSLD("baseline")) *
+              100
+            ).toFixed(1)
           : "",
       tp2:
-        sumSLD("tp2") != 0
-          ? (sumSLD("tp2") - sumSLD("baseline")) / sumSLD("baseline")
+        sumSLD("tp2") !== 0
+          ? (
+              ((sumSLD("tp2") - sumSLD("baseline")) / sumSLD("baseline")) *
+              100
+            ).toFixed(1)
           : "",
       tp3:
-        sumSLD("tp3") != 0
-          ? (sumSLD("tp3") - sumSLD("baseline")) / sumSLD("baseline")
+        sumSLD("tp3") !== 0
+          ? (
+              ((sumSLD("tp3") - sumSLD("baseline")) / sumSLD("baseline")) *
+              100
+            ).toFixed(1)
           : "",
       tp4:
-        sumSLD("tp4") != 0
-          ? (sumSLD("tp4") - sumSLD("baseline")) / sumSLD("baseline")
+        sumSLD("tp4") !== 0
+          ? (
+              ((sumSLD("tp4") - sumSLD("baseline")) / sumSLD("baseline")) *
+              100
+            ).toFixed(1)
           : "",
     },
     {
       location: "Thay đổi Nadir:",
       baseline: "",
       tp1:
-        sumSLD("tp1") != 0
-          ? (sumSLD("tp1") - getNadir(data, dataDate)) /
-            getNadir(data, dataDate)
+        sumSLD("tp1") !== 0
+          ? (
+              ((sumSLD("tp1") - getNadir(data, dataDate)) /
+                getNadir(data, dataDate)) *
+              100
+            ).toFixed(1)
           : "",
       tp2:
-        sumSLD("tp2") != 0
-          ? (sumSLD("tp2") - getNadir(data, dataDate)) /
-            getNadir(data, dataDate)
+        sumSLD("tp2") !== 0
+          ? (
+              ((sumSLD("tp2") - getNadir(data, dataDate)) /
+                getNadir(data, dataDate)) *
+              100
+            ).toFixed(1)
           : "",
       tp3:
-        sumSLD("tp3") != 0
-          ? (sumSLD("tp3") - getNadir(data, dataDate)) /
-            getNadir(data, dataDate)
+        sumSLD("tp3") !== 0
+          ? (
+              ((sumSLD("tp3") - getNadir(data, dataDate)) /
+                getNadir(data, dataDate)) *
+              100
+            ).toFixed(1)
           : "",
       tp4:
-        sumSLD("tp4") != 0
-          ? (sumSLD("tp4") - getNadir(data, dataDate)) /
-            getNadir(data, dataDate)
+        sumSLD("tp4") !== 0
+          ? (
+              ((sumSLD("tp4") - getNadir(data, dataDate)) /
+                getNadir(data, dataDate)) *
+              100
+            ).toFixed(1)
           : "",
     },
     {

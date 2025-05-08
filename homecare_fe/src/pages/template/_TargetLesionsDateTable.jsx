@@ -10,11 +10,13 @@ const columnsDate = [
     dataIndex: "location",
     render: (text, record, index) => "Ngày chụp",
     width: 150,
+    align: "center",
   },
   dataKeys.map((key, index) => ({
     title: timepoints[index],
     dataIndex: key,
     width: 100,
+    align: "center",
     render: (text, record, index) => (
       <Input
         type="date"

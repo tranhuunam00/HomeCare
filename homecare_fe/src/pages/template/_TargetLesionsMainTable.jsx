@@ -12,6 +12,7 @@ const columnsFn = (dataDate) =>
     {
       title: "Vị trí",
       dataIndex: "location",
+      align: "center",
       render: (text, record, index) => (
         <Input
           value={text}
@@ -26,6 +27,7 @@ const columnsFn = (dataDate) =>
       title: key.toUpperCase(),
       dataIndex: key,
       width: 100,
+      align: "center",
       render: (text, record, index) => {
         const isEnabled = !!dataDate[0]?.[key];
         if (colIdx === arr.length - 1) {
