@@ -24,7 +24,7 @@ import TargetLesionsDateTable from "./_TargetLesionsDateTable.jsx";
 import TargetLesionsMainTable from "./_TargetLesionsMainTable.jsx";
 import TargetLesionsTotalTable from "./_TargetLesionsTotalTable.jsx";
 import TargetLesionsChart from "./_TargetLesionsChart.jsx";
-import { exportPDF } from "../utils/exportPDF.js";
+import { exportPDF, generatePDF } from "../utils/exportPDF.js";
 
 const { Title } = Typography;
 
@@ -87,7 +87,7 @@ const PatientForm = () => {
         </div>
 
         {/* THÔNG TIN YÊU CẦU */}
-        <div style={formStyle}>
+        <div style={formStyle} className="print-section-request">
           <h3 style={titleStyle}>THÔNG TIN YÊU CẦU</h3>
           {renderRequestInfoFields({
             contrast,
@@ -333,6 +333,7 @@ const renderRequestInfoFields = ({
                   right: 0,
                   padding: "4px",
                 }}
+                className="no-print"
               />
             </>
           )}
@@ -555,7 +556,7 @@ export default function Template() {
 
   const handlePrint = async () => {
     setLoading(true);
-    await exportPDF({ selector: ".print-section", type: "print" });
+    await generatePDF();
     setLoading(false);
   };
 
@@ -636,8 +637,8 @@ export default function Template() {
             <Title
               level={4}
               style={{
-                margin: 0,
-                textAlign: "left",
+                marginBottom: 15,
+                textAlign: "center",
                 width: "100%",
                 color: "#1890ff",
               }}
@@ -647,7 +648,7 @@ export default function Template() {
           </div>
 
           {/* Bảng ngày tháng chung */}
-          <div style={{ marginBottom: "24px" }}>
+          <div style={{ marginBottom: "24px" }} className="no-print">
             <TargetLesionsDateTable
               dataDate={dataDate}
               onChangeDate={onChangeDate}
@@ -695,7 +696,7 @@ export default function Template() {
           </div>
 
           {/* Bảng tổn thương mới */}
-          <div style={{ marginBottom: "24px" }}>
+          <div style={{ marginBottom: "24px" }} className="print-section">
             <Title level={4} style={{ textAlign: "left", color: "#1890ff" }}>
               TỔN THƯƠNG MỚI
             </Title>
@@ -715,7 +716,7 @@ export default function Template() {
           </div>
 
           {/* Các biểu đồ */}
-          <div style={{ marginTop: "48px" }}>
+          <div style={{ marginTop: "48px" }} className="print-section">
             <TargetLesionsChart
               data={targetData}
               dataDate={dataDate}

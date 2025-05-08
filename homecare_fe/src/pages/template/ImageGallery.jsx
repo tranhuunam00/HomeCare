@@ -36,7 +36,7 @@ const ImageGallery = () => {
 
   const renderAddImageButton = (isFirst = false) => (
     <div
-      className="add-image-button"
+      className="add-image-button no-print"
       onClick={() => handleAddImage()}
       style={{
         width: "300px",

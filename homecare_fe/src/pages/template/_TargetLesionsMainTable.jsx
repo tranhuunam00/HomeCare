@@ -98,6 +98,7 @@ const TargetLesionsMainTable = ({
           type="default"
           size="small"
           icon={<ReloadOutlined />}
+          className="no-print"
         />
       </div>
       <Table
@@ -112,6 +113,7 @@ const TargetLesionsMainTable = ({
         block
         icon={<PlusOutlined />}
         style={{ marginTop: "8px" }}
+        className="no-print"
       >
         Thêm dòng
       </Button>

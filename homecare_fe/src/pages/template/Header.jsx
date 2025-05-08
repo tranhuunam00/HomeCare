@@ -52,6 +52,7 @@ export const Header = () => {
       {/* Nút sửa */}
       {!isEditing && (
         <Button
+          className="no-print"
           icon={<EditOutlined />}
           type="text"
           style={{ position: "absolute", top: 0, right: 0, zIndex: 2 }}
@@ -88,7 +89,9 @@ export const Header = () => {
                   style={{ fontWeight: "bold", fontSize: 20, marginBottom: 8 }}
                 />
               ) : (
-                <h2 style={{ margin: 0 }}>{title}</h2>
+                <h2 style={{ margin: 0 }} className="name_title">
+                  {title}
+                </h2>
               )}
               <div style={{ display: "flex", justifyContent: "flex-start" }}>
                 <ul

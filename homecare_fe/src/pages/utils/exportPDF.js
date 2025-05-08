@@ -4,7 +4,6 @@ import html2canvas from "html2canvas";
 export async function exportPDF({
   selector = ".print-section",
   fileName = "ketqua_recist.pdf",
-  type = "pdf", // "pdf" hoặc "print"
 }) {
   // Thêm CSS cho in ấn
   const style = `
@@ -41,12 +40,6 @@ export async function exportPDF({
 
   // Đợi một chút để đảm bảo các style đã được áp dụng
   await new Promise((resolve) => setTimeout(resolve, 1000));
-
-  if (type === "print") {
-    window.print();
-    document.head.removeChild(styleTag);
-    return;
-  }
 
   // Kiểu PDF như cũ
   const sections = document.querySelectorAll(selector);
@@ -96,5 +89,120 @@ export async function exportPDF({
   pdf.save(fileName);
 
   // Xóa bỏ style đã thêm
+  document.head.removeChild(styleTag);
+}
+
+export async function generatePDF() {
+  // Lưu title cũ
+  const oldTitle = document.title;
+  // Đặt tên mới cho file PDF
+  document.title = `RECIST_Report_${new Date()
+    .toLocaleDateString("vi-VN")
+    .replace(/\//g, "_")}`;
+
+  // Thêm CSS cho in ấn
+  const style = `
+    @page {
+      size: A4;
+      margin: 151px 76px 151px 76px;
+    }
+    @media print {
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html {
+        height: 100vh;
+      }
+      body {
+        height: 100vh;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+      }
+      /* Ẩn tất cả extension và thanh công cụ */
+      #browser-extension-hide,
+      #browser-action-hide,
+      #page-action-hide,
+      #nav-bar-hide,
+      #toolbar-hide,
+      #chrome-extension-hide,
+      .chrome-extension,
+      .browser-action,
+      .page-action {
+        display: none !important;
+        visibility: hidden !important;
+      }
+      /* Ẩn tất cả nội dung khác */
+      body * {
+        visibility: hidden;
+      }
+      /* Chỉ hiển thị nội dung cần in */
+      #report-container, 
+      #report-container * {
+        visibility: visible;
+      }
+      #report-container {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        background-color: white !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        margin: 0;
+        padding: 15mm;
+        box-sizing: border-box;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-section {
+        page-break-inside: avoid;
+        padding: 10px 0;
+
+      }
+      table {
+        page-break-inside: avoid;
+      }
+      .ant-table {
+        page-break-inside: avoid;
+      }
+      .ant-table-tbody {
+        page-break-inside: avoid;
+      }
+      .ant-table-row {
+        page-break-inside: avoid;
+      }
+      /* Ẩn các form control không cần thiết khi in */
+      .ant-form-item-control-input-content .ant-picker-suffix,
+      .ant-form-item-control-input-content .ant-select-arrow,
+      .ant-form-item-control-input-content .ant-input-number-handler-wrap {
+        display: none !important;
+      }
+      .name_title {
+        font-size: 18px;
+        font-weight: bold;
+      }
+      .print-section-request {
+        padding-top: 10px;
+      }
+    }
+  `;
+
+  const styleTag = document.createElement("style");
+  styleTag.innerHTML = style;
+  document.head.appendChild(styleTag);
+
+  // Đợi một chút để đảm bảo các style đã được áp dụng
+  await new Promise((resolve) => setTimeout(resolve, 100));
+  // Gọi hàm in của trình duyệt
+  window.print();
+  // Khôi phục lại title cũ
+  document.title = oldTitle;
+
+  // Xóa style sau khi in xong
   document.head.removeChild(styleTag);
 }
