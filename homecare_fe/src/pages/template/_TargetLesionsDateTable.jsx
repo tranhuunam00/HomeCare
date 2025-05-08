@@ -1,16 +1,10 @@
 import React from "react";
 import { Table, Input } from "antd";
 
-const timepoints = ["Baseline", "TP1", "TP2", "TP3", "TP4", "TP5"];
-const dataKeys = ["baseline", "tp1", "tp2", "tp3", "tp4", "tp5"];
+const timepoints = ["Baseline", "TP1", "TP2", "TP3", "TP4"];
+const dataKeys = ["baseline", "tp1", "tp2", "tp3", "tp4"];
 
 const columnsDate = [
-  {
-    title: "STT",
-    dataIndex: "key",
-    render: (_, __, index) => "1",
-    width: 60,
-  },
   {
     title: "Timepoint",
     dataIndex: "location",
@@ -35,12 +29,11 @@ const columnsDate = [
 const TargetLesionsDateTable = ({ dataDate, onChangeDate }) => {
   const parsedDataDate = dataDate.map((item) => ({
     ...item,
-    baseline: item.baseline,
-    tp1: item.tp1,
-    tp2: item.tp2,
-    tp3: item.tp3,
-    tp4: item.tp4,
-    tp5: item.tp5,
+    baseline: item.baseline || "",
+    tp1: item.tp1 || "",
+    tp2: item.tp2 || "",
+    tp3: item.tp3 || "",
+    tp4: item.tp4 || "",
     onChange: onChangeDate,
   }));
 

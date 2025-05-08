@@ -7,7 +7,9 @@ import {
   Button,
   Typography,
   Space,
+  InputNumber,
 } from "antd";
+import { EditOutlined } from "@ant-design/icons";
 
 import GuildLine from "./_guildline";
 
@@ -29,6 +31,12 @@ const PatientForm = () => {
   const [form] = Form.useForm();
   const [gender, setGender] = useState(1);
   const [contrast, setContrast] = useState(1);
+  const [isEditingTechnique, setIsEditingTechnique] = useState(false);
+  const [techniqueContent, setTechniqueContent] = useState(
+    "Trước tiêm thuốc cản quang, độ dày lớp cắt 1.5mm\n" +
+      "Sau tiêm thuốc cản quang, độ dày lớp cắt 1.5mm\n" +
+      "Xử lý tái tạo ảnh: MPR, VRT"
+  );
 
   const handleGenderChange = (e) => {
     console.log("Giới tính đã thay đổi:", e.target.value);
@@ -80,7 +88,14 @@ const PatientForm = () => {
         {/* THÔNG TIN YÊU CẦU */}
         <div style={formStyle}>
           <h3 style={titleStyle}>THÔNG TIN YÊU CẦU</h3>
-          {renderRequestInfoFields({ contrast, handleContrastChange })}
+          {renderRequestInfoFields({
+            contrast,
+            handleContrastChange,
+            isEditingTechnique,
+            techniqueContent,
+            setTechniqueContent,
+            setIsEditingTechnique,
+          })}
         </div>
       </div>
     </Form>
@@ -116,8 +131,8 @@ const renderPatientInfoFields = ({ gender, handleGenderChange }) => (
           ]}
         />
       </Form.Item>
-      <Form.Item label="Ngày sinh" name="dob" style={{ textAlign: "left" }}>
-        <DatePicker format="DD/MM/YYYY" />
+      <Form.Item label="Năm sinh" name="dob" style={{ textAlign: "left" }}>
+        <InputNumber min={1900} max={2100} placeholder="1900" />
       </Form.Item>
       <Form.Item label="Điện thoại" name="phone">
         <Input />
@@ -134,8 +149,23 @@ const renderPatientInfoFields = ({ gender, handleGenderChange }) => (
         <Input />
       </Form.Item>
     </div>
-    <Form.Item label="Địa chỉ" name="address">
-      <Input />
+    <Form.Item label="Địa chỉ">
+      <div
+        style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}
+      >
+        <Form.Item name="province" style={{ margin: 0 }}>
+          <Input placeholder="Tỉnh/Thành phố" />
+        </Form.Item>
+        <Form.Item name="district" style={{ margin: 0 }}>
+          <Input placeholder="Huyện/Quận" />
+        </Form.Item>
+        <Form.Item name="ward" style={{ margin: 0 }}>
+          <Input placeholder="Phường/Xã" />
+        </Form.Item>
+        <Form.Item name="detail" style={{ margin: 0 }}>
+          <Input placeholder="Chi tiết" />
+        </Form.Item>
+      </div>
     </Form.Item>
   </>
 );
@@ -204,7 +234,14 @@ const renderDoctorInfoFields = () => (
 );
 
 // Hàm để render các trường thông tin yêu cầu
-const renderRequestInfoFields = ({ contrast, handleContrastChange }) => (
+const renderRequestInfoFields = ({
+  contrast,
+  handleContrastChange,
+  isEditingTechnique,
+  techniqueContent,
+  setTechniqueContent,
+  setIsEditingTechnique,
+}) => (
   <>
     <div
       style={{
@@ -222,12 +259,12 @@ const renderRequestInfoFields = ({ contrast, handleContrastChange }) => (
         />
       </Form.Item>
 
-      <div style={{ textAlign: "left" }}>Ngày thực hiện:</div>
+      <div style={{ textAlign: "left" }}>Ngày chụp:</div>
       <Form.Item name="executionDate" style={{ margin: 0 }}>
         <DatePicker format="DD/MM/YYYY" style={{ width: "100%" }} />
       </Form.Item>
 
-      <div style={{ textAlign: "left" }}>Nơi thực hiện:</div>
+      <div style={{ textAlign: "left" }}>Nơi chụp:</div>
       <Form.Item name="location" style={{ margin: 0 }}>
         <Input />
       </Form.Item>
@@ -252,10 +289,46 @@ const renderRequestInfoFields = ({ contrast, handleContrastChange }) => (
 
       <div style={{ textAlign: "left" }}>Kỹ thuật tạo ảnh:</div>
       <Form.Item name="technique" style={{ margin: 0, textAlign: "left" }}>
-        <div>
-          <p>Trước tiêm thuốc cản quang, độ dày lớp cắt 1.5mm</p>
-          <p>Sau tiêm thuốc cản quang, độ dày lớp cắt 1.5mm</p>
-          <p>Xử lý tái tạo ảnh: MPR, VRT</p>
+        <div style={{ position: "relative" }}>
+          {isEditingTechnique ? (
+            <>
+              <Input.TextArea
+                value={techniqueContent}
+                onChange={(e) => setTechniqueContent(e.target.value)}
+                style={{ marginBottom: "8px" }}
+                rows={4}
+              />
+              <div style={{ textAlign: "right" }}>
+                <Button
+                  type="primary"
+                  onClick={() => setIsEditingTechnique(false)}
+                  style={{ marginRight: "8px" }}
+                >
+                  Lưu
+                </Button>
+                <Button onClick={() => setIsEditingTechnique(false)}>
+                  Hủy
+                </Button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div style={{ whiteSpace: "pre-line", paddingRight: "30px" }}>
+                {techniqueContent}
+              </div>
+              <Button
+                type="text"
+                icon={<EditOutlined />}
+                onClick={() => setIsEditingTechnique(true)}
+                style={{
+                  position: "absolute",
+                  bottom: 0,
+                  right: 0,
+                  padding: "4px",
+                }}
+              />
+            </>
+          )}
         </div>
       </Form.Item>
     </div>
@@ -269,80 +342,99 @@ export default function Template() {
   // State cho dữ liệu bảng tổn thương đích
   const [targetData, setTargetData] = useState([
     {
-      location: "RUL3",
-      baseline: 52,
-      tp1: 45,
-      tp2: 25,
+      location: "",
+      baseline: "",
+      tp1: "",
+      tp2: "",
       tp3: "",
       tp4: "",
-      tp5: "",
-    },
-    {
-      location: "RML5",
-      baseline: 45,
-      tp1: 41,
-      tp2: 20,
-      tp3: "",
-      tp4: "",
-      tp5: "",
-    },
-    {
-      location: "LLL10",
-      baseline: 32,
-      tp1: 32,
-      tp2: 14,
-      tp3: "",
-      tp4: "",
-      tp5: "",
     },
   ]);
 
   // State cho dữ liệu bảng tổn thương ngoài đích
   const [nonTargetData, setNonTargetData] = useState([
     {
-      location: "RUL3",
-      baseline: 52,
-      tp1: 45,
-      tp2: 25,
+      location: "",
+      baseline: "",
+      tp1: "",
+      tp2: "",
       tp3: "",
       tp4: "",
-      tp5: "",
-    },
-    {
-      location: "RML5",
-      baseline: 45,
-      tp1: 41,
-      tp2: 20,
-      tp3: "",
-      tp4: "",
-      tp5: "",
     },
   ]);
 
   // State cho dữ liệu bảng tổn thương mới
   const [newLesionData, setNewLesionData] = useState([
     {
-      location: "RUL3",
-      baseline: 52,
-      tp1: 45,
-      tp2: 25,
+      location: "",
+      baseline: "",
+      tp1: "",
+      tp2: "",
       tp3: "",
       tp4: "",
-      tp5: "",
     },
   ]);
 
   const [dataDate, setDataDate] = useState([
     {
       location: "",
-      baseline: "2024-01-01",
-      tp1: "2024-05-01",
-      tp2: "2025-01-01",
+      baseline: "",
+      tp1: "",
+      tp2: "",
       tp3: "",
       tp4: "",
-      tp5: "",
     },
   ]);
+
+  // Kiểm tra đã chọn ngày chưa
+  const isDateSelected = dataDate.some((row) =>
+    ["baseline", "tp1", "tp2", "tp3", "tp4"].some((key) => row[key])
+  );
+
+  // Hàm xử lý thêm dòng cho tổn thương đích
+  const onAddTargetRow = () => {
+    setTargetData([
+      ...targetData,
+      {
+        location: "",
+        baseline: "",
+        tp1: "",
+        tp2: "",
+        tp3: "",
+        tp4: "",
+      },
+    ]);
+  };
+
+  // Hàm xử lý thêm dòng cho tổn thương ngoài đích
+  const onAddNonTargetRow = () => {
+    setNonTargetData([
+      ...nonTargetData,
+      {
+        location: "",
+        baseline: "",
+        tp1: "",
+        tp2: "",
+        tp3: "",
+        tp4: "",
+      },
+    ]);
+  };
+
+  // Hàm xử lý thêm dòng cho tổn thương mới
+  const onAddNewRow = () => {
+    setNewLesionData([
+      ...newLesionData,
+      {
+        location: "",
+        baseline: "",
+        tp1: "",
+        tp2: "",
+        tp3: "",
+        tp4: "",
+      },
+    ]);
+  };
 
   // Hàm xử lý thay đổi dữ liệu cho tổn thương đích
   const onTargetChange = (rowIndex, key, value) => {
@@ -381,6 +473,27 @@ export default function Template() {
     const newData = [...dataDate];
     newData[rowIndex][key] = value;
     setDataDate(newData);
+  };
+
+  // Hàm xử lý xóa dòng cho tổn thương đích
+  const onDeleteTargetRow = (index) => {
+    const newData = [...targetData];
+    newData.splice(index, 1);
+    setTargetData(newData);
+  };
+
+  // Hàm xử lý xóa dòng cho tổn thương ngoài đích
+  const onDeleteNonTargetRow = (index) => {
+    const newData = [...nonTargetData];
+    newData.splice(index, 1);
+    setNonTargetData(newData);
+  };
+
+  // Hàm xử lý xóa dòng cho tổn thương mới
+  const onDeleteNewRow = (index) => {
+    const newData = [...newLesionData];
+    newData.splice(index, 1);
+    setNewLesionData(newData);
   };
 
   const generatePDF = async () => {
@@ -530,9 +643,9 @@ export default function Template() {
         </div>
 
         {/* Thêm component ExaminationResults */}
-        <div className="print-section">
+        {/* <div className="print-section">
           <ExaminationResults />
-        </div>
+        </div> */}
         {/* Các bảng tổn thương */}
         <div className="print-section">
           <div
@@ -571,6 +684,9 @@ export default function Template() {
             <TargetLesionsMainTable
               data={targetData}
               onChange={onTargetChange}
+              onAddRow={onAddTargetRow}
+              onDeleteRow={onDeleteTargetRow}
+              dataDate={dataDate}
             />
             <TargetLesionsTotalTable
               data={targetData}
@@ -587,6 +703,9 @@ export default function Template() {
             <TargetLesionsMainTable
               data={nonTargetData}
               onChange={onNonTargetChange}
+              onAddRow={onAddNonTargetRow}
+              onDeleteRow={onDeleteNonTargetRow}
+              dataDate={dataDate}
             />
             <TargetLesionsTotalTable
               data={nonTargetData}
@@ -603,6 +722,9 @@ export default function Template() {
             <TargetLesionsMainTable
               data={newLesionData}
               onChange={onNewChange}
+              onAddRow={onAddNewRow}
+              onDeleteRow={onDeleteNewRow}
+              dataDate={dataDate}
             />
             <TargetLesionsTotalTable
               data={newLesionData}

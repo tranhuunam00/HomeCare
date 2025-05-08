@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Table, Input } from "antd";
+import "./_TargetLesionsTotalTable.css";
 
 const { TextArea } = Input;
 
@@ -7,7 +8,7 @@ const columnsTotal = [
   {
     title: "",
     dataIndex: "location",
-    width: 210,
+    width: 150,
     render: (text, record) => {
       if (record.isTextArea) {
         return {
@@ -20,7 +21,7 @@ const columnsTotal = [
       return text;
     },
   },
-  ["baseline", "tp1", "tp2", "tp3", "tp4", "tp5"].map((key, index) => ({
+  ["baseline", "tp1", "tp2", "tp3", "tp4"].map((key, index) => ({
     title: "",
     dataIndex: key,
     width: 100,
@@ -92,7 +93,6 @@ const TargetLesionsTotalTable = ({ data, dataDate, onChange }) => {
       tp2: Number(data.reduce((acc, row) => acc + row["tp2"], 0)) || "",
       tp3: Number(data.reduce((acc, row) => acc + row["tp3"], 0)) || "",
       tp4: Number(data.reduce((acc, row) => acc + row["tp4"], 0)) || "",
-      tp5: Number(data.reduce((acc, row) => acc + row["tp5"], 0)) || "",
     },
     {
       location: "Nadir (mm):",
@@ -116,10 +116,6 @@ const TargetLesionsTotalTable = ({ data, dataDate, onChange }) => {
       tp4:
         sumSLD("tp4") != 0
           ? (sumSLD("tp4") - sumSLD("baseline")) / sumSLD("baseline")
-          : "",
-      tp5:
-        sumSLD("tp5") != 0
-          ? (sumSLD("tp5") - sumSLD("baseline")) / sumSLD("baseline")
           : "",
     },
     {
@@ -145,11 +141,6 @@ const TargetLesionsTotalTable = ({ data, dataDate, onChange }) => {
           ? (sumSLD("tp4") - getNadir(data, dataDate)) /
             getNadir(data, dataDate)
           : "",
-      tp5:
-        sumSLD("tp5") != 0
-          ? (sumSLD("tp5") - getNadir(data, dataDate)) /
-            getNadir(data, dataDate)
-          : "",
     },
     {
       key: "response",
@@ -162,6 +153,7 @@ const TargetLesionsTotalTable = ({ data, dataDate, onChange }) => {
 
   return (
     <Table
+      className="table-total-custom"
       columns={columnsTotal}
       dataSource={parsedDataTotal}
       pagination={false}
