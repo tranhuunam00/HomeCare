@@ -122,20 +122,20 @@ export default function TiradPage() {
             >
               <Link to="/">Quay lại Trang chủ</Link>
               <div style={{ display: "flex", gap: 8 }}>
-                <Button
+                {/* <Button
                   type="primary"
                   onClick={handleExportPDF}
                   loading={loading}
                   disabled={loading}
                 >
                   {loading ? "Đang xuất file PDF..." : "Xuất PDF"}
-                </Button>
+                </Button> */}
                 <Button
                   onClick={handlePrint}
                   loading={loading}
                   disabled={loading}
                 >
-                  In trình duyệt
+                  Xuất PDF
                 </Button>
               </div>
             </Space>

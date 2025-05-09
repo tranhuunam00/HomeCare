@@ -20,7 +20,7 @@ const columnsDate = [
     render: (text, record, index) => (
       <Input
         type="date"
-        style={{ height: 20, width: "100%", fontSize: 8 }}
+        style={{ height: 28, width: "100%", fontSize: 16 }}
         value={text}
         onChange={(e) => record.onChange(index, key, e.target.value)}
       />
