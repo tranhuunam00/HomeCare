@@ -561,7 +561,7 @@ export default function Template() {
   };
 
   return (
-    <div>
+    <div className="a4-page">
       <div>
         <Space
           style={{

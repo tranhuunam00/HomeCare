@@ -89,9 +89,9 @@ export const Header = () => {
                   style={{ fontWeight: "bold", fontSize: 20, marginBottom: 8 }}
                 />
               ) : (
-                <h2 style={{ margin: 0 }} className="name_title">
+                <h3 style={{ margin: 0 }} className="name_title">
                   {title}
-                </h2>
+                </h3>
               )}
               <div style={{ display: "flex", justifyContent: "flex-start" }}>
                 <ul

@@ -109,7 +109,7 @@ export default function TiradPage() {
     setLoading(false);
   };
   return (
-    <div className="tirads-page-wrapper print-section">
+    <div className="tirads-page-wrapper print-section a4-page">
       <div className="tirads-container main-content">
         <div className="tirads-toolbar no-print">
           <div>
@@ -160,7 +160,7 @@ export default function TiradPage() {
                   : "(Chọn 1)"}
               </em>
               {opts.map((opt, i) => (
-                <label className="option" key={i}>
+                <h2 className="option" key={i}>
                   <input
                     type={category === "echogenicFoci" ? "checkbox" : "radio"}
                     name={`radio-${category}`}
@@ -176,7 +176,7 @@ export default function TiradPage() {
                     }
                   />
                   {opt.label} <span className="points">({opt.value} điểm)</span>
-                </label>
+                </h2>
               ))}
             </div>
           ))}
