@@ -104,7 +104,7 @@ export async function generatePDF() {
   const style = `
     @page {
       size: A4;
-      margin: 151px 76px 151px 76px;
+      margin: 15mm;
     }
     @media print {
 
@@ -113,14 +113,10 @@ export async function generatePDF() {
         padding: 0;
         box-sizing: border-box;
       }
-      html {
-        height: 100vh;
-      }
+
       body {
-        height: 100vh;
         margin: 0 !important;
         padding: 0 !important;
-        overflow: hidden !important;
       }
       /* Ẩn tất cả extension và thanh công cụ */
       #browser-extension-hide,
@@ -140,11 +136,16 @@ export async function generatePDF() {
         visibility: hidden;
       }
       /* Chỉ hiển thị nội dung cần in */
-      #report-container, 
-      #report-container * {
-        visibility: visible;
+      #report-container,
+      #report-container *,
+      .print-section,
+      .print-section *,
+      .tirads-container,
+      .tirads-container * {
+        visibility: visible !important;
       }
-      #report-container {
+      #report-container,
+      .tirads-container {
         position: absolute;
         left: 0;
         top: 0;
@@ -162,7 +163,6 @@ export async function generatePDF() {
       .print-section {
         page-break-inside: avoid;
         padding: 10px 0;
-
       }
       table {
         page-break-inside: avoid;
@@ -183,11 +183,31 @@ export async function generatePDF() {
         display: none !important;
       }
       .name_title {
-        font-size: 18px;
+        font-size: 16px;
         font-weight: bold;
       }
       .print-section-request {
         padding-top: 10px;
+      }
+      .tirads-categories-section {
+        display: flex;
+        flex-direction: column;
+        padding: 15px;
+      }
+      .tirads-categories-section .category {
+        page-break-inside: avoid;
+        break-inside: avoid;
+        display: flex;
+        flex-direction: column;
+        margin-top: 16px; /* hoặc padding-top: 16px; */
+      }
+      .tirads-reference {
+        border: none !important;
+        margin-top: 16px;
+      }
+      .tirads-description {
+        border: none !important;
+        margin: 0;
       }
     }
   `;
