@@ -78,10 +78,6 @@ const GuildLine = ({ title }) => {
 
   return (
     <div style={{ padding: 24 }}>
-      <Title level={4} style={{ textAlign: "center", marginBottom: 20 }}>
-        {title}
-      </Title>
-
       <Row gutter={24} style={{ marginBottom: 24 }}>
         <Col span={12}>
           <img
@@ -98,6 +94,9 @@ const GuildLine = ({ title }) => {
           />
         </Col>
       </Row>
+      <Title level={4} style={{ textAlign: "center", marginBottom: 20 }}>
+        {title}
+      </Title>
 
       <Table
         columns={columns}
