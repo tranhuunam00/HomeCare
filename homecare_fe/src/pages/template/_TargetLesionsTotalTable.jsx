@@ -8,23 +8,19 @@ const { Option } = Select;
 const responseOptions = [
   {
     value: "CR",
-    label:
-      "CR - Complete Response: Bệnh thoái triển hoàn toàn: không còn thấy (< 10mm đối với hạch) và không có tổn thương mới",
+    label: "CR",
   },
   {
     value: "PR",
-    label:
-      "PR - Partial Response: Bệnh thoái triển một phần: SLD giảm tối thiểu 30% so với BLD và không có tổn thương mới",
+    label: "PR",
   },
   {
     value: "PD",
-    label:
-      "PD - Progressive Disease: Bệnh tiến triển: có tổn thương mới hoặc SLD tăng tối thiểu 20% (hoặc 5mm) so với NADIR",
+    label: "PD",
   },
   {
     value: "SD",
-    label:
-      "SD - Stable Disease: Bệnh ổn định: không đủ tiêu chuẩn của PR và PD",
+    label: "SD",
   },
 ];
 

@@ -87,7 +87,7 @@ const PatientForm = () => {
         </div>
 
         {/* THÔNG TIN YÊU CẦU */}
-        <div style={formStyle} className="print-section-request">
+        <div style={formStyle} className="print-section">
           <h3 style={titleStyle}>THÔNG TIN YÊU CẦU</h3>
           {renderRequestInfoFields({
             contrast,

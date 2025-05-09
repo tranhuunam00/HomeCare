@@ -200,6 +200,18 @@ const ConclusionTable = () => {
             options={responseOptions}
             value={recistResponse}
             onChange={(value) => setRecistResponse(value)}
+            optionLabelProp="label"
+            dropdownStyle={{ whiteSpace: "normal", maxWidth: 600 }}
+            className="no-print"
+          />
+          <TextArea
+            style={{ marginTop: 8 }}
+            value={
+              responseOptions.find((opt) => opt.value === recistResponse)
+                ?.label || ""
+            }
+            autoSize={{ minRows: 2, maxRows: 6 }}
+            readOnly
           />
         </Col>
       </Row>
