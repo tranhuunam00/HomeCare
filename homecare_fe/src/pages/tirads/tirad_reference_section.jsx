@@ -52,15 +52,15 @@ const TiradsReferenceSection = () => {
         </ul>
       </div>
       <div className="print-section">
-        <h2 className="reference-title">TIRADS Classification Table</h2>
+        <h2 className="reference-title">Bảng phân loại TIRADS</h2>
         <table className="reference-table">
           <thead>
             <tr>
-              <th>Category</th>
-              <th>Points</th>
-              <th>Suspicion</th>
-              <th>Risk of Malignancy</th>
-              <th>Guideline</th>
+              <th>Nhóm</th>
+              <th>Điểm</th>
+              <th>Mức độ nghi ngờ</th>
+              <th>Tỷ lệ ác tính</th>
+              <th>Khuyến cáo</th>
             </tr>
           </thead>
           <tbody>

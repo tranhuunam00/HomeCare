@@ -678,7 +678,7 @@ export default function Template() {
           {/* Bảng tổn thương ngoài đích */}
           <div style={{ marginBottom: "24px" }}>
             <Title level={4} style={{ textAlign: "left", color: "#1890ff" }}>
-              NGOÀI TỔN THƯƠNG ĐÍCH (NON-TARGET LESIONS)
+              TỔN THƯƠNG NGOÀI ĐÍCH (NON-TARGET LESIONS)
             </Title>
             <TargetLesionsMainTable
               data={nonTargetData}
@@ -720,17 +720,19 @@ export default function Template() {
             <TargetLesionsChart
               data={targetData}
               dataDate={dataDate}
-              name_chart={"Đồ thị minh họa thay đổi tổn thương đích"}
+              name_chart={"Hình 1: Đồ thị minh họa thay đổi tổn thương đích"}
             />
             <TargetLesionsChart
               data={nonTargetData}
               dataDate={dataDate}
-              name_chart={"Đồ thị minh họa thay đổi tổn thương ngoài đích"}
+              name_chart={
+                "Hình 2: Đồ thị minh họa thay đổi tổn thương ngoài đích"
+              }
             />
             <TargetLesionsChart
               data={newLesionData}
               dataDate={dataDate}
-              name_chart={"Đồ thị minh họa thay đổi tổn thương mới"}
+              name_chart={"Hình 3: Đồ thị minh họa thay đổi tổn thương mới"}
             />
           </div>
         </div>

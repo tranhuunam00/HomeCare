@@ -26,71 +26,7 @@ export async function exportPDF({
     .ant-table-row {
       page-break-inside: avoid;
     }
-    /* Ẩn các form control không cần thiết khi in */
-    .ant-form-item-control-input-content .ant-picker-suffix,
-    .ant-form-item-control-input-content .ant-select-arrow,
-    .ant-form-item-control-input-content .ant-input-number-handler-wrap {
-      display: none !important;
-    }
-    .image-gallery {
-      page-break-inside: avoid !important;
-      break-inside: avoid !important;
-      page-break-before: auto !important;
-      margin-bottom: 0 !important;
-      padding-bottom: 0 !important;
-    }
-    .image-gallery .gallery-title {
-      margin-bottom: 8px !important;
-      page-break-after: avoid !important;
-    }
-    .image-gallery .gallery-images {
-      display: grid !important;
-      grid-template-columns: repeat(3, 1fr) !important;
-      gap: 12px !important;
-      page-break-inside: auto !important;
-      break-inside: auto !important;
-      margin-top: 0 !important;
-      padding: 0 !important;
-    }
-    .image-gallery .image-container {
-      page-break-inside: avoid !important;
-      break-inside: avoid !important;
-      height: 310px !important;
-      min-height: 310px !important;
-      max-height: 310px !important;
-      width: 100% !important;
-      margin: 0 !important;
-      box-sizing: border-box !important;
-      display: flex !important;
-      flex-direction: column !important;
-      justify-content: flex-start !important;
-    }
-    .image-gallery .image-item {
-      width: 100% !important;
-      height: 250px !important;
-      min-height: 250px !important;
-      max-height: 250px !important;
-      margin-bottom: 4px !important;
-      flex-shrink: 0 !important;
-    }
-    .image-gallery .image-caption {
-      width: 100% !important;
-      flex: 1 0 auto !important;
-    }
-    .image-gallery .image-caption textarea {
-      font-size: 12px !important;
-      height: 48px !important;
-      min-height: 36px !important;
-      max-height: 60px !important;
-      padding: 2px 4px !important;
-      width: 100% !important;
-      box-sizing: border-box !important;
-    }
-    .image-gallery img {
-      width: 100% !important;
-      height: 100% !important;
-      object-fit: cover !important;
-    }
+   
 
   `;
 
@@ -164,7 +100,6 @@ export async function generatePDF() {
   const style = `
     @page {
       size: A4;
-      margin: 15mm;
     }
     @media print {
 
@@ -242,108 +177,10 @@ export async function generatePDF() {
       .ant-form-item-control-input-content .ant-input-number-handler-wrap {
         display: none !important;
       }
-      .name_title {
-        font-size: 16px;
-        font-weight: bold;
-      }
-      .print-section-request {
-        padding-top: 10px;
-      }
-      .tirads-categories-section {
-        display: flex;
-        flex-wrap: wrap;
-        padding: 15px;
-      }
-      .tirads-categories-section .category {
-        page-break-inside: avoid;
-        break-inside: avoid;
-        display: flex;
-        flex-direction: column;
-        margin-top: 16px; /* hoặc padding-top: 16px; */
-      }
-      .tirads-reference {
-        border: none !important;
-        margin-top: 16px;
-      }
-      .tirads-description {
-        border: none !important;
-        margin: 0;
-      }
-      .tirads-categories-section .category {
-        font-size: 13px !important;
-      }
-      .tirads-categories-section .category-title {
-        font-size: 15px !important;
-      }
-      .tirads-categories-section .option {
-        font-size: 13px !important;
-      }
-      .tirads-categories-section .points {
-        font-size: 12px !important;
-      }
-      .tirads-categories-section label {
-        font-size: 13px !important;
-        line-height: 1.2 !important;
-      }
-      .image-gallery {
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
-        page-break-before: auto !important;
-        margin-bottom: 0 !important;
-        padding-bottom: 0 !important;
-      }
-      .image-gallery .gallery-title {
-        margin-bottom: 8px !important;
-        page-break-after: avoid !important;
-      }
-      .image-gallery .gallery-images {
-        display: grid !important;
-        grid-template-columns: repeat(3, 1fr) !important;
-        gap: 12px !important;
-        page-break-inside: auto !important;
-        break-inside: auto !important;
-        margin-top: 0 !important;
-        padding: 0 !important;
-      }
-      .image-gallery .image-container {
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
-        height: 310px !important;
-        min-height: 310px !important;
-        max-height: 310px !important;
-        width: 100% !important;
-        margin: 0 !important;
-        box-sizing: border-box !important;
-        display: flex !important;
-        flex-direction: column !important;
-        justify-content: flex-start !important;
-      }
-      .image-gallery .image-item {
-        width: 100% !important;
-        height: 250px !important;
-        min-height: 250px !important;
-        max-height: 250px !important;
-        margin-bottom: 4px !important;
-        flex-shrink: 0 !important;
-      }
-      .image-gallery .image-caption {
-        width: 100% !important;
-        flex: 1 0 auto !important;
-      }
-      .image-gallery .image-caption textarea {
-        font-size: 12px !important;
-        height: 48px !important;
-        min-height: 36px !important;
-        max-height: 60px !important;
-        padding: 2px 4px !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
-      }
-      .image-gallery img {
-        width: 100% !important;
-        height: 100% !important;
-        object-fit: cover !important;
-      }
+
+    
+     
+    
     }
   `;
 

@@ -142,11 +142,9 @@ export default function TiradPage() {
           </div>
         </div>
         <Header />
-        <h2 className="title">TIRADS CHO NANG GIÁP</h2>
-        <p className="disclaimer no-print">
-          <strong>Lưu ý:</strong> Công cụ này dựa theo phân loại của ACR nhưng
-          chưa được phê duyệt chính thức.
-        </p>
+        <h2 className="title">
+          TIRADS SỬ DỤNG CHO CÁC NỐT, KHỐI TRONG TUYẾN GIÁP
+        </h2>
 
         <div className="categories tirads-categories-section">
           {Object.entries(options).map(([category, opts]) => (

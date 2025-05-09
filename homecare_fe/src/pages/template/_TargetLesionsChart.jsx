@@ -81,7 +81,10 @@ const TargetLesionsChart = ({ data, dataDate, name_chart }) => {
         />
         <Line type="monotone" dataKey="sld" stroke="#8884d8" dot={{ r: 4 }} />
       </LineChart>
-      <Title level={5} style={{ marginTop: 24 }}>
+      <Title
+        level={5}
+        style={{ marginTop: 24, fontStyle: "italic", fontSize: 11 }}
+      >
         {name_chart}
       </Title>
     </>

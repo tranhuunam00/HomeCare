@@ -77,17 +77,7 @@ const ImageGallery = () => {
       >
         HÌNH ẢNH MINH HỌA
       </div>
-      <div
-        className="gallery-images"
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "30px",
-          alignItems: "center",
-          justifyContent: "flex-start",
-          padding: "20px",
-        }}
-      >
+      <div className="gallery-images">
         {images.length === 0 ? (
           renderAddImageButton(true)
         ) : (
