@@ -82,7 +82,15 @@ const columnsTotal = [
         record.location === "Thay đổi SLD:" ||
         record.location === "Thay đổi Nadir:"
       ) {
-        return text !== "" ? <span>{text}%</span> : <span></span>;
+        if (
+          text === "" ||
+          text === "Infinity" ||
+          text === "-Infinity" ||
+          text === "NaN"
+        ) {
+          return <span></span>;
+        }
+        return <span>{text}%</span>;
       }
       return <span>{text}</span>;
     },
