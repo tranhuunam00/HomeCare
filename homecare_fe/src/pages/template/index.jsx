@@ -648,7 +648,7 @@ export default function Template() {
           </div>
 
           {/* Bảng ngày tháng chung */}
-          <div style={{ marginBottom: "24px" }} className="no-print">
+          <div style={{ marginBottom: "24px" }}>
             <TargetLesionsDateTable
               dataDate={dataDate}
               onChangeDate={onChangeDate}
