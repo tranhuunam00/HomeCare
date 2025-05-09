@@ -51,55 +51,57 @@ const TiradsReferenceSection = () => {
           </li>
         </ul>
       </div>
-      <h2 className="reference-title">TIRADS Classification Table</h2>
-      <table className="reference-table">
-        <thead>
-          <tr>
-            <th>Category</th>
-            <th>Points</th>
-            <th>Suspicion</th>
-            <th>Risk of Malignancy</th>
-            <th>Guideline</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>TR1</td>
-            <td>0</td>
-            <td>Lành tính</td>
-            <td>0.3%</td>
-            <td>Không FNA</td>
-          </tr>
-          <tr>
-            <td>TR2</td>
-            <td>2</td>
-            <td>Không nghi ngờ</td>
-            <td>1.5%</td>
-            <td>Không FNA</td>
-          </tr>
-          <tr>
-            <td>TR3</td>
-            <td>3</td>
-            <td>Nghi ngờ thấp</td>
-            <td>4.8%</td>
-            <td>FNA nếu ≥ 2.5cm; Theo dõi nếu ≥ 1.5cm</td>
-          </tr>
-          <tr>
-            <td>TR4</td>
-            <td>4 - 6</td>
-            <td>Nghi ngờ vừa</td>
-            <td>9.1%</td>
-            <td>FNA nếu ≥ 1.5cm; Theo dõi nếu ≥ 1cm</td>
-          </tr>
-          <tr>
-            <td>TR5</td>
-            <td>≥ 7</td>
-            <td>Nghi ngờ cao</td>
-            <td>35%</td>
-            <td>FNA nếu ≥ 1cm; Theo dõi nếu ≥ 0.5cm hàng năm trong 5 năm</td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="print-section">
+        <h2 className="reference-title">TIRADS Classification Table</h2>
+        <table className="reference-table">
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Points</th>
+              <th>Suspicion</th>
+              <th>Risk of Malignancy</th>
+              <th>Guideline</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>TR1</td>
+              <td>0</td>
+              <td>Lành tính</td>
+              <td>0.3%</td>
+              <td>Không FNA</td>
+            </tr>
+            <tr>
+              <td>TR2</td>
+              <td>2</td>
+              <td>Không nghi ngờ</td>
+              <td>1.5%</td>
+              <td>Không FNA</td>
+            </tr>
+            <tr>
+              <td>TR3</td>
+              <td>3</td>
+              <td>Nghi ngờ thấp</td>
+              <td>4.8%</td>
+              <td>FNA nếu ≥ 2.5cm; Theo dõi nếu ≥ 1.5cm</td>
+            </tr>
+            <tr>
+              <td>TR4</td>
+              <td>4 - 6</td>
+              <td>Nghi ngờ vừa</td>
+              <td>9.1%</td>
+              <td>FNA nếu ≥ 1.5cm; Theo dõi nếu ≥ 1cm</td>
+            </tr>
+            <tr>
+              <td>TR5</td>
+              <td>≥ 7</td>
+              <td>Nghi ngờ cao</td>
+              <td>35%</td>
+              <td>FNA nếu ≥ 1cm; Theo dõi nếu ≥ 0.5cm hàng năm trong 5 năm</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

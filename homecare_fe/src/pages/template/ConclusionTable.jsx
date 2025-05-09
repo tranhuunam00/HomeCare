@@ -5,10 +5,26 @@ const { Title, Text } = Typography;
 const { TextArea } = Input;
 
 const responseOptions = [
-  { value: "CR", label: "CR" },
-  { value: "PR", label: "PR" },
-  { value: "SD", label: "SD" },
-  { value: "PD", label: "PD" },
+  {
+    value: "CR",
+    label:
+      "CR - Complete Response: Bệnh thoái triển hoàn toàn: không còn thấy (< 10mm đối với hạch) và không có tổn thương mới",
+  },
+  {
+    value: "PR",
+    label:
+      "PR - Partial Response: Bệnh thoái triển một phần: SLD giảm tối thiểu 30% so với BLD và không có tổn thương mới",
+  },
+  {
+    value: "PD",
+    label:
+      "PD - Progressive Disease: Bệnh tiến triển: có tổn thương mới hoặc SLD tăng tối thiểu 20% (hoặc 5mm) so với NADIR",
+  },
+  {
+    value: "SD",
+    label:
+      "SD - Stable Disease: Bệnh ổn định: không đủ tiêu chuẩn của PR và PD",
+  },
 ];
 
 const ConclusionTable = () => {
@@ -86,7 +102,9 @@ const ConclusionTable = () => {
       {data.map((item, index) => (
         <Row key={index} style={{ marginBottom: 8, textAlign: "left" }}>
           <Col span={8}>
-            <Text style={{ textAlign: "left" }}>{item.label}</Text>
+            <Text style={{ textAlign: "left", fontSize: "18px" }}>
+              {item.label}
+            </Text>
           </Col>
           <Col span={16}>
             <TextArea
@@ -136,7 +154,6 @@ const ConclusionTable = () => {
                 setDoctorData({ ...doctorData, doctor1: e.target.value })
               }
             />
-            <Text>Chữ ký số</Text>
           </div>
         </Col>
         <Col span={8}>
@@ -149,7 +166,6 @@ const ConclusionTable = () => {
                 setDoctorData({ ...doctorData, doctor2: e.target.value })
               }
             />
-            <Text>Chữ ký số</Text>
           </div>
         </Col>
         <Col span={8}>
@@ -175,7 +191,7 @@ const ConclusionTable = () => {
       {renderSection("KẾT LUẬN", conclusionData, setConclusionData)}
       <Row style={{ marginBottom: 16, textAlign: "left" }}>
         <Col span={8}>
-          <Text>Đáp ứng RECIST:</Text>
+          <Text style={{ fontSize: "18px" }}>Đáp ứng RECIST:</Text>
         </Col>
         <Col span={16}>
           <Select
@@ -184,6 +200,18 @@ const ConclusionTable = () => {
             options={responseOptions}
             value={recistResponse}
             onChange={(value) => setRecistResponse(value)}
+            optionLabelProp="label"
+            dropdownStyle={{ whiteSpace: "normal", maxWidth: 600 }}
+            className="no-print"
+          />
+          <TextArea
+            style={{ marginTop: 8 }}
+            value={
+              responseOptions.find((opt) => opt.value === recistResponse)
+                ?.label || ""
+            }
+            autoSize={{ minRows: 2, maxRows: 6 }}
+            readOnly
           />
         </Col>
       </Row>

@@ -2,6 +2,10 @@
 import React, { useState } from "react";
 import "./tirad.css";
 import TiradsReferenceSection from "./tirad_reference_section";
+import { Header } from "../template/Header.jsx";
+import { exportPDF, generatePDF } from "../utils/exportPDF";
+import { Button, Space } from "antd";
+import { Link } from "react-router-dom";
 
 const options = {
   composition: [
@@ -88,147 +92,199 @@ export default function TiradPage() {
     if (totalScore <= 6) return "4 - Nghi ngờ vừa";
     return "5 - Nghi ngờ cao";
   };
+  const [loading, setLoading] = useState(false);
+  const handleExportPDF = async () => {
+    setLoading(true);
+    await exportPDF({
+      selector: ".print-section",
+      fileName: "ketqua_tirads.pdf",
+      type: "pdf",
+    });
+    setLoading(false);
+  };
 
+  const handlePrint = async () => {
+    setLoading(true);
+    await generatePDF();
+    setLoading(false);
+  };
   return (
-    <div className="tirads-container">
-      <h2 className="title">TIRADS CHO NANG GIÁP</h2>
-      <p className="disclaimer">
-        <strong>Lưu ý:</strong> Công cụ này dựa theo phân loại của ACR nhưng
-        chưa được phê duyệt chính thức.
-      </p>
-
-      <div className="categories">
-        {Object.entries(options).map(([category, opts]) => (
-          <div className="category" key={category}>
-            <h3 className="category-title">
-              {category.replace(/([A-Z])/g, " $1").toUpperCase()}
-            </h3>
-            <em>
-              {category === "echogenicFoci"
-                ? "(Chọn tất cả các áp dụng)"
-                : "(Chọn 1)"}
-            </em>
-            {opts.map((opt, i) => (
-              <label className="option" key={i}>
-                <input
-                  type={category === "echogenicFoci" ? "checkbox" : "radio"}
-                  name={`radio-${category}`}
-                  checked={
-                    category === "echogenicFoci"
-                      ? selected[category].includes(opt)
-                      : selected[category] === opt
-                  }
-                  onChange={() =>
-                    category === "echogenicFoci"
-                      ? handleFociChange(opt)
-                      : handleSelect(category, opt)
-                  }
-                />
-                {opt.label} <span className="points">({opt.value} điểm)</span>
-              </label>
-            ))}
-          </div>
-        ))}
-      </div>
-
-      <div className="total">Tổng điểm: {totalScore}</div>
-
-      <div className="tirads-result">
-        <div className="tr-boxes">
-          {[1, 2, 3, 4, 5].map((tr) => (
-            <div
-              key={tr}
-              className={`tr-box ${
-                (Math.floor(totalScore) === 0 && tr === 1) ||
-                (tr === 2 && totalScore >= 1 && totalScore <= 2) ||
-                (tr === 3 && totalScore === 3) ||
-                (tr === 4 && totalScore >= 4 && totalScore <= 6) ||
-                (tr === 5 && totalScore >= 7)
-                  ? "active"
-                  : ""
-              }`}
+    <div className="tirads-page-wrapper print-section">
+      <div className="tirads-container main-content">
+        <div className="tirads-toolbar no-print">
+          <div>
+            <Space
+              style={{
+                marginBottom: 16,
+                justifyContent: "space-between",
+                width: "100%",
+              }}
             >
-              TR{tr}
-              <br />
-              <strong>
-                {
-                  {
-                    1: "Lành tính",
-                    2: "Không nghi ngờ",
-                    3: "Nghi ngờ thấp",
-                    4: "Nghi ngờ vừa",
-                    5: "Nghi ngờ cao",
-                  }[tr]
-                }
-              </strong>
-              <br />
-              {{
-                1: "Không FNA",
-                2: "Không FNA",
-                3: "FNA ≥ 2.5cm\nTheo dõi ≥ 1.5cm",
-                4: "FNA ≥ 1.5cm\nTheo dõi ≥ 1cm",
-                5: "FNA ≥ 1cm\nTheo dõi ≥ 0.5cm",
-              }[tr]
-                .split("\n")
-                .map((line, i) => (
-                  <div key={i}>{line}</div>
-                ))}
+              <Link to="/">Quay lại Trang chủ</Link>
+              <div style={{ display: "flex", gap: 8 }}>
+                <Button
+                  type="primary"
+                  onClick={handleExportPDF}
+                  loading={loading}
+                  disabled={loading}
+                >
+                  {loading ? "Đang xuất file PDF..." : "Xuất PDF"}
+                </Button>
+                <Button
+                  onClick={handlePrint}
+                  loading={loading}
+                  disabled={loading}
+                >
+                  In trình duyệt
+                </Button>
+              </div>
+            </Space>
+          </div>
+        </div>
+        <Header />
+        <h2 className="title">TIRADS CHO NANG GIÁP</h2>
+        <p className="disclaimer no-print">
+          <strong>Lưu ý:</strong> Công cụ này dựa theo phân loại của ACR nhưng
+          chưa được phê duyệt chính thức.
+        </p>
+
+        <div className="categories tirads-categories-section">
+          {Object.entries(options).map(([category, opts]) => (
+            <div className="category" key={category}>
+              <h3 className="category-title">
+                {category.replace(/([A-Z])/g, " $1").toUpperCase()}
+              </h3>
+              <em className="no-print">
+                {category === "echogenicFoci"
+                  ? "(Chọn tất cả các áp dụng)"
+                  : "(Chọn 1)"}
+              </em>
+              {opts.map((opt, i) => (
+                <label className="option" key={i}>
+                  <input
+                    type={category === "echogenicFoci" ? "checkbox" : "radio"}
+                    name={`radio-${category}`}
+                    checked={
+                      category === "echogenicFoci"
+                        ? selected[category].includes(opt)
+                        : selected[category] === opt
+                    }
+                    onChange={() =>
+                      category === "echogenicFoci"
+                        ? handleFociChange(opt)
+                        : handleSelect(category, opt)
+                    }
+                  />
+                  {opt.label} <span className="points">({opt.value} điểm)</span>
+                </label>
+              ))}
             </div>
           ))}
         </div>
 
-        <button
-          className="reset-button"
-          onClick={() =>
-            setSelected({
-              composition: null,
-              echogenicity: null,
-              shape: null,
-              margin: null,
-              echogenicFoci: [],
-            })
-          }
-        >
-          Xóa tất cả
-        </button>
-      </div>
+        <div className="total tirads-total-section">
+          Tổng điểm: {totalScore}
+        </div>
 
-      <div className="findings">
-        <h3>Kết quả:</h3>
-        <p>
-          <strong>TIRADS Score:</strong> {totalScore}
-        </p>
-        <p>
-          <strong>Phân loại:</strong> {getCategory()}
-        </p>
-        <ul>
-          {["composition", "echogenicity", "shape", "margin"].map(
-            (key) =>
-              selected[key] && (
-                <li key={key}>
-                  {key.charAt(0).toUpperCase() + key.slice(1)}:{" "}
-                  {selected[key].label} ({selected[key].value} điểm)
-                </li>
-              )
-          )}
-          {selected.echogenicFoci.length > 0 && (
-            <li>
-              Echogenic foci:
-              <ul>
-                {selected.echogenicFoci.map((f, i) => (
-                  <li key={i}>
-                    {f.label} ({f.value} điểm)
+        <div className="tirads-result tirads-result-section print-section">
+          <div className="tr-boxes">
+            {[1, 2, 3, 4, 5].map((tr) => (
+              <div
+                key={tr}
+                className={`tr-box ${
+                  (Math.floor(totalScore) === 0 && tr === 1) ||
+                  (tr === 2 && totalScore >= 1 && totalScore <= 2) ||
+                  (tr === 3 && totalScore === 3) ||
+                  (tr === 4 && totalScore >= 4 && totalScore <= 6) ||
+                  (tr === 5 && totalScore >= 7)
+                    ? "active"
+                    : ""
+                }`}
+              >
+                TR{tr}
+                <br />
+                <strong>
+                  {
+                    {
+                      1: "Lành tính",
+                      2: "Không nghi ngờ",
+                      3: "Nghi ngờ thấp",
+                      4: "Nghi ngờ vừa",
+                      5: "Nghi ngờ cao",
+                    }[tr]
+                  }
+                </strong>
+                <br />
+                {{
+                  1: "Không FNA",
+                  2: "Không FNA",
+                  3: "FNA ≥ 2.5cm\nTheo dõi ≥ 1.5cm",
+                  4: "FNA ≥ 1.5cm\nTheo dõi ≥ 1cm",
+                  5: "FNA ≥ 1cm\nTheo dõi ≥ 0.5cm",
+                }[tr]
+                  .split("\n")
+                  .map((line, i) => (
+                    <div key={i}>{line}</div>
+                  ))}
+              </div>
+            ))}
+          </div>
+
+          <button
+            className="reset-button no-print"
+            onClick={() =>
+              setSelected({
+                composition: null,
+                echogenicity: null,
+                shape: null,
+                margin: null,
+                echogenicFoci: [],
+              })
+            }
+          >
+            Xóa tất cả
+          </button>
+        </div>
+
+        <div className="findings tirads-findings-section">
+          <h3>Kết quả:</h3>
+          <p>
+            <strong>TIRADS Score:</strong> {totalScore}
+          </p>
+          <p>
+            <strong>Phân loại:</strong> {getCategory()}
+          </p>
+          <ul>
+            {["composition", "echogenicity", "shape", "margin"].map(
+              (key) =>
+                selected[key] && (
+                  <li key={key}>
+                    {key.charAt(0).toUpperCase() + key.slice(1)}:{" "}
+                    {selected[key].label} ({selected[key].value} điểm)
                   </li>
-                ))}
-              </ul>
-            </li>
-          )}
-        </ul>
-        <div className="recommendation">
-          <strong>Khuyến nghị:</strong> {getRecommendation()}
+                )
+            )}
+            {selected.echogenicFoci.length > 0 && (
+              <li>
+                Echogenic foci:
+                <ul>
+                  {selected.echogenicFoci.map((f, i) => (
+                    <li key={i}>
+                      {f.label} ({f.value} điểm)
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            )}
+          </ul>
+          <div className="recommendation">
+            <strong>Khuyến nghị:</strong> {getRecommendation()}
+          </div>
+        </div>
+        <div className="print-section">
+          <TiradsReferenceSection />
         </div>
       </div>
-      <TiradsReferenceSection />
     </div>
   );
 }

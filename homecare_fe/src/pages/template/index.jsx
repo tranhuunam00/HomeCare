@@ -7,7 +7,9 @@ import {
   Button,
   Typography,
   Space,
+  InputNumber,
 } from "antd";
+import { EditOutlined } from "@ant-design/icons";
 
 import GuildLine from "./_guildline";
 
@@ -22,6 +24,7 @@ import TargetLesionsDateTable from "./_TargetLesionsDateTable.jsx";
 import TargetLesionsMainTable from "./_TargetLesionsMainTable.jsx";
 import TargetLesionsTotalTable from "./_TargetLesionsTotalTable.jsx";
 import TargetLesionsChart from "./_TargetLesionsChart.jsx";
+import { exportPDF, generatePDF } from "../utils/exportPDF.js";
 
 const { Title } = Typography;
 
@@ -29,6 +32,12 @@ const PatientForm = () => {
   const [form] = Form.useForm();
   const [gender, setGender] = useState(1);
   const [contrast, setContrast] = useState(1);
+  const [isEditingTechnique, setIsEditingTechnique] = useState(false);
+  const [techniqueContent, setTechniqueContent] = useState(
+    "Trước tiêm thuốc cản quang, độ dày lớp cắt 1.5mm\n" +
+      "Sau tiêm thuốc cản quang, độ dày lớp cắt 1.5mm\n" +
+      "Xử lý tái tạo ảnh: MPR, VRT"
+  );
 
   const handleGenderChange = (e) => {
     console.log("Giới tính đã thay đổi:", e.target.value);
@@ -78,9 +87,16 @@ const PatientForm = () => {
         </div>
 
         {/* THÔNG TIN YÊU CẦU */}
-        <div style={formStyle}>
+        <div style={formStyle} className="print-section">
           <h3 style={titleStyle}>THÔNG TIN YÊU CẦU</h3>
-          {renderRequestInfoFields({ contrast, handleContrastChange })}
+          {renderRequestInfoFields({
+            contrast,
+            handleContrastChange,
+            isEditingTechnique,
+            techniqueContent,
+            setTechniqueContent,
+            setIsEditingTechnique,
+          })}
         </div>
       </div>
     </Form>
@@ -116,8 +132,8 @@ const renderPatientInfoFields = ({ gender, handleGenderChange }) => (
           ]}
         />
       </Form.Item>
-      <Form.Item label="Ngày sinh" name="dob" style={{ textAlign: "left" }}>
-        <DatePicker format="DD/MM/YYYY" />
+      <Form.Item label="Năm sinh" name="dob" style={{ textAlign: "left" }}>
+        <InputNumber min={1900} max={2100} placeholder="1900" />
       </Form.Item>
       <Form.Item label="Điện thoại" name="phone">
         <Input />
@@ -134,8 +150,23 @@ const renderPatientInfoFields = ({ gender, handleGenderChange }) => (
         <Input />
       </Form.Item>
     </div>
-    <Form.Item label="Địa chỉ" name="address">
-      <Input />
+    <Form.Item label="Địa chỉ">
+      <div
+        style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}
+      >
+        <Form.Item name="province" style={{ margin: 0 }}>
+          <Input placeholder="Tỉnh/Thành phố" />
+        </Form.Item>
+        <Form.Item name="district" style={{ margin: 0 }}>
+          <Input placeholder="Huyện/Quận" />
+        </Form.Item>
+        <Form.Item name="ward" style={{ margin: 0 }}>
+          <Input placeholder="Phường/Xã" />
+        </Form.Item>
+        <Form.Item name="detail" style={{ margin: 0 }}>
+          <Input placeholder="Chi tiết" />
+        </Form.Item>
+      </div>
     </Form.Item>
   </>
 );
@@ -204,7 +235,14 @@ const renderDoctorInfoFields = () => (
 );
 
 // Hàm để render các trường thông tin yêu cầu
-const renderRequestInfoFields = ({ contrast, handleContrastChange }) => (
+const renderRequestInfoFields = ({
+  contrast,
+  handleContrastChange,
+  isEditingTechnique,
+  techniqueContent,
+  setTechniqueContent,
+  setIsEditingTechnique,
+}) => (
   <>
     <div
       style={{
@@ -222,12 +260,12 @@ const renderRequestInfoFields = ({ contrast, handleContrastChange }) => (
         />
       </Form.Item>
 
-      <div style={{ textAlign: "left" }}>Ngày thực hiện:</div>
+      <div style={{ textAlign: "left" }}>Ngày chụp:</div>
       <Form.Item name="executionDate" style={{ margin: 0 }}>
         <DatePicker format="DD/MM/YYYY" style={{ width: "100%" }} />
       </Form.Item>
 
-      <div style={{ textAlign: "left" }}>Nơi thực hiện:</div>
+      <div style={{ textAlign: "left" }}>Nơi chụp:</div>
       <Form.Item name="location" style={{ margin: 0 }}>
         <Input />
       </Form.Item>
@@ -252,10 +290,53 @@ const renderRequestInfoFields = ({ contrast, handleContrastChange }) => (
 
       <div style={{ textAlign: "left" }}>Kỹ thuật tạo ảnh:</div>
       <Form.Item name="technique" style={{ margin: 0, textAlign: "left" }}>
-        <div>
-          <p>Trước tiêm thuốc cản quang, độ dày lớp cắt 1.5mm</p>
-          <p>Sau tiêm thuốc cản quang, độ dày lớp cắt 1.5mm</p>
-          <p>Xử lý tái tạo ảnh: MPR, VRT</p>
+        <div style={{ position: "relative" }}>
+          {isEditingTechnique ? (
+            <>
+              <Input.TextArea
+                value={techniqueContent}
+                onChange={(e) => setTechniqueContent(e.target.value)}
+                style={{ marginBottom: "8px", fontSize: "18px" }}
+                rows={4}
+              />
+              <div style={{ textAlign: "right" }}>
+                <Button
+                  type="primary"
+                  onClick={() => setIsEditingTechnique(false)}
+                  style={{ marginRight: "8px" }}
+                >
+                  Lưu
+                </Button>
+                <Button onClick={() => setIsEditingTechnique(false)}>
+                  Hủy
+                </Button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div
+                style={{
+                  whiteSpace: "pre-line",
+                  paddingRight: "30px",
+                  fontSize: "18px",
+                }}
+              >
+                {techniqueContent}
+              </div>
+              <Button
+                type="text"
+                icon={<EditOutlined />}
+                onClick={() => setIsEditingTechnique(true)}
+                style={{
+                  position: "absolute",
+                  bottom: 0,
+                  right: 0,
+                  padding: "4px",
+                }}
+                className="no-print"
+              />
+            </>
+          )}
         </div>
       </Form.Item>
     </div>
@@ -269,80 +350,99 @@ export default function Template() {
   // State cho dữ liệu bảng tổn thương đích
   const [targetData, setTargetData] = useState([
     {
-      location: "RUL3",
-      baseline: 52,
-      tp1: 45,
-      tp2: 25,
-      tp3: "",
-      tp4: "",
-      tp5: "",
-    },
-    {
-      location: "RML5",
-      baseline: 45,
-      tp1: 41,
-      tp2: 20,
-      tp3: "",
-      tp4: "",
-      tp5: "",
-    },
-    {
-      location: "LLL10",
-      baseline: 32,
-      tp1: 32,
-      tp2: 14,
-      tp3: "",
-      tp4: "",
-      tp5: "",
+      location: "",
+      baseline: 0,
+      tp1: 0,
+      tp2: 0,
+      tp3: 0,
+      tp4: 0,
     },
   ]);
 
   // State cho dữ liệu bảng tổn thương ngoài đích
   const [nonTargetData, setNonTargetData] = useState([
     {
-      location: "RUL3",
-      baseline: 52,
-      tp1: 45,
-      tp2: 25,
-      tp3: "",
-      tp4: "",
-      tp5: "",
-    },
-    {
-      location: "RML5",
-      baseline: 45,
-      tp1: 41,
-      tp2: 20,
-      tp3: "",
-      tp4: "",
-      tp5: "",
+      location: "",
+      baseline: 0,
+      tp1: 0,
+      tp2: 0,
+      tp3: 0,
+      tp4: 0,
     },
   ]);
 
   // State cho dữ liệu bảng tổn thương mới
   const [newLesionData, setNewLesionData] = useState([
     {
-      location: "RUL3",
-      baseline: 52,
-      tp1: 45,
-      tp2: 25,
-      tp3: "",
-      tp4: "",
-      tp5: "",
+      location: "",
+      baseline: 0,
+      tp1: 0,
+      tp2: 0,
+      tp3: 0,
+      tp4: 0,
     },
   ]);
 
   const [dataDate, setDataDate] = useState([
     {
       location: "",
-      baseline: "2024-01-01",
-      tp1: "2024-05-01",
-      tp2: "2025-01-01",
+      baseline: "",
+      tp1: "",
+      tp2: "",
       tp3: "",
       tp4: "",
-      tp5: "",
     },
   ]);
+
+  // Kiểm tra đã chọn ngày chưa
+  const isDateSelected = dataDate.some((row) =>
+    ["baseline", "tp1", "tp2", "tp3", "tp4"].some((key) => row[key])
+  );
+
+  // Hàm xử lý thêm dòng cho tổn thương đích
+  const onAddTargetRow = () => {
+    setTargetData([
+      ...targetData,
+      {
+        location: "",
+        baseline: 0,
+        tp1: 0,
+        tp2: 0,
+        tp3: 0,
+        tp4: 0,
+      },
+    ]);
+  };
+
+  // Hàm xử lý thêm dòng cho tổn thương ngoài đích
+  const onAddNonTargetRow = () => {
+    setNonTargetData([
+      ...nonTargetData,
+      {
+        location: "",
+        baseline: 0,
+        tp1: 0,
+        tp2: 0,
+        tp3: 0,
+        tp4: 0,
+      },
+    ]);
+  };
+
+  // Hàm xử lý thêm dòng cho tổn thương mới
+  const onAddNewRow = () => {
+    setNewLesionData([
+      ...newLesionData,
+      {
+        location: "",
+        baseline: 0,
+        tp1: 0,
+        tp2: 0,
+        tp3: 0,
+        tp4: 0,
+      },
+    ]);
+  };
 
   // Hàm xử lý thay đổi dữ liệu cho tổn thương đích
   const onTargetChange = (rowIndex, key, value) => {
@@ -383,94 +483,81 @@ export default function Template() {
     setDataDate(newData);
   };
 
-  const generatePDF = async () => {
+  // Hàm xử lý xóa dòng cho tổn thương đích
+  const onDeleteTargetRow = (index) => {
+    const newData = [...targetData];
+    newData.splice(index, 1);
+    setTargetData(newData);
+  };
+
+  // Hàm xử lý xóa dòng cho tổn thương ngoài đích
+  const onDeleteNonTargetRow = (index) => {
+    const newData = [...nonTargetData];
+    newData.splice(index, 1);
+    setNonTargetData(newData);
+  };
+
+  // Hàm xử lý xóa dòng cho tổn thương mới
+  const onDeleteNewRow = (index) => {
+    const newData = [...newLesionData];
+    newData.splice(index, 1);
+    setNewLesionData(newData);
+  };
+
+  // Hàm reset dữ liệu về 0 cho bảng tổn thương đích
+  const onResetTarget = () => {
+    setTargetData(
+      targetData.map((row) => ({
+        ...row,
+        baseline: 0,
+        tp1: 0,
+        tp2: 0,
+        tp3: 0,
+        tp4: 0,
+      }))
+    );
+  };
+  // Hàm reset dữ liệu về 0 cho bảng tổn thương ngoài đích
+  const onResetNonTarget = () => {
+    setNonTargetData(
+      nonTargetData.map((row) => ({
+        ...row,
+        baseline: 0,
+        tp1: 0,
+        tp2: 0,
+        tp3: 0,
+        tp4: 0,
+      }))
+    );
+  };
+  // Hàm reset dữ liệu về 0 cho bảng tổn thương mới
+  const onResetNew = () => {
+    setNewLesionData(
+      newLesionData.map((row) => ({
+        ...row,
+        baseline: 0,
+        tp1: 0,
+        tp2: 0,
+        tp3: 0,
+        tp4: 0,
+      }))
+    );
+  };
+
+  const handleExportPDF = async () => {
     setLoading(true);
-
-    // Thêm CSS cho in ấn
-    const style = `
-      .no-print {
-        display: none !important;
-      }
-      .print-section {
-        page-break-inside: avoid;
-        margin-bottom: 20px;
-      }
-      table {
-        page-break-inside: avoid;
-      }
-      .ant-table {
-        page-break-inside: avoid;
-      }
-      .ant-table-tbody {
-        page-break-inside: avoid;
-      }
-      .ant-table-row {
-        page-break-inside: avoid;
-      }
-      /* Ẩn các form control không cần thiết khi in */
-      .ant-form-item-control-input-content .ant-picker-suffix,
-      .ant-form-item-control-input-content .ant-select-arrow,
-      .ant-form-item-control-input-content .ant-input-number-handler-wrap {
-        display: none !important;
-      }
-    `;
-
-    const styleTag = document.createElement("style");
-    styleTag.innerHTML = style;
-    document.head.appendChild(styleTag);
-
-    // Đợi một chút để đảm bảo các style đã được áp dụng
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    const sections = document.querySelectorAll(".print-section");
-    const pdf = new jsPDF({
-      orientation: "portrait",
-      unit: "mm",
-      format: "a4",
+    await exportPDF({
+      selector: ".print-section",
+      fileName: "ketqua_recist.pdf",
+      type: "pdf",
     });
-
-    const margin = 10;
-    const pdfWidth = pdf.internal.pageSize.getWidth() - margin * 2;
-
-    for (let i = 0; i < sections.length; i++) {
-      const section = sections[i];
-      const canvas = await html2canvas(section, {
-        scale: 2,
-        useCORS: true,
-      });
-
-      const imgData = canvas.toDataURL("image/jpeg", 1);
-      const imgProperties = pdf.getImageProperties(imgData);
-      const imgWidth = pdfWidth;
-      const imgHeight = (imgProperties.height * imgWidth) / imgProperties.width;
-
-      // Thêm nội dung vào trang
-      pdf.addImage(imgData, "JPEG", margin, margin, imgWidth, imgHeight);
-
-      // Thêm số trang
-      const pageCount = pdf.internal.getNumberOfPages();
-      for (let j = 1; j <= pageCount; j++) {
-        pdf.setPage(j);
-        pdf.setFontSize(10);
-        pdf.setTextColor("#A9A9A9");
-        pdf.text(
-          `${j} / ${sections.length}`,
-          pdf.internal.pageSize.getWidth() / 2,
-          pdf.internal.pageSize.getHeight() - 10,
-          { align: "center" }
-        );
-      }
-
-      if (i < sections.length - 1) {
-        pdf.addPage();
-      }
-    }
-
-    pdf.save("ketqua_recist.pdf");
     setLoading(false);
+  };
 
-    // Xóa bỏ style đã thêm
-    document.head.removeChild(styleTag);
+  const handlePrint = async () => {
+    setLoading(true);
+    await generatePDF();
+    setLoading(false);
   };
 
   return (
@@ -484,14 +571,19 @@ export default function Template() {
           }}
         >
           <Link to="/">Quay lại Trang chủ</Link>
-          <Button
-            type="primary"
-            onClick={generatePDF}
-            loading={loading}
-            disabled={loading}
-          >
-            {loading ? "Đang xuất file PDF..." : "Xuất PDF"}
-          </Button>
+          <div style={{ display: "flex", gap: 8 }}>
+            <Button
+              type="primary"
+              onClick={handleExportPDF}
+              loading={loading}
+              disabled={loading}
+            >
+              {loading ? "Đang xuất file PDF..." : "Xuất PDF"}
+            </Button>
+            <Button onClick={handlePrint} loading={loading} disabled={loading}>
+              In trình duyệt
+            </Button>
+          </div>
         </Space>
       </div>
 
@@ -530,9 +622,9 @@ export default function Template() {
         </div>
 
         {/* Thêm component ExaminationResults */}
-        <div className="print-section">
+        {/* <div className="print-section">
           <ExaminationResults />
-        </div>
+        </div> */}
         {/* Các bảng tổn thương */}
         <div className="print-section">
           <div
@@ -545,8 +637,8 @@ export default function Template() {
             <Title
               level={4}
               style={{
-                margin: 0,
-                textAlign: "left",
+                marginBottom: 15,
+                textAlign: "center",
                 width: "100%",
                 color: "#1890ff",
               }}
@@ -556,7 +648,7 @@ export default function Template() {
           </div>
 
           {/* Bảng ngày tháng chung */}
-          <div style={{ marginBottom: "24px" }}>
+          <div style={{ marginBottom: "24px" }} className="no-print">
             <TargetLesionsDateTable
               dataDate={dataDate}
               onChangeDate={onChangeDate}
@@ -571,6 +663,10 @@ export default function Template() {
             <TargetLesionsMainTable
               data={targetData}
               onChange={onTargetChange}
+              onAddRow={onAddTargetRow}
+              onDeleteRow={onDeleteTargetRow}
+              dataDate={dataDate}
+              onReset={onResetTarget}
             />
             <TargetLesionsTotalTable
               data={targetData}
@@ -587,6 +683,10 @@ export default function Template() {
             <TargetLesionsMainTable
               data={nonTargetData}
               onChange={onNonTargetChange}
+              onAddRow={onAddNonTargetRow}
+              onDeleteRow={onDeleteNonTargetRow}
+              dataDate={dataDate}
+              onReset={onResetNonTarget}
             />
             <TargetLesionsTotalTable
               data={nonTargetData}
@@ -596,13 +696,17 @@ export default function Template() {
           </div>
 
           {/* Bảng tổn thương mới */}
-          <div style={{ marginBottom: "24px" }}>
+          <div style={{ marginBottom: "24px" }} className="print-section">
             <Title level={4} style={{ textAlign: "left", color: "#1890ff" }}>
               TỔN THƯƠNG MỚI
             </Title>
             <TargetLesionsMainTable
               data={newLesionData}
               onChange={onNewChange}
+              onAddRow={onAddNewRow}
+              onDeleteRow={onDeleteNewRow}
+              dataDate={dataDate}
+              onReset={onResetNew}
             />
             <TargetLesionsTotalTable
               data={newLesionData}
@@ -612,7 +716,7 @@ export default function Template() {
           </div>
 
           {/* Các biểu đồ */}
-          <div style={{ marginTop: "48px" }}>
+          <div style={{ marginTop: "48px" }} className="print-section">
             <TargetLesionsChart
               data={targetData}
               dataDate={dataDate}

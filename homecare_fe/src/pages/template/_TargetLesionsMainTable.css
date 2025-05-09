@@ -1,0 +1,8 @@
+.row-hover-action .delete-row-btn {
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.row-hover-action:hover .delete-row-btn {
+  opacity: 1;
+} 
