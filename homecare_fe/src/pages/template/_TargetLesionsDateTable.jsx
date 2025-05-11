@@ -8,25 +8,32 @@ const columnsDate = [
   {
     title: "Timepoint",
     dataIndex: "location",
-    render: (text, record, index) => "Ngày chụp",
-    width: 150,
+    render: () => "Ngày chụp",
+    width: 160,
     align: "center",
   },
-  dataKeys.map((key, index) => ({
+  ...dataKeys.map((key, index) => ({
     title: timepoints[index],
     dataIndex: key,
     width: 100,
     align: "center",
-    render: (text, record, index) => (
-      <Input
+    render: (text, record, rowIndex) => (
+      <input
         type="date"
-        style={{ height: 20, width: 100, fontSize: 11 }}
         value={text}
-        onChange={(e) => record.onChange(index, key, e.target.value)}
+        onChange={(e) => record.onChange(rowIndex, key, e.target.value)}
+        style={{
+          height: 28,
+          fontSize: 15,
+          width: 106,
+          padding: "3px 0px",
+          border: "1px solid #d9d9d9",
+          borderRadius: 4,
+        }}
       />
     ),
   })),
-].flat();
+];
 
 const TargetLesionsDateTable = ({ dataDate, onChangeDate }) => {
   const parsedDataDate = dataDate.map((item) => ({

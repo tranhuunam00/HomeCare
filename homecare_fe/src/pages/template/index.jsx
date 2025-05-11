@@ -8,6 +8,7 @@ import {
   Typography,
   Space,
   InputNumber,
+  Select,
 } from "antd";
 import { EditOutlined } from "@ant-design/icons";
 
@@ -25,6 +26,12 @@ import TargetLesionsMainTable from "./_TargetLesionsMainTable.jsx";
 import TargetLesionsTotalTable from "./_TargetLesionsTotalTable.jsx";
 import TargetLesionsChart from "./_TargetLesionsChart.jsx";
 import { exportPDF, generatePDF } from "../utils/exportPDF.js";
+import moment from "moment";
+import useVietnamAddress from "../../hooks/useVietnamAddress.js";
+
+import { QRCodeCanvas } from "qrcode.react";
+
+const qrValue = `http://222.255.214.218:3003/template`;
 
 const { Title } = Typography;
 
@@ -38,6 +45,32 @@ const PatientForm = () => {
       "Sau tiêm thuốc cản quang, độ dày lớp cắt 1.5mm\n" +
       "Xử lý tái tạo ảnh: MPR, VRT"
   );
+
+  const {
+    provinces,
+    districts,
+    wards,
+    setSelectedProvince,
+    setSelectedDistrict,
+  } = useVietnamAddress();
+
+  const currentYear = moment().year(); // hoặc new Date().getFullYear()
+
+  const handleDobChange = (value) => {
+    if (value && value <= currentYear) {
+      form.setFieldsValue({ age: currentYear - value });
+    } else {
+      form.setFieldsValue({ age: undefined });
+    }
+  };
+
+  const handleAgeChange = (value) => {
+    if (value && value <= 150) {
+      form.setFieldsValue({ dob: currentYear - value });
+    } else {
+      form.setFieldsValue({ dob: undefined });
+    }
+  };
 
   const handleGenderChange = (e) => {
     console.log("Giới tính đã thay đổi:", e.target.value);
@@ -68,10 +101,23 @@ const PatientForm = () => {
   return (
     <Form form={form} onFinish={onFinish}>
       <div>
+        <QRCodeCanvas value={qrValue} size={128} level="H" includeMargin />
+
         {/* THÔNG TIN BỆNH NHÂN */}
         <div style={formStyle}>
           <h3 style={titleStyle}>THÔNG TIN BỆNH NHÂN</h3>
-          {renderPatientInfoFields({ gender, handleGenderChange })}
+          {renderPatientInfoFields({
+            gender,
+            handleGenderChange,
+            handleDobChange,
+            handleAgeChange,
+            form,
+            setSelectedProvince,
+            provinces,
+            setSelectedDistrict,
+            districts,
+            wards,
+          })}
         </div>
 
         {/* THÔNG TIN LÂM SÀNG */}
@@ -104,7 +150,18 @@ const PatientForm = () => {
 };
 
 // Hàm để render các trường thông tin bệnh nhân
-const renderPatientInfoFields = ({ gender, handleGenderChange }) => (
+const renderPatientInfoFields = ({
+  gender,
+  handleGenderChange,
+  handleDobChange,
+  handleAgeChange,
+  form,
+  setSelectedProvince,
+  provinces,
+  setSelectedDistrict,
+  districts,
+  wards,
+}) => (
   <>
     <div
       style={{
@@ -132,8 +189,22 @@ const renderPatientInfoFields = ({ gender, handleGenderChange }) => (
           ]}
         />
       </Form.Item>
-      <Form.Item label="Năm sinh" name="dob" style={{ textAlign: "left" }}>
-        <InputNumber min={1900} max={2100} placeholder="1900" />
+      <Form.Item label="Năm sinh" name="dob">
+        <InputNumber
+          min={1900}
+          max={2100}
+          placeholder="1980"
+          onChange={handleDobChange}
+        />
+      </Form.Item>
+
+      <Form.Item label="Tuổi" name="age">
+        <InputNumber
+          min={0}
+          max={150}
+          placeholder="45"
+          onChange={handleAgeChange}
+        />
       </Form.Item>
       <Form.Item label="Điện thoại" name="phone">
         <Input />
@@ -150,23 +221,51 @@ const renderPatientInfoFields = ({ gender, handleGenderChange }) => (
         <Input />
       </Form.Item>
     </div>
-    <Form.Item label="Địa chỉ">
-      <div
-        style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}
+    <Form.Item label="Tỉnh / Thành phố" name="province">
+      <Select
+        placeholder="Chọn Tỉnh / Thành phố"
+        onChange={(val) => {
+          form.setFieldsValue({ district: undefined, ward: undefined });
+          setSelectedProvince(val);
+        }}
       >
-        <Form.Item name="province" style={{ margin: 0 }}>
-          <Input placeholder="Tỉnh/Thành phố" />
-        </Form.Item>
-        <Form.Item name="district" style={{ margin: 0 }}>
-          <Input placeholder="Huyện/Quận" />
-        </Form.Item>
-        <Form.Item name="ward" style={{ margin: 0 }}>
-          <Input placeholder="Phường/Xã" />
-        </Form.Item>
-        <Form.Item name="detail" style={{ margin: 0 }}>
-          <Input placeholder="Chi tiết" />
-        </Form.Item>
-      </div>
+        {provinces.map((prov) => (
+          <Option key={prov.code} value={prov.code}>
+            {prov.name}
+          </Option>
+        ))}
+      </Select>
+    </Form.Item>
+
+    <Form.Item label="Huyện / Quận" name="district">
+      <Select
+        placeholder="Chọn Huyện / Quận"
+        onChange={(val) => {
+          form.setFieldsValue({ ward: undefined });
+          setSelectedDistrict(val);
+        }}
+        disabled={!districts.length}
+      >
+        {districts.map((dist) => (
+          <Option key={dist.code} value={dist.code}>
+            {dist.name}
+          </Option>
+        ))}
+      </Select>
+    </Form.Item>
+
+    <Form.Item label="Xã / Phường" name="ward">
+      <Select placeholder="Chọn Xã / Phường" disabled={!wards.length}>
+        {wards.map((ward) => (
+          <Option key={ward.code} value={ward.code}>
+            {ward.name}
+          </Option>
+        ))}
+      </Select>
+    </Form.Item>
+
+    <Form.Item label="Chi tiết địa chỉ" name="detail">
+      <Input placeholder="..." />
     </Form.Item>
   </>
 );
@@ -607,7 +706,8 @@ export default function Template() {
               color: "#0000FF",
             }}
           >
-            KẾT QUẢ CHỤP CẮT LỚP VI TÍNH MSCT REPORT
+            KẾT QUẢ ĐÁNH GIÁ THEO DÕI ĐÁP ỨNG ĐIỀU TRỊ KHỐI U ĐẶC THEO TIÊU
+            CHUẨN RECIST 1.1
           </h2>
           <PatientForm />
         </div>

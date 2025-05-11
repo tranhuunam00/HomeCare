@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Table, Input, Typography, Row, Col, Select } from "antd";
+import { Table, Input, Typography, Row, Col, Select, Upload } from "antd";
+import { UploadOutlined } from "@ant-design/icons";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -146,28 +147,77 @@ const ConclusionTable = () => {
       <Row gutter={16}>
         <Col span={8}>
           <div style={{ textAlign: "center" }}>
-            <Text>Bác sỹ 1</Text>
-            <Input
-              style={{ height: 100, marginTop: 8, marginBottom: 8 }}
-              value={doctorData.doctor1}
-              onChange={(e) =>
-                setDoctorData({ ...doctorData, doctor1: e.target.value })
-              }
-            />
+            <div style={{ marginTop: 8, marginBottom: 8, textAlign: "left" }}>
+              <Text>Họ và tên</Text>
+              <Input
+                value={doctorData.name}
+                onChange={(e) =>
+                  setDoctorData({ ...doctorData, name: e.target.value })
+                }
+                style={{ marginBottom: 8 }}
+              />
+
+              <Text>Chữ ký</Text>
+              <Input
+                value={doctorData.signature}
+                onChange={(e) =>
+                  setDoctorData({ ...doctorData, signature: e.target.value })
+                }
+                style={{ height: 80 }}
+              />
+            </div>
           </div>
         </Col>
+
         <Col span={8}>
           <div style={{ textAlign: "center" }}>
-            <Text>Bác sỹ 2</Text>
-            <Input
-              style={{ height: 100, marginTop: 8, marginBottom: 8 }}
-              value={doctorData.doctor2}
-              onChange={(e) =>
-                setDoctorData({ ...doctorData, doctor2: e.target.value })
-              }
-            />
+            <Text strong></Text>
+            <div
+              style={{
+                width: 100,
+                height: 100,
+                margin: "8px auto",
+                border: "1px solid #d9d9d9",
+                borderRadius: 50,
+                overflow: "hidden",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {doctorData.avatar ? (
+                <img
+                  src={doctorData.avatar}
+                  alt="avatar"
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    borderRadius: "50%",
+                  }}
+                />
+              ) : (
+                <span style={{ color: "#aaa" }}>No Avatar</span>
+              )}
+            </div>
+
+            <Upload
+              showUploadList={false}
+              accept="image/*"
+              beforeUpload={(file) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                  setDoctorData({ ...doctorData, avatar: e.target.result });
+                };
+                reader.readAsDataURL(file);
+                return false;
+              }}
+            >
+              <UploadOutlined className="no-print" />
+            </Upload>
           </div>
         </Col>
+
         <Col span={8}>
           <div style={{ textAlign: "center" }}>
             <Text>Ngày, giờ</Text>

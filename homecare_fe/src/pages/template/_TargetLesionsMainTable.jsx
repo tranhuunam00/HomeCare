@@ -38,6 +38,7 @@ const columnsFn = (dataDate) =>
                 value={text}
                 onChange={(e) => record.onChange(index, key, e.target.value)}
                 disabled={!isEnabled}
+                style={{ textAlign: "right" }}
               />
               <Button
                 className="delete-row-btn"
@@ -62,6 +63,7 @@ const columnsFn = (dataDate) =>
             value={text}
             onChange={(e) => record.onChange(index, key, e.target.value)}
             disabled={!isEnabled}
+            style={{ textAlign: "right" }}
           />
         );
       },

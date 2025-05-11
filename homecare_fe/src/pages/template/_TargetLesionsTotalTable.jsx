@@ -8,19 +8,22 @@ const { Option } = Select;
 const responseOptions = [
   {
     value: "CR",
-    label: "CR",
+    label:
+      "CR. Bệnh thoái triển hoàn toàn: không còn thấy (< 10mm đối với hạch) và không có tổn thương mới",
   },
   {
     value: "PR",
-    label: "PR",
+    label:
+      "PR. Bệnh thoái triển một phần: SLD giảm tối thiểu 30% so với BLD và không có tổn thương mới",
   },
   {
     value: "PD",
-    label: "PD",
+    label:
+      "PD. Bệnh tiến triển: có tổn thương mới hoặc SLD tăng tối thiểu 20% (hoặc 5mm) so với NADIR",
   },
   {
     value: "SD",
-    label: "SD",
+    label: "SD.	Bệnh ổn định: không đủ tiêu chuẩn của PR và PD",
   },
 ];
 
@@ -29,7 +32,7 @@ const columnsTotal = [
     title: "",
     dataIndex: "location",
     width: 150,
-    align: "center",
+    align: "left",
     render: (text, record) => {
       if (record.isTextArea) {
         return {
@@ -46,7 +49,7 @@ const columnsTotal = [
     title: "",
     dataIndex: key,
     width: 100,
-    align: "center",
+    align: "left",
     render: (text, record, rowIndex) => {
       if (record.isTextArea) {
         if (index === 0) {
@@ -55,13 +58,23 @@ const columnsTotal = [
               <Select
                 value={record.response}
                 onChange={record.onResponseChange}
-                style={{ width: "100%" }}
+                style={{ width: 450 }}
                 placeholder="Chọn đánh giá đáp ứng"
                 showSearch
                 optionFilterProp="label"
               >
                 {responseOptions.map((opt) => (
-                  <Option key={opt.value} value={opt.value} label={opt.label}>
+                  <Option
+                    key={opt.value}
+                    value={opt.value}
+                    label={opt.label}
+                    style={{
+                      whiteSpace: "normal", // Chỉ áp dụng cho dropdown
+                      wordBreak: "break-word",
+                      lineHeight: 1.4,
+                      padding: "8px 12px",
+                    }}
+                  >
                     {opt.label}
                   </Option>
                 ))}
@@ -92,7 +105,7 @@ const columnsTotal = [
         }
         return <span>{text}%</span>;
       }
-      return <span>{text}</span>;
+      return <span style={{ paddingLeft: "10px" }}>{text}</span>;
     },
   })),
 ].flat();
