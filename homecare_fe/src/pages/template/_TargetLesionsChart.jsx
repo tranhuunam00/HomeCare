@@ -12,7 +12,7 @@ import { Typography } from "antd";
 
 const { Title } = Typography;
 
-const TargetLesionsChart = ({ data, dataDate, name_chart }) => {
+const TargetLesionsChart = ({ data, dataDate, name_chart, hideChart }) => {
   const getNadir = (data, dataDate) => {
     const endDate = new Date();
     endDate.setHours(23);
@@ -87,6 +87,14 @@ const TargetLesionsChart = ({ data, dataDate, name_chart }) => {
       >
         {name_chart}
       </Title>
+      <div
+        style={{
+          width: "100%",
+          height: 1,
+          backgroundColor: "grey",
+          marginBottom: 100,
+        }}
+      ></div>
     </>
   );
 };

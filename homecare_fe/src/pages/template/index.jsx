@@ -165,36 +165,39 @@ const renderPatientInfoFields = ({
   <>
     <div
       style={{
-        display: "grid",
-        gridTemplateColumns: "1fr 1fr",
-        gap: "10px",
+        display: "flex",
+        flexWrap: "wrap",
+        gap: "20px",
       }}
     >
-      <Form.Item label="Họ và tên" name="name" rules={[{ required: true }]}>
+      <Form.Item
+        label="Họ và tên"
+        name="name"
+        rules={[{ required: true }]}
+        style={{ width: "40%", fontSize: 15 }}
+      >
         <Input placeholder="NGUYỄN VĂN A" />
       </Form.Item>
+
       <Form.Item
         label="Giới tính"
         name="gender"
         rules={[{ required: true, message: "Vui lòng chọn giới tính" }]}
-        style={{ textAlign: "left" }}
+        style={{ width: "20%" }}
       >
-        <Radio.Group
-          name="gender_radio"
-          value={gender}
-          onChange={handleGenderChange}
-          options={[
-            { value: 1, label: "Nam" },
-            { value: 2, label: "Nữ" },
-          ]}
-        />
+        <Select placeholder="Chọn giới tính" onChange={handleGenderChange}>
+          <Option value={1}>Nam</Option>
+          <Option value={2}>Nữ</Option>
+        </Select>
       </Form.Item>
+
       <Form.Item label="Năm sinh" name="dob">
         <InputNumber
           min={1900}
           max={2100}
           placeholder="1980"
           onChange={handleDobChange}
+          style={{ width: 55 }}
         />
       </Form.Item>
 
@@ -204,69 +207,83 @@ const renderPatientInfoFields = ({
           max={150}
           placeholder="45"
           onChange={handleAgeChange}
+          style={{ width: 40 }}
         />
       </Form.Item>
-      <Form.Item label="Điện thoại" name="phone">
+
+      <Form.Item label="Điện thoại" name="phone" style={{ width: "45%" }}>
         <Input />
       </Form.Item>
-      <div style={{ display: "flex", gap: "10px" }}>
-        <Form.Item label="PID" name="pid" style={{ flex: 1 }}>
-          <Input />
-        </Form.Item>
-        <Form.Item label="SID" name="sid" style={{ flex: 1 }}>
-          <Input />
-        </Form.Item>
-      </div>
-      <Form.Item label="Email" name="email">
+
+      <Form.Item label="Email" name="email" style={{ width: "50%" }}>
+        <Input />
+      </Form.Item>
+
+      {/* Hàng 3-4: Địa chỉ */}
+      <Form.Item label="Tỉnh" name="province" style={{ width: "30%" }}>
+        <Select
+          placeholder="Chọn Tỉnh / Thành phố"
+          onChange={(val) => {
+            form.setFieldsValue({ district: undefined, ward: undefined });
+            setSelectedProvince(val);
+          }}
+        >
+          {provinces.map((prov) => (
+            <Option key={prov.code} value={prov.code}>
+              {prov.name}
+            </Option>
+          ))}
+        </Select>
+      </Form.Item>
+
+      <Form.Item label="Huyện" name="district" style={{ width: "31%" }}>
+        <Select
+          placeholder="Chọn Huyện/Quận"
+          onChange={(val) => {
+            form.setFieldsValue({ ward: undefined });
+            setSelectedDistrict(val);
+          }}
+          disabled={!districts.length}
+          style={{ fontSize: 12 }}
+        >
+          {districts.map((dist) => (
+            <Option key={dist.code} value={dist.code}>
+              {dist.name}
+            </Option>
+          ))}
+        </Select>
+      </Form.Item>
+
+      <Form.Item label="Xã" name="ward" style={{ width: "31%" }}>
+        <Select placeholder="Chọn Xã / Phường" disabled={!wards.length}>
+          {wards.map((ward) => (
+            <Option key={ward.code} value={ward.code}>
+              {ward.name}
+            </Option>
+          ))}
+        </Select>
+      </Form.Item>
+
+      <Form.Item
+        label="Chi tiết địa chỉ"
+        name="detail"
+        style={{ width: "98%" }}
+      >
+        <Input.TextArea
+          placeholder="..."
+          autoSize={{ minRows: 2, maxRows: 4 }}
+        />
+      </Form.Item>
+
+      {/* Hàng 5: PID, SID */}
+      <Form.Item label="PID" name="pid">
+        <Input />
+      </Form.Item>
+
+      <Form.Item label="SID" name="sid">
         <Input />
       </Form.Item>
     </div>
-    <Form.Item label="Tỉnh / Thành phố" name="province">
-      <Select
-        placeholder="Chọn Tỉnh / Thành phố"
-        onChange={(val) => {
-          form.setFieldsValue({ district: undefined, ward: undefined });
-          setSelectedProvince(val);
-        }}
-      >
-        {provinces.map((prov) => (
-          <Option key={prov.code} value={prov.code}>
-            {prov.name}
-          </Option>
-        ))}
-      </Select>
-    </Form.Item>
-
-    <Form.Item label="Huyện / Quận" name="district">
-      <Select
-        placeholder="Chọn Huyện / Quận"
-        onChange={(val) => {
-          form.setFieldsValue({ ward: undefined });
-          setSelectedDistrict(val);
-        }}
-        disabled={!districts.length}
-      >
-        {districts.map((dist) => (
-          <Option key={dist.code} value={dist.code}>
-            {dist.name}
-          </Option>
-        ))}
-      </Select>
-    </Form.Item>
-
-    <Form.Item label="Xã / Phường" name="ward">
-      <Select placeholder="Chọn Xã / Phường" disabled={!wards.length}>
-        {wards.map((ward) => (
-          <Option key={ward.code} value={ward.code}>
-            {ward.name}
-          </Option>
-        ))}
-      </Select>
-    </Form.Item>
-
-    <Form.Item label="Chi tiết địa chỉ" name="detail">
-      <Input placeholder="..." />
-    </Form.Item>
   </>
 );
 
@@ -829,11 +846,11 @@ export default function Template() {
                 "Hình 2: Đồ thị minh họa thay đổi tổn thương ngoài đích"
               }
             />
-            <TargetLesionsChart
+            {/* <TargetLesionsChart
               data={newLesionData}
               dataDate={dataDate}
               name_chart={"Hình 3: Đồ thị minh họa thay đổi tổn thương mới"}
-            />
+            /> */}
           </div>
         </div>
 

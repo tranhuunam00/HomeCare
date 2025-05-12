@@ -149,7 +149,6 @@ export async function generatePDF() {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
         margin: 0;
-        padding: 15mm;
         box-sizing: border-box;
       }
       .no-print {
@@ -157,7 +156,6 @@ export async function generatePDF() {
       }
       .print-section {
         page-break-inside: avoid;
-        padding: 10px 0;
       }
       table {
         page-break-inside: avoid;
