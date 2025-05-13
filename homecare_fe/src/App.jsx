@@ -11,6 +11,8 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route index element={<LoginForm />} />
+
         <Route path="/home" element={<Home />}>
           <Route index element={<Profile />} />
           <Route path="tirads" element={<TiradPage />} />
