@@ -31,7 +31,7 @@ import useVietnamAddress from "../../hooks/useVietnamAddress.js";
 
 import { QRCodeCanvas } from "qrcode.react";
 
-const qrValue = `http://222.255.214.218:3003/template`;
+const qrValue = `http://222.255.214.218:3003/home/recist`;
 
 const { Title } = Typography;
 
@@ -459,7 +459,7 @@ const renderRequestInfoFields = ({
   </>
 );
 
-export default function Template() {
+export default function Recist() {
   const [loading, setLoading] = useState(false);
   const printRef = useRef(null);
 
@@ -686,7 +686,7 @@ export default function Template() {
             width: "100%",
           }}
         >
-          <Link to="/">Quay lại Trang chủ</Link>
+          <Link to=""></Link>
           <div style={{ display: "flex", gap: 8 }}>
             {/* <Button
               type="primary"

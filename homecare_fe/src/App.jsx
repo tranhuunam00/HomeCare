@@ -1,17 +1,25 @@
 import "./App.css";
 import Home from "./pages/home";
-import Template from "./pages/template";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import TiradPage from "./pages/tirads";
+import LoginForm from "./pages/authentication/LoginForm";
+import { ToastContainer } from "react-toastify";
+import Recist from "./pages/recist";
+import Profile from "./pages/profile/Profile";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/template" element={<Template />} />
-        <Route path="/tirads" element={<TiradPage />} />
+        <Route path="/home" element={<Home />}>
+          <Route index element={<Profile />} />
+          <Route path="tirads" element={<TiradPage />} />
+          <Route path="recist" element={<Recist />} />
+          <Route path="profile" element={<Profile />} />
+        </Route>
+        <Route path="/login" element={<LoginForm />} />
       </Routes>
+      <ToastContainer />
     </BrowserRouter>
   );
 }

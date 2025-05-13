@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import "./tirad.css";
 import TiradsReferenceSection from "./tirad_reference_section";
-import { Header } from "../template/Header.jsx";
+import { Header } from "../recist/Header.jsx";
 import { exportPDF, generatePDF } from "../utils/exportPDF";
 import { Button, Space } from "antd";
 import { Link } from "react-router-dom";
@@ -120,7 +120,7 @@ export default function TiradPage() {
                 width: "100%",
               }}
             >
-              <Link to="/">Quay lại Trang chủ</Link>
+              <Link to=""></Link>
               <div style={{ display: "flex", gap: 8 }}>
                 {/* <Button
                   type="primary"
