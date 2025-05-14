@@ -8,6 +8,7 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const { showError, showSuccess } = useToast();
   const onFinish = ({ username, password }) => {
+    console.log("username, password ", username, password);
     if (username === "admin" && password === "123456") {
       showSuccess("Đăng nhập thành công!");
       navigate("/home");

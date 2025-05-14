@@ -1,0 +1,192 @@
+import React, { useState } from "react";
+import { Input, Avatar, Tooltip, Badge, Dropdown, Menu, Drawer } from "antd";
+import {
+  MenuOutlined,
+  BellOutlined,
+  UserOutlined,
+  CloudDownloadOutlined,
+  AppstoreOutlined,
+} from "@ant-design/icons";
+
+import { useNavigate } from "react-router-dom";
+
+import styles from "./TopHeader.module.scss";
+
+import { QRCodeCanvas } from "qrcode.react";
+
+const qrValue = `https://www.daogroup.vn/`;
+
+const userInfo = {
+  fullName: "Vũ Thị Hồng_272",
+  username: "tk.tieuchuan272",
+  role: "Stand_Admin",
+};
+
+const TopHeader = ({ collapsed, toggleSidebar }) => {
+  const [rightDrawerVisible, setRightDrawerVisible] = useState(false);
+
+  const showRightDrawer = () => setRightDrawerVisible(true);
+  const closeRightDrawer = () => setRightDrawerVisible(false);
+  const navigate = useNavigate();
+
+  const handleMenuClick = ({ key }) => {
+    switch (key) {
+      case "account":
+        navigate("account");
+        break;
+      case "checkin":
+        console.log("Chấm công");
+        break;
+      case "logout":
+        console.log("Đăng xuất");
+        break;
+      case "connect":
+        window.open("https://www.daogroup.vn/", "_blank");
+        break;
+      default:
+        break;
+    }
+  };
+
+  const userMenu = (
+    <Menu onClick={handleMenuClick}>
+      <Menu.Item key="user" disabled>
+        <div style={{ lineHeight: "1.2" }}>
+          <strong style={{ color: "#1677ff" }}>{userInfo.fullName}</strong>
+          <br />
+          <small>{`${userInfo.username} - ${userInfo.role}`}</small>
+        </div>
+      </Menu.Item>
+      <Menu.Divider />
+      <Menu.Item key="account">Quản Lý Tài Khoản</Menu.Item>
+      <Menu.Item key="checkin">Chấm công</Menu.Item>
+      <Menu.Item key="logout">Đăng Xuất</Menu.Item>
+      <Menu.Divider />
+      <Menu.Item key="connect" icon={<CloudDownloadOutlined />}>
+        Kết nối ứng dụng
+      </Menu.Item>
+    </Menu>
+  );
+
+  return (
+    <div className={styles.topHeader}>
+      <div className={styles.topHeader__left}>
+        <img
+          src="/logo_home_care.jpg"
+          className={styles.topHeader__logo}
+          alt="logo"
+        />
+        {!collapsed && (
+          <span className={styles.topHeader__title}>VTTECH V2</span>
+        )}
+        <MenuOutlined
+          style={{ marginLeft: 50 }}
+          onClick={toggleSidebar}
+          className={styles.topHeader__toggleIcon}
+        />
+      </div>
+
+      <div className={styles.topHeader__right}>
+        <Input
+          placeholder="Chi tiết eg. nhập tối thiểu 3 ký tự"
+          className={styles.topHeader__search}
+        />
+        <Dropdown
+          overlay={userMenu}
+          placement="bottomRight"
+          trigger={["click"]}
+        >
+          <Avatar
+            size={36}
+            style={{
+              backgroundColor: "#d9d9d9",
+              cursor: "pointer",
+            }}
+            src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
+          />
+        </Dropdown>
+        <Tooltip title="Thông báo">
+          <Badge count={3} size="small">
+            <BellOutlined className={styles.topHeader__icon} />
+          </Badge>
+        </Tooltip>
+
+        {/* Avatar Dropdown giữ nguyên ở đây nếu có */}
+
+        {/* Nút menu bên phải */}
+        <AppstoreOutlined
+          onClick={showRightDrawer}
+          className={styles.topHeader__rightToggle}
+        />
+
+        <Drawer
+          title={null}
+          placement="right"
+          width={320}
+          onClose={closeRightDrawer}
+          open={rightDrawerVisible}
+          closable={false}
+          className={styles.rightDrawer}
+        >
+          <div className={styles.drawerHeader}>
+            <div>
+              <div className={styles.customerName}>Daogroup D software</div>
+              <div className={styles.version}>ver. 1</div>
+            </div>
+            <div className={styles.drawerClose} onClick={closeRightDrawer}>
+              ✕
+            </div>
+          </div>
+
+          <div className={styles.serviceList}>
+            <DrawerItem
+              icon="🎤"
+              title="Voice device"
+              desc="Checking voice device"
+            />
+            <DrawerItem icon="🎧" title="Network" desc="Internet speed test" />
+            <DrawerItem icon="🌐" title="Portal" desc="No connect" />
+            <DrawerItem
+              icon="📞"
+              title="Call center"
+              desc="Không sử dụng trung tâm cuộc gọi"
+            />
+            <DrawerItem icon="💬" title="SMS–ZNS" desc="No connect" />
+            <DrawerItem icon="📄" title="E-Invoice" desc="No connect" />
+            <DrawerItem icon="🔗" title="Account 3rd" desc="No connect" />
+            <DrawerItem
+              icon="✉️"
+              title="Mail"
+              desc="daogroupltd@gmail.com"
+              isLink
+            />
+          </div>
+
+          <div className={styles.qrContact}>
+            <QRCodeCanvas value={qrValue} size={128} level="H" includeMargin />
+            <p>
+              Liên hệ <strong>0961 766 816</strong>
+            </p>
+            <div className={styles.socials}>
+              <a href="#">Zalo</a> · <a href="#">Facebook</a> ·{" "}
+              <a href="https://www.daogroup.vn/">Website</a>
+            </div>
+          </div>
+        </Drawer>
+      </div>
+    </div>
+  );
+};
+
+const DrawerItem = ({ icon, title, desc, isLink }) => (
+  <div style={{ display: "flex", gap: 12, marginBottom: 12 }}>
+    <span style={{ fontSize: 20 }}>{icon}</span>
+    <div>
+      <div style={{ fontWeight: 500 }}>{title}</div>
+      <div style={{ fontSize: 13, color: isLink ? "#1677ff" : "#666" }}>
+        {desc}
+      </div>
+    </div>
+  </div>
+);
+export default TopHeader;

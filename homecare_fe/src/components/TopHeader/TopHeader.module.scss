@@ -1,0 +1,150 @@
+.topHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 64px;
+  padding: 0 24px;
+  background: #f8f9fa;
+  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+  width: calc(100vw - 84px);
+}
+
+.topHeader__left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.topHeader__logo {
+  width: 36px;
+  height: 36px;
+}
+
+.topHeader__title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.topHeader__toggleIcon {
+  font-size: 20px;
+  cursor: pointer;
+  transition: 0.3s;
+
+  &:hover {
+    color: #1677ff;
+  }
+}
+
+.topHeader__right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.topHeader__search {
+  width: 300px;
+  border-radius: 20px;
+  background: #fff;
+}
+
+.topHeader__icon {
+  font-size: 20px;
+  cursor: pointer;
+  color: #444;
+}
+
+.topHeader__avatar {
+  background-color: #d9d9d9;
+  cursor: pointer;
+}
+
+.userInfo {
+  line-height: 1.3;
+  padding: 4px 4px;
+}
+
+.dropdownMenu {
+  min-width: 220px;
+}
+.topHeader__rightToggle {
+  font-size: 20px;
+  cursor: pointer;
+  color: #444;
+  padding: 4px;
+  margin-left: 8px;
+
+  &:hover {
+    color: #1677ff;
+  }
+}
+.qrContact {
+  margin-top: 24px;
+  padding: 16px;
+  background: linear-gradient(to right, #f5faff, #e6f7ff);
+  border-radius: 12px;
+  text-align: center;
+
+  img {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+    color: #222;
+
+    strong {
+      color: #1aa33b; // xanh lá
+      font-weight: 600;
+    }
+  }
+
+  .socials {
+    margin-top: 8px;
+    font-size: 14px;
+
+    a {
+      color: #1677ff;
+      text-decoration: none;
+      font-weight: 500;
+
+      &:hover {
+        text-decoration: underline;
+      }
+
+      &:not(:last-child)::after {
+        content: " · ";
+        color: #999;
+      }
+    }
+  }
+}
+
+.drawerHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  font-size: 16px;
+  font-weight: 500;
+
+  .customerName {
+    color: #1677ff;
+    font-weight: bold;
+  }
+
+  .version {
+    font-size: 13px;
+    color: #999;
+  }
+
+  .drawerClose {
+    cursor: pointer;
+    font-size: 18px;
+    color: #1677ff;
+    font-weight: bold;
+  }
+}

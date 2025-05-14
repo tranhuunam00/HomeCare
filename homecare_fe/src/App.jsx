@@ -6,6 +6,8 @@ import LoginForm from "./pages/authentication/LoginForm";
 import { ToastContainer } from "react-toastify";
 import Recist from "./pages/recist";
 import Profile from "./pages/profile/Profile";
+import ProductList from "./pages/products/ProductsList";
+import AccountPage from "./pages/account/AccountPage";
 
 function App() {
   return (
@@ -16,8 +18,10 @@ function App() {
         <Route path="/home" element={<Home />}>
           <Route index element={<Profile />} />
           <Route path="tirads" element={<TiradPage />} />
+          <Route path="products" element={<ProductList />} />
           <Route path="recist" element={<Recist />} />
-          <Route path="profile" element={<Profile />} />
+          <Route path="profile" element={<Profile />}></Route>
+          <Route path="account" element={<AccountPage />} />
         </Route>
         <Route path="/login" element={<LoginForm />} />
       </Routes>

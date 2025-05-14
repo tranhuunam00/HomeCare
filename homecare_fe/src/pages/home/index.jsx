@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Routes, Route, useNavigate, Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { Avatar, Layout, Menu } from "antd";
 import {
   AppstoreOutlined,
@@ -7,23 +7,13 @@ import {
   SettingOutlined,
 } from "@ant-design/icons";
 
-import LoginPage from "../authentication/LoginForm";
-import TiradPage from "../tirads";
 import Sider from "antd/es/layout/Sider";
 import { Content } from "antd/es/layout/layout";
+import TopHeader from "../../components/TopHeader/TopHeader";
 
-const items = [
-  {
-    key: "Profile",
-    icon: (
-      <Avatar
-        src="https://png.pngtree.com/png-clipart/20200224/original/pngtree-cartoon-color-simple-male-avatar-png-image_5230557.jpg"
-        size={40}
-        style={{ marginTop: -2 }}
-      />
-    ),
-    label: "Trang cá nhân",
-  },
+const { Header } = Layout;
+
+const menuItems = [
   {
     key: "Mẫu kết quả",
     icon: (
@@ -36,8 +26,19 @@ const items = [
     label: "Mẫu kết quả",
     children: [
       {
+        key: "products",
+        label: "Danh sách",
+        icon: (
+          <Avatar
+            src="https://file1.hutech.edu.vn/file/news/22c468210bf0e7d711a424c1d48f1d62.png"
+            size={30}
+            style={{ marginTop: -2 }}
+          />
+        ),
+      },
+      {
         key: "Tirads",
-        label: "Tirads",
+        label: "D-Tirads",
         icon: (
           <Avatar
             src="https://radiologyassistant.nl/assets/1-tab-1615022783.png"
@@ -48,7 +49,7 @@ const items = [
       },
       {
         key: "Recist",
-        label: "Recist",
+        label: "D-Recist",
         icon: (
           <Avatar
             src="https://recist.eortc.org/wp-content/uploads/sites/4/2014/08/RECIST-logo-v3.2.png"
@@ -61,8 +62,9 @@ const items = [
   },
 ];
 
-const Sidebar = () => {
+const Sidebar = ({ collapsed }) => {
   const navigate = useNavigate();
+
   const handleClick = (e) => {
     navigate(e.key);
   };
@@ -70,66 +72,75 @@ const Sidebar = () => {
   return (
     <Menu
       onClick={handleClick}
-      style={{ width: 256, height: "100%" }}
-      defaultSelectedKeys={["tirads"]}
+      defaultSelectedKeys={["products"]}
       mode="inline"
-      items={items}
+      items={menuItems}
+      style={{ height: "100%" }}
+      inlineCollapsed={collapsed}
     />
   );
 };
 
 const Home = () => {
+  const [collapsed, setCollapsed] = useState(false);
   const [logo, setLogo] = useState("/logo_home_care.jpg");
 
   return (
-    <div>
-      <Layout
-        style={{
-          display: "flex",
-          backgroundColor: "rgba(202, 196, 250, 0.1)",
-        }}
-      >
-        <Sider
-          width={200}
-          style={{
-            background: "rgba(202, 196, 250, 0.1)",
-            color: "#fff",
-            padding: "16px 0",
-          }}
-        >
-          <div
+    <>
+      <TopHeader
+        collapsed={collapsed}
+        toggleSidebar={() => setCollapsed(!collapsed)}
+      />
+
+      <Layout style={{ minHeight: "100vh" }}>
+        <>
+          <Sider
+            collapsible
+            collapsed={collapsed}
+            onCollapse={(value) => setCollapsed(value)}
+            width={240}
             style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexDirection: "column",
-              marginBottom: 24,
-              width: 240,
+              background: "rgba(202, 196, 250, 0.1)",
+              paddingTop: 16,
             }}
           >
-            <img
-              src={logo}
-              alt="DAO Group Logo"
-              style={{
-                width: 80,
-                height: 80,
-                borderRadius: 8,
-                marginBottom: 8,
-              }}
-            />
-            <span style={{ fontWeight: "bold", color: "black", fontSize: 16 }}>
-              DAOGROUP
-            </span>
-          </div>
-          <Sidebar />
-        </Sider>
-        <Layout style={{ marginLeft: "60px" }}>
-          <Content style={{}}>
+            {!collapsed && (
+              <div
+                style={{
+                  textAlign: "center",
+                  marginBottom: 24,
+                }}
+              >
+                <img
+                  src={logo}
+                  alt="DAO Group Logo"
+                  style={{
+                    width: 80,
+                    height: 80,
+                    borderRadius: 8,
+                    marginBottom: 8,
+                  }}
+                />
+                <div
+                  style={{
+                    fontWeight: "bold",
+                    fontSize: 16,
+                    color: "#000",
+                  }}
+                >
+                  DAOGROUP
+                </div>
+              </div>
+            )}
+            <Sidebar collapsed={collapsed} />
+          </Sider>
+
+          <Content style={{ padding: 24, background: "#fff" }}>
             <Outlet />
           </Content>
-        </Layout>
+        </>
       </Layout>
-    </div>
+    </>
   );
 };
 
