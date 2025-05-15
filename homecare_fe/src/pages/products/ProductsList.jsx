@@ -1,26 +1,73 @@
+// ProductList.jsx
 import React, { useState, useEffect } from "react";
-import { Input, Typography, Card, Select, Row, Col } from "antd";
+import { Input, Typography, Card, Select, Row, Col, Modal, Button } from "antd";
+import { useNavigate } from "react-router-dom";
 import styles from "./ProductList.module.scss";
 
 const { Title } = Typography;
 const { Option } = Select;
 
-const products = Array.from({ length: 20 }, (_, index) => ({
-  id: index + 1,
-  name: `Sản phẩm ${index + 1}`,
-  price: (Math.random() * 1000000).toFixed(0),
-  category: index % 2 === 0 ? "Thực phẩm" : "Đồ gia dụng",
-  image:
-    "https://media.istockphoto.com/id/624183176/vi/anh/ru%E1%BB%99ng-b%E1%BA%ADc-thang-%E1%BB%9F-mu-cang-ch%E1%BA%A3i-vi%E1%BB%87t-nam.jpg?s=612x612&w=0&k=20&c=UbNrn36xFBIff9yV3RDl5lPs3-kW-WQ_sSNMB1M3Trs=",
-  purchased: Math.random() > 0.5,
-  remainingUses: Math.floor(Math.random() * 10) + 1,
-}));
+const products = [
+  {
+    id: 1,
+    name: "TIRADS Template",
+    price: 100000,
+    category: "Chẩn đoán hình ảnh",
+    image:
+      "https://nhahangchotinhsapa.vn/wp-content/uploads/2024/01/kham-pha-nui-rung-Tay-Bac.jpg",
+    subImages: [
+      "https://nhahangchotinhsapa.vn/wp-content/uploads/2024/01/kham-pha-nui-rung-Tay-Bac.jpg",
+      "https://nhahangchotinhsapa.vn/wp-content/uploads/2024/01/kham-pha-nui-rung-Tay-Bac.jpg",
+      "https://nhahangchotinhsapa.vn/wp-content/uploads/2024/01/kham-pha-nui-rung-Tay-Bac.jpg",
+    ],
+    description:
+      "Mẫu báo cáo tự động hóa TIRADS giúp phân loại nhân giáp trên siêu âm theo chuẩn ACR.",
+    usage: "Dùng trong hệ thống chẩn đoán hỗ trợ AI",
+    purchased: false,
+    remainingUses: 3,
+  },
+  {
+    id: 2,
+    name: "RECIST Template",
+    price: 120000,
+    category: "Ung thư học",
+    image: "https://via.placeholder.com/300x200.png?text=RECIST",
+    subImages: [
+      "https://via.placeholder.com/100x100.png?text=CT1",
+      "https://via.placeholder.com/100x100.png?text=CT2",
+      "https://via.placeholder.com/100x100.png?text=CT3",
+    ],
+    description: "Báo cáo tiêu chuẩn đánh giá đáp ứng khối u theo RECIST 1.1.",
+    usage: "Dùng trong theo dõi điều trị ung thư qua hình ảnh CT/MRI.",
+    purchased: true,
+    remainingUses: 5,
+  },
+  {
+    id: 3,
+    name: "BIRADS Template",
+    price: 95000,
+    category: "Nhũ ảnh",
+    image: "https://via.placeholder.com/300x200.png?text=BIRADS",
+    subImages: [
+      "https://via.placeholder.com/100x100.png?text=Mammo1",
+      "https://via.placeholder.com/100x100.png?text=Mammo2",
+      "https://via.placeholder.com/100x100.png?text=Mammo3",
+    ],
+    description: "Chuẩn hóa mô tả tổn thương tuyến vú trên nhũ ảnh.",
+    usage: "Phân loại nguy cơ ung thư vú từ BIRADS 1-6.",
+    purchased: false,
+    remainingUses: 1,
+  },
+];
 
 const ProductList = () => {
   const [searchText, setSearchText] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortOrder, setSortOrder] = useState("none");
   const [filteredProducts, setFilteredProducts] = useState(products);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     handleFilterSort();
@@ -50,76 +97,127 @@ const ProductList = () => {
     setFilteredProducts(result);
   };
 
+  const showModal = (product) => {
+    setSelectedProduct(product);
+    setIsModalVisible(true);
+  };
+
+  const handleCancel = () => {
+    setIsModalVisible(false);
+    setSelectedProduct(null);
+  };
+
+  const handleBuy = () => {
+    navigate("/home/payment", { state: { product: selectedProduct } });
+  };
+
   return (
     <div className={styles.productListContainer}>
       <Title level={3} className={styles.title}>
         Danh sách sản phẩm
       </Title>
 
-      <Row gutter={16} className={styles.controls}>
-        <Col>
-          <Input.Search
-            placeholder="Tìm kiếm theo tên sản phẩm"
-            onChange={(e) => setSearchText(e.target.value)}
-            value={searchText}
-            allowClear
-          />
+      <Row gutter={24}>
+        <Col xs={24} sm={8} md={6} lg={5} className={styles.filterSidebar}>
+          <div className={styles.filterBox}>
+            <Input.Search
+              placeholder="Tìm kiếm theo tên sản phẩm"
+              onChange={(e) => setSearchText(e.target.value)}
+              value={searchText}
+              allowClear
+              className={styles.filterInput}
+            />
+            <Select
+              value={statusFilter}
+              onChange={setStatusFilter}
+              className={styles.filterSelect}
+            >
+              <Option value="all">Tất cả trạng thái</Option>
+              <Option value="purchased">Đã mua</Option>
+              <Option value="notPurchased">Chưa mua</Option>
+            </Select>
+            <Select
+              value={sortOrder}
+              onChange={setSortOrder}
+              className={styles.filterSelect}
+            >
+              <Option value="none">Không sắp xếp</Option>
+              <Option value="asc">Lượt dùng tăng dần</Option>
+              <Option value="desc">Lượt dùng giảm dần</Option>
+            </Select>
+          </div>
         </Col>
-        <Col>
-          <Select
-            value={statusFilter}
-            onChange={setStatusFilter}
-            style={{ width: 160 }}
-          >
-            <Option value="all">Tất cả trạng thái</Option>
-            <Option value="purchased">Đã mua</Option>
-            <Option value="notPurchased">Chưa mua</Option>
-          </Select>
-        </Col>
-        <Col>
-          <Select
-            value={sortOrder}
-            onChange={setSortOrder}
-            style={{ width: 180 }}
-          >
-            <Option value="none">Không sắp xếp</Option>
-            <Option value="asc">Lượt dùng tăng dần</Option>
-            <Option value="desc">Lượt dùng giảm dần</Option>
-          </Select>
+
+        <Col xs={24} sm={16} md={18} lg={19}>
+          <div className={styles.productGrid}>
+            {filteredProducts.map((product) => (
+              <Card
+                key={product.id}
+                className={styles.productCard}
+                hoverable
+                onClick={() => showModal(product)}
+                cover={
+                  <img
+                    alt={product.name}
+                    src={product.image}
+                    className={styles.productImage}
+                  />
+                }
+              >
+                <div className={styles.productName}>{product.name}</div>
+                <div className={styles.productPrice}>
+                  {Number(product.price).toLocaleString("vi-VN")} đ
+                </div>
+                <div className={styles.productCategory}>{product.category}</div>
+                <div
+                  className={
+                    product.purchased
+                      ? styles.remainingUses
+                      : styles.notPurchased
+                  }
+                >
+                  {product.purchased
+                    ? `Còn dùng được: ${product.remainingUses} lượt`
+                    : "Chưa mua"}
+                </div>
+              </Card>
+            ))}
+          </div>
         </Col>
       </Row>
 
-      <div className={styles.productGrid}>
-        {filteredProducts.map((product) => (
-          <Card
-            key={product.id}
-            className={styles.productCard}
-            hoverable
-            cover={
+      <Modal
+        title={selectedProduct?.name}
+        open={isModalVisible}
+        onCancel={handleCancel}
+        footer={[
+          <Button key="buy" type="primary" onClick={handleBuy}>
+            Thanh toán
+          </Button>,
+        ]}
+      >
+        <img
+          src={selectedProduct?.image}
+          alt="main"
+          style={{ width: "100%", marginBottom: 12 }}
+        />
+        <Row gutter={8}>
+          {selectedProduct?.subImages.map((img, idx) => (
+            <Col span={8} key={idx}>
               <img
-                alt={product.name}
-                src={product.image}
-                className={styles.productImage}
+                src={img}
+                alt={`sub-${idx}`}
+                style={{ width: "100%", borderRadius: 8 }}
               />
-            }
-          >
-            <div className={styles.productName}>{product.name}</div>
-            <div className={styles.productPrice}>
-              {Number(product.price).toLocaleString("vi-VN")} đ
-            </div>
-            <div className={styles.productCategory}>{product.category}</div>
-            <div
-              className={
-                product.purchased ? styles.remainingUses : styles.notPurchased
-              }
-            >
-              {product.purchased
-                ? `Còn dùng được: ${product.remainingUses} lượt`
-                : "Chưa mua"}
-            </div>
-          </Card>
-        ))}
-      </div>
+            </Col>
+          ))}
+        </Row>
+        <p style={{ marginTop: 12 }}>
+          Giá: {Number(selectedProduct?.price).toLocaleString("vi-VN")} đ
+        </p>
+        <p>Loại: {selectedProduct?.category}</p>
+        <p>Mô tả: {selectedProduct?.description}</p>
+      </Modal>
     </div>
   );
 };

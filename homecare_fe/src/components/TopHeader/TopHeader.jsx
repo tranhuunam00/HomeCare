@@ -34,8 +34,9 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
       case "account":
         navigate("account");
         break;
-      case "checkin":
-        console.log("Chấm công");
+      case "wallet":
+        navigate("wallet");
+
         break;
       case "logout":
         console.log("Đăng xuất");
@@ -59,7 +60,7 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
       </Menu.Item>
       <Menu.Divider />
       <Menu.Item key="account">Quản Lý Tài Khoản</Menu.Item>
-      <Menu.Item key="checkin">Chấm công</Menu.Item>
+      <Menu.Item key="wallet">Ví của tôi</Menu.Item>
       <Menu.Item key="logout">Đăng Xuất</Menu.Item>
       <Menu.Divider />
       <Menu.Item key="connect" icon={<CloudDownloadOutlined />}>

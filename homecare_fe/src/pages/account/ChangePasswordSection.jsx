@@ -1,28 +1,85 @@
 // ChangePasswordSection.jsx
 import React from "react";
-import { Card, Input, Button } from "antd";
+import { Card, Input, Button, Form, Typography } from "antd";
 import styles from "./AccountPage.module.scss";
 
-const ChangePasswordSection = () => (
-  <Card className={styles["account-page__card"]} title="Đổi mật khẩu">
-    <p>Tên đăng nhập</p>
-    <Input defaultValue="tk.tieuchuan272" disabled />
-    <p>Mật khẩu hiện tại</p>
-    <Input.Password placeholder="Nhập mật khẩu hiện tại" />
-    <p>Mật khẩu mới (6 - 15 kí tự)</p>
-    <Input.Password placeholder="Nhập mật khẩu mới" />
-    <p>Nhập lại mật khẩu mới</p>
-    <Input.Password placeholder="Xác nhận mật khẩu mới" />
-    <p style={{ fontSize: 13, marginTop: 8 }}>
-      <ul>
-        <li>Bao gồm số và chữ cái</li>
-        <li>Tối thiểu 6 ký tự</li>
-      </ul>
-    </p>
-    <Button type="primary" style={{ marginTop: 8 }}>
-      Lưu
-    </Button>
-  </Card>
-);
+const { Title, Text } = Typography;
+
+const ChangePasswordSection = () => {
+  const [form] = Form.useForm();
+
+  const onFinish = (values) => {
+    console.log("Change Password Values:", values);
+  };
+
+  return (
+    <Card className={styles["account-page__card"]} title="Đổi mật khẩu">
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={onFinish}
+        className={styles["change-password-form"]}
+      >
+        <Form.Item label="Tên đăng nhập">
+          <Input defaultValue="tk.tieuchuan272" disabled />
+        </Form.Item>
+
+        <Form.Item
+          label="Mật khẩu hiện tại"
+          name="currentPassword"
+          rules={[
+            { required: true, message: "Vui lòng nhập mật khẩu hiện tại" },
+          ]}
+        >
+          <Input.Password placeholder="Nhập mật khẩu hiện tại" />
+        </Form.Item>
+
+        <Form.Item
+          label="Mật khẩu mới"
+          name="newPassword"
+          rules={[
+            { required: true, message: "Vui lòng nhập mật khẩu mới" },
+            { min: 6, message: "Mật khẩu ít nhất 6 ký tự" },
+            { max: 15, message: "Mật khẩu tối đa 15 ký tự" },
+          ]}
+        >
+          <Input.Password placeholder="Nhập mật khẩu mới" />
+        </Form.Item>
+
+        <Form.Item
+          label="Xác nhận mật khẩu mới"
+          name="confirmPassword"
+          dependencies={["newPassword"]}
+          rules={[
+            { required: true, message: "Vui lòng xác nhận mật khẩu" },
+            ({ getFieldValue }) => ({
+              validator(_, value) {
+                if (!value || getFieldValue("newPassword") === value) {
+                  return Promise.resolve();
+                }
+                return Promise.reject("Mật khẩu xác nhận không khớp!");
+              },
+            }),
+          ]}
+        >
+          <Input.Password placeholder="Xác nhận mật khẩu mới" />
+        </Form.Item>
+
+        <div className={styles["password-note"]}>
+          <ul>
+            <li>Tối thiểu 6 ký tự</li>
+            <li>Bao gồm cả chữ cái và số</li>
+          </ul>
+        </div>
+
+        <Form.Item style={{ marginTop: 16 }}>
+          <Button type="primary" htmlType="submit" block>
+            Lưu
+          </Button>
+        </Form.Item>
+      </Form>
+    </Card>
+  );
+};
 
 export default ChangePasswordSection;

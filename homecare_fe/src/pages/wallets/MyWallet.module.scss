@@ -1,0 +1,58 @@
+.wallet-container {
+  padding: 24px;
+  background: #f9f9f9;
+}
+
+.wallet-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  padding: 24px;
+}
+
+.wallet-visual {
+  background: linear-gradient(to right, #eef1f5, #ffffff);
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+
+  &__title {
+    font-size: 24px;
+    font-weight: bold;
+  }
+
+  &__code {
+    color: #888;
+    margin-top: 4px;
+  }
+
+  &__value {
+    font-size: 18px;
+    margin-top: 12px;
+    font-weight: 500;
+  }
+
+  &__qrcode {
+    margin-top: 16px;
+  }
+}
+
+.wallet-config {
+  margin-top: 24px;
+
+  &__checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+
+    .ant-checkbox-wrapper {
+      display: block;
+      margin-bottom: 8px;
+    }
+  }
+
+  &__footer {
+    text-align: right;
+    margin-top: 24px;
+  }
+}

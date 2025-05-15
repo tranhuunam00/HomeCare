@@ -8,6 +8,8 @@ import Recist from "./pages/recist";
 import Profile from "./pages/profile/Profile";
 import ProductList from "./pages/products/ProductsList";
 import AccountPage from "./pages/account/AccountPage";
+import MyWallet from "./pages/wallets/MyWallet";
+import PaymentScreen from "./pages/payments/PaymentScreen";
 
 function App() {
   return (
@@ -22,6 +24,8 @@ function App() {
           <Route path="recist" element={<Recist />} />
           <Route path="profile" element={<Profile />}></Route>
           <Route path="account" element={<AccountPage />} />
+          <Route path="wallet" element={<MyWallet />} />
+          <Route path="payment" element={<PaymentScreen />} />
         </Route>
         <Route path="/login" element={<LoginForm />} />
       </Routes>
