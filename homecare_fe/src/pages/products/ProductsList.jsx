@@ -108,7 +108,7 @@ const ProductList = () => {
   };
 
   const handleBuy = () => {
-    navigate("/home/payment", { state: { product: selectedProduct } });
+    navigate("/home/payments", { state: { product: selectedProduct } });
   };
 
   return (

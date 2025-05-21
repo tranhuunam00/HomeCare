@@ -10,6 +10,9 @@ import ProductList from "./pages/products/ProductsList";
 import AccountPage from "./pages/account/AccountPage";
 import MyWallet from "./pages/wallets/MyWallet";
 import PaymentScreen from "./pages/payments/PaymentScreen";
+import CustomerList from "./pages/customers/CustomerList";
+import OrderList from "./pages/orders/OrderList";
+import StaffPage from "./pages/staff/StaffPage";
 
 function App() {
   return (
@@ -18,14 +21,17 @@ function App() {
         <Route index element={<LoginForm />} />
 
         <Route path="/home" element={<Home />}>
-          <Route index element={<Profile />} />
+          <Route index element={<ProductList />} />
           <Route path="tirads" element={<TiradPage />} />
           <Route path="products" element={<ProductList />} />
           <Route path="recist" element={<Recist />} />
           <Route path="profile" element={<Profile />}></Route>
           <Route path="account" element={<AccountPage />} />
           <Route path="wallet" element={<MyWallet />} />
-          <Route path="payment" element={<PaymentScreen />} />
+          <Route path="payments" element={<PaymentScreen />} />
+          <Route path="customers" element={<CustomerList />} />
+          <Route path="orders" element={<OrderList />} />
+          <Route path="staffs" element={<StaffPage />} />
         </Route>
         <Route path="/login" element={<LoginForm />} />
       </Routes>

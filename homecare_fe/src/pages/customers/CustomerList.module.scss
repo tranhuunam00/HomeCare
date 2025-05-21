@@ -1,0 +1,55 @@
+.customerList {
+  padding: 24px;
+
+  &__title {
+    margin-bottom: 20px;
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  &__table {
+    :global(.ant-table) {
+      border: 1px solid #d9d9d9; // Khung bảng tổng
+    }
+
+    :global(.ant-table-cell),
+    :global(.ant-table-thead > tr > th) {
+      padding: 10px !important;
+      border: 1px solid #d9d9d9 !important; // Đường kẻ rõ ràng
+    }
+
+    :global(.ant-table-tbody > tr > td) {
+      border: 1px solid #ffffff !important;
+    }
+
+    :global(.ant-table-thead > tr > th) {
+      background-color: #fafafa;
+      font-weight: 600;
+    }
+
+    :global(.ant-table-tbody > tr:hover > td) {
+      background-color: #ffffff;
+    }
+  }
+}
+.filterGroup {
+  margin-bottom: 20px;
+
+  .ant-card {
+    background: #fafafa;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+
+  .filterLabel {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 4px;
+    color: #444;
+  }
+
+  .ant-select,
+  .ant-input {
+    border-radius: 8px;
+  }
+}
