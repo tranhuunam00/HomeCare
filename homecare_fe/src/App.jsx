@@ -13,12 +13,13 @@ import PaymentScreen from "./pages/payments/PaymentScreen";
 import CustomerList from "./pages/customers/CustomerList";
 import OrderList from "./pages/orders/OrderList";
 import StaffPage from "./pages/staff/StaffPage";
+import HomeCareLanding from "./pages/landingpage/HomeCareLanding";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route index element={<LoginForm />} />
+        <Route index element={<HomeCareLanding />} />
 
         <Route path="/home" element={<Home />}>
           <Route index element={<ProductList />} />
@@ -34,6 +35,7 @@ function App() {
           <Route path="staffs" element={<StaffPage />} />
         </Route>
         <Route path="/login" element={<LoginForm />} />
+        <Route path="/" element={<HomeCareLanding />} />
       </Routes>
       <ToastContainer />
     </BrowserRouter>

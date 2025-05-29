@@ -27,8 +27,8 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
 
   const showRightDrawer = () => setRightDrawerVisible(true);
   const closeRightDrawer = () => setRightDrawerVisible(false);
-  const navigate = useNavigate();
 
+  const navigate = useNavigate();
   const handleMenuClick = ({ key }) => {
     switch (key) {
       case "account":
@@ -78,7 +78,7 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
           alt="logo"
         />
         {!collapsed && (
-          <span className={styles.topHeader__title}>VTTECH V2</span>
+          <span className={styles.topHeader__title}>HOMECARE</span>
         )}
         <MenuOutlined
           style={{ marginLeft: 50 }}

@@ -1,0 +1,66 @@
+.productCard {
+  border-radius: 12px;
+  transition: all 0.3s;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  width: 260px;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .ant-card-body {
+    padding: 12px;
+  }
+
+  .productImage {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+  }
+
+  .productName {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 8px 0;
+  }
+
+  .productPrice {
+    color: #ff4d4f;
+    font-weight: 500;
+  }
+
+  .productCategory {
+    font-size: 13px;
+    color: #999;
+    margin-top: 4px;
+  }
+
+  .productStatus {
+    margin-top: 8px;
+
+    .purchased {
+      color: #52c41a;
+      font-weight: 500;
+    }
+
+    .notPurchased {
+      color: #d9d9d9;
+    }
+  }
+
+  .remainingUses {
+    font-size: 13px;
+    margin-top: 8px;
+    color: #389e0d; // màu xanh lá
+    font-weight: 500;
+  }
+
+  .notPurchased {
+    font-size: 13px;
+    margin-top: 8px;
+    color: #ff4d4f; // màu đỏ
+    font-weight: 500;
+  }
+}

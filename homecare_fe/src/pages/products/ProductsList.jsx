@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Input, Typography, Card, Select, Row, Col, Modal, Button } from "antd";
 import { useNavigate } from "react-router-dom";
 import styles from "./ProductList.module.scss";
+import ProductCard from "./productCard/ProductCard";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -11,7 +12,7 @@ const products = [
   {
     id: 1,
     name: "TIRADS Template",
-    price: 100000,
+    price: 0,
     category: "Chẩn đoán hình ảnh",
     image:
       "https://nhahangchotinhsapa.vn/wp-content/uploads/2024/01/kham-pha-nui-rung-Tay-Bac.jpg",
@@ -29,7 +30,7 @@ const products = [
   {
     id: 2,
     name: "RECIST Template",
-    price: 120000,
+    price: 0,
     category: "Ung thư học",
     image: "https://via.placeholder.com/300x200.png?text=RECIST",
     subImages: [
@@ -45,7 +46,7 @@ const products = [
   {
     id: 3,
     name: "BIRADS Template",
-    price: 95000,
+    price: 0,
     category: "Nhũ ảnh",
     image: "https://via.placeholder.com/300x200.png?text=BIRADS",
     subImages: [
@@ -150,37 +151,12 @@ const ProductList = () => {
 
         <Col xs={24} sm={16} md={18} lg={19}>
           <div className={styles.productGrid}>
-            {filteredProducts.map((product) => (
-              <Card
-                key={product.id}
-                className={styles.productCard}
-                hoverable
-                onClick={() => showModal(product)}
-                cover={
-                  <img
-                    alt={product.name}
-                    src={product.image}
-                    className={styles.productImage}
-                  />
-                }
-              >
-                <div className={styles.productName}>{product.name}</div>
-                <div className={styles.productPrice}>
-                  {Number(product.price).toLocaleString("vi-VN")} đ
-                </div>
-                <div className={styles.productCategory}>{product.category}</div>
-                <div
-                  className={
-                    product.purchased
-                      ? styles.remainingUses
-                      : styles.notPurchased
-                  }
-                >
-                  {product.purchased
-                    ? `Còn dùng được: ${product.remainingUses} lượt`
-                    : "Chưa mua"}
-                </div>
-              </Card>
+            {filteredProducts.map((product, index) => (
+              <ProductCard
+                key={index}
+                product={product}
+                showModal={showModal}
+              />
             ))}
           </div>
         </Col>
