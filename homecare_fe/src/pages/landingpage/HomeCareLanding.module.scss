@@ -18,6 +18,30 @@
     background-color: #fff;
     border-bottom: 1px solid #eee;
   }
+  .homecare__lang-switcher {
+    background-color: transparent;
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 14px;
+    color: #333;
+    appearance: none;
+    cursor: pointer;
+    margin-right: 16px;
+    transition: all 0.3s ease;
+    width: 90px;
+
+    &:hover {
+      border-color: #1890ff;
+      color: #1890ff;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: #40a9ff;
+      box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+    }
+  }
 
   &__nav-left,
   &__nav-right {

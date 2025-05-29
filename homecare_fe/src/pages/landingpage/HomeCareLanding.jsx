@@ -7,6 +7,7 @@ import { SiZalo } from "react-icons/si";
 import styles from "./HomeCareLanding.module.scss";
 import { useNavigate } from "react-router-dom";
 import ProductCard from "../products/productCard/ProductCard";
+import useToast from "../../hooks/useToast";
 
 const products = [
   {
@@ -75,6 +76,8 @@ const HomeCareLanding = () => {
   const aboutRef = useRef(null);
   const serviceRef = useRef(null);
 
+  const { showError, showSuccess } = useToast();
+
   const scrollToSection = (ref) => {
     if (ref.current) {
       ref.current.scrollIntoView({ behavior: "smooth" });
@@ -87,6 +90,7 @@ const HomeCareLanding = () => {
           <div className={styles["homecare__logo"]}>
             <img src="/logo_home_care.jpg" alt="logo_home_care.jpg" />
           </div>
+
           <div className={styles["homecare__nav-left"]}>
             <Menu
               mode="horizontal"
@@ -107,13 +111,26 @@ const HomeCareLanding = () => {
               </Menu.Item>
             </Menu>
           </div>
+
           <div className={styles["homecare__nav-right"]}>
+            {/* Giao diện chọn ngôn ngữ */}
+            <select
+              className={styles["homecare__lang-switcher"]}
+              onChange={(e) =>
+                showSuccess(`Chuyển sang ngôn ngữ: ${e.target.value}`)
+              }
+              defaultValue="vi"
+            >
+              <option value="vi">🇻🇳 VN</option>
+              <option value="en">🇺🇸 EN</option>
+            </select>
+
             <Menu
               mode="horizontal"
               selectable={false}
               className={styles["homecare__auth"]}
             >
-              <Menu.Item key="about" onClick={() => navigate("login")}>
+              <Menu.Item key="login" onClick={() => navigate("login")}>
                 Đăng nhập
               </Menu.Item>
             </Menu>
