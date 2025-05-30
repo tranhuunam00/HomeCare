@@ -125,21 +125,19 @@ const HomeCareLanding = () => {
               <option value="en">🇺🇸 EN</option>
             </select>
 
-            <Menu
-              mode="horizontal"
-              selectable={false}
-              className={styles["homecare__auth"]}
-            >
-              <Menu.Item key="login" onClick={() => navigate("login")}>
-                Đăng nhập
-              </Menu.Item>
-            </Menu>
             <Button
               type="primary"
               className={styles["homecare__contact"]}
-              onClick={showContactModal}
+              onClick={() => navigate("login")}
             >
-              Liên Hệ
+              Đăng nhập
+            </Button>
+            <Button
+              type="primary"
+              className={styles["homecare__contact"]}
+              onClick={() => navigate("register")}
+            >
+              Đăng ký
             </Button>
           </div>
         </div>
@@ -175,19 +173,31 @@ const HomeCareLanding = () => {
         </p>
       </section>
 
-      <h2 className={styles["homecare__about-title"]}>Sản phẩm</h2>
+      <h2
+        style={{ textAlign: "center" }}
+        className={styles["homecare__about-title"]}
+      >
+        Sản phẩm
+      </h2>
       <section ref={serviceRef} className={styles["homecare__service"]}>
         {products.map((product, index) => (
           <ProductCard key={index} product={product} />
         ))}
       </section>
-      <Button
-        type="link"
-        className={styles["homecare__about-link"]}
-        onClick={() => navigate("home/products")}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+        }}
       >
-        Xem Thêm
-      </Button>
+        <Button
+          type="link"
+          className={styles["homecare__about-link"]}
+          onClick={() => navigate("home/products")}
+        >
+          Xem Thêm
+        </Button>
+      </div>
 
       {/* Footer Subscribe Section */}
       <section className={styles["homecare__subscribe"]}>
@@ -235,7 +245,7 @@ const HomeCareLanding = () => {
 
       <Modal
         key={new Date()}
-        title="Liên Hệ Với Chúng Tôi"
+        title="Đăng ký làm đối tác"
         open={isContactOpen}
         onCancel={handleContactCancel}
         footer={null}

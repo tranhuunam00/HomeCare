@@ -40,6 +40,52 @@ const menuItems = [
     ],
   },
   {
+    key: "Mẫu in kết quả",
+    icon: (
+      <Avatar
+        src={
+          "https://png.pngtree.com/png-clipart/20200224/original/pngtree-printer-icon-for-your-project-png-image_5214091.jpg"
+        }
+        size={40}
+        style={{ marginTop: -2 }}
+      />
+    ),
+    label: "Mẫu in kết quả",
+    children: [
+      {
+        key: "products",
+        label: "Danh sách",
+      },
+      {
+        key: "Tirads",
+        label: "D-Tirads",
+      },
+      {
+        key: "Recist",
+        label: "D-Recist",
+      },
+    ],
+  },
+
+  {
+    key: "Phòng khám",
+    icon: (
+      <Avatar
+        src="https://media.istockphoto.com/id/1207077610/vi/vec-to/bi%E1%BB%83u-t%C6%B0%E1%BB%A3ng-b%E1%BB%87nh-vi%E1%BB%87n-d%E1%BA%A5u-hi%E1%BB%87u-y-t%E1%BA%BF-bi%E1%BB%83u-t%C6%B0%E1%BB%A3ng-trung-t%C3%A2m-y-t%E1%BA%BF-t%C3%B2a-nh%C3%A0-ph%C3%B2ng-kh%C3%A1m-ch%C4%83m-s%C3%B3c.jpg?s=612x612&w=0&k=20&c=y8ORmGSTk-ucigOIzHy6ndkTUrG7jyUcAEVPJRYQqdc="
+        size={40}
+        style={{ marginTop: -2 }}
+      />
+    ),
+    label: "Phòng khám",
+
+    children: [
+      {
+        key: "clinics",
+        label: "Danh sách",
+      },
+    ],
+  },
+  {
     key: "Khách hàng",
     icon: (
       <Avatar

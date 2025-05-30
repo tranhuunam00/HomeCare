@@ -14,6 +14,7 @@ import CustomerList from "./pages/customers/CustomerList";
 import OrderList from "./pages/orders/OrderList";
 import StaffPage from "./pages/staff/StaffPage";
 import HomeCareLanding from "./pages/landingpage/HomeCareLanding";
+import RegisterForm from "./pages/authentication/RegisterForm";
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
           <Route path="staffs" element={<StaffPage />} />
         </Route>
         <Route path="/login" element={<LoginForm />} />
+        <Route path="/register" element={<RegisterForm />} />
         <Route path="/" element={<HomeCareLanding />} />
       </Routes>
       <ToastContainer />
