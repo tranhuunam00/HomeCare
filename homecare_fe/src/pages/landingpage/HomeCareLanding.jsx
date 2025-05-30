@@ -8,6 +8,7 @@ import styles from "./HomeCareLanding.module.scss";
 import { useNavigate } from "react-router-dom";
 import ProductCard from "../products/productCard/ProductCard";
 import useToast from "../../hooks/useToast";
+import FurnitureCarousel from "../../components/slick/FurnitureCarousel";
 
 const products = [
   {
@@ -146,10 +147,10 @@ const HomeCareLanding = () => {
       <section ref={topRef} className={styles["homecare__hero"]}>
         <div className={styles["homecare__hero-inner"]}>
           <h1 className={styles["homecare__title"]}>
-            <span>HOME</span>CARE
+            <span>D</span>_RAD
           </h1>
           <h2 className={styles["homecare__subtitle"]}>
-            Giải Pháp Chăm Sóc Sức Khỏe Toàn Diện
+            Chuẩn hóa kết quả chẩn đoán hình ảnh theo tiêu chuẩn quốc tế
           </h2>
           <Button
             type="primary"
@@ -162,17 +163,157 @@ const HomeCareLanding = () => {
       </section>
 
       <section ref={aboutRef} className={styles["homecare__about"]}>
-        <h2 className={styles["homecare__about-title"]}>Về Chúng Tôi</h2>
+        <h2 className={styles["homecare__about-title"]}>Giới thiệu chung</h2>
         <p className={styles["homecare__about-text"]}>
           Công ty TNHH Đầu tư & Công nghệ DAOGROUP là doanh nghiệp công nghệ
           tiên phong trong lĩnh vực y tế và giáo dục, chuyên cung cấp các giải
           pháp số hóa tiên tiến nhằm nâng cao chất lượng chăm sóc sức khỏe và
           đào tạo. Với đội ngũ chuyên gia giàu kinh nghiệm, chúng tôi cam kết
           mang đến những sản phẩm và dịch vụ sáng tạo, góp phần cải thiện cuộc
-          sống cộng đồng.
+          sống cộng đồng. Chúng tôi xây dựng một số giải pháp phần mềm y khoa
+          ứng dụng AI – Chuẩn hóa kết quả chẩn đoán hình ảnh theo tiêu chuẩn
+          quốc tế (D-RADS).
         </p>
+        <h4>Giải pháp dành cho</h4>
+        <p>Phòng khám – Bệnh viện – Trung tâm chẩn đoán hình ảnh</p>
+        <p>Bác sĩ chuyên khoa siêu âm, X-quang, CT, MRI</p>
+        <p>Đơn vị nghiên cứu – đào tạo trong ngành Y</p>
+        <p>Đơn vị sản xuất phần mềm HIS, RIS, PACS</p>
       </section>
 
+      <section className={styles["homecare__articles"]}>
+        <div className={styles["homecare__articles-top"]}>
+          <div className={styles["homecare__articles-text"]}>
+            <h2>Tăng tốc độ – giảm sai sót – nâng cao chất lượng chẩn đoán</h2>
+            <p>
+              Trong kỷ nguyên y học số, việc ứng dụng phần mềm y khoa tích hợp
+              trí tuệ nhân tạo (AI) trong chẩn đoán hình ảnh đang trở thành xu
+              hướng tất yếu. Một trong những giải pháp đột phá hiện nay là hệ
+              thống phần mềm hỗ trợ đánh giá tổn thương theo các hệ thống phân
+              loại chuẩn quốc tế: TIRADS, LI-RADS, BI-RADS, PI-RADS, Lung-RADS,
+              RECIST...
+            </p>
+          </div>
+          <div className={styles["homecare__articles-image"]}>
+            <img src="/tirads.png" alt="Writing Guide" />
+          </div>
+        </div>
+
+        <div className={styles["homecare__articles-bottom"]}>
+          <div className={styles["homecare__article-card"]}>
+            <img src="/si2.png" alt="Article 1" />
+            <h4>Hệ thống chuẩn hóa đánh giá tổn thương trên hình ảnh y khoa</h4>
+            <p>
+              Phân loại nguy cơ ác tính của các nhân tuyến giáp: D-TIRADS
+              (Thyroid Imaging Reporting and Data System).
+            </p>
+            <p>
+              Đánh giá nguy cơ ung thư biểu mô tế bào gan: D-LIRADS (Liver
+              Imaging Reporting and Data System).
+            </p>
+            <p>
+              Chuẩn hóa đánh giá và báo cáo các bất thường tuyến vú: D-BIRADS
+              (Breast Imaging Reporting and Data System).
+            </p>
+          </div>
+          <div className={styles["homecare__article-card"]}>
+            <img src="/si1.png" alt="Article 2" />
+            <div>
+              <h4>Công cụ hỗ trợ chẩn đoán hình ảnh chính xác và nhất quán</h4>
+              <p>
+                Hỗ trợ phát hiện và phân tầng nguy cơ ung thư tuyến tiền liệt:
+                D-PIRADS (Prostate Imaging Reporting and Data System).
+              </p>
+              <p>
+                Sàng lọc và phân loại tổn thương phổi trong phát hiện sớm ung
+                thư: D-LungRADS (Lung Imaging Reporting and Data System).
+              </p>
+              <p>
+                Đo lường và theo dõi đáp ứng điều trị của các khối u đặc:
+                D-RECIST (Response Evaluation Criteria in Solid Tumors).
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <h2
+        className={styles["homecare__about-title"]}
+        style={{ textAlign: "center" }}
+      >
+        Lợi ích
+      </h2>
+      <section
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <FurnitureCarousel />
+      </section>
+      <h2
+        className={styles["homecare__about-title"]}
+        style={{ textAlign: "center" }}
+      >
+        Tính năng nổi bật
+      </h2>
+      <section className={styles["homecare__articles"]}>
+        <div className={styles["homecare__articles-bottom"]}>
+          <div className={styles["homecare__article-card"]}>
+            <img src="/si2.png" alt="Article 1" />
+            <h4>Cá nhân hóa</h4>
+            <p>
+              Tự động dịch kết quả đa ngôn ngữ (Anh, Pháp, Nhật, Trung). Tạo báo
+              cáo chẩn đoán bán tự động, rút ngắn thời gian ghi chép.
+            </p>
+            <p>
+              Tự động báo cáo theo mẫu chuẩn: TIRADS, BIRADS, PIRADS, Lung RADS,
+              RECIST. Đề xuất phân loại RADS phù hợp, hỗ trợ quyết định lâm
+              sàng.
+            </p>
+          </div>
+          <div className={styles["homecare__article-card"]}>
+            <img src="/si2.png" alt="Article 1" />
+            <h4>AI tạo sinh</h4>
+            <p>
+              Tích hợp AI tư vấn, biện luận kết quả: giúp Người bệnh dễ dàng
+              hiểu được các thuật ngữ chuyên môn có tính đặc thù cao, nâng cao
+              trải nghiệm của người bệnh.
+            </p>
+            <p>
+              Tích hợp AI tạo kết quả dạng video: đa dạng hóa trải nghiệm của
+              người dùng, hỗ trợ những người hạn chế thị lực, khó đọc.
+            </p>
+          </div>
+          <div className={styles["homecare__article-card"]}>
+            <img src="/si1.png" alt="Article 2" />
+            <div>
+              <h4>AI hỗ trợ</h4>
+              <p>
+                Tích hợp AI hỗ trợ phát hiện bất thường. Nhận diện tự động các
+                đặc điểm hình ảnh trên siêu âm, MRI, CT.
+              </p>
+              <p>
+                Tích hợp AI đo lường và định lượng tổn thương tự động. Lưu trữ
+                và theo dõi diễn tiến tổn thương qua từng lần chụp.
+              </p>
+            </div>
+          </div>
+
+          <div className={styles["homecare__article-card"]}>
+            <img src="/si1.png" alt="Article 2" />
+            <div>
+              <h4>Dễ dàng mở rộng</h4>
+              <p>
+                Kêt nối hệ thống phần mềm bệnh viện và dữ liệu hồ sơ sức khỏe:
+                HIS, RIS, PACS, eHos. Kết nối HL7/PACS/RIS, dễ dàng tích hợp vào
+                hệ thống bệnh viện.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
       <h2
         style={{ textAlign: "center" }}
         className={styles["homecare__about-title"]}
@@ -205,9 +346,9 @@ const HomeCareLanding = () => {
           Đăng Ký Nhận Thông Tin Mới Nhất Từ Home Care
         </h2>
         <p className={styles["homecare__subscribe-desc"]}>
-          Hãy để lại email của bạn để nhận thông báo về các dịch vụ y tế tại
-          nhà, chương trình ưu đãi đặc biệt, và những mẹo chăm sóc sức khỏe hữu
-          ích từ đội ngũ chuyên gia của chúng tôi.
+          Liên hệ ngay với chúng tôi để được trải nghiệm demo miễn phí và nhận
+          tư vấn giải pháp tích hợp hệ thống phần mềm D-RADS vào quy trình vận
+          hành y tế.
         </p>
         <div className={styles["homecare__subscribe-input"]}>
           <Input placeholder="Nhập email của bạn..." size="large" />

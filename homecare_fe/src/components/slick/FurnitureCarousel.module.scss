@@ -1,0 +1,68 @@
+.carouselWrapper {
+  max-width: 1540px;
+  padding: 40px 0;
+
+  .slick-slide {
+    transition: all 0.5s ease;
+    transform: scale(0.9);
+    opacity: 0.6;
+    padding: 0 1000px;
+  }
+
+  .slick-center {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+
+  .slide {
+    align-items: center;
+  }
+
+  .card {
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    max-width: 400px;
+    height: 260px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+
+    img {
+      width: 400px;
+      object-fit: cover;
+      display: block;
+    }
+    &::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4); // độ tối ở đây
+      z-index: 0;
+    }
+
+    .overlay {
+      position: absolute;
+      z-index: 1;
+      bottom: 0;
+      padding: 20px;
+      background: linear-gradient(
+        to top right,
+        rgba(2, 88, 6, 0.3),
+        rgba(216, 153, 17, 0.3),
+        transparent
+      );
+      color: rgb(255, 255, 255);
+
+      h3 {
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+
+      p {
+        font-size: 14px;
+      }
+    }
+  }
+}

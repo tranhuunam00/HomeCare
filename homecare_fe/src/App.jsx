@@ -15,6 +15,8 @@ import OrderList from "./pages/orders/OrderList";
 import StaffPage from "./pages/staff/StaffPage";
 import HomeCareLanding from "./pages/landingpage/HomeCareLanding";
 import RegisterForm from "./pages/authentication/RegisterForm";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
 function App() {
   return (
