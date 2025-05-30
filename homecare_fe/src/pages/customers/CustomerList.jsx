@@ -104,6 +104,14 @@ const CustomerList = () => {
   const [isVerifyModalVisible, setIsVerifyModalVisible] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
 
+  const [xScroll, setXScroll] = useState("fixed");
+
+  const handleXScrollChange = (e) => {
+    setXScroll(e.target.value);
+  };
+
+  const scroll = {};
+
   const handleAction = (action, record) => {
     if (action === "verify") {
       setSelectedCustomer(record);
@@ -145,21 +153,21 @@ const CustomerList = () => {
       title: "STT",
       dataIndex: "key",
       key: "key",
-      width: 50,
+      width: 60,
       sorter: (a, b) => a.key.localeCompare(b.key),
     },
     {
       title: "Tên khách hàng",
       dataIndex: "name",
       key: "name",
-      width: 200,
+      width: 160,
       sorter: (a, b) => a.name.localeCompare(b.name),
     },
     {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
-      width: 150,
+      width: 100,
       render: (status) => <StatusTag status={status} type={"customer"} />,
       filters: [
         { text: "Chưa xác nhận", value: "Chưa xác nhận" },
@@ -172,7 +180,7 @@ const CustomerList = () => {
       title: "Tổng giao dịch",
       dataIndex: "total",
       key: "total",
-      width: 150,
+      width: 100,
       render: (amount) =>
         amount.toLocaleString("vi-VN", {
           style: "currency",
@@ -184,8 +192,15 @@ const CustomerList = () => {
       title: "Số điện thoại",
       dataIndex: "phoneNumber",
       key: "phoneNumber",
-      width: 200,
+      width: 100,
       sorter: (a, b) => a.phoneNumber.localeCompare(b.phoneNumber),
+    },
+    {
+      title: "Ngày tham gia",
+      dataIndex: "createdAt",
+      key: "createdAt",
+      width: 100,
+      sorter: (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
     },
     {
       title: "Nơi công tác hiện nay",
@@ -194,17 +209,11 @@ const CustomerList = () => {
       width: 400,
       sorter: (a, b) => a.workplace.localeCompare(b.workplace),
     },
-    {
-      title: "Ngày tham gia",
-      dataIndex: "createdAt",
-      key: "createdAt",
-      width: 150,
-      sorter: (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
-    },
+
     {
       title: "Hành động",
       key: "action",
-      width: 120,
+      width: 50,
       render: (_, record) => (
         <Dropdown
           overlay={
@@ -235,6 +244,13 @@ const CustomerList = () => {
       ),
     },
   ];
+  if (xScroll === "fixed") {
+    columns[0].fixed = true;
+    columns[columns.length - 1].fixed = "right";
+  }
+  if (xScroll !== "unset") {
+    scroll.x = "100vw";
+  }
 
   return (
     <div className={styles.customerList}>
@@ -303,7 +319,8 @@ const CustomerList = () => {
         onRow={(record) => ({
           onClick: () => navigate("/home/account"),
         })}
-        scroll={{ x: true, y: 400 }}
+        scroll={scroll}
+        size="small"
       />
       <Modal
         title="Xác nhận xác thực"
