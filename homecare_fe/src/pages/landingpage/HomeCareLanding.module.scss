@@ -80,6 +80,95 @@
     width: 160px;
   }
 
+  &__agency {
+    padding: 80px 30px;
+    background: linear-gradient(
+      135deg,
+      #82f84c63 10%,
+      #f3785363 50%,
+      #263af1a9 100%
+    );
+
+    &-container {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      max-width: 1240px;
+      margin: auto;
+      gap: 40px;
+    }
+
+    &-left {
+      flex: 1 1 40%;
+      text-align: center;
+
+      img {
+        width: 80%;
+        max-width: 300px;
+        margin-bottom: 20px;
+      }
+
+      h2 {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 16px;
+      }
+
+      p {
+        font-size: 16px;
+        color: #555;
+      }
+    }
+
+    &-right {
+      flex: 1 1 55%;
+    }
+
+    &-services {
+      list-style: none;
+      padding: 0;
+      margin-bottom: 24px;
+
+      li {
+        margin-bottom: 20px;
+
+        strong {
+          display: block;
+          font-size: 16px;
+          font-weight: 600;
+          color: #000;
+        }
+
+        span {
+          display: block;
+          font-size: 14px;
+          color: #666;
+          margin-top: 4px;
+        }
+      }
+      &_module {
+        display: flex;
+        img {
+          height: 40px;
+          padding-right: 30px;
+        }
+        strong {
+          font-size: 11px;
+        }
+      }
+    }
+
+    &-tools {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+
+      img {
+        height: 40px;
+      }
+    }
+  }
+
   &__hero {
     background: url("/banner.png") center/cover no-repeat;
     height: 90vh;

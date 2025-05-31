@@ -9,7 +9,22 @@ import { useNavigate } from "react-router-dom";
 import ProductCard from "../products/productCard/ProductCard";
 import useToast from "../../hooks/useToast";
 import FurnitureCarousel from "../../components/slick/FurnitureCarousel";
+import { motion } from "framer-motion";
 
+const textVariants = {
+  hidden: { opacity: 0, x: 30 },
+  visible: (i) => ({
+    opacity: 1,
+    x: 0,
+    transition: {
+      delay: i * 0.2,
+      duration: 2,
+      ease: "easeOut",
+      repeat: Infinity,
+      repeatDelay: 2, // l
+    },
+  }),
+};
 const products = [
   {
     id: 1,
@@ -159,6 +174,52 @@ const HomeCareLanding = () => {
           >
             Tư Vấn Ngay
           </Button>
+        </div>
+      </section>
+      <h2 style={{ textAlign: "center", marginTop: 50 }}>
+        Những điều T-rads sẽ giải quyết giúp bạn
+      </h2>
+
+      <section className={styles["homecare__agency"]}>
+        <div className={styles["homecare__agency-container"]}>
+          <div className={styles["homecare__agency-left"]}>
+            <img
+              style={{ width: 100 }}
+              src="/logo_home_care.jpg"
+              alt="Rocket launch"
+            />
+            <h2>R-rads</h2>
+            <p style={{ textAlign: "left" }}>
+              Phần mềm D-RADS chuẩn hóa quy trình chẩn đoán, rút ngắn thời gian
+              đọc kết quả và nâng cao hiệu quả chuyên môn cho bác sĩ. Tích hợp
+              AI thông minh giúp phân loại tổn thương, dịch đa ngôn ngữ, tư vấn
+              kết quả và tạo video trực quan từ văn bản.
+            </p>
+          </div>
+          <div className={styles["homecare__agency-right"]}>
+            <ul className={styles["homecare__agency-services"]}>
+              {[
+                "Thiết kế biểu mẫu chuẩn hóa, đồng bộ giúp rút ngắn thời gian đọc kết quả, tăng chất lượng chẩn đoán cho Bác sĩ",
+                "Tích hợp AI tự động phân loại tổn thương theo tiêu chuẩn quốc tế: TIRADS, BIRADS, Lung RADS, PIRADS, LIRADS, RECIST...",
+                "Tích hợp AI tự động dịch kết quả đa ngôn ngữ (Anh, Pháp, Trung...)",
+                "Tích hợp AI tự động hỗ trợ tư vấn và phiên giải kết quả",
+                "Tích hợp AI tự động chuyển kết quả Text sang Video",
+              ].map((text, index) => (
+                <motion.li
+                  key={index}
+                  className={styles["homecare__agency-services_module"]}
+                  custom={index}
+                  initial="hidden"
+                  whileInView="visible"
+                  variants={textVariants}
+                  viewport={{ once: true }}
+                >
+                  <img src={`/landing/icon${index + 1}.svg`} alt="Figma" />
+                  <strong>{text}</strong>
+                </motion.li>
+              ))}
+            </ul>
+          </div>
         </div>
       </section>
 
