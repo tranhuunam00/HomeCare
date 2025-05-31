@@ -1,7 +1,7 @@
 .carouselWrapper {
   max-width: 1540px;
   padding: 40px 0;
-
+  cursor: pointer;
   .slick-slide {
     transition: all 0.5s ease;
     transform: scale(0.9);
@@ -65,4 +65,9 @@
       }
     }
   }
+}
+
+.tooltipText {
+  color: rgb(0, 0, 0);
+  text-align: left;
 }

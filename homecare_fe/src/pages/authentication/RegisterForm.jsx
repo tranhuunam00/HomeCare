@@ -1,23 +1,33 @@
 import React, { useState } from "react";
-import { Form, Input, Button, Typography, Card } from "antd";
+import { Form, Input, Button, Typography, Card, Checkbox, Divider } from "antd";
 import { useNavigate } from "react-router-dom";
 import useToast from "../../hooks/useToast";
+
 const { Title } = Typography;
 
-const RegisterForm = () => {
+const RegisterPage = () => {
   const navigate = useNavigate();
   const { showError, showSuccess } = useToast();
-  const onFinish = ({ username, password }) => {
-    console.log("username, password ", username, password);
+  const [showPassword, setShowPassword] = useState(false);
+  const [logo] = useState("/logo_home_care.jpg");
+
+  const onFinish = ({ username, password, confirmPassword }) => {
+    if (password !== confirmPassword) {
+      showError("Mật khẩu nhập lại không khớp!");
+      return;
+    }
+
     if (username === "admin" && password === "123456") {
-      showSuccess("Chúng tôi đã tiếp nhận thông tin của bạn cung cấp.");
-      navigate("/");
+      showSuccess("Đăng ký thành công!");
+      navigate("/home");
     } else {
-      showError("Tên Đăng ký hoặc mật khẩu không đúng!");
+      showError("Tên đăng nhập hoặc mật khẩu không đúng!");
     }
   };
 
-  const [logo, setLogo] = useState("/logo_home_care.jpg");
+  const handleGoogleLogin = () => {
+    showSuccess("Chức năng đăng nhập bằng Google đang phát triển...");
+  };
 
   return (
     <div
@@ -26,39 +36,17 @@ const RegisterForm = () => {
         backgroundColor: "#f0f2f5",
         justifyContent: "center",
         width: "100vw",
-        textAlign: "left",
       }}
     >
+      {/* Bên trái: Hình ảnh giới thiệu */}
       <div
         style={{
           backgroundImage: "url('/banner.png')",
           backgroundSize: "cover",
           backgroundPosition: "center",
           width: 500,
-          inset: 0,
         }}
-      >
-        <div
-          style={{
-            backgroundColor: "rgba(255, 255, 255, 0.7)", // lớp phủ mờ
-            inset: 0,
-            height: "100%",
-          }}
-        >
-          <div style={{ textAlign: "center", marginBottom: 20, zIndex: 1 }}>
-            <img src={logo} alt="Logo" style={{ height: 60, color: "black" }} />
-          </div>
-
-          <Title level={3} style={{ textAlign: "center", zIndex: 1 }}>
-            Đăng ký
-          </Title>
-          <p style={{ textAlign: "center", zIndex: 2 }}>
-            Chúng tôi hiện đang cung cấp các biểu mẫu kết quả dành cho bác sĩ
-            tại Homecare, hỗ trợ chuẩn hóa quy trình chẩn đoán – điều trị và
-            nâng cao hiệu quả chăm sóc sức khỏe tại nhà
-          </p>
-        </div>
-      </div>
+      ></div>
 
       <div
         style={{
@@ -70,14 +58,22 @@ const RegisterForm = () => {
         <Card
           style={{
             width: 500,
+            padding: 24,
             borderRadius: 10,
             boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
           }}
         >
           {/* Logo */}
+          <div style={{ textAlign: "center", marginBottom: 20 }}>
+            <img src={logo} alt="Logo" style={{ height: 60 }} />
+          </div>
+
+          <Title level={3} style={{ textAlign: "center" }}>
+            Đăng Ký
+          </Title>
 
           <Form
-            name="login_form"
+            name="register_form"
             onFinish={onFinish}
             layout="vertical"
             requiredMark={false}
@@ -93,56 +89,33 @@ const RegisterForm = () => {
             </Form.Item>
 
             <Form.Item
-              label="Email"
-              name="clinic_name"
-              rules={[
-                {
-                  required: true,
-                  message: "Vui lòng nhập email của bạn!",
-                  type: "email",
-                },
-              ]}
-            >
-              <Input placeholder="Email" />
-            </Form.Item>
-
-            <Form.Item
               label="Mật khẩu"
               name="password"
               rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
             >
-              <Input.Password placeholder="Mật khẩu" />
+              <Input
+                placeholder="Mật khẩu"
+                type={showPassword ? "text" : "password"}
+              />
             </Form.Item>
 
             <Form.Item
-              label="Họ và tên"
-              name="fullName"
+              label="Nhập lại mật khẩu"
+              name="confirmPassword"
               rules={[
-                { required: true, message: "Vui lòng nhập tên của bạn!" },
+                { required: true, message: "Vui lòng nhập lại mật khẩu!" },
               ]}
             >
-              <Input placeholder="Họ và tên" />
+              <Input
+                placeholder="Nhập lại mật khẩu"
+                type={showPassword ? "text" : "password"}
+              />
             </Form.Item>
 
-            <Form.Item
-              label="Số điện thoại"
-              name="phoneNumber"
-              rules={[
-                {
-                  required: true,
-                  message: "Vui lòng nhập số điện thoại của bạn!",
-                },
-              ]}
-            >
-              <Input placeholder="Số điện thoại" />
-            </Form.Item>
-
-            <Form.Item label="Tên phòng khám" name="clinic_name">
-              <Input placeholder="Tên phòng khám" />
-            </Form.Item>
-
-            <Form.Item label="Mã phòng khám (đã có)" name="clinic_name">
-              <Input placeholder="Tên phòng khám" />
+            <Form.Item style={{ marginTop: -10 }}>
+              <Checkbox onChange={(e) => setShowPassword(e.target.checked)}>
+                Hiện mật khẩu
+              </Checkbox>
             </Form.Item>
 
             <Form.Item>
@@ -155,10 +128,33 @@ const RegisterForm = () => {
               </Button>
             </Form.Item>
           </Form>
+
+          <Divider plain>Hoặc</Divider>
+
+          <Button
+            type="default"
+            style={{
+              width: "100%",
+              backgroundColor: "#fff",
+              border: "1px solid #d9d9d9",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "8px",
+            }}
+            onClick={handleGoogleLogin}
+          >
+            <img
+              src="https://developers.google.com/identity/images/g-logo.png"
+              alt="Google"
+              style={{ width: 18, height: 18 }}
+            />
+            Đăng nhập bằng Google
+          </Button>
         </Card>
       </div>
     </div>
   );
 };
 
-export default RegisterForm;
+export default RegisterPage;

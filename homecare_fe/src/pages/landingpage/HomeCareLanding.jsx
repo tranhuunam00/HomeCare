@@ -147,7 +147,7 @@ const HomeCareLanding = () => {
       <section ref={topRef} className={styles["homecare__hero"]}>
         <div className={styles["homecare__hero-inner"]}>
           <h1 className={styles["homecare__title"]}>
-            <span>D</span>_RAD
+            <span>HOME</span>CARE
           </h1>
           <h2 className={styles["homecare__subtitle"]}>
             Chuẩn hóa kết quả chẩn đoán hình ảnh theo tiêu chuẩn quốc tế
@@ -168,17 +168,36 @@ const HomeCareLanding = () => {
           Công ty TNHH Đầu tư & Công nghệ DAOGROUP là doanh nghiệp công nghệ
           tiên phong trong lĩnh vực y tế và giáo dục, chuyên cung cấp các giải
           pháp số hóa tiên tiến nhằm nâng cao chất lượng chăm sóc sức khỏe và
-          đào tạo. Với đội ngũ chuyên gia giàu kinh nghiệm, chúng tôi cam kết
-          mang đến những sản phẩm và dịch vụ sáng tạo, góp phần cải thiện cuộc
-          sống cộng đồng. Chúng tôi xây dựng một số giải pháp phần mềm y khoa
-          ứng dụng AI – Chuẩn hóa kết quả chẩn đoán hình ảnh theo tiêu chuẩn
-          quốc tế (D-RADS).
+          đào tạo.
         </p>
-        <h4>Giải pháp dành cho</h4>
-        <p>Phòng khám – Bệnh viện – Trung tâm chẩn đoán hình ảnh</p>
-        <p>Bác sĩ chuyên khoa siêu âm, X-quang, CT, MRI</p>
-        <p>Đơn vị nghiên cứu – đào tạo trong ngành Y</p>
-        <p>Đơn vị sản xuất phần mềm HIS, RIS, PACS</p>
+        <p className={styles["homecare__about-text"]}>
+          Với đội ngũ chuyên gia giàu kinh nghiệm, chúng tôi cam kết mang đến
+          những sản phẩm và dịch vụ sáng tạo, góp phần cải thiện cuộc sống cộng
+          đồng. Chúng tôi xây dựng một số giải pháp phần mềm y khoa ứng dụng AI
+          – Chuẩn hóa kết quả chẩn đoán hình ảnh theo tiêu chuẩn quốc tế
+          (D-RADS).
+        </p>
+        <div
+          style={{
+            backgroundImage:
+              "linear-gradient(135deg,rgb(126, 248, 153),rgb(15, 71, 190))",
+            width: 600,
+            margin: "auto",
+            padding: 20,
+            paddingLeft: 60,
+            borderRadius: 12,
+            color: "#fff",
+            textAlign: "left",
+          }}
+        >
+          <h3 style={{ textAlign: "center", marginBottom: 20 }}>
+            Giải pháp dành cho
+          </h3>
+          <p>Phòng khám – Bệnh viện – Trung tâm chẩn đoán hình ảnh</p>
+          <p>Bác sĩ chuyên khoa siêu âm, X-quang, CT, MRI</p>
+          <p>Đơn vị nghiên cứu – đào tạo trong ngành Y</p>
+          <p>Đơn vị sản xuất phần mềm HIS, RIS, PACS</p>
+        </div>
       </section>
 
       <section className={styles["homecare__articles"]}>
@@ -188,10 +207,12 @@ const HomeCareLanding = () => {
             <p>
               Trong kỷ nguyên y học số, việc ứng dụng phần mềm y khoa tích hợp
               trí tuệ nhân tạo (AI) trong chẩn đoán hình ảnh đang trở thành xu
-              hướng tất yếu. Một trong những giải pháp đột phá hiện nay là hệ
-              thống phần mềm hỗ trợ đánh giá tổn thương theo các hệ thống phân
-              loại chuẩn quốc tế: TIRADS, LI-RADS, BI-RADS, PI-RADS, Lung-RADS,
-              RECIST...
+              hướng tất yếu.
+            </p>
+            <p>
+              Một trong những giải pháp đột phá hiện nay là hệ thống phần mềm hỗ
+              trợ đánh giá tổn thương theo các hệ thống phân loại chuẩn quốc tế:
+              TIRADS, LI-RADS, BI-RADS, PI-RADS, Lung-RADS, RECIST...
             </p>
           </div>
           <div className={styles["homecare__articles-image"]}>
@@ -201,7 +222,10 @@ const HomeCareLanding = () => {
 
         <div className={styles["homecare__articles-bottom"]}>
           <div className={styles["homecare__article-card"]}>
-            <img src="/si2.png" alt="Article 1" />
+            <img
+              src="https://medlatec.vn/media/52668/file/sang-loc-133-gen-2.jpg"
+              alt="Article 1"
+            />
             <h4>Hệ thống chuẩn hóa đánh giá tổn thương trên hình ảnh y khoa</h4>
             <p>
               Phân loại nguy cơ ác tính của các nhân tuyến giáp: D-TIRADS
@@ -217,7 +241,10 @@ const HomeCareLanding = () => {
             </p>
           </div>
           <div className={styles["homecare__article-card"]}>
-            <img src="/si1.png" alt="Article 2" />
+            <img
+              src="https://benhvienvietbac.vn/wp-content/uploads/2020/01/chuan-doan-hinh-anh.jpg"
+              alt="Article 2"
+            />
             <div>
               <h4>Công cụ hỗ trợ chẩn đoán hình ảnh chính xác và nhất quán</h4>
               <p>
@@ -261,7 +288,10 @@ const HomeCareLanding = () => {
       <section className={styles["homecare__articles"]}>
         <div className={styles["homecare__articles-bottom"]}>
           <div className={styles["homecare__article-card"]}>
-            <img src="/si2.png" alt="Article 1" />
+            <img
+              src="https://www.vinmec.com/static/uploads/20210521_164340_688751_chan_doan_hinh_anh_max_1800x1800_jpg_c5d59ea823.jpg"
+              alt="Article 1"
+            />
             <h4>Cá nhân hóa</h4>
             <p>
               Tự động dịch kết quả đa ngôn ngữ (Anh, Pháp, Nhật, Trung). Tạo báo
@@ -274,7 +304,10 @@ const HomeCareLanding = () => {
             </p>
           </div>
           <div className={styles["homecare__article-card"]}>
-            <img src="/si2.png" alt="Article 1" />
+            <img
+              src="https://cdn.nhathuoclongchau.com.vn/unsafe/https://cms-prod.s3-sgn09.fptcloud.com/cac_ky_thuat_chan_doan_hinh_anh_pho_bien_hien_nay_1_7997c4f8d7.jpg"
+              alt="Article 1"
+            />
             <h4>AI tạo sinh</h4>
             <p>
               Tích hợp AI tư vấn, biện luận kết quả: giúp Người bệnh dễ dàng
@@ -287,7 +320,10 @@ const HomeCareLanding = () => {
             </p>
           </div>
           <div className={styles["homecare__article-card"]}>
-            <img src="/si1.png" alt="Article 2" />
+            <img
+              src="https://benhvienbinhthuan.vn/Uploads/images/KhoaPhong/khoa-chandoanhinhanh.jpg"
+              alt="Article 2"
+            />
             <div>
               <h4>AI hỗ trợ</h4>
               <p>
