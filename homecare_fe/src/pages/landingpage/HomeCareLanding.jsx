@@ -10,6 +10,7 @@ import ProductCard from "../products/productCard/ProductCard";
 import useToast from "../../hooks/useToast";
 import FurnitureCarousel from "../../components/slick/FurnitureCarousel";
 import { motion } from "framer-motion";
+import { products } from "./products";
 
 const textVariants = {
   hidden: { opacity: 0, x: 30 },
@@ -25,61 +26,6 @@ const textVariants = {
     },
   }),
 };
-const products = [
-  {
-    id: 1,
-    name: "TIRADS Template",
-    price: 0,
-    category: "Chẩn đoán hình ảnh",
-    image: "/banner.png",
-
-    subImages: [
-      "https://nhahangchotinhsapa.vn/wp-content/uploads/2024/01/kham-pha-nui-rung-Tay-Bac.jpg",
-      "https://nhahangchotinhsapa.vn/wp-content/uploads/2024/01/kham-pha-nui-rung-Tay-Bac.jpg",
-      "https://nhahangchotinhsapa.vn/wp-content/uploads/2024/01/kham-pha-nui-rung-Tay-Bac.jpg",
-    ],
-    description:
-      "Mẫu báo cáo tự động hóa TIRADS giúp phân loại nhân giáp trên siêu âm theo chuẩn ACR.",
-    usage: "Dùng trong hệ thống chẩn đoán hỗ trợ AI",
-    purchased: false,
-    remainingUses: 3,
-    isLanding: true,
-  },
-  {
-    id: 2,
-    name: "RECIST Template",
-    price: 0,
-    category: "Ung thư học",
-    image: "/banner.png",
-
-    subImages: [
-      "https://via.placeholder.com/100x100.png?text=CT1",
-      "https://via.placeholder.com/100x100.png?text=CT2",
-      "https://via.placeholder.com/100x100.png?text=CT3",
-    ],
-    description: "Báo cáo tiêu chuẩn đánh giá đáp ứng khối u theo RECIST 1.1.",
-    usage: "Dùng trong theo dõi điều trị ung thư qua hình ảnh CT/MRI.",
-    purchased: true,
-    remainingUses: 5,
-    isLanding: true,
-  },
-  {
-    id: 3,
-    name: "BIRADS Template",
-    price: 0,
-    category: "Nhũ ảnh",
-    image: "/banner.png",
-    subImages: [
-      "https://via.placeholder.com/100x100.png?text=Mammo1",
-      "https://via.placeholder.com/100x100.png?text=Mammo2",
-      "https://via.placeholder.com/100x100.png?text=Mammo3",
-    ],
-    description: "Chuẩn hóa mô tả tổn thương tuyến vú trên nhũ ảnh.",
-    usage: "Phân loại nguy cơ ung thư vú từ BIRADS 1-6.",
-    purchased: false,
-    isLanding: true,
-  },
-];
 
 const HomeCareLanding = () => {
   const navigate = useNavigate();
@@ -177,7 +123,7 @@ const HomeCareLanding = () => {
         </div>
       </section>
       <h2 style={{ textAlign: "center", marginTop: 50 }}>
-        Những điều T-rads sẽ giải quyết giúp bạn
+        Giá trị của các phần mềm D-RADS
       </h2>
 
       <section className={styles["homecare__agency"]}>
@@ -188,7 +134,7 @@ const HomeCareLanding = () => {
               src="/logo_home_care.jpg"
               alt="Rocket launch"
             />
-            <h2>R-rads</h2>
+            <h2>D-RADS</h2>
             <p style={{ textAlign: "left" }}>
               Phần mềm D-RADS chuẩn hóa quy trình chẩn đoán, rút ngắn thời gian
               đọc kết quả và nâng cao hiệu quả chuyên môn cho bác sĩ. Tích hợp

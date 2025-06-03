@@ -67,7 +67,7 @@ const ProductList = () => {
   const [sortOrder, setSortOrder] = useState("none");
   const [filteredProducts, setFilteredProducts] = useState(products);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [isModalVisible, setIsModalVisible] = useState(false);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -96,16 +96,6 @@ const ProductList = () => {
     }
 
     setFilteredProducts(result);
-  };
-
-  const showModal = (product) => {
-    setSelectedProduct(product);
-    setIsModalVisible(true);
-  };
-
-  const handleCancel = () => {
-    setIsModalVisible(false);
-    setSelectedProduct(null);
   };
 
   const handleBuy = () => {
@@ -152,48 +142,11 @@ const ProductList = () => {
         <Col xs={24} sm={16} md={18} lg={19}>
           <div className={styles.productGrid}>
             {filteredProducts.map((product, index) => (
-              <ProductCard
-                key={index}
-                product={product}
-                showModal={showModal}
-              />
+              <ProductCard key={index} product={product} />
             ))}
           </div>
         </Col>
       </Row>
-
-      <Modal
-        title={selectedProduct?.name}
-        open={isModalVisible}
-        onCancel={handleCancel}
-        footer={[
-          <Button key="buy" type="primary" onClick={handleBuy}>
-            Thanh toán
-          </Button>,
-        ]}
-      >
-        <img
-          src={selectedProduct?.image}
-          alt="main"
-          style={{ width: "100%", marginBottom: 12 }}
-        />
-        <Row gutter={8}>
-          {selectedProduct?.subImages.map((img, idx) => (
-            <Col span={8} key={idx}>
-              <img
-                src={img}
-                alt={`sub-${idx}`}
-                style={{ width: "100%", borderRadius: 8 }}
-              />
-            </Col>
-          ))}
-        </Row>
-        <p style={{ marginTop: 12 }}>
-          Giá: {Number(selectedProduct?.price).toLocaleString("vi-VN")} đ
-        </p>
-        <p>Loại: {selectedProduct?.category}</p>
-        <p>Mô tả: {selectedProduct?.description}</p>
-      </Modal>
     </div>
   );
 };

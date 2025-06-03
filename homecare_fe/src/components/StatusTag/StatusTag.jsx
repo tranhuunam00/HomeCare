@@ -21,9 +21,33 @@ const StatusTag = ({ status, type }) => {
       if (status === "Bị cấm") {
         color = "red";
       }
+      break;
+
+    case "products":
+      if (status === "Coming soon") {
+        color = "orange";
+      }
+      if (status === "Đang hoạt động") {
+        color = "green";
+      }
   }
 
-  return <Tag color={color}>{status}</Tag>;
+  return (
+    <Tag
+      style={{
+        padding: 0,
+        paddingLeft: 4,
+        paddingRight: 4,
+
+        margin: 0,
+        fontSize: 12,
+        height: 24,
+      }}
+      color={color}
+    >
+      {status}
+    </Tag>
+  );
 };
 
 export default StatusTag;

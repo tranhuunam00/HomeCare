@@ -229,6 +229,7 @@
     max-width: 900px;
     margin: 0 auto 32px;
     line-height: 1.8;
+    text-align: justify;
   }
 
   &__about-link {
@@ -243,6 +244,7 @@
     align-items: center;
     flex-wrap: wrap;
     margin: 32px auto;
+    gap: 40px;
   }
 
   &__subscribe {
