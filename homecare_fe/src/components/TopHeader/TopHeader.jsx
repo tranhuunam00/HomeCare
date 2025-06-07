@@ -13,17 +13,15 @@ import { useNavigate } from "react-router-dom";
 import styles from "./TopHeader.module.scss";
 
 import { QRCodeCanvas } from "qrcode.react";
+import { useGlobalAuth } from "../../contexts/AuthContext";
+import { USER_ROLE, USER_ROLE_ID } from "../../constant/app";
 
 const qrValue = `https://www.daogroup.vn/`;
 
-const userInfo = {
-  fullName: "Vũ Thị Hồng_272",
-  username: "tk.tieuchuan272",
-  role: "Stand_Admin",
-};
-
 const TopHeader = ({ collapsed, toggleSidebar }) => {
   const [rightDrawerVisible, setRightDrawerVisible] = useState(false);
+  const { user, doctor } = useGlobalAuth();
+  console.log(user, doctor);
 
   const showRightDrawer = () => setRightDrawerVisible(true);
   const closeRightDrawer = () => setRightDrawerVisible(false);
@@ -53,9 +51,9 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
     <Menu onClick={handleMenuClick}>
       <Menu.Item key="user" disabled>
         <div style={{ lineHeight: "1.2" }}>
-          <strong style={{ color: "#1677ff" }}>{userInfo.fullName}</strong>
+          <strong style={{ color: "#1677ff" }}>{doctor?.full_name}</strong>
           <br />
-          <small>{`${userInfo.username} - ${userInfo.role}`}</small>
+          <small>{`${USER_ROLE_ID[user?.id_role]}`}</small>
         </div>
       </Menu.Item>
       <Menu.Divider />

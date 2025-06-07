@@ -37,7 +37,7 @@ axiosInstance.interceptors.response.use(
     if (
       error?.response?.status === 401 &&
       !originalConfig._retry &&
-      originalConfig.url !== "/users/login"
+      originalConfig.url !== "/auth/login"
     ) {
       originalConfig._retry = true;
       try {

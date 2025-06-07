@@ -1,5 +1,4 @@
-// src/pages/Profile.jsx
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Form,
   Input,
@@ -11,137 +10,209 @@ import {
   Row,
   Col,
   Typography,
+  Tooltip,
 } from "antd";
 import {
   UploadOutlined,
   LogoutOutlined,
   PlusOutlined,
+  EditOutlined,
 } from "@ant-design/icons";
 import styles from "./Profile.module.scss";
 
 const { Option } = Select;
-const { Title, Link } = Typography;
+const { Title, Text, Link } = Typography;
 
-const Profile = () => {
+const Profile = ({ idUser, user, doctor }) => {
   const [form] = Form.useForm();
+  const [isEditing, setIsEditing] = useState(false);
+
+  useEffect(() => {
+    if (doctor) {
+      form.setFieldsValue({
+        fullName: doctor.full_name,
+        phone: doctor.phone_number,
+        address: doctor.address,
+      });
+    }
+  }, [doctor, form]);
 
   const onFinish = (values) => {
     console.log("Submitted:", values);
+    setIsEditing(false);
   };
+
+  const editableFields = ["phone", "gender", "fullName", "dob"]; // những fields có thế sửa
+  const renderItem = (label, name, children) => (
+    <Form.Item label={label} name={name}>
+      {isEditing && editableFields.includes(name) ? (
+        children
+      ) : (
+        <Text>{form.getFieldValue(name) || "-"}</Text>
+      )}
+    </Form.Item>
+  );
 
   return (
     <div className={styles.profileContainer}>
-      <Title level={3} className={styles.profileTitle}>
-        Thông Tin Cá Nhân
-      </Title>
-      <Form form={form} layout="vertical" onFinish={onFinish}>
+      <div className={styles.profileTitleWrapper}>
+        <Title level={3} className={styles.profileTitle}>
+          Thông Tin Cá Nhân
+        </Title>
+        <Tooltip
+          title={isEditing ? "Chuyển sang chế độ xem" : "Chỉnh sửa thông tin"}
+        >
+          <EditOutlined
+            onClick={() => setIsEditing(!isEditing)}
+            style={{ fontSize: 18, marginLeft: 12, cursor: "pointer" }}
+          />
+        </Tooltip>
+      </div>
+
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={onFinish}
+        className={styles.boldLabel}
+      >
         <Row gutter={24}>
           <Col span={18}>
             <Row gutter={16}>
               <Col span={10}>
-                <Form.Item label="Họ và tên" name="fullName">
+                {renderItem(
+                  "Họ và tên",
+                  "fullName",
                   <Input placeholder="Nguyễn Văn A" />
-                </Form.Item>
+                )}
               </Col>
               <Col span={4}>
-                <Form.Item label="Ngày sinh" name="dob">
-                  <DatePicker />
-                </Form.Item>
+                {renderItem(
+                  "Ngày sinh",
+                  "dob",
+                  <DatePicker style={{ width: "100%" }} />
+                )}
               </Col>
               <Col span={4}>
-                <Form.Item label="Giới tính" name="gender">
+                {renderItem(
+                  "Giới tính",
+                  "gender",
                   <Select placeholder="Chọn giới tính">
                     <Option value="Nam">Nam</Option>
                     <Option value="Nữ">Nữ</Option>
                   </Select>
-                </Form.Item>
+                )}
               </Col>
             </Row>
 
             <Row gutter={16}>
               <Col span={12}>
                 <Form.Item label="Email" name="email">
-                  <Input placeholder="example@gmail.com" />
+                  <Text>{user?.email || "Chưa có email"}</Text>
                 </Form.Item>
               </Col>
               <Col>
-                <Form.Item label="Số điện thoại" name="phone">
+                {renderItem(
+                  "Số điện thoại",
+                  "phone",
                   <Input placeholder="0912345678" />
-                </Form.Item>
+                )}
               </Col>
             </Row>
 
+            <Col span={6} className={styles.signatureSection}>
+              <img
+                // src={signatureUrl}
+                alt="Chữ ký"
+                className={styles.signature}
+              />
+              <Upload
+                showUploadList={false}
+                // beforeUpload={handleSignatureUpload}
+                disabled={!isEditing}
+              >
+                <Button icon={<UploadOutlined />} disabled={!isEditing}>
+                  Đổi chữ ký
+                </Button>
+              </Upload>
+            </Col>
+
             <Row gutter={16}>
               <Col span={4}>
-                <Form.Item label="Quốc tịch" name="nation">
+                {renderItem(
+                  "Quốc tịch",
+                  "nation",
                   <Select defaultValue="Việt Nam">
                     <Option value="Việt Nam">Việt Nam</Option>
                   </Select>
-                </Form.Item>
+                )}
               </Col>
               <Col span={6}>
-                <Form.Item label="Tỉnh/Thành phố" name="city">
+                {renderItem(
+                  "Tỉnh/Thành phố",
+                  "city",
                   <Select>
                     <Option value="Hà Nội">Hà Nội</Option>
                     <Option value="HCM">Hồ Chí Minh</Option>
                   </Select>
-                </Form.Item>
+                )}
               </Col>
-
               <Col span={6}>
-                <Form.Item label="Quận/Huyện" name="city">
+                {renderItem(
+                  "Quận/Huyện",
+                  "district",
                   <Select>
-                    <Option value="Hà Nội">Hà Nội</Option>
-                    <Option value="HCM">Hồ Chí Minh</Option>
+                    <Option value="Ba Đình">Ba Đình</Option>
                   </Select>
-                </Form.Item>
+                )}
               </Col>
-
               <Col span={6}>
-                <Form.Item label="Xã/Phường" name="city">
+                {renderItem(
+                  "Xã/Phường",
+                  "ward",
                   <Select>
-                    <Option value="Hà Nội">Hà Nội</Option>
-                    <Option value="HCM">Hồ Chí Minh</Option>
+                    <Option value="Phúc Xá">Phúc Xá</Option>
                   </Select>
-                </Form.Item>
+                )}
               </Col>
             </Row>
-            <Form.Item label="Địa chỉ" name="address">
-              <Input placeholder="Số 22, đường 3/2, Gamuda Gardens..." />
-            </Form.Item>
+
+            {renderItem(
+              "Địa chỉ",
+              "address",
+              <Input placeholder="Số 22, đường 3/2..." />
+            )}
+
             <Row gutter={16}>
               <Col span={4}>
-                <Form.Item label="Mã số CCHN" name="nation">
-                  <Select defaultValue="Việt Nam">
-                    <Option value="Việt Nam">Việt Nam</Option>
-                  </Select>
-                </Form.Item>
+                {renderItem("Mã số CCHN", "cchnCode", <Input />)}
               </Col>
               <Col span={12}>
-                <Form.Item label="Nơi cấp CCHN" name="city">
+                {renderItem(
+                  "Nơi cấp CCHN",
+                  "cchnPlace",
                   <Select>
                     <Option value="Hà Nội">Hà Nội</Option>
                     <Option value="HCM">Hồ Chí Minh</Option>
                   </Select>
-                </Form.Item>
+                )}
               </Col>
-
               <Col span={6}>
-                <Form.Item label="Năm cấp CCHN" name="city">
+                {renderItem(
+                  "Năm cấp CCHN",
+                  "cchnYear",
                   <Select>
-                    <Option value="Hà Nội">Hà Nội</Option>
-                    <Option value="HCM">Hồ Chí Minh</Option>
+                    <Option value="2020">2020</Option>
                   </Select>
-                </Form.Item>
+                )}
               </Col>
-
               <Col span={12}>
-                <Form.Item label="Phạm vi chứng chỉ hành nghề" name="city">
+                {renderItem(
+                  "Phạm vi chứng chỉ hành nghề",
+                  "cchnScope",
                   <Select>
-                    <Option value="Hà Nội">Hà Nội</Option>
-                    <Option value="HCM">Hồ Chí Minh</Option>
+                    <Option value="Toàn quốc">Toàn quốc</Option>
                   </Select>
-                </Form.Item>
+                )}
               </Col>
             </Row>
           </Col>
@@ -152,8 +223,10 @@ const Profile = () => {
               src="https://i.pravatar.cc/300"
               className={styles.avatar}
             />
-            <Upload showUploadList={false}>
-              <Button icon={<UploadOutlined />}>Đổi Ảnh Đại Diện</Button>
+            <Upload showUploadList={false} disabled={!isEditing}>
+              <Button icon={<UploadOutlined />} disabled={!isEditing}>
+                Đổi Ảnh Đại Diện
+              </Button>
             </Upload>
           </Col>
         </Row>
@@ -161,87 +234,104 @@ const Profile = () => {
         <Title level={4} className={styles.sectionTitle}>
           Kinh Nghiệm Làm Việc
         </Title>
+
         <Form.Item label="Lý lịch khoa học (CV)">
           <Row gutter={16} align="middle">
             <Col>
               <Link href="#">ly-lich-khoa-hoc.pdf</Link>
             </Col>
             <Col>
-              <Upload beforeUpload={() => false} showUploadList={false}>
-                <Button icon={<UploadOutlined />}>Tải lên lý lịch</Button>
+              <Upload
+                beforeUpload={() => false}
+                showUploadList={false}
+                disabled={!isEditing}
+              >
+                <Button icon={<UploadOutlined />} disabled={!isEditing}>
+                  Tải lên lý lịch
+                </Button>
               </Upload>
             </Col>
           </Row>
         </Form.Item>
+
         <Row gutter={16}>
           <Col span={4}>
-            <Form.Item label="Học hàm" name="rank">
+            {renderItem(
+              "Học hàm",
+              "rank",
               <Select>
                 <Option value="Giáo sư">Giáo sư</Option>
               </Select>
-            </Form.Item>
+            )}
           </Col>
           <Col span={4}>
-            <Form.Item label="Học vị" name="degree">
+            {renderItem(
+              "Học vị",
+              "degree",
               <Select>
                 <Option value="Tiến sĩ">Tiến sĩ</Option>
               </Select>
-            </Form.Item>
+            )}
           </Col>
         </Row>
+
         <Row gutter={16}>
           <Col span={8}>
-            <Form.Item label="Chuyên khoa" name="specialty">
+            {renderItem(
+              "Chuyên khoa",
+              "specialty",
               <Select>
                 <Option value="Tim mạch">Tim mạch</Option>
               </Select>
-            </Form.Item>
+            )}
           </Col>
           <Col span={8}>
-            <Form.Item label="Chuyên sâu" name="workplace">
-              <Input />
-            </Form.Item>
+            {renderItem("Chuyên sâu", "subspecialty", <Input />)}
           </Col>
         </Row>
+
         <Title level={4} className={styles.sectionTitle}>
           Chi tiết quá trình làm việc
         </Title>
+
         <Form.List name="workExperiences">
           {(fields, { add, remove }) => (
             <>
               {fields.map(({ key, name, ...restField }) => (
-                <div
-                  key={key}
-                  style={{
-                    marginBottom: 16,
-                    padding: 12,
-                    border: "1px solid #f0f0f0",
-                    borderRadius: 4,
-                  }}
-                >
+                <div key={key} className={styles.workExperienceItem}>
                   <Row gutter={16}>
                     <Col span={4}>
                       <Form.Item
                         {...restField}
                         name={[name, "from"]}
                         label="Từ"
-                        rules={[
-                          { required: true, message: "Nhập năm bắt đầu" },
-                        ]}
                       >
-                        <Input placeholder="2005" />
+                        {isEditing ? (
+                          <Input />
+                        ) : (
+                          <Text>
+                            {form.getFieldValue([
+                              "workExperiences",
+                              name,
+                              "from",
+                            ])}
+                          </Text>
+                        )}
                       </Form.Item>
                     </Col>
                     <Col span={4}>
-                      <Form.Item
-                        {...restField}
-                        name={[name, "to"]}
-                        label="Đến"
-                        rules={[
-                          { required: true, message: "Nhập năm kết thúc" },
-                        ]}
-                      >
-                        <Input placeholder="Nay" />
+                      <Form.Item {...restField} name={[name, "to"]} label="Đến">
+                        {isEditing ? (
+                          <Input />
+                        ) : (
+                          <Text>
+                            {form.getFieldValue([
+                              "workExperiences",
+                              name,
+                              "to",
+                            ])}
+                          </Text>
+                        )}
                       </Form.Item>
                     </Col>
                     <Col span={8}>
@@ -249,40 +339,52 @@ const Profile = () => {
                         {...restField}
                         name={[name, "position"]}
                         label="Chức vụ"
-                        rules={[{ required: true, message: "Nhập chức vụ" }]}
                       >
-                        <Input placeholder="Bác sĩ chuyên khoa" />
+                        {isEditing ? (
+                          <Input />
+                        ) : (
+                          <Text>
+                            {form.getFieldValue([
+                              "workExperiences",
+                              name,
+                              "position",
+                            ])}
+                          </Text>
+                        )}
                       </Form.Item>
                     </Col>
                   </Row>
-                  <Row>
-                    <Col span={24}>
-                      <Form.Item
-                        {...restField}
-                        name={[name, "workplace"]}
-                        rules={[
-                          { required: true, message: "Nhập nơi làm việc" },
-                        ]}
-                      >
-                        <Input placeholder="Viện tim thành phố Hà Nội" />
-                      </Form.Item>
-                    </Col>
-                  </Row>
+                  <Form.Item {...restField} name={[name, "workplace"]}>
+                    {isEditing ? (
+                      <Input />
+                    ) : (
+                      <Text>
+                        {form.getFieldValue([
+                          "workExperiences",
+                          name,
+                          "workplace",
+                        ])}
+                      </Text>
+                    )}
+                  </Form.Item>
                 </div>
               ))}
-              <Form.Item>
-                <Button
-                  type="dashed"
-                  onClick={() => add()}
-                  block
-                  icon={<PlusOutlined />}
-                >
-                  Thêm quá trình làm việc
-                </Button>
-              </Form.Item>
+              {isEditing && (
+                <Form.Item>
+                  <Button
+                    type="dashed"
+                    onClick={() => add()}
+                    block
+                    icon={<PlusOutlined />}
+                  >
+                    Thêm quá trình làm việc
+                  </Button>
+                </Form.Item>
+              )}
             </>
           )}
         </Form.List>
+
         <Row justify="space-between" style={{ marginTop: 24 }}>
           <Col>
             <Button danger icon={<LogoutOutlined />}>
@@ -290,9 +392,11 @@ const Profile = () => {
             </Button>
           </Col>
           <Col>
-            <Button type="primary" htmlType="submit">
-              Cập nhật thông tin
-            </Button>
+            {isEditing && (
+              <Button type="primary" htmlType="submit">
+                Lưu thay đổi
+              </Button>
+            )}
           </Col>
         </Row>
       </Form>

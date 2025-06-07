@@ -9,16 +9,18 @@ import SidebarMenu from "./Sidebar";
 import ChangePasswordSection from "./ChangePasswordSection";
 import SignatureSection from "./SignatureSection";
 import Profile from "../profile/Profile";
+import { useGlobalAuth } from "../../contexts/AuthContext";
 
 const { TabPane } = Tabs;
 
 const AccountPage = () => {
   const [selectedMenu, setSelectedMenu] = useState("profile");
+  const { user, doctor } = useGlobalAuth();
 
   const renderContent = () => {
     switch (selectedMenu) {
       case "profile":
-        return <Profile />;
+        return <Profile user={user} doctor={doctor} idUser={user?.id} />;
       case "notifications":
         return <NotificationSection />;
       case "password":

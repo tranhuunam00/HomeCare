@@ -19,6 +19,7 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import ClinicList from "./pages/clinics/ClinicList";
 import useAuthInitializer from "./hooks/useAuthInitializer";
+import ProtectedRoute from "./ProtectedRoute";
 
 function App() {
   useAuthInitializer();
@@ -26,13 +27,23 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route index element={<HomeCareLanding />} />
+        <Route path="/" element={<HomeCareLanding />} />
+        <Route path="/login" element={<LoginForm />} />
+        <Route path="/register" element={<RegisterForm />} />
 
-        <Route path="/home" element={<Home />}>
+        <Route
+          path="/home"
+          element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          }
+        >
           <Route index element={<ProductList />} />
           <Route path="tirads" element={<TiradPage />} />
           <Route path="products" element={<ProductList />} />
           <Route path="recist" element={<Recist />} />
-          <Route path="profile" element={<Profile />}></Route>
+          <Route path="profile" element={<Profile />} />
           <Route path="account" element={<AccountPage />} />
           <Route path="wallet" element={<MyWallet />} />
           <Route path="payments" element={<PaymentScreen />} />
@@ -41,9 +52,6 @@ function App() {
           <Route path="staffs" element={<StaffPage />} />
           <Route path="clinics" element={<ClinicList />} />
         </Route>
-        <Route path="/login" element={<LoginForm />} />
-        <Route path="/register" element={<RegisterForm />} />
-        <Route path="/" element={<HomeCareLanding />} />
       </Routes>
       <ToastContainer />
     </BrowserRouter>
