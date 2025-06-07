@@ -11,6 +11,7 @@ import useToast from "../../hooks/useToast";
 import FurnitureCarousel from "../../components/slick/FurnitureCarousel";
 import { motion } from "framer-motion";
 import { products } from "./products";
+import { useGlobalAuth } from "../../contexts/AuthContext";
 
 const textVariants = {
   hidden: { opacity: 0, x: 30 },
@@ -39,6 +40,8 @@ const HomeCareLanding = () => {
   const serviceRef = useRef(null);
 
   const { showError, showSuccess } = useToast();
+
+  const { isLoggedIn } = useGlobalAuth();
 
   const scrollToSection = (ref) => {
     if (ref.current) {
@@ -75,7 +78,6 @@ const HomeCareLanding = () => {
           </div>
 
           <div className={styles["homecare__nav-right"]}>
-            {/* Giao diện chọn ngôn ngữ */}
             <select
               className={styles["homecare__lang-switcher"]}
               onChange={(e) =>
@@ -87,20 +89,32 @@ const HomeCareLanding = () => {
               <option value="en">🇺🇸 EN</option>
             </select>
 
-            <Button
-              type="primary"
-              className={styles["homecare__contact"]}
-              onClick={() => navigate("login")}
-            >
-              Đăng nhập
-            </Button>
-            <Button
-              type="primary"
-              className={styles["homecare__contact"]}
-              onClick={() => navigate("register")}
-            >
-              Đăng ký
-            </Button>
+            {isLoggedIn ? (
+              <Button
+                type="primary"
+                className={styles["homecare__contact"]}
+                onClick={() => navigate("/home")} // hoặc route bạn muốn
+              >
+                Sử dụng ngay
+              </Button>
+            ) : (
+              <>
+                <Button
+                  type="primary"
+                  className={styles["homecare__contact"]}
+                  onClick={() => navigate("login")}
+                >
+                  Đăng nhập
+                </Button>
+                <Button
+                  type="primary"
+                  className={styles["homecare__contact"]}
+                  onClick={() => navigate("register")}
+                >
+                  Đăng ký
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </header>

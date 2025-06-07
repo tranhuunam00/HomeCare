@@ -17,8 +17,11 @@ import HomeCareLanding from "./pages/landingpage/HomeCareLanding";
 import RegisterForm from "./pages/authentication/RegisterForm";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import ClinicList from "./pages/clinics/ClinicList";
+import useAuthInitializer from "./hooks/useAuthInitializer";
 
 function App() {
+  useAuthInitializer();
   return (
     <BrowserRouter>
       <Routes>
@@ -36,6 +39,7 @@ function App() {
           <Route path="customers" element={<CustomerList />} />
           <Route path="orders" element={<OrderList />} />
           <Route path="staffs" element={<StaffPage />} />
+          <Route path="clinics" element={<ClinicList />} />
         </Route>
         <Route path="/login" element={<LoginForm />} />
         <Route path="/register" element={<RegisterForm />} />

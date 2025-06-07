@@ -20,8 +20,8 @@ const ChangePasswordSection = () => {
         onFinish={onFinish}
         className={styles["change-password-form"]}
       >
-        <Form.Item label="Tên đăng nhập">
-          <Input defaultValue="tk.tieuchuan272" disabled />
+        <Form.Item label="Email">
+          <Input defaultValue="email@email.com" disabled />
         </Form.Item>
 
         <Form.Item

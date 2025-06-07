@@ -2,18 +2,29 @@ import React, { useState } from "react";
 import { Form, Input, Button, Typography, Card } from "antd";
 import { useNavigate } from "react-router-dom";
 import useToast from "../../hooks/useToast";
+import API_CALL from "../../services/axiosClient";
+import STORAGE from "../../services/storage";
+import { useGlobalAuth } from "../../contexts/AuthContext";
 const { Title } = Typography;
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const { showError, showSuccess } = useToast();
-  const onFinish = ({ username, password }) => {
-    console.log("username, password ", username, password);
-    if (username === "admin" && password === "123456") {
-      showSuccess("Đăng nhập thành công!");
-      navigate("/home");
-    } else {
-      showError("Tên đăng nhập hoặc mật khẩu không đúng!");
+  const { handleLoginContext } = useGlobalAuth();
+
+  const onFinish = async ({ email, password }) => {
+    try {
+      const res = await API_CALL.post("/auth/login", {
+        email,
+        password,
+      });
+      const { token, user, doctor } = res.data.data;
+      handleLoginContext({ token, user, doctor });
+      showSuccess("Đăng nhập thành công");
+      navigate("/");
+    } catch (err) {
+      const message = err?.response?.data?.message || "Đăng nhập thất bại!";
+      showError(message);
     }
   };
 
@@ -71,13 +82,17 @@ const LoginPage = () => {
             requiredMark={false}
           >
             <Form.Item
-              label="Tên đăng nhập"
-              name="username"
+              label="Email"
+              name="email"
               rules={[
-                { required: true, message: "Vui lòng nhập tên đăng nhập!" },
+                {
+                  required: true,
+                  type: "email",
+                  message: "Vui lòng nhập Email!",
+                },
               ]}
             >
-              <Input placeholder="Tên đăng nhập" />
+              <Input placeholder="Email" />
             </Form.Item>
 
             <Form.Item

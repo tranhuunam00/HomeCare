@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Form, Input, Button, Typography, Card, Checkbox, Divider } from "antd";
 import { useNavigate } from "react-router-dom";
 import useToast from "../../hooks/useToast";
+import API_CALL from "../../services/axiosClient";
+import { USER_ROLE } from "../../constant/app";
 
 const { Title } = Typography;
 
@@ -11,17 +13,24 @@ const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [logo] = useState("/logo_home_care.jpg");
 
-  const onFinish = ({ username, password, confirmPassword }) => {
+  const onFinish = async ({ email, password, confirmPassword, fullName }) => {
     if (password !== confirmPassword) {
       showError("Mật khẩu nhập lại không khớp!");
       return;
     }
 
-    if (username === "admin" && password === "123456") {
-      showSuccess("Đăng ký thành công!");
-      navigate("/home");
-    } else {
-      showError("Tên đăng nhập hoặc mật khẩu không đúng!");
+    try {
+      const res = await API_CALL.post("/auth/register", {
+        email,
+        password,
+        id_role: USER_ROLE.DOCTOR,
+        fullName,
+      });
+      showSuccess("Đăng ký thành công! Vui lòng kiểm tra email để xác nhận");
+      navigate("/");
+    } catch (err) {
+      const message = err?.response?.data?.message || "Đăng ký thất bại!";
+      showError(message);
     }
   };
 
@@ -79,13 +88,27 @@ const RegisterPage = () => {
             requiredMark={false}
           >
             <Form.Item
-              label="Tên đăng nhập"
-              name="username"
+              label="Email"
+              name="email"
               rules={[
-                { required: true, message: "Vui lòng nhập tên đăng nhập!" },
+                {
+                  required: true,
+                  type: "email",
+                  message: "Vui lòng nhập email!",
+                },
               ]}
             >
-              <Input placeholder="Tên đăng nhập" />
+              <Input placeholder="Email@gmail.com" />
+            </Form.Item>
+
+            <Form.Item
+              label="Họ và tên"
+              name="fullName"
+              rules={[
+                { required: true, message: "Vui lòng nhập tên của bạn!" },
+              ]}
+            >
+              <Input placeholder="Trần Văn B" />
             </Form.Item>
 
             <Form.Item
