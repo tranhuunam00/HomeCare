@@ -20,6 +20,8 @@ import "slick-carousel/slick/slick-theme.css";
 import ClinicList from "./pages/clinics/ClinicList";
 import useAuthInitializer from "./hooks/useAuthInitializer";
 import ProtectedRoute from "./ProtectedRoute";
+import TemplateList from "./pages/products/TemplatesList/TemplateList";
+import AddOrEditTemplateProduct from "./pages/products/TemplateProduct/AddTemplateProduct";
 
 function App() {
   useAuthInitializer();
@@ -39,11 +41,22 @@ function App() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<ProductList />} />
+          <Route index element={<TemplateList />} />
           <Route path="tirads" element={<TiradPage />} />
+
           <Route path="products" element={<ProductList />} />
+          <Route path="templates" element={<TemplateList />} />
+          <Route
+            path="/home/templates/add"
+            element={<AddOrEditTemplateProduct />}
+          />
+          <Route
+            path="/home/templates/edit/:id"
+            element={<AddOrEditTemplateProduct />}
+          />
           <Route path="recist" element={<Recist />} />
           <Route path="profile" element={<Profile />} />
+          <Route path="profile/:idDoctor" element={<Profile />} />
           <Route path="account" element={<AccountPage />} />
           <Route path="wallet" element={<MyWallet />} />
           <Route path="payments" element={<PaymentScreen />} />

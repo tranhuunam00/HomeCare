@@ -81,11 +81,16 @@ const putForm = (url, data, config = {}) =>
     headers: { "Content-Type": "multipart/form-data" },
     ...config,
   });
+
+const patch = (url, data, config = {}) =>
+  axiosInstance.patch(url, data, config);
+
 const API_CALL = {
   get,
   post,
   put,
   del,
+  patch,
   postForm,
   putForm,
 };

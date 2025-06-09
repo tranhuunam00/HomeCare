@@ -26,7 +26,7 @@ const menuItems = [
     label: "Mẫu kết quả",
     children: [
       {
-        key: "products",
+        key: "templates",
         label: "Danh sách",
       },
       {
@@ -56,14 +56,6 @@ const menuItems = [
         key: "products",
         label: "Danh sách",
       },
-      {
-        key: "Tirads",
-        label: "D-Tirads",
-      },
-      {
-        key: "Recist",
-        label: "D-Recist",
-      },
     ],
   },
 
@@ -86,7 +78,7 @@ const menuItems = [
     ],
   },
   {
-    key: "Khách hàng",
+    key: "Bác sĩ",
     icon: (
       <Avatar
         src="https://img.freepik.com/premium-vector/user-icon-icon_1076610-59410.jpg?w=360"
@@ -94,16 +86,12 @@ const menuItems = [
         style={{ marginTop: -2 }}
       />
     ),
-    label: "Khách hàng",
+    label: "Bác sĩ",
 
     children: [
       {
         key: "customers",
         label: "Danh sách",
-      },
-      {
-        key: "orders",
-        label: "Danh sách đơn hàng",
       },
     ],
   },

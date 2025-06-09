@@ -4,6 +4,7 @@ import { Input, Typography, Card, Select, Row, Col, Modal, Button } from "antd";
 import { useNavigate } from "react-router-dom";
 import styles from "./ProductList.module.scss";
 import ProductCard from "./productCard/ProductCard";
+import { PlusOutlined } from "@ant-design/icons";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -66,7 +67,6 @@ const ProductList = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortOrder, setSortOrder] = useState("none");
   const [filteredProducts, setFilteredProducts] = useState(products);
-  const [selectedProduct, setSelectedProduct] = useState(null);
 
   const navigate = useNavigate();
 
@@ -98,15 +98,19 @@ const ProductList = () => {
     setFilteredProducts(result);
   };
 
-  const handleBuy = () => {
-    navigate("/home/payments", { state: { product: selectedProduct } });
-  };
-
   return (
     <div className={styles.productListContainer}>
       <Title level={3} className={styles.title}>
         Danh sách sản phẩm
       </Title>
+      <Button
+        style={{ margin: 30 }}
+        type="primary"
+        icon={<PlusOutlined />}
+        onClick={() => navigate("/home/products/add")}
+      >
+        Thêm mới
+      </Button>
 
       <Row gutter={24}>
         <Col xs={24} sm={8} md={6} lg={5} className={styles.filterSidebar}>

@@ -1,0 +1,33 @@
+.editor-container {
+  background: white;
+  padding: 10px;
+  margin: 0 auto;
+  width: 794px; // tương đương 21cm
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  border: 1px solid #ccc;
+  overflow: hidden;
+
+  .sun-editor {
+    width: 100% !important;
+    margin-bottom: 100px;
+  }
+
+  .se-container {
+    box-sizing: border-box;
+  }
+}
+
+@media print {
+  body {
+    background: none;
+  }
+
+  .editor-container {
+    box-shadow: none;
+    border: none;
+    page-break-after: always;
+  }
+}
+.se-btn-group-sub.sun-editor-common.se-list-layer.se-resizing-align-list {
+  z-index: 1 !important;
+}
