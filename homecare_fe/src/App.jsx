@@ -59,7 +59,11 @@ function App() {
 
           <Route path="templates-print" element={<TemplatePrintList />} />
           <Route
-            path="templates-print/:idTemplate"
+            path="templates-print/edit/:id_print_template"
+            element={<TemplatePrintPreview />}
+          />
+          <Route
+            path="templates-print/create"
             element={<TemplatePrintPreview />}
           />
           <Route path="recist" element={<Recist />} />

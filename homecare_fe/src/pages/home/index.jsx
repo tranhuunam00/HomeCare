@@ -56,6 +56,10 @@ const menuItems = [
         key: "templates-print",
         label: "Danh sách",
       },
+      {
+        key: "templates-print-use",
+        label: "Sử dụng",
+      },
     ],
   },
 

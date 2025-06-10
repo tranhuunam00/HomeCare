@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Form,
   Input,
@@ -15,18 +15,24 @@ import styles from "./TemplateHeaderEditor.module.scss";
 const { Option } = Select;
 
 const TemplateHeaderEditor = ({ value = {}, onChange }) => {
-  const [logoPreview, setLogoPreview] = useState(value.logoUrl || "");
+  const [logoPreview, setLogoPreview] = useState(value.logo_url || "");
   const [form] = Form.useForm();
+  form.setFieldsValue(value);
+
+  console.log("value", value);
 
   const handleLogoChange = (file) => {
     const preview = URL.createObjectURL(file);
     setLogoPreview(preview);
-    onChange?.({ ...form.getFieldsValue(), logoFile: file, logoUrl: preview });
+    onChange?.({ ...form.getFieldsValue(), logo: file, logo_url: preview });
     return false;
   };
+  useEffect(() => {
+    setLogoPreview(value?.logo_url);
+  }, [value.id]);
 
   const handleFormChange = (_, allValues) => {
-    onChange?.({ ...allValues, logoUrl: logoPreview });
+    onChange?.({ ...allValues, logo_url: logoPreview });
   };
 
   return (
@@ -56,18 +62,19 @@ const TemplateHeaderEditor = ({ value = {}, onChange }) => {
               <Button icon={<UploadOutlined />}>Tải logo</Button>
             </Upload>
 
-            <Form.Item name="headerType" label="Kiểu hiển thị">
+            <Form.Item name="code_header" label="Kiểu header">
               <Select>
-                <Option value="classic">Cổ điển</Option>
-                <Option value="modern">Hiện đại</Option>
-                <Option value="minimal">Tối giản</Option>
+                <Option value="1">Header 1</Option>
               </Select>
             </Form.Item>
           </div>
         </Col>
 
         <Col span={18}>
-          <Form.Item name="clinicName" label="Tên phòng khám">
+          <Form.Item name="clinic_name" label="Tên phòng khám">
+            <Input />
+          </Form.Item>
+          <Form.Item name="department_name" label="Khoa">
             <Input />
           </Form.Item>
           <Form.Item name="address" label="Địa chỉ">
@@ -78,7 +85,7 @@ const TemplateHeaderEditor = ({ value = {}, onChange }) => {
               <Form.Item name="website" label="Website">
                 <Input />
               </Form.Item>
-              <Form.Item name="hotline" label="Hotline">
+              <Form.Item name="phone" label="Hotline">
                 <Input />
               </Form.Item>
             </Col>

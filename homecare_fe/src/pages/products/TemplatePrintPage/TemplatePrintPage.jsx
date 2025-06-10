@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import API_CALL from "../../../services/axiosClient";
 import TemplateHeaderEditor from "../TemplatePrint/Header/TemplateHeaderEditor";
 import styles from "./TemplatePrintPreview.module.scss";
+import { useParams } from "react-router-dom";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -22,8 +23,11 @@ const TemplatePrintPreview = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [headerInfo, setHeaderInfo] = useState({});
-  const [idTemplate, setIdTemplate] = useState(null);
+  const [template, setTemplate] = useState({});
+
   const [templateList, setTemplateList] = useState([]);
+  const { id_print_template } = useParams();
+  const [idTemplate, setIdTemplate] = useState(id_print_template);
 
   const printRef = useRef();
 
@@ -42,6 +46,23 @@ const TemplatePrintPreview = () => {
       .catch(() => message.error("Không thể tải danh sách template"));
   }, []);
 
+  useEffect(() => {
+    if (id_print_template) {
+      setLoading(true);
+      API_CALL.get(`/print-template/${id_print_template}`)
+        .then((res) => {
+          const data = res.data.data;
+          form.setFieldsValue(data);
+          if (data) {
+            setHeaderInfo(data);
+            setIdTemplate(data.id_template);
+          }
+        })
+        .catch(() => message.error("Không thể tải dữ liệu chi tiết"))
+        .finally(() => setLoading(false));
+    }
+  }, [id_print_template]);
+
   // Khi chọn template → load chi tiết
   useEffect(() => {
     if (idTemplate) {
@@ -49,8 +70,7 @@ const TemplatePrintPreview = () => {
       API_CALL.get(`/templates/${idTemplate}`)
         .then((res) => {
           const data = res.data.data;
-          form.setFieldsValue(data);
-          if (data) setHeaderInfo(data);
+          if (data) setTemplate(data);
         })
         .catch(() => message.error("Không thể tải dữ liệu chi tiết"))
         .finally(() => setLoading(false));
@@ -58,10 +78,39 @@ const TemplatePrintPreview = () => {
   }, [idTemplate]);
 
   const onFinish = async (values) => {
-    console.log("Submit:", { ...values, ...headerInfo });
-    // TODO: call API update/create
-  };
+    const formData = new FormData();
 
+    // Gộp tất cả dữ liệu cần submit
+    const payload = { ...headerInfo, ...values, id_template: idTemplate };
+
+    // Đẩy từng key-value vào FormData
+    Object.entries(payload).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        formData.append(key, value);
+      }
+    });
+
+    try {
+      setLoading(true);
+      if (id_print_template) {
+        await API_CALL.put(`/print-template/${id_print_template}`, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        message.success("Cập nhật thành công!");
+      } else {
+        await API_CALL.post("/print-template", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        message.success("Tạo mới thành công!");
+      }
+      navigate("/home/templates-print");
+    } catch (err) {
+      console.error(err);
+      message.error("Lưu thất bại!");
+    } finally {
+      setLoading(false);
+    }
+  };
   const handlePrint = () => {
     const printContents = printRef.current.innerHTML;
     const newWindow = window.open("", "_blank", "width=800,height=600");
@@ -91,11 +140,11 @@ const TemplatePrintPreview = () => {
       th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
     </style>
     <h3>Mô tả và kỹ thuật</h3>
-    ${form.getFieldValue("description") || ""}
+    ${template.description || ""}
     <h3>Kết quả</h3>
-    ${form.getFieldValue("result") || ""}
+    ${template.result || ""}
     <h3>Khuyến nghị</h3>
-    ${form.getFieldValue("recommendation") || ""}
+    ${template.recommendation || ""}
   `;
 
   return (
@@ -108,6 +157,7 @@ const TemplatePrintPreview = () => {
             showSearch
             allowClear
             style={{ width: 400 }}
+            value={idTemplate}
             placeholder="Chọn template cần xem trước"
             optionFilterProp="children"
             onChange={(val) => setIdTemplate(val)}
@@ -128,7 +178,11 @@ const TemplatePrintPreview = () => {
             <Input />
           </Form.Item>
 
-          <TemplateHeaderEditor value={headerInfo} onChange={setHeaderInfo} />
+          <TemplateHeaderEditor
+            value={headerInfo}
+            onChange={setHeaderInfo}
+            headerInfo={headerInfo}
+          />
 
           <h1 style={{ marginBottom: 30 }}>Nội dung tổng hợp</h1>
 
@@ -149,7 +203,7 @@ const TemplatePrintPreview = () => {
                 <img
                   style={{ objectFit: "cover", alignContent: "center" }}
                   src={
-                    headerInfo.logoUrl ||
+                    headerInfo.logo_url ||
                     "https://via.placeholder.com/150x100?text=Logo"
                   }
                   alt="Logo"
@@ -157,10 +211,12 @@ const TemplatePrintPreview = () => {
                   height={100}
                 />
                 <div style={{ maxWidth: "350px" }}>
-                  <h3>{headerInfo.clinicName || "Tên phòng khám"}</h3>
+                  <h3>{headerInfo.clinic_name || "[Tên phòng khám]"}</h3>
                   <p>
-                    <strong>Địa chỉ:</strong>{" "}
-                    {headerInfo.address || "Chưa nhập địa chỉ"}
+                    <strong>Khoa:</strong> {headerInfo.department_name || "-"}
+                  </p>
+                  <p>
+                    <strong>Địa chỉ:</strong> {headerInfo.address || "-"}
                   </p>
                 </div>
                 <div style={{ maxWidth: "280px" }}>
@@ -169,7 +225,7 @@ const TemplatePrintPreview = () => {
                     <i>{headerInfo.website || "http://..."}</i>
                   </p>
                   <p>
-                    <strong>Hotline:</strong> {headerInfo.hotline || "..."}
+                    <strong>Hotline:</strong> {headerInfo.phone || "..."}
                   </p>
                   <p>
                     <strong>Email:</strong>{" "}
@@ -186,7 +242,7 @@ const TemplatePrintPreview = () => {
 
           <Form.Item style={{ marginTop: 24 }}>
             <Button type="primary" htmlType="submit">
-              {idTemplate ? "Cập nhật" : "Thêm mới"}
+              {id_print_template ? "Cập nhật" : "Thêm mới"}
             </Button>
             <Button
               style={{ marginLeft: 8 }}

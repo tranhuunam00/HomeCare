@@ -11,7 +11,11 @@ import {
   Button,
   InputNumber,
 } from "antd";
-import { FilterOutlined, PrinterOutlined } from "@ant-design/icons";
+import {
+  EditOutlined,
+  FilterOutlined,
+  PrinterOutlined,
+} from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import styles from "./TemplateList.module.scss";
 import API_CALL from "../../../../services/axiosClient";
@@ -32,7 +36,7 @@ const TemplatePrintList = () => {
   const fetchTemplates = async () => {
     setLoading(true);
     try {
-      const res = await API_CALL.get("/api/print-template", {
+      const res = await API_CALL.get("/print-template", {
         params: {
           name: searchName,
           page,
@@ -80,13 +84,11 @@ const TemplatePrintList = () => {
       key: "action",
       render: (_, record) => (
         <Button
-          icon={<PrinterOutlined />}
+          icon={<EditOutlined />}
           type="primary"
-          onClick={() =>
-            navigate(`/home/templates-print/${record.id_template}`)
-          }
+          onClick={() => navigate(`/home/templates-print/edit/${record.id}`)}
         >
-          In mẫu
+          Chỉnh sửa
         </Button>
       ),
     },
