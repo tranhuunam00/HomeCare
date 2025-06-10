@@ -93,15 +93,6 @@ export default function TiradPage() {
     return "5 - Nghi ngờ cao";
   };
   const [loading, setLoading] = useState(false);
-  const handleExportPDF = async () => {
-    setLoading(true);
-    await exportPDF({
-      selector: ".print-section",
-      fileName: "ketqua_tirads.pdf",
-      type: "pdf",
-    });
-    setLoading(false);
-  };
 
   const handlePrint = async () => {
     setLoading(true);

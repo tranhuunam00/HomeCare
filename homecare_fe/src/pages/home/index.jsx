@@ -53,7 +53,7 @@ const menuItems = [
     label: "Mẫu in kết quả",
     children: [
       {
-        key: "products",
+        key: "templates-print",
         label: "Danh sách",
       },
     ],

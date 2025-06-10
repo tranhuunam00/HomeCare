@@ -22,6 +22,8 @@ import useAuthInitializer from "./hooks/useAuthInitializer";
 import ProtectedRoute from "./ProtectedRoute";
 import TemplateList from "./pages/products/TemplatesList/TemplateList";
 import AddOrEditTemplateProduct from "./pages/products/TemplateProduct/AddTemplateProduct";
+import TemplatePrintList from "./pages/products/TemplatePrint/TemplatePrintList/TemplatePrintList";
+import TemplatePrintPreview from "./pages/products/TemplatePrintPage/TemplatePrintPage";
 
 function App() {
   useAuthInitializer();
@@ -53,6 +55,12 @@ function App() {
           <Route
             path="/home/templates/edit/:id"
             element={<AddOrEditTemplateProduct />}
+          />
+
+          <Route path="templates-print" element={<TemplatePrintList />} />
+          <Route
+            path="templates-print/:idTemplate"
+            element={<TemplatePrintPreview />}
           />
           <Route path="recist" element={<Recist />} />
           <Route path="profile" element={<Profile />} />
