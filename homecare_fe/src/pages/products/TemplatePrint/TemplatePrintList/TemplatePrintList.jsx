@@ -1,6 +1,16 @@
 // src/pages/templates/TemplatePrintList.jsx
 import React, { useEffect, useState } from "react";
-import { Table, Input, Row, Col, Card, Select, Spin, Button } from "antd";
+import {
+  Table,
+  Input,
+  Row,
+  Col,
+  Card,
+  Select,
+  Spin,
+  Button,
+  InputNumber,
+} from "antd";
 import { FilterOutlined, PrinterOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import styles from "./TemplateList.module.scss";
@@ -13,21 +23,25 @@ const TemplatePrintList = () => {
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
+
+  // Bộ lọc
   const [searchName, setSearchName] = useState("");
+
   const navigate = useNavigate();
 
   const fetchTemplates = async () => {
     setLoading(true);
     try {
-      const res = await API_CALL.get("/templates", {
+      const res = await API_CALL.get("/api/print-template", {
         params: {
           name: searchName,
           page,
           limit: 10,
         },
       });
-      setTemplates(res.data.data.data);
-      setTotal(res.data.data.count);
+
+      setTemplates(res.data.data?.data || res.data.data || []);
+      setTotal(res.data.data?.count || res.data.total || 0);
     } catch (err) {
       console.error("Lỗi khi lấy danh sách template:", err);
     } finally {
@@ -40,20 +54,26 @@ const TemplatePrintList = () => {
   }, [page, searchName]);
 
   const columns = [
+    { title: "ID", dataIndex: "id", key: "id" },
+    { title: "Tên", dataIndex: "name", key: "name" },
+    { title: "Phòng khám", dataIndex: "clinic_name", key: "clinic_name" },
+    { title: "Khoa", dataIndex: "department_name", key: "department_name" },
+    { title: "SĐT", dataIndex: "phone", key: "phone" },
+    { title: "Email", dataIndex: "email", key: "email" },
+    { title: "Website", dataIndex: "website", key: "website" },
+    { title: "Mã header", dataIndex: "code_header", key: "code_header" },
     {
-      title: "ID",
-      dataIndex: "id",
-      key: "id",
+      title: "Logo",
+      dataIndex: "logo_url",
+      key: "logo_url",
+      render: (url) =>
+        url ? <img src={url} alt="logo" style={{ width: 40 }} /> : "—",
     },
     {
-      title: "Tên",
-      dataIndex: "name",
-      key: "name",
-    },
-    {
-      title: "Mô tả ngắn",
-      dataIndex: "short_description",
-      key: "short_description",
+      title: "Kích hoạt",
+      dataIndex: "is_active",
+      key: "is_active",
+      render: (active) => (active ? "✔️" : "❌"),
     },
     {
       title: "In kết quả",
@@ -62,7 +82,9 @@ const TemplatePrintList = () => {
         <Button
           icon={<PrinterOutlined />}
           type="primary"
-          onClick={() => navigate(`/home/templates-print/${record.id}`)}
+          onClick={() =>
+            navigate(`/home/templates-print/${record.id_template}`)
+          }
         >
           In mẫu
         </Button>
@@ -72,12 +94,26 @@ const TemplatePrintList = () => {
 
   return (
     <div className={styles.TemplateList}>
-      <h2 className={styles.title}>Danh sách mẫu in kết quả</h2>
+      <Row justify="space-between" align="middle" style={{ marginBottom: 16 }}>
+        <Col>
+          <h2 className={styles.title}>Danh sách mẫu in kết quả</h2>
+        </Col>
+        <Col>
+          <Button
+            type="primary"
+            icon={<PrinterOutlined />}
+            onClick={() => navigate("/home/templates-print/create")}
+          >
+            Tạo mới
+          </Button>
+        </Col>
+      </Row>
 
       <Row gutter={16} className={styles.filterGroup}>
-        <Col span={8}>
+        <Col span={6}>
           <Card
             size="small"
+            style={{ display: "flex" }}
             title={
               <>
                 <FilterOutlined /> Bộ lọc
@@ -88,6 +124,8 @@ const TemplatePrintList = () => {
               placeholder="Tìm theo tên..."
               value={searchName}
               onChange={(e) => setSearchName(e.target.value)}
+              allowClear
+              style={{ marginBottom: 8 }}
             />
           </Card>
         </Col>

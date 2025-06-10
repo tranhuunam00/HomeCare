@@ -1,20 +1,48 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Form, Input, Button, Card, Typography, message, Spin } from "antd";
-import { useNavigate, useParams } from "react-router-dom";
+import {
+  Form,
+  Input,
+  Button,
+  Card,
+  Typography,
+  message,
+  Spin,
+  Select,
+} from "antd";
+import { useNavigate } from "react-router-dom";
 import API_CALL from "../../../services/axiosClient";
 import TemplateHeaderEditor from "../TemplatePrint/Header/TemplateHeaderEditor";
 import styles from "./TemplatePrintPreview.module.scss";
 
 const { Title } = Typography;
+const { Option } = Select;
 
 const TemplatePrintPreview = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
-  const { idTemplate } = useParams();
   const [loading, setLoading] = useState(false);
   const [headerInfo, setHeaderInfo] = useState({});
+  const [idTemplate, setIdTemplate] = useState(null);
+  const [templateList, setTemplateList] = useState([]);
+
   const printRef = useRef();
 
+  // Lấy danh sách tất cả template
+  useEffect(() => {
+    API_CALL.get("/templates", {
+      params: {
+        page: 1,
+        limit: 100,
+      },
+    })
+      .then((res) => {
+        const data = res.data.data?.data || res.data.data || [];
+        setTemplateList(data);
+      })
+      .catch(() => message.error("Không thể tải danh sách template"));
+  }, []);
+
+  // Khi chọn template → load chi tiết
   useEffect(() => {
     if (idTemplate) {
       setLoading(true);
@@ -22,16 +50,16 @@ const TemplatePrintPreview = () => {
         .then((res) => {
           const data = res.data.data;
           form.setFieldsValue(data);
-          if (data) setHeaderInfo(data); // nếu header info nằm chung
+          if (data) setHeaderInfo(data);
         })
         .catch(() => message.error("Không thể tải dữ liệu chi tiết"))
         .finally(() => setLoading(false));
     }
-  }, [idTemplate, form]);
+  }, [idTemplate]);
 
   const onFinish = async (values) => {
-    // Xử lý lưu dữ liệu nếu cần
     console.log("Submit:", { ...values, ...headerInfo });
+    // TODO: call API update/create
   };
 
   const handlePrint = () => {
@@ -73,7 +101,28 @@ const TemplatePrintPreview = () => {
   return (
     <Card style={{ maxWidth: 1240, margin: "auto" }}>
       <Title level={3}>Xem trước mẫu in</Title>
+
       <Spin spinning={loading}>
+        <div style={{ marginBottom: 20 }}>
+          <Select
+            showSearch
+            allowClear
+            style={{ width: 400 }}
+            placeholder="Chọn template cần xem trước"
+            optionFilterProp="children"
+            onChange={(val) => setIdTemplate(val)}
+            filterOption={(input, option) =>
+              option.children.toLowerCase().includes(input.toLowerCase())
+            }
+          >
+            {templateList.map((tpl) => (
+              <Option key={tpl.id} value={tpl.id}>
+                {tpl.name}
+              </Option>
+            ))}
+          </Select>
+        </div>
+
         <Form layout="vertical" form={form} onFinish={onFinish}>
           <Form.Item label="Tên mẫu" name="name" rules={[{ required: true }]}>
             <Input />
@@ -149,6 +198,7 @@ const TemplatePrintPreview = () => {
               style={{ marginLeft: 8 }}
               type="default"
               onClick={handlePrint}
+              disabled={!idTemplate}
             >
               In
             </Button>
