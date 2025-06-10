@@ -1,43 +1,19 @@
 import React, { useEffect, useState, useRef } from "react";
-import {
-  Form,
-  Input,
-  Button,
-  Select,
-  Card,
-  Typography,
-  message,
-  Spin,
-} from "antd";
+import { Form, Input, Button, Card, Typography, message, Spin } from "antd";
 import { useNavigate, useParams } from "react-router-dom";
 import API_CALL from "../../../services/axiosClient";
 import TemplateHeaderEditor from "../TemplatePrint/Header/TemplateHeaderEditor";
+import styles from "./TemplatePrintPreview.module.scss";
 
 const { Title } = Typography;
-const { Option } = Select;
 
 const TemplatePrintPreview = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const { idTemplate } = useParams();
-  const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [headerInfo, setHeaderInfo] = useState({});
   const printRef = useRef();
-
-  useEffect(() => {
-    const fetchServices = async () => {
-      try {
-        const res = await API_CALL.get("/ts", {
-          params: { page: 1, limit: 100 },
-        });
-        setServices(res.data.data.data || []);
-      } catch (err) {
-        message.error("Không thể tải danh sách dịch vụ");
-      }
-    };
-
-    fetchServices();
-  }, []);
 
   useEffect(() => {
     if (idTemplate) {
@@ -46,6 +22,7 @@ const TemplatePrintPreview = () => {
         .then((res) => {
           const data = res.data.data;
           form.setFieldsValue(data);
+          if (data) setHeaderInfo(data); // nếu header info nằm chung
         })
         .catch(() => message.error("Không thể tải dữ liệu chi tiết"))
         .finally(() => setLoading(false));
@@ -53,7 +30,8 @@ const TemplatePrintPreview = () => {
   }, [idTemplate, form]);
 
   const onFinish = async (values) => {
-    // Xử lý khi người dùng submit form (nếu cần)
+    // Xử lý lưu dữ liệu nếu cần
+    console.log("Submit:", { ...values, ...headerInfo });
   };
 
   const handlePrint = () => {
@@ -80,19 +58,20 @@ const TemplatePrintPreview = () => {
   };
 
   const combinedHtml = `
-  <style>
-    table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-  </style>
-  <h3>Mô tả và kỹ thuật</h3>
-  ${form.getFieldValue("description") || ""}
-  <h3>Kết quả</h3>
-  ${form.getFieldValue("result") || ""}
-  <h3>Khuyến nghị</h3>
-  ${form.getFieldValue("recommendation") || ""}
-`;
+    <style>
+      table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+      th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    </style>
+    <h3>Mô tả và kỹ thuật</h3>
+    ${form.getFieldValue("description") || ""}
+    <h3>Kết quả</h3>
+    ${form.getFieldValue("result") || ""}
+    <h3>Khuyến nghị</h3>
+    ${form.getFieldValue("recommendation") || ""}
+  `;
+
   return (
-    <Card style={{ maxWidth: 800, margin: "auto" }}>
+    <Card style={{ maxWidth: 1240, margin: "auto" }}>
       <Title level={3}>Xem trước mẫu in</Title>
       <Spin spinning={loading}>
         <Form layout="vertical" form={form} onFinish={onFinish}>
@@ -100,47 +79,59 @@ const TemplatePrintPreview = () => {
             <Input />
           </Form.Item>
 
-          <TemplateHeaderEditor />
+          <TemplateHeaderEditor value={headerInfo} onChange={setHeaderInfo} />
 
-          <h1 style={{ marginBottom: 100 }}>Nội dung tổng hợp</h1>
+          <h1 style={{ marginBottom: 30 }}>Nội dung tổng hợp</h1>
 
           <div ref={printRef}>
-            <Card bordered={false} className="a4-page">
+            <Card
+              bordered={false}
+              className={`a4-page  ${styles["card-print-template"]}`}
+            >
               <header
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
                   marginBottom: 20,
+                  alignItems: "flex-start",
                   gap: 20,
                 }}
               >
                 <img
-                  style={{ objectFit: "cover" }}
-                  src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTFYqoKTu_o3Zns2yExbst2Co84Gpc2Q1RJbA&s"
+                  style={{ objectFit: "cover", alignContent: "center" }}
+                  src={
+                    headerInfo.logoUrl ||
+                    "https://via.placeholder.com/150x100?text=Logo"
+                  }
                   alt="Logo"
                   width={150}
                   height={100}
                 />
-                <div>
-                  <h3>CÔNG TY TNHH ĐẦU TƯ & CÔNG NGHỆ DAOGROUP</h3>
+                <div style={{ maxWidth: "350px" }}>
+                  <h3>{headerInfo.clinicName || "Tên phòng khám"}</h3>
                   <p>
-                    <strong>Địa chỉ:</strong> Số 22, R3.7/10, Gamuda Gardens,
-                    Trần Phú, Hoàng Mai, Hà Nội
+                    <strong>Địa chỉ:</strong>{" "}
+                    {headerInfo.address || "Chưa nhập địa chỉ"}
                   </p>
                 </div>
-                <div>
+                <div style={{ maxWidth: "280px" }}>
                   <p>
-                    <strong>Website:</strong> <i>http://www.daogroup.com/</i>
+                    <strong>Website:</strong>{" "}
+                    <i>{headerInfo.website || "http://..."}</i>
                   </p>
                   <p>
-                    <strong>Hotline:</strong> 0969268000
+                    <strong>Hotline:</strong> {headerInfo.hotline || "..."}
                   </p>
                   <p>
-                    <strong>Email:</strong> <i>http://www.daogroup.com/</i>
+                    <strong>Email:</strong>{" "}
+                    <i>{headerInfo.email || "example@email.com"}</i>
                   </p>
                 </div>
               </header>
-              <div dangerouslySetInnerHTML={{ __html: combinedHtml }} />
+              <div
+                className="print-content"
+                dangerouslySetInnerHTML={{ __html: combinedHtml }}
+              />
             </Card>
           </div>
 

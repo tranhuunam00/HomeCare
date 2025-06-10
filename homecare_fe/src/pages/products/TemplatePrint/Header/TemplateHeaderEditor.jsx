@@ -1,9 +1,18 @@
 import React, { useState } from "react";
-import { Form, Input, Upload, Button, Row, Col, Typography } from "antd";
+import {
+  Form,
+  Input,
+  Upload,
+  Button,
+  Row,
+  Col,
+  Typography,
+  Select,
+} from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import styles from "./TemplateHeaderEditor.module.scss";
 
-const { Text, Title } = Typography;
+const { Option } = Select;
 
 const TemplateHeaderEditor = ({ value = {}, onChange }) => {
   const [logoPreview, setLogoPreview] = useState(value.logoUrl || "");
@@ -13,7 +22,7 @@ const TemplateHeaderEditor = ({ value = {}, onChange }) => {
     const preview = URL.createObjectURL(file);
     setLogoPreview(preview);
     onChange?.({ ...form.getFieldsValue(), logoFile: file, logoUrl: preview });
-    return false; // Ngăn Antd upload mặc định
+    return false;
   };
 
   const handleFormChange = (_, allValues) => {
@@ -37,6 +46,7 @@ const TemplateHeaderEditor = ({ value = {}, onChange }) => {
               }
               alt="Logo"
               className={styles.logoImage}
+              width={180}
             />
             <Upload
               beforeUpload={handleLogoChange}
@@ -45,8 +55,17 @@ const TemplateHeaderEditor = ({ value = {}, onChange }) => {
             >
               <Button icon={<UploadOutlined />}>Tải logo</Button>
             </Upload>
+
+            <Form.Item name="headerType" label="Kiểu hiển thị">
+              <Select>
+                <Option value="classic">Cổ điển</Option>
+                <Option value="modern">Hiện đại</Option>
+                <Option value="minimal">Tối giản</Option>
+              </Select>
+            </Form.Item>
           </div>
         </Col>
+
         <Col span={18}>
           <Form.Item name="clinicName" label="Tên phòng khám">
             <Input />
