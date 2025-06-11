@@ -15,6 +15,7 @@ import {
   EditOutlined,
   FilterOutlined,
   PrinterOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import styles from "./TemplateList.module.scss";
@@ -89,6 +90,20 @@ const TemplatePrintList = () => {
           onClick={() => navigate(`/home/templates-print/edit/${record.id}`)}
         >
           Chỉnh sửa
+        </Button>
+      ),
+    },
+
+    {
+      title: "Sử dụng",
+      key: "action",
+      render: (_, record) => (
+        <Button
+          icon={<UserOutlined />}
+          type="link"
+          onClick={() => navigate(`/home/templates-print/use/${record.id}`)}
+        >
+          Sử dụng
         </Button>
       ),
     },

@@ -24,6 +24,8 @@ import TemplateList from "./pages/products/TemplatesList/TemplateList";
 import AddOrEditTemplateProduct from "./pages/products/TemplateProduct/AddTemplateProduct";
 import TemplatePrintList from "./pages/products/TemplatePrint/TemplatePrintList/TemplatePrintList";
 import TemplatePrintPreview from "./pages/products/TemplatePrintPage/TemplatePrintPage";
+import TemplatePrintUse from "./pages/products/TemplatePrintUse/TemplatePrintUse";
+import DoctorPrintTemplateList from "./pages/products/DoctorUseTemplate/DoctorUseTemplate";
 
 function App() {
   useAuthInitializer();
@@ -65,6 +67,11 @@ function App() {
           <Route
             path="templates-print/create"
             element={<TemplatePrintPreview />}
+          />
+          <Route path="doctor-used" element={<DoctorPrintTemplateList />} />
+          <Route
+            path="templates-print/use/:id_print_template"
+            element={<TemplatePrintUse />}
           />
           <Route path="recist" element={<Recist />} />
           <Route path="profile" element={<Profile />} />

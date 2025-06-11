@@ -57,7 +57,7 @@ const menuItems = [
         label: "Danh sách",
       },
       {
-        key: "templates-print-use",
+        key: "doctor-used",
         label: "Sử dụng",
       },
     ],
