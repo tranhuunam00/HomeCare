@@ -22,6 +22,7 @@ import { useGlobalAuth } from "../../../contexts/AuthContext";
 import ImageWithCaptionInput from "../ImageWithCaptionInput/ImageWithCaptionInput";
 import CustomSunEditor from "../../../components/Suneditor/CustomSunEditor";
 import { UploadOutlined } from "@ant-design/icons";
+import { toast } from "react-toastify";
 
 const calculateAge = (dob) => {
   if (!dob) return "";
@@ -70,11 +71,14 @@ const TemplatePrintUse = () => {
     })
       .then(() => {
         message.success("Tải file PDF thành công!");
-        setSelectedFile(null); // Reset file sau khi upload thành công
+        toast.success("Tải thành công");
+        setSelectedFile(null);
+        navigate("/home/doctor-used");
+        // Reset file sau khi upload thành công
       })
       .catch((err) => {
         console.error(err);
-        message.error("Tải file thất bại!");
+        toast.error("Tải file thất bại!", err?.response?.data?.message);
       });
   };
   const { provinces, districts, setSelectedProvince } = useVietnamAddress();

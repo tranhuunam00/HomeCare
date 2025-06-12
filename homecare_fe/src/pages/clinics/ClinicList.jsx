@@ -79,7 +79,6 @@ const ClinicList = () => {
       setEditingId(null);
     } catch (err) {
       toast.error(err?.response?.data?.message);
-
       console.error("Lỗi xử lý cơ sở:", err);
     }
   };
