@@ -14,6 +14,7 @@ import API_CALL from "../../../services/axiosClient";
 import TemplateHeaderEditor from "../TemplatePrint/Header/TemplateHeaderEditor";
 import styles from "./TemplatePrintPreview.module.scss";
 import { useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -106,7 +107,7 @@ const TemplatePrintPreview = () => {
       navigate("/home/templates-print");
     } catch (err) {
       console.error(err);
-      message.error("Lưu thất bại!");
+      toast.error(err?.response?.data?.message);
     } finally {
       setLoading(false);
     }

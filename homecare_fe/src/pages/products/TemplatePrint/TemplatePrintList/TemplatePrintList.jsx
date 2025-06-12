@@ -20,6 +20,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import styles from "./TemplateList.module.scss";
 import API_CALL from "../../../../services/axiosClient";
+import { toast } from "react-toastify";
 
 const { Option } = Select;
 
@@ -49,6 +50,7 @@ const TemplatePrintList = () => {
       setTotal(res.data.data?.count || res.data.total || 0);
     } catch (err) {
       console.error("Lỗi khi lấy danh sách template:", err);
+      toast.error(err?.response?.data?.message);
     } finally {
       setLoading(false);
     }

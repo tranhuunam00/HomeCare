@@ -16,6 +16,7 @@ import {
 import { FilterOutlined, PlusOutlined, EditOutlined } from "@ant-design/icons";
 import API_CALL from "../../services/axiosClient";
 import styles from "./ClinicList.module.scss";
+import { toast } from "react-toastify";
 
 const { Option } = Select;
 
@@ -43,7 +44,7 @@ const ClinicList = () => {
       });
       setClinicList(res.data.data.data);
     } catch (err) {
-      console.error("Lỗi lấy danh sách cơ sở:", err);
+      toast.error(err?.response?.data?.message);
     } finally {
       setLoading(false);
     }
@@ -54,6 +55,7 @@ const ClinicList = () => {
       const res = await API_CALL.get(`/clinics/${id}`);
       form.setFieldsValue(res.data.data);
     } catch (err) {
+      toast.error(err?.response?.data?.message);
       message.error("Không lấy được thông tin cơ sở");
     }
   };
@@ -76,6 +78,8 @@ const ClinicList = () => {
       form.resetFields();
       setEditingId(null);
     } catch (err) {
+      toast.error(err?.response?.data?.message);
+
       console.error("Lỗi xử lý cơ sở:", err);
     }
   };

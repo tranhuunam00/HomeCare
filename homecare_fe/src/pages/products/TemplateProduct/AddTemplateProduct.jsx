@@ -13,6 +13,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import API_CALL from "../../../services/axiosClient";
 import CustomSunEditor from "../../../components/Suneditor/CustomSunEditor";
 import storage from "../../../services/storage";
+import useToast from "../../../hooks/useToast";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -23,6 +24,7 @@ const AddOrEditTemplateProduct = () => {
   const { id } = useParams();
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(false);
+  const { showError, showSuccess } = useToast();
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -70,15 +72,14 @@ const AddOrEditTemplateProduct = () => {
 
       if (id) {
         await API_CALL.patch(`/templates/${id}`, payload);
-        message.success("Đã cập nhật mẫu kết quả thành công");
       } else {
         await API_CALL.post("/templates", payload);
-        message.success("Đã thêm mẫu kết quả thành công");
       }
+      showSuccess("Đã thêm thành công");
       navigate("/home/templates");
     } catch (err) {
       console.error("❌ Lỗi khi gửi:", err);
-      message.error("Gửi mẫu kết quả thất bại");
+      showError("Gửi mẫu kết quả thất bại: " + err?.response?.data?.message);
     }
   };
 

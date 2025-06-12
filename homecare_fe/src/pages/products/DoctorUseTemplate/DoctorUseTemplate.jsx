@@ -22,6 +22,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import styles from "./DoctorUseTemplate.module.scss";
 import API_CALL from "../../../services/axiosClient";
+import { toast } from "react-toastify";
 
 const { Dragger } = Upload;
 
@@ -53,6 +54,7 @@ const DoctorPrintTemplateList = () => {
       setList(res.data.data?.data || res.data.data || []);
       setTotal(res.data.data?.count || res.data.total || 0);
     } catch (err) {
+      toast.error(err?.response?.data?.message);
       console.error("Lỗi khi lấy danh sách doctor print template:", err);
     } finally {
       setLoading(false);
@@ -93,7 +95,7 @@ const DoctorPrintTemplateList = () => {
       fetchList();
     } catch (err) {
       console.error(err);
-      message.error("Cập nhật thất bại!");
+      toast.error(err?.response?.data?.message);
     }
   };
 

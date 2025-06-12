@@ -117,7 +117,7 @@ const Profile = () => {
       setIsEditing(false);
     } catch (error) {
       console.error("Update error:", error);
-      showError("Cập nhật thất bại", error);
+      showError("Cập nhật thất bại:  " + error?.response?.data?.message);
     }
   };
 

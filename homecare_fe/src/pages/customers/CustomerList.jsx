@@ -14,6 +14,7 @@ import { FilterOutlined, EditOutlined } from "@ant-design/icons";
 import API_CALL from "../../services/axiosClient";
 import styles from "./CustomerList.module.scss";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const { Option } = Select;
 
@@ -49,7 +50,7 @@ const CustomerList = () => {
       setTotal(res.data.data.count);
     } catch (error) {
       console.error("Lỗi lấy danh sách bác sĩ:", error);
-      message.error("Không thể tải danh sách bác sĩ");
+      toast.error(error?.response?.data?.message);
     } finally {
       setLoading(false);
     }
@@ -67,6 +68,7 @@ const CustomerList = () => {
         });
         setClinics(res.data.data.data);
       } catch (error) {
+        toast.error(error?.response?.data?.message);
         console.error("Lỗi lấy danh sách phòng khám:", error);
       }
     };

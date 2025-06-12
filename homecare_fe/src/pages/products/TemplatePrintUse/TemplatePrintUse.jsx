@@ -152,7 +152,7 @@ const TemplatePrintUse = () => {
       navigate("/home/templates-print");
     } catch (err) {
       console.error(err);
-      message.error("Lưu thất bại!");
+      toast.error(err?.response?.data?.message);
     } finally {
       setLoading(false);
     }
