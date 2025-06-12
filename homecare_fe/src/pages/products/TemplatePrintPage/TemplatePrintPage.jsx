@@ -193,6 +193,7 @@ const TemplatePrintPreview = () => {
               className={`a4-page  ${styles["card-print-template"]}`}
             >
               <header
+                className={styles.printHeader}
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
@@ -202,33 +203,42 @@ const TemplatePrintPreview = () => {
                 }}
               >
                 <img
-                  style={{ objectFit: "cover", alignContent: "center" }}
+                  style={{
+                    marginTop: 10,
+                    objectFit: "cover",
+                    alignContent: "center",
+                  }}
                   src={
                     headerInfo.logo_url ||
                     "https://via.placeholder.com/150x100?text=Logo"
                   }
                   alt="Logo"
-                  width={150}
+                  width={100}
                   height={100}
                 />
                 <div style={{ maxWidth: "350px" }}>
-                  <h3>{headerInfo.clinic_name || "[Tên phòng khám]"}</h3>
-                  <p>
+                  <p
+                    className={styles.printHeader_name}
+                    style={{ fontWeight: 600, color: "red", fontSize: 16 }}
+                  >
+                    {headerInfo.clinic_name || "[Tên phòng khám]"}
+                  </p>
+                  <p style={{ fontSize: 14 }}>
                     <strong>Khoa:</strong> {headerInfo.department_name || "-"}
                   </p>
-                  <p>
+                  <p style={{ fontSize: 14 }}>
                     <strong>Địa chỉ:</strong> {headerInfo.address || "-"}
                   </p>
                 </div>
                 <div style={{ maxWidth: "280px" }}>
-                  <p>
+                  <p style={{ fontSize: 14 }}>
                     <strong>Website:</strong>{" "}
                     <i>{headerInfo.website || "http://..."}</i>
                   </p>
-                  <p>
+                  <p style={{ fontSize: 14 }}>
                     <strong>Hotline:</strong> {headerInfo.phone || "..."}
                   </p>
-                  <p>
+                  <p style={{ fontSize: 14 }}>
                     <strong>Email:</strong>{" "}
                     <i>{headerInfo.email || "example@email.com"}</i>
                   </p>

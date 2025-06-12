@@ -311,6 +311,7 @@ const TemplatePrintUse = () => {
           className={`a4-page  ${styles["card-print-template"]}`}
         >
           <header
+            className={styles.printHeader}
             style={{
               display: "flex",
               justifyContent: "space-between",
@@ -320,33 +321,42 @@ const TemplatePrintUse = () => {
             }}
           >
             <img
-              style={{ objectFit: "cover", alignContent: "center" }}
+              style={{
+                marginTop: 10,
+                objectFit: "cover",
+                alignContent: "center",
+              }}
               src={
                 headerInfo.logo_url ||
                 "https://via.placeholder.com/150x100?text=Logo"
               }
               alt="Logo"
-              width={150}
+              width={100}
               height={100}
             />
             <div style={{ maxWidth: "350px" }}>
-              <h4>{headerInfo.clinic_name || "[Tên phòng khám]"}</h4>
-              <p>
+              <p
+                className={styles.printHeader_name}
+                style={{ fontWeight: 600, color: "red", fontSize: 16 }}
+              >
+                {headerInfo.clinic_name || "[Tên phòng khám]"}
+              </p>
+              <p style={{ fontSize: 14 }}>
                 <strong>Khoa:</strong> {headerInfo.department_name || "-"}
               </p>
-              <p>
+              <p style={{ fontSize: 14 }}>
                 <strong>Địa chỉ:</strong> {headerInfo.address || "-"}
               </p>
             </div>
             <div style={{ maxWidth: "280px" }}>
-              <p>
-                <strong style={{ width: 300 }}>Website:</strong>{" "}
+              <p style={{ fontSize: 14 }}>
+                <strong>Website:</strong>{" "}
                 <i>{headerInfo.website || "http://..."}</i>
               </p>
-              <p>
+              <p style={{ fontSize: 14 }}>
                 <strong>Hotline:</strong> {headerInfo.phone || "..."}
               </p>
-              <p>
+              <p style={{ fontSize: 14 }}>
                 <strong>Email:</strong>{" "}
                 <i>{headerInfo.email || "example@email.com"}</i>
               </p>
@@ -365,23 +375,46 @@ const TemplatePrintUse = () => {
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
+                  fontSize: 16,
                 }}
               >
                 <div style={{ width: 150 }}>
-                  <strong>Họ và tên:</strong>
+                  <p
+                    style={{
+                      fontSize: 16,
+                      fontWeight: 600,
+                      margin: 0,
+                      padding: 0,
+                    }}
+                  >
+                    Họ và tên:
+                  </p>
                 </div>
-                {patient.full_name}
+                <p style={{ fontSize: 16, margin: 0, padding: 0 }}>
+                  {patient.full_name}
+                </p>
               </div>
+
               <div
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
+                  fontSize: 16,
                 }}
               >
-                <div style={{ width: 100 }}>
-                  <strong>Giới tính:</strong>
+                <div style={{ width: 150 }}>
+                  <p
+                    style={{
+                      fontWeight: 600,
+                      width: 100,
+                      margin: 0,
+                      padding: 0,
+                    }}
+                  >
+                    Giới tính:
+                  </p>
                 </div>
-                {patient.gender}
+                <p style={{ margin: 0, padding: 0 }}>{patient.gender}</p>
               </div>
             </div>
 
@@ -396,23 +429,50 @@ const TemplatePrintUse = () => {
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
+                  fontSize: 16,
                 }}
               >
                 <div style={{ width: 150 }}>
-                  <strong>Năm sinh:</strong>
+                  <p
+                    style={{
+                      fontSize: 16,
+                      fontWeight: 600,
+                      margin: 0,
+                      padding: 0,
+                    }}
+                  >
+                    Năm sinh:
+                  </p>
                 </div>
-                {dayjs(patient.dob).format("YYYY")}
+                <p style={{ fontSize: 16, margin: 0, padding: 0 }}>
+                  {dayjs(patient.dob).format("YYYY")}
+                </p>
               </div>
+
               <div
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
+                  fontSize: 16,
+                  margin: 0,
+                  padding: 0,
                 }}
               >
-                <div style={{ width: 100 }}>
-                  <strong>Tuổi:</strong>
+                <div style={{ width: 150 }}>
+                  <p
+                    style={{
+                      fontWeight: 600,
+                      width: 100,
+                      margin: 0,
+                      padding: 0,
+                    }}
+                  >
+                    Tuổi:
+                  </p>
                 </div>
-                {calculateAge(patient.dob)}
+                <p style={{ margin: 0, padding: 0 }}>
+                  {calculateAge(patient.dob)}
+                </p>
               </div>
             </div>
 
