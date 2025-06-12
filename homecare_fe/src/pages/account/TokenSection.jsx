@@ -15,12 +15,6 @@ const TokenSection = () => (
       Mở quyền thông báo để nhận thông báo từ ứng dụng
     </p>
     <Divider />
-    <p>
-      <b>Token:</b>
-    </p>
-    <p className="token">
-      dQeZrYaBRVZOrjIfB1POZM:APA91bFzaRv-iBfLd_7GLLFQvZNcgJ5Rt4v6C7Twlo...
-    </p>
   </Card>
 );
 

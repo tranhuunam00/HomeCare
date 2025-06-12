@@ -47,6 +47,7 @@ const AccountPage = () => {
 
         <TabPane tab="Lịch sử" key="2">
           <p>Lịch sử hoạt động sẽ hiển thị ở đây...</p>
+          <h2>Sắp ra mắt!</h2>
         </TabPane>
       </Tabs>
     </div>

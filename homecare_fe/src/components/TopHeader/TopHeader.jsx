@@ -15,13 +15,15 @@ import styles from "./TopHeader.module.scss";
 import { QRCodeCanvas } from "qrcode.react";
 import { useGlobalAuth } from "../../contexts/AuthContext";
 import { USER_ROLE, USER_ROLE_ID } from "../../constant/app";
+import useToast from "../../hooks/useToast";
+import { toast } from "react-toastify";
 
 const qrValue = `https://www.daogroup.vn/`;
 
 const TopHeader = ({ collapsed, toggleSidebar }) => {
   const [rightDrawerVisible, setRightDrawerVisible] = useState(false);
-  const { user, doctor } = useGlobalAuth();
-  console.log(user, doctor);
+  const { user, doctor, handleLogoutGlobal } = useGlobalAuth();
+  const { showSuccess, showError, showWarning } = useToast();
 
   const showRightDrawer = () => setRightDrawerVisible(true);
   const closeRightDrawer = () => setRightDrawerVisible(false);
@@ -33,14 +35,14 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
         navigate("account");
         break;
       case "wallet":
-        navigate("wallet");
-
+        showWarning("Sắp ra mắt");
         break;
       case "logout":
         console.log("Đăng xuất");
+        handleLogoutGlobal();
         break;
       case "connect":
-        window.open("https://www.daogroup.vn/", "_blank");
+        showWarning("Sắp ra mắt");
         break;
       default:
         break;
@@ -61,7 +63,7 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
       <Menu.Item key="wallet">Ví của tôi</Menu.Item>
       <Menu.Item key="logout">Đăng Xuất</Menu.Item>
       <Menu.Divider />
-      <Menu.Item key="connect" icon={<CloudDownloadOutlined />}>
+      <Menu.Item key="/connect" icon={<CloudDownloadOutlined />}>
         Kết nối ứng dụng
       </Menu.Item>
     </Menu>
@@ -101,11 +103,18 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
               backgroundColor: "#d9d9d9",
               cursor: "pointer",
             }}
-            src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
+            src={
+              doctor.avatar_url ||
+              "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+            }
           />
         </Dropdown>
         <Tooltip title="Thông báo">
-          <Badge count={3} size="small">
+          <Badge
+            onClick={() => toast.warning("Sắp ra mắt")}
+            count={""}
+            size="small"
+          >
             <BellOutlined className={styles.topHeader__icon} />
           </Badge>
         </Tooltip>

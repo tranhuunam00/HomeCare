@@ -63,9 +63,6 @@ const TemplatePrintList = () => {
     { title: "Tên", dataIndex: "name", key: "name" },
     { title: "Phòng khám", dataIndex: "clinic_name", key: "clinic_name" },
     { title: "Khoa", dataIndex: "department_name", key: "department_name" },
-    { title: "SĐT", dataIndex: "phone", key: "phone" },
-    { title: "Email", dataIndex: "email", key: "email" },
-    { title: "Website", dataIndex: "website", key: "website" },
     { title: "Mã header", dataIndex: "code_header", key: "code_header" },
     {
       title: "Logo",

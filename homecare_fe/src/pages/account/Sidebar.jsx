@@ -6,6 +6,7 @@ import {
   EditOutlined,
 } from "@ant-design/icons";
 import styles from "./AccountPage.module.scss";
+import { toast } from "react-toastify";
 
 const SidebarMenu = ({ onSelect, selected }) => (
   <div className={styles["account-page__sidebar"]}>
@@ -21,7 +22,8 @@ const SidebarMenu = ({ onSelect, selected }) => (
       className={`${styles["account-page__sidebar-item"]} ${
         selected === "notifications" ? styles.selected : ""
       }`}
-      onClick={() => onSelect("notifications")}
+      // onClick={() => onSelect("notifications")}
+      onClick={() => toast.warn("Sắp ra mắt!")}
     >
       <SettingOutlined /> Thông báo
     </div>
@@ -32,14 +34,6 @@ const SidebarMenu = ({ onSelect, selected }) => (
       onClick={() => onSelect("password")}
     >
       <KeyOutlined /> Đổi mật khẩu
-    </div>
-    <div
-      className={`${styles["account-page__sidebar-item"]} ${
-        selected === "signature" ? styles.selected : ""
-      }`}
-      onClick={() => onSelect("signature")}
-    >
-      <EditOutlined /> Cập nhật chữ ký
     </div>
   </div>
 );

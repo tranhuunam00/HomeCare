@@ -40,9 +40,8 @@ const TemplatePrintUse = () => {
   const [template, setTemplate] = useState({});
   const [patient, setPatient] = useState({});
 
-  const [templateList, setTemplateList] = useState([]);
   const { id_print_template } = useParams();
-  const [idTemplate, setIdTemplate] = useState(id_print_template);
+  const [idTemplate, setIdTemplate] = useState();
   const [imageList, setImageList] = useState([]);
   const [combinedHtml, setCombinedHtml] = useState("");
 
@@ -78,23 +77,7 @@ const TemplatePrintUse = () => {
         message.error("Tải file thất bại!");
       });
   };
-  const { provinces, districts, wards, setSelectedProvince } =
-    useVietnamAddress();
-
-  // Lấy danh sách tất cả template
-  useEffect(() => {
-    API_CALL.get("/templates", {
-      params: {
-        page: 1,
-        limit: 100,
-      },
-    })
-      .then((res) => {
-        const data = res.data.data?.data || res.data.data || [];
-        setTemplateList(data);
-      })
-      .catch(() => message.error("Không thể tải danh sách template"));
-  }, []);
+  const { provinces, districts, setSelectedProvince } = useVietnamAddress();
 
   useEffect(() => {
     setSelectedProvince(patient.province);
@@ -118,6 +101,8 @@ const TemplatePrintUse = () => {
   }, [id_print_template]);
 
   // Khi chọn template → load chi tiết
+
+  console.log("idTemplate", idTemplate);
   useEffect(() => {
     if (idTemplate) {
       setLoading(true);
