@@ -45,6 +45,23 @@ const Sidebar = ({ collapsed }) => {
       ],
     },
     {
+      key: "Ca chẩn đoán",
+      icon: (
+        <Avatar
+          src="https://stockdep.net/files/images/27167199.jpg"
+          size={40}
+          style={{ marginTop: -2 }}
+        />
+      ),
+      label: "Ca chẩn đoán",
+      children: [
+        {
+          key: "patients-diagnose",
+          label: "Danh sách",
+        },
+      ],
+    },
+    {
       key: "Mẫu in kết quả",
       icon: (
         <Avatar
