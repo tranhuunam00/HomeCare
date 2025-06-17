@@ -8,12 +8,16 @@ import {
   Typography,
   message,
   Spin,
+  Col,
+  Row,
 } from "antd";
 import { useNavigate, useParams } from "react-router-dom";
 import API_CALL from "../../../services/axiosClient";
 import CustomSunEditor from "../../../components/Suneditor/CustomSunEditor";
 import storage from "../../../services/storage";
 import useToast from "../../../hooks/useToast";
+import { extractDynamicFieldsFromHtml } from "../../../constant/app";
+import { renderDynamicAntdFields } from "../../../components/RenderInputFormTemplate";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -25,6 +29,9 @@ const AddOrEditTemplateProduct = () => {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(false);
   const { showError, showSuccess } = useToast();
+  const [resultText, setResultText] = useState("");
+  const [descriptionText, setDescriptionText] = useState("");
+  const [recommendationText, setRecommendationText] = useState("");
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -83,68 +90,108 @@ const AddOrEditTemplateProduct = () => {
     }
   };
 
+  console.log("resultText", resultText);
+
+  console.log(extractDynamicFieldsFromHtml(resultText)[0]);
   return (
-    <Card style={{ maxWidth: 800, margin: "auto" }}>
-      <Title level={3}>{id ? "Chỉnh sửa" : "Thêm mới"} mẫu kết quả</Title>
-      <Spin spinning={loading}>
-        <Form layout="vertical" form={form} onFinish={onFinish}>
-          <Form.Item label="Tên" name="name" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
+    <div style={{ display: "flex" }}>
+      <Card
+        style={{
+          maxWidth: 800,
+          marginRight: 60,
+        }}
+      >
+        <Title level={3}>{id ? "Chỉnh sửa" : "Thêm mới"} mẫu kết quả</Title>
+        <Spin spinning={loading}>
+          <Form layout="vertical" form={form} onFinish={onFinish}>
+            <Form.Item label="Tên" name="name" rules={[{ required: true }]}>
+              <Input />
+            </Form.Item>
 
-          <Form.Item
-            label="Dịch vụ"
-            name="id_template_service"
-            rules={[{ required: true }]}
-          >
-            <Select placeholder="Chọn dịch vụ">
-              {services.map((s) => (
-                <Option key={s.id} value={s.id}>
-                  {s.name}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
-
-          <Form.Item label="Mô tả ngắn gọn" name="short_description">
-            <Input />
-          </Form.Item>
-
-          <Form.Item label="Mô tả và kỹ thuật" name="description">
-            <CustomSunEditor
-              value={form.getFieldValue("description")}
-              onChange={(value) => form.setFieldValue("description", value)}
-            />
-          </Form.Item>
-
-          <Form.Item label="Kết quả" name="result">
-            <CustomSunEditor
-              value={form.getFieldValue("result")}
-              onChange={(value) => form.setFieldValue("result", value)}
-            />
-          </Form.Item>
-
-          <Form.Item label="Khuyến nghị" name="recommendation">
-            <CustomSunEditor
-              value={form.getFieldValue("recommendation")}
-              onChange={(value) => form.setFieldValue("recommendation", value)}
-            />
-          </Form.Item>
-
-          <Form.Item>
-            <Button type="primary" htmlType="submit">
-              {id ? "Cập nhật" : "Thêm mới"}
-            </Button>
-            <Button
-              style={{ marginLeft: 8 }}
-              onClick={() => navigate("/home/products")}
+            <Form.Item
+              label="Dịch vụ"
+              name="id_template_service"
+              rules={[{ required: true }]}
             >
-              Hủy
-            </Button>
-          </Form.Item>
-        </Form>
-      </Spin>
-    </Card>
+              <Select placeholder="Chọn dịch vụ">
+                {services.map((s) => (
+                  <Option key={s.id} value={s.id}>
+                    {s.name}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+
+            <Form.Item label="Mô tả ngắn gọn" name="short_description">
+              <Input />
+            </Form.Item>
+
+            <Form.Item label="Mô tả và kỹ thuật" name="description">
+              <CustomSunEditor
+                value={form.getFieldValue("description")}
+                onChange={(value) => {
+                  form.setFieldValue("description", value);
+                  setDescriptionText(value);
+                }}
+              />
+            </Form.Item>
+
+            <Form.Item label="Kết quả" name="result">
+              <CustomSunEditor
+                value={form.getFieldValue("result")}
+                onChange={(value) => {
+                  form.setFieldValue("result", value);
+                  setResultText(value);
+                }}
+              />
+            </Form.Item>
+
+            <Form.Item label="Khuyến nghị" name="recommendation">
+              <CustomSunEditor
+                value={form.getFieldValue("recommendation")}
+                onChange={(value) => {
+                  form.setFieldValue("recommendation", value);
+                  setRecommendationText(value);
+                }}
+              />
+            </Form.Item>
+
+            <Form.Item>
+              <Button type="primary" htmlType="submit">
+                {id ? "Cập nhật" : "Thêm mới"}
+              </Button>
+              <Button
+                style={{ marginLeft: 8 }}
+                onClick={() => navigate("/home/products")}
+              >
+                Hủy
+              </Button>
+            </Form.Item>
+          </Form>
+        </Spin>
+      </Card>
+      <Card style={{ width: 500 }}>
+        <Title level={3}>Chỗ nhập liệu</Title>
+        <Card title="Form nhập liệu tự động">
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={(values) => console.log(values)}
+          >
+            <h2>Mô tả và kĩ thuật</h2>
+            {renderDynamicAntdFields(
+              extractDynamicFieldsFromHtml(descriptionText)
+            )}
+            <h2>Kết quả</h2>
+            {renderDynamicAntdFields(extractDynamicFieldsFromHtml(resultText))}
+            <h2>Khuyến nghị</h2>
+            {renderDynamicAntdFields(
+              extractDynamicFieldsFromHtml(recommendationText)
+            )}
+          </Form>
+        </Card>
+      </Card>
+    </div>
   );
 };
 

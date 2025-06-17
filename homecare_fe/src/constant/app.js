@@ -32,3 +32,15 @@ export const PATIENT_DIAGNOSE_COLOR = {
   3: "Orange",
   4: "Green",
 };
+export function extractDynamicFieldsFromHtml(htmlString) {
+  const regex =
+    /\{\{(text|number|checkbox|select|textarea|image|file|date):\s*(.+?)\s*\}\}/g;
+  const matches = [...htmlString.matchAll(regex)];
+
+  return matches.map((match, index) => ({
+    type: match[1].toLowerCase(),
+    label: match[2].trim(),
+    raw: match[0],
+    index,
+  }));
+}
