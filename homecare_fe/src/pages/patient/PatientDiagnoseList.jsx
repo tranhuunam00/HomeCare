@@ -129,7 +129,7 @@ const allColumns = [
 
 const defaultVisibleKeys = ["id", "name", "pid", "sid", "status"];
 
-const PatientTablePage = () => {
+const PatientTablePage = ({ isNotCreate = false }) => {
   const navigate = useNavigate();
 
   const [data, setData] = useState([]);
@@ -228,13 +228,15 @@ const PatientTablePage = () => {
         >
           <Button icon={<SettingOutlined />}>Chọn cột</Button>
         </Dropdown>
-        <Button
-          onClick={() => navigate("create")}
-          type="primary"
-          icon={<UserAddOutlined />}
-        >
-          Thêm mới
-        </Button>
+        {!isNotCreate && (
+          <Button
+            onClick={() => navigate("create")}
+            type="primary"
+            icon={<UserAddOutlined />}
+          >
+            Thêm mới
+          </Button>
+        )}
       </Space>
 
       {/* Bộ lọc */}
@@ -286,6 +288,10 @@ const PatientTablePage = () => {
         dataSource={filteredData}
         bordered
         scroll={{ x: 1200 }}
+        onRow={(record) => ({
+          onClick: () => navigate(`/home/patients-diagnose/${record.id}`),
+          style: { cursor: "pointer" },
+        })}
       />
     </div>
   );

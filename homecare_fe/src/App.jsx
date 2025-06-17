@@ -26,8 +26,9 @@ import TemplatePrintList from "./pages/products/TemplatePrint/TemplatePrintList/
 import TemplatePrintPreview from "./pages/products/TemplatePrintPage/TemplatePrintPage";
 import TemplatePrintUse from "./pages/products/TemplatePrintUse/TemplatePrintUse";
 import DoctorPrintTemplateList from "./pages/products/DoctorUseTemplate/DoctorUseTemplate";
-import PatientList from "./pages/patient/PatientList";
-import PatientFormPage from "./pages/patient/NewPatient/PatientFormPage";
+import PatientTablePage from "./pages/patient/PatientDiagnoseList";
+import PatientFormPage from "./pages/patient/New/PatientFormPage";
+import PatientDiagnoseDetailPage from "./pages/patient/Detail/DetailPatientDiagnose";
 
 function App() {
   useAuthInitializer();
@@ -85,7 +86,7 @@ function App() {
           <Route path="orders" element={<OrderList />} />
           <Route path="staffs" element={<StaffPage />} />
           <Route path="clinics" element={<ClinicList />} />
-          <Route path="patients-diagnose" element={<PatientList />} />
+          <Route path="patients-diagnose" element={<PatientTablePage />} />
           <Route
             path="patients-diagnose/create"
             element={<PatientFormPage />}
@@ -93,6 +94,10 @@ function App() {
           <Route
             path="patients-diagnose/edit/:id"
             element={<PatientFormPage />}
+          />
+          <Route
+            path="patients-diagnose/:id"
+            element={<PatientDiagnoseDetailPage />}
           />
         </Route>
       </Routes>

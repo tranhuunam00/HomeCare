@@ -113,6 +113,7 @@ const PatientFormPage = () => {
     }
   };
 
+  console.log(form.getFieldsValue());
   return (
     <div style={{ padding: "2rem" }}>
       <Card
@@ -237,6 +238,7 @@ const PatientFormPage = () => {
                   placeholder="Chọn Tỉnh / Thành phố"
                   onChange={(val) => {
                     form.setFieldsValue({
+                      province: val,
                       district: undefined,
                       ward: undefined,
                     });
@@ -260,7 +262,7 @@ const PatientFormPage = () => {
                 <Select
                   placeholder="Chọn Quận/Huyện"
                   onChange={(val) => {
-                    form.setFieldsValue({ ward: undefined });
+                    form.setFieldsValue({ ward: undefined, district: val });
                     setSelectedDistrict(val);
                   }}
                   disabled={!districts.length}
@@ -279,7 +281,14 @@ const PatientFormPage = () => {
                 label="Phường/Xã"
                 rules={[{ required: false }]}
               >
-                <Select placeholder="Chọn Xã / Phường" disabled={!wards.length}>
+                <Select
+                  onChange={(val) => {
+                    console.log(val);
+                    form.setFieldsValue({ ward: val });
+                  }}
+                  placeholder="Chọn Xã / Phường"
+                  disabled={!wards.length}
+                >
                   {wards.map((ward) => (
                     <Option key={ward.code} value={ward.code}>
                       {ward.name}

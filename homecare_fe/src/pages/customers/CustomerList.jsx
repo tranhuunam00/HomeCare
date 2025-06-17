@@ -8,7 +8,7 @@ import {
   Card,
   Button,
   Spin,
-  message,
+  Modal,
 } from "antd";
 import { FilterOutlined, EditOutlined } from "@ant-design/icons";
 import API_CALL from "../../services/axiosClient";
@@ -28,10 +28,55 @@ const CustomerList = () => {
   const [statusFilter, setStatusFilter] = useState();
   const [clinics, setClinics] = useState([]);
   const navigate = useNavigate();
+  const [permissionModalOpen, setPermissionModalOpen] = useState(false);
+  const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [selectedClinics, setSelectedClinics] = useState([]);
 
   const getClinicName = (clinicId) => {
     const found = clinics.find((clinic) => clinic.id === clinicId);
     return found ? found.name : "Không rõ";
+  };
+
+  const openPermissionModal = (doctor) => {
+    setSelectedDoctor(doctor);
+    setSelectedClinics(doctor.clinic_permissions || []); // nếu API có danh sách sẵn
+    setPermissionModalOpen(true);
+  };
+
+  const closePermissionModal = () => {
+    if (selectedClinics.length > 0) {
+      const confirmClose = window.confirm(
+        "Bạn đang chỉnh sửa phân quyền. Bạn có chắc chắn muốn thoát không?"
+      );
+      if (!confirmClose) return;
+    }
+    setPermissionModalOpen(false);
+    setSelectedDoctor(null);
+    setSelectedClinics([]);
+  };
+
+  const savePermissions = () => {
+    if (!selectedDoctor) return;
+
+    const confirmMessage = `Bạn xác nhận phân quyền cho bác sĩ ${
+      selectedDoctor.full_name
+    } đọc kết quả các phòng khám sau?\n- ${selectedClinics
+      .map((id) => getClinicName(id))
+      .join("\n- ")}`;
+
+    if (window.confirm(confirmMessage)) {
+      API_CALL.post(`/doctor/${selectedDoctor.id}/assign-clinics`, {
+        clinic_ids: selectedClinics,
+      })
+        .then(() => {
+          toast.success("Phân quyền thành công!");
+          closePermissionModal();
+        })
+        .catch((err) => {
+          toast.error("Phân quyền thất bại");
+          console.error(err);
+        });
+    }
   };
 
   const fetchDoctors = async () => {
@@ -128,6 +173,13 @@ const CustomerList = () => {
         </Button>
       ),
     },
+    {
+      title: "Phân quyền",
+      key: "permissions",
+      render: (_, record) => (
+        <Button onClick={() => openPermissionModal(record)}>Phân quyền</Button>
+      ),
+    },
   ];
 
   return (
@@ -192,6 +244,39 @@ const CustomerList = () => {
           }}
         />
       </Spin>
+      <Modal
+        title={`Phân quyền bác sĩ: ${selectedDoctor?.full_name}`}
+        open={permissionModalOpen}
+        onCancel={closePermissionModal}
+        onOk={savePermissions}
+        okText="Lưu"
+        cancelText="Hủy"
+      >
+        <p>Chọn phòng khám được phép truy cập:</p>
+        <Select
+          mode="multiple"
+          style={{ width: "100%" }}
+          placeholder="Chọn các phòng khám"
+          value={selectedClinics}
+          onChange={setSelectedClinics}
+          optionFilterProp="children"
+        >
+          {clinics.map((clinic) => (
+            <Option key={clinic.id} value={clinic.id}>
+              {clinic.name}
+            </Option>
+          ))}
+        </Select>
+
+        <div style={{ marginTop: 16 }}>
+          <strong>Đã chọn:</strong>
+          <ul style={{ paddingLeft: 20 }}>
+            {selectedClinics.map((id) => (
+              <li key={id}>{getClinicName(id)}</li>
+            ))}
+          </ul>
+        </div>
+      </Modal>
     </div>
   );
 };
