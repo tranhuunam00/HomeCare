@@ -172,24 +172,15 @@ const AddOrEditTemplateProduct = () => {
       </Card>
       <Card style={{ width: 500 }}>
         <Title level={3}>Chỗ nhập liệu</Title>
-        <Card title="Form nhập liệu tự động">
-          <Form
-            form={form}
-            layout="vertical"
-            onFinish={(values) => console.log(values)}
-          >
-            <h2>Mô tả và kĩ thuật</h2>
-            {renderDynamicAntdFields(
-              extractDynamicFieldsFromHtml(descriptionText)
-            )}
-            <h2>Kết quả</h2>
-            {renderDynamicAntdFields(extractDynamicFieldsFromHtml(resultText))}
-            <h2>Khuyến nghị</h2>
-            {renderDynamicAntdFields(
-              extractDynamicFieldsFromHtml(recommendationText)
-            )}
-          </Form>
-        </Card>
+
+        <h2>Mô tả và kĩ thuật</h2>
+        {renderDynamicAntdFields(extractDynamicFieldsFromHtml(descriptionText))}
+        <h2>Kết quả</h2>
+        {renderDynamicAntdFields(extractDynamicFieldsFromHtml(resultText))}
+        <h2>Khuyến nghị</h2>
+        {renderDynamicAntdFields(
+          extractDynamicFieldsFromHtml(recommendationText)
+        )}
       </Card>
     </div>
   );

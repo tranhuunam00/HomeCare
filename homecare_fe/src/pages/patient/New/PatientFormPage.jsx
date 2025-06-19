@@ -66,48 +66,45 @@ const PatientFormPage = () => {
     fetchCountries();
   }, []);
 
-  const fetchPatientInfo = async (patientId) => {
-    // try {
-    //   setLoading(true);
-    //   const res = await axios.get(`/api/patients/${patientId}`);
-    //   const data = res.data;
-    //   form.setFieldsValue({
-    //     ...data,
-    //     dob: data.dob ? dayjs(data.dob) : null,
-    //   });
-    // } catch (err) {
-    //   message.error("Không thể tải thông tin bệnh nhân");
-    // } finally {
-    //   setLoading(false);
-    // }
-  };
-
   const handleDobChange = (date) => {
     if (date) {
-      const age = dayjs().year() - dayjs(date).year();
+      const today = dayjs();
+      const birth = dayjs(date);
+      const age = today.diff(birth, "year");
       form.setFieldsValue({ age });
+    } else {
+      form.setFieldsValue({ age: undefined });
     }
   };
-
   const onFinish = async (values) => {
     try {
       setLoading(true);
+
       const payload = {
-        ...values,
-        dob: values.dob ? values.dob.format("YYYY-MM-DD") : null,
+        name: values.name,
+        PID: values.pid,
+        SID: values.sid,
+        Indication: values.Indication,
+        gender: values.gender,
+        CCCD: values.cccd,
+        phoneNumber: values.phone,
+        email: values.email,
+        address: values.detail,
+        countryCode: values.country,
+        province_code: values.province + "",
+        district_code: values.district + "",
+        ward_code: values.ward + "",
+        id_clinic: values.id_clinic,
+        createdBy: user?.id,
+        status: 1,
       };
 
-      if (id) {
-        await axios.put(`/api/patients/${id}`, payload);
-        message.success("Cập nhật thông tin bệnh nhân thành công");
-      } else {
-        await axios.post(`/api/patients`, payload);
-        message.success("Tạo mới ca chẩn đoán thành công");
-      }
-
-      navigate("/patients-diagnose");
+      await API_CALL.post("/patient-diagnose", payload);
+      message.success("Tạo mới ca chẩn đoán thành công");
+      navigate("/home/patients-diagnose");
     } catch (err) {
       message.error("Có lỗi xảy ra, vui lòng thử lại");
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -139,9 +136,9 @@ const PatientFormPage = () => {
                 rules={[{ required: true }]}
               >
                 <Select placeholder="Chọn giới tính">
-                  <Option value="male">Nam</Option>
-                  <Option value="female">Nữ</Option>
-                  <Option value="other">Khác</Option>
+                  <Option value="Nam">Nam</Option>
+                  <Option value="Nữ">Nữ</Option>
+                  <Option value="Khác">Khác</Option>
                 </Select>
               </Form.Item>
             </Col>
@@ -156,7 +153,11 @@ const PatientFormPage = () => {
               </Form.Item>
             </Col>
           </Row>
-          <Form.Item label="Phòng khám" name="id_clinic">
+          <Form.Item
+            label="Phòng khám"
+            name="id_clinic"
+            rules={[{ required: true }]}
+          >
             <Select placeholder="Chọn phòng khám">
               {clinics.map((clinic) => (
                 <Option key={clinic.id} value={clinic.id}>
@@ -170,7 +171,11 @@ const PatientFormPage = () => {
           {/* Ngày sinh + tuổi */}
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item name="dob" label="Ngày sinh">
+              <Form.Item
+                name="dob"
+                label="Ngày sinh"
+                rules={[{ required: false }]}
+              >
                 <DatePicker
                   onChange={handleDobChange}
                   style={{ width: "100%" }}
@@ -178,7 +183,7 @@ const PatientFormPage = () => {
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="age" label="Tuổi">
+              <Form.Item name="age" label="Tuổi" rules={[{ required: false }]}>
                 <Input disabled />
               </Form.Item>
             </Col>
@@ -190,7 +195,7 @@ const PatientFormPage = () => {
               <Form.Item
                 name="phone"
                 label="Số điện thoại"
-                // rules={[{ required: true }]}
+                rules={[{ required: true }]}
               >
                 <Input />
               </Form.Item>
@@ -205,7 +210,11 @@ const PatientFormPage = () => {
               </Form.Item>
             </Col>
             <Col>
-              <Form.Item name="country" label="Quốc tịch">
+              <Form.Item
+                name="country"
+                label="Quốc tịch"
+                rules={[{ required: true }]}
+              >
                 <Select
                   showSearch
                   placeholder="Chọn quốc gia"
@@ -232,7 +241,7 @@ const PatientFormPage = () => {
               <Form.Item
                 name="province"
                 label="Tỉnh/Thành phố"
-                rules={[{ required: false }]}
+                rules={[{ required: true }]}
               >
                 <Select
                   placeholder="Chọn Tỉnh / Thành phố"
@@ -257,7 +266,7 @@ const PatientFormPage = () => {
               <Form.Item
                 name="district"
                 label="Quận/Huyện"
-                rules={[{ required: false }]}
+                rules={[{ required: true }]}
               >
                 <Select
                   placeholder="Chọn Quận/Huyện"
@@ -279,7 +288,7 @@ const PatientFormPage = () => {
               <Form.Item
                 name="ward"
                 label="Phường/Xã"
-                rules={[{ required: false }]}
+                rules={[{ required: true }]}
               >
                 <Select
                   onChange={(val) => {
@@ -314,12 +323,12 @@ const PatientFormPage = () => {
           {/* PID - SID - CCCD */}
           <Row gutter={16}>
             <Col span={8}>
-              <Form.Item name="pid" label="PID">
+              <Form.Item name="pid" label="PID" rules={[{ required: true }]}>
                 <Input />
               </Form.Item>
             </Col>
             <Col span={8}>
-              <Form.Item name="sid" label="SID">
+              <Form.Item name="sid" label="SID" rules={[{ required: true }]}>
                 <Input />
               </Form.Item>
             </Col>

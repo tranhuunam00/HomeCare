@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { Card, Row, Col, Typography, Spin, Tag, Button } from "antd";
 import dayjs from "dayjs";
 import useVietnamAddress from "../../../hooks/useVietnamAddress";
-import API_CALL from "../../../services/axiosClient"; // dùng để call /clinics
+import API_CALL from "../../../services/axiosClient";
 import {
   PATIENT_DIAGNOSE_COLOR,
   PATIENT_DIAGNOSE_STATUS,
@@ -26,52 +26,20 @@ const PatientDiagnoiseDetailPage = () => {
     setSelectedDistrict,
   } = useVietnamAddress();
 
-  console.log("districts", districts);
-  const fakeData = {
-    id: 1,
-    name: "Nguyễn Văn A",
-    pid: "123456",
-    sid: "SID001",
-    indication: "MRI não",
-    gender: "Nam",
-    dob: "1990-05-15",
-    age: 34,
-    phone: "0901234567",
-    email: "a@gmail.com",
-    cccd: "012345678901",
-    country: "Việt Nam",
-    detail: "Căn hộ A101",
-    province_code: "2",
-    district_code: "26",
-    ward_code: "724",
-    status: 3,
-    createdAt: "2024-06-01T10:00:00Z",
-    updatedAt: "2024-06-10T16:30:00Z",
-    deletedAt: null,
-    id_clinic: 2,
-    createdBy: 2,
-  };
-
-  // Load dữ liệu bệnh nhân
+  // Lấy dữ liệu bệnh nhân theo ID
   useEffect(() => {
-    setData(fakeData);
-  }, []);
-
-  // Load danh sách phòng khám
-  useEffect(() => {
-    const fetchClinics = async () => {
+    const fetchDetail = async () => {
       try {
-        const res = await API_CALL.get("/clinics", {
-          params: { page: 1, limit: 100 },
-        });
-        setClinics(res.data.data.data || []);
+        const res = await API_CALL.get(`/patient-diagnose/${id}`);
+        setData(res.data.data);
       } catch (err) {
-        console.error("Không thể tải danh sách phòng khám", err);
+        console.error("Không thể lấy dữ liệu bệnh nhân:", err);
       }
     };
-    fetchClinics();
-  }, []);
+    if (id) fetchDetail();
+  }, [id]);
 
+  // Lấy danh sách phòng khám và gán tên
   useEffect(() => {
     const fetchClinics = async () => {
       try {
@@ -80,28 +48,18 @@ const PatientDiagnoiseDetailPage = () => {
         });
         const list = res.data.data.data;
         setClinics(list);
-
-        // tìm tên phòng khám theo id
         if (data) {
-          const found = list.find((c) => c.id === data.id_clinic);
+          const found = list.find((c) => c.id == data.id_clinic);
           setClinicName(found?.name || "Không xác định");
         }
       } catch (err) {
-        console.error("Không thể tải phòng khám", err);
+        console.error("Không thể tải danh sách phòng khám", err);
       }
     };
-
     fetchClinics();
   }, [data]);
 
-  // Sau khi có clinics và data thì tìm tên phòng khám
-  useEffect(() => {
-    if (data && clinics.length > 0) {
-      const found = clinics.find((c) => c.id === data.id_clinic);
-      setClinicName(found?.name || "Không xác định");
-    }
-  }, [data, clinics]);
-
+  // Set tỉnh/huyện/xã dựa trên data
   useEffect(() => {
     if (data && provinces.length > 0) {
       setSelectedProvince(data.province_code);
@@ -115,7 +73,7 @@ const PatientDiagnoiseDetailPage = () => {
   }, [data, districts]);
 
   const getNameByCode = (list, code) => {
-    const item = list.find((x) => x.code === code);
+    const item = list.find((x) => x.code == code);
     return item ? item.name : "Không rõ";
   };
 
@@ -133,7 +91,7 @@ const PatientDiagnoiseDetailPage = () => {
             <Title level={5}>Giới tính:</Title>
             <Text>{data.gender}</Text>
           </Col>
-          <Col span={2}>
+          <Col span={3}>
             <Title level={5}>Ngày sinh:</Title>
             <Text>{dayjs(data.dob).format("DD/MM/YYYY")}</Text>
           </Col>
@@ -143,70 +101,66 @@ const PatientDiagnoiseDetailPage = () => {
           </Col>
           <Col span={2}>
             <Title level={5}>PID:</Title>
-            <Text>{data.pid}</Text>
-          </Col>
-          <Col span={2}>
-            <Title level={5}>SID:</Title>
-            <Text>{data.sid}</Text>
+            <Text>{data.PID}</Text>
           </Col>
           <Col span={3}>
+            <Title level={5}>SID:</Title>
+            <Text>{data.SID}</Text>
+          </Col>
+          <Col span={4}>
             <Title level={5}>CCCD:</Title>
-            <Text>{data.cccd}</Text>
+            <Text>{data.CCCD}</Text>
           </Col>
         </Row>
 
         <Row gutter={24} style={{ marginTop: 16 }}>
-          <Col span={3}>
+          <Col span={4}>
             <Title level={5}>Trạng thái:</Title>
             <Tag color={PATIENT_DIAGNOSE_COLOR[data.status]}>
               {PATIENT_DIAGNOSE_STATUS[data.status]}
             </Tag>
           </Col>
-          <Col span={8}>
+          <Col span={10}>
             <Title level={5}>Chỉ định:</Title>
-            <Text>{data.indication}</Text>
+            <Text>{data.Indication}</Text>
           </Col>
-          <Col span={8}>
+          <Col span={10}>
             <Title level={5}>Phòng khám:</Title>
             <Text>{clinicName}</Text>
           </Col>
         </Row>
 
         <Row gutter={24} style={{ marginTop: 16 }}>
-          <Col span={2}>
+          <Col span={4}>
             <Title level={5}>SĐT:</Title>
-            <Text>{data.phone}</Text>
+            <Text>{data.phoneNumber}</Text>
           </Col>
-          <Col span={5}>
+          <Col span={6}>
             <Title level={5}>Email:</Title>
             <Text>{data.email}</Text>
           </Col>
           <Col span={8}>
             <Title level={5}>Quốc tịch:</Title>
-            <Text>{data.country}</Text>
+            <Text>{data.countryCode}</Text>
           </Col>
         </Row>
 
         <Row gutter={24} style={{ marginTop: 16 }}>
-          <Col span={3}>
+          <Col span={4}>
             <Title level={5}>Phường/Xã:</Title>
-            <Text>{wards.find((p) => p.code == data.ward_code)?.name}</Text>
+            <Text>{getNameByCode(wards, data.ward_code)}</Text>
           </Col>
-          <Col span={3}>
+          <Col span={4}>
             <Title level={5}>Quận/Huyện:</Title>
-            <Text>
-              {districts.find((p) => p.code == data.district_code)?.name}
-            </Text>
+            <Text>{getNameByCode(districts, data.district_code)}</Text>
           </Col>
-          <Col span={3}>
+          <Col span={6}>
             <Title level={5}>Tỉnh/Thành phố:</Title>
-            <Text>
-              {provinces.find((p) => p.code == data.province_code)?.name}
-            </Text>
+            <Text>{getNameByCode(provinces, data.province_code)}</Text>
           </Col>
-          <Col span={8}>
+          <Col span={10}>
             <Title level={5}>Địa chỉ chi tiết:</Title>
-            <Text>{data.detail}</Text>
+            <Text>{data.address}</Text>
           </Col>
         </Row>
 
@@ -220,6 +174,7 @@ const PatientDiagnoiseDetailPage = () => {
             <Text>{dayjs(data.updatedAt).format("HH:mm DD/MM/YYYY")}</Text>
           </Col>
         </Row>
+
         <Row gutter={24} style={{ marginTop: 40 }}>
           <h2>Hành động</h2>
         </Row>
@@ -236,11 +191,11 @@ const PatientDiagnoiseDetailPage = () => {
             <Button type="default">In kết quả</Button>
           </Col>
         </Row>
+
         <Row gutter={24} style={{ marginTop: 40 }}>
           <h2>Lịch sử</h2>
         </Row>
-
-        <PatientTablePage isNotCreate={true} />
+        <PatientTablePage isNotCreate={true} PID={data.PID} />
       </Card>
     </div>
   );
