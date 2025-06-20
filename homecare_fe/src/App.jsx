@@ -29,6 +29,7 @@ import DoctorPrintTemplateList from "./pages/products/DoctorUseTemplate/DoctorUs
 import PatientTablePage from "./pages/patient/PatientDiagnoseList";
 import PatientFormPage from "./pages/patient/New/PatientFormPage";
 import PatientDiagnoseDetailPage from "./pages/patient/Detail/DetailPatientDiagnose";
+import PatientUseTemplate from "./pages/patient/Use/PatientUseTemplate";
 
 function App() {
   useAuthInitializer();
@@ -90,6 +91,10 @@ function App() {
           <Route
             path="patients-diagnose/create"
             element={<PatientFormPage />}
+          />
+          <Route
+            path="patients-diagnose/use/:id_patient_diagnose"
+            element={<PatientUseTemplate />}
           />
           <Route
             path="patients-diagnose/edit/:id"

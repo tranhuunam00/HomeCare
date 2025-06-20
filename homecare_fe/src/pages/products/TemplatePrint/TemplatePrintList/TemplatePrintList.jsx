@@ -92,20 +92,6 @@ const TemplatePrintList = () => {
         </Button>
       ),
     },
-
-    {
-      title: "Sử dụng",
-      key: "action",
-      render: (_, record) => (
-        <Button
-          icon={<UserOutlined />}
-          type="link"
-          onClick={() => navigate(`/home/templates-print/use/${record.id}`)}
-        >
-          Sử dụng
-        </Button>
-      ),
-    },
   ];
 
   return (

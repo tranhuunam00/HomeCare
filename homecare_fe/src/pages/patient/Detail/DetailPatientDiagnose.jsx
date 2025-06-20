@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Card, Row, Col, Typography, Spin, Tag, Button } from "antd";
 import dayjs from "dayjs";
 import useVietnamAddress from "../../../hooks/useVietnamAddress";
@@ -17,6 +17,7 @@ const PatientDiagnoiseDetailPage = () => {
   const [data, setData] = useState(null);
   const [clinics, setClinics] = useState([]);
   const [clinicName, setClinicName] = useState("");
+  const navigate = useNavigate();
 
   const {
     provinces,
@@ -180,7 +181,12 @@ const PatientDiagnoiseDetailPage = () => {
         </Row>
         <Row gutter={24} style={{ marginTop: 16 }}>
           <Col span={4}>
-            <Button type="primary">Đọc kết quả</Button>
+            <Button
+              onClick={() => navigate("/home/patients-diagnose/use/" + id)}
+              type="primary"
+            >
+              Đọc kết quả
+            </Button>
           </Col>
           <Col span={5}>
             <Button type="dashed" danger>

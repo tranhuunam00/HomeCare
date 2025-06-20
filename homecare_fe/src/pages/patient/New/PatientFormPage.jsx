@@ -16,6 +16,7 @@ import dayjs from "dayjs";
 import useVietnamAddress from "../../../hooks/useVietnamAddress";
 import API_CALL from "../../../services/axiosClient";
 import { useGlobalAuth } from "../../../contexts/AuthContext";
+import { USER_ROLE } from "../../../constant/app";
 
 const { Option } = Select;
 
@@ -72,8 +73,10 @@ const PatientFormPage = () => {
       const birth = dayjs(date);
       const age = today.diff(birth, "year");
       form.setFieldsValue({ age });
+      form.setFieldsValue({ dob: date });
     } else {
       form.setFieldsValue({ age: undefined });
+      form.setFieldsValue({ dob: null });
     }
   };
   const onFinish = async (values) => {
@@ -97,6 +100,7 @@ const PatientFormPage = () => {
         id_clinic: values.id_clinic,
         createdBy: user?.id,
         status: 1,
+        dob: values.dob,
       };
 
       await API_CALL.post("/patient-diagnose", payload);
@@ -153,19 +157,21 @@ const PatientFormPage = () => {
               </Form.Item>
             </Col>
           </Row>
-          <Form.Item
-            label="Phòng khám"
-            name="id_clinic"
-            rules={[{ required: true }]}
-          >
-            <Select placeholder="Chọn phòng khám">
-              {clinics.map((clinic) => (
-                <Option key={clinic.id} value={clinic.id}>
-                  {clinic.name}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
+          {user.id_role == USER_ROLE.ADMIN && (
+            <Form.Item
+              label="Phòng khám"
+              name="id_clinic"
+              rules={[{ required: true }]}
+            >
+              <Select placeholder="Chọn phòng khám">
+                {clinics.map((clinic) => (
+                  <Option key={clinic.id} value={clinic.id}>
+                    {clinic.name}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+          )}
           {/* Quốc tịch */}
 
           {/* Ngày sinh + tuổi */}

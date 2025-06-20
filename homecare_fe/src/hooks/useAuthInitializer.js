@@ -6,7 +6,8 @@ import API_CALL from "../services/axiosClient";
 import useToast from "./useToast";
 
 const useAuthInitializer = () => {
-  const { handleLoginContext, handleLogoutGlobal } = useGlobalAuth();
+  const { handleLoginContext, handleLogoutGlobal, setTemplateServices } =
+    useGlobalAuth();
   const { showWarning } = useToast();
 
   useEffect(() => {
@@ -18,11 +19,19 @@ const useAuthInitializer = () => {
         .then((res) => {
           const { user, doctor } = res.data.data;
           console.log("-----------------------zxoo---------");
-          handleLoginContext({ token, user, doctor }); // ✅ xác thực thành công
+          handleLoginContext({ token, user, doctor });
         })
         .catch(() => {
-          handleLogoutGlobal(); // ❌ token hết hạn hoặc không hợp lệ
+          handleLogoutGlobal();
           showWarning("Vui lòng đăng nhập lại ");
+        });
+
+      API_CALL.get(`/ts`)
+        .then((res) => {
+          setTemplateServices(res.data.data.data);
+        })
+        .catch(() => {
+          showWarning("Vui lòng  API_CALL.get(`/users/ts`)");
         });
     }
   }, []);

@@ -9,6 +9,7 @@ import {
   Button,
 } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
+import { useState } from "react";
 
 const { Option } = Select;
 
@@ -17,7 +18,11 @@ const { Option } = Select;
  * @param {Array} fields - danh sách field gồm { type, label, raw, index }
  * @returns JSX[]
  */
-export const renderDynamicAntdFields = (fields) => {
+export const renderDynamicAntdFields = (
+  fields,
+  inputsRender,
+  setInputsRender
+) => {
   return fields.map((field) => {
     const name = `field_${field.index}`;
 
@@ -25,7 +30,16 @@ export const renderDynamicAntdFields = (fields) => {
       case "text":
         return (
           <Form.Item label={field.label} name={name} key={name}>
-            <Input placeholder={field.label} />
+            <Input
+              onChange={(e) => {
+                console.log("value", e.target.value);
+                setInputsRender({
+                  ...inputsRender,
+                  [field.raw]: e.target.value,
+                });
+              }}
+              placeholder={field.label}
+            />
           </Form.Item>
         );
 

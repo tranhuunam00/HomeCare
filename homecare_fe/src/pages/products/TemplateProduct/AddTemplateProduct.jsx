@@ -54,8 +54,6 @@ const AddOrEditTemplateProduct = () => {
       API_CALL.get(`/templates/${id}`)
         .then((res) => {
           const data = res.data.data;
-          console.log(" API_CALL.get(`/templates/${id}`)");
-          console.log(data);
           form.setFieldsValue(data);
         })
         .catch(() => message.error("Không thể tải dữ liệu chi tiết"))
@@ -90,9 +88,9 @@ const AddOrEditTemplateProduct = () => {
     }
   };
 
-  console.log("resultText", resultText);
+  console.log("des", resultText);
 
-  console.log(extractDynamicFieldsFromHtml(resultText)[0]);
+  console.log(extractDynamicFieldsFromHtml(resultText));
   return (
     <div style={{ display: "flex" }}>
       <Card

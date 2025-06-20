@@ -28,7 +28,7 @@ const TemplatePrintPreview = () => {
 
   const [templateList, setTemplateList] = useState([]);
   const { id_print_template } = useParams();
-  const [idTemplate, setIdTemplate] = useState(id_print_template);
+  const [idTemplate, setIdTemplate] = useState();
 
   const printRef = useRef();
 
