@@ -46,7 +46,7 @@ const ImageWithCaptionInput = ({ value = [], onChange }) => {
       </Button>
       <Row gutter={[16, 16]}>
         {images.map((item, index) => (
-          <Col key={index} span={12} md={6}>
+          <Col key={index} span={16} md={8}>
             <div style={{ border: "1px solid #ccc", padding: 8 }}>
               <Upload
                 showUploadList={false}
@@ -60,8 +60,8 @@ const ImageWithCaptionInput = ({ value = [], onChange }) => {
                   src={item.url}
                   alt="preview"
                   style={{
-                    width: "100%",
-                    height: 200,
+                    width: 100,
+                    height: 100,
                     objectFit: "cover",
                     marginTop: 8,
                   }}

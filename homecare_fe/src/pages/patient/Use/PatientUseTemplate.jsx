@@ -102,9 +102,9 @@ const PatientUseTemplate = () => {
     <h3>QUY TRÌNH VÀ KĨ THUẬT</h3>
     ${replaceInputsInHtml(template?.description || "", inputsRender)}
     <h3>KẾT LUẬN CHẨN ĐOÁN</h3>
-    ${template?.result || ""}
+    ${replaceInputsInHtml(template?.result || "", inputsRender)}
     <h3>KHUYẾN NGHỊ</h3>
-    ${template?.recommendation || ""}
+    ${replaceInputsInHtml(template?.recommendation || "", inputsRender)}
   `;
     setCombinedHtml(html);
   }, [template, inputsRender]);
@@ -189,10 +189,6 @@ const PatientUseTemplate = () => {
     newWindow.close();
   };
 
-  console.log(
-    'extractDynamicFieldsFromHtml(template?.result || "")',
-    extractDynamicFieldsFromHtml(template?.result || "")
-  );
   return (
     <div style={{ display: "flex" }}>
       <Card style={{ width: 600, margin: "0" }}>
@@ -252,97 +248,105 @@ const PatientUseTemplate = () => {
         </div>
 
         <Spin spinning={loading}>
-          <Card style={{ fontSize: 11, padding: 0 }} paddingLG={0}>
-            <div style={{ marginBottom: 8 }}>
-              <div>Triệu chứng</div>
+          <Card style={{ fontSize: 11, padding: 8 }}>
+            <div style={{ marginBottom: 8, fontSize: 11 }}>
+              <div style={{ marginBottom: 4 }}>Triệu chứng</div>
               <Input.TextArea
-                onChange={(e) => {
-                  setInputsAddon({
-                    ...inputsAddon,
-                    [e.target.name]: e.target.value,
-                  });
-                }}
+                size="small"
                 rows={2}
                 name="symptoms"
-              />
-            </div>
-
-            <div style={{ marginBottom: 8 }}>
-              <div>Diễn biến</div>
-              <Input
-                onChange={(e) => {
+                onChange={(e) =>
                   setInputsAddon({
                     ...inputsAddon,
                     [e.target.name]: e.target.value,
-                  });
-                }}
+                  })
+                }
+                style={{ fontSize: 11 }}
+              />
+            </div>
+
+            <div style={{ marginBottom: 8, fontSize: 11 }}>
+              <div style={{ marginBottom: 4 }}>Diễn biến</div>
+              <Input
+                size="small"
                 name="progress"
-              />
-            </div>
-
-            <div style={{ marginBottom: 8 }}>
-              <div>Tiền sử bệnh</div>
-              <Input
-                onChange={(e) => {
+                onChange={(e) =>
                   setInputsAddon({
                     ...inputsAddon,
                     [e.target.name]: e.target.value,
-                  });
-                }}
-                name="medical_history"
+                  })
+                }
+                style={{ fontSize: 11 }}
               />
             </div>
 
-            <Row gutter={16}>
+            <div style={{ marginBottom: 8, fontSize: 11 }}>
+              <div style={{ marginBottom: 4 }}>Tiền sử bệnh</div>
+              <Input
+                size="small"
+                name="medical_history"
+                onChange={(e) =>
+                  setInputsAddon({
+                    ...inputsAddon,
+                    [e.target.name]: e.target.value,
+                  })
+                }
+                style={{ fontSize: 11 }}
+              />
+            </div>
+
+            <Row gutter={12}>
               <Col span={16}>
-                <div style={{ marginBottom: 8 }}>
-                  <div>Link so sánh:</div>
+                <div style={{ marginBottom: 8, fontSize: 11 }}>
+                  <div style={{ marginBottom: 4 }}>Link so sánh:</div>
                   <Input
-                    onChange={(e) => {
+                    size="small"
+                    name="compare_link"
+                    onChange={(e) =>
                       setInputsAddon({
                         ...inputsAddon,
                         [e.target.name]: e.target.value,
-                      });
-                    }}
-                    name="compare_link"
+                      })
+                    }
+                    style={{ fontSize: 11 }}
                   />
                 </div>
               </Col>
               <Col span={8}>
-                <div style={{ marginBottom: 8 }}>
-                  <div>Có kết quả cũ:</div>
+                <div style={{ marginBottom: 8, fontSize: 11 }}>
+                  <div style={{ marginBottom: 4 }}>Có kết quả cũ:</div>
                   <Input
-                    onChange={(e) => {
+                    size="small"
+                    name="old_date"
+                    onChange={(e) =>
                       setInputsAddon({
                         ...inputsAddon,
                         [e.target.name]: e.target.value,
-                      });
-                    }}
-                    name="old_date"
+                      })
+                    }
+                    style={{ fontSize: 11 }}
                   />
                 </div>
               </Col>
             </Row>
           </Card>
 
-          <h2 style={{ marginBottom: 30 }}>Nội dung tổng hợp</h2>
-
           <Card style={{ width: 500 }}>
-            <Title level={3}>Chỗ nhập liệu</Title>
+            <h2>Chỗ nhập liệu</h2>
 
-            <h2>Mô tả và kĩ thuật</h2>
+            <h4>Mô tả và kĩ thuật</h4>
             {renderDynamicAntdFields(
               extractDynamicFieldsFromHtml(template?.description || ""),
               inputsRender,
               setInputsRender
             )}
-            <h2>Kết quả</h2>
+            <h4>Kết quả</h4>
             {renderDynamicAntdFields(
               extractDynamicFieldsFromHtml(template?.result || ""),
               inputsRender,
               setInputsRender
             )}
-            <h2>Khuyến nghị</h2>
+            <h4>Khuyến nghị</h4>
             {renderDynamicAntdFields(
               extractDynamicFieldsFromHtml(template?.recommendation || ""),
               inputsRender,
@@ -463,13 +467,13 @@ const PatientUseTemplate = () => {
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  fontSize: 16,
+                  fontSize: 14,
                 }}
               >
-                <div style={{ width: 150 }}>
+                <div style={{ width: 90 }}>
                   <p
                     style={{
-                      fontSize: 16,
+                      fontSize: 14,
                       fontWeight: 600,
                       margin: 0,
                       padding: 0,
@@ -478,7 +482,7 @@ const PatientUseTemplate = () => {
                     Họ và tên:
                   </p>
                 </div>
-                <p style={{ fontSize: 16, margin: 0, padding: 0 }}>
+                <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
                   {patientDiagnose?.name}
                 </p>
               </div>
@@ -487,10 +491,10 @@ const PatientUseTemplate = () => {
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  fontSize: 16,
+                  fontSize: 14,
                 }}
               >
-                <div style={{ width: 150 }}>
+                <div style={{ width: 90 }}>
                   <p
                     style={{
                       fontWeight: 600,
@@ -519,13 +523,13 @@ const PatientUseTemplate = () => {
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  fontSize: 16,
+                  fontSize: 14,
                 }}
               >
                 <div style={{ width: 90 }}>
                   <p
                     style={{
-                      fontSize: 16,
+                      fontSize: 14,
                       fontWeight: 600,
                       margin: 0,
                       padding: 0,
@@ -534,7 +538,7 @@ const PatientUseTemplate = () => {
                     Năm sinh:
                   </p>
                 </div>
-                <p style={{ fontSize: 16, margin: 0, padding: 0 }}>
+                <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
                   {dayjs(patientDiagnose?.dob).format("YYYY")}
                 </p>
               </div>
@@ -543,12 +547,12 @@ const PatientUseTemplate = () => {
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  fontSize: 16,
+                  fontSize: 14,
                   margin: 0,
                   padding: 0,
                 }}
               >
-                <div style={{ width: 150 }}>
+                <div style={{ width: 70 }}>
                   <p
                     style={{
                       fontWeight: 600,
@@ -578,13 +582,13 @@ const PatientUseTemplate = () => {
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  fontSize: 16,
+                  fontSize: 14,
                 }}
               >
                 <div style={{ width: 80 }}>
                   <p
                     style={{
-                      fontSize: 16,
+                      fontSize: 14,
                       fontWeight: 600,
                       margin: 0,
                       padding: 0,
@@ -593,20 +597,20 @@ const PatientUseTemplate = () => {
                     Quốc gia:
                   </p>
                 </div>
-                <p style={{ fontSize: 16, margin: 0, padding: 0 }}>Việt Nam</p>
+                <p style={{ fontSize: 14, margin: 0, padding: 0 }}>Việt Nam</p>
               </div>
 
               <div
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  fontSize: 16,
+                  fontSize: 14,
                 }}
               >
                 <div style={{ width: 130 }}>
                   <p
                     style={{
-                      fontSize: 16,
+                      fontSize: 14,
                       fontWeight: 600,
                       margin: 0,
                       padding: 0,
@@ -615,7 +619,7 @@ const PatientUseTemplate = () => {
                     Tỉnh/Thành phố:
                   </p>
                 </div>
-                <p style={{ fontSize: 16, margin: 0, padding: 0 }}>
+                <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
                   {provinces.find(
                     (s) => s.code == patientDiagnose?.province_code
                   )?.name || "-"}
@@ -624,7 +628,7 @@ const PatientUseTemplate = () => {
               <div style={{ width: 60 }}>
                 <p
                   style={{
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: 600,
                     margin: 0,
                     padding: 0,
@@ -633,7 +637,7 @@ const PatientUseTemplate = () => {
                   Quận/Huyện:
                 </p>
               </div>
-              <p style={{ fontSize: 16, margin: 0, padding: 0 }}>
+              <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
                 {districts.find((s) => s.code == patientDiagnose?.district_code)
                   ?.name || "-"}
               </p>
@@ -649,13 +653,13 @@ const PatientUseTemplate = () => {
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  fontSize: 16,
+                  fontSize: 14,
                 }}
               >
-                <div style={{ width: 150 }}>
+                <div style={{ width: 100 }}>
                   <p
                     style={{
-                      fontSize: 16,
+                      fontSize: 14,
                       fontWeight: 600,
                       margin: 0,
                       padding: 0,
@@ -664,7 +668,7 @@ const PatientUseTemplate = () => {
                     Xã/Phường:
                   </p>
                 </div>
-                <p style={{ fontSize: 16, margin: 0, padding: 0 }}>
+                <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
                   {wards.find((s) => s.code == patientDiagnose?.ward_code)
                     ?.name || "-"}
                 </p>
@@ -675,13 +679,13 @@ const PatientUseTemplate = () => {
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  fontSize: 16,
+                  fontSize: 14,
                 }}
               >
-                <div style={{ width: 150 }}>
+                <div style={{ width: 90 }}>
                   <p
                     style={{
-                      fontSize: 16,
+                      fontSize: 14,
                       fontWeight: 600,
                       margin: 0,
                       padding: 0,
@@ -690,7 +694,7 @@ const PatientUseTemplate = () => {
                     Số nhà:
                   </p>
                 </div>
-                <p style={{ fontSize: 16, margin: 0, padding: 0 }}>
+                <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
                   {patientDiagnose?.address || "-"}
                 </p>
               </div>
@@ -706,13 +710,13 @@ const PatientUseTemplate = () => {
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  fontSize: 16,
+                  fontSize: 14,
                 }}
               >
-                <div style={{ width: 150 }}>
+                <div style={{ width: 110 }}>
                   <p
                     style={{
-                      fontSize: 16,
+                      fontSize: 14,
                       fontWeight: 600,
                       margin: 0,
                       padding: 0,
@@ -721,7 +725,7 @@ const PatientUseTemplate = () => {
                     Số điện thoại
                   </p>
                 </div>
-                <p style={{ fontSize: 16, margin: 0, padding: 0 }}>
+                <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
                   {patientDiagnose?.phoneNumber}
                 </p>
               </div>
@@ -731,13 +735,13 @@ const PatientUseTemplate = () => {
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  fontSize: 16,
+                  fontSize: 14,
                 }}
               >
                 <div style={{ width: 60 }}>
                   <p
                     style={{
-                      fontSize: 16,
+                      fontSize: 14,
                       fontWeight: 600,
                       margin: 0,
                       padding: 0,
@@ -746,7 +750,7 @@ const PatientUseTemplate = () => {
                     Email:
                   </p>
                 </div>
-                <p style={{ fontSize: 16, margin: 0, padding: 0 }}>
+                <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
                   {patientDiagnose?.email || "-"}
                 </p>
               </div>
@@ -763,13 +767,13 @@ const PatientUseTemplate = () => {
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  fontSize: 16,
+                  fontSize: 14,
                 }}
               >
-                <div style={{ width: 150 }}>
+                <div style={{ width: 110 }}>
                   <p
                     style={{
-                      fontSize: 16,
+                      fontSize: 14,
                       fontWeight: 600,
                       margin: 0,
                       padding: 0,
@@ -778,7 +782,7 @@ const PatientUseTemplate = () => {
                     Triệu chứng:
                   </p>
                 </div>
-                <p style={{ fontSize: 16, margin: 0, padding: 0 }}>
+                <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
                   {inputsAddon?.symptoms}
                 </p>
               </div>
@@ -794,13 +798,13 @@ const PatientUseTemplate = () => {
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  fontSize: 16,
+                  fontSize: 14,
                 }}
               >
-                <div style={{ width: 150 }}>
+                <div style={{ width: 100 }}>
                   <p
                     style={{
-                      fontSize: 16,
+                      fontSize: 14,
                       fontWeight: 600,
                       margin: 0,
                       padding: 0,
@@ -809,7 +813,7 @@ const PatientUseTemplate = () => {
                     Diễn biến:
                   </p>
                 </div>
-                <p style={{ fontSize: 16, margin: 0, padding: 0 }}>
+                <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
                   {inputsAddon?.progress}
                 </p>
               </div>
@@ -817,13 +821,13 @@ const PatientUseTemplate = () => {
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  fontSize: 16,
+                  fontSize: 14,
                 }}
               >
-                <div style={{ width: 150 }}>
+                <div style={{ width: 110 }}>
                   <p
                     style={{
-                      fontSize: 16,
+                      fontSize: 14,
                       fontWeight: 600,
                       margin: 0,
                       padding: 0,
@@ -832,7 +836,7 @@ const PatientUseTemplate = () => {
                     Tiền xử bệnh:
                   </p>
                 </div>
-                <p style={{ fontSize: 16, margin: 0, padding: 0 }}>
+                <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
                   {inputsAddon?.medical_history}
                 </p>
               </div>
@@ -849,13 +853,13 @@ const PatientUseTemplate = () => {
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  fontSize: 16,
+                  fontSize: 14,
                 }}
               >
-                <div style={{ width: 150 }}>
+                <div style={{ width: 80 }}>
                   <p
                     style={{
-                      fontSize: 16,
+                      fontSize: 14,
                       fontWeight: 600,
                       margin: 0,
                       padding: 0,
@@ -864,7 +868,7 @@ const PatientUseTemplate = () => {
                     So sánh:
                   </p>
                 </div>
-                <p style={{ fontSize: 16, margin: 0, padding: 0 }}>
+                <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
                   {inputsAddon?.compare_link}
                 </p>
               </div>
@@ -872,13 +876,13 @@ const PatientUseTemplate = () => {
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  fontSize: 16,
+                  fontSize: 14,
                 }}
               >
-                <div style={{ width: 150 }}>
+                <div style={{ width: 120 }}>
                   <p
                     style={{
-                      fontSize: 16,
+                      fontSize: 14,
                       fontWeight: 600,
                       margin: 0,
                       padding: 0,
@@ -887,7 +891,7 @@ const PatientUseTemplate = () => {
                     Có kết quả cũ:
                   </p>
                 </div>
-                <p style={{ fontSize: 16, margin: 0, padding: 0 }}>
+                <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
                   {inputsAddon?.old_date}
                 </p>
               </div>
@@ -898,43 +902,6 @@ const PatientUseTemplate = () => {
             className="print-content"
             dangerouslySetInnerHTML={{ __html: combinedHtml }}
           />
-
-          <h3>BÁC SĨ THỰC HIỆN</h3>
-
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <section>
-              <div style={{ display: "flex", marginBottom: 10 }}>
-                <div style={{ width: 150 }}>
-                  <strong>Họ và tên:</strong>
-                </div>
-                {doctor.full_name}
-              </div>
-              <div style={{ display: "flex", marginBottom: 10 }}>
-                <div style={{ width: 150 }}>
-                  <strong>Điện thoại:</strong>
-                </div>
-                {doctor.phone_number}
-              </div>
-              <div style={{ display: "flex", marginBottom: 10 }}>
-                <div style={{ width: 150 }}>
-                  <strong>Thời gian:</strong>
-                </div>
-                {dayjs().format("DD-MM-YYYY HH:mm")}
-              </div>
-              <div style={{ display: "flex", marginBottom: 10 }}>
-                <div style={{ width: 150 }}>
-                  <strong>Chữ ký số:</strong>
-                </div>
-                digital signed by Tran Van A
-              </div>
-            </section>
-            <section>
-              <img src={doctor.avatar_url} alt="" width={150} height={150} />
-            </section>
-            <section>
-              <img src={doctor.signature_url} alt="" width={150} height={150} />
-            </section>
-          </div>
           <h3>HÌNH ẢNH MINH HỌA</h3>
           <div
             style={{
@@ -948,12 +915,48 @@ const PatientUseTemplate = () => {
                 <img
                   src={item.url}
                   alt={`img-${idx}`}
-                  width={250}
-                  height={250}
+                  width={150}
+                  height={150}
                 />
-                <p style={{ width: 250 }}>{item.caption}</p>
+                <p style={{ width: 150 }}>{item.caption}</p>
               </section>
             ))}
+          </div>
+          <h3>BÁC SĨ THỰC HIỆN</h3>
+
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <section>
+              <div style={{ display: "flex", marginBottom: 10, fontSize: 14 }}>
+                <div style={{ width: 150 }}>
+                  <strong>Họ và tên:</strong>
+                </div>
+                {doctor.full_name}
+              </div>
+              <div style={{ display: "flex", marginBottom: 10, fontSize: 14 }}>
+                <div style={{ width: 150 }}>
+                  <strong>Điện thoại:</strong>
+                </div>
+                {doctor.phone_number}
+              </div>
+              <div style={{ display: "flex", marginBottom: 10, fontSize: 14 }}>
+                <div style={{ width: 150 }}>
+                  <strong>Thời gian:</strong>
+                </div>
+                {dayjs().format("DD-MM-YYYY HH:mm")}
+              </div>
+              <div style={{ display: "flex", marginBottom: 10, fontSize: 14 }}>
+                <div style={{ width: 150 }}>
+                  <strong>Chữ ký số:</strong>
+                </div>
+                digital signed by Tran Van A
+              </div>
+            </section>
+            <section>
+              <img src={doctor.avatar_url} alt="" width={100} height={100} />
+            </section>
+            <section>
+              <img src={doctor.signature_url} alt="" width={100} height={100} />
+            </section>
           </div>
         </Card>
       </div>

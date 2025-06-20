@@ -3,21 +3,14 @@ import {
   InputNumber,
   Checkbox,
   Select,
-  Form,
   DatePicker,
   Upload,
   Button,
 } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
-import { useState } from "react";
 
 const { Option } = Select;
 
-/**
- * Render Ant Design form items từ danh sách field động
- * @param {Array} fields - danh sách field gồm { type, label, raw, index }
- * @returns JSX[]
- */
 export const renderDynamicAntdFields = (
   fields,
   inputsRender,
@@ -25,82 +18,117 @@ export const renderDynamicAntdFields = (
 ) => {
   return fields.map((field) => {
     const name = `field_${field.index}`;
+    const commonStyle = { fontSize: 11, marginBottom: 8 };
+
+    const updateValue = (value) => {
+      setInputsRender((prev) => ({
+        ...prev,
+        [field.raw]: value,
+      }));
+    };
 
     switch (field.type) {
       case "text":
         return (
-          <Form.Item label={field.label} name={name} key={name}>
+          <div key={name} style={commonStyle}>
+            <div>{field.label}</div>
             <Input
-              onChange={(e) => {
-                console.log("value", e.target.value);
-                setInputsRender({
-                  ...inputsRender,
-                  [field.raw]: e.target.value,
-                });
-              }}
+              size="small"
               placeholder={field.label}
+              onChange={(e) => updateValue(e.target.value)}
+              style={{ fontSize: 11 }}
             />
-          </Form.Item>
+          </div>
         );
 
       case "textarea":
         return (
-          <Form.Item label={field.label} name={name} key={name}>
+          <div key={name} style={commonStyle}>
+            <div>{field.label}</div>
             <Input.TextArea
+              size="small"
               placeholder={field.label}
-              autoSize={{ minRows: 3, maxRows: 6 }}
+              autoSize={{ minRows: 2, maxRows: 4 }}
+              onChange={(e) => updateValue(e.target.value)}
+              style={{ fontSize: 11 }}
             />
-          </Form.Item>
+          </div>
         );
 
       case "number":
         return (
-          <Form.Item label={field.label} name={name} key={name}>
-            <InputNumber placeholder={field.label} style={{ width: "100%" }} />
-          </Form.Item>
+          <div key={name} style={commonStyle}>
+            <div>{field.label}</div>
+            <InputNumber
+              size="small"
+              style={{ width: "100%", fontSize: 11 }}
+              placeholder={field.label}
+              onChange={(val) => updateValue(val)}
+            />
+          </div>
         );
 
       case "checkbox":
         return (
-          <Form.Item name={name} valuePropName="checked" key={name}>
-            <Checkbox>{field.label}</Checkbox>
-          </Form.Item>
+          <div key={name} style={{ ...commonStyle }}>
+            <Checkbox
+              style={{ fontSize: 11 }}
+              onChange={(e) => updateValue(e.target.checked)}
+            >
+              {field.label}
+            </Checkbox>
+          </div>
         );
 
       case "select":
         return (
-          <Form.Item label={field.label} name={name} key={name}>
-            <Select placeholder={`Chọn ${field.label}`}>
+          <div key={name} style={commonStyle}>
+            <div>{field.label}</div>
+            <Select
+              size="small"
+              style={{ width: "100%", fontSize: 11 }}
+              placeholder={`Chọn ${field.label}`}
+              onChange={(val) => updateValue(val)}
+            >
               <Option value="option1">Option 1</Option>
               <Option value="option2">Option 2</Option>
               <Option value="option3">Option 3</Option>
             </Select>
-          </Form.Item>
+          </div>
         );
 
       case "date":
         return (
-          <Form.Item label={field.label} name={name} key={name}>
-            <DatePicker style={{ width: "100%" }} />
-          </Form.Item>
+          <div key={name} style={commonStyle}>
+            <div>{field.label}</div>
+            <DatePicker
+              size="small"
+              style={{ width: "100%", fontSize: 11 }}
+              onChange={(date, dateString) => updateValue(dateString)}
+            />
+          </div>
         );
 
       case "image":
       case "file":
         return (
-          <Form.Item
-            label={field.label}
-            name={name}
-            key={name}
-            valuePropName="fileList"
-            getValueFromEvent={(e) => e?.fileList}
-          >
-            <Upload beforeUpload={() => false} listType="picture">
-              <Button icon={<UploadOutlined />}>
+          <div key={name} style={commonStyle}>
+            <div>{field.label}</div>
+            <Upload
+              beforeUpload={() => false}
+              listType="picture"
+              onChange={(info) => updateValue(info.fileList)}
+              style={{ fontSize: 11 }}
+            >
+              <Button
+                size="small"
+                icon={<UploadOutlined />}
+                style={{ fontSize: 11 }}
+              >
                 Tải lên {field.type === "image" ? "ảnh" : "file"}
               </Button>
             </Upload>
-          </Form.Item>
+          </div>
         );
 
       default:
