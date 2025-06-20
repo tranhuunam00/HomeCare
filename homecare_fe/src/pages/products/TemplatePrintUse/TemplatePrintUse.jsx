@@ -679,10 +679,15 @@ const TemplatePrintUse = () => {
               </div>
             </section>
             <section>
-              <img src={doctor.avatar_url} alt="" width={150} height={150} />
+              <img src={doctor?.avatar_url} alt="" width={150} height={150} />
             </section>
             <section>
-              <img src={doctor.signature_url} alt="" width={150} height={150} />
+              <img
+                src={doctor?.signature_url}
+                alt=""
+                width={150}
+                height={150}
+              />
             </section>
           </div>
           <h3>HÌNH ẢNH MINH HỌA</h3>

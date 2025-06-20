@@ -952,10 +952,15 @@ const PatientUseTemplate = () => {
               </div>
             </section>
             <section>
-              <img src={doctor.avatar_url} alt="" width={100} height={100} />
+              <img src={doctor?.avatar_url} alt="" width={100} height={100} />
             </section>
             <section>
-              <img src={doctor.signature_url} alt="" width={100} height={100} />
+              <img
+                src={doctor?.signature_url}
+                alt=""
+                width={100}
+                height={100}
+              />
             </section>
           </div>
         </Card>
