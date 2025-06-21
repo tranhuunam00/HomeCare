@@ -9,7 +9,7 @@ import {
   PATIENT_DIAGNOSE_STATUS,
 } from "../../../constant/app";
 import PatientTablePage from "../PatientDiagnoseList";
-import StatusButtonPatientDiagnose from "../../../components/statusButtonPatientDiagnose";
+import StatusButtonPatientDiagnose from "../../../components/Status2ButtonPatientDiagnose";
 
 const { Title, Text } = Typography;
 

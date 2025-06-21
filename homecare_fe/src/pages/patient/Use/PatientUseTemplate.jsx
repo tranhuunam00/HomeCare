@@ -23,8 +23,8 @@ import useVietnamAddress from "../../../hooks/useVietnamAddress";
 import ImageWithCaptionInput from "../../products/ImageWithCaptionInput/ImageWithCaptionInput";
 import { renderDynamicAntdFields } from "../../../components/RenderInputFormTemplate";
 import { extractDynamicFieldsFromHtml } from "../../../constant/app";
-import StatusButtonPatientDiagnose from "../../../components/statusButtonPatientDiagnose";
 import CompletionActionsDiagnose from "../../../components/CompletionActionsDiagnose";
+import StatusButtonPatientDiagnose from "../../../components/Status2ButtonPatientDiagnose.jsx";
 
 export const replaceInputsInHtml = (html, inputsRender) => {
   const fields = extractDynamicFieldsFromHtml(html);
