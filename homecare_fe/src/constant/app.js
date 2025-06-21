@@ -28,7 +28,7 @@ export const PATIENT_DIAGNOSE_STATUS = {
 
 export const PATIENT_DIAGNOSE_COLOR = {
   1: "Blue",
-  2: "Yellow",
+  2: "#808000",
   3: "Orange",
   4: "Green",
 };

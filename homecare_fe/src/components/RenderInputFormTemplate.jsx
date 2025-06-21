@@ -21,10 +21,10 @@ export const renderDynamicAntdFields = (
     const commonStyle = { fontSize: 11, marginBottom: 8 };
 
     const updateValue = (value) => {
-      setInputsRender((prev) => ({
-        ...prev,
+      setInputsRender({
+        ...inputsRender,
         [field.raw]: value,
-      }));
+      });
     };
 
     switch (field.type) {
@@ -115,9 +115,13 @@ export const renderDynamicAntdFields = (
           <div key={name} style={commonStyle}>
             <div>{field.label}</div>
             <Upload
-              beforeUpload={() => false}
+              beforeUpload={() => false} // Không upload tự động
               listType="picture"
-              onChange={(info) => updateValue(info.fileList)}
+              maxCount={1} // Chỉ cho phép 1 file
+              onChange={(info) => {
+                const fileList = info.fileList.slice(-1); // chỉ lấy file cuối cùng
+                updateValue(fileList[0]);
+              }}
               style={{ fontSize: 11 }}
             >
               <Button

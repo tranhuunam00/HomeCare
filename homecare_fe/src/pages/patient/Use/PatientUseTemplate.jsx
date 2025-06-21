@@ -23,13 +23,30 @@ import useVietnamAddress from "../../../hooks/useVietnamAddress";
 import ImageWithCaptionInput from "../../products/ImageWithCaptionInput/ImageWithCaptionInput";
 import { renderDynamicAntdFields } from "../../../components/RenderInputFormTemplate";
 import { extractDynamicFieldsFromHtml } from "../../../constant/app";
+import StatusButtonPatientDiagnose from "../../../components/statusButtonPatientDiagnose";
+import CompletionActionsDiagnose from "../../../components/CompletionActionsDiagnose";
 
 export const replaceInputsInHtml = (html, inputsRender) => {
   const fields = extractDynamicFieldsFromHtml(html);
   let result = html;
 
   fields.forEach((field) => {
-    const replacement = inputsRender[field.raw] ?? ""; // Nếu không có thì ""
+    const value = inputsRender[field.raw];
+    let replacement = "";
+    console.log("field", field);
+    console.log("value", value);
+    if ((field.type == "image" || field.type == "file") && value) {
+      const url = value?.thumbUrl || value.url || "";
+      console.log("url", url);
+      if (url) {
+        if (field.type === "image") {
+          replacement = `<img src="${url}" alt="${field.label}" style="width: 320px; height: 200px; object-fit: cover;" />`;
+        }
+      }
+    } else if (value) {
+      replacement = value;
+    }
+
     result = result.replaceAll(field.raw, replacement);
   });
 
@@ -146,13 +163,11 @@ const PatientUseTemplate = () => {
     setSelectedDistrict,
   } = useVietnamAddress();
 
-  console.log("patientDiagnose", patientDiagnose);
   useEffect(() => {
     setSelectedProvince(patientDiagnose?.province_code);
     setSelectedDistrict(patientDiagnose?.district_code);
   }, [patientDiagnose]);
 
-  console.log("wards", wards);
   useEffect(() => {
     if (id_patient_diagnose) {
       setLoading(true);
@@ -192,6 +207,10 @@ const PatientUseTemplate = () => {
   return (
     <div style={{ display: "flex" }}>
       <Card style={{ width: 600, margin: "0" }}>
+        <StatusButtonPatientDiagnose
+          id={patientDiagnose?.id}
+          status={patientDiagnose?.status || 1}
+        />
         <Title level={3}>Phiếu kết quả</Title>
 
         <div style={{ marginBottom: 20 }}>
@@ -357,24 +376,10 @@ const PatientUseTemplate = () => {
           <Form.Item label="Hình ảnh minh họa">
             <ImageWithCaptionInput value={imageList} onChange={setImageList} />
           </Form.Item>
-
-          <h2>Thao tác hoàn thành</h2>
-          <Form.Item style={{ marginTop: 24 }}>
-            <Button
-              style={{ marginLeft: 8 }}
-              onClick={() => navigate("/home/templates-print")}
-            >
-              Hủy
-            </Button>
-            <Button
-              style={{ marginLeft: 8 }}
-              type="default"
-              onClick={handlePrint}
-              // disabled={!idTemplate}
-            >
-              In
-            </Button>
-          </Form.Item>
+          <CompletionActionsDiagnose
+            status={patientDiagnose?.status}
+            handlePrint={handlePrint}
+          />
 
           <Card title="Tải file PDF đã in" style={{ marginTop: 24 }}>
             <Upload

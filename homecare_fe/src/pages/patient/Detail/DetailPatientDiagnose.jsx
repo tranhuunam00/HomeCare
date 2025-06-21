@@ -9,6 +9,7 @@ import {
   PATIENT_DIAGNOSE_STATUS,
 } from "../../../constant/app";
 import PatientTablePage from "../PatientDiagnoseList";
+import StatusButtonPatientDiagnose from "../../../components/statusButtonPatientDiagnose";
 
 const { Title, Text } = Typography;
 
@@ -179,24 +180,7 @@ const PatientDiagnoiseDetailPage = () => {
         <Row gutter={24} style={{ marginTop: 40 }}>
           <h2>Hành động</h2>
         </Row>
-        <Row gutter={24} style={{ marginTop: 16 }}>
-          <Col span={4}>
-            <Button
-              onClick={() => navigate("/home/patients-diagnose/use/" + id)}
-              type="primary"
-            >
-              Đọc kết quả
-            </Button>
-          </Col>
-          <Col span={5}>
-            <Button type="dashed" danger>
-              Xác nhận kết quả
-            </Button>
-          </Col>
-          <Col span={3}>
-            <Button type="default">In kết quả</Button>
-          </Col>
-        </Row>
+        <StatusButtonPatientDiagnose id={data.id} status={data.status} />
 
         <Row gutter={24} style={{ marginTop: 40 }}>
           <h2>Lịch sử</h2>
