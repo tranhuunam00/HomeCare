@@ -16,7 +16,11 @@ import { useNavigate } from "react-router-dom";
 import API_CALL from "../../../services/axiosClient";
 import { useParams } from "react-router-dom";
 import dayjs from "dayjs";
-import { UploadOutlined } from "@ant-design/icons";
+import {
+  EyeInvisibleOutlined,
+  EyeOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
 import { toast } from "react-toastify";
 import { useGlobalAuth } from "../../../contexts/AuthContext";
 import useVietnamAddress from "../../../hooks/useVietnamAddress";
@@ -33,18 +37,20 @@ export const replaceInputsInHtml = (html, inputsRender) => {
   fields.forEach((field) => {
     const value = inputsRender[field.raw];
     let replacement = "";
-    console.log("field", field);
-    console.log("value", value);
-    if ((field.type == "image" || field.type == "file") && value) {
-      const url = value?.thumbUrl || value.url || "";
-      console.log("url", url);
+
+    if (field.type == "image" || field.type == "file") {
+      const url = value?.thumbUrl || value?.url || field.defaultValue || "";
       if (url) {
         if (field.type === "image") {
-          replacement = `<img src="${url}" alt="${field.label}" style="width: 320px; height: 200px; object-fit: cover;" />`;
+          replacement = `
+            <div style="display: flex; justify-content: center; align-items: center; height: 100%; min-height: 200px;">
+              <img src="${url}" alt="${field.label}" style="width: 300px; height: 200px; object-fit: cover;" />
+            </div>
+          `;
         }
       }
-    } else if (value) {
-      replacement = value;
+    } else {
+      replacement = value || field.defaultValue || "";
     }
 
     result = result.replaceAll(field.raw, replacement);
@@ -81,8 +87,11 @@ const PatientUseTemplate = () => {
 
   const [inputsRender, setInputsRender] = useState([]);
   const [inputsAddon, setInputsAddon] = useState([]);
+  const [isOpenPreview, setIsOpenPreview] = useState(true);
 
   console.log("inputsRender", inputsRender);
+  console.log("inputsAddon", inputsAddon);
+  console.log("imageList", imageList);
 
   // Lấy danh sách tất cả template
   useEffect(() => {
@@ -113,7 +122,7 @@ const PatientUseTemplate = () => {
     const html = `
     <style>
       table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-      th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+      th, td { border: 0px solid #ccc; padding: 8px; text-align: left; }
       h3 {margin-bottom: 20px; margin-top: 40px;}
     </style>
     <h3>QUY TRÌNH VÀ KĨ THUẬT</h3>
@@ -191,7 +200,7 @@ const PatientUseTemplate = () => {
           <style>
             body { font-family: Arial, sans-serif; padding: 20px; }
             table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-            th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+            th, td { border: 0px solid #ccc; padding: 8px; text-align: left; }
             h3 { margin-top: 24px; }
           </style>
         </head>
@@ -206,11 +215,28 @@ const PatientUseTemplate = () => {
 
   return (
     <div style={{ display: "flex" }}>
-      <Card style={{ width: 600, margin: "0" }}>
+      <Card style={{ width: isOpenPreview ? 600 : "100%", margin: "0" }}>
         <StatusButtonPatientDiagnose
           id={patientDiagnose?.id}
           status={patientDiagnose?.status || 1}
         />
+        <Button
+          type={isOpenPreview ? "default" : "primary"} // màu khác nhau
+          danger={isOpenPreview} // nếu đang mở thì dùng màu đỏ nhẹ
+          style={{
+            marginTop: 16,
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            height: 32,
+            padding: "0 12px",
+            fontSize: 14,
+          }}
+          onClick={() => setIsOpenPreview(!isOpenPreview)}
+          icon={isOpenPreview ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+        >
+          {isOpenPreview ? "Tắt preview" : "Mở preview"}
+        </Button>
         <Title level={3}>Phiếu kết quả</Title>
 
         <div style={{ marginBottom: 20 }}>
@@ -267,8 +293,25 @@ const PatientUseTemplate = () => {
         </div>
 
         <Spin spinning={loading}>
-          <Card style={{ fontSize: 11, padding: 8 }}>
-            <div style={{ marginBottom: 8, fontSize: 11 }}>
+          <div
+            style={{
+              width: "100%",
+              fontSize: 11,
+              padding: 8,
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 12,
+              flexDirection: "row",
+            }}
+          >
+            <div
+              style={{
+                marginBottom: 8,
+                fontSize: 11,
+                maxWidth: 600,
+                flex: "1 1 100%",
+              }}
+            >
               <div style={{ marginBottom: 4 }}>Triệu chứng</div>
               <Input.TextArea
                 size="small"
@@ -284,7 +327,14 @@ const PatientUseTemplate = () => {
               />
             </div>
 
-            <div style={{ marginBottom: 8, fontSize: 11 }}>
+            <div
+              style={{
+                marginBottom: 8,
+                fontSize: 11,
+                maxWidth: 600,
+                flex: "1 1 100%",
+              }}
+            >
               <div style={{ marginBottom: 4 }}>Diễn biến</div>
               <Input
                 size="small"
@@ -299,7 +349,14 @@ const PatientUseTemplate = () => {
               />
             </div>
 
-            <div style={{ marginBottom: 8, fontSize: 11 }}>
+            <div
+              style={{
+                marginBottom: 8,
+                fontSize: 11,
+                maxWidth: 600,
+                flex: "1 1 100%",
+              }}
+            >
               <div style={{ marginBottom: 4 }}>Tiền sử bệnh</div>
               <Input
                 size="small"
@@ -314,7 +371,7 @@ const PatientUseTemplate = () => {
               />
             </div>
 
-            <Row gutter={12}>
+            <Row gutter={12} style={{ maxWidth: 600, flex: "1 1 100%" }}>
               <Col span={16}>
                 <div style={{ marginBottom: 8, fontSize: 11 }}>
                   <div style={{ marginBottom: 4 }}>Link so sánh:</div>
@@ -348,30 +405,36 @@ const PatientUseTemplate = () => {
                 </div>
               </Col>
             </Row>
-          </Card>
+          </div>
+          <h2>Chỗ nhập liệu</h2>
+          <h4>Mô tả và kĩ thuật</h4>
 
-          <Card style={{ width: 500 }}>
-            <h2>Chỗ nhập liệu</h2>
-
-            <h4>Mô tả và kĩ thuật</h4>
+          <div style={{ width: "100%", display: "flex", flexWrap: "wrap" }}>
             {renderDynamicAntdFields(
               extractDynamicFieldsFromHtml(template?.description || ""),
               inputsRender,
               setInputsRender
             )}
-            <h4>Kết quả</h4>
+          </div>
+          <h4>Kết quả</h4>
+
+          <div style={{ width: "100%", display: "flex", flexWrap: "wrap" }}>
             {renderDynamicAntdFields(
               extractDynamicFieldsFromHtml(template?.result || ""),
               inputsRender,
               setInputsRender
             )}
-            <h4>Khuyến nghị</h4>
+          </div>
+
+          <h4>Khuyến nghị</h4>
+
+          <div style={{ width: "100%", display: "flex", flexWrap: "wrap" }}>
             {renderDynamicAntdFields(
               extractDynamicFieldsFromHtml(template?.recommendation || ""),
               inputsRender,
               setInputsRender
             )}
-          </Card>
+          </div>
 
           <Form.Item label="Hình ảnh minh họa">
             <ImageWithCaptionInput value={imageList} onChange={setImageList} />
@@ -409,340 +472,230 @@ const PatientUseTemplate = () => {
           </Card>
         </Spin>
       </Card>
-      <div ref={printRef}>
-        <Card bordered={false} className={`a4-page`}>
-          <header
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              marginBottom: 20,
-              alignItems: "flex-start",
-              gap: 20,
-            }}
-          >
-            <img
+      {isOpenPreview && (
+        <div ref={printRef}>
+          <Card bordered={false} className={`a4-page`}>
+            <header
               style={{
-                marginTop: 10,
-                objectFit: "cover",
-                alignContent: "center",
-              }}
-              src={
-                printTemplate?.logo_url ||
-                "https://via.placeholder.com/150x100?text=Logo"
-              }
-              alt="Logo"
-              width={100}
-              height={100}
-            />
-            <div style={{ maxWidth: "350px" }}>
-              <p style={{ fontWeight: 600, color: "red", fontSize: 16 }}>
-                {printTemplate?.clinic_name || "[Tên phòng khám]"}
-              </p>
-              <p style={{ fontSize: 14 }}>
-                <strong>Khoa:</strong> {printTemplate?.department_name || "-"}
-              </p>
-              <p style={{ fontSize: 14 }}>
-                <strong>Địa chỉ:</strong> {printTemplate?.address || "-"}
-              </p>
-            </div>
-            <div style={{ maxWidth: "280px" }}>
-              <p style={{ fontSize: 14 }}>
-                <strong>Website:</strong>{" "}
-                <i>{printTemplate?.website || "http://..."}</i>
-              </p>
-              <p style={{ fontSize: 14 }}>
-                <strong>Hotline:</strong> {printTemplate?.phone || "..."}
-              </p>
-              <p style={{ fontSize: 14 }}>
-                <strong>Email:</strong>
-                <i>{printTemplate?.email || "example@email.com"}</i>
-              </p>
-            </div>
-          </header>
-          <div>
-            <h3>THÔNG TIN HÀNH CHÍNH</h3>
-            <div
-              style={{
-                marginBottom: 10,
                 display: "flex",
                 justifyContent: "space-between",
+                marginBottom: 20,
+                alignItems: "flex-start",
+                gap: 20,
               }}
             >
-              <div
+              <img
                 style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  fontSize: 14,
+                  marginTop: 10,
+                  objectFit: "cover",
+                  alignContent: "center",
                 }}
-              >
-                <div style={{ width: 90 }}>
-                  <p
-                    style={{
-                      fontSize: 14,
-                      fontWeight: 600,
-                      margin: 0,
-                      padding: 0,
-                    }}
-                  >
-                    Họ và tên:
-                  </p>
-                </div>
-                <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
-                  {patientDiagnose?.name}
+                src={
+                  printTemplate?.logo_url ||
+                  "https://via.placeholder.com/150x100?text=Logo"
+                }
+                alt="Logo"
+                width={100}
+                height={100}
+              />
+              <div style={{ maxWidth: "350px" }}>
+                <p style={{ fontWeight: 600, color: "red", fontSize: 16 }}>
+                  {printTemplate?.clinic_name || "[Tên phòng khám]"}
+                </p>
+                <p style={{ fontSize: 14 }}>
+                  <strong>Khoa:</strong> {printTemplate?.department_name || "-"}
+                </p>
+                <p style={{ fontSize: 14 }}>
+                  <strong>Địa chỉ:</strong> {printTemplate?.address || "-"}
                 </p>
               </div>
-
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  fontSize: 14,
-                }}
-              >
-                <div style={{ width: 90 }}>
-                  <p
-                    style={{
-                      fontWeight: 600,
-                      width: 100,
-                      margin: 0,
-                      padding: 0,
-                    }}
-                  >
-                    Giới tính:
-                  </p>
-                </div>
-                <p style={{ margin: 0, padding: 0 }}>
-                  {patientDiagnose?.gender}
+              <div style={{ maxWidth: "280px" }}>
+                <p style={{ fontSize: 14 }}>
+                  <strong>Website:</strong>{" "}
+                  <i>{printTemplate?.website || "http://..."}</i>
+                </p>
+                <p style={{ fontSize: 14 }}>
+                  <strong>Hotline:</strong> {printTemplate?.phone || "..."}
+                </p>
+                <p style={{ fontSize: 14 }}>
+                  <strong>Email:</strong>
+                  <i>{printTemplate?.email || "example@email.com"}</i>
                 </p>
               </div>
-            </div>
-
-            <div
-              style={{
-                marginBottom: 10,
-                display: "flex",
-                justifyContent: "space-between",
-              }}
-            >
+            </header>
+            <div>
+              <h3>THÔNG TIN HÀNH CHÍNH</h3>
               <div
                 style={{
+                  marginBottom: 10,
                   display: "flex",
                   justifyContent: "space-between",
-                  fontSize: 14,
                 }}
               >
-                <div style={{ width: 90 }}>
-                  <p
-                    style={{
-                      fontSize: 14,
-                      fontWeight: 600,
-                      margin: 0,
-                      padding: 0,
-                    }}
-                  >
-                    Năm sinh:
-                  </p>
-                </div>
-                <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
-                  {dayjs(patientDiagnose?.dob).format("YYYY")}
-                </p>
-              </div>
-
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  fontSize: 14,
-                  margin: 0,
-                  padding: 0,
-                }}
-              >
-                <div style={{ width: 70 }}>
-                  <p
-                    style={{
-                      fontWeight: 600,
-                      width: 100,
-                      margin: 0,
-                      padding: 0,
-                    }}
-                  >
-                    Tuổi:
-                  </p>
-                </div>
-                <p style={{ margin: 0, padding: 0 }}>
-                  {calculateAge(patientDiagnose?.dob)}
-                </p>
-              </div>
-            </div>
-
-            <div
-              style={{
-                marginBottom: 10,
-                display: "flex",
-                justifyContent: "space-between",
-              }}
-            >
-              {/* Quốc gia */}
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  fontSize: 14,
-                }}
-              >
-                <div style={{ width: 80 }}>
-                  <p
-                    style={{
-                      fontSize: 14,
-                      fontWeight: 600,
-                      margin: 0,
-                      padding: 0,
-                    }}
-                  >
-                    Quốc gia:
-                  </p>
-                </div>
-                <p style={{ fontSize: 14, margin: 0, padding: 0 }}>Việt Nam</p>
-              </div>
-
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  fontSize: 14,
-                }}
-              >
-                <div style={{ width: 130 }}>
-                  <p
-                    style={{
-                      fontSize: 14,
-                      fontWeight: 600,
-                      margin: 0,
-                      padding: 0,
-                    }}
-                  >
-                    Tỉnh/Thành phố:
-                  </p>
-                </div>
-                <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
-                  {provinces.find(
-                    (s) => s.code == patientDiagnose?.province_code
-                  )?.name || "-"}
-                </p>
-              </div>
-              <div style={{ width: 60 }}>
-                <p
+                <div
                   style={{
+                    display: "flex",
+                    justifyContent: "space-between",
                     fontSize: 14,
-                    fontWeight: 600,
+                  }}
+                >
+                  <div style={{ width: 90 }}>
+                    <p
+                      style={{
+                        fontSize: 14,
+                        fontWeight: 600,
+                        margin: 0,
+                        padding: 0,
+                      }}
+                    >
+                      Họ và tên:
+                    </p>
+                  </div>
+                  <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
+                    {patientDiagnose?.name}
+                  </p>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontSize: 14,
+                  }}
+                >
+                  <div style={{ width: 90 }}>
+                    <p
+                      style={{
+                        fontWeight: 600,
+                        width: 100,
+                        margin: 0,
+                        padding: 0,
+                      }}
+                    >
+                      Giới tính:
+                    </p>
+                  </div>
+                  <p style={{ margin: 0, padding: 0 }}>
+                    {patientDiagnose?.gender}
+                  </p>
+                </div>
+              </div>
+
+              <div
+                style={{
+                  marginBottom: 10,
+                  display: "flex",
+                  justifyContent: "space-between",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontSize: 14,
+                  }}
+                >
+                  <div style={{ width: 90 }}>
+                    <p
+                      style={{
+                        fontSize: 14,
+                        fontWeight: 600,
+                        margin: 0,
+                        padding: 0,
+                      }}
+                    >
+                      Năm sinh:
+                    </p>
+                  </div>
+                  <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
+                    {dayjs(patientDiagnose?.dob).format("YYYY")}
+                  </p>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontSize: 14,
                     margin: 0,
                     padding: 0,
                   }}
                 >
-                  Quận/Huyện:
-                </p>
-              </div>
-              <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
-                {districts.find((s) => s.code == patientDiagnose?.district_code)
-                  ?.name || "-"}
-              </p>
-            </div>
-            <div
-              style={{
-                marginBottom: 10,
-                display: "flex",
-                justifyContent: "space-between",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  fontSize: 14,
-                }}
-              >
-                <div style={{ width: 100 }}>
-                  <p
-                    style={{
-                      fontSize: 14,
-                      fontWeight: 600,
-                      margin: 0,
-                      padding: 0,
-                    }}
-                  >
-                    Xã/Phường:
+                  <div style={{ width: 70 }}>
+                    <p
+                      style={{
+                        fontWeight: 600,
+                        width: 100,
+                        margin: 0,
+                        padding: 0,
+                      }}
+                    >
+                      Tuổi:
+                    </p>
+                  </div>
+                  <p style={{ margin: 0, padding: 0 }}>
+                    {calculateAge(patientDiagnose?.dob)}
                   </p>
                 </div>
-                <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
-                  {wards.find((s) => s.code == patientDiagnose?.ward_code)
-                    ?.name || "-"}
-                </p>
               </div>
 
-              {/* Số nhà */}
               <div
                 style={{
+                  marginBottom: 10,
                   display: "flex",
                   justifyContent: "space-between",
-                  fontSize: 14,
                 }}
               >
-                <div style={{ width: 90 }}>
-                  <p
-                    style={{
-                      fontSize: 14,
-                      fontWeight: 600,
-                      margin: 0,
-                      padding: 0,
-                    }}
-                  >
-                    Số nhà:
+                {/* Quốc gia */}
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontSize: 14,
+                  }}
+                >
+                  <div style={{ width: 80 }}>
+                    <p
+                      style={{
+                        fontSize: 14,
+                        fontWeight: 600,
+                        margin: 0,
+                        padding: 0,
+                      }}
+                    >
+                      Quốc gia:
+                    </p>
+                  </div>
+                  <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
+                    Việt Nam
                   </p>
                 </div>
-                <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
-                  {patientDiagnose?.address || "-"}
-                </p>
-              </div>
-            </div>
-            <div
-              style={{
-                marginBottom: 10,
-                display: "flex",
-                justifyContent: "space-between",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  fontSize: 14,
-                }}
-              >
-                <div style={{ width: 110 }}>
-                  <p
-                    style={{
-                      fontSize: 14,
-                      fontWeight: 600,
-                      margin: 0,
-                      padding: 0,
-                    }}
-                  >
-                    Số điện thoại
-                  </p>
-                </div>
-                <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
-                  {patientDiagnose?.phoneNumber}
-                </p>
-              </div>
 
-              {/* Số nhà */}
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  fontSize: 14,
-                }}
-              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontSize: 14,
+                  }}
+                >
+                  <div style={{ width: 130 }}>
+                    <p
+                      style={{
+                        fontSize: 14,
+                        fontWeight: 600,
+                        margin: 0,
+                        padding: 0,
+                      }}
+                    >
+                      Tỉnh/Thành phố:
+                    </p>
+                  </div>
+                  <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
+                    {provinces.find(
+                      (s) => s.code == patientDiagnose?.province_code
+                    )?.name || "-"}
+                  </p>
+                </div>
                 <div style={{ width: 60 }}>
                   <p
                     style={{
@@ -752,224 +705,347 @@ const PatientUseTemplate = () => {
                       padding: 0,
                     }}
                   >
-                    Email:
+                    Quận/Huyện:
                   </p>
                 </div>
                 <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
-                  {patientDiagnose?.email || "-"}
+                  {districts.find(
+                    (s) => s.code == patientDiagnose?.district_code
+                  )?.name || "-"}
                 </p>
+              </div>
+              <div
+                style={{
+                  marginBottom: 10,
+                  display: "flex",
+                  justifyContent: "space-between",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontSize: 14,
+                  }}
+                >
+                  <div style={{ width: 100 }}>
+                    <p
+                      style={{
+                        fontSize: 14,
+                        fontWeight: 600,
+                        margin: 0,
+                        padding: 0,
+                      }}
+                    >
+                      Xã/Phường:
+                    </p>
+                  </div>
+                  <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
+                    {wards.find((s) => s.code == patientDiagnose?.ward_code)
+                      ?.name || "-"}
+                  </p>
+                </div>
+
+                {/* Số nhà */}
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontSize: 14,
+                  }}
+                >
+                  <div style={{ width: 90 }}>
+                    <p
+                      style={{
+                        fontSize: 14,
+                        fontWeight: 600,
+                        margin: 0,
+                        padding: 0,
+                      }}
+                    >
+                      Số nhà:
+                    </p>
+                  </div>
+                  <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
+                    {patientDiagnose?.address || "-"}
+                  </p>
+                </div>
+              </div>
+              <div
+                style={{
+                  marginBottom: 10,
+                  display: "flex",
+                  justifyContent: "space-between",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontSize: 14,
+                  }}
+                >
+                  <div style={{ width: 110 }}>
+                    <p
+                      style={{
+                        fontSize: 14,
+                        fontWeight: 600,
+                        margin: 0,
+                        padding: 0,
+                      }}
+                    >
+                      Số điện thoại
+                    </p>
+                  </div>
+                  <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
+                    {patientDiagnose?.phoneNumber}
+                  </p>
+                </div>
+
+                {/* Số nhà */}
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontSize: 14,
+                  }}
+                >
+                  <div style={{ width: 60 }}>
+                    <p
+                      style={{
+                        fontSize: 14,
+                        fontWeight: 600,
+                        margin: 0,
+                        padding: 0,
+                      }}
+                    >
+                      Email:
+                    </p>
+                  </div>
+                  <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
+                    {patientDiagnose?.email || "-"}
+                  </p>
+                </div>
+              </div>
+
+              <div
+                style={{
+                  marginBottom: 10,
+                  display: "flex",
+                  justifyContent: "space-between",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontSize: 14,
+                  }}
+                >
+                  <div style={{ width: 110 }}>
+                    <p
+                      style={{
+                        fontSize: 14,
+                        fontWeight: 600,
+                        margin: 0,
+                        padding: 0,
+                      }}
+                    >
+                      Triệu chứng:
+                    </p>
+                  </div>
+                  <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
+                    {inputsAddon?.symptoms}
+                  </p>
+                </div>
+              </div>
+              <div
+                style={{
+                  marginBottom: 10,
+                  display: "flex",
+                  justifyContent: "space-between",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontSize: 14,
+                  }}
+                >
+                  <div style={{ width: 100 }}>
+                    <p
+                      style={{
+                        fontSize: 14,
+                        fontWeight: 600,
+                        margin: 0,
+                        padding: 0,
+                      }}
+                    >
+                      Diễn biến:
+                    </p>
+                  </div>
+                  <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
+                    {inputsAddon?.progress}
+                  </p>
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontSize: 14,
+                  }}
+                >
+                  <div style={{ width: 110 }}>
+                    <p
+                      style={{
+                        fontSize: 14,
+                        fontWeight: 600,
+                        margin: 0,
+                        padding: 0,
+                      }}
+                    >
+                      Tiền xử bệnh:
+                    </p>
+                  </div>
+                  <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
+                    {inputsAddon?.medical_history}
+                  </p>
+                </div>
+              </div>
+
+              <div
+                style={{
+                  marginBottom: 10,
+                  display: "flex",
+                  justifyContent: "space-between",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontSize: 14,
+                  }}
+                >
+                  <div style={{ width: 80 }}>
+                    <p
+                      style={{
+                        fontSize: 14,
+                        fontWeight: 600,
+                        margin: 0,
+                        padding: 0,
+                      }}
+                    >
+                      So sánh:
+                    </p>
+                  </div>
+                  <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
+                    {inputsAddon?.compare_link}
+                  </p>
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontSize: 14,
+                  }}
+                >
+                  <div style={{ width: 120 }}>
+                    <p
+                      style={{
+                        fontSize: 14,
+                        fontWeight: 600,
+                        margin: 0,
+                        padding: 0,
+                      }}
+                    >
+                      Có kết quả cũ:
+                    </p>
+                  </div>
+                  <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
+                    {inputsAddon?.old_date}
+                  </p>
+                </div>
               </div>
             </div>
 
             <div
-              style={{
-                marginBottom: 10,
-                display: "flex",
-                justifyContent: "space-between",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  fontSize: 14,
-                }}
-              >
-                <div style={{ width: 110 }}>
-                  <p
-                    style={{
-                      fontSize: 14,
-                      fontWeight: 600,
-                      margin: 0,
-                      padding: 0,
-                    }}
-                  >
-                    Triệu chứng:
-                  </p>
-                </div>
-                <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
-                  {inputsAddon?.symptoms}
-                </p>
-              </div>
-            </div>
+              className="print-content"
+              dangerouslySetInnerHTML={{ __html: combinedHtml }}
+            />
+            <h3>HÌNH ẢNH MINH HỌA</h3>
             <div
               style={{
-                marginBottom: 10,
                 display: "flex",
-                justifyContent: "space-between",
+                justifyContent: "space-evenly",
+                flexWrap: "wrap",
               }}
             >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  fontSize: 14,
-                }}
-              >
-                <div style={{ width: 100 }}>
-                  <p
-                    style={{
-                      fontSize: 14,
-                      fontWeight: 600,
-                      margin: 0,
-                      padding: 0,
-                    }}
-                  >
-                    Diễn biến:
-                  </p>
-                </div>
-                <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
-                  {inputsAddon?.progress}
-                </p>
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  fontSize: 14,
-                }}
-              >
-                <div style={{ width: 110 }}>
-                  <p
-                    style={{
-                      fontSize: 14,
-                      fontWeight: 600,
-                      margin: 0,
-                      padding: 0,
-                    }}
-                  >
-                    Tiền xử bệnh:
-                  </p>
-                </div>
-                <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
-                  {inputsAddon?.medical_history}
-                </p>
-              </div>
+              {imageList.map((item, idx) => (
+                <section key={idx}>
+                  <img
+                    src={item.url}
+                    alt={`img-${idx}`}
+                    width={150}
+                    height={150}
+                  />
+                  <p style={{ width: 150 }}>{item.caption}</p>
+                </section>
+              ))}
             </div>
+            <h3>BÁC SĨ THỰC HIỆN</h3>
 
-            <div
-              style={{
-                marginBottom: 10,
-                display: "flex",
-                justifyContent: "space-between",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  fontSize: 14,
-                }}
-              >
-                <div style={{ width: 80 }}>
-                  <p
-                    style={{
-                      fontSize: 14,
-                      fontWeight: 600,
-                      margin: 0,
-                      padding: 0,
-                    }}
-                  >
-                    So sánh:
-                  </p>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <section>
+                <div
+                  style={{ display: "flex", marginBottom: 10, fontSize: 14 }}
+                >
+                  <div style={{ width: 150 }}>
+                    <strong>Họ và tên:</strong>
+                  </div>
+                  {doctor.full_name}
                 </div>
-                <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
-                  {inputsAddon?.compare_link}
-                </p>
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  fontSize: 14,
-                }}
-              >
-                <div style={{ width: 120 }}>
-                  <p
-                    style={{
-                      fontSize: 14,
-                      fontWeight: 600,
-                      margin: 0,
-                      padding: 0,
-                    }}
-                  >
-                    Có kết quả cũ:
-                  </p>
+                <div
+                  style={{ display: "flex", marginBottom: 10, fontSize: 14 }}
+                >
+                  <div style={{ width: 150 }}>
+                    <strong>Điện thoại:</strong>
+                  </div>
+                  {doctor.phone_number}
                 </div>
-                <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
-                  {inputsAddon?.old_date}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div
-            className="print-content"
-            dangerouslySetInnerHTML={{ __html: combinedHtml }}
-          />
-          <h3>HÌNH ẢNH MINH HỌA</h3>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-evenly",
-              flexWrap: "wrap",
-            }}
-          >
-            {imageList.map((item, idx) => (
-              <section key={idx}>
-                <img
-                  src={item.url}
-                  alt={`img-${idx}`}
-                  width={150}
-                  height={150}
-                />
-                <p style={{ width: 150 }}>{item.caption}</p>
+                <div
+                  style={{ display: "flex", marginBottom: 10, fontSize: 14 }}
+                >
+                  <div style={{ width: 150 }}>
+                    <strong>Thời gian:</strong>
+                  </div>
+                  {dayjs().format("DD-MM-YYYY HH:mm")}
+                </div>
+                <div
+                  style={{ display: "flex", marginBottom: 10, fontSize: 14 }}
+                >
+                  <div style={{ width: 150 }}>
+                    <strong>Chữ ký số:</strong>
+                  </div>
+                  digital signed by Tran Van A
+                </div>
               </section>
-            ))}
-          </div>
-          <h3>BÁC SĨ THỰC HIỆN</h3>
-
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <section>
-              <div style={{ display: "flex", marginBottom: 10, fontSize: 14 }}>
-                <div style={{ width: 150 }}>
-                  <strong>Họ và tên:</strong>
-                </div>
-                {doctor.full_name}
-              </div>
-              <div style={{ display: "flex", marginBottom: 10, fontSize: 14 }}>
-                <div style={{ width: 150 }}>
-                  <strong>Điện thoại:</strong>
-                </div>
-                {doctor.phone_number}
-              </div>
-              <div style={{ display: "flex", marginBottom: 10, fontSize: 14 }}>
-                <div style={{ width: 150 }}>
-                  <strong>Thời gian:</strong>
-                </div>
-                {dayjs().format("DD-MM-YYYY HH:mm")}
-              </div>
-              <div style={{ display: "flex", marginBottom: 10, fontSize: 14 }}>
-                <div style={{ width: 150 }}>
-                  <strong>Chữ ký số:</strong>
-                </div>
-                digital signed by Tran Van A
-              </div>
-            </section>
-            <section>
-              <img src={doctor?.avatar_url} alt="" width={100} height={100} />
-            </section>
-            <section>
-              <img
-                src={doctor?.signature_url}
-                alt=""
-                width={100}
-                height={100}
-              />
-            </section>
-          </div>
-        </Card>
-      </div>
+              <section>
+                <img src={doctor?.avatar_url} alt="" width={100} height={100} />
+              </section>
+              <section>
+                <img
+                  src={doctor?.signature_url}
+                  alt=""
+                  width={100}
+                  height={100}
+                />
+              </section>
+            </div>
+          </Card>
+        </div>
+      )}
     </div>
   );
 };

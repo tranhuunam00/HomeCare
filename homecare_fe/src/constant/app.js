@@ -34,12 +34,14 @@ export const PATIENT_DIAGNOSE_COLOR = {
 };
 export function extractDynamicFieldsFromHtml(htmlString) {
   const regex =
-    /\{\{\{(text|number|checkbox|select|textarea|image|file|date):\s*(.+?)\s*\}\}\}/g;
+    /\{\{\{(text|number|checkbox|select|textarea|image|file|date):\s*([^\}=]+?)(?:=([^\}]+))?\s*\}\}\}/g;
+
   const matches = [...htmlString.matchAll(regex)];
 
   return matches.map((match, index) => ({
     type: match[1].toLowerCase(),
     label: match[2].trim(),
+    defaultValue: match[3]?.trim() || "", // nếu không có thì trả ""
     raw: match[0],
     index,
   }));

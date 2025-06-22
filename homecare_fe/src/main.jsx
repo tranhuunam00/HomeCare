@@ -5,9 +5,9 @@ import App from "./App.jsx";
 import { GlobalAuthProvider } from "./contexts/AuthContext.jsx";
 
 createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <GlobalAuthProvider>
-      <App />
-    </GlobalAuthProvider>
-  </React.StrictMode>
+  // <React.StrictMode>
+  <GlobalAuthProvider>
+    <App />
+  </GlobalAuthProvider>
+  // </React.StrictMode>
 );

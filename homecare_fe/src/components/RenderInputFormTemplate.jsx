@@ -13,12 +13,23 @@ const { Option } = Select;
 
 export const renderDynamicAntdFields = (
   fields,
-  inputsRender,
+  inputsRender = {},
   setInputsRender
 ) => {
   return fields.map((field) => {
     const name = `field_${field.index}`;
-    const commonStyle = { fontSize: 11, marginBottom: 8 };
+    const value =
+      inputsRender[field.raw] ||
+      (field.type == "image"
+        ? { url: field.defaultValue }
+        : field.defaultValue);
+
+    const commonStyle = {
+      fontSize: 11,
+      marginBottom: 8,
+      width: 600,
+      marginRight: 30,
+    };
 
     const updateValue = (value) => {
       setInputsRender({
@@ -33,6 +44,7 @@ export const renderDynamicAntdFields = (
           <div key={name} style={commonStyle}>
             <div>{field.label}</div>
             <Input
+              value={value}
               size="small"
               placeholder={field.label}
               onChange={(e) => updateValue(e.target.value)}
@@ -47,6 +59,7 @@ export const renderDynamicAntdFields = (
             <div>{field.label}</div>
             <Input.TextArea
               size="small"
+              value={value}
               placeholder={field.label}
               autoSize={{ minRows: 2, maxRows: 4 }}
               onChange={(e) => updateValue(e.target.value)}
@@ -60,6 +73,7 @@ export const renderDynamicAntdFields = (
           <div key={name} style={commonStyle}>
             <div>{field.label}</div>
             <InputNumber
+              value={value}
               size="small"
               style={{ width: "100%", fontSize: 11 }}
               placeholder={field.label}
@@ -110,26 +124,43 @@ export const renderDynamicAntdFields = (
         );
 
       case "image":
-      case "file":
         return (
           <div key={name} style={commonStyle}>
             <div>{field.label}</div>
+
+            {/* Hiển thị ảnh mặc định nếu có */}
+            {value?.url && (
+              <div style={{ marginBottom: 8 }}>
+                <img
+                  src={value.url}
+                  alt="Ảnh mặc định"
+                  style={{
+                    width: 120,
+                    height: 80,
+                    objectFit: "cover",
+                    borderRadius: 4,
+                  }}
+                />
+              </div>
+            )}
+
             <Upload
-              beforeUpload={() => false} // Không upload tự động
+              beforeUpload={() => false}
               listType="picture"
-              maxCount={1} // Chỉ cho phép 1 file
+              maxCount={1}
               onChange={(info) => {
-                const fileList = info.fileList.slice(-1); // chỉ lấy file cuối cùng
+                const fileList = info.fileList.slice(-1);
                 updateValue(fileList[0]);
               }}
               style={{ fontSize: 11 }}
+              defaultFileList={value ? [value] : []}
             >
               <Button
                 size="small"
                 icon={<UploadOutlined />}
                 style={{ fontSize: 11 }}
               >
-                Tải lên {field.type === "image" ? "ảnh" : "file"}
+                Tải lên ảnh
               </Button>
             </Upload>
           </div>
