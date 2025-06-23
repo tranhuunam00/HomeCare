@@ -30,6 +30,19 @@ import { extractDynamicFieldsFromHtml } from "../../../constant/app";
 import CompletionActionsDiagnose from "../../../components/CompletionActionsDiagnose";
 import StatusButtonPatientDiagnose from "../../../components/Status2ButtonPatientDiagnose.jsx";
 
+const urlToFile = async (url, fallbackName = "image") => {
+  const res = await fetch(url);
+  const blob = await res.blob();
+
+  // Ưu tiên lấy extension từ Content-Type
+  const typeFromMime = blob.type?.split("/")[1] || "jpg";
+  const extFromUrl = url.split(".").pop().split("?")[0];
+  const ext = extFromUrl?.length <= 5 ? extFromUrl : typeFromMime;
+
+  const filename = `${fallbackName}.${ext}`;
+  return new File([blob], filename, { type: blob.type });
+};
+
 export const replaceInputsInHtml = (html, inputsRender) => {
   const fields = extractDynamicFieldsFromHtml(html);
   let result = html;
@@ -290,7 +303,6 @@ const PatientUseTemplate = () => {
     try {
       const formData = new FormData();
 
-      // Gán các ID cơ bản
       formData.append("id_print_template", printTemplate?.id);
       formData.append("id_template_service", idTemplateService);
       formData.append("id_patient_diagnose", id_patient_diagnose);
@@ -301,27 +313,33 @@ const PatientUseTemplate = () => {
       );
       formData.append("inputsAddon", JSON.stringify(inputsAddon));
 
-      // Xử lý images và descriptions
+      // Xử lý imageList
       const descriptionsArr = [];
-      imageList.forEach((item) => {
-        const file = item.file?.originFileObj || item.file;
+      for (const item of imageList) {
+        let file = item.file;
+        if (!file?.size && item.url) {
+          file = await urlToFile(item.url, `image_${Date.now()}`);
+        }
         if (file) {
           formData.append("images", file);
           descriptionsArr.push(item.caption || "-");
         }
-      });
+      }
       formData.append(
         "descriptions",
         JSON.stringify(descriptionsArr.join("{{D}}"))
       );
 
-      // Tách inputsRender: replaceImage và replaceFields
+      // Xử lý inputsRender
       const replaceLabels = [];
       const inputsRenderJson = {};
 
-      Object.entries(inputsRender).forEach(([key, val]) => {
+      for (const [key, val] of Object.entries(inputsRender)) {
         if (key.includes("{{{image:")) {
-          const file = val.originFileObj || val;
+          let file = val.originFileObj;
+          if (!file && val?.url) {
+            file = await urlToFile(val.url, `replace_${Date.now()}`);
+          }
           if (file) {
             formData.append("replaceImage", file);
           }
@@ -329,7 +347,7 @@ const PatientUseTemplate = () => {
         } else {
           inputsRenderJson[key] = val;
         }
-      });
+      }
 
       formData.append("inputsRender", JSON.stringify(inputsRenderJson));
       formData.append(
