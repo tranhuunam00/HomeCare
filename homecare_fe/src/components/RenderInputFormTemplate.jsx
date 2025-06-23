@@ -42,7 +42,9 @@ export const renderDynamicAntdFields = (
       case "text":
         return (
           <div key={name} style={commonStyle}>
-            <div>{field.label}</div>
+            <div style={{ fontWeight: 600, fontStyle: "italic" }}>
+              {field.label}
+            </div>
             <Input
               value={value}
               size="small"
@@ -56,7 +58,9 @@ export const renderDynamicAntdFields = (
       case "textarea":
         return (
           <div key={name} style={commonStyle}>
-            <div>{field.label}</div>
+            <div style={{ fontWeight: 600, fontStyle: "italic" }}>
+              {field.label}
+            </div>
             <Input.TextArea
               size="small"
               value={value}
@@ -71,7 +75,9 @@ export const renderDynamicAntdFields = (
       case "number":
         return (
           <div key={name} style={commonStyle}>
-            <div>{field.label}</div>
+            <div style={{ fontWeight: 600, fontStyle: "italic" }}>
+              {field.label}
+            </div>
             <InputNumber
               value={value}
               size="small"
@@ -125,9 +131,18 @@ export const renderDynamicAntdFields = (
 
       case "image":
         return (
-          <div key={name} style={commonStyle}>
-            <div>{field.label}</div>
-
+          <div
+            key={name}
+            style={{
+              fontSize: 11,
+              marginBottom: 8,
+              width: 150,
+              marginRight: 30,
+            }}
+          >
+            <div style={{ fontWeight: 150, fontStyle: "italic" }}>
+              {field.label}
+            </div>
             {/* Hiển thị ảnh mặc định nếu có */}
             {value?.url && (
               <div style={{ marginBottom: 8 }}>
@@ -145,13 +160,21 @@ export const renderDynamicAntdFields = (
             )}
 
             <Upload
-              beforeUpload={() => false}
+              beforeUpload={(file) => {
+                const previewUrl = URL.createObjectURL(file);
+                updateValue({
+                  ...file,
+                  url: previewUrl,
+                  originFileObj: file, // Rất quan trọng khi gửi API
+                });
+                return false; // Ngăn upload mặc định
+              }}
               listType="picture"
               maxCount={1}
-              onChange={(info) => {
-                const fileList = info.fileList.slice(-1);
-                updateValue(fileList[0]);
-              }}
+              // onChange={(info) => {
+              //   const fileList = info.fileList.slice(-1);
+              //   updateValue(fileList[0]);
+              // }}
               style={{ fontSize: 11 }}
               defaultFileList={value ? [value] : []}
             >

@@ -89,9 +89,46 @@ const PatientUseTemplate = () => {
   const [inputsAddon, setInputsAddon] = useState([]);
   const [isOpenPreview, setIsOpenPreview] = useState(true);
 
-  console.log("inputsRender", inputsRender);
-  console.log("inputsAddon", inputsAddon);
-  console.log("imageList", imageList);
+  console.log("inputsRender ---", inputsRender);
+
+  const normalizeDoctorPrintTemplateData = (template) => {
+    const imageList = [];
+    const inputsRender = {};
+    const inputsAddon = JSON.parse(template.inputsAddon || "{}");
+
+    template.doctor_print_template_images?.forEach((img) => {
+      if (img.type === "ADDON") {
+        imageList.push({
+          caption: img.description || "-",
+          url: img.link,
+          file: {
+            uid: `uploaded-${img.id}`,
+            name: img.link.split("/").pop(),
+            url: img.link,
+          },
+        });
+      } else if (img.type === "REPLACE" && img.replace) {
+        inputsRender[img.replace] = {
+          url: img.link,
+          name: img.link.split("/").pop(),
+        };
+      }
+    });
+
+    // Gộp với inputsRender từ text
+    try {
+      const renderObj = JSON.parse(template.inputsRender || "{}");
+      Object.assign(inputsRender, renderObj);
+    } catch (e) {
+      console.warn("Lỗi parse inputsRender", e);
+    }
+
+    return {
+      imageList,
+      inputsRender,
+      inputsAddon,
+    };
+  };
 
   // Lấy danh sách tất cả template
   useEffect(() => {
@@ -108,6 +145,16 @@ const PatientUseTemplate = () => {
       })
       .catch(() => message.error("Không thể tải danh sách template"));
   }, [idTemplateService]);
+
+  useEffect(() => {
+    const doctor_print_templates =
+      patientDiagnose?.doctor_print_templates?.find((d) => d.status == 1);
+    const exist = printTemplateList?.find(
+      (p) => p.id == doctor_print_templates?.id_print_template
+    );
+    setPrintTemplate(exist);
+    setIdTemplate(exist?.id_template);
+  }, [printTemplateList, patientDiagnose]);
 
   useEffect(() => {
     API_CALL.get(`/templates/${idTemplate}`)
@@ -184,6 +231,18 @@ const PatientUseTemplate = () => {
         .then((res) => {
           const data = res.data.data;
           setPatientDiagnose(data);
+          const doctor_print_templates = data?.doctor_print_templates?.find(
+            (d) => d.status == 1
+          );
+          const { imageList, inputsRender, inputsAddon } =
+            normalizeDoctorPrintTemplateData(doctor_print_templates);
+
+          setIdTemplateService(doctor_print_templates?.id_template_service);
+          setImageList(imageList);
+          console.log("inputsAddon", inputsAddon);
+          setInputsAddon(inputsAddon);
+          setInputsRender(inputsRender);
+          console.log("inputsRender", inputsRender);
         })
         .catch(() => message.error("Không thể tải dữ liệu chi tiết"))
         .finally(() => setLoading(false));
@@ -213,6 +272,87 @@ const PatientUseTemplate = () => {
     newWindow.close();
   };
 
+  const updateStatusPatientDiagnose = async (status) => {
+    try {
+      await API_CALL.put("/patient-diagnose/" + patientDiagnose.id, {
+        status: status,
+      });
+      toast.success("Thành công");
+      return true;
+    } catch (err) {
+      console.error("Lỗi Update:", err);
+      toast.error(err);
+      return false;
+    }
+  };
+
+  const createDoctorPrintTemplate = async (status = 1) => {
+    try {
+      const formData = new FormData();
+
+      // Gán các ID cơ bản
+      formData.append("id_print_template", printTemplate?.id);
+      formData.append("id_template_service", idTemplateService);
+      formData.append("id_patient_diagnose", id_patient_diagnose);
+      formData.append("status", status);
+      formData.append(
+        "name",
+        `Phiếu ${new Date().toLocaleDateString("vi-VN")}`
+      );
+      formData.append("inputsAddon", JSON.stringify(inputsAddon));
+
+      // Xử lý images và descriptions
+      const descriptionsArr = [];
+      imageList.forEach((item) => {
+        const file = item.file?.originFileObj || item.file;
+        if (file) {
+          formData.append("images", file);
+          descriptionsArr.push(item.caption || "-");
+        }
+      });
+      formData.append(
+        "descriptions",
+        JSON.stringify(descriptionsArr.join("{{D}}"))
+      );
+
+      // Tách inputsRender: replaceImage và replaceFields
+      const replaceLabels = [];
+      const inputsRenderJson = {};
+
+      Object.entries(inputsRender).forEach(([key, val]) => {
+        if (key.includes("{{{image:")) {
+          const file = val.originFileObj || val;
+          if (file) {
+            formData.append("replaceImage", file);
+          }
+          replaceLabels.push(key);
+        } else {
+          inputsRenderJson[key] = val;
+        }
+      });
+
+      formData.append("inputsRender", JSON.stringify(inputsRenderJson));
+      formData.append(
+        "replaceFields",
+        JSON.stringify(replaceLabels.join("{{D}}"))
+      );
+
+      // Gửi API
+      const res = await API_CALL.post("/doctor-print-template", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      toast.success("Tạo mới thành công!");
+      return res;
+    } catch (err) {
+      console.error("Lỗi khi tạo:", err);
+      toast.error("Tạo thất bại");
+      return false;
+    }
+  };
+
   return (
     <div style={{ display: "flex" }}>
       <Card style={{ width: isOpenPreview ? 600 : "100%", margin: "0" }}>
@@ -237,6 +377,12 @@ const PatientUseTemplate = () => {
         >
           {isOpenPreview ? "Tắt preview" : "Mở preview"}
         </Button>
+
+        <Title level={3}>
+          Hiện có: {patientDiagnose?.doctor_print_templates?.length || 0} bản
+          ghi{" "}
+        </Title>
+
         <Title level={3}>Phiếu kết quả</Title>
 
         <div style={{ marginBottom: 20 }}>
@@ -324,6 +470,7 @@ const PatientUseTemplate = () => {
                   })
                 }
                 style={{ fontSize: 11 }}
+                value={inputsAddon.symptoms}
               />
             </div>
 
@@ -346,6 +493,7 @@ const PatientUseTemplate = () => {
                   })
                 }
                 style={{ fontSize: 11 }}
+                value={inputsAddon.progress}
               />
             </div>
 
@@ -367,6 +515,7 @@ const PatientUseTemplate = () => {
                     [e.target.name]: e.target.value,
                   })
                 }
+                value={inputsAddon.medical_history}
                 style={{ fontSize: 11 }}
               />
             </div>
@@ -384,6 +533,7 @@ const PatientUseTemplate = () => {
                         [e.target.name]: e.target.value,
                       })
                     }
+                    value={inputsAddon.compare_link}
                     style={{ fontSize: 11 }}
                   />
                 </div>
@@ -400,6 +550,7 @@ const PatientUseTemplate = () => {
                         [e.target.name]: e.target.value,
                       })
                     }
+                    value={inputsAddon.old_date}
                     style={{ fontSize: 11 }}
                   />
                 </div>
@@ -441,7 +592,23 @@ const PatientUseTemplate = () => {
           </Form.Item>
           <CompletionActionsDiagnose
             status={patientDiagnose?.status}
+            handleRead={async () => {
+              const res = await updateStatusPatientDiagnose(2);
+              if (res) {
+                setPatientDiagnose({ ...patientDiagnose, status: 2 });
+              }
+            }}
+            handleCancelRead={async () => {
+              const res = await updateStatusPatientDiagnose(1);
+              if (res) {
+                setPatientDiagnose({ ...patientDiagnose, status: 1 });
+              }
+            }}
+            handleConfirm={() => {}}
             handlePrint={handlePrint}
+            handleSend={() => {
+              createDoctorPrintTemplate();
+            }}
           />
 
           <Card title="Tải file PDF đã in" style={{ marginTop: 24 }}>
@@ -905,7 +1072,7 @@ const PatientUseTemplate = () => {
                         padding: 0,
                       }}
                     >
-                      Tiền xử bệnh:
+                      Tiền sử bệnh:
                     </p>
                   </div>
                   <p style={{ fontSize: 14, margin: 0, padding: 0 }}>

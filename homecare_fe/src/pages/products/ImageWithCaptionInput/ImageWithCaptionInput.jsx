@@ -1,11 +1,15 @@
 // src/components/ImageWithCaptionInput.jsx
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Upload, Input, Button, Row, Col, Form, message } from "antd";
 import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
 
 const ImageWithCaptionInput = ({ value = [], onChange }) => {
   const [images, setImages] = useState(value);
+  useEffect(() => {
+    setImages(value);
+  }, [value]);
 
+  console.log("images", images);
   const handleAddImage = () => {
     const newList = [...images, { url: "", caption: "" }];
     setImages(newList);

@@ -13,6 +13,8 @@ const CompletionActionsDiagnose = ({
   handlePrint,
   handleRead,
   handleConfirm,
+  handleCancelRead,
+  handleSend,
 }) => {
   const navigate = useNavigate();
 
@@ -37,8 +39,20 @@ const CompletionActionsDiagnose = ({
 
         {/* Trạng thái 2: Chỉ hiện Đang đọc */}
         {status === 2 && (
-          <Button style={{ marginLeft: 8 }} type="primary" onClick={handleRead}>
-            Đang đọc
+          <Button
+            style={{ marginLeft: 8 }}
+            type="primary"
+            danger
+            onClick={handleCancelRead}
+          >
+            Hủy Đang đọc
+          </Button>
+        )}
+
+        {/* Trạng thái 2: Chỉ hiện Đang đọc */}
+        {status === 2 && (
+          <Button style={{ marginLeft: 8 }} type="primary" onClick={handleSend}>
+            Chốt kết quả
           </Button>
         )}
 
@@ -46,7 +60,7 @@ const CompletionActionsDiagnose = ({
         {status === 3 && (
           <Button
             style={{ marginLeft: 8 }}
-            type="dashed"
+            type="link"
             danger
             onClick={handleConfirm}
           >
