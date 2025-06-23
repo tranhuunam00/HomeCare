@@ -26,7 +26,10 @@ import { useGlobalAuth } from "../../../contexts/AuthContext";
 import useVietnamAddress from "../../../hooks/useVietnamAddress";
 import ImageWithCaptionInput from "../../products/ImageWithCaptionInput/ImageWithCaptionInput";
 import { renderDynamicAntdFields } from "../../../components/RenderInputFormTemplate";
-import { extractDynamicFieldsFromHtml } from "../../../constant/app";
+import {
+  extractDynamicFieldsFromHtml,
+  PATIENT_DIAGNOSE_STATUS_CODE,
+} from "../../../constant/app";
 import CompletionActionsDiagnose from "../../../components/CompletionActionsDiagnose";
 import StatusButtonPatientDiagnose from "../../../components/Status2ButtonPatientDiagnose.jsx";
 
@@ -86,6 +89,8 @@ const PatientUseTemplate = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [printTemplate, setPrintTemplate] = useState({});
+  const [idPrintTemplate, setIdPrintTemplate] = useState();
+
   const [template, setTemplate] = useState({});
 
   const { id_patient_diagnose } = useParams();
@@ -95,14 +100,12 @@ const PatientUseTemplate = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [patientDiagnose, setPatientDiagnose] = useState();
   const [printTemplateList, setPrintTemplateList] = useState([]);
-  const { templateServices, user, doctor } = useGlobalAuth();
+  const { templateServices, doctor } = useGlobalAuth();
   const [idTemplateService, setIdTemplateService] = useState();
 
   const [inputsRender, setInputsRender] = useState([]);
   const [inputsAddon, setInputsAddon] = useState([]);
   const [isOpenPreview, setIsOpenPreview] = useState(true);
-
-  console.log("inputsRender ---", inputsRender);
 
   const normalizeDoctorPrintTemplateData = (template) => {
     const imageList = [];
@@ -161,12 +164,22 @@ const PatientUseTemplate = () => {
 
   useEffect(() => {
     const doctor_print_templates =
-      patientDiagnose?.doctor_print_templates?.find((d) => d.status == 1);
+      patientDiagnose?.doctor_print_templates?.find(
+        (d) => d.status == patientDiagnose?.status
+      );
     const exist = printTemplateList?.find(
       (p) => p.id == doctor_print_templates?.id_print_template
     );
+
+    // console.log("exist", exist);
+    // console.log(
+    //   "printTemplateList, patientDiagnose",
+    //   printTemplateList,
+    //   patientDiagnose
+    // );
     setPrintTemplate(exist);
     setIdTemplate(exist?.id_template);
+    setIdPrintTemplate(exist?.id);
   }, [printTemplateList, patientDiagnose]);
 
   useEffect(() => {
@@ -244,18 +257,19 @@ const PatientUseTemplate = () => {
         .then((res) => {
           const data = res.data.data;
           setPatientDiagnose(data);
-          const doctor_print_templates = data?.doctor_print_templates?.find(
-            (d) => d.status == 1
-          );
-          const { imageList, inputsRender, inputsAddon } =
-            normalizeDoctorPrintTemplateData(doctor_print_templates);
 
-          setIdTemplateService(doctor_print_templates?.id_template_service);
-          setImageList(imageList);
-          console.log("inputsAddon", inputsAddon);
-          setInputsAddon(inputsAddon);
-          setInputsRender(inputsRender);
-          console.log("inputsRender", inputsRender);
+          const doctor_print_templates = data?.doctor_print_templates?.find(
+            (d) => d.status == data?.status
+          );
+          if (doctor_print_templates) {
+            const { imageList, inputsRender, inputsAddon } =
+              normalizeDoctorPrintTemplateData(doctor_print_templates);
+
+            setIdTemplateService(doctor_print_templates?.id_template_service);
+            setImageList(imageList);
+            setInputsAddon(inputsAddon);
+            setInputsRender(inputsRender);
+          }
         })
         .catch(() => message.error("Không thể tải dữ liệu chi tiết"))
         .finally(() => setLoading(false));
@@ -371,92 +385,160 @@ const PatientUseTemplate = () => {
     }
   };
 
+  console.log("patientDiagnose", patientDiagnose);
   return (
     <div style={{ display: "flex" }}>
-      <Card style={{ width: isOpenPreview ? 600 : "100%", margin: "0" }}>
-        <StatusButtonPatientDiagnose
-          id={patientDiagnose?.id}
-          status={patientDiagnose?.status || 1}
-        />
-        <Button
-          type={isOpenPreview ? "default" : "primary"} // màu khác nhau
-          danger={isOpenPreview} // nếu đang mở thì dùng màu đỏ nhẹ
-          style={{
-            marginTop: 16,
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            height: 32,
-            padding: "0 12px",
-            fontSize: 14,
-          }}
-          onClick={() => setIsOpenPreview(!isOpenPreview)}
-          icon={isOpenPreview ? <EyeInvisibleOutlined /> : <EyeOutlined />}
-        >
-          {isOpenPreview ? "Tắt preview" : "Mở preview"}
-        </Button>
-
-        <Title level={3}>
-          Hiện có: {patientDiagnose?.doctor_print_templates?.length || 0} bản
-          ghi{" "}
-        </Title>
-
-        <Title level={3}>Phiếu kết quả</Title>
-
-        <div style={{ marginBottom: 20 }}>
-          <Select
-            showSearch
-            allowClear
-            style={{ width: 400 }}
-            value={idTemplateService}
-            placeholder="Chọn dịch vụ"
-            optionFilterProp="children"
-            onChange={(val) => {
-              setIdTemplateService(val);
-              setIdTemplate(null);
-              setTemplate(null);
-              setPrintTemplate(null);
+      {patientDiagnose?.status != PATIENT_DIAGNOSE_STATUS_CODE.VERIFY ? (
+        <Card style={{ width: isOpenPreview ? 600 : "100%", margin: "0" }}>
+          <StatusButtonPatientDiagnose
+            id={patientDiagnose?.id}
+            status={patientDiagnose?.status || 1}
+          />
+          <Button
+            type={isOpenPreview ? "default" : "primary"} // màu khác nhau
+            danger={isOpenPreview} // nếu đang mở thì dùng màu đỏ nhẹ
+            style={{
+              marginTop: 16,
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              height: 32,
+              padding: "0 12px",
+              fontSize: 14,
             }}
-            filterOption={(input, option) =>
-              option.children.toLowerCase().includes(input.toLowerCase())
-            }
+            onClick={() => setIsOpenPreview(!isOpenPreview)}
+            icon={isOpenPreview ? <EyeInvisibleOutlined /> : <EyeOutlined />}
           >
-            {templateServices.map((tpl) => (
-              <Option key={tpl.id} value={tpl.id}>
-                {tpl.name}
-              </Option>
-            ))}
-          </Select>
-        </div>
+            {isOpenPreview ? "Tắt preview" : "Mở preview"}
+          </Button>
 
-        <div style={{ marginBottom: 20 }}>
-          <Select
-            showSearch
-            allowClear
-            style={{ width: 400 }}
-            value={printTemplate?.id}
-            placeholder="Chọn template cần xem trước"
-            optionFilterProp="children"
-            onChange={(val) => {
-              const printT = printTemplateList.find((t) => t.id == val);
-              setPrintTemplate(printT);
-              setIdTemplate(printT.id_template);
+          <Title level={3}>
+            Hiện có: {patientDiagnose?.doctor_print_templates?.length || 0} bản
+            ghi{" "}
+          </Title>
+          <CompletionActionsDiagnose
+            statusCode={patientDiagnose?.status}
+            handleRead={async () => {
+              const res = await updateStatusPatientDiagnose(2);
+              if (res) {
+                setPatientDiagnose({ ...patientDiagnose, status: 2 });
+              }
             }}
-            filterOption={(input, option) =>
-              option.children.toLowerCase().includes(input.toLowerCase())
-            }
-          >
-            {printTemplateList
-              .filter((t) => t.id_template_service == idTemplateService)
-              .map((tpl) => (
+            handleCancelRead={async () => {
+              const res = await updateStatusPatientDiagnose(1);
+              if (res) {
+                setPatientDiagnose({ ...patientDiagnose, status: 1 });
+              }
+            }}
+            handleConfirm={async () => {
+              const confirm = window.confirm(
+                "Bạn có chắc chắn muốn chốt kết quả không?\nSau khi chốt sẽ không thể sửa."
+              );
+              if (confirm) {
+                try {
+                  const data = await createDoctorPrintTemplate(
+                    PATIENT_DIAGNOSE_STATUS_CODE.VERIFY
+                  );
+
+                  if (data) {
+                    toast.success("Chốt kết quả thành công!");
+                    setPatientDiagnose({
+                      ...patientDiagnose,
+                      status: PATIENT_DIAGNOSE_STATUS_CODE.VERIFY,
+                    });
+                    navigate("/home/patients-diagnose");
+                  }
+                } catch (error) {
+                  console.error("Lỗi khi chốt kết quả:", error);
+                  toast.error("Chốt kết quả thất bại!");
+                }
+              }
+            }}
+            handlePrint={handlePrint}
+            handleSend={async () => {
+              const confirm = window.confirm(
+                "Bạn có chắc chắn muốn chốt kết quả không?\nSau khi chốt sẽ không thể sửa."
+              );
+              if (confirm) {
+                try {
+                  const data = await createDoctorPrintTemplate(
+                    PATIENT_DIAGNOSE_STATUS_CODE.WAIT
+                  );
+
+                  if (data) {
+                    toast.success("Chốt kết quả thành công!");
+                    setPatientDiagnose({
+                      ...patientDiagnose,
+                      status: PATIENT_DIAGNOSE_STATUS_CODE.WAIT,
+                    });
+                    navigate("/home/patients-diagnose");
+                  }
+                } catch (error) {
+                  console.error("Lỗi khi chốt kết quả:", error);
+                  toast.error("Chốt kết quả thất bại!");
+                }
+              }
+            }}
+          />
+          <Title level={3}>Phiếu kết quả</Title>
+
+          <div style={{ marginBottom: 20 }}>
+            <Select
+              disabled={
+                patientDiagnose?.status == PATIENT_DIAGNOSE_STATUS_CODE.NEW
+              }
+              showSearch
+              allowClear
+              style={{ width: 400 }}
+              value={idTemplateService}
+              placeholder="Chọn dịch vụ"
+              optionFilterProp="children"
+              onChange={(val) => {
+                setIdTemplateService(val);
+                setIdTemplate(null);
+                setTemplate(null);
+                setPrintTemplate(null);
+              }}
+              filterOption={(input, option) =>
+                option.children.toLowerCase().includes(input.toLowerCase())
+              }
+            >
+              {templateServices.map((tpl) => (
                 <Option key={tpl.id} value={tpl.id}>
                   {tpl.name}
                 </Option>
               ))}
-          </Select>
-        </div>
+            </Select>
+          </div>
 
-        <Spin spinning={loading}>
+          <div style={{ marginBottom: 20 }}>
+            <Select
+              showSearch
+              allowClear
+              style={{ width: 400 }}
+              value={idPrintTemplate}
+              placeholder="Chọn template cần xem trước"
+              optionFilterProp="children"
+              onChange={(val) => {
+                const printT = printTemplateList.find((t) => t.id == val);
+                setPrintTemplate(printT);
+                setIdTemplate(printT.id_template);
+                setIdPrintTemplate(printT.id);
+              }}
+              filterOption={(input, option) =>
+                option.children.toLowerCase().includes(input.toLowerCase())
+              }
+            >
+              {printTemplateList
+                .filter((t) => t.id_template_service == idTemplateService)
+                .map((tpl) => (
+                  <Option key={tpl.id} value={tpl.id}>
+                    {tpl.name}
+                  </Option>
+                ))}
+            </Select>
+          </div>
+
           <div
             style={{
               width: "100%",
@@ -608,26 +690,6 @@ const PatientUseTemplate = () => {
           <Form.Item label="Hình ảnh minh họa">
             <ImageWithCaptionInput value={imageList} onChange={setImageList} />
           </Form.Item>
-          <CompletionActionsDiagnose
-            status={patientDiagnose?.status}
-            handleRead={async () => {
-              const res = await updateStatusPatientDiagnose(2);
-              if (res) {
-                setPatientDiagnose({ ...patientDiagnose, status: 2 });
-              }
-            }}
-            handleCancelRead={async () => {
-              const res = await updateStatusPatientDiagnose(1);
-              if (res) {
-                setPatientDiagnose({ ...patientDiagnose, status: 1 });
-              }
-            }}
-            handleConfirm={() => {}}
-            handlePrint={handlePrint}
-            handleSend={() => {
-              createDoctorPrintTemplate();
-            }}
-          />
 
           <Card title="Tải file PDF đã in" style={{ marginTop: 24 }}>
             <Upload
@@ -655,8 +717,14 @@ const PatientUseTemplate = () => {
               Tải lên
             </Button>
           </Card>
-        </Spin>
-      </Card>
+        </Card>
+      ) : (
+        <CompletionActionsDiagnose
+          statusCode={patientDiagnose?.status}
+          handlePrint={handlePrint}
+        />
+      )}
+
       {isOpenPreview && (
         <div ref={printRef}>
           <Card bordered={false} className={`a4-page`}>

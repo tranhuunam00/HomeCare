@@ -1,4 +1,6 @@
 import { Button, Form } from "antd";
+import { useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 const PATIENT_DIAGNOSE_COLOR = {
@@ -9,7 +11,7 @@ const PATIENT_DIAGNOSE_COLOR = {
 };
 
 const CompletionActionsDiagnose = ({
-  status,
+  statusCode,
   handlePrint,
   handleRead,
   handleConfirm,
@@ -17,7 +19,9 @@ const CompletionActionsDiagnose = ({
   handleSend,
 }) => {
   const navigate = useNavigate();
-
+  const [status, setStatus] = useState(1);
+  useEffect(() => setStatus(statusCode), [statusCode]);
+  console.log("status", status);
   return (
     <>
       <h2>Thao tác hoàn thành</h2>
@@ -25,7 +29,7 @@ const CompletionActionsDiagnose = ({
         {/* Nút Huỷ luôn có */}
         <Button
           style={{ marginLeft: 8 }}
-          onClick={() => navigate("/home/templates-print")}
+          onClick={() => navigate("/home/patients-diagnose")}
         >
           Hủy
         </Button>
@@ -60,7 +64,7 @@ const CompletionActionsDiagnose = ({
         {status === 3 && (
           <Button
             style={{ marginLeft: 8 }}
-            type="link"
+            type="dashed"
             danger
             onClick={handleConfirm}
           >
@@ -69,20 +73,19 @@ const CompletionActionsDiagnose = ({
         )}
 
         {/* Trạng thái 4: Chỉ hiện In */}
-        {status === 4 ||
-          (status === 1 && (
-            <Button
-              style={{
-                marginLeft: 8,
-                backgroundColor: PATIENT_DIAGNOSE_COLOR[4],
-                color: "#fff",
-                border: "none",
-              }}
-              onClick={handlePrint}
-            >
-              In kết quả
-            </Button>
-          ))}
+        {status === 4 && (
+          <Button
+            style={{
+              marginLeft: 8,
+              backgroundColor: PATIENT_DIAGNOSE_COLOR[4],
+              color: "#fff",
+              border: "none",
+            }}
+            onClick={handlePrint}
+          >
+            In kết quả
+          </Button>
+        )}
       </Form.Item>
     </>
   );

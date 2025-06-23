@@ -26,6 +26,13 @@ export const PATIENT_DIAGNOSE_STATUS = {
   4: "Đã xác nhận",
 };
 
+export const PATIENT_DIAGNOSE_STATUS_CODE = {
+  NEW: 1,
+  INPROCESS: 2,
+  WAIT: 3,
+  VERIFY: 4,
+};
+
 export const PATIENT_DIAGNOSE_COLOR = {
   1: "Blue",
   2: "#808000",

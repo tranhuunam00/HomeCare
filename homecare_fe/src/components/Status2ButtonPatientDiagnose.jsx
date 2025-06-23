@@ -48,6 +48,7 @@ const StatusButtonPatientDiagnose = ({ id, status }) => {
         <Button
           type="dashed"
           danger
+          onClick={() => navigate("/home/patients-diagnose/use/" + id)}
           disabled={!buttonStatus.canConfirm}
           style={getStyle(buttonStatus.canConfirm, PATIENT_DIAGNOSE_COLOR[3])}
         >
@@ -59,6 +60,7 @@ const StatusButtonPatientDiagnose = ({ id, status }) => {
           type="default"
           disabled={!buttonStatus.canPrint}
           style={getStyle(buttonStatus.canPrint, PATIENT_DIAGNOSE_COLOR[4])}
+          onClick={() => navigate("/home/patients-diagnose/use/" + id)}
         >
           In kết quả
         </Button>
