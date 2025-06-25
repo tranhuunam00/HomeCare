@@ -185,6 +185,14 @@ const PatientDiagnoiseDetailPage = () => {
         <Row gutter={24} style={{ marginTop: 40 }}>
           <h2>Lịch sử</h2>
         </Row>
+        <Row gutter={24} style={{ marginTop: 40 }}>
+          <h3>
+            Người tạo:{" "}
+            <p style={{ color: "cadetblue" }}>
+              {data?.createdBy_user?.doctors[0]?.full_name}
+            </p>
+          </h3>
+        </Row>
         <PatientTablePage isNotCreate={true} PID={data.PID} />
       </Card>
     </div>

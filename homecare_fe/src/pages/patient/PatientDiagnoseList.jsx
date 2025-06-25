@@ -12,15 +12,22 @@ import {
   Col,
   Tag,
   Select,
+  message,
 } from "antd";
-import { SettingOutlined, UserAddOutlined } from "@ant-design/icons";
+import {
+  SettingOutlined,
+  UserAddOutlined,
+  DeleteOutlined,
+  CopyOutlined,
+} from "@ant-design/icons";
 import debounce from "lodash.debounce";
 import { useNavigate } from "react-router-dom";
 import API_CALL from "../../services/axiosClient";
+import { useGlobalAuth } from "../../contexts/AuthContext";
+import { USER_ROLE } from "../../constant/app";
 
 const { Option } = Select;
 
-// ==== Trạng thái bệnh án ====
 const PATIENT_DIAGNOSE_STATUS = {
   1: "Mới",
   2: "Đang đọc",
@@ -35,65 +42,7 @@ const PATIENT_DIAGNOSE_COLOR = {
   4: "green",
 };
 
-// ==== Cấu hình cột bảng ====
-const allColumns = [
-  { title: "ID", dataIndex: "id", key: "id", fixed: "left", width: 80 },
-  { title: "Họ tên", dataIndex: "name", key: "name", width: 200 },
-  { title: "PID", dataIndex: "PID", key: "PID", width: 120 },
-  { title: "SID", dataIndex: "SID", key: "SID", width: 120 },
-  { title: "Chỉ định", dataIndex: "Indication", key: "Indication", width: 200 },
-  { title: "Giới tính", dataIndex: "gender", key: "gender", width: 120 },
-  { title: "CCCD", dataIndex: "CCCD", key: "CCCD", width: 160 },
-  { title: "SĐT", dataIndex: "phoneNumber", key: "phoneNumber", width: 140 },
-  { title: "Email", dataIndex: "email", key: "email", width: 200 },
-  { title: "Địa chỉ", dataIndex: "address", key: "address", width: 220 },
-  {
-    title: "Quốc tịch",
-    dataIndex: "countryCode",
-    key: "countryCode",
-    width: 140,
-  },
-  {
-    title: "Tỉnh/TP",
-    dataIndex: "province_code",
-    key: "province_code",
-    width: 140,
-  },
-  {
-    title: "Quận/Huyện",
-    dataIndex: "district_code",
-    key: "district_code",
-    width: 140,
-  },
-  { title: "Phường/Xã", dataIndex: "ward_code", key: "ward_code", width: 140 },
-  {
-    title: "Trạng thái",
-    dataIndex: "status",
-    key: "status",
-    width: 150,
-    render: (status) => (
-      <Tag color={PATIENT_DIAGNOSE_COLOR[status]}>
-        {PATIENT_DIAGNOSE_STATUS[status]}
-      </Tag>
-    ),
-  },
-  { title: "Ngày tạo", dataIndex: "createdAt", key: "createdAt", width: 180 },
-  {
-    title: "Ngày cập nhật",
-    dataIndex: "updatedAt",
-    key: "updatedAt",
-    width: 180,
-  },
-  {
-    title: "Mã phòng khám",
-    dataIndex: "id_clinic",
-    key: "id_clinic",
-    width: 120,
-  },
-  { title: "Người tạo", dataIndex: "createdBy", key: "createdBy", width: 120 },
-];
-
-const defaultVisibleKeys = ["id", "name", "PID", "SID", "status"];
+const defaultVisibleKeys = ["id", "name", "PID", "SID", "status", "action"];
 
 const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
   const navigate = useNavigate();
@@ -101,6 +50,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
+  const { user } = useGlobalAuth();
 
   const [visibleKeys, setVisibleKeys] = useState(defaultVisibleKeys);
   const [filters, setFilters] = useState({
@@ -135,11 +85,144 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
     }
   };
 
+  const handleDelete = (id) => {
+    const confirm = window.confirm("Bạn có chắc chắn muốn xóa bản ghi này?");
+    if (!confirm) return;
+    API_CALL.del(`/patient-diagnose/${id}`)
+      .then(() => {
+        message.success("Xóa thành công");
+        fetchPatients();
+      })
+      .catch((err) => {
+        message.error("Xóa thất bại, vui lòng thử lại");
+        console.error("Lỗi xóa:", err);
+      });
+  };
+
+  const handleClone = async (record) => {
+    try {
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+      const payload = {
+        ...record,
+        id: undefined,
+        name: `${record.name} - Copy ${timestamp}`,
+      };
+
+      await API_CALL.post("/patient-diagnose", payload);
+      message.success("Đã clone thành công");
+      fetchPatients();
+    } catch (err) {
+      message.error("Clone thất bại, vui lòng thử lại");
+      console.error("Lỗi clone:", err);
+    }
+  };
+  const allColumns = [
+    { title: "ID", dataIndex: "id", key: "id", fixed: "left", width: 80 },
+    { title: "Họ tên", dataIndex: "name", key: "name", width: 200 },
+    { title: "PID", dataIndex: "PID", key: "PID", width: 120 },
+    { title: "SID", dataIndex: "SID", key: "SID", width: 120 },
+    {
+      title: "Chỉ định",
+      dataIndex: "Indication",
+      key: "Indication",
+      width: 200,
+    },
+    { title: "Giới tính", dataIndex: "gender", key: "gender", width: 120 },
+    { title: "CCCD", dataIndex: "CCCD", key: "CCCD", width: 160 },
+    { title: "SĐT", dataIndex: "phoneNumber", key: "phoneNumber", width: 140 },
+    { title: "Email", dataIndex: "email", key: "email", width: 200 },
+    { title: "Địa chỉ", dataIndex: "address", key: "address", width: 220 },
+    {
+      title: "Quốc tịch",
+      dataIndex: "countryCode",
+      key: "countryCode",
+      width: 140,
+    },
+    {
+      title: "Tỉnh/TP",
+      dataIndex: "province_code",
+      key: "province_code",
+      width: 140,
+    },
+    {
+      title: "Quận/Huyện",
+      dataIndex: "district_code",
+      key: "district_code",
+      width: 140,
+    },
+    {
+      title: "Phường/Xã",
+      dataIndex: "ward_code",
+      key: "ward_code",
+      width: 140,
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
+      width: 150,
+      render: (status) => (
+        <Tag color={PATIENT_DIAGNOSE_COLOR[status]}>
+          {PATIENT_DIAGNOSE_STATUS[status]}
+        </Tag>
+      ),
+    },
+    { title: "Ngày tạo", dataIndex: "createdAt", key: "createdAt", width: 180 },
+    {
+      title: "Ngày cập nhật",
+      dataIndex: "updatedAt",
+      key: "updatedAt",
+      width: 180,
+    },
+    {
+      title: "Mã phòng khám",
+      dataIndex: "id_clinic",
+      key: "id_clinic",
+      width: 120,
+    },
+    {
+      title: "Người tạo",
+      dataIndex: "createdBy",
+      key: "createdBy",
+      width: 120,
+    },
+    {
+      title: "Hành động",
+      key: "action",
+      fixed: "right",
+      width: 120,
+      render: (_, record) => {
+        return user?.id_role == USER_ROLE.ADMIN ||
+          record.createdBy == user.id ? (
+          <Space>
+            <Button
+              icon={<DeleteOutlined />}
+              type="text"
+              danger
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDelete(record.id);
+              }}
+            />
+            <Button
+              icon={<CopyOutlined />}
+              type="text"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleClone(record);
+              }}
+            />
+          </Space>
+        ) : null;
+      },
+    },
+  ];
+
   const handleFilterChange = useMemo(
     () =>
       debounce((key, value) => {
         setFilters((prev) => ({ ...prev, [key]: value }));
-        setPage(1); // reset page khi filter
+        setPage(1);
       }, 300),
     []
   );
@@ -208,7 +291,6 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         </Space>
       </Space>
 
-      {/* Bộ lọc */}
       <Row gutter={16} style={{ marginBottom: 12 }}>
         <Col span={6}>
           <Input
