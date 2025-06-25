@@ -16,8 +16,9 @@ import API_CALL from "../../../services/axiosClient";
 import CustomSunEditor from "../../../components/Suneditor/CustomSunEditor";
 import storage from "../../../services/storage";
 import useToast from "../../../hooks/useToast";
-import { extractDynamicFieldsFromHtml } from "../../../constant/app";
+import { extractDynamicFieldsFromHtml, USER_ROLE } from "../../../constant/app";
 import { renderDynamicAntdFields } from "../../../components/RenderInputFormTemplate";
+import { useGlobalAuth } from "../../../contexts/AuthContext";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -33,6 +34,7 @@ const AddOrEditTemplateProduct = () => {
   const [descriptionText, setDescriptionText] = useState("");
   const [recommendationText, setRecommendationText] = useState("");
 
+  const { user, doctor } = useGlobalAuth();
   useEffect(() => {
     const fetchServices = async () => {
       try {
@@ -54,6 +56,15 @@ const AddOrEditTemplateProduct = () => {
       API_CALL.get(`/templates/${id}`)
         .then((res) => {
           const data = res.data.data;
+
+          const isAdmin = user?.id_role == USER_ROLE.ADMIN;
+          const isOwner = data?.id_user == user?.id;
+
+          if (!isAdmin && !isOwner) {
+            message.error("Bạn không có quyền chỉnh sửa mẫu này");
+            return navigate("/home/templates");
+          }
+
           form.setFieldsValue(data);
         })
         .catch(() => message.error("Không thể tải dữ liệu chi tiết"))

@@ -1,10 +1,29 @@
 // src/pages/templates/TemplateList.jsx
 import React, { useEffect, useState } from "react";
-import { Table, Input, Row, Col, Card, Select, Spin, Button } from "antd";
-import { EditOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  Table,
+  Input,
+  Row,
+  Col,
+  Card,
+  Select,
+  Spin,
+  Button,
+  Modal,
+} from "antd";
+import {
+  EditOutlined,
+  EyeInvisibleOutlined,
+  EyeOutlined,
+  FilterOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
 import styles from "./TemplateList.module.scss";
 import API_CALL from "../../../services/axiosClient";
 import { useNavigate } from "react-router-dom";
+import { useGlobalAuth } from "../../../contexts/AuthContext";
+import { USER_ROLE } from "../../../constant/app";
+import { toast } from "react-toastify";
 
 const { Option } = Select;
 
@@ -16,6 +35,8 @@ const TemplateList = () => {
   const [searchName, setSearchName] = useState("");
   const [clinicMap, setClinicMap] = useState({});
   const [serviceMap, setServiceMap] = useState({});
+
+  const { user, doctor } = useGlobalAuth();
 
   const navigate = useNavigate();
 
@@ -49,6 +70,43 @@ const TemplateList = () => {
     }
   };
 
+  const handleDeleteTemplate = async (id) => {
+    const confirmed = window.confirm(
+      "Bạn có chắc chắn muốn xóa mẫu này? Thao tác này không thể hoàn tác."
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await API_CALL.del(`/templates/${id}`);
+      toast.success("Đã xóa thành công");
+      fetchTemplates(); // làm mới danh sách
+    } catch (err) {
+      toast.error("Xóa thất bại, vui lòng thử lại");
+      console.error("Lỗi xóa template:", err);
+    }
+  };
+
+  const handleCloneTemplate = async (record) => {
+    try {
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+
+      const payload = {
+        ...record,
+        id: undefined, // tránh gửi ID gốc
+        name: `${record.name} - Copy ${timestamp}`,
+        createdAt: Date.now(),
+        updated_at: Date.now(),
+      };
+
+      await API_CALL.post("/templates", payload);
+      toast.success("Đã clone mẫu thành công");
+      fetchTemplates(); // làm mới danh sách
+    } catch (err) {
+      toast.error("Clone thất bại, vui lòng thử lại");
+      console.error("Lỗi clone template:", err);
+    }
+  };
   const fetchTemplates = async () => {
     setLoading(true);
     try {
@@ -121,15 +179,45 @@ const TemplateList = () => {
     {
       title: "Hành động",
       key: "action",
-      render: (_, record) => (
-        <Button
-          icon={<EditOutlined />}
-          onClick={() => navigate(`/home/templates/edit/${record.id}`)}
-          type="link"
-        >
-          Chỉnh sửa
-        </Button>
-      ),
+      render: (_, record) => {
+        const isAdmin = user?.id_role == USER_ROLE.ADMIN;
+        const isOwner = record.id_user == user?.id;
+
+        return (
+          <>
+            <Button
+              icon={<EyeOutlined />}
+              onClick={() => navigate(`/home/templates/view/${record.id}`)}
+              type="link"
+            >
+              Xem
+            </Button>
+
+            {(isAdmin || isOwner) && (
+              <>
+                <Button
+                  icon={<EditOutlined />}
+                  onClick={() => navigate(`/home/templates/edit/${record.id}`)}
+                  type="link"
+                >
+                  Chỉnh sửa
+                </Button>
+
+                <Button
+                  danger
+                  type="link"
+                  onClick={() => handleDeleteTemplate(record.id)}
+                >
+                  Xóa
+                </Button>
+              </>
+            )}
+            <Button type="link" onClick={() => handleCloneTemplate(record)}>
+              Clone
+            </Button>
+          </>
+        );
+      },
     },
   ];
 

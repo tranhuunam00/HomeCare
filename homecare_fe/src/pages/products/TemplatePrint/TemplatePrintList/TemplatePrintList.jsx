@@ -21,6 +21,8 @@ import { useNavigate } from "react-router-dom";
 import styles from "./TemplateList.module.scss";
 import API_CALL from "../../../../services/axiosClient";
 import { toast } from "react-toastify";
+import { useGlobalAuth } from "../../../../contexts/AuthContext";
+import { USER_ROLE } from "../../../../constant/app";
 
 const { Option } = Select;
 
@@ -29,6 +31,8 @@ const TemplatePrintList = () => {
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
+
+  const { user } = useGlobalAuth();
 
   // Bộ lọc
   const [searchName, setSearchName] = useState("");
@@ -60,6 +64,45 @@ const TemplatePrintList = () => {
     fetchTemplates();
   }, [page, searchName]);
 
+  const handleDelete = async (id) => {
+    const confirmDelete = window.confirm(
+      "Bạn có chắc chắn muốn xóa mẫu in này? Thao tác này không thể hoàn tác."
+    );
+    if (!confirmDelete) return;
+
+    try {
+      await API_CALL.del(`/print-template/${id}`);
+      toast.success("Đã xóa thành công");
+      fetchTemplates();
+    } catch (err) {
+      toast.error("Xóa thất bại, vui lòng thử lại");
+      console.error("Lỗi xóa template:", err);
+    }
+  };
+
+  const handleClone = async (record) => {
+    const confirmClone = window.confirm("Bạn có muốn clone mẫu in này không?");
+    if (!confirmClone) return;
+
+    try {
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+      const payload = {
+        ...record,
+        id: undefined,
+        name: `${record.name} - Copy ${timestamp}`,
+        createdAt: Date.now(),
+        updated_at: Date.now(),
+      };
+
+      await API_CALL.post("/print-template", payload);
+      toast.success("Đã clone mẫu in thành công");
+      fetchTemplates();
+    } catch (err) {
+      toast.error("Clone thất bại, vui lòng thử lại");
+      console.error("Lỗi clone:", err);
+    }
+  };
+
   const columns = [
     { title: "ID", dataIndex: "id", key: "id" },
     { title: "Tên", dataIndex: "name", key: "name" },
@@ -80,17 +123,40 @@ const TemplatePrintList = () => {
       render: (active) => (active ? "✔️" : "❌"),
     },
     {
-      title: "In kết quả",
+      title: "Thao tác",
       key: "action",
-      render: (_, record) => (
-        <Button
-          icon={<EditOutlined />}
-          type="primary"
-          onClick={() => navigate(`/home/templates-print/edit/${record.id}`)}
-        >
-          Chỉnh sửa
-        </Button>
-      ),
+      render: (_, record) => {
+        const isAdmin = user?.id_role == USER_ROLE.ADMIN;
+        const isOwner = record.id_user == user?.id;
+
+        return (
+          <>
+            <Button
+              icon={<EditOutlined />}
+              type="link"
+              onClick={() =>
+                navigate(`/home/templates-print/edit/${record.id}`)
+              }
+            >
+              Chỉnh sửa
+            </Button>
+
+            {(isAdmin || isOwner) && (
+              <Button
+                danger
+                type="link"
+                onClick={() => handleDelete(record.id)}
+              >
+                Xóa
+              </Button>
+            )}
+
+            <Button type="link" onClick={() => handleClone(record)}>
+              Clone
+            </Button>
+          </>
+        );
+      },
     },
   ];
 

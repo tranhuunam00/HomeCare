@@ -60,12 +60,8 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
       </Menu.Item>
       <Menu.Divider />
       <Menu.Item key="account">Quản Lý Tài Khoản</Menu.Item>
-      <Menu.Item key="wallet">Ví của tôi</Menu.Item>
       <Menu.Item key="logout">Đăng Xuất</Menu.Item>
       <Menu.Divider />
-      <Menu.Item key="/connect" icon={<CloudDownloadOutlined />}>
-        Kết nối ứng dụng
-      </Menu.Item>
     </Menu>
   );
 
