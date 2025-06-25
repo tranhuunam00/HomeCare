@@ -25,6 +25,7 @@ import { useNavigate } from "react-router-dom";
 import API_CALL from "../../services/axiosClient";
 import { useGlobalAuth } from "../../contexts/AuthContext";
 import { USER_ROLE } from "../../constant/app";
+import { toast } from "react-toastify";
 
 const { Option } = Select;
 
@@ -109,10 +110,9 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
       };
 
       await API_CALL.post("/patient-diagnose", payload);
-      message.success("Đã clone thành công");
+      toast.success("Đã clone thành công");
       fetchPatients();
     } catch (err) {
-      message.error("Clone thất bại, vui lòng thử lại");
       console.error("Lỗi clone:", err);
     }
   };

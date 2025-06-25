@@ -103,7 +103,6 @@ const TemplateList = () => {
       toast.success("Đã clone mẫu thành công");
       fetchTemplates(); // làm mới danh sách
     } catch (err) {
-      toast.error("Clone thất bại, vui lòng thử lại");
       console.error("Lỗi clone template:", err);
     }
   };
@@ -213,7 +212,7 @@ const TemplateList = () => {
               </>
             )}
             <Button type="link" onClick={() => handleCloneTemplate(record)}>
-              Clone
+              Copy
             </Button>
           </>
         );

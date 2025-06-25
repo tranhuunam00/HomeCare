@@ -1,6 +1,7 @@
 // src/utils/axiosClient.js
 import axios from "axios";
 import STORAGE from "./storage";
+import { toast } from "react-toastify";
 
 const apiEndPoint = `${
   import.meta.env.VITE_API_ENDPOINT || "https://default-url.com"
@@ -65,25 +66,57 @@ axiosInstance.interceptors.response.use(
   }
 );
 
-// ✅ Method wrappers
-const get = (url, config = {}) => axiosInstance.get(url, config);
-const post = (url, data, config = {}) => axiosInstance.post(url, data, config);
-const put = (url, data, config = {}) => axiosInstance.put(url, data, config);
-const del = (url, data, config = {}) =>
-  axiosInstance.delete(url, { data, ...config });
-const postForm = (url, data, config = {}) =>
-  axiosInstance.post(url, data, {
-    headers: { "Content-Type": "multipart/form-data" },
-    ...config,
-  });
-const putForm = (url, data, config = {}) =>
-  axiosInstance.put(url, data, {
-    headers: { "Content-Type": "multipart/form-data" },
-    ...config,
-  });
+const withErrorToast =
+  (fn, defaultMsg) =>
+  async (...args) => {
+    try {
+      return await fn(...args);
+    } catch (err) {
+      toast.error(err?.response?.data?.message || defaultMsg);
+      throw err;
+    }
+  };
 
-const patch = (url, data, config = {}) =>
-  axiosInstance.patch(url, data, config);
+// ✅ Method wrappers
+const get = withErrorToast(
+  (url, config) => axiosInstance.get(url, config),
+  "Lỗi khi GET dữ liệu"
+);
+const post = withErrorToast(
+  (url, data, config) => axiosInstance.post(url, data, config),
+  "Lỗi khi POST dữ liệu"
+);
+const put = withErrorToast(
+  (url, data, config) => axiosInstance.put(url, data, config),
+  "Lỗi khi PUT dữ liệu"
+);
+const del = withErrorToast(
+  (url, data, config) => axiosInstance.delete(url, { data, ...config }),
+  "Lỗi khi DELETE dữ liệu"
+);
+
+const postForm = withErrorToast(
+  (url, data, config) =>
+    axiosInstance.post(url, data, {
+      headers: { "Content-Type": "multipart/form-data" },
+      ...config,
+    }),
+  "Lỗi khi upload form"
+);
+
+const putForm = withErrorToast(
+  (url, data, config) =>
+    axiosInstance.put(url, data, {
+      headers: { "Content-Type": "multipart/form-data" },
+      ...config,
+    }),
+  "Lỗi khi update form"
+);
+
+const patch = withErrorToast(
+  (url, data, config) => axiosInstance.patch(url, data, config),
+  "Lỗi khi PATCH dữ liệu"
+);
 
 const API_CALL = {
   get,

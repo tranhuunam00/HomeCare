@@ -67,11 +67,11 @@ const ClinicList = () => {
   const handleSubmit = async (values) => {
     try {
       if (editingId) {
-        await API_CALL.put(`/clinics/${editingId}`, values);
-        message.success("Cập nhật cơ sở thành công");
+        await API_CALL.patch(`/clinics/${editingId}`, values);
+        toast.success("Thành công");
       } else {
         await API_CALL.post("/clinics", values);
-        message.success("Thêm mới cơ sở thành công");
+        toast.success("Thêm mới cơ sở thành công");
       }
       fetchClinics();
       setModalVisible(false);
