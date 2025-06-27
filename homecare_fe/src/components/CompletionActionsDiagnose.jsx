@@ -17,6 +17,9 @@ const CompletionActionsDiagnose = ({
   handleConfirm,
   handleCancelRead,
   handleSend,
+  handleTranslate,
+  handleTranslateAll,
+  isTranslateAll = false,
 }) => {
   const navigate = useNavigate();
   const [status, setStatus] = useState(1);
@@ -84,6 +87,39 @@ const CompletionActionsDiagnose = ({
             onClick={handlePrint}
           >
             In kết quả
+          </Button>
+        )}
+
+        {status == 4 && (
+          <Button
+            style={{
+              marginLeft: 8,
+              backgroundColor: PATIENT_DIAGNOSE_COLOR[4],
+              color: "#fff",
+              border: "none",
+            }}
+            onClick={handleTranslate}
+          >
+            Bắt đầu dịch
+          </Button>
+        )}
+
+        {status == 4 && (
+          <Button
+            style={{
+              marginLeft: 8,
+              backgroundColor: !isTranslateAll
+                ? "#ccc"
+                : PATIENT_DIAGNOSE_COLOR[4],
+              color: "#fff",
+              border: "none",
+              cursor: !isTranslateAll ? "not-allowed" : "pointer",
+              opacity: !isTranslateAll ? 0.6 : 1, // làm mờ khi disabled
+            }}
+            disabled={!isTranslateAll}
+            onClick={handleTranslateAll}
+          >
+            Hoàn thành dịch
           </Button>
         )}
       </Form.Item>

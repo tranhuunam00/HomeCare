@@ -28,10 +28,13 @@ import ImageWithCaptionInput from "../../products/ImageWithCaptionInput/ImageWit
 import { renderDynamicAntdFields } from "../../../components/RenderInputFormTemplate";
 import {
   extractDynamicFieldsFromHtml,
+  LANGUAGES,
   PATIENT_DIAGNOSE_STATUS_CODE,
 } from "../../../constant/app";
 import CompletionActionsDiagnose from "../../../components/CompletionActionsDiagnose";
 import StatusButtonPatientDiagnose from "../../../components/Status2ButtonPatientDiagnose.jsx";
+import PrintPreview from "./PrintPreview.jsx";
+import AddonInputSection from "./InputsAdon.jsx";
 
 const urlToFile = async (url, fallbackName = "image") => {
   const res = await fetch(url);
@@ -87,15 +90,12 @@ const { Option } = Select;
 const PatientUseTemplate = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = React.useState(false);
   const [printTemplate, setPrintTemplate] = useState({});
   const [idPrintTemplate, setIdPrintTemplate] = useState();
 
-  const [template, setTemplate] = useState({});
-
   const { id_patient_diagnose } = useParams();
   const [idTemplate, setIdTemplate] = useState();
-  const [imageList, setImageList] = useState([]);
   const [combinedHtml, setCombinedHtml] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [patientDiagnose, setPatientDiagnose] = useState();
@@ -103,9 +103,97 @@ const PatientUseTemplate = () => {
   const { templateServices, doctor } = useGlobalAuth();
   const [idTemplateService, setIdTemplateService] = useState();
 
+  const [template, setTemplate] = useState({});
+  const [imageList, setImageList] = useState([]);
   const [inputsRender, setInputsRender] = useState([]);
   const [inputsAddon, setInputsAddon] = useState([]);
+
   const [isOpenPreview, setIsOpenPreview] = useState(true);
+  const [htmlTranslate, setHtmlTranslate] = useState("");
+  const [isTrans, setIsTrans] = useState("");
+
+  const [imageListTrans, setImageListTrans] = useState([]);
+  const [inputsRenderTrans, setInputsRenderTrans] = useState([]);
+  const [inputsAddonTrans, setInputsAddonTrans] = useState([]);
+  const [isTranslateAll, setIsTranslateAll] = useState();
+
+  useEffect(() => {
+    setImageListTrans(imageList);
+  }, [imageList]);
+  useEffect(() => {
+    setInputsRenderTrans(inputsRender);
+  }, [inputsRender]);
+  useEffect(() => {
+    setInputsAddonTrans(inputsAddon);
+  }, [inputsAddon]);
+
+  const handleTranslateInputs = async () => {
+    setLoading(true);
+    // 🧩 Tạo payload từ dữ liệu gốc
+    const payloadsAddon = inputsAddon;
+    const payloadsImage = {
+      texts: imageList.map((i) => i.caption),
+    };
+
+    // 🔍 Chỉ lấy key dạng {{{text:...}}}
+    const textObjectToTranslate = Object.fromEntries(
+      Object.entries(inputsRender).filter(([key]) => key.includes("{{{text:"))
+    );
+
+    const payloadsRender = textObjectToTranslate;
+
+    try {
+      const [translatedAddon, translatedImageCaptions, translatedRender] =
+        await Promise.all([
+          API_CALL.post("translate/object", payloadsAddon),
+          API_CALL.post("translate/text-array", payloadsImage),
+          API_CALL.post("translate/object", payloadsRender),
+        ]);
+
+      // ✅ Cập nhật kết quả dịch
+      setInputsAddonTrans(translatedAddon.data.data);
+
+      const updatedImageList = imageList.map((img, idx) => ({
+        ...img,
+        caption: translatedImageCaptions.data.data[idx],
+      }));
+
+      console.log("updatedImageList", updatedImageList);
+      setImageListTrans(updatedImageList);
+
+      const newInputRenderTrans = {
+        ...inputsRender,
+        ...translatedRender.data.data,
+      };
+      setInputsRenderTrans(newInputRenderTrans);
+      setIsTranslateAll(true);
+      toast.success("Vui lòng ấn vào Hoàn thành dịch để dịch full bản ");
+    } catch (err) {
+      toast.error("❌ Lỗi dịch nội dung:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleTranslate = async (htmltext) => {
+    try {
+      setLoading(true);
+
+      const payload = {
+        text: htmltext,
+      };
+      const htmlR = await API_CALL.post("translate/html-text", payload, {
+        timeout: 120000,
+      });
+      console.log("html", htmlR);
+      setHtmlTranslate(htmlR?.data?.data);
+    } catch (error) {
+      console.log(error);
+      toast.error("lỗi");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const normalizeDoctorPrintTemplateData = (template) => {
     const imageList = [];
@@ -152,7 +240,7 @@ const PatientUseTemplate = () => {
       params: {
         page: 1,
         limit: 1000,
-        id_template_service: +idTemplateService,
+        id_template_service: +idTemplateService || -1,
       },
     })
       .then((res) => {
@@ -183,12 +271,14 @@ const PatientUseTemplate = () => {
   }, [printTemplateList, patientDiagnose]);
 
   useEffect(() => {
-    API_CALL.get(`/templates/${idTemplate}`)
-      .then((res) => {
-        const data = res.data.data?.data || res.data.data || {};
-        setTemplate(data);
-      })
-      .catch(() => message.error("Không thể tải danh sách template"));
+    if (idTemplate) {
+      API_CALL.get(`/templates/${idTemplate}`)
+        .then((res) => {
+          const data = res.data.data?.data || res.data.data || {};
+          setTemplate(data);
+        })
+        .catch(() => message.error("Không thể tải danh sách template"));
+    }
   }, [idTemplate]);
 
   useEffect(() => {
@@ -207,6 +297,23 @@ const PatientUseTemplate = () => {
   `;
     setCombinedHtml(html);
   }, [template, inputsRender]);
+
+  useEffect(() => {
+    const html = `
+    <style>
+      table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+      th, td { border: 0px solid #ccc; padding: 8px; text-align: left; }
+      h3 {margin-bottom: 20px; margin-top: 40px;}
+    </style>
+    <h3>QUY TRÌNH VÀ KĨ THUẬT</h3>
+    ${replaceInputsInHtml(template?.description || "", inputsRenderTrans)}
+    <h3>KẾT LUẬN CHẨN ĐOÁN</h3>
+    ${replaceInputsInHtml(template?.result || "", inputsRenderTrans)}
+    <h3>KHUYẾN NGHỊ</h3>
+    ${replaceInputsInHtml(template?.recommendation || "", inputsRenderTrans)}
+  `;
+    setHtmlTranslate(html);
+  }, [template, inputsRenderTrans]);
 
   const printRef = useRef();
 
@@ -385,921 +492,293 @@ const PatientUseTemplate = () => {
     }
   };
 
-  console.log("patientDiagnose", patientDiagnose);
+  console.log("imageListTrans", imageListTrans, imageList);
   return (
-    <div style={{ display: "flex" }}>
-      {patientDiagnose?.status != PATIENT_DIAGNOSE_STATUS_CODE.VERIFY ? (
-        <Card style={{ width: isOpenPreview ? 600 : "100%", margin: "0" }}>
-          <StatusButtonPatientDiagnose
-            id={patientDiagnose?.id}
-            status={patientDiagnose?.status || 1}
-          />
-          <Button
-            type={isOpenPreview ? "default" : "primary"} // màu khác nhau
-            danger={isOpenPreview} // nếu đang mở thì dùng màu đỏ nhẹ
-            style={{
-              marginTop: 16,
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              height: 32,
-              padding: "0 12px",
-              fontSize: 14,
-            }}
-            onClick={() => setIsOpenPreview(!isOpenPreview)}
-            icon={isOpenPreview ? <EyeInvisibleOutlined /> : <EyeOutlined />}
-          >
-            {isOpenPreview ? "Tắt preview" : "Mở preview"}
-          </Button>
-
-          <Title level={3}>
-            Hiện có: {patientDiagnose?.doctor_print_templates?.length || 0} bản
-            ghi{" "}
-          </Title>
-          <CompletionActionsDiagnose
-            statusCode={patientDiagnose?.status}
-            handleRead={async () => {
-              const res = await updateStatusPatientDiagnose(2);
-              if (res) {
-                setPatientDiagnose({ ...patientDiagnose, status: 2 });
-              }
-            }}
-            handleCancelRead={async () => {
-              const res = await updateStatusPatientDiagnose(1);
-              if (res) {
-                setPatientDiagnose({ ...patientDiagnose, status: 1 });
-              }
-            }}
-            handleConfirm={async () => {
-              const confirm = window.confirm(
-                "Bạn có chắc chắn muốn chốt kết quả không?\nSau khi chốt sẽ không thể sửa."
-              );
-              if (confirm) {
-                try {
-                  const data = await createDoctorPrintTemplate(
-                    PATIENT_DIAGNOSE_STATUS_CODE.VERIFY
-                  );
-
-                  if (data) {
-                    toast.success("Chốt kết quả thành công!");
-                    setPatientDiagnose({
-                      ...patientDiagnose,
-                      status: PATIENT_DIAGNOSE_STATUS_CODE.VERIFY,
-                    });
-                    navigate("/home/patients-diagnose");
-                  }
-                } catch (error) {
-                  console.error("Lỗi khi chốt kết quả:", error);
-                  toast.error("Chốt kết quả thất bại!");
-                }
-              }
-            }}
-            handlePrint={handlePrint}
-            handleSend={async () => {
-              const confirm = window.confirm(
-                "Bạn có chắc chắn muốn chốt kết quả không?\nSau khi chốt sẽ không thể sửa."
-              );
-              if (confirm) {
-                try {
-                  const data = await createDoctorPrintTemplate(
-                    PATIENT_DIAGNOSE_STATUS_CODE.WAIT
-                  );
-
-                  if (data) {
-                    toast.success("Chốt kết quả thành công!");
-                    setPatientDiagnose({
-                      ...patientDiagnose,
-                      status: PATIENT_DIAGNOSE_STATUS_CODE.WAIT,
-                    });
-                    navigate("/home/patients-diagnose");
-                  }
-                } catch (error) {
-                  console.error("Lỗi khi chốt kết quả:", error);
-                  toast.error("Chốt kết quả thất bại!");
-                }
-              }
-            }}
-          />
-          <Title level={3}>Phiếu kết quả</Title>
-
-          <div style={{ marginBottom: 20 }}>
-            <Select
-              disabled={
-                patientDiagnose?.status == PATIENT_DIAGNOSE_STATUS_CODE.NEW
-              }
-              showSearch
-              allowClear
-              style={{ width: 400 }}
-              value={idTemplateService}
-              placeholder="Chọn dịch vụ"
-              optionFilterProp="children"
-              onChange={(val) => {
-                setIdTemplateService(val);
-                setIdTemplate(null);
-                setTemplate(null);
-                setPrintTemplate(null);
+    <Spin spinning={loading}>
+      <div style={{ display: "flex" }}>
+        {patientDiagnose?.status != PATIENT_DIAGNOSE_STATUS_CODE.VERIFY ? (
+          <Card style={{ width: isOpenPreview ? 600 : "100%", margin: "0" }}>
+            <StatusButtonPatientDiagnose
+              id={patientDiagnose?.id}
+              status={patientDiagnose?.status || 1}
+            />
+            <Button
+              type={isOpenPreview ? "default" : "primary"} // màu khác nhau
+              danger={isOpenPreview} // nếu đang mở thì dùng màu đỏ nhẹ
+              style={{
+                marginTop: 16,
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                height: 32,
+                padding: "0 12px",
+                fontSize: 14,
               }}
-              filterOption={(input, option) =>
-                option.children.toLowerCase().includes(input.toLowerCase())
-              }
+              onClick={() => setIsOpenPreview(!isOpenPreview)}
+              icon={isOpenPreview ? <EyeInvisibleOutlined /> : <EyeOutlined />}
             >
-              {templateServices.map((tpl) => (
-                <Option key={tpl.id} value={tpl.id}>
-                  {tpl.name}
-                </Option>
-              ))}
-            </Select>
-          </div>
+              {isOpenPreview ? "Tắt preview" : "Mở preview"}
+            </Button>
 
-          <div style={{ marginBottom: 20 }}>
-            <Select
-              showSearch
-              allowClear
-              style={{ width: 400 }}
-              value={idPrintTemplate}
-              placeholder="Chọn template cần xem trước"
-              optionFilterProp="children"
-              onChange={(val) => {
-                const printT = printTemplateList.find((t) => t.id == val);
-                setPrintTemplate(printT);
-                setIdTemplate(printT.id_template);
-                setIdPrintTemplate(printT.id);
+            <Title level={3}>
+              Hiện có: {patientDiagnose?.doctor_print_templates?.length || 0}{" "}
+              bản ghi{" "}
+            </Title>
+            <CompletionActionsDiagnose
+              statusCode={patientDiagnose?.status}
+              handleRead={async () => {
+                const res = await updateStatusPatientDiagnose(2);
+                if (res) {
+                  setPatientDiagnose({ ...patientDiagnose, status: 2 });
+                }
               }}
-              filterOption={(input, option) =>
-                option.children.toLowerCase().includes(input.toLowerCase())
-              }
-            >
-              {printTemplateList
-                .filter((t) => t.id_template_service == idTemplateService)
-                .map((tpl) => (
+              handleCancelRead={async () => {
+                const res = await updateStatusPatientDiagnose(1);
+                if (res) {
+                  setPatientDiagnose({ ...patientDiagnose, status: 1 });
+                }
+              }}
+              handleConfirm={async () => {
+                const confirm = window.confirm(
+                  "Bạn có chắc chắn muốn chốt kết quả không?\nSau khi chốt sẽ không thể sửa."
+                );
+                if (confirm) {
+                  try {
+                    const data = await createDoctorPrintTemplate(
+                      PATIENT_DIAGNOSE_STATUS_CODE.VERIFY
+                    );
+
+                    if (data) {
+                      toast.success("Chốt kết quả thành công!");
+                      setPatientDiagnose({
+                        ...patientDiagnose,
+                        status: PATIENT_DIAGNOSE_STATUS_CODE.VERIFY,
+                      });
+                      navigate("/home/patients-diagnose");
+                    }
+                  } catch (error) {
+                    console.error("Lỗi khi chốt kết quả:", error);
+                    toast.error("Chốt kết quả thất bại!");
+                  }
+                }
+              }}
+              handlePrint={handlePrint}
+              handleSend={async () => {
+                const confirm = window.confirm(
+                  "Bạn có chắc chắn muốn chốt kết quả không?\nSau khi chốt sẽ không thể sửa."
+                );
+                if (confirm) {
+                  try {
+                    const data = await createDoctorPrintTemplate(
+                      PATIENT_DIAGNOSE_STATUS_CODE.WAIT
+                    );
+
+                    if (data) {
+                      toast.success("Chốt kết quả thành công!");
+                      setPatientDiagnose({
+                        ...patientDiagnose,
+                        status: PATIENT_DIAGNOSE_STATUS_CODE.WAIT,
+                      });
+                      navigate("/home/patients-diagnose");
+                    }
+                  } catch (error) {
+                    console.error("Lỗi khi chốt kết quả:", error);
+                    toast.error("Chốt kết quả thất bại!");
+                  }
+                }
+              }}
+            />
+            <Title level={3}>Phiếu kết quả</Title>
+
+            <div style={{ marginBottom: 20 }}>
+              <Select
+                disabled={
+                  patientDiagnose?.status == PATIENT_DIAGNOSE_STATUS_CODE.NEW
+                }
+                showSearch
+                allowClear
+                style={{ width: 400 }}
+                value={idTemplateService}
+                placeholder="Chọn dịch vụ"
+                optionFilterProp="children"
+                onChange={(val) => {
+                  setIdTemplateService(val);
+                  setIdTemplate(null);
+                  setTemplate(null);
+                  setPrintTemplate(null);
+                }}
+                filterOption={(input, option) =>
+                  option.children.toLowerCase().includes(input.toLowerCase())
+                }
+              >
+                {templateServices.map((tpl) => (
                   <Option key={tpl.id} value={tpl.id}>
                     {tpl.name}
                   </Option>
                 ))}
-            </Select>
-          </div>
-
-          <div
-            style={{
-              width: "100%",
-              fontSize: 11,
-              padding: 8,
-              display: "flex",
-              flexWrap: "wrap",
-              gap: 12,
-              flexDirection: "row",
-            }}
-          >
-            <div
-              style={{
-                marginBottom: 8,
-                fontSize: 11,
-                maxWidth: 600,
-                flex: "1 1 100%",
-              }}
-            >
-              <div style={{ marginBottom: 4 }}>Triệu chứng</div>
-              <Input.TextArea
-                size="small"
-                rows={2}
-                name="symptoms"
-                onChange={(e) =>
-                  setInputsAddon({
-                    ...inputsAddon,
-                    [e.target.name]: e.target.value,
-                  })
-                }
-                style={{ fontSize: 11 }}
-                value={inputsAddon.symptoms}
-              />
+              </Select>
             </div>
 
-            <div
-              style={{
-                marginBottom: 8,
-                fontSize: 11,
-                maxWidth: 600,
-                flex: "1 1 100%",
-              }}
-            >
-              <div style={{ marginBottom: 4 }}>Diễn biến</div>
-              <Input
-                size="small"
-                name="progress"
-                onChange={(e) =>
-                  setInputsAddon({
-                    ...inputsAddon,
-                    [e.target.name]: e.target.value,
-                  })
+            <div style={{ marginBottom: 20 }}>
+              <Select
+                showSearch
+                allowClear
+                style={{ width: 400 }}
+                value={idPrintTemplate}
+                placeholder="Chọn template cần xem trước"
+                optionFilterProp="children"
+                onChange={(val) => {
+                  const printT = printTemplateList.find((t) => t.id == val);
+                  setPrintTemplate(printT);
+                  setIdTemplate(printT.id_template);
+                  setIdPrintTemplate(printT.id);
+                }}
+                filterOption={(input, option) =>
+                  option.children.toLowerCase().includes(input.toLowerCase())
                 }
-                style={{ fontSize: 11 }}
-                value={inputsAddon.progress}
-              />
+              >
+                {printTemplateList
+                  .filter((t) => t.id_template_service == idTemplateService)
+                  .map((tpl) => (
+                    <Option key={tpl.id} value={tpl.id}>
+                      {tpl.name}
+                    </Option>
+                  ))}
+              </Select>
             </div>
 
-            <div
-              style={{
-                marginBottom: 8,
-                fontSize: 11,
-                maxWidth: 600,
-                flex: "1 1 100%",
-              }}
-            >
-              <div style={{ marginBottom: 4 }}>Tiền sử bệnh</div>
-              <Input
-                size="small"
-                name="medical_history"
-                onChange={(e) =>
-                  setInputsAddon({
-                    ...inputsAddon,
-                    [e.target.name]: e.target.value,
-                  })
-                }
-                value={inputsAddon.medical_history}
-                style={{ fontSize: 11 }}
-              />
-            </div>
-
-            <Row gutter={12} style={{ maxWidth: 600, flex: "1 1 100%" }}>
-              <Col span={16}>
-                <div style={{ marginBottom: 8, fontSize: 11 }}>
-                  <div style={{ marginBottom: 4 }}>Link so sánh:</div>
-                  <Input
-                    size="small"
-                    name="compare_link"
-                    onChange={(e) =>
-                      setInputsAddon({
-                        ...inputsAddon,
-                        [e.target.name]: e.target.value,
-                      })
-                    }
-                    value={inputsAddon.compare_link}
-                    style={{ fontSize: 11 }}
-                  />
-                </div>
-              </Col>
-              <Col span={8}>
-                <div style={{ marginBottom: 8, fontSize: 11 }}>
-                  <div style={{ marginBottom: 4 }}>Có kết quả cũ:</div>
-                  <Input
-                    size="small"
-                    name="old_date"
-                    onChange={(e) =>
-                      setInputsAddon({
-                        ...inputsAddon,
-                        [e.target.name]: e.target.value,
-                      })
-                    }
-                    value={inputsAddon.old_date}
-                    style={{ fontSize: 11 }}
-                  />
-                </div>
-              </Col>
-            </Row>
-          </div>
-          <h2>Chỗ nhập liệu</h2>
-          <h4>Mô tả và kĩ thuật</h4>
-
-          <div style={{ width: "100%", display: "flex", flexWrap: "wrap" }}>
-            {renderDynamicAntdFields(
-              extractDynamicFieldsFromHtml(template?.description || ""),
-              inputsRender,
-              setInputsRender
-            )}
-          </div>
-          <h4>Kết quả</h4>
-
-          <div style={{ width: "100%", display: "flex", flexWrap: "wrap" }}>
-            {renderDynamicAntdFields(
-              extractDynamicFieldsFromHtml(template?.result || ""),
-              inputsRender,
-              setInputsRender
-            )}
-          </div>
-
-          <h4>Khuyến nghị</h4>
-
-          <div style={{ width: "100%", display: "flex", flexWrap: "wrap" }}>
-            {renderDynamicAntdFields(
-              extractDynamicFieldsFromHtml(template?.recommendation || ""),
-              inputsRender,
-              setInputsRender
-            )}
-          </div>
-
-          <Form.Item label="Hình ảnh minh họa">
-            <ImageWithCaptionInput value={imageList} onChange={setImageList} />
-          </Form.Item>
-
-          <Card title="Tải file PDF đã in" style={{ marginTop: 24 }}>
-            <Upload
-              name="file"
-              accept=".pdf"
-              beforeUpload={(file) => {
-                setSelectedFile(file); // Lưu file vào state
-                return false; // Ngăn không upload ngay
-              }}
-              showUploadList={{
-                showRemoveIcon: true,
-              }}
-              onRemove={() => setSelectedFile(null)}
-              fileList={selectedFile ? [selectedFile] : []}
-            >
-              <Button icon={<UploadOutlined />}>Chọn file PDF</Button>
-            </Upload>
-
-            <Button
-              type="primary"
-              style={{ marginTop: 16 }}
-              disabled={!selectedFile}
-              onClick={handleUploadPDF}
-            >
-              Tải lên
-            </Button>
-          </Card>
-        </Card>
-      ) : (
-        <CompletionActionsDiagnose
-          statusCode={patientDiagnose?.status}
-          handlePrint={handlePrint}
-        />
-      )}
-
-      {isOpenPreview && (
-        <div ref={printRef}>
-          <Card bordered={false} className={`a4-page`}>
-            <header
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                marginBottom: 20,
-                alignItems: "flex-start",
-                gap: 20,
-              }}
-            >
-              <img
-                style={{
-                  marginTop: 10,
-                  objectFit: "cover",
-                  alignContent: "center",
-                }}
-                src={
-                  printTemplate?.logo_url ||
-                  "https://via.placeholder.com/150x100?text=Logo"
-                }
-                alt="Logo"
-                width={100}
-                height={100}
-              />
-              <div style={{ maxWidth: "350px" }}>
-                <p style={{ fontWeight: 600, color: "red", fontSize: 16 }}>
-                  {printTemplate?.clinic_name || "[Tên phòng khám]"}
-                </p>
-                <p style={{ fontSize: 14 }}>
-                  <strong>Khoa:</strong> {printTemplate?.department_name || "-"}
-                </p>
-                <p style={{ fontSize: 14 }}>
-                  <strong>Địa chỉ:</strong> {printTemplate?.address || "-"}
-                </p>
-              </div>
-              <div style={{ maxWidth: "280px" }}>
-                <p style={{ fontSize: 14 }}>
-                  <strong>Website:</strong>{" "}
-                  <i>{printTemplate?.website || "http://..."}</i>
-                </p>
-                <p style={{ fontSize: 14 }}>
-                  <strong>Hotline:</strong> {printTemplate?.phone || "..."}
-                </p>
-                <p style={{ fontSize: 14 }}>
-                  <strong>Email:</strong>
-                  <i>{printTemplate?.email || "example@email.com"}</i>
-                </p>
-              </div>
-            </header>
-            <div>
-              <h3>THÔNG TIN HÀNH CHÍNH</h3>
-              <div
-                style={{
-                  marginBottom: 10,
-                  display: "flex",
-                  justifyContent: "space-between",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    fontSize: 14,
-                  }}
-                >
-                  <div style={{ width: 90 }}>
-                    <p
-                      style={{
-                        fontSize: 14,
-                        fontWeight: 600,
-                        margin: 0,
-                        padding: 0,
-                      }}
-                    >
-                      Họ và tên:
-                    </p>
-                  </div>
-                  <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
-                    {patientDiagnose?.name}
-                  </p>
-                </div>
-
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    fontSize: 14,
-                  }}
-                >
-                  <div style={{ width: 90 }}>
-                    <p
-                      style={{
-                        fontWeight: 600,
-                        width: 100,
-                        margin: 0,
-                        padding: 0,
-                      }}
-                    >
-                      Giới tính:
-                    </p>
-                  </div>
-                  <p style={{ margin: 0, padding: 0 }}>
-                    {patientDiagnose?.gender}
-                  </p>
-                </div>
-              </div>
-
-              <div
-                style={{
-                  marginBottom: 10,
-                  display: "flex",
-                  justifyContent: "space-between",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    fontSize: 14,
-                  }}
-                >
-                  <div style={{ width: 90 }}>
-                    <p
-                      style={{
-                        fontSize: 14,
-                        fontWeight: 600,
-                        margin: 0,
-                        padding: 0,
-                      }}
-                    >
-                      Năm sinh:
-                    </p>
-                  </div>
-                  <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
-                    {dayjs(patientDiagnose?.dob).format("YYYY")}
-                  </p>
-                </div>
-
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    fontSize: 14,
-                    margin: 0,
-                    padding: 0,
-                  }}
-                >
-                  <div style={{ width: 70 }}>
-                    <p
-                      style={{
-                        fontWeight: 600,
-                        width: 100,
-                        margin: 0,
-                        padding: 0,
-                      }}
-                    >
-                      Tuổi:
-                    </p>
-                  </div>
-                  <p style={{ margin: 0, padding: 0 }}>
-                    {calculateAge(patientDiagnose?.dob)}
-                  </p>
-                </div>
-              </div>
-
-              <div
-                style={{
-                  marginBottom: 10,
-                  display: "flex",
-                  justifyContent: "space-between",
-                }}
-              >
-                {/* Quốc gia */}
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    fontSize: 14,
-                  }}
-                >
-                  <div style={{ width: 80 }}>
-                    <p
-                      style={{
-                        fontSize: 14,
-                        fontWeight: 600,
-                        margin: 0,
-                        padding: 0,
-                      }}
-                    >
-                      Quốc gia:
-                    </p>
-                  </div>
-                  <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
-                    Việt Nam
-                  </p>
-                </div>
-
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    fontSize: 14,
-                  }}
-                >
-                  <div style={{ width: 130 }}>
-                    <p
-                      style={{
-                        fontSize: 14,
-                        fontWeight: 600,
-                        margin: 0,
-                        padding: 0,
-                      }}
-                    >
-                      Tỉnh/Thành phố:
-                    </p>
-                  </div>
-                  <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
-                    {provinces.find(
-                      (s) => s.code == patientDiagnose?.province_code
-                    )?.name || "-"}
-                  </p>
-                </div>
-                <div style={{ width: 60 }}>
-                  <p
-                    style={{
-                      fontSize: 14,
-                      fontWeight: 600,
-                      margin: 0,
-                      padding: 0,
-                    }}
-                  >
-                    Quận/Huyện:
-                  </p>
-                </div>
-                <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
-                  {districts.find(
-                    (s) => s.code == patientDiagnose?.district_code
-                  )?.name || "-"}
-                </p>
-              </div>
-              <div
-                style={{
-                  marginBottom: 10,
-                  display: "flex",
-                  justifyContent: "space-between",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    fontSize: 14,
-                  }}
-                >
-                  <div style={{ width: 100 }}>
-                    <p
-                      style={{
-                        fontSize: 14,
-                        fontWeight: 600,
-                        margin: 0,
-                        padding: 0,
-                      }}
-                    >
-                      Xã/Phường:
-                    </p>
-                  </div>
-                  <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
-                    {wards.find((s) => s.code == patientDiagnose?.ward_code)
-                      ?.name || "-"}
-                  </p>
-                </div>
-
-                {/* Số nhà */}
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    fontSize: 14,
-                  }}
-                >
-                  <div style={{ width: 90 }}>
-                    <p
-                      style={{
-                        fontSize: 14,
-                        fontWeight: 600,
-                        margin: 0,
-                        padding: 0,
-                      }}
-                    >
-                      Số nhà:
-                    </p>
-                  </div>
-                  <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
-                    {patientDiagnose?.address || "-"}
-                  </p>
-                </div>
-              </div>
-              <div
-                style={{
-                  marginBottom: 10,
-                  display: "flex",
-                  justifyContent: "space-between",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    fontSize: 14,
-                  }}
-                >
-                  <div style={{ width: 110 }}>
-                    <p
-                      style={{
-                        fontSize: 14,
-                        fontWeight: 600,
-                        margin: 0,
-                        padding: 0,
-                      }}
-                    >
-                      Số điện thoại
-                    </p>
-                  </div>
-                  <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
-                    {patientDiagnose?.phoneNumber}
-                  </p>
-                </div>
-
-                {/* Số nhà */}
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    fontSize: 14,
-                  }}
-                >
-                  <div style={{ width: 60 }}>
-                    <p
-                      style={{
-                        fontSize: 14,
-                        fontWeight: 600,
-                        margin: 0,
-                        padding: 0,
-                      }}
-                    >
-                      Email:
-                    </p>
-                  </div>
-                  <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
-                    {patientDiagnose?.email || "-"}
-                  </p>
-                </div>
-              </div>
-
-              <div
-                style={{
-                  marginBottom: 10,
-                  display: "flex",
-                  justifyContent: "space-between",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    fontSize: 14,
-                  }}
-                >
-                  <div style={{ width: 110 }}>
-                    <p
-                      style={{
-                        fontSize: 14,
-                        fontWeight: 600,
-                        margin: 0,
-                        padding: 0,
-                      }}
-                    >
-                      Triệu chứng:
-                    </p>
-                  </div>
-                  <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
-                    {inputsAddon?.symptoms}
-                  </p>
-                </div>
-              </div>
-              <div
-                style={{
-                  marginBottom: 10,
-                  display: "flex",
-                  justifyContent: "space-between",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    fontSize: 14,
-                  }}
-                >
-                  <div style={{ width: 100 }}>
-                    <p
-                      style={{
-                        fontSize: 14,
-                        fontWeight: 600,
-                        margin: 0,
-                        padding: 0,
-                      }}
-                    >
-                      Diễn biến:
-                    </p>
-                  </div>
-                  <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
-                    {inputsAddon?.progress}
-                  </p>
-                </div>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    fontSize: 14,
-                  }}
-                >
-                  <div style={{ width: 110 }}>
-                    <p
-                      style={{
-                        fontSize: 14,
-                        fontWeight: 600,
-                        margin: 0,
-                        padding: 0,
-                      }}
-                    >
-                      Tiền sử bệnh:
-                    </p>
-                  </div>
-                  <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
-                    {inputsAddon?.medical_history}
-                  </p>
-                </div>
-              </div>
-
-              <div
-                style={{
-                  marginBottom: 10,
-                  display: "flex",
-                  justifyContent: "space-between",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    fontSize: 14,
-                  }}
-                >
-                  <div style={{ width: 80 }}>
-                    <p
-                      style={{
-                        fontSize: 14,
-                        fontWeight: 600,
-                        margin: 0,
-                        padding: 0,
-                      }}
-                    >
-                      So sánh:
-                    </p>
-                  </div>
-                  <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
-                    {inputsAddon?.compare_link}
-                  </p>
-                </div>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    fontSize: 14,
-                  }}
-                >
-                  <div style={{ width: 120 }}>
-                    <p
-                      style={{
-                        fontSize: 14,
-                        fontWeight: 600,
-                        margin: 0,
-                        padding: 0,
-                      }}
-                    >
-                      Có kết quả cũ:
-                    </p>
-                  </div>
-                  <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
-                    {inputsAddon?.old_date}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div
-              className="print-content"
-              dangerouslySetInnerHTML={{ __html: combinedHtml }}
+            <AddonInputSection
+              inputsAddon={inputsAddon}
+              setInputsAddon={setInputsAddon}
+              template={template}
+              inputsRender={inputsRender}
+              setInputsRender={setInputsRender}
+              imageList={imageList}
+              setImageList={setImageList}
+              renderDynamicAntdFields={renderDynamicAntdFields}
+              extractDynamicFieldsFromHtml={extractDynamicFieldsFromHtml}
             />
-            <h3>HÌNH ẢNH MINH HỌA</h3>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-evenly",
-                flexWrap: "wrap",
-              }}
-            >
-              {imageList.map((item, idx) => (
-                <section key={idx}>
-                  <img
-                    src={item.url}
-                    alt={`img-${idx}`}
-                    width={150}
-                    height={150}
-                  />
-                  <p style={{ width: 150 }}>{item.caption}</p>
-                </section>
-              ))}
-            </div>
-            <h3>BÁC SĨ THỰC HIỆN</h3>
 
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <section>
-                <div
-                  style={{ display: "flex", marginBottom: 10, fontSize: 14 }}
-                >
-                  <div style={{ width: 150 }}>
-                    <strong>Họ và tên:</strong>
-                  </div>
-                  {doctor.full_name}
-                </div>
-                <div
-                  style={{ display: "flex", marginBottom: 10, fontSize: 14 }}
-                >
-                  <div style={{ width: 150 }}>
-                    <strong>Điện thoại:</strong>
-                  </div>
-                  {doctor.phone_number}
-                </div>
-                <div
-                  style={{ display: "flex", marginBottom: 10, fontSize: 14 }}
-                >
-                  <div style={{ width: 150 }}>
-                    <strong>Thời gian:</strong>
-                  </div>
-                  {dayjs().format("DD-MM-YYYY HH:mm")}
-                </div>
-                <div
-                  style={{ display: "flex", marginBottom: 10, fontSize: 14 }}
-                >
-                  <div style={{ width: 150 }}>
-                    <strong>Chữ ký số:</strong>
-                  </div>
-                  digital signed by Tran Van A
-                </div>
-              </section>
-              <section>
-                <img src={doctor?.avatar_url} alt="" width={100} height={100} />
-              </section>
-              <section>
-                <img
-                  src={doctor?.signature_url}
-                  alt=""
-                  width={100}
-                  height={100}
-                />
-              </section>
-            </div>
+            <Card title="Tải file PDF đã in" style={{ marginTop: 24 }}>
+              <Upload
+                name="file"
+                accept=".pdf"
+                beforeUpload={(file) => {
+                  setSelectedFile(file); // Lưu file vào state
+                  return false; // Ngăn không upload ngay
+                }}
+                showUploadList={{
+                  showRemoveIcon: true,
+                }}
+                onRemove={() => setSelectedFile(null)}
+                fileList={selectedFile ? [selectedFile] : []}
+              >
+                <Button icon={<UploadOutlined />}>Chọn file PDF</Button>
+              </Upload>
+
+              <Button
+                type="primary"
+                style={{ marginTop: 16 }}
+                disabled={!selectedFile}
+                onClick={handleUploadPDF}
+              >
+                Tải lên
+              </Button>
+            </Card>
           </Card>
-        </div>
-      )}
-    </div>
+        ) : (
+          <Card style={{ width: 600, margin: "0" }}>
+            <CompletionActionsDiagnose
+              isTranslateAll={isTranslateAll}
+              statusCode={patientDiagnose?.status}
+              handlePrint={handlePrint}
+              handleTranslate={async () => {
+                const confirmed = window.confirm(
+                  "Bạn có chắc chắn muốn bắt đầu dịch nội dung không?"
+                );
+                if (!confirmed) return;
+
+                setIsTrans(true);
+                toast.success("Bắt đầu dịch");
+                await handleTranslateInputs();
+              }}
+              handleTranslateAll={async () => {
+                await handleTranslate(`
+                        <style>
+                          table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+                          th, td { border: 0px solid #ccc; padding: 8px; text-align: left; }
+                          h3 {margin-bottom: 20px; margin-top: 40px;}
+                        </style>
+                        <h3>QUY TRÌNH VÀ KĨ THUẬT</h3>
+                        ${replaceInputsInHtml(
+                          template?.description || "",
+                          inputsRenderTrans
+                        )}
+                        <h3>KẾT LUẬN CHẨN ĐOÁN</h3>
+                        ${replaceInputsInHtml(
+                          template?.result || "",
+                          inputsRenderTrans
+                        )}
+                        <h3>KHUYẾN NGHỊ</h3>
+                        ${replaceInputsInHtml(
+                          template?.recommendation || "",
+                          inputsRenderTrans
+                        )}
+                      `);
+              }}
+            />
+            {isTrans && (
+              <AddonInputSection
+                inputsAddon={inputsAddonTrans}
+                setInputsAddon={setInputsAddonTrans}
+                template={template}
+                inputsRender={inputsRenderTrans}
+                setInputsRender={setInputsRenderTrans}
+                imageList={imageListTrans}
+                setImageList={setImageListTrans}
+                renderDynamicAntdFields={renderDynamicAntdFields}
+                extractDynamicFieldsFromHtml={extractDynamicFieldsFromHtml}
+              />
+            )}
+          </Card>
+        )}
+
+        {isOpenPreview && !isTrans && (
+          <PrintPreview
+            printRef={printRef}
+            printTemplate={printTemplate}
+            patientDiagnose={patientDiagnose}
+            inputsAddon={inputsAddon}
+            combinedHtml={combinedHtml}
+            imageList={imageList}
+            doctor={doctor}
+            provinces={provinces}
+            districts={districts}
+            wards={wards}
+            calculateAge={calculateAge}
+            lang={LANGUAGES.vi}
+          />
+        )}
+
+        {isTrans &&
+          patientDiagnose.status == PATIENT_DIAGNOSE_STATUS_CODE.VERIFY && (
+            <PrintPreview
+              printRef={printRef}
+              printTemplate={printTemplate}
+              patientDiagnose={patientDiagnose}
+              inputsAddon={inputsAddonTrans}
+              combinedHtml={htmlTranslate}
+              imageList={imageListTrans}
+              doctor={doctor}
+              provinces={provinces}
+              districts={districts}
+              wards={wards}
+              calculateAge={calculateAge}
+              lang={LANGUAGES.en}
+            />
+          )}
+      </div>
+    </Spin>
   );
 };
 

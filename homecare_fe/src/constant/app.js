@@ -53,3 +53,56 @@ export function extractDynamicFieldsFromHtml(htmlString) {
     index,
   }));
 }
+
+export const ADMIN_INFO_LABELS = {
+  full_name: "Họ và tên",
+  gender: "Giới tính",
+  dob: "Năm sinh",
+  age: "Tuổi",
+  country: "Quốc gia",
+  province: "Tỉnh/Thành phố",
+  district: "Quận/Huyện",
+  ward: "Xã/Phường",
+  address: "Số nhà",
+  phoneNumber: "Số điện thoại",
+  email: "Email",
+  symptoms: "Triệu chứng",
+  progress: "Diễn biến",
+  medical_history: "Tiền sử bệnh",
+  compare_link: "So sánh",
+  old_date: "Có kết quả cũ",
+  section_title: "THÔNG TIN HÀNH CHÍNH",
+  image_section: "HÌNH ẢNH MINH HỌA",
+  doctor: "BÁC SĨ THỰC HIỆN",
+  time: "Thời gian",
+  digital_signature: "Chữ ký số",
+};
+
+export const ADMIN_INFO_LABELS_EN = {
+  full_name: "Full Name",
+  gender: "Gender",
+  dob: "Year of Birth",
+  age: "Age",
+  country: "Country",
+  province: "Province/City",
+  district: "District",
+  ward: "Ward/Commune",
+  address: "Address",
+  phoneNumber: "Phone Number",
+  email: "Email",
+  symptoms: "Symptoms",
+  progress: "Progress",
+  medical_history: "Medical History",
+  compare_link: "Comparison",
+  old_date: "Previous Result",
+  section_title: "ADMINISTRATIVE INFORMATION",
+  image_section: "ILLUSTRATIVE IMAGES",
+  doctor: "DOCTOR",
+  time: "Time",
+  digital_signature: "Digital signature",
+};
+
+export const LANGUAGES = {
+  vi: "vi",
+  en: "en",
+};
