@@ -48,7 +48,7 @@ export function extractDynamicFieldsFromHtml(htmlString) {
   return matches.map((match, index) => ({
     type: match[1].toLowerCase(),
     label: match[2].trim(),
-    defaultValue: match[3]?.trim() || "", // nếu không có thì trả ""
+    defaultValue: match[3]?.trim() || "",
     raw: match[0],
     index,
   }));

@@ -31,3 +31,10 @@
 .se-btn-group-sub.sun-editor-common.se-list-layer.se-resizing-align-list {
   z-index: 1 !important;
 }
+
+.editor-container td span {
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  display: block;
+}

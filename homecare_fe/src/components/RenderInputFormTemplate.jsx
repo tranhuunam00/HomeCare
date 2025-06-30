@@ -147,7 +147,7 @@ export const renderDynamicAntdFields = (
             {value?.url && (
               <div style={{ marginBottom: 8 }}>
                 <img
-                  src={value.url}
+                  src={value.url?.trim()}
                   alt="Ảnh mặc định"
                   style={{
                     width: 120,

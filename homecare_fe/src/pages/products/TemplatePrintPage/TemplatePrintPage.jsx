@@ -15,6 +15,7 @@ import TemplateHeaderEditor from "../TemplatePrint/Header/TemplateHeaderEditor";
 import styles from "./TemplatePrintPreview.module.scss";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useGlobalAuth } from "../../../contexts/AuthContext";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -24,28 +25,13 @@ const TemplatePrintPreview = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [headerInfo, setHeaderInfo] = useState({});
-  const [template, setTemplate] = useState({});
 
-  const [templateList, setTemplateList] = useState([]);
   const { id_print_template } = useParams();
   const [idTemplate, setIdTemplate] = useState();
 
-  const printRef = useRef();
+  const { user, doctor, templateServices } = useGlobalAuth();
 
-  // Lấy danh sách tất cả template
-  useEffect(() => {
-    API_CALL.get("/templates", {
-      params: {
-        page: 1,
-        limit: 100,
-      },
-    })
-      .then((res) => {
-        const data = res.data.data?.data || res.data.data || [];
-        setTemplateList(data);
-      })
-      .catch(() => message.error("Không thể tải danh sách template"));
-  }, []);
+  const printRef = useRef();
 
   useEffect(() => {
     if (id_print_template) {
@@ -63,20 +49,6 @@ const TemplatePrintPreview = () => {
         .finally(() => setLoading(false));
     }
   }, [id_print_template]);
-
-  // Khi chọn template → load chi tiết
-  useEffect(() => {
-    if (idTemplate) {
-      setLoading(true);
-      API_CALL.get(`/templates/${idTemplate}`)
-        .then((res) => {
-          const data = res.data.data;
-          if (data) setTemplate(data);
-        })
-        .catch(() => message.error("Không thể tải dữ liệu chi tiết"))
-        .finally(() => setLoading(false));
-    }
-  }, [idTemplate]);
 
   const onFinish = async (values) => {
     const formData = new FormData();
@@ -135,48 +107,28 @@ const TemplatePrintPreview = () => {
     newWindow.close();
   };
 
-  const combinedHtml = `
-    <style>
-      table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-      th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    </style>
-    <h3>QUY TRÌNH KỸ THUẬT</h3>
-    ${template.description || ""}
-    <h3>MÔ TẢ HÌNH ẢNH</h3>
-    ${template.result || ""}
-    <h3>KẾT LUẬN CHẨN ĐOÁN</h3>
-    ${template.recommendation || ""}
-  `;
-
   return (
     <Card style={{ maxWidth: 1240, margin: "auto" }}>
       <Title level={3}>Xem trước mẫu in</Title>
 
       <Spin spinning={loading}>
-        <div style={{ marginBottom: 20 }}>
-          <Select
-            showSearch
-            allowClear
-            style={{ width: 400 }}
-            value={idTemplate}
-            placeholder="Chọn template cần xem trước"
-            optionFilterProp="children"
-            onChange={(val) => setIdTemplate(val)}
-            filterOption={(input, option) =>
-              option.children.toLowerCase().includes(input.toLowerCase())
-            }
-          >
-            {templateList.map((tpl) => (
-              <Option key={tpl.id} value={tpl.id}>
-                {tpl.name}
-              </Option>
-            ))}
-          </Select>
-        </div>
-
         <Form layout="vertical" form={form} onFinish={onFinish}>
           <Form.Item label="Tên mẫu" name="name" rules={[{ required: true }]}>
             <Input />
+          </Form.Item>
+
+          <Form.Item
+            label="Dịch vụ"
+            name="id_template_service"
+            rules={[{ required: true }]}
+          >
+            <Select placeholder="Chọn dịch vụ">
+              {templateServices.map((s) => (
+                <Option key={s.id} value={s.id}>
+                  {s.name}
+                </Option>
+              ))}
+            </Select>
           </Form.Item>
 
           <TemplateHeaderEditor
@@ -184,72 +136,6 @@ const TemplatePrintPreview = () => {
             onChange={setHeaderInfo}
             headerInfo={headerInfo}
           />
-
-          <h1 style={{ marginBottom: 30 }}>Nội dung tổng hợp</h1>
-
-          <div ref={printRef}>
-            <Card
-              bordered={false}
-              className={`a4-page  ${styles["card-print-template"]}`}
-            >
-              <header
-                className={styles.printHeader}
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  marginBottom: 20,
-                  alignItems: "flex-start",
-                  gap: 20,
-                }}
-              >
-                <img
-                  style={{
-                    marginTop: 10,
-                    objectFit: "cover",
-                    alignContent: "center",
-                  }}
-                  src={
-                    headerInfo.logo_url ||
-                    "https://via.placeholder.com/150x100?text=Logo"
-                  }
-                  alt="Logo"
-                  width={100}
-                  height={100}
-                />
-                <div style={{ maxWidth: "350px" }}>
-                  <p
-                    className={styles.printHeader_name}
-                    style={{ fontWeight: 600, color: "red", fontSize: 16 }}
-                  >
-                    {headerInfo.clinic_name || "[Tên phòng khám]"}
-                  </p>
-                  <p style={{ fontSize: 14 }}>
-                    <strong>Khoa:</strong> {headerInfo.department_name || "-"}
-                  </p>
-                  <p style={{ fontSize: 14 }}>
-                    <strong>Địa chỉ:</strong> {headerInfo.address || "-"}
-                  </p>
-                </div>
-                <div style={{ maxWidth: "280px" }}>
-                  <p style={{ fontSize: 14 }}>
-                    <strong>Website:</strong>{" "}
-                    <i>{headerInfo.website || "http://..."}</i>
-                  </p>
-                  <p style={{ fontSize: 14 }}>
-                    <strong>Hotline:</strong> {headerInfo.phone || "..."}
-                  </p>
-                  <p style={{ fontSize: 14 }}>
-                    <strong>Email:</strong>{" "}
-                    <i>{headerInfo.email || "example@email.com"}</i>
-                  </p>
-                </div>
-              </header>
-              <div
-                className="print-content"
-                dangerouslySetInnerHTML={{ __html: combinedHtml }}
-              />
-            </Card>
-          </div>
 
           <Form.Item style={{ marginTop: 24 }}>
             <Button type="primary" htmlType="submit">

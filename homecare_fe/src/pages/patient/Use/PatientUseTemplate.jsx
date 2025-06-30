@@ -94,12 +94,15 @@ const PatientUseTemplate = () => {
   const [printTemplate, setPrintTemplate] = useState({});
   const [idPrintTemplate, setIdPrintTemplate] = useState();
 
-  const { id_patient_diagnose } = useParams();
   const [idTemplate, setIdTemplate] = useState();
+  const { id_patient_diagnose } = useParams();
   const [combinedHtml, setCombinedHtml] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [patientDiagnose, setPatientDiagnose] = useState();
+
   const [printTemplateList, setPrintTemplateList] = useState([]);
+  const [templates, setTemplates] = useState([]);
+
   const { templateServices, doctor } = useGlobalAuth();
   const [idTemplateService, setIdTemplateService] = useState();
 
@@ -234,20 +237,40 @@ const PatientUseTemplate = () => {
     };
   };
 
-  // Lấy danh sách tất cả template
+  console.log("templatesData", templates);
+
   useEffect(() => {
-    API_CALL.get("/print-template", {
-      params: {
-        page: 1,
-        limit: 1000,
-        id_template_service: +idTemplateService || -1,
-      },
-    })
-      .then((res) => {
-        const data = res.data.data?.data || res.data.data || [];
-        setPrintTemplateList(data);
-      })
-      .catch(() => message.error("Không thể tải danh sách template"));
+    const fetchTemplates = async () => {
+      try {
+        const [printRes, templatesRes] = await Promise.all([
+          API_CALL.get("/print-template", {
+            params: {
+              page: 1,
+              limit: 1000,
+              id_template_service: +idTemplateService || -1,
+            },
+          }),
+          API_CALL.get("/templates", {
+            params: {
+              page: 1,
+              limit: 1000,
+              id_template_service: +idTemplateService || -1,
+            },
+          }),
+        ]);
+
+        const printData = printRes.data.data?.data || printRes.data.data || [];
+        const templatesData =
+          templatesRes.data.data?.data || templatesRes.data.data || [];
+
+        setPrintTemplateList(printData);
+        setTemplates(templatesData);
+      } catch (error) {
+        message.error("Không thể tải danh sách template");
+      }
+    };
+
+    fetchTemplates();
   }, [idTemplateService]);
 
   useEffect(() => {
@@ -266,7 +289,6 @@ const PatientUseTemplate = () => {
     //   patientDiagnose
     // );
     setPrintTemplate(exist);
-    setIdTemplate(exist?.id_template);
     setIdPrintTemplate(exist?.id);
   }, [printTemplateList, patientDiagnose]);
 
@@ -288,11 +310,11 @@ const PatientUseTemplate = () => {
       th, td { border: 0px solid #ccc; padding: 8px; text-align: left; }
       h3 {margin-bottom: 20px; margin-top: 40px;}
     </style>
-    <h3>QUY TRÌNH KĨ THUẬT</h3>
+    <h3>QUY TRÌNH VÀ KĨ THUẬT</h3>
     ${replaceInputsInHtml(template?.description || "", inputsRender)}
-    <h3>MÔ TẢ HÌNH ẢNH</h3>
-    ${replaceInputsInHtml(template?.result || "", inputsRender)}
     <h3>KẾT LUẬN CHẨN ĐOÁN</h3>
+    ${replaceInputsInHtml(template?.result || "", inputsRender)}
+    <h3>KHUYẾN NGHỊ</h3>
     ${replaceInputsInHtml(template?.recommendation || "", inputsRender)}
   `;
     setCombinedHtml(html);
@@ -307,9 +329,9 @@ const PatientUseTemplate = () => {
     </style>
     <h3>QUY TRÌNH VÀ KĨ THUẬT</h3>
     ${replaceInputsInHtml(template?.description || "", inputsRenderTrans)}
-    <h3>MÔ TẢ HÌNH ẢNH</h3>
-    ${replaceInputsInHtml(template?.result || "", inputsRenderTrans)}
     <h3>KẾT LUẬN CHẨN ĐOÁN</h3>
+    ${replaceInputsInHtml(template?.result || "", inputsRenderTrans)}
+    <h3>KHUYẾN NGHỊ</h3>
     ${replaceInputsInHtml(template?.recommendation || "", inputsRenderTrans)}
   `;
     setHtmlTranslate(html);
@@ -376,6 +398,8 @@ const PatientUseTemplate = () => {
             setImageList(imageList);
             setInputsAddon(inputsAddon);
             setInputsRender(inputsRender);
+
+            setIdTemplate(doctor_print_templates.id_template);
           }
         })
         .catch(() => message.error("Không thể tải dữ liệu chi tiết"))
@@ -427,6 +451,8 @@ const PatientUseTemplate = () => {
       formData.append("id_print_template", printTemplate?.id);
       formData.append("id_template_service", idTemplateService);
       formData.append("id_patient_diagnose", id_patient_diagnose);
+      formData.append("id_template", idTemplate);
+
       formData.append("status", status);
       formData.append(
         "name",
@@ -605,7 +631,9 @@ const PatientUseTemplate = () => {
                   setIdTemplateService(val);
                   setIdTemplate(null);
                   setTemplate(null);
+                  setTemplates([]);
                   setPrintTemplate(null);
+                  setPrintTemplateList([]);
                 }}
                 filterOption={(input, option) =>
                   option.children.toLowerCase().includes(input.toLowerCase())
@@ -625,19 +653,45 @@ const PatientUseTemplate = () => {
                 allowClear
                 style={{ width: 400 }}
                 value={idPrintTemplate}
-                placeholder="Chọn template cần xem trước"
+                placeholder="Chọn mẫu in"
                 optionFilterProp="children"
                 onChange={(val) => {
                   const printT = printTemplateList.find((t) => t.id == val);
                   setPrintTemplate(printT);
-                  setIdTemplate(printT.id_template);
-                  setIdPrintTemplate(printT.id);
+                  setIdPrintTemplate(printT?.id);
                 }}
                 filterOption={(input, option) =>
                   option.children.toLowerCase().includes(input.toLowerCase())
                 }
               >
                 {printTemplateList
+                  .filter((t) => t.id_template_service == idTemplateService)
+                  .map((tpl) => (
+                    <Option key={tpl.id} value={tpl.id}>
+                      {tpl.name}
+                    </Option>
+                  ))}
+              </Select>
+            </div>
+
+            <div style={{ marginBottom: 20 }}>
+              <Select
+                showSearch
+                allowClear
+                style={{ width: 400 }}
+                value={idTemplate}
+                placeholder="Chọn mẫu form"
+                optionFilterProp="children"
+                onChange={(val) => {
+                  const temp = templates.find((t) => t.id == val);
+                  setIdTemplate(temp?.id);
+                  setTemplate(temp);
+                }}
+                filterOption={(input, option) =>
+                  option.children.toLowerCase().includes(input.toLowerCase())
+                }
+              >
+                {templates
                   .filter((t) => t.id_template_service == idTemplateService)
                   .map((tpl) => (
                     <Option key={tpl.id} value={tpl.id}>
@@ -709,17 +763,17 @@ const PatientUseTemplate = () => {
                           th, td { border: 0px solid #ccc; padding: 8px; text-align: left; }
                           h3 {margin-bottom: 20px; margin-top: 40px;}
                         </style>
-                        <h3>QUY TRÌNH KĨ THUẬT</h3>
+                        <h3>QUY TRÌNH VÀ KĨ THUẬT</h3>
                         ${replaceInputsInHtml(
                           template?.description || "",
                           inputsRenderTrans
                         )}
-                        <h3>MÔ TẢ HÌNH ẢNH</h3>
+                        <h3>KẾT LUẬN CHẨN ĐOÁN</h3>
                         ${replaceInputsInHtml(
                           template?.result || "",
                           inputsRenderTrans
                         )}
-                        <h3>KẾT LUẬN CHẨN ĐOÁN</h3>
+                        <h3>KHUYẾN NGHỊ</h3>
                         ${replaceInputsInHtml(
                           template?.recommendation || "",
                           inputsRenderTrans
