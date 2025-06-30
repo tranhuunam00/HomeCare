@@ -288,11 +288,11 @@ const PatientUseTemplate = () => {
       th, td { border: 0px solid #ccc; padding: 8px; text-align: left; }
       h3 {margin-bottom: 20px; margin-top: 40px;}
     </style>
-    <h3>QUY TRÌNH VÀ KĨ THUẬT</h3>
+    <h3>QUY TRÌNH KĨ THUẬT</h3>
     ${replaceInputsInHtml(template?.description || "", inputsRender)}
-    <h3>KẾT LUẬN CHẨN ĐOÁN</h3>
+    <h3>MÔ TẢ HÌNH ẢNH</h3>
     ${replaceInputsInHtml(template?.result || "", inputsRender)}
-    <h3>KHUYẾN NGHỊ</h3>
+    <h3>KẾT LUẬN CHẨN ĐOÁN</h3>
     ${replaceInputsInHtml(template?.recommendation || "", inputsRender)}
   `;
     setCombinedHtml(html);
@@ -307,9 +307,9 @@ const PatientUseTemplate = () => {
     </style>
     <h3>QUY TRÌNH VÀ KĨ THUẬT</h3>
     ${replaceInputsInHtml(template?.description || "", inputsRenderTrans)}
-    <h3>KẾT LUẬN CHẨN ĐOÁN</h3>
+    <h3>MÔ TẢ HÌNH ẢNH</h3>
     ${replaceInputsInHtml(template?.result || "", inputsRenderTrans)}
-    <h3>KHUYẾN NGHỊ</h3>
+    <h3>KẾT LUẬN CHẨN ĐOÁN</h3>
     ${replaceInputsInHtml(template?.recommendation || "", inputsRenderTrans)}
   `;
     setHtmlTranslate(html);
@@ -709,17 +709,17 @@ const PatientUseTemplate = () => {
                           th, td { border: 0px solid #ccc; padding: 8px; text-align: left; }
                           h3 {margin-bottom: 20px; margin-top: 40px;}
                         </style>
-                        <h3>QUY TRÌNH VÀ KĨ THUẬT</h3>
+                        <h3>QUY TRÌNH KĨ THUẬT</h3>
                         ${replaceInputsInHtml(
                           template?.description || "",
                           inputsRenderTrans
                         )}
-                        <h3>KẾT LUẬN CHẨN ĐOÁN</h3>
+                        <h3>MÔ TẢ HÌNH ẢNH</h3>
                         ${replaceInputsInHtml(
                           template?.result || "",
                           inputsRenderTrans
                         )}
-                        <h3>KHUYẾN NGHỊ</h3>
+                        <h3>KẾT LUẬN CHẨN ĐOÁN</h3>
                         ${replaceInputsInHtml(
                           template?.recommendation || "",
                           inputsRenderTrans

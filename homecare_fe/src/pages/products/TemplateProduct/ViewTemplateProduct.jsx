@@ -48,11 +48,11 @@ const ViewTemplateProduct = () => {
               th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
               h3 {margin-bottom: 20px; margin-top: 40px;}
             </style>
-            <h3>QUY TRÌNH VÀ KĨ THUẬT</h3>
+            <h3>QUY TRÌNH KĨ THUẬT</h3>
             ${replaceInputsInHtml(data?.description || "", [])}
-            <h3>KẾT LUẬN CHẨN ĐOÁN</h3>
+            <h3>MÔ TẢ HÌNH ẢNH</h3>
             ${replaceInputsInHtml(data?.result || "", [])}
-            <h3>KHUYẾN NGHỊ</h3>
+            <h3>KẾT LUẬN CHẨN ĐOÁN</h3>
             ${replaceInputsInHtml(data?.recommendation || "", [])}
           `;
           setCombinedHtml(html);

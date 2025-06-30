@@ -140,11 +140,11 @@ const TemplatePrintPreview = () => {
       table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
       th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
     </style>
-    <h3>Mô tả và kỹ thuật</h3>
+    <h3>QUY TRÌNH KỸ THUẬT</h3>
     ${template.description || ""}
-    <h3>Kết quả</h3>
+    <h3>MÔ TẢ HÌNH ẢNH</h3>
     ${template.result || ""}
-    <h3>Khuyến nghị</h3>
+    <h3>KẾT LUẬN CHẨN ĐOÁN</h3>
     ${template.recommendation || ""}
   `;
 

@@ -154,7 +154,7 @@ const AddonInputSection = ({
       <h2>Chỗ nhập liệu</h2>
 
       {/* Description & technique */}
-      <h4>Mô tả và kĩ thuật</h4>
+      <h4>QUY TRÌNH KỸ THUẬT</h4>
       <div style={{ width: "100%", display: "flex", flexWrap: "wrap" }}>
         {renderDynamicAntdFields(
           extractDynamicFieldsFromHtml(template?.description || ""),
@@ -164,7 +164,7 @@ const AddonInputSection = ({
       </div>
 
       {/* Result */}
-      <h4>Kết quả</h4>
+      <h4>MÔ TẢ HÌNH ẢNH</h4>
       <div style={{ width: "100%", display: "flex", flexWrap: "wrap" }}>
         {renderDynamicAntdFields(
           extractDynamicFieldsFromHtml(template?.result || ""),
@@ -174,7 +174,7 @@ const AddonInputSection = ({
       </div>
 
       {/* Recommendation */}
-      <h4>Khuyến nghị</h4>
+      <h4>KẾT LUẬN CHẨN ĐOÁN</h4>
       <div style={{ width: "100%", display: "flex", flexWrap: "wrap" }}>
         {renderDynamicAntdFields(
           extractDynamicFieldsFromHtml(template?.recommendation || ""),

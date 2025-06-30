@@ -135,7 +135,7 @@ const AddOrEditTemplateProduct = () => {
               <Input />
             </Form.Item>
 
-            <Form.Item label="Mô tả và kỹ thuật" name="description">
+            <Form.Item label=" QUY TRÌNH KỸ THUẬT" name="description">
               <CustomSunEditor
                 value={form.getFieldValue("description")}
                 onChange={(value) => {
@@ -145,7 +145,7 @@ const AddOrEditTemplateProduct = () => {
               />
             </Form.Item>
 
-            <Form.Item label="Kết quả" name="result">
+            <Form.Item label="MÔ TẢ HÌNH ẢNH" name="result">
               <CustomSunEditor
                 value={form.getFieldValue("result")}
                 onChange={(value) => {
@@ -155,7 +155,7 @@ const AddOrEditTemplateProduct = () => {
               />
             </Form.Item>
 
-            <Form.Item label="Khuyến nghị" name="recommendation">
+            <Form.Item label="KẾT LUẬN CHẨN ĐOÁN" name="recommendation">
               <CustomSunEditor
                 value={form.getFieldValue("recommendation")}
                 onChange={(value) => {
@@ -182,11 +182,11 @@ const AddOrEditTemplateProduct = () => {
       <Card style={{ width: 500 }}>
         <Title level={3}>Chỗ nhập liệu</Title>
 
-        <h2>Mô tả và kĩ thuật</h2>
+        <h2>QUY TRÌNH KỸ THUẬT</h2>
         {renderDynamicAntdFields(extractDynamicFieldsFromHtml(descriptionText))}
-        <h2>Kết quả</h2>
+        <h2>MÔ TẢ HÌNH ẢNH</h2>
         {renderDynamicAntdFields(extractDynamicFieldsFromHtml(resultText))}
-        <h2>Khuyến nghị</h2>
+        <h2>KẾT LUẬN CHẨN ĐOÁN</h2>
         {renderDynamicAntdFields(
           extractDynamicFieldsFromHtml(recommendationText)
         )}

@@ -193,9 +193,9 @@ const TemplatePrintUse = () => {
     </style>
     <h3>QUY TRÌNH VÀ KĨ THUẬT</h3>
     ${allValues.description_template || ""}
-    <h3>KẾT LUẬN CHẨN ĐOÁN</h3>
+    <h3>MÔ TẢ HÌNH ẢNH</h3>
     ${allValues.result_template || ""}
-    <h3>KHUYẾN NGHỊ</h3>
+    <h3>KẾT LUẬN CHẨN ĐOÁN</h3>
     ${allValues.recommendation_template || ""}
   `;
     setCombinedHtml(html);
@@ -222,7 +222,7 @@ const TemplatePrintUse = () => {
 
             <h1 style={{ marginBottom: 30 }}>Nội dung tổng hợp</h1>
 
-            <Form.Item label="Mô tả và kỹ thuật" name="description_template">
+            <Form.Item label="QUY TRÌNH KỸ THUẬT" name="description_template">
               <CustomSunEditor
                 value={template?.value}
                 onChange={(value) => {
@@ -231,7 +231,7 @@ const TemplatePrintUse = () => {
               />
             </Form.Item>
 
-            <Form.Item label="Kết quả" name="result_template">
+            <Form.Item label="MÔ TẢ HÌNH ẢNH" name="result_template">
               <CustomSunEditor
                 value={template?.value}
                 onChange={(value) => {
@@ -241,7 +241,10 @@ const TemplatePrintUse = () => {
               />
             </Form.Item>
 
-            <Form.Item label="Khuyến nghị" name="recommendation_template">
+            <Form.Item
+              label="KẾT LUẬN CHẨN ĐOÁN"
+              name="recommendation_template"
+            >
               <CustomSunEditor
                 value={template?.value}
                 onChange={(value) => {

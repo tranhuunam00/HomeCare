@@ -5,7 +5,7 @@ import "./CustomSunEditor.scss";
 import storage from "../../services/storage";
 
 const apiEndPoint = `${
-  import.meta.env.VITE_API_ENDPOINT || "https://default-url.com"
+  import.meta.env.VITE_API_ENDPOINT || "http://localhost:3001/api/"
 }/api`;
 
 const CustomSunEditor = ({ value, onChange }) => {
