@@ -28,10 +28,29 @@ const TemplatePrintPreview = () => {
 
   const { id_print_template } = useParams();
   const [idTemplate, setIdTemplate] = useState();
+  const [clinics, setClinics] = useState([]);
 
   const { user, doctor, templateServices } = useGlobalAuth();
 
   const printRef = useRef();
+
+  const fetchClinics = async () => {
+    setLoading(true);
+    try {
+      const res = await API_CALL.get("/clinics", {
+        params: { page: 1, limit: 100 },
+      });
+      setClinics(res.data.data.data);
+    } catch (err) {
+      toast.error(err?.response?.data?.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchClinics();
+  }, []);
 
   useEffect(() => {
     if (id_print_template) {
@@ -124,6 +143,20 @@ const TemplatePrintPreview = () => {
           >
             <Select placeholder="Chọn dịch vụ">
               {templateServices.map((s) => (
+                <Option key={s.id} value={s.id}>
+                  {s.name}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            label="Phòng khám"
+            name="id_clinic"
+            rules={[{ required: true }]}
+          >
+            <Select placeholder="Chọn phòng khám">
+              {clinics.map((s) => (
                 <Option key={s.id} value={s.id}>
                   {s.name}
                 </Option>

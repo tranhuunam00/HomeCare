@@ -248,6 +248,7 @@ const PatientUseTemplate = () => {
               page: 1,
               limit: 1000,
               id_template_service: +idTemplateService || -1,
+              id_clinic: patientDiagnose?.id_clinic,
             },
           }),
           API_CALL.get("/templates", {
@@ -263,6 +264,9 @@ const PatientUseTemplate = () => {
         const templatesData =
           templatesRes.data.data?.data || templatesRes.data.data || [];
 
+        if (printRes?.length == 0) {
+          toast.error("Không có mẫu in nào phù hợp cho phòng khám");
+        }
         setPrintTemplateList(printData);
         setTemplates(templatesData);
       } catch (error) {
