@@ -40,18 +40,41 @@ export const PATIENT_DIAGNOSE_COLOR = {
   4: "Green",
 };
 export function extractDynamicFieldsFromHtml(htmlString) {
-  const regex =
-    /\{\{\{(text|number|checkbox|select|textarea|image|file|date):\s*([^\}=]+?)(?:=([^\}]+))?\s*\}\}\}/g;
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlString, "text/html");
 
-  const matches = [...htmlString.matchAll(regex)];
+  const rows = Array.from(doc.querySelectorAll("tr"));
+  const result = [];
 
-  return matches.map((match, index) => ({
-    type: match[1].toLowerCase(),
-    label: match[2].trim(),
-    defaultValue: match[3]?.trim() || "",
-    raw: match[0],
-    index,
-  }));
+  let currentGroup = null;
+  let index = 0;
+
+  for (const row of rows) {
+    // Nếu là dòng nhóm có <strong>
+    const strongCell = row.querySelector("td[colspan] strong");
+    if (strongCell) {
+      currentGroup = strongCell.textContent.trim();
+      continue;
+    }
+
+    // Tìm tất cả dynamic fields trong dòng
+    const regex =
+      /\{\{\{(text|number|checkbox|select|textarea|image|file|date):\s*([^\}=]+?)(?:=([^\}]+))?\s*\}\}\}/g;
+    const matches = [...row.innerHTML.matchAll(regex)];
+
+    for (const match of matches) {
+      result.push({
+        type: match[1].toLowerCase(),
+        label: match[2].trim(),
+        defaultValue: match[3]?.trim() || "",
+        raw: match[0],
+        index: index++,
+        group: currentGroup || null,
+      });
+    }
+  }
+
+  return result;
 }
 
 export const ADMIN_INFO_LABELS = {

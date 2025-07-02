@@ -179,7 +179,7 @@ const AddOrEditTemplateProduct = () => {
           </Form>
         </Spin>
       </Card>
-      <Card style={{ width: 500 }}>
+      <Card style={{ width: 700 }}>
         <Title level={3}>Chỗ nhập liệu</Title>
 
         <h2>QUY TRÌNH KỸ THUẬT</h2>

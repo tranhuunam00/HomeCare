@@ -16,11 +16,22 @@ export const renderDynamicAntdFields = (
   inputsRender = {},
   setInputsRender
 ) => {
-  return fields.map((field) => {
+  const groupedFields = {};
+
+  // Gom nhóm theo group
+  fields.forEach((field) => {
+    const groupName = field.group || "__no_group__";
+    if (!groupedFields[groupName]) {
+      groupedFields[groupName] = [];
+    }
+    groupedFields[groupName].push(field);
+  });
+
+  const renderField = (field) => {
     const name = `field_${field.index}`;
     const value =
       inputsRender[field.raw] ||
-      (field.type == "image"
+      (field.type === "image"
         ? { url: field.defaultValue }
         : field.defaultValue);
 
@@ -143,7 +154,6 @@ export const renderDynamicAntdFields = (
             <div style={{ fontWeight: 150, fontStyle: "italic" }}>
               {field.label}
             </div>
-            {/* Hiển thị ảnh mặc định nếu có */}
             {value?.url && (
               <div style={{ marginBottom: 8 }}>
                 <img
@@ -165,17 +175,12 @@ export const renderDynamicAntdFields = (
                 updateValue({
                   ...file,
                   url: previewUrl,
-                  originFileObj: file, // Rất quan trọng khi gửi API
+                  originFileObj: file,
                 });
-                return false; // Ngăn upload mặc định
+                return false;
               }}
               listType="picture"
               maxCount={1}
-              // onChange={(info) => {
-              //   const fileList = info.fileList.slice(-1);
-              //   updateValue(fileList[0]);
-              // }}
-              style={{ fontSize: 11 }}
               defaultFileList={value ? [value] : []}
             >
               <Button
@@ -192,5 +197,19 @@ export const renderDynamicAntdFields = (
       default:
         return null;
     }
-  });
+  };
+
+  // Render theo nhóm
+  return Object.entries(groupedFields).map(([groupName, groupFields]) => (
+    <div key={groupName} style={{ marginBottom: 24 }}>
+      {groupName !== "__no_group__" && (
+        <div style={{ fontWeight: 700, marginBottom: 8 }}>
+          <strong>{groupName}</strong>
+        </div>
+      )}
+      <div style={{ display: "flex", flexWrap: "wrap" }}>
+        {groupFields.map((field) => renderField(field))}
+      </div>
+    </div>
+  ));
 };
