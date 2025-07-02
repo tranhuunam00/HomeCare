@@ -815,6 +815,9 @@ const PatientUseTemplate = () => {
             wards={wards}
             calculateAge={calculateAge}
             lang={LANGUAGES.vi}
+            serviceName={
+              templateServices?.find((s) => s.id == idTemplateService)?.name
+            }
           />
         )}
 
@@ -833,6 +836,9 @@ const PatientUseTemplate = () => {
               wards={wards}
               calculateAge={calculateAge}
               lang={LANGUAGES.en}
+              serviceName={
+                templateServices?.find((s) => s.id == idTemplateService)?.name
+              }
             />
           )}
       </div>

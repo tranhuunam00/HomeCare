@@ -31,6 +31,7 @@ import PatientFormPage from "./pages/patient/New/PatientFormPage";
 import PatientDiagnoseDetailPage from "./pages/patient/Detail/DetailPatientDiagnose";
 import PatientUseTemplate from "./pages/patient/Use/PatientUseTemplate";
 import ViewTemplateProduct from "./pages/products/TemplateProduct/ViewTemplateProduct";
+import TemplateServiceList from "./pages/template_service/TemplateServiceList";
 
 function App() {
   useAuthInitializer();
@@ -63,6 +64,7 @@ function App() {
             path="/home/templates/edit/:id"
             element={<AddOrEditTemplateProduct />}
           />
+          <Route path="template_services" element={<TemplateServiceList />} />
 
           <Route
             path="/home/templates/view/:id"

@@ -1,21 +1,9 @@
-// src/pages/templates/TemplatePrintList.jsx
 import React, { useEffect, useState } from "react";
-import {
-  Table,
-  Input,
-  Row,
-  Col,
-  Card,
-  Select,
-  Spin,
-  Button,
-  InputNumber,
-} from "antd";
+import { Table, Input, Row, Col, Card, Spin, Button } from "antd";
 import {
   EditOutlined,
   FilterOutlined,
   PrinterOutlined,
-  UserOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import styles from "./TemplateList.module.scss";
@@ -24,19 +12,14 @@ import { toast } from "react-toastify";
 import { useGlobalAuth } from "../../../../contexts/AuthContext";
 import { USER_ROLE } from "../../../../constant/app";
 
-const { Option } = Select;
-
 const TemplatePrintList = () => {
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
-
-  const { user } = useGlobalAuth();
-
-  // Bộ lọc
   const [searchName, setSearchName] = useState("");
 
+  const { user } = useGlobalAuth();
   const navigate = useNavigate();
 
   const fetchTemplates = async () => {
@@ -50,11 +33,12 @@ const TemplatePrintList = () => {
         },
       });
 
-      setTemplates(res.data.data?.data || res.data.data || []);
-      setTotal(res.data.data?.count || res.data.total || 0);
+      const responseData = res.data.data;
+      setTemplates(responseData?.data || []);
+      setTotal(responseData?.total || 0);
     } catch (err) {
       console.error("Lỗi khi lấy danh sách template:", err);
-      toast.error(err?.response?.data?.message);
+      toast.error(err?.response?.data?.message || "Không thể tải danh sách");
     } finally {
       setLoading(false);
     }
@@ -65,10 +49,10 @@ const TemplatePrintList = () => {
   }, [page, searchName]);
 
   const handleDelete = async (id) => {
-    const confirmDelete = window.confirm(
+    const confirm = window.confirm(
       "Bạn có chắc chắn muốn xóa mẫu in này? Thao tác này không thể hoàn tác."
     );
-    if (!confirmDelete) return;
+    if (!confirm) return;
 
     try {
       await API_CALL.del(`/print-template/${id}`);
@@ -81,8 +65,8 @@ const TemplatePrintList = () => {
   };
 
   const handleClone = async (record) => {
-    const confirmClone = window.confirm("Bạn có muốn clone mẫu in này không?");
-    if (!confirmClone) return;
+    const confirm = window.confirm("Bạn có muốn clone mẫu in này không?");
+    if (!confirm) return;
 
     try {
       const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
@@ -98,6 +82,7 @@ const TemplatePrintList = () => {
       toast.success("Đã clone mẫu in thành công");
       fetchTemplates();
     } catch (err) {
+      toast.error("Clone thất bại");
       console.error("Lỗi clone:", err);
     }
   };
@@ -180,7 +165,6 @@ const TemplatePrintList = () => {
         <Col span={6}>
           <Card
             size="small"
-            style={{ display: "flex" }}
             title={
               <>
                 <FilterOutlined /> Bộ lọc
@@ -190,7 +174,10 @@ const TemplatePrintList = () => {
             <Input
               placeholder="Tìm theo tên..."
               value={searchName}
-              onChange={(e) => setSearchName(e.target.value)}
+              onChange={(e) => {
+                setPage(1);
+                setSearchName(e.target.value);
+              }}
               allowClear
               style={{ marginBottom: 8 }}
             />
@@ -207,6 +194,7 @@ const TemplatePrintList = () => {
             current: page,
             pageSize: 10,
             total,
+            showSizeChanger: false,
             onChange: (p) => setPage(p),
           }}
         />

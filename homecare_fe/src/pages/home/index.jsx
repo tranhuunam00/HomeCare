@@ -102,6 +102,25 @@ const Sidebar = ({ collapsed }) => {
         },
       ],
     },
+
+    user.id_role === USER_ROLE.ADMIN && {
+      key: "Dịch vụ khám",
+      icon: (
+        <Avatar
+          src="https://dentalflow.vn/wp-content/webpc-passthru.php?src=https://dentalflow.vn/wp-content/uploads/2023/12/6-e1703673521472.png&nocache=1"
+          size={40}
+          style={{ marginTop: -2 }}
+        />
+      ),
+      label: "Dịch vụ khám",
+
+      children: [
+        {
+          key: "template_services",
+          label: "Danh sách",
+        },
+      ],
+    },
     user.id_role === USER_ROLE.ADMIN && {
       key: "Bác sĩ",
       icon: (

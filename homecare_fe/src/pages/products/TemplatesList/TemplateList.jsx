@@ -13,7 +13,6 @@ import {
 } from "antd";
 import {
   EditOutlined,
-  EyeInvisibleOutlined,
   EyeOutlined,
   FilterOutlined,
   PlusOutlined,
@@ -31,13 +30,13 @@ const TemplateList = () => {
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
   const [searchName, setSearchName] = useState("");
   const [clinicMap, setClinicMap] = useState({});
   const [serviceMap, setServiceMap] = useState({});
 
-  const { user, doctor } = useGlobalAuth();
-
+  const { user } = useGlobalAuth();
   const navigate = useNavigate();
 
   const fetchClinics = async () => {
@@ -70,42 +69,6 @@ const TemplateList = () => {
     }
   };
 
-  const handleDeleteTemplate = async (id) => {
-    const confirmed = window.confirm(
-      "Bạn có chắc chắn muốn xóa mẫu này? Thao tác này không thể hoàn tác."
-    );
-
-    if (!confirmed) return;
-
-    try {
-      await API_CALL.del(`/templates/${id}`);
-      toast.success("Đã xóa thành công");
-      fetchTemplates(); // làm mới danh sách
-    } catch (err) {
-      toast.error("Xóa thất bại, vui lòng thử lại");
-      console.error("Lỗi xóa template:", err);
-    }
-  };
-
-  const handleCloneTemplate = async (record) => {
-    try {
-      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-
-      const payload = {
-        ...record,
-        id: undefined, // tránh gửi ID gốc
-        name: `${record.name} - Copy ${timestamp}`,
-        createdAt: Date.now(),
-        updated_at: Date.now(),
-      };
-
-      await API_CALL.post("/templates", payload);
-      toast.success("Đã clone mẫu thành công");
-      fetchTemplates(); // làm mới danh sách
-    } catch (err) {
-      console.error("Lỗi clone template:", err);
-    }
-  };
   const fetchTemplates = async () => {
     setLoading(true);
     try {
@@ -113,11 +76,11 @@ const TemplateList = () => {
         params: {
           name: searchName,
           page,
-          limit: 10,
+          limit,
         },
       });
       setTemplates(res.data.data.data);
-      setTotal(res.data.data.count);
+      setTotal(res.data.data.total);
     } catch (err) {
       console.error("Lỗi khi lấy templates:", err);
     } finally {
@@ -132,31 +95,52 @@ const TemplateList = () => {
 
   useEffect(() => {
     fetchTemplates();
-  }, [page, searchName]);
+  }, [page, limit, searchName]);
+
+  const handleDeleteTemplate = async (id) => {
+    const confirmed = window.confirm("Bạn có chắc chắn muốn xóa mẫu này?");
+    if (!confirmed) return;
+    try {
+      await API_CALL.del(`/templates/${id}`);
+      toast.success("Đã xóa thành công");
+      fetchTemplates();
+    } catch (err) {
+      toast.error("Xóa thất bại, vui lòng thử lại");
+    }
+  };
+
+  const handleCloneTemplate = async (record) => {
+    try {
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+      const payload = {
+        ...record,
+        id: undefined,
+        name: `${record.name} - Copy ${timestamp}`,
+        createdAt: Date.now(),
+        updated_at: Date.now(),
+      };
+      await API_CALL.post("/templates", payload);
+      toast.success("Đã clone mẫu thành công");
+      fetchTemplates();
+    } catch (err) {
+      console.error("Lỗi clone template:", err);
+    }
+  };
 
   const columns = [
-    {
-      title: "ID",
-      dataIndex: "id",
-      key: "id",
-      width: 60,
-    },
-    {
-      title: "Tên",
-      dataIndex: "name",
-      key: "name",
-    },
+    { title: "ID", dataIndex: "id", key: "id", width: 60 },
+    { title: "Tên", dataIndex: "name", key: "name" },
     {
       title: "Dịch vụ",
       dataIndex: "id_template_service",
       key: "id_template_service",
-      render: (value) => serviceMap[value] || "-",
+      render: (val) => serviceMap[val] || "-",
     },
     {
       title: "Phòng khám",
       dataIndex: "id_clinic",
       key: "id_clinic",
-      render: (value) => clinicMap[value] || "-",
+      render: (val) => clinicMap[val] || "-",
     },
     {
       title: "Mô tả ngắn",
@@ -179,9 +163,8 @@ const TemplateList = () => {
       title: "Hành động",
       key: "action",
       render: (_, record) => {
-        const isAdmin = user?.id_role == USER_ROLE.ADMIN;
-        const isOwner = record.id_user == user?.id;
-
+        const isAdmin = user?.id_role === USER_ROLE.ADMIN;
+        const isOwner = record.id_user === user?.id;
         return (
           <>
             <Button
@@ -191,7 +174,6 @@ const TemplateList = () => {
             >
               Xem
             </Button>
-
             {(isAdmin || isOwner) && (
               <>
                 <Button
@@ -201,7 +183,6 @@ const TemplateList = () => {
                 >
                   Chỉnh sửa
                 </Button>
-
                 <Button
                   danger
                   type="link"
@@ -245,6 +226,7 @@ const TemplateList = () => {
               placeholder="Tên template..."
               value={searchName}
               onChange={(e) => setSearchName(e.target.value)}
+              allowClear
             />
           </Card>
         </Col>
@@ -257,9 +239,13 @@ const TemplateList = () => {
           columns={columns}
           pagination={{
             current: page,
-            pageSize: 10,
+            pageSize: limit,
             total,
-            onChange: (p) => setPage(p),
+            showSizeChanger: true,
+            onChange: (p, l) => {
+              setPage(p);
+              setLimit(l);
+            },
           }}
         />
       </Spin>

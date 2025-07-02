@@ -47,11 +47,12 @@ const defaultVisibleKeys = ["id", "name", "PID", "SID", "status", "action"];
 
 const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
   const navigate = useNavigate();
+  const { user } = useGlobalAuth();
+
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
-  const { user } = useGlobalAuth();
 
   const [visibleKeys, setVisibleKeys] = useState(defaultVisibleKeys);
   const [filters, setFilters] = useState({
@@ -79,25 +80,26 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
           limit,
         },
       });
-      setData(res.data.data.rows);
-      setTotal(res.data.data.count);
+      const responseData = res.data.data;
+      setData(responseData?.rows || []);
+      setTotal(responseData?.count || 0);
     } catch (err) {
       console.error("Lỗi lấy danh sách:", err);
     }
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     const confirm = window.confirm("Bạn có chắc chắn muốn xóa bản ghi này?");
     if (!confirm) return;
-    API_CALL.del(`/patient-diagnose/${id}`)
-      .then(() => {
-        message.success("Xóa thành công");
-        fetchPatients();
-      })
-      .catch((err) => {
-        message.error("Xóa thất bại, vui lòng thử lại");
-        console.error("Lỗi xóa:", err);
-      });
+
+    try {
+      await API_CALL.del(`/patient-diagnose/${id}`);
+      message.success("Xóa thành công");
+      fetchPatients();
+    } catch (err) {
+      message.error("Xóa thất bại, vui lòng thử lại");
+      console.error("Lỗi xóa:", err);
+    }
   };
 
   const handleClone = async (record) => {
@@ -108,14 +110,24 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         id: undefined,
         name: `${record.name} - Copy ${timestamp}`,
       };
-
       await API_CALL.post("/patient-diagnose", payload);
       toast.success("Đã clone thành công");
       fetchPatients();
     } catch (err) {
+      toast.error("Clone thất bại");
       console.error("Lỗi clone:", err);
     }
   };
+
+  const handleFilterChange = useMemo(
+    () =>
+      debounce((key, value) => {
+        setFilters((prev) => ({ ...prev, [key]: value }));
+        setPage(1); // reset về trang 1 khi lọc
+      }, 300),
+    []
+  );
+
   const allColumns = [
     { title: "ID", dataIndex: "id", key: "id", fixed: "left", width: 80 },
     { title: "Họ tên", dataIndex: "name", key: "name", width: 200 },
@@ -191,9 +203,8 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
       key: "action",
       fixed: "right",
       width: 120,
-      render: (_, record) => {
-        return user?.id_role == USER_ROLE.ADMIN ||
-          record.createdBy == user.id ? (
+      render: (_, record) =>
+        user?.id_role === USER_ROLE.ADMIN || record.createdBy === user?.id ? (
           <Space>
             <Button
               icon={<DeleteOutlined />}
@@ -213,31 +224,19 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
               }}
             />
           </Space>
-        ) : null;
-      },
+        ) : null,
     },
   ];
-
-  const handleFilterChange = useMemo(
-    () =>
-      debounce((key, value) => {
-        setFilters((prev) => ({ ...prev, [key]: value }));
-        setPage(1);
-      }, 300),
-    []
-  );
-
-  const handleColumnToggle = (key) => {
-    setVisibleKeys((prev) =>
-      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
-    );
-  };
-
-  const resetColumns = () => setVisibleKeys(defaultVisibleKeys);
 
   const columnsToRender = allColumns.filter((col) =>
     visibleKeys.includes(col.key)
   );
+
+  const toggleColumn = (key) => {
+    setVisibleKeys((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+    );
+  };
 
   const columnMenu = (
     <div style={{ padding: 12, maxHeight: 300, overflowY: "auto" }}>
@@ -248,14 +247,14 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         <div key={col.key} style={{ padding: "4px 0" }}>
           <Checkbox
             checked={visibleKeys.includes(col.key)}
-            onChange={() => handleColumnToggle(col.key)}
+            onChange={() => toggleColumn(col.key)}
           >
             {col.title}
           </Checkbox>
         </div>
       ))}
       <Divider style={{ margin: "8px 0" }} />
-      <Button size="small" onClick={resetColumns}>
+      <Button size="small" onClick={() => setVisibleKeys(defaultVisibleKeys)}>
         Khôi phục mặc định
       </Button>
     </div>
@@ -272,18 +271,14 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
       >
         <Typography.Title level={4}>Danh sách ca chẩn đoán</Typography.Title>
         <Space>
-          <Dropdown
-            overlay={columnMenu}
-            placement="bottomRight"
-            trigger={["click"]}
-          >
+          <Dropdown overlay={columnMenu} trigger={["click"]}>
             <Button icon={<SettingOutlined />}>Chọn cột</Button>
           </Dropdown>
           {!isNotCreate && (
             <Button
-              onClick={() => navigate("create")}
               type="primary"
               icon={<UserAddOutlined />}
+              onClick={() => navigate("create")}
             >
               Thêm mới
             </Button>
@@ -329,10 +324,10 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
             allowClear
             style={{ width: "100%" }}
             placeholder="Lọc theo trạng thái"
+            value={filters.statuses}
             onChange={(value) =>
               setFilters((prev) => ({ ...prev, statuses: value }))
             }
-            value={filters.statuses}
           >
             {Object.entries(PATIENT_DIAGNOSE_STATUS).map(([key, label]) => (
               <Option key={key} value={parseInt(key)}>
@@ -343,7 +338,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         </Col>
       </Row>
 
-      <h3>Tổng cộng: {total || 0} bản ghi</h3>
+      <h3>Tổng cộng: {total} bản ghi</h3>
 
       <Table
         rowKey="id"

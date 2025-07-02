@@ -20,6 +20,7 @@ const PrintPreview = ({
   wards,
   calculateAge,
   lang = LANGUAGES.vi,
+  serviceName,
 }) => {
   const LABELS_ADDON =
     lang == LANGUAGES.vi ? ADMIN_INFO_LABELS : ADMIN_INFO_LABELS_EN;
@@ -74,6 +75,13 @@ const PrintPreview = ({
             </p>
           </div>
         </header>
+        <h2 style={{ textAlign: "center", fontSize: "30px", color: "blue" }}>
+          {LABELS_ADDON.Medical_test_result}
+        </h2>
+        <h2 style={{ textAlign: "center", fontSize: "24px", color: "blue" }}>
+          {serviceName}
+        </h2>
+
         <div>
           <h3> {LABELS_ADDON.section_title}</h3>
           <div
