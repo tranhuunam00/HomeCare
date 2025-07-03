@@ -99,7 +99,7 @@ export const ADMIN_INFO_LABELS = {
   doctor: "BÁC SĨ THỰC HIỆN",
   time: "Thời gian",
   digital_signature: "Chữ ký số",
-  Medical_test_result: "Phiếu kết quả",
+  Medical_test_result: "PHIẾU KẾT QUẢ",
 };
 
 export const ADMIN_INFO_LABELS_EN = {
@@ -124,7 +124,7 @@ export const ADMIN_INFO_LABELS_EN = {
   doctor: "DOCTOR",
   time: "Time",
   digital_signature: "Digital signature",
-  Medical_test_result: "Medical test result",
+  Medical_test_result: "MEDICAL TEST RESULT",
 };
 
 export const LANGUAGES = {

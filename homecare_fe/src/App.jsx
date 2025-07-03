@@ -32,6 +32,7 @@ import PatientDiagnoseDetailPage from "./pages/patient/Detail/DetailPatientDiagn
 import PatientUseTemplate from "./pages/patient/Use/PatientUseTemplate";
 import ViewTemplateProduct from "./pages/products/TemplateProduct/ViewTemplateProduct";
 import TemplateServiceList from "./pages/template_service/TemplateServiceList";
+import ExamPartList from "./pages/template_service/ExamPart/ExamPartList";
 
 function App() {
   useAuthInitializer();
@@ -65,6 +66,7 @@ function App() {
             element={<AddOrEditTemplateProduct />}
           />
           <Route path="template_services" element={<TemplateServiceList />} />
+          <Route path="exam-parts" element={<ExamPartList />} />
 
           <Route
             path="/home/templates/view/:id"

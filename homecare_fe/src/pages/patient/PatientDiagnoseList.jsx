@@ -43,24 +43,168 @@ const PATIENT_DIAGNOSE_COLOR = {
   4: "green",
 };
 
-const defaultVisibleKeys = ["id", "name", "PID", "SID", "status", "action"];
+const defaultVisibleKeys = [
+  "id",
+  "name",
+  "id_template_service",
+  "PID",
+  "SID",
+  "status",
+  "action",
+];
+
+const STORAGE_KEY = "visibleColumns_patientDiagnose";
 
 const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
   const navigate = useNavigate();
-  const { user } = useGlobalAuth();
 
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
+  const [visibleKeys, setVisibleKeys] = useState([]);
+  const { user, doctor, examParts, templateServices } = useGlobalAuth();
 
-  const [visibleKeys, setVisibleKeys] = useState(defaultVisibleKeys);
+  const allColumns = useMemo(
+    () => [
+      {
+        title: "ID",
+        dataIndex: "id",
+        key: "id",
+        fixed: "left",
+        width: 80,
+        align: "center",
+      },
+      {
+        title: "Họ tên",
+        dataIndex: "name",
+        key: "name",
+        width: 200,
+        render: (text) => text?.toUpperCase(),
+      },
+      { title: "PID", dataIndex: "PID", key: "PID", width: 120 },
+      { title: "SID", dataIndex: "SID", key: "SID", width: 120 },
+      {
+        width: 220,
+        title: "Chỉnh định",
+        dataIndex: "id_template_service",
+        key: "id_template_service",
+        render: (val) => templateServices?.find((t) => t.id == val)?.name,
+      },
+      { title: "Giới tính", dataIndex: "gender", key: "gender", width: 120 },
+      { title: "CCCD", dataIndex: "CCCD", key: "CCCD", width: 160 },
+      {
+        title: "SĐT",
+        dataIndex: "phoneNumber",
+        key: "phoneNumber",
+        width: 140,
+      },
+      { title: "Email", dataIndex: "email", key: "email", width: 200 },
+      { title: "Địa chỉ", dataIndex: "address", key: "address", width: 220 },
+      {
+        title: "Quốc tịch",
+        dataIndex: "countryCode",
+        key: "countryCode",
+        width: 140,
+      },
+      {
+        title: "Tỉnh/TP",
+        dataIndex: "province_code",
+        key: "province_code",
+        width: 140,
+      },
+      {
+        title: "Quận/Huyện",
+        dataIndex: "district_code",
+        key: "district_code",
+        width: 140,
+      },
+      {
+        title: "Phường/Xã",
+        dataIndex: "ward_code",
+        key: "ward_code",
+        width: 140,
+      },
+      {
+        title: "Trạng thái",
+        dataIndex: "status",
+        key: "status",
+        width: 150,
+        render: (status) => (
+          <Tag color={PATIENT_DIAGNOSE_COLOR[status]}>
+            {PATIENT_DIAGNOSE_STATUS[status]}
+          </Tag>
+        ),
+      },
+      {
+        title: "Ngày tạo",
+        dataIndex: "createdAt",
+        key: "createdAt",
+        width: 180,
+      },
+      {
+        title: "Ngày cập nhật",
+        dataIndex: "updatedAt",
+        key: "updatedAt",
+        width: 180,
+      },
+      {
+        title: "Mã phòng khám",
+        dataIndex: "id_clinic",
+        key: "id_clinic",
+        width: 120,
+      },
+      {
+        title: "Người tạo",
+        dataIndex: "createdBy",
+        key: "createdBy",
+        width: 120,
+      },
+      {
+        title: "Hành động",
+        key: "action",
+        fixed: "right",
+        width: 120,
+        render: (_, record) =>
+          (user?.id_role === USER_ROLE.ADMIN ||
+            record.createdBy === user?.id) && (
+            <Space>
+              <Button
+                icon={<DeleteOutlined />}
+                type="text"
+                danger
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDelete(record.id);
+                }}
+              />
+              <Button
+                icon={<CopyOutlined />}
+                type="text"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleClone(record);
+                }}
+              />
+            </Space>
+          ),
+      },
+    ],
+    [user]
+  );
+
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    setVisibleKeys(saved ? JSON.parse(saved) : defaultVisibleKeys);
+  }, []);
+
   const [filters, setFilters] = useState({
     name: null,
     PID: PID,
     SID: null,
     id_clinic: null,
     statuses: [],
+    id_template_service: null,
   });
 
   useEffect(() => {
@@ -70,15 +214,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
   const fetchPatients = async () => {
     try {
       const res = await API_CALL.get("/patient-diagnose", {
-        params: {
-          name: filters.name,
-          PID: filters.PID,
-          SID: filters.SID,
-          id_clinic: filters.id_clinic,
-          status: filters.statuses,
-          page,
-          limit,
-        },
+        params: { ...filters, page, limit },
       });
       const responseData = res.data.data;
       setData(responseData?.rows || []);
@@ -89,16 +225,13 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
   };
 
   const handleDelete = async (id) => {
-    const confirm = window.confirm("Bạn có chắc chắn muốn xóa bản ghi này?");
-    if (!confirm) return;
-
+    if (!window.confirm("Bạn có chắc chắn muốn xóa bản ghi này?")) return;
     try {
       await API_CALL.del(`/patient-diagnose/${id}`);
       message.success("Xóa thành công");
       fetchPatients();
     } catch (err) {
       message.error("Xóa thất bại, vui lòng thử lại");
-      console.error("Lỗi xóa:", err);
     }
   };
 
@@ -115,7 +248,6 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
       fetchPatients();
     } catch (err) {
       toast.error("Clone thất bại");
-      console.error("Lỗi clone:", err);
     }
   };
 
@@ -123,120 +255,23 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
     () =>
       debounce((key, value) => {
         setFilters((prev) => ({ ...prev, [key]: value }));
-        setPage(1); // reset về trang 1 khi lọc
+        setPage(1);
       }, 300),
     []
   );
 
-  const allColumns = [
-    { title: "ID", dataIndex: "id", key: "id", fixed: "left", width: 80 },
-    { title: "Họ tên", dataIndex: "name", key: "name", width: 200 },
-    { title: "PID", dataIndex: "PID", key: "PID", width: 120 },
-    { title: "SID", dataIndex: "SID", key: "SID", width: 120 },
-    {
-      title: "Chỉ định",
-      dataIndex: "Indication",
-      key: "Indication",
-      width: 200,
-    },
-    { title: "Giới tính", dataIndex: "gender", key: "gender", width: 120 },
-    { title: "CCCD", dataIndex: "CCCD", key: "CCCD", width: 160 },
-    { title: "SĐT", dataIndex: "phoneNumber", key: "phoneNumber", width: 140 },
-    { title: "Email", dataIndex: "email", key: "email", width: 200 },
-    { title: "Địa chỉ", dataIndex: "address", key: "address", width: 220 },
-    {
-      title: "Quốc tịch",
-      dataIndex: "countryCode",
-      key: "countryCode",
-      width: 140,
-    },
-    {
-      title: "Tỉnh/TP",
-      dataIndex: "province_code",
-      key: "province_code",
-      width: 140,
-    },
-    {
-      title: "Quận/Huyện",
-      dataIndex: "district_code",
-      key: "district_code",
-      width: 140,
-    },
-    {
-      title: "Phường/Xã",
-      dataIndex: "ward_code",
-      key: "ward_code",
-      width: 140,
-    },
-    {
-      title: "Trạng thái",
-      dataIndex: "status",
-      key: "status",
-      width: 150,
-      render: (status) => (
-        <Tag color={PATIENT_DIAGNOSE_COLOR[status]}>
-          {PATIENT_DIAGNOSE_STATUS[status]}
-        </Tag>
-      ),
-    },
-    { title: "Ngày tạo", dataIndex: "createdAt", key: "createdAt", width: 180 },
-    {
-      title: "Ngày cập nhật",
-      dataIndex: "updatedAt",
-      key: "updatedAt",
-      width: 180,
-    },
-    {
-      title: "Mã phòng khám",
-      dataIndex: "id_clinic",
-      key: "id_clinic",
-      width: 120,
-    },
-    {
-      title: "Người tạo",
-      dataIndex: "createdBy",
-      key: "createdBy",
-      width: 120,
-    },
-    {
-      title: "Hành động",
-      key: "action",
-      fixed: "right",
-      width: 120,
-      render: (_, record) =>
-        user?.id_role === USER_ROLE.ADMIN || record.createdBy === user?.id ? (
-          <Space>
-            <Button
-              icon={<DeleteOutlined />}
-              type="text"
-              danger
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDelete(record.id);
-              }}
-            />
-            <Button
-              icon={<CopyOutlined />}
-              type="text"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleClone(record);
-              }}
-            />
-          </Space>
-        ) : null,
-    },
-  ];
-
-  const columnsToRender = allColumns.filter((col) =>
-    visibleKeys.includes(col.key)
-  );
-
   const toggleColumn = (key) => {
-    setVisibleKeys((prev) =>
-      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
-    );
+    const updated = visibleKeys.includes(key)
+      ? visibleKeys.filter((k) => k !== key)
+      : [...visibleKeys, key];
+    setVisibleKeys(updated);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
   };
+
+  const columnsToRender = useMemo(
+    () => allColumns.filter((col) => visibleKeys.includes(col.key)),
+    [visibleKeys, allColumns]
+  );
 
   const columnMenu = (
     <div style={{ padding: 12, maxHeight: 300, overflowY: "auto" }}>
@@ -244,7 +279,10 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         Chọn cột hiển thị
       </Typography.Text>
       {allColumns.map((col) => (
-        <div key={col.key} style={{ padding: "4px 0" }}>
+        <div
+          key={col.key}
+          style={{ padding: "4px 0", backgroundColor: "white" }}
+        >
           <Checkbox
             checked={visibleKeys.includes(col.key)}
             onChange={() => toggleColumn(col.key)}
@@ -254,7 +292,13 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         </div>
       ))}
       <Divider style={{ margin: "8px 0" }} />
-      <Button size="small" onClick={() => setVisibleKeys(defaultVisibleKeys)}>
+      <Button
+        size="small"
+        onClick={() => {
+          setVisibleKeys(defaultVisibleKeys);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultVisibleKeys));
+        }}
+      >
         Khôi phục mặc định
       </Button>
     </div>
@@ -332,6 +376,23 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
             {Object.entries(PATIENT_DIAGNOSE_STATUS).map(([key, label]) => (
               <Option key={key} value={parseInt(key)}>
                 {label}
+              </Option>
+            ))}
+          </Select>
+        </Col>
+        <Col span={6}>
+          <Select
+            allowClear
+            style={{ width: "100%" }}
+            placeholder="Chỉ định"
+            value={filters.id_template_service}
+            onChange={(value) =>
+              setFilters((prev) => ({ ...prev, id_template_service: value }))
+            }
+          >
+            {templateServices?.map((se) => (
+              <Option key={se.id} value={parseInt(se.id)}>
+                {se.name}
               </Option>
             ))}
           </Select>

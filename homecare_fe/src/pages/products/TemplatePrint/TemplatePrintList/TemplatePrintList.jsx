@@ -88,7 +88,7 @@ const TemplatePrintList = () => {
   };
 
   const columns = [
-    { title: "ID", dataIndex: "id", key: "id" },
+    { title: "ID", dataIndex: "id", key: "id", align: "center" },
     { title: "Tên", dataIndex: "name", key: "name" },
     { title: "Phòng khám", dataIndex: "clinic_name", key: "clinic_name" },
     { title: "Khoa", dataIndex: "department_name", key: "department_name" },

@@ -75,10 +75,24 @@ const PrintPreview = ({
             </p>
           </div>
         </header>
-        <h2 style={{ textAlign: "center", fontSize: "30px", color: "blue" }}>
+        <h2
+          style={{
+            textAlign: "center",
+            fontSize: "30px",
+            color: "blue",
+            fontWeight: 700,
+          }}
+        >
           {LABELS_ADDON.Medical_test_result}
         </h2>
-        <h2 style={{ textAlign: "center", fontSize: "24px", color: "blue" }}>
+        <h2
+          style={{
+            fontWeight: 500,
+            textAlign: "center",
+            fontSize: "20px",
+            color: "blue",
+          }}
+        >
           {serviceName}
         </h2>
 

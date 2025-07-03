@@ -132,7 +132,7 @@ const CustomerList = () => {
   }, []);
 
   const columns = [
-    { title: "ID", dataIndex: "id", key: "id", width: 60 },
+    { title: "ID", dataIndex: "id", key: "id", width: 60, align: "center" },
     { title: "Họ tên", dataIndex: "full_name", key: "full_name" },
     { title: "Số điện thoại", dataIndex: "phone_number", key: "phone_number" },
     { title: "Giới tính", dataIndex: "gender", key: "gender" },

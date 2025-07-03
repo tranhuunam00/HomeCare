@@ -128,7 +128,7 @@ const TemplateList = () => {
   };
 
   const columns = [
-    { title: "ID", dataIndex: "id", key: "id", width: 60 },
+    { title: "ID", dataIndex: "id", key: "id", width: 60, align: "center" },
     { title: "Tên", dataIndex: "name", key: "name" },
     {
       title: "Dịch vụ",

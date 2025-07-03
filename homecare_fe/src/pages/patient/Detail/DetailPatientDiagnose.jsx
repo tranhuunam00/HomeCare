@@ -10,6 +10,7 @@ import {
 } from "../../../constant/app";
 import PatientTablePage from "../PatientDiagnoseList";
 import StatusButtonPatientDiagnose from "../../../components/Status2ButtonPatientDiagnose";
+import { useGlobalAuth } from "../../../contexts/AuthContext";
 
 const { Title, Text } = Typography;
 
@@ -19,6 +20,7 @@ const PatientDiagnoiseDetailPage = () => {
   const [clinics, setClinics] = useState([]);
   const [clinicName, setClinicName] = useState("");
   const navigate = useNavigate();
+  const { user, doctor, examParts, templateServices } = useGlobalAuth();
 
   const {
     provinces,
@@ -124,13 +126,22 @@ const PatientDiagnoiseDetailPage = () => {
           </Col>
           <Col span={10}>
             <Title level={5}>Chỉ định:</Title>
-            <Text>{data.Indication}</Text>
+            <Text>
+              {
+                templateServices?.find((t) => t.id == data.id_template_service)
+                  ?.name
+              }
+            </Text>
           </Col>
           <Col span={10}>
             <Title level={5}>Phòng khám:</Title>
             <Text>{clinicName}</Text>
           </Col>
         </Row>
+        <Col span={10}>
+          <Title level={5}>Bộ phận thăm khám:</Title>
+          <Text>{examParts?.find((t) => t.id == data.id_exam_part)?.name}</Text>
+        </Col>
 
         <Row gutter={24} style={{ marginTop: 16 }}>
           <Col span={4}>

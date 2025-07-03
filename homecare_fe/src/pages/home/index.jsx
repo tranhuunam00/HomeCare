@@ -117,7 +117,11 @@ const Sidebar = ({ collapsed }) => {
       children: [
         {
           key: "template_services",
-          label: "Danh sách",
+          label: "Dịch vụ",
+        },
+        {
+          key: "exam-parts",
+          label: "Bộ phận thăm khám",
         },
       ],
     },

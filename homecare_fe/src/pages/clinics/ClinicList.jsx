@@ -84,7 +84,7 @@ const ClinicList = () => {
   };
 
   const columns = [
-    { title: "ID", dataIndex: "id", key: "id", width: 60 },
+    { title: "ID", dataIndex: "id", key: "id", width: 60, align: "center" },
     { title: "Tên cơ sở", dataIndex: "name", key: "name" },
     { title: "SĐT", dataIndex: "phone_number", key: "phone_number" },
     { title: "Địa chỉ", dataIndex: "address", key: "address" },

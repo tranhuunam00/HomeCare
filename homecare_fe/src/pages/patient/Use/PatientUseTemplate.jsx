@@ -103,12 +103,12 @@ const PatientUseTemplate = () => {
   const [printTemplateList, setPrintTemplateList] = useState([]);
   const [templates, setTemplates] = useState([]);
 
-  const { templateServices, doctor } = useGlobalAuth();
+  const { templateServices, doctor, examParts } = useGlobalAuth();
   const [idTemplateService, setIdTemplateService] = useState();
 
   const [template, setTemplate] = useState({});
   const [imageList, setImageList] = useState([]);
-  const [inputsRender, setInputsRender] = useState([]);
+  const [inputsRender, setInputsRender] = useState({});
   const [inputsAddon, setInputsAddon] = useState([]);
 
   const [isOpenPreview, setIsOpenPreview] = useState(true);
@@ -381,6 +381,11 @@ const PatientUseTemplate = () => {
   useEffect(() => {
     setSelectedProvince(patientDiagnose?.province_code);
     setSelectedDistrict(patientDiagnose?.district_code);
+    setInputsRender({
+      "{{{text: Bộ phận thăm khám}}}": examParts?.find(
+        (ex) => patientDiagnose?.id_exam_part == ex.id
+      )?.name,
+    });
   }, [patientDiagnose]);
 
   useEffect(() => {
@@ -390,6 +395,7 @@ const PatientUseTemplate = () => {
         .then((res) => {
           const data = res.data.data;
           setPatientDiagnose(data);
+          setIdTemplateService(data?.id_template_service);
 
           const doctor_print_templates = data?.doctor_print_templates?.find(
             (d) => d.status == data?.status
@@ -703,6 +709,14 @@ const PatientUseTemplate = () => {
                     </Option>
                   ))}
               </Select>
+              <p>
+                <strong>Bộ phận thăm khám: </strong>
+                {
+                  examParts?.find(
+                    (ex) => ex.id == patientDiagnose?.id_exam_part
+                  )?.name
+                }
+              </p>
             </div>
 
             <AddonInputSection

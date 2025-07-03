@@ -27,7 +27,7 @@ const PatientFormPage = () => {
   const [loading, setLoading] = useState(false);
   const [countries, setCountries] = useState([]);
   const [clinics, setClinics] = useState([]);
-  const { user, doctor, handleLogoutGlobal } = useGlobalAuth();
+  const { user, doctor, examParts, templateServices } = useGlobalAuth();
 
   const fetchClinics = async () => {
     try {
@@ -87,7 +87,7 @@ const PatientFormPage = () => {
         name: values.name,
         PID: values.pid,
         SID: values.sid,
-        Indication: values.Indication,
+        Indication: values.Indication ?? "-",
         gender: values.gender,
         CCCD: values.cccd,
         phoneNumber: values.phone,
@@ -101,6 +101,8 @@ const PatientFormPage = () => {
         createdBy: user?.id,
         status: 1,
         dob: values.dob,
+        id_template_service: values.id_template_service,
+        id_exam_part: values.id_exam_part,
       };
 
       await API_CALL.post("/patient-diagnose", payload);
@@ -129,6 +131,7 @@ const PatientFormPage = () => {
                 name="name"
                 label="Họ và tên"
                 rules={[{ required: true }]}
+                normalize={(value) => value?.toUpperCase()}
               >
                 <Input />
               </Form.Item>
@@ -149,14 +152,35 @@ const PatientFormPage = () => {
 
             <Col span={12}>
               <Form.Item
-                name="Indication"
                 label="Chỉ định"
+                name="id_template_service"
                 rules={[{ required: true }]}
               >
-                <Input />
+                <Select placeholder="Chọn chỉ định">
+                  {templateServices.map((s) => (
+                    <Option key={s.id} value={s.id}>
+                      {s.name}
+                    </Option>
+                  ))}
+                </Select>
               </Form.Item>
             </Col>
           </Row>
+          <Col span={12}>
+            <Form.Item
+              label="Bộ phận thăm khám"
+              name="id_exam_part"
+              rules={[{ required: true }]}
+            >
+              <Select placeholder="Chọn bộ phận thăm khám">
+                {examParts.map((s) => (
+                  <Option key={s.id} value={s.id}>
+                    {s.name}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </Col>
           {user.id_role == USER_ROLE.ADMIN && (
             <Form.Item
               label="Phòng khám"
