@@ -35,6 +35,7 @@ import CompletionActionsDiagnose from "../../../components/CompletionActionsDiag
 import StatusButtonPatientDiagnose from "../../../components/Status2ButtonPatientDiagnose.jsx";
 import PrintPreview from "./PrintPreview.jsx";
 import AddonInputSection from "./InputsAdon.jsx";
+import CustomSunEditor from "../../../components/Suneditor/CustomSunEditor.jsx";
 
 const urlToFile = async (url, fallbackName = "image") => {
   const res = await fetch(url);
@@ -116,7 +117,7 @@ const PatientUseTemplate = () => {
   const [isTrans, setIsTrans] = useState("");
 
   const [imageListTrans, setImageListTrans] = useState([]);
-  const [inputsRenderTrans, setInputsRenderTrans] = useState([]);
+  const [inputsRenderTrans, setInputsRenderTrans] = useState({});
   const [inputsAddonTrans, setInputsAddonTrans] = useState([]);
   const [isTranslateAll, setIsTranslateAll] = useState();
 
@@ -188,7 +189,6 @@ const PatientUseTemplate = () => {
       const htmlR = await API_CALL.post("translate/html-text", payload, {
         timeout: 120000,
       });
-      console.log("html", htmlR);
       setHtmlTranslate(htmlR?.data?.data);
     } catch (error) {
       console.log(error);
@@ -381,11 +381,6 @@ const PatientUseTemplate = () => {
   useEffect(() => {
     setSelectedProvince(patientDiagnose?.province_code);
     setSelectedDistrict(patientDiagnose?.district_code);
-    setInputsRender({
-      "{{{text: Bộ phận thăm khám}}}": examParts?.find(
-        (ex) => patientDiagnose?.id_exam_part == ex.id
-      )?.name,
-    });
   }, [patientDiagnose]);
 
   useEffect(() => {
@@ -396,7 +391,11 @@ const PatientUseTemplate = () => {
           const data = res.data.data;
           setPatientDiagnose(data);
           setIdTemplateService(data?.id_template_service);
-
+          setInputsRender({
+            "{{{text: Bộ phận thăm khám}}}": examParts?.find(
+              (ex) => data?.id_exam_part == ex.id
+            )?.name,
+          });
           const doctor_print_templates = data?.doctor_print_templates?.find(
             (d) => d.status == data?.status
           );
@@ -427,7 +426,7 @@ const PatientUseTemplate = () => {
           <style>
             body { font-family: Arial, sans-serif; padding: 20px; }
             table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-            th, td { border: 0px solid #ccc; padding: 8px; text-align: left; }
+            th, td { border: 0px solid #ccc; padding: 8px; text-align: left; font-size: 13px}
             h3 { margin-top: 24px; }
           </style>
         </head>
@@ -532,35 +531,49 @@ const PatientUseTemplate = () => {
   return (
     <Spin spinning={loading}>
       <div style={{ display: "flex" }}>
+        <Button
+          type={isOpenPreview ? "default" : "primary"} // màu khác nhau
+          danger={isOpenPreview} // nếu đang mở thì dùng màu đỏ nhẹ
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            height: 32,
+            padding: "0 12px",
+            fontSize: 14,
+          }}
+          onClick={() => setIsOpenPreview(!isOpenPreview)}
+          icon={isOpenPreview ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+        >
+          {isOpenPreview ? "Tắt preview" : "Mở preview"}
+        </Button>
+        {isTrans && (
+          <p
+            style={{ textAlign: "center", lineHeight: "30px", marginLeft: 40 }}
+          >
+            Lưu ý: Bạn có thể tắt chế độ preview để mở editor{" "}
+            <strong>
+              Khi bạn mở editor, cấu trúc của preview có thể bị thay đổi nhưng
+              sẽ không ảnh hưởng đến kết quả in
+            </strong>
+          </p>
+        )}
+      </div>
+
+      <div style={{ display: "flex" }}>
         {patientDiagnose?.status != PATIENT_DIAGNOSE_STATUS_CODE.VERIFY ? (
           <Card style={{ width: isOpenPreview ? 600 : "100%", margin: "0" }}>
             <StatusButtonPatientDiagnose
               id={patientDiagnose?.id}
               status={patientDiagnose?.status || 1}
             />
-            <Button
-              type={isOpenPreview ? "default" : "primary"} // màu khác nhau
-              danger={isOpenPreview} // nếu đang mở thì dùng màu đỏ nhẹ
-              style={{
-                marginTop: 16,
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                height: 32,
-                padding: "0 12px",
-                fontSize: 14,
-              }}
-              onClick={() => setIsOpenPreview(!isOpenPreview)}
-              icon={isOpenPreview ? <EyeInvisibleOutlined /> : <EyeOutlined />}
-            >
-              {isOpenPreview ? "Tắt preview" : "Mở preview"}
-            </Button>
 
             <Title level={3}>
               Hiện có: {patientDiagnose?.doctor_print_templates?.length || 0}{" "}
               bản ghi{" "}
             </Title>
             <CompletionActionsDiagnose
+              isOpenPreview={isOpenPreview}
               statusCode={patientDiagnose?.status}
               handleRead={async () => {
                 const res = await updateStatusPatientDiagnose(2);
@@ -836,6 +849,18 @@ const PatientUseTemplate = () => {
         )}
 
         {isTrans &&
+          !isOpenPreview &&
+          patientDiagnose.status == PATIENT_DIAGNOSE_STATUS_CODE.VERIFY && (
+            <CustomSunEditor
+              value={htmlTranslate}
+              onChange={(value) => {
+                setHtmlTranslate(value);
+              }}
+            />
+          )}
+
+        {isTrans &&
+          isOpenPreview &&
           patientDiagnose.status == PATIENT_DIAGNOSE_STATUS_CODE.VERIFY && (
             <PrintPreview
               printRef={printRef}

@@ -14,7 +14,7 @@ const CustomSunEditor = ({ value, onChange }) => {
   return (
     <div className="editor-container">
       <SunEditor
-        height="500"
+        height="100%"
         setContents={value}
         onChange={onChange}
         onImageUploadBefore={(files, info, uploadHandler) => {
