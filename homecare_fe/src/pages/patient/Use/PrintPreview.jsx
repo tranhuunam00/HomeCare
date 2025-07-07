@@ -79,7 +79,7 @@ const PrintPreview = ({
           style={{
             textAlign: "center",
             fontSize: "30px",
-            color: "##4299d4",
+            color: "#4299d4",
             fontWeight: 700,
           }}
         >
@@ -97,7 +97,14 @@ const PrintPreview = ({
         </h2>
 
         <div>
-          <h3> {LABELS_ADDON.section_title}</h3>
+          <h3
+            style={{
+              color: "#4299d4",
+            }}
+          >
+            {" "}
+            {LABELS_ADDON.section_title}
+          </h3>
           <div
             style={{
               marginBottom: 10,
@@ -554,7 +561,13 @@ const PrintPreview = ({
           className="print-content"
           dangerouslySetInnerHTML={{ __html: combinedHtml }}
         />
-        <h3>{LABELS_ADDON.image_section}</h3>
+        <h3
+          style={{
+            color: "#4299d4",
+          }}
+        >
+          {LABELS_ADDON.image_section}
+        </h3>
         <div
           style={{
             display: "flex",
@@ -569,7 +582,7 @@ const PrintPreview = ({
             </section>
           ))}
         </div>
-        <h3>{LABELS_ADDON.doctor}</h3>
+        <h3 style={{ color: "#4299d4" }}>{LABELS_ADDON.doctor}</h3>
 
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <section>

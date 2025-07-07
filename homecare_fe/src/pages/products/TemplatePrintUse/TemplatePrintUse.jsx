@@ -191,11 +191,11 @@ const TemplatePrintUse = () => {
       th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
       h3 {margin-bottom: 20px; margin-top: 40px;}
     </style>
-    <h3>QUY TRÌNH VÀ KĨ THUẬT</h3>
+    <h3 style="color: #4299d4">QUY TRÌNH VÀ KĨ THUẬT</h3>
     ${allValues.description_template || ""}
-    <h3>MÔ TẢ HÌNH ẢNH</h3>
+    <h3 style="color: #4299d4">MÔ TẢ HÌNH ẢNH</h3>
     ${allValues.result_template || ""}
-    <h3>KẾT LUẬN CHẨN ĐOÁN</h3>
+    <h3 style="color: #4299d4">KẾT LUẬN CHẨN ĐOÁN</h3>
     ${allValues.recommendation_template || ""}
   `;
     setCombinedHtml(html);
@@ -693,7 +693,7 @@ const TemplatePrintUse = () => {
               />
             </section>
           </div>
-          <h3>HÌNH ẢNH MINH HỌA</h3>
+          <h3 style="color: #4299d4">HÌNH ẢNH MINH HỌA</h3>
           <div
             style={{
               display: "flex",
