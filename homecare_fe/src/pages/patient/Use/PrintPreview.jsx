@@ -79,7 +79,7 @@ const PrintPreview = ({
           style={{
             textAlign: "center",
             fontSize: "30px",
-            color: "blue",
+            color: "##4299d4",
             fontWeight: 700,
           }}
         >
@@ -90,7 +90,7 @@ const PrintPreview = ({
             fontWeight: 500,
             textAlign: "center",
             fontSize: "20px",
-            color: "blue",
+            color: "#4299d4",
           }}
         >
           {serviceName}
