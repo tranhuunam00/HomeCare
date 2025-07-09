@@ -13,6 +13,7 @@ import {
   Tag,
   Select,
   message,
+  DatePicker,
 } from "antd";
 import {
   SettingOutlined,
@@ -26,8 +27,17 @@ import API_CALL from "../../services/axiosClient";
 import { useGlobalAuth } from "../../contexts/AuthContext";
 import { USER_ROLE } from "../../constant/app";
 import { toast } from "react-toastify";
+import dayjs from "dayjs";
+const { RangePicker } = DatePicker;
 
 const { Option } = Select;
+
+const DATE_OPTIONS = [
+  { label: "Hôm nay", value: "today" },
+  { label: "Hôm qua", value: "yesterday" },
+  { label: "Tuần này", value: "this_week" },
+  { label: "Khoảng thời gian", value: "range" },
+];
 
 const PATIENT_DIAGNOSE_STATUS = {
   1: "Mới",
@@ -64,6 +74,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
   const [limit, setLimit] = useState(10);
   const [visibleKeys, setVisibleKeys] = useState([]);
   const { user, doctor, examParts, templateServices } = useGlobalAuth();
+  const [clinics, setClinics] = useState([]);
 
   const allColumns = useMemo(
     () => [
@@ -193,9 +204,21 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
     [user]
   );
 
+  const fetchClinics = async () => {
+    try {
+      const res = await API_CALL.get("/clinics", {
+        params: { page: 1, limit: 100 },
+      });
+      setClinics(res.data.data.data);
+    } catch (err) {
+      toast.error(err?.response?.data?.message);
+    }
+  };
+
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     setVisibleKeys(saved ? JSON.parse(saved) : defaultVisibleKeys);
+    fetchClinics();
   }, []);
 
   const [filters, setFilters] = useState({
@@ -338,39 +361,53 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
             allowClear
           />
         </Col>
-        <Col span={6}>
+        <Col span={4}>
           <Input
             placeholder="Tìm theo PID"
             onChange={(e) => handleFilterChange("PID", e.target.value)}
             allowClear
           />
         </Col>
-        <Col span={6}>
+        <Col span={4}>
           <Input
             placeholder="Tìm theo SID"
             onChange={(e) => handleFilterChange("SID", e.target.value)}
             allowClear
           />
         </Col>
-        <Col span={6}>
-          <Input
-            placeholder="ID phòng khám"
-            onChange={(e) => handleFilterChange("id_clinic", e.target.value)}
+        <Col span={10}>
+          <Select
             allowClear
-          />
+            showSearch
+            style={{ width: "100%" }}
+            placeholder="Chọn phòng khám"
+            optionFilterProp="children"
+            value={filters.id_clinic}
+            onChange={(value) =>
+              setFilters((prev) => ({ ...prev, id_clinic: value }))
+            }
+            filterOption={(input, option) =>
+              option?.children?.toLowerCase().includes(input.toLowerCase())
+            }
+          >
+            {clinics?.map((clinic) => (
+              <Option key={clinic.id} value={clinic.id}>
+                {clinic.name}
+              </Option>
+            ))}
+          </Select>
         </Col>
       </Row>
-
-      <Row gutter={16} style={{ marginBottom: 16 }}>
+      <Row gutter={16} style={{ marginBottom: 12 }}>
         <Col span={6}>
           <Select
             mode="multiple"
             allowClear
             style={{ width: "100%" }}
             placeholder="Lọc theo trạng thái"
-            value={filters.statuses}
+            value={filters.status}
             onChange={(value) =>
-              setFilters((prev) => ({ ...prev, statuses: value }))
+              setFilters((prev) => ({ ...prev, status: value }))
             }
           >
             {Object.entries(PATIENT_DIAGNOSE_STATUS).map(([key, label]) => (
@@ -380,6 +417,8 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
             ))}
           </Select>
         </Col>
+
+        {/* Bộ lọc chỉ định */}
         <Col span={6}>
           <Select
             allowClear
@@ -397,6 +436,56 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
             ))}
           </Select>
         </Col>
+      </Row>
+
+      <Row gutter={16} style={{ marginBottom: 16 }}>
+        {/* Bộ lọc theo thời gian */}
+        <Col span={6}>
+          <Select
+            allowClear
+            style={{ width: "100%" }}
+            placeholder="Lọc theo thời gian"
+            value={filters.date_type}
+            onChange={(value) =>
+              setFilters((prev) => ({
+                ...prev,
+                date_type: value,
+                ...(value !== "range" && {
+                  from_date: undefined,
+                  to_date: undefined,
+                }),
+              }))
+            }
+          >
+            {DATE_OPTIONS.map(({ label, value }) => (
+              <Option key={value} value={value}>
+                {label}
+              </Option>
+            ))}
+          </Select>
+        </Col>
+
+        {/* RangePicker chỉ hiển thị khi chọn 'range' */}
+        {filters.date_type === "range" && (
+          <Col span={12}>
+            <RangePicker
+              style={{ width: "100%" }}
+              value={
+                filters.from_date && filters.to_date
+                  ? [dayjs(filters.from_date), dayjs(filters.to_date)]
+                  : null
+              }
+              onChange={(dates) => {
+                const [from, to] = dates || [];
+                setFilters((prev) => ({
+                  ...prev,
+                  from_date: from ? from.format("YYYY-MM-DD") : undefined,
+                  to_date: to ? to.format("YYYY-MM-DD") : undefined,
+                }));
+              }}
+            />
+          </Col>
+        )}
       </Row>
 
       <h3>Tổng cộng: {total} bản ghi</h3>
