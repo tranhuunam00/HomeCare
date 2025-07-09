@@ -52,7 +52,13 @@ const HomeCareLanding = () => {
     <div className={styles["homecare"]}>
       <header className={styles["homecare__header"]}>
         <div className={styles["homecare__container"]}>
-          <div className={styles["homecare__logo"]}>
+          <div
+            style={{ cursor: "pointer" }}
+            onClick={() => {
+              window.open("https://home-care.vn/", "_blank");
+            }}
+            className={styles["homecare__logo"]}
+          >
             <img src="/logo_home_care.jpg" alt="logo_home_care.jpg" />
           </div>
 

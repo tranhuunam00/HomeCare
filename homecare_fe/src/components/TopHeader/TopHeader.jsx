@@ -20,6 +20,10 @@ import { toast } from "react-toastify";
 
 const qrValue = `https://www.daogroup.vn/`;
 
+const currentEndpont = `${
+  import.meta.env.VITE_MAIN_ENDPOINT || "http://localhost:5173"
+}`;
+
 const TopHeader = ({ collapsed, toggleSidebar }) => {
   const [rightDrawerVisible, setRightDrawerVisible] = useState(false);
   const { user, doctor, handleLogoutGlobal } = useGlobalAuth();
@@ -67,7 +71,13 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
 
   return (
     <div className={styles.topHeader}>
-      <div className={styles.topHeader__left}>
+      <div
+        onClick={() => {
+          window.open(currentEndpont);
+        }}
+        className={styles.topHeader__left}
+        style={{ cursor: "pointer" }}
+      >
         <img
           src="/logo_home_care.jpg"
           className={styles.topHeader__logo}

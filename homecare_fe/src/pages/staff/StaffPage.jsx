@@ -21,7 +21,7 @@ const StaffPage = () => {
   return (
     <div className={styles["staff-page"]}>
       <Tabs defaultActiveKey="1" className={styles["staff-page__tabs"]}>
-        <TabPane tab="Thông tin chung" key="1">
+        <TabPane tab="Dịch vụ" key="1">
           <div className={styles["staff-page__content"]}>
             <SidebarMenu onSelect={setSelectedMenu} selected={selectedMenu} />
             <div className={styles["staff-page__details"]}>

@@ -35,9 +35,27 @@ const AccountPage = () => {
   return (
     <div className={styles["account-page"]}>
       <Tabs defaultActiveKey="1" className={styles["account-page__tabs"]}>
-        <TabPane tab="Thông tin chung" key="1">
+        <TabPane tab="Dịch vụ" key="1">
           <div className={styles["account-page__content"]}>
-            <SidebarMenu onSelect={setSelectedMenu} selected={selectedMenu} />
+            <SidebarMenu
+              onSelect={(key) => {
+                setSelectedMenu(key); // vẫn dùng cho các mục nội bộ
+                if (
+                  [
+                    "profile",
+                    "notifications",
+                    "password",
+                    "signature",
+                  ].includes(key)
+                ) {
+                  setSelectedMenu(key); // giữ logic cũ
+                } else {
+                  // 👉 xử lý điều hướng bên ngoài hoặc trong app
+                  window.open(`/${key}`, "_blank"); // hoặc navigate(`/${key}`)
+                }
+              }}
+              selected={selectedMenu}
+            />
             <div className={styles["account-page__details"]}>
               {renderContent()}
             </div>
