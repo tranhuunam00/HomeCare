@@ -106,7 +106,6 @@ const TemplatePrintUse = () => {
 
   // Khi chọn template → load chi tiết
 
-  console.log("idTemplate", idTemplate);
   useEffect(() => {
     if (idTemplate) {
       setLoading(true);
@@ -235,7 +234,6 @@ const TemplatePrintUse = () => {
               <CustomSunEditor
                 value={template?.value}
                 onChange={(value) => {
-                  console.log("value result_template", value);
                   form.setFieldValue("result_template", value);
                 }}
               />

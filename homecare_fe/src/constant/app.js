@@ -26,6 +26,14 @@ export const PATIENT_DIAGNOSE_STATUS = {
   4: "Đã xác nhận",
 };
 
+export const PATIENT_DIAGNOSE_STATUS_NAME = {
+  NEW: 1,
+  IN_PROCESS: 2,
+  WAITING: 3,
+  VERIFY: 4,
+  TRANSLATE: 5,
+};
+
 export const PATIENT_DIAGNOSE_STATUS_CODE = {
   NEW: 1,
   INPROCESS: 2,
@@ -38,6 +46,7 @@ export const PATIENT_DIAGNOSE_COLOR = {
   2: "#808000",
   3: "Orange",
   4: "Green",
+  5: "#11111",
 };
 export function extractDynamicFieldsFromHtml(htmlString) {
   const parser = new DOMParser();

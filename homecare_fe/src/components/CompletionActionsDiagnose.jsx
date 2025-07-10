@@ -2,6 +2,7 @@ import { Button, Form } from "antd";
 import { useState } from "react";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { PATIENT_DIAGNOSE_STATUS_NAME } from "../constant/app";
 
 const PATIENT_DIAGNOSE_COLOR = {
   1: "blue",
@@ -20,11 +21,11 @@ const CompletionActionsDiagnose = ({
   handleTranslate,
   handleTranslateAll,
   isTranslateAll = false,
+  isTrans = false,
 }) => {
   const navigate = useNavigate();
   const [status, setStatus] = useState(1);
   useEffect(() => setStatus(statusCode), [statusCode]);
-  console.log("status", status);
   return (
     <>
       <h2>Thao tác hoàn thành</h2>
@@ -38,14 +39,14 @@ const CompletionActionsDiagnose = ({
         </Button>
 
         {/* Trạng thái 1: Chỉ hiện Đọc kết quả */}
-        {status === 1 && (
+        {status === PATIENT_DIAGNOSE_STATUS_NAME.NEW && (
           <Button style={{ marginLeft: 8 }} type="primary" onClick={handleRead}>
             Đọc kết quả
           </Button>
         )}
 
         {/* Trạng thái 2: Chỉ hiện Đang đọc */}
-        {status === 2 && (
+        {status === PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESS && !isTrans && (
           <Button
             style={{ marginLeft: 8 }}
             type="primary"
@@ -57,14 +58,14 @@ const CompletionActionsDiagnose = ({
         )}
 
         {/* Trạng thái 2: Chỉ hiện Đang đọc */}
-        {status === 2 && (
+        {status === PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESS && !isTrans && (
           <Button style={{ marginLeft: 8 }} type="primary" onClick={handleSend}>
             Chốt kết quả
           </Button>
         )}
 
         {/* Trạng thái 3: Chỉ hiện Xác nhận */}
-        {status === 3 && (
+        {status === PATIENT_DIAGNOSE_STATUS_NAME.WAITING && (
           <Button
             style={{ marginLeft: 8 }}
             type="dashed"
@@ -90,7 +91,7 @@ const CompletionActionsDiagnose = ({
           </Button>
         )}
 
-        {status == 4 && (
+        {status == PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESS && isTrans && (
           <Button
             style={{
               marginLeft: 8,
@@ -104,7 +105,7 @@ const CompletionActionsDiagnose = ({
           </Button>
         )}
 
-        {status == 4 && (
+        {status == PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESS && isTrans && (
           <Button
             style={{
               marginLeft: 8,

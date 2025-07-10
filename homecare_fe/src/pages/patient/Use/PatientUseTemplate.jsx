@@ -113,6 +113,7 @@ const PatientUseTemplate = () => {
   const [inputsAddon, setInputsAddon] = useState([]);
 
   const [isOpenPreview, setIsOpenPreview] = useState(true);
+
   const [htmlTranslate, setHtmlTranslate] = useState("");
   const [isTrans, setIsTrans] = useState("");
 
@@ -162,7 +163,6 @@ const PatientUseTemplate = () => {
         caption: translatedImageCaptions.data.data[idx],
       }));
 
-      console.log("updatedImageList", updatedImageList);
       setImageListTrans(updatedImageList);
 
       const newInputRenderTrans = {
@@ -237,8 +237,6 @@ const PatientUseTemplate = () => {
     };
   };
 
-  console.log("templatesData", templates);
-
   useEffect(() => {
     const fetchTemplates = async () => {
       try {
@@ -295,13 +293,29 @@ const PatientUseTemplate = () => {
     setPrintTemplate(exist);
     setIdPrintTemplate(exist?.id);
   }, [printTemplateList, patientDiagnose]);
-
+  console.log("inputsRender", inputsRender);
   useEffect(() => {
     if (idTemplate) {
       API_CALL.get(`/templates/${idTemplate}`)
         .then((res) => {
           const data = res.data.data?.data || res.data.data || {};
           setTemplate(data);
+
+          const a = extractDynamicFieldsFromHtml(data?.description || "");
+          const b = extractDynamicFieldsFromHtml(data?.result || "");
+          const c = extractDynamicFieldsFromHtml(data?.recommendation || "");
+
+          const mergedFields = [...a, ...b, ...c]
+            .filter((d) => d.type == "text")
+            .reduce((acc, field) => {
+              acc[field.raw] = field.defaultValue;
+              return acc;
+            }, {});
+
+          setInputsRender({
+            ...inputsRender,
+            ...mergedFields,
+          });
         })
         .catch(() => message.error("Không thể tải danh sách template"));
     }
@@ -527,41 +541,67 @@ const PatientUseTemplate = () => {
     }
   };
 
-  console.log("imageListTrans", imageListTrans, imageList);
-  return (
-    <Spin spinning={loading}>
-      <div style={{ display: "flex" }}>
-        <Button
-          type={isOpenPreview ? "default" : "primary"} // màu khác nhau
-          danger={isOpenPreview} // nếu đang mở thì dùng màu đỏ nhẹ
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            height: 32,
-            padding: "0 12px",
-            fontSize: 14,
-          }}
-          onClick={() => setIsOpenPreview(!isOpenPreview)}
-          icon={isOpenPreview ? <EyeInvisibleOutlined /> : <EyeOutlined />}
-        >
-          {isOpenPreview ? "Tắt preview" : "Mở preview"}
-        </Button>
-        {isTrans && (
-          <p
-            style={{ textAlign: "center", lineHeight: "30px", marginLeft: 40 }}
-          >
-            Lưu ý: Bạn có thể tắt chế độ preview để mở editor{" "}
-            <strong>
-              Khi bạn mở editor, cấu trúc của preview có thể bị thay đổi nhưng
-              sẽ không ảnh hưởng đến kết quả in
-            </strong>
-          </p>
-        )}
-      </div>
+  const renderDiagnoseContent = () => {
+    if (isTrans) {
+      return (
+        <Card style={{ width: 600, margin: "0" }}>
+          <CompletionActionsDiagnose
+            isTranslateAll={isTranslateAll}
+            isTrans={isTrans}
+            statusCode={patientDiagnose?.status}
+            handlePrint={handlePrint}
+            handleTranslate={async () => {
+              const confirmed = window.confirm(
+                "Bạn có chắc chắn muốn bắt đầu dịch nội dung không?"
+              );
+              if (!confirmed) return;
 
-      <div style={{ display: "flex" }}>
-        {patientDiagnose?.status != PATIENT_DIAGNOSE_STATUS_CODE.VERIFY ? (
+              setIsTrans(true);
+              toast.success("Bắt đầu dịch");
+              await handleTranslateInputs();
+            }}
+            handleTranslateAll={async () => {
+              await handleTranslate(`
+                        <style>
+                          table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+                          th, td { border: 0px solid #ccc; padding: 8px; text-align: left; }
+                          h3 {margin-bottom: 20px; margin-top: 40px;}
+                        </style>
+                        <h3 style="color: #4299d4">QUY TRÌNH VÀ KĨ THUẬT</h3>
+                        ${replaceInputsInHtml(
+                          template?.description || "",
+                          inputsRenderTrans
+                        )}
+                        <h3>KẾT LUẬN CHẨN ĐOÁN</h3>
+                        ${replaceInputsInHtml(
+                          template?.result || "",
+                          inputsRenderTrans
+                        )}
+                        <h3>KHUYẾN NGHỊ</h3>
+                        ${replaceInputsInHtml(
+                          template?.recommendation || "",
+                          inputsRenderTrans
+                        )}
+                      `);
+            }}
+          />
+          <AddonInputSection
+            inputsAddon={inputsAddonTrans}
+            setInputsAddon={setInputsAddonTrans}
+            template={template}
+            inputsRender={inputsRenderTrans}
+            setInputsRender={setInputsRenderTrans}
+            imageList={imageListTrans}
+            setImageList={setImageListTrans}
+            renderDynamicAntdFields={renderDynamicAntdFields}
+            extractDynamicFieldsFromHtml={extractDynamicFieldsFromHtml}
+          />
+        </Card>
+      );
+    }
+    switch (+patientDiagnose?.status) {
+      default:
+        return (
           <Card style={{ width: isOpenPreview ? 600 : "100%", margin: "0" }}>
             <StatusButtonPatientDiagnose
               id={patientDiagnose?.id}
@@ -771,62 +811,74 @@ const PatientUseTemplate = () => {
               </Button>
             </Card>
           </Card>
-        ) : (
+        );
+      case PATIENT_DIAGNOSE_STATUS_CODE.VERIFY:
+        return (
           <Card style={{ width: 600, margin: "0" }}>
             <CompletionActionsDiagnose
               isTranslateAll={isTranslateAll}
               statusCode={patientDiagnose?.status}
               handlePrint={handlePrint}
-              handleTranslate={async () => {
-                const confirmed = window.confirm(
-                  "Bạn có chắc chắn muốn bắt đầu dịch nội dung không?"
-                );
-                if (!confirmed) return;
-
-                setIsTrans(true);
-                toast.success("Bắt đầu dịch");
-                await handleTranslateInputs();
-              }}
-              handleTranslateAll={async () => {
-                await handleTranslate(`
-                        <style>
-                          table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-                          th, td { border: 0px solid #ccc; padding: 8px; text-align: left; }
-                          h3 {margin-bottom: 20px; margin-top: 40px;}
-                        </style>
-                        <h3 style="color: #4299d4">QUY TRÌNH VÀ KĨ THUẬT</h3>
-                        ${replaceInputsInHtml(
-                          template?.description || "",
-                          inputsRenderTrans
-                        )}
-                        <h3>KẾT LUẬN CHẨN ĐOÁN</h3>
-                        ${replaceInputsInHtml(
-                          template?.result || "",
-                          inputsRenderTrans
-                        )}
-                        <h3>KHUYẾN NGHỊ</h3>
-                        ${replaceInputsInHtml(
-                          template?.recommendation || "",
-                          inputsRenderTrans
-                        )}
-                      `);
-              }}
             />
-            {isTrans && (
-              <AddonInputSection
-                inputsAddon={inputsAddonTrans}
-                setInputsAddon={setInputsAddonTrans}
-                template={template}
-                inputsRender={inputsRenderTrans}
-                setInputsRender={setInputsRenderTrans}
-                imageList={imageListTrans}
-                setImageList={setImageListTrans}
-                renderDynamicAntdFields={renderDynamicAntdFields}
-                extractDynamicFieldsFromHtml={extractDynamicFieldsFromHtml}
-              />
-            )}
           </Card>
+        );
+    }
+  };
+  return (
+    <Spin spinning={loading}>
+      <div style={{ display: "flex" }}>
+        <Button
+          type={isOpenPreview ? "default" : "primary"} // màu khác nhau
+          danger={isOpenPreview} // nếu đang mở thì dùng màu đỏ nhẹ
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            height: 32,
+            padding: "0 12px",
+            fontSize: 14,
+          }}
+          onClick={() => setIsOpenPreview(!isOpenPreview)}
+          icon={isOpenPreview ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+        >
+          {isOpenPreview
+            ? isTrans
+              ? "Mở editor"
+              : "Tắt preview"
+            : "Mở preview"}
+        </Button>
+
+        <Button
+          type={isTrans ? "default" : "primary"} // màu khác nhau
+          danger={isTrans} // nếu đang mở thì dùng màu đỏ nhẹ
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            height: 32,
+            padding: "0 12px",
+            fontSize: 14,
+          }}
+          onClick={() => setIsTrans(!isTrans)}
+          icon={isTrans ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+        >
+          {!isTrans ? "Bật chế độ dịch" : "Tắt chế độ dịch"}
+        </Button>
+        {isTrans && (
+          <p
+            style={{ textAlign: "center", lineHeight: "30px", marginLeft: 40 }}
+          >
+            Lưu ý: Bạn có thể tắt chế độ preview để mở editor{" "}
+            <strong>
+              Khi bạn mở editor, cấu trúc của preview có thể bị thay đổi nhưng
+              sẽ không ảnh hưởng đến kết quả in
+            </strong>
+          </p>
         )}
+      </div>
+
+      <div style={{ display: "flex" }}>
+        {renderDiagnoseContent()}
 
         {isOpenPreview && !isTrans && (
           <PrintPreview
@@ -850,18 +902,20 @@ const PatientUseTemplate = () => {
 
         {isTrans &&
           !isOpenPreview &&
-          patientDiagnose.status == PATIENT_DIAGNOSE_STATUS_CODE.VERIFY && (
-            <CustomSunEditor
-              value={htmlTranslate}
-              onChange={(value) => {
-                setHtmlTranslate(value);
-              }}
-            />
+          patientDiagnose.status == PATIENT_DIAGNOSE_STATUS_CODE.INPROCESS && (
+            <div>
+              <CustomSunEditor
+                value={htmlTranslate}
+                onChange={(value) => {
+                  setHtmlTranslate(value);
+                }}
+              />
+            </div>
           )}
 
         {isTrans &&
           isOpenPreview &&
-          patientDiagnose.status == PATIENT_DIAGNOSE_STATUS_CODE.VERIFY && (
+          patientDiagnose.status == PATIENT_DIAGNOSE_STATUS_CODE.INPROCESS && (
             <PrintPreview
               printRef={printRef}
               printTemplate={printTemplate}

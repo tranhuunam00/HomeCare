@@ -19,8 +19,6 @@ const TemplateHeaderEditor = ({ value = {}, onChange }) => {
   const [form] = Form.useForm();
   form.setFieldsValue(value);
 
-  console.log("value", value);
-
   const handleLogoChange = (file) => {
     const preview = URL.createObjectURL(file);
     setLogoPreview(preview);

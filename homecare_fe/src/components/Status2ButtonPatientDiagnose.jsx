@@ -12,6 +12,7 @@ const StatusButtonPatientDiagnose = ({ id, status }) => {
       isReading: status === 2,
       canConfirm: status === 3,
       canPrint: status === 4,
+      translate: status == 5,
     };
   }, [status]);
 
@@ -42,6 +43,18 @@ const StatusButtonPatientDiagnose = ({ id, status }) => {
           style={getStyle(buttonStatus.isReading, PATIENT_DIAGNOSE_COLOR[2])}
         >
           Đang đọc
+        </Button>
+      </Col>
+      <Col span={4}>
+        <Button
+          type="primary"
+          disabled={!buttonStatus.translate}
+          onClick={() => navigate("/home/patients-diagnose/use/" + id)}
+          style={{
+            ...getStyle(buttonStatus.translate, PATIENT_DIAGNOSE_COLOR[2]),
+          }}
+        >
+          Dịch tự động
         </Button>
       </Col>
       <Col span={5}>

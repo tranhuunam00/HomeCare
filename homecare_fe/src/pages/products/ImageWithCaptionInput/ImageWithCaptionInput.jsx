@@ -9,7 +9,6 @@ const ImageWithCaptionInput = ({ value = [], onChange }) => {
     setImages(value);
   }, [value]);
 
-  console.log("images", images);
   const handleAddImage = () => {
     const newList = [...images, { url: "", caption: "" }];
     setImages(newList);

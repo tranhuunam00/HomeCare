@@ -22,7 +22,6 @@ const useAuthInitializer = () => {
       API_CALL.get(`/users/profile/${user.id}`)
         .then((res) => {
           const { user, doctor } = res.data.data;
-          console.log("-----------------------zxoo---------");
           handleLoginContext({ token, user, doctor });
         })
         .catch(() => {
