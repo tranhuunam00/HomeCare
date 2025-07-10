@@ -91,38 +91,42 @@ const CompletionActionsDiagnose = ({
           </Button>
         )}
 
-        {status == PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESS && isTrans && (
-          <Button
-            style={{
-              marginLeft: 8,
-              backgroundColor: PATIENT_DIAGNOSE_COLOR[4],
-              color: "#fff",
-              border: "none",
-            }}
-            onClick={handleTranslate}
-          >
-            Bắt đầu dịch
-          </Button>
-        )}
+        {(status == PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESS ||
+          status == PATIENT_DIAGNOSE_STATUS_NAME.WAITING) &&
+          isTrans && (
+            <Button
+              style={{
+                marginLeft: 8,
+                backgroundColor: PATIENT_DIAGNOSE_COLOR[4],
+                color: "#fff",
+                border: "none",
+              }}
+              onClick={handleTranslate}
+            >
+              Bắt đầu dịch
+            </Button>
+          )}
 
-        {status == PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESS && isTrans && (
-          <Button
-            style={{
-              marginLeft: 8,
-              backgroundColor: !isTranslateAll
-                ? "#ccc"
-                : PATIENT_DIAGNOSE_COLOR[4],
-              color: "#fff",
-              border: "none",
-              cursor: !isTranslateAll ? "not-allowed" : "pointer",
-              opacity: !isTranslateAll ? 0.6 : 1, // làm mờ khi disabled
-            }}
-            disabled={!isTranslateAll}
-            onClick={handleTranslateAll}
-          >
-            Hoàn thành dịch
-          </Button>
-        )}
+        {(status == PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESS ||
+          status == PATIENT_DIAGNOSE_STATUS_NAME.WAITING) &&
+          isTrans && (
+            <Button
+              style={{
+                marginLeft: 8,
+                backgroundColor: !isTranslateAll
+                  ? "#ccc"
+                  : PATIENT_DIAGNOSE_COLOR[4],
+                color: "#fff",
+                border: "none",
+                cursor: !isTranslateAll ? "not-allowed" : "pointer",
+                opacity: !isTranslateAll ? 0.6 : 1, // làm mờ khi disabled
+              }}
+              disabled={!isTranslateAll}
+              onClick={handleTranslateAll}
+            >
+              Hoàn thành dịch
+            </Button>
+          )}
       </Form.Item>
     </>
   );

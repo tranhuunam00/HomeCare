@@ -3,39 +3,73 @@ import React, { useEffect, useState } from "react";
 import { Upload, Input, Button, Row, Col, Form, message } from "antd";
 import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
 
-const ImageWithCaptionInput = ({ value = [], onChange }) => {
+const ImageWithCaptionInput = ({
+  value = [],
+  onChange,
+  valueTrans = [],
+  onChangeTrans,
+}) => {
   const [images, setImages] = useState(value);
+  const [imagesTrans, setImagesTrans] = useState(valueTrans);
+
   useEffect(() => {
     setImages(value);
-  }, [value]);
+    setImagesTrans(valueTrans);
+  }, [value, valueTrans]);
 
   const handleAddImage = () => {
     const newList = [...images, { url: "", caption: "" }];
+    const newListTrans = [...imagesTrans, { url: "", caption: "" }];
+
     setImages(newList);
+    setImagesTrans(newListTrans);
+
     onChange?.(newList);
+    onChangeTrans?.(newListTrans);
   };
 
   const handleImageChange = (file, index) => {
     const preview = URL.createObjectURL(file);
     const newList = [...images];
+    const newListTrans = [...imagesTrans];
+
     newList[index].file = file;
+    newListTrans[index].file = file;
+
     newList[index].url = preview;
+    newListTrans[index].url = preview;
+
     setImages(newList);
+    setImagesTrans(newListTrans);
+
     onChange?.(newList);
+    onChangeTrans?.(newListTrans);
     return false;
   };
 
   const handleCaptionChange = (e, index) => {
     const newList = [...images];
+    const newListTrans = [...imagesTrans];
+
     newList[index].caption = e.target.value;
+    newListTrans[index].caption = e.target.value;
+
     setImages(newList);
+    setImagesTrans(newListTrans);
+
     onChange?.(newList);
+    onChangeTrans?.(newListTrans);
   };
 
   const handleRemove = (index) => {
     const newList = images.filter((_, i) => i !== index);
+    const newListTrans = imagesTrans.filter((_, i) => i !== index);
+
     setImages(newList);
+    setImagesTrans(newListTrans);
+
     onChange?.(newList);
+    onChangeTrans?.(newListTrans);
   };
 
   return (

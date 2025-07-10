@@ -26,11 +26,15 @@ import ImageWithCaptionInput from "../../products/ImageWithCaptionInput/ImageWit
 const AddonInputSection = ({
   inputsAddon,
   setInputsAddon,
+  setInputsAddonTrans,
   template,
   inputsRender,
   setInputsRender,
+  setInputsRenderTrans,
   imageList,
+  imageListTrans,
   setImageList,
+  setImageListTrans,
   renderDynamicAntdFields,
   extractDynamicFieldsFromHtml,
 }) => {
@@ -40,6 +44,9 @@ const AddonInputSection = ({
   const handleAddonChange = (e) => {
     const { name, value } = e.target;
     setInputsAddon((prev) => ({ ...prev, [name]: value }));
+    if (setInputsAddonTrans) {
+      setInputsAddonTrans((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   /** ----------------------------------------------------------------------- */
@@ -159,7 +166,8 @@ const AddonInputSection = ({
         {renderDynamicAntdFields(
           extractDynamicFieldsFromHtml(template?.description || ""),
           inputsRender,
-          setInputsRender
+          setInputsRender,
+          setInputsRenderTrans
         )}
       </div>
 
@@ -169,7 +177,8 @@ const AddonInputSection = ({
         {renderDynamicAntdFields(
           extractDynamicFieldsFromHtml(template?.result || ""),
           inputsRender,
-          setInputsRender
+          setInputsRender,
+          setInputsRenderTrans
         )}
       </div>
 
@@ -179,7 +188,8 @@ const AddonInputSection = ({
         {renderDynamicAntdFields(
           extractDynamicFieldsFromHtml(template?.recommendation || ""),
           inputsRender,
-          setInputsRender
+          setInputsRender,
+          setInputsRenderTrans
         )}
       </div>
 
@@ -188,7 +198,12 @@ const AddonInputSection = ({
       {/* ------------------------------------------------------------------ */}
       <Form.Item label="Hình ảnh minh họa">
         {/* ImageWithCaptionInput is expected to be provided by parent scope */}
-        <ImageWithCaptionInput value={imageList} onChange={setImageList} />
+        <ImageWithCaptionInput
+          value={imageList}
+          onChange={setImageList}
+          onChangeTrans={setImageListTrans}
+          valueTrans={imageListTrans}
+        />
       </Form.Item>
     </>
   );

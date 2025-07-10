@@ -14,7 +14,8 @@ const { Option } = Select;
 export const renderDynamicAntdFields = (
   fields,
   inputsRender = {},
-  setInputsRender
+  setInputsRender,
+  setInputsRenderTrans
 ) => {
   const groupedFields = {};
 
@@ -47,6 +48,9 @@ export const renderDynamicAntdFields = (
         ...inputsRender,
         [field.raw]: value,
       });
+      if (setInputsRenderTrans) {
+        setInputsRenderTrans((prev) => ({ ...prev, [field.raw]: value }));
+      }
     };
 
     switch (field.type) {

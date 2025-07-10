@@ -24,7 +24,6 @@ import {
 import { toast } from "react-toastify";
 import { useGlobalAuth } from "../../../contexts/AuthContext";
 import useVietnamAddress from "../../../hooks/useVietnamAddress";
-import ImageWithCaptionInput from "../../products/ImageWithCaptionInput/ImageWithCaptionInput";
 import { renderDynamicAntdFields } from "../../../components/RenderInputFormTemplate";
 import {
   extractDynamicFieldsFromHtml,
@@ -135,14 +134,16 @@ const PatientUseTemplate = () => {
   const handleTranslateInputs = async () => {
     setLoading(true);
     // 🧩 Tạo payload từ dữ liệu gốc
-    const payloadsAddon = inputsAddon;
+    const payloadsAddon = inputsAddonTrans;
     const payloadsImage = {
       texts: imageList.map((i) => i.caption),
     };
 
     // 🔍 Chỉ lấy key dạng {{{text:...}}}
     const textObjectToTranslate = Object.fromEntries(
-      Object.entries(inputsRender).filter(([key]) => key.includes("{{{text:"))
+      Object.entries(inputsRenderTrans).filter(([key]) =>
+        key.includes("{{{text:")
+      )
     );
 
     const payloadsRender = textObjectToTranslate;
@@ -343,6 +344,10 @@ const PatientUseTemplate = () => {
               ...inputsRender,
               ...mergedFields,
             });
+            setInputsRenderTrans({
+              ...inputsRender,
+              ...mergedFields,
+            });
           }
         })
         .catch(() => message.error("Không thể tải danh sách template"));
@@ -463,6 +468,7 @@ const PatientUseTemplate = () => {
             setImageListTrans(imageListTrans);
 
             setIdTemplate(doctor_print_templates.id_template);
+            setHtmlTranslate(doctor_print_templates.htmlTranslate);
           }
         })
         .catch(() => message.error("Không thể tải dữ liệu chi tiết"))
@@ -523,6 +529,7 @@ const PatientUseTemplate = () => {
       );
       formData.append("inputsAddon", JSON.stringify(inputsAddon));
       formData.append("inputsAddonTrans", JSON.stringify(inputsAddonTrans));
+      formData.append("htmlTranslate", JSON.stringify(htmlTranslate));
 
       // Xử lý imageList
       const descriptionsArr = [];
@@ -661,6 +668,8 @@ const PatientUseTemplate = () => {
             setInputsRender={setInputsRenderTrans}
             imageList={imageListTrans}
             setImageList={setImageListTrans}
+            imageListTrans={imageListTrans}
+            setImageListTrans={setImageListTrans}
             renderDynamicAntdFields={renderDynamicAntdFields}
             extractDynamicFieldsFromHtml={extractDynamicFieldsFromHtml}
           />
@@ -843,11 +852,15 @@ const PatientUseTemplate = () => {
             <AddonInputSection
               inputsAddon={inputsAddon}
               setInputsAddon={setInputsAddon}
+              setInputsAddonTrans={setInputsAddonTrans}
               template={template}
               inputsRender={inputsRender}
               setInputsRender={setInputsRender}
+              setInputsRenderTrans={setInputsRenderTrans}
               imageList={imageList}
+              imageListTrans={imageListTrans}
               setImageList={setImageList}
+              setImageListTrans={setImageListTrans}
               renderDynamicAntdFields={renderDynamicAntdFields}
               extractDynamicFieldsFromHtml={extractDynamicFieldsFromHtml}
             />
