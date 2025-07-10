@@ -122,15 +122,15 @@ const PatientUseTemplate = () => {
   const [inputsAddonTrans, setInputsAddonTrans] = useState([]);
   const [isTranslateAll, setIsTranslateAll] = useState();
 
-  useEffect(() => {
-    setImageListTrans(imageList);
-  }, [imageList]);
-  useEffect(() => {
-    setInputsRenderTrans(inputsRender);
-  }, [inputsRender]);
-  useEffect(() => {
-    setInputsAddonTrans(inputsAddon);
-  }, [inputsAddon]);
+  // useEffect(() => {
+  //   setImageListTrans(imageList);
+  // }, [imageList]);
+  // useEffect(() => {
+  //   setInputsRenderTrans(inputsRender);
+  // }, [inputsRender]);
+  // useEffect(() => {
+  //   setInputsAddonTrans(inputsAddon);
+  // }, [inputsAddon]);
 
   const handleTranslateInputs = async () => {
     setLoading(true);
@@ -203,10 +203,24 @@ const PatientUseTemplate = () => {
     const inputsRender = {};
     const inputsAddon = JSON.parse(template.inputsAddon || "{}");
 
+    const inputsAddonTrans = JSON.parse(template.inputsAddonTrans || "{}");
+    const inputsRenderTrans = {};
+    const imageListTrans = [];
+
     template.doctor_print_template_images?.forEach((img) => {
+      console.log("img", img);
       if (img.type === "ADDON") {
         imageList.push({
           caption: img.description || "-",
+          url: img.link,
+          file: {
+            uid: `uploaded-${img.id}`,
+            name: img.link.split("/").pop(),
+            url: img.link,
+          },
+        });
+        imageListTrans.push({
+          caption: img.translateTe || "-",
           url: img.link,
           file: {
             uid: `uploaded-${img.id}`,
@@ -219,13 +233,20 @@ const PatientUseTemplate = () => {
           url: img.link,
           name: img.link.split("/").pop(),
         };
+        inputsRenderTrans[img.replace] = {
+          url: img.link,
+          name: img.link.split("/").pop(),
+        };
       }
     });
 
     // Gộp với inputsRender từ text
     try {
       const renderObj = JSON.parse(template.inputsRender || "{}");
+      const renderObjTrans = JSON.parse(template.inputsRenderTrans || "{}");
+
       Object.assign(inputsRender, renderObj);
+      Object.assign(inputsRenderTrans, renderObjTrans);
     } catch (e) {
       console.warn("Lỗi parse inputsRender", e);
     }
@@ -234,6 +255,9 @@ const PatientUseTemplate = () => {
       imageList,
       inputsRender,
       inputsAddon,
+      inputsAddonTrans,
+      imageListTrans,
+      inputsRenderTrans,
     };
   };
 
@@ -312,10 +336,14 @@ const PatientUseTemplate = () => {
               return acc;
             }, {});
 
-          setInputsRender({
-            ...inputsRender,
-            ...mergedFields,
-          });
+          if (
+            patientDiagnose.status == PATIENT_DIAGNOSE_STATUS_CODE.INPROCESS
+          ) {
+            setInputsRender({
+              ...inputsRender,
+              ...mergedFields,
+            });
+          }
         })
         .catch(() => message.error("Không thể tải danh sách template"));
     }
@@ -397,6 +425,8 @@ const PatientUseTemplate = () => {
     setSelectedDistrict(patientDiagnose?.district_code);
   }, [patientDiagnose]);
 
+  console.log("----------inputsRenderTrans--------", inputsRenderTrans);
+
   useEffect(() => {
     if (id_patient_diagnose) {
       setLoading(true);
@@ -414,13 +444,23 @@ const PatientUseTemplate = () => {
             (d) => d.status == data?.status
           );
           if (doctor_print_templates) {
-            const { imageList, inputsRender, inputsAddon } =
-              normalizeDoctorPrintTemplateData(doctor_print_templates);
+            const {
+              imageList,
+              inputsRender,
+              inputsAddon,
+              inputsRenderTrans,
+              inputsAddonTrans,
+              imageListTrans,
+            } = normalizeDoctorPrintTemplateData(doctor_print_templates);
 
             setIdTemplateService(doctor_print_templates?.id_template_service);
             setImageList(imageList);
             setInputsAddon(inputsAddon);
             setInputsRender(inputsRender);
+
+            setInputsRenderTrans(inputsRenderTrans);
+            setInputsAddonTrans(inputsAddonTrans);
+            setImageListTrans(imageListTrans);
 
             setIdTemplate(doctor_print_templates.id_template);
           }
@@ -482,9 +522,12 @@ const PatientUseTemplate = () => {
         `Phiếu ${new Date().toLocaleDateString("vi-VN")}`
       );
       formData.append("inputsAddon", JSON.stringify(inputsAddon));
+      formData.append("inputsAddonTrans", JSON.stringify(inputsAddonTrans));
 
       // Xử lý imageList
       const descriptionsArr = [];
+      const descriptionsArrTrans = [];
+
       for (const item of imageList) {
         let file = item.file;
         if (!file?.size && item.url) {
@@ -495,14 +538,28 @@ const PatientUseTemplate = () => {
           descriptionsArr.push(item.caption || "-");
         }
       }
+
+      for (const item of imageListTrans) {
+        let file = item.file;
+        if (!file?.size && item.url) {
+          file = await urlToFile(item.url, `image_${Date.now()}`);
+        }
+        if (file) {
+          descriptionsArrTrans.push(item.caption || "-");
+        }
+      }
       formData.append(
         "descriptions",
         JSON.stringify(descriptionsArr.join("{{D}}"))
       );
-
+      formData.append(
+        "descriptionsTrans",
+        JSON.stringify(descriptionsArrTrans.join("{{D}}"))
+      );
       // Xử lý inputsRender
       const replaceLabels = [];
       const inputsRenderJson = {};
+      const inputsRenderJsonTrans = {};
 
       for (const [key, val] of Object.entries(inputsRender)) {
         if (key.includes("{{{image:")) {
@@ -519,7 +576,18 @@ const PatientUseTemplate = () => {
         }
       }
 
+      for (const [key, val] of Object.entries(inputsRenderTrans)) {
+        if (!key.includes("{{{image:")) {
+          inputsRenderJsonTrans[key] = val;
+        }
+      }
+
       formData.append("inputsRender", JSON.stringify(inputsRenderJson));
+      formData.append(
+        "inputsRenderTrans",
+        JSON.stringify(inputsRenderJsonTrans)
+      );
+
       formData.append(
         "replaceFields",
         JSON.stringify(replaceLabels.join("{{D}}"))
@@ -902,7 +970,8 @@ const PatientUseTemplate = () => {
 
         {isTrans &&
           !isOpenPreview &&
-          patientDiagnose.status == PATIENT_DIAGNOSE_STATUS_CODE.INPROCESS && (
+          (patientDiagnose.status == PATIENT_DIAGNOSE_STATUS_CODE.INPROCESS ||
+            patientDiagnose.status == PATIENT_DIAGNOSE_STATUS_CODE.WAIT) && (
             <div>
               <CustomSunEditor
                 value={htmlTranslate}
@@ -915,7 +984,8 @@ const PatientUseTemplate = () => {
 
         {isTrans &&
           isOpenPreview &&
-          patientDiagnose.status == PATIENT_DIAGNOSE_STATUS_CODE.INPROCESS && (
+          (patientDiagnose.status == PATIENT_DIAGNOSE_STATUS_CODE.INPROCESS ||
+            patientDiagnose.status == PATIENT_DIAGNOSE_STATUS_CODE.WAIT) && (
             <PrintPreview
               printRef={printRef}
               printTemplate={printTemplate}
