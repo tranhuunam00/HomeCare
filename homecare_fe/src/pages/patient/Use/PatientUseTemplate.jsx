@@ -156,11 +156,14 @@ const PatientUseTemplate = () => {
     try {
       const [translatedAddon, translatedImageCaptions, translatedRender] =
         await Promise.all([
-          API_CALL.post("translate/object", payloadsAddon),
-          API_CALL.post("translate/text-array", payloadsImage),
-          API_CALL.post("translate/object", payloadsRender),
+          API_CALL.post("translate/object", payloadsAddon, { timeout: 120000 }),
+          API_CALL.post("translate/text-array", payloadsImage, {
+            timeout: 120000,
+          }),
+          API_CALL.post("translate/object", payloadsRender, {
+            timeout: 120000,
+          }),
         ]);
-
       // ✅ Cập nhật kết quả dịch
       setInputsAddonTrans(translatedAddon.data.data);
 
