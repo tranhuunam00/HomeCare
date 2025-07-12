@@ -56,6 +56,8 @@ const TemplateList = () => {
 
   const fetchServices = async () => {
     try {
+      setLoading(true);
+
       const res = await API_CALL.get("/ts", {
         params: { page: 1, limit: 100 },
       });
@@ -66,6 +68,8 @@ const TemplateList = () => {
       setServiceMap(map);
     } catch (err) {
       console.error("Lỗi khi lấy service:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -101,35 +105,56 @@ const TemplateList = () => {
     const confirmed = window.confirm("Bạn có chắc chắn muốn xóa mẫu này?");
     if (!confirmed) return;
     try {
+      setLoading(true);
+
       await API_CALL.del(`/templates/${id}`);
       toast.success("Đã xóa thành công");
       fetchTemplates();
     } catch (err) {
       toast.error("Xóa thất bại, vui lòng thử lại");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleCloneTemplate = async (record) => {
+  const handleCloneTemplate = async ({
+    record,
+    language = "vi",
+    parentId,
+    name,
+  }) => {
     try {
+      setLoading(true);
       const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
       const payload = {
         ...record,
-        id: undefined,
-        name: `${record.name} - Copy ${timestamp}`,
+        id: record.id,
+        name: name || `${record.name} - Copy ${timestamp}`,
         createdAt: Date.now(),
         updated_at: Date.now(),
+        parentId: parentId,
+        language: language ?? record.language,
+        isClone: true,
       };
-      await API_CALL.post("/templates", payload);
+
+      console.log("payload", payload);
+      await API_CALL.post("/templates", payload, {
+        timeout: 120000, // 120.000 ms = 2 phút
+      });
       toast.success("Đã clone mẫu thành công");
       fetchTemplates();
     } catch (err) {
       console.error("Lỗi clone template:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
   const columns = [
     { title: "ID", dataIndex: "id", key: "id", width: 60, align: "center" },
     { title: "Tên", dataIndex: "name", key: "name" },
+    { title: "Ngôn ngữ", dataIndex: "language", key: "language", width: 60 },
+    { title: "Id cha", dataIndex: "parentId", key: "parentId", width: 60 },
     {
       title: "Dịch vụ",
       dataIndex: "id_template_service",
@@ -192,8 +217,21 @@ const TemplateList = () => {
                 </Button>
               </>
             )}
-            <Button type="link" onClick={() => handleCloneTemplate(record)}>
+            <Button type="link" onClick={() => handleCloneTemplate({ record })}>
               Copy
+            </Button>
+            <Button
+              type="link"
+              onClick={() =>
+                handleCloneTemplate({
+                  record,
+                  language: "en",
+                  parentId: record.id,
+                  name: record.name + " Phiên bản tiếng anh " + new Date(),
+                })
+              }
+            >
+              Nhân bản sang tiếng Anh
             </Button>
           </>
         );
@@ -202,54 +240,56 @@ const TemplateList = () => {
   ];
 
   return (
-    <div className={styles.TemplateList}>
-      <h2 className={styles.title}>Danh sách Template Mẫu</h2>
-      <Button
-        style={{ margin: 30 }}
-        type="primary"
-        icon={<PlusOutlined />}
-        onClick={() => navigate("/home/templates/add")}
-      >
-        Thêm mới
-      </Button>
-      <Row gutter={16} className={styles.filterGroup}>
-        <Col span={8}>
-          <Card
-            size="small"
-            title={
-              <>
-                <FilterOutlined /> Bộ lọc
-              </>
-            }
-          >
-            <Input
-              placeholder="Tên template..."
-              value={searchName}
-              onChange={(e) => setSearchName(e.target.value)}
-              allowClear
-            />
-          </Card>
-        </Col>
-      </Row>
+    <Spin spinning={loading} tip="Đang tải dữ liệu...">
+      <div className={styles.TemplateList}>
+        <h2 className={styles.title}>Danh sách Template Mẫu</h2>
+        <Button
+          style={{ margin: 30 }}
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => navigate("/home/templates/add")}
+        >
+          Thêm mới
+        </Button>
+        <Row gutter={16} className={styles.filterGroup}>
+          <Col span={8}>
+            <Card
+              size="small"
+              title={
+                <>
+                  <FilterOutlined /> Bộ lọc
+                </>
+              }
+            >
+              <Input
+                placeholder="Tên template..."
+                value={searchName}
+                onChange={(e) => setSearchName(e.target.value)}
+                allowClear
+              />
+            </Card>
+          </Col>
+        </Row>
 
-      <Spin spinning={loading}>
-        <Table
-          rowKey="id"
-          dataSource={templates}
-          columns={columns}
-          pagination={{
-            current: page,
-            pageSize: limit,
-            total,
-            showSizeChanger: true,
-            onChange: (p, l) => {
-              setPage(p);
-              setLimit(l);
-            },
-          }}
-        />
-      </Spin>
-    </div>
+        <Spin spinning={loading}>
+          <Table
+            rowKey="id"
+            dataSource={templates}
+            columns={columns}
+            pagination={{
+              current: page,
+              pageSize: limit,
+              total,
+              showSizeChanger: true,
+              onChange: (p, l) => {
+                setPage(p);
+                setLimit(l);
+              },
+            }}
+          />
+        </Spin>
+      </div>
+    </Spin>
   );
 };
 

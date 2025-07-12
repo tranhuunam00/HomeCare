@@ -45,18 +45,7 @@ const StatusButtonPatientDiagnose = ({ id, status }) => {
           Đang đọc
         </Button>
       </Col>
-      <Col span={4}>
-        <Button
-          type="primary"
-          disabled={!buttonStatus.translate}
-          onClick={() => navigate("/home/patients-diagnose/use/" + id)}
-          style={{
-            ...getStyle(buttonStatus.translate, PATIENT_DIAGNOSE_COLOR[2]),
-          }}
-        >
-          Dịch tự động
-        </Button>
-      </Col>
+
       <Col span={5}>
         <Button
           type="dashed"

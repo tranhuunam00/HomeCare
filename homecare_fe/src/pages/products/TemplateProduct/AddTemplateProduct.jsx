@@ -116,20 +116,38 @@ const AddOrEditTemplateProduct = () => {
             <Form.Item label="Tên" name="name" rules={[{ required: true }]}>
               <Input />
             </Form.Item>
+            <Row gutter={16}>
+              <Col span={8}>
+                <Form.Item
+                  label="Ngôn ngữ"
+                  name="language"
+                  rules={[
+                    { required: true, message: "Vui lòng chọn ngôn ngữ" },
+                  ]}
+                >
+                  <Select placeholder="Chọn ngôn ngữ">
+                    <Select.Option value="vi">Tiếng Việt</Select.Option>
+                    <Select.Option value="en">English</Select.Option>
+                  </Select>
+                </Form.Item>
+              </Col>
 
-            <Form.Item
-              label="Dịch vụ"
-              name="id_template_service"
-              rules={[{ required: true }]}
-            >
-              <Select placeholder="Chọn dịch vụ">
-                {services.map((s) => (
-                  <Option key={s.id} value={s.id}>
-                    {s.name}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
+              <Col span={16}>
+                <Form.Item
+                  label="Dịch vụ"
+                  name="id_template_service"
+                  rules={[{ required: true }]}
+                >
+                  <Select placeholder="Chọn dịch vụ">
+                    {services.map((s) => (
+                      <Select.Option key={s.id} value={s.id}>
+                        {s.name}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+            </Row>
 
             <Form.Item label="Mô tả ngắn gọn" name="short_description">
               <Input />

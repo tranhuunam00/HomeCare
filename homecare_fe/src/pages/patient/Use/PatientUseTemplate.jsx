@@ -95,6 +95,11 @@ const PatientUseTemplate = () => {
   const [idPrintTemplate, setIdPrintTemplate] = useState();
 
   const [idTemplate, setIdTemplate] = useState();
+  const [relatedTemplates, setRelatedTemplates] = useState([]);
+
+  const [relatedTemplateChoose, setRelatedTemplatesChoose] = useState([]);
+  const [relatedTemplateChooseId, setRelatedTemplatesChooseId] = useState();
+
   const { id_patient_diagnose } = useParams();
   const [combinedHtml, setCombinedHtml] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
@@ -175,25 +180,6 @@ const PatientUseTemplate = () => {
       toast.success("Vui lòng ấn vào Hoàn thành dịch để dịch full bản ");
     } catch (err) {
       toast.error("❌ Lỗi dịch nội dung:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleTranslate = async (htmltext) => {
-    try {
-      setLoading(true);
-
-      const payload = {
-        text: htmltext,
-      };
-      const htmlR = await API_CALL.post("translate/html-text", payload, {
-        timeout: 120000,
-      });
-      setHtmlTranslate(htmlR?.data?.data);
-    } catch (error) {
-      console.log(error);
-      toast.error("lỗi");
     } finally {
       setLoading(false);
     }
@@ -351,8 +337,25 @@ const PatientUseTemplate = () => {
           }
         })
         .catch(() => message.error("Không thể tải danh sách template"));
+
+      API_CALL.get(`/templates/by-id-or-parent?id=${idTemplate}`)
+        .then((res) => {
+          setRelatedTemplates(res.data?.data || []);
+        })
+        .catch(() => message.error("Không thể tải danh sách bản sao template"));
     }
   }, [idTemplate]);
+
+  useEffect(() => {
+    if (relatedTemplateChooseId) {
+      API_CALL.get(`/templates/${relatedTemplateChooseId}`)
+        .then((res) => {
+          const data = res.data.data?.data || res.data.data || {};
+          setRelatedTemplatesChoose(data);
+        })
+        .catch(() => message.error("Không thể tải danh sách template"));
+    }
+  }, [relatedTemplateChooseId]);
 
   useEffect(() => {
     const html = `
@@ -378,15 +381,24 @@ const PatientUseTemplate = () => {
       th, td { border: 0px solid #ccc; padding: 8px; text-align: left; }
       h3 {margin-bottom: 20px; margin-top: 40px;}
     </style>
-    <h3 style="color: #4299d4">QUY TRÌNH VÀ KĨ THUẬT</h3>
-    ${replaceInputsInHtml(template?.description || "", inputsRenderTrans)}
-    <h3 style="color: #4299d4">KẾT LUẬN CHẨN ĐOÁN</h3>
-    ${replaceInputsInHtml(template?.result || "", inputsRenderTrans)}
-    <h3 style="color: #4299d4">KHUYẾN NGHỊ</h3>
-    ${replaceInputsInHtml(template?.recommendation || "", inputsRenderTrans)}
+    <h3 style="color: #4299d4">MEDICAL AND PROTOCOL</h3>
+    ${replaceInputsInHtml(
+      relatedTemplateChoose?.description || "",
+      inputsRenderTrans
+    )}
+    <h3 style="color: #4299d4">RESULT</h3>
+    ${replaceInputsInHtml(
+      relatedTemplateChoose?.result || "",
+      inputsRenderTrans
+    )}
+    <h3 style="color: #4299d4">RECOMMENDATION</h3>
+    ${replaceInputsInHtml(
+      relatedTemplateChoose?.recommendation || "",
+      inputsRenderTrans
+    )}
   `;
     setHtmlTranslate(html);
-  }, [template, inputsRenderTrans]);
+  }, [relatedTemplateChoose, inputsRenderTrans]);
 
   const printRef = useRef();
 
@@ -458,7 +470,13 @@ const PatientUseTemplate = () => {
               imageListTrans,
             } = normalizeDoctorPrintTemplateData(doctor_print_templates);
 
+            console.log("doctor_print_templates", doctor_print_templates);
+
             setIdTemplateService(doctor_print_templates?.id_template_service);
+            setRelatedTemplatesChooseId(
+              doctor_print_templates?.id_template_translate
+            );
+
             setImageList(imageList);
             setInputsAddon(inputsAddon);
             setInputsRender(inputsRender);
@@ -529,7 +547,7 @@ const PatientUseTemplate = () => {
       );
       formData.append("inputsAddon", JSON.stringify(inputsAddon));
       formData.append("inputsAddonTrans", JSON.stringify(inputsAddonTrans));
-      formData.append("htmlTranslate", JSON.stringify(htmlTranslate));
+      formData.append("id_template_translate", relatedTemplateChoose?.id);
 
       // Xử lý imageList
       const descriptionsArr = [];
@@ -617,65 +635,6 @@ const PatientUseTemplate = () => {
   };
 
   const renderDiagnoseContent = () => {
-    if (isTrans) {
-      return (
-        <Card style={{ width: 600, margin: "0" }}>
-          <CompletionActionsDiagnose
-            isTranslateAll={isTranslateAll}
-            isTrans={isTrans}
-            statusCode={patientDiagnose?.status}
-            handlePrint={handlePrint}
-            handleTranslate={async () => {
-              const confirmed = window.confirm(
-                "Bạn có chắc chắn muốn bắt đầu dịch nội dung không?"
-              );
-              if (!confirmed) return;
-
-              setIsTrans(true);
-              toast.success("Bắt đầu dịch");
-              await handleTranslateInputs();
-            }}
-            handleTranslateAll={async () => {
-              await handleTranslate(`
-                        <style>
-                          table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-                          th, td { border: 0px solid #ccc; padding: 8px; text-align: left; }
-                          h3 {margin-bottom: 20px; margin-top: 40px;}
-                        </style>
-                        <h3 style="color: #4299d4">QUY TRÌNH VÀ KĨ THUẬT</h3>
-                        ${replaceInputsInHtml(
-                          template?.description || "",
-                          inputsRenderTrans
-                        )}
-                        <h3>KẾT LUẬN CHẨN ĐOÁN</h3>
-                        ${replaceInputsInHtml(
-                          template?.result || "",
-                          inputsRenderTrans
-                        )}
-                        <h3>KHUYẾN NGHỊ</h3>
-                        ${replaceInputsInHtml(
-                          template?.recommendation || "",
-                          inputsRenderTrans
-                        )}
-                      `);
-            }}
-          />
-          <AddonInputSection
-            inputsAddon={inputsAddonTrans}
-            setInputsAddon={setInputsAddonTrans}
-            template={template}
-            inputsRender={inputsRenderTrans}
-            setInputsRender={setInputsRenderTrans}
-            imageList={imageListTrans}
-            setImageList={setImageListTrans}
-            imageListTrans={imageListTrans}
-            setImageListTrans={setImageListTrans}
-            renderDynamicAntdFields={renderDynamicAntdFields}
-            extractDynamicFieldsFromHtml={extractDynamicFieldsFromHtml}
-          />
-        </Card>
-      );
-    }
     switch (+patientDiagnose?.status) {
       default:
         return (
@@ -690,6 +649,7 @@ const PatientUseTemplate = () => {
               bản ghi{" "}
             </Title>
             <CompletionActionsDiagnose
+              isTrans={isTrans}
               isOpenPreview={isOpenPreview}
               statusCode={patientDiagnose?.status}
               handleRead={async () => {
@@ -752,6 +712,16 @@ const PatientUseTemplate = () => {
                     toast.error("Chốt kết quả thất bại!");
                   }
                 }
+              }}
+              handleTranslate={async () => {
+                const confirmed = window.confirm(
+                  "Bạn có chắc chắn muốn bắt đầu dịch nội dung không?"
+                );
+                if (!confirmed) return;
+
+                setIsTrans(true);
+                toast.success("Bắt đầu dịch");
+                await handleTranslateInputs();
               }}
             />
             <Title level={3}>Phiếu kết quả</Title>
@@ -850,47 +820,22 @@ const PatientUseTemplate = () => {
             </div>
 
             <AddonInputSection
-              inputsAddon={inputsAddon}
-              setInputsAddon={setInputsAddon}
+              inputsAddon={!isTrans ? inputsAddon : inputsAddonTrans}
+              setInputsAddon={!isTrans ? setInputsAddon : setInputsAddonTrans}
               setInputsAddonTrans={setInputsAddonTrans}
               template={template}
-              inputsRender={inputsRender}
-              setInputsRender={setInputsRender}
+              inputsRender={!isTrans ? inputsRender : inputsRenderTrans}
+              setInputsRender={
+                !isTrans ? setInputsRender : setInputsRenderTrans
+              }
               setInputsRenderTrans={setInputsRenderTrans}
-              imageList={imageList}
+              imageList={!isTrans ? imageList : imageListTrans}
               imageListTrans={imageListTrans}
-              setImageList={setImageList}
+              setImageList={!isTrans ? setImageList : setImageListTrans}
               setImageListTrans={setImageListTrans}
               renderDynamicAntdFields={renderDynamicAntdFields}
               extractDynamicFieldsFromHtml={extractDynamicFieldsFromHtml}
             />
-
-            <Card title="Tải file PDF đã in" style={{ marginTop: 24 }}>
-              <Upload
-                name="file"
-                accept=".pdf"
-                beforeUpload={(file) => {
-                  setSelectedFile(file); // Lưu file vào state
-                  return false; // Ngăn không upload ngay
-                }}
-                showUploadList={{
-                  showRemoveIcon: true,
-                }}
-                onRemove={() => setSelectedFile(null)}
-                fileList={selectedFile ? [selectedFile] : []}
-              >
-                <Button icon={<UploadOutlined />}>Chọn file PDF</Button>
-              </Upload>
-
-              <Button
-                type="primary"
-                style={{ marginTop: 16 }}
-                disabled={!selectedFile}
-                onClick={handleUploadPDF}
-              >
-                Tải lên
-              </Button>
-            </Card>
           </Card>
         );
       case PATIENT_DIAGNOSE_STATUS_CODE.VERIFY:
@@ -908,6 +853,8 @@ const PatientUseTemplate = () => {
   return (
     <Spin spinning={loading}>
       <div style={{ display: "flex" }}>
+        <h2 style={{ marginRight: 50 }}>WORK SPACE</h2>
+
         <Button
           type={isOpenPreview ? "default" : "primary"} // màu khác nhau
           danger={isOpenPreview} // nếu đang mở thì dùng màu đỏ nhẹ
@@ -922,11 +869,7 @@ const PatientUseTemplate = () => {
           onClick={() => setIsOpenPreview(!isOpenPreview)}
           icon={isOpenPreview ? <EyeInvisibleOutlined /> : <EyeOutlined />}
         >
-          {isOpenPreview
-            ? isTrans
-              ? "Mở editor"
-              : "Tắt preview"
-            : "Mở preview"}
+          {isOpenPreview ? "Tắt preview" : "Mở preview"}
         </Button>
 
         <Button
@@ -945,15 +888,48 @@ const PatientUseTemplate = () => {
         >
           {!isTrans ? "Bật chế độ dịch" : "Tắt chế độ dịch"}
         </Button>
+
+        {isTrans &&
+          patientDiagnose?.status != PATIENT_DIAGNOSE_STATUS_CODE.VERIFY && (
+            <div style={{ marginBottom: 20 }}>
+              <Select
+                showSearch
+                allowClear
+                style={{ width: 400 }}
+                value={relatedTemplateChoose?.name}
+                placeholder="Chọn bản dịch template"
+                optionFilterProp="children"
+                onChange={(val) => {
+                  const selected = relatedTemplates.find((t) => t.id === val);
+                  setRelatedTemplatesChoose(selected);
+                  setRelatedTemplatesChooseId(selected.id);
+                }}
+                filterOption={(input, option) =>
+                  option.children.toLowerCase().includes(input.toLowerCase())
+                }
+              >
+                {relatedTemplates
+                  .filter((t) => t.id_template_service === idTemplateService)
+                  .filter((t) => t.id !== Number(idTemplate)) // ẩn bản chính
+                  .map((tpl) => (
+                    <Option key={tpl.id} value={tpl.id}>
+                      {tpl.name} ({tpl.language})
+                    </Option>
+                  ))}
+              </Select>
+            </div>
+          )}
+
         {isTrans && (
           <p
-            style={{ textAlign: "center", lineHeight: "30px", marginLeft: 40 }}
+            style={{
+              textAlign: "center",
+              lineHeight: "30px",
+              marginLeft: 40,
+              fontWeight: 500,
+            }}
           >
-            Lưu ý: Bạn có thể tắt chế độ preview để mở editor{" "}
-            <strong>
-              Khi bạn mở editor, cấu trúc của preview có thể bị thay đổi nhưng
-              sẽ không ảnh hưởng đến kết quả in
-            </strong>
+            {!relatedTemplates?.length && "Chưa có bản dịch nào!"}
           </p>
         )}
       </div>
@@ -981,42 +957,25 @@ const PatientUseTemplate = () => {
           />
         )}
 
-        {isTrans &&
-          !isOpenPreview &&
-          (patientDiagnose.status == PATIENT_DIAGNOSE_STATUS_CODE.INPROCESS ||
-            patientDiagnose.status == PATIENT_DIAGNOSE_STATUS_CODE.WAIT) && (
-            <div>
-              <CustomSunEditor
-                value={htmlTranslate}
-                onChange={(value) => {
-                  setHtmlTranslate(value);
-                }}
-              />
-            </div>
-          )}
-
-        {isTrans &&
-          isOpenPreview &&
-          (patientDiagnose.status == PATIENT_DIAGNOSE_STATUS_CODE.INPROCESS ||
-            patientDiagnose.status == PATIENT_DIAGNOSE_STATUS_CODE.WAIT) && (
-            <PrintPreview
-              printRef={printRef}
-              printTemplate={printTemplate}
-              patientDiagnose={patientDiagnose}
-              inputsAddon={inputsAddonTrans}
-              combinedHtml={htmlTranslate}
-              imageList={imageListTrans}
-              doctor={doctor}
-              provinces={provinces}
-              districts={districts}
-              wards={wards}
-              calculateAge={calculateAge}
-              lang={LANGUAGES.en}
-              serviceName={
-                templateServices?.find((s) => s.id == idTemplateService)?.name
-              }
-            />
-          )}
+        {isTrans && isOpenPreview && (
+          <PrintPreview
+            printRef={printRef}
+            printTemplate={printTemplate}
+            patientDiagnose={patientDiagnose}
+            inputsAddon={inputsAddonTrans}
+            combinedHtml={htmlTranslate}
+            imageList={imageListTrans}
+            doctor={doctor}
+            provinces={provinces}
+            districts={districts}
+            wards={wards}
+            calculateAge={calculateAge}
+            lang={LANGUAGES.en}
+            serviceName={
+              templateServices?.find((s) => s.id == idTemplateService)?.name
+            }
+          />
+        )}
       </div>
     </Spin>
   );
