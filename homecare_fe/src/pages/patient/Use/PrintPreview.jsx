@@ -608,7 +608,7 @@ const PrintPreview = ({
               <div style={{ width: 150 }}>
                 <strong>{LABELS_ADDON.digital_signature}:</strong>
               </div>
-              digital signed by Tran Van A
+              {doctor.e_signature_url}
             </div>
           </section>
           <section>

@@ -2,7 +2,6 @@
 import React, { useState } from "react";
 import { Tabs } from "antd";
 import styles from "./StaffPage.module.scss";
-import SidebarMenu from "./Sidebar";
 
 const { TabPane } = Tabs;
 
@@ -23,7 +22,6 @@ const StaffPage = () => {
       <Tabs defaultActiveKey="1" className={styles["staff-page__tabs"]}>
         <TabPane tab="Dịch vụ" key="1">
           <div className={styles["staff-page__content"]}>
-            <SidebarMenu onSelect={setSelectedMenu} selected={selectedMenu} />
             <div className={styles["staff-page__details"]}>
               {renderContent()}
             </div>

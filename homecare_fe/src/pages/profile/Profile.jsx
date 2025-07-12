@@ -102,6 +102,8 @@ const Profile = () => {
     formData.append("description", values.description);
     formData.append("id_clinic", values.id_clinic);
     formData.append("gender", values.gender);
+    formData.append("e_signature_url", values.e_signature_url);
+
     formData.append(
       "dob",
       values.dob ? dayjs(values.dob).format("YYYY-MM-DD") : null
@@ -121,7 +123,13 @@ const Profile = () => {
     }
   };
 
-  const editableFields = ["phone_number", "gender", "full_name", "dob"];
+  const editableFields = [
+    "e_signature_url",
+    "phone_number",
+    "gender",
+    "full_name",
+    "dob",
+  ];
   const renderItem = (label, name, children) => (
     <Form.Item label={label} name={name}>
       {isEditing && editableFields.includes(name) ? (
@@ -226,6 +234,7 @@ const Profile = () => {
                   ))}
                 </Select>
               </Form.Item>
+
               <Col span={6} className={styles.signatureSection}>
                 <img
                   src={signatureUrl || "http://suneditor.com/docs/cat.jpg"}
@@ -262,6 +271,13 @@ const Profile = () => {
               </Upload>
             </Col>
           </Row>
+          <Col span={20}>
+            {renderItem(
+              "Chữ kí điện tử",
+              "e_signature_url",
+              <Input placeholder="Nguyễn Văn A" />
+            )}
+          </Col>
           <Row justify="space-between" style={{ marginTop: 24 }}>
             <Col>
               {isEditing && (

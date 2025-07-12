@@ -136,3 +136,11 @@
     }
   }
 }
+.account-page__content-child {
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+  cursor: pointer;
+  &:hover {
+    background-color: #666;
+  }
+}

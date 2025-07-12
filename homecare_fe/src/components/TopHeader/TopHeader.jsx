@@ -17,6 +17,7 @@ import { useGlobalAuth } from "../../contexts/AuthContext";
 import { USER_ROLE, USER_ROLE_ID } from "../../constant/app";
 import useToast from "../../hooks/useToast";
 import { toast } from "react-toastify";
+import SidebarMenu from "../Sidebar";
 
 const qrValue = `https://www.daogroup.vn/`;
 
@@ -28,6 +29,7 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
   const [rightDrawerVisible, setRightDrawerVisible] = useState(false);
   const { user, doctor, handleLogoutGlobal } = useGlobalAuth();
   const { showSuccess, showError, showWarning } = useToast();
+  const [selectedMenu, setSelectedMenu] = useState("profile");
 
   const showRightDrawer = () => setRightDrawerVisible(true);
   const closeRightDrawer = () => setRightDrawerVisible(false);
@@ -71,17 +73,14 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
 
   return (
     <div className={styles.topHeader}>
-      <div
-        onClick={() => {
-          window.open(currentEndpont);
-        }}
-        className={styles.topHeader__left}
-        style={{ cursor: "pointer" }}
-      >
+      <div className={styles.topHeader__left} style={{ cursor: "pointer" }}>
         <img
           src="/logo_home_care.jpg"
           className={styles.topHeader__logo}
           alt="logo"
+          onClick={() => {
+            window.open(currentEndpont);
+          }}
         />
         {!collapsed && (
           <span className={styles.topHeader__title}>HOMECARE</span>
@@ -151,30 +150,14 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
               ✕
             </div>
           </div>
+          <SidebarMenu
+            onSelect={(key) => {
+              setSelectedMenu(key); // vẫn dùng cho các mục nội bộ
 
-          <div className={styles.serviceList}>
-            <DrawerItem
-              icon="🎤"
-              title="Voice device"
-              desc="Checking voice device"
-            />
-            <DrawerItem icon="🎧" title="Network" desc="Internet speed test" />
-            <DrawerItem icon="🌐" title="Portal" desc="No connect" />
-            <DrawerItem
-              icon="📞"
-              title="Call center"
-              desc="Không sử dụng trung tâm cuộc gọi"
-            />
-            <DrawerItem icon="💬" title="SMS–ZNS" desc="No connect" />
-            <DrawerItem icon="📄" title="E-Invoice" desc="No connect" />
-            <DrawerItem icon="🔗" title="Account 3rd" desc="No connect" />
-            <DrawerItem
-              icon="✉️"
-              title="Mail"
-              desc="daogroupltd@gmail.com"
-              isLink
-            />
-          </div>
+              window.open(`/${key}`, "_blank"); // hoặc navigate(`/${key}`)
+            }}
+            selected={selectedMenu}
+          />
 
           <div className={styles.qrContact}>
             <QRCodeCanvas value={qrValue} size={128} level="H" includeMargin />

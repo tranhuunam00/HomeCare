@@ -52,7 +52,7 @@ function App() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<TemplateList />} />
+          <Route index element={<PatientTablePage />} />
           <Route path="tirads" element={<TiradPage />} />
 
           <Route path="products" element={<ProductList />} />

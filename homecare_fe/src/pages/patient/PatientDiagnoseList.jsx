@@ -336,7 +336,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
           width: "100%",
         }}
       >
-        <Typography.Title level={4}>Danh sách ca chẩn đoán</Typography.Title>
+        <Typography.Title level={4}>WORK LIST</Typography.Title>
         <Space>
           <Dropdown overlay={columnMenu} trigger={["click"]}>
             <Button icon={<SettingOutlined />}>Chọn cột</Button>
@@ -345,7 +345,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
             <Button
               type="primary"
               icon={<UserAddOutlined />}
-              onClick={() => navigate("create")}
+              onClick={() => navigate("/home/patients-diagnose/create")}
             >
               Thêm mới
             </Button>

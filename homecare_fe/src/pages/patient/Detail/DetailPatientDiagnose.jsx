@@ -85,7 +85,7 @@ const PatientDiagnoiseDetailPage = () => {
 
   return (
     <div style={{ padding: "2rem" }}>
-      <Card title="Thông tin chi tiết bệnh nhân" bordered>
+      <Card title="WORK SPACE" bordered>
         <Row gutter={24}>
           <Col span={6}>
             <Title level={5}>Họ và tên:</Title>

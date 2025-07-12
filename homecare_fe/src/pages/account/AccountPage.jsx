@@ -5,11 +5,12 @@ import ProfileSection from "./ProfileSection";
 import NotificationSection from "./NotificationSection";
 import TokenSection from "./TokenSection";
 import styles from "./AccountPage.module.scss";
-import SidebarMenu from "./Sidebar";
+import SidebarMenu from "../../components/Sidebar";
 import ChangePasswordSection from "./ChangePasswordSection";
 import SignatureSection from "./SignatureSection";
 import Profile from "../profile/Profile";
 import { useGlobalAuth } from "../../contexts/AuthContext";
+import { KeyOutlined, SettingOutlined, UserOutlined } from "@ant-design/icons";
 
 const { TabPane } = Tabs;
 
@@ -37,25 +38,18 @@ const AccountPage = () => {
       <Tabs defaultActiveKey="1" className={styles["account-page__tabs"]}>
         <TabPane tab="Dịch vụ" key="1">
           <div className={styles["account-page__content"]}>
-            <SidebarMenu
-              onSelect={(key) => {
-                setSelectedMenu(key); // vẫn dùng cho các mục nội bộ
-                if (
-                  [
-                    "profile",
-                    "notifications",
-                    "password",
-                    "signature",
-                  ].includes(key)
-                ) {
-                  setSelectedMenu(key); // giữ logic cũ
-                } else {
-                  // 👉 xử lý điều hướng bên ngoài hoặc trong app
-                  window.open(`/${key}`, "_blank"); // hoặc navigate(`/${key}`)
-                }
-              }}
-              selected={selectedMenu}
-            />
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <div className={styles["account-page__content-child"]}>
+                <UserOutlined /> Hồ sơ cá nhân
+              </div>
+              <div className={styles["account-page__content-child"]}>
+                <SettingOutlined /> Thông báo
+              </div>
+              <div className={styles["account-page__content-child"]}>
+                <KeyOutlined /> Đổi mật khẩu
+              </div>
+            </div>
+
             <div className={styles["account-page__details"]}>
               {renderContent()}
             </div>

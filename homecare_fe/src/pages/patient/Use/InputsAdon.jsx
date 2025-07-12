@@ -158,7 +158,6 @@ const AddonInputSection = ({
       {/* ------------------------------------------------------------------ */}
       {/* DYNAMIC FIELDS INPUT GROUPS                                       */}
       {/* ------------------------------------------------------------------ */}
-      <h2>Chỗ nhập liệu</h2>
 
       {/* Description & technique */}
       <h4>QUY TRÌNH KỸ THUẬT</h4>

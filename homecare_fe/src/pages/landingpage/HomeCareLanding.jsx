@@ -12,6 +12,8 @@ import FurnitureCarousel from "../../components/slick/FurnitureCarousel";
 import { motion } from "framer-motion";
 import { products } from "./products";
 import { useGlobalAuth } from "../../contexts/AuthContext";
+import dayjs from "dayjs";
+import DropdownNav from "../../components/DropdownNav";
 
 const textVariants = {
   hidden: { opacity: 0, x: 30 },
@@ -28,6 +30,64 @@ const textVariants = {
   }),
 };
 
+const veHomecareItems = [
+  {
+    label: "VỀ HOMECARE",
+    onClick: () =>
+      (window.location.href = "https://home-care.vn/category/about-us/"),
+  },
+  {
+    label: "BÁC SĨ HOMECARE",
+    onClick: () =>
+      (window.location.href =
+        "https://home-care.vn/category/about-us/bac-si-homecare/"),
+  },
+  {
+    label: "DỊCH VỤ HOMECARE",
+    onClick: () =>
+      (window.location.href =
+        "https://home-care.vn/category/about-us/dich-vu-homecare/"),
+  },
+  {
+    label: "QUẢN LÝ CHẤT LƯỢNG",
+    onClick: () =>
+      (window.location.href =
+        "https://home-care.vn/category/about-us/quan-ly-chat-luong/"),
+  },
+  {
+    label: "TẠI SAO CHỌN HOMECARE",
+    onClick: () =>
+      (window.location.href =
+        "https://home-care.vn/category/about-us/tai-sao-chon-homecare/"),
+  },
+];
+
+const dichVuItems = [
+  {
+    label: "TƯ VẤN HOMECARE",
+    onClick: () =>
+      (window.location.href =
+        "https://home-care.vn/product-category/dich-vu-homecare/tu-van-homecare/"),
+  },
+  {
+    label: "KHÁM HOMECARE",
+    onClick: () =>
+      (window.location.href =
+        "https://home-care.vn/product-category/dich-vu-homecare/kham-homecare/"),
+  },
+  {
+    label: "XÉT NGHIỆM HOMECARE",
+    onClick: () =>
+      (window.location.href =
+        "https://home-care.vn/product-category/dich-vu-homecare/xet-nghiem-homecare/"),
+  },
+  {
+    label: "ĐIỀU TRỊ HOMECARE",
+    onClick: () =>
+      (window.location.href =
+        "https://home-care.vn/product-category/dich-vu-homecare/dieu-tri-homecare/"),
+  },
+];
 const HomeCareLanding = () => {
   const navigate = useNavigate();
   const [isContactOpen, setIsContactOpen] = useState(false);
@@ -51,77 +111,112 @@ const HomeCareLanding = () => {
   return (
     <div className={styles["homecare"]}>
       <header className={styles["homecare__header"]}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <img src="cropped-logo-png-01-scaled-1.png" alt="" width={200} />
+          <h2 style={{ color: "#1b8415", fontWeight: 450 }}>
+            BỆNH VIỆN TẠI NHÀ HOMECARE
+          </h2>
+        </div>
         <div className={styles["homecare__container"]}>
           <div
-            style={{ cursor: "pointer" }}
-            onClick={() => {
-              window.open("https://home-care.vn/", "_blank");
+            className={styles["homecare__nav-left"]}
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              justifyContent: "center",
+              width: "100%",
+              gap: 50,
             }}
-            className={styles["homecare__logo"]}
           >
-            <img src="/logo_home_care.jpg" alt="logo_home_care.jpg" />
-          </div>
-
-          <div className={styles["homecare__nav-left"]}>
             <Menu
               mode="horizontal"
               selectable={false}
               className={styles["homecare__menu"]}
             >
-              <Menu.Item key="home" onClick={() => scrollToSection(topRef)}>
-                Trang Chủ
+              <Menu.Item
+                key="home"
+                onClick={() => (window.location.href = "https://home-care.vn/")}
+              >
+                HOME
               </Menu.Item>
-              <Menu.Item key="about" onClick={() => scrollToSection(aboutRef)}>
-                Giới Thiệu
+              <Menu.Item
+                key="about"
+                onClick={() =>
+                  (window.location.href =
+                    "https://home-care.vn/category/tin-tuc/")
+                }
+              >
+                TIN TỨC
               </Menu.Item>
               <Menu.Item
                 key="service"
-                onClick={() => scrollToSection(serviceRef)}
+                onClick={() =>
+                  (window.location.href = "https://home-care.vn/contact-us/")
+                }
               >
-                Dịch vụ
+                LIÊN HỆ
               </Menu.Item>
+
+              <DropdownNav
+                onClickTitle={() =>
+                  (window.location.href =
+                    "https://home-care.vn/category/about-us/")
+                }
+                title="VỀ HOMECARE"
+                items={veHomecareItems}
+              />
+              <DropdownNav
+                title="DỊCH VỤ HOMECARE"
+                items={dichVuItems}
+                onClickTitle={() =>
+                  (window.location.href =
+                    "https://home-care.vn/product-category/dich-vu-homecare/")
+                }
+              />
             </Menu>
           </div>
-
-          <div className={styles["homecare__nav-right"]}>
-            <select
-              className={styles["homecare__lang-switcher"]}
-              onChange={(e) =>
-                showSuccess(`Chuyển sang ngôn ngữ: ${e.target.value}`)
-              }
-              defaultValue="vi"
+        </div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            marginBottom: "30px",
+            gap: 30,
+          }}
+        >
+          {isLoggedIn ? (
+            <Button
+              type="primary"
+              className={styles["homecare__contact"]}
+              onClick={() => navigate("/home")} // hoặc route bạn muốn
             >
-              <option value="vi">🇻🇳 VN</option>
-              <option value="en">🇺🇸 EN</option>
-            </select>
-
-            {isLoggedIn ? (
+              Tư vấn ngay
+            </Button>
+          ) : (
+            <>
               <Button
                 type="primary"
                 className={styles["homecare__contact"]}
-                onClick={() => navigate("/home")} // hoặc route bạn muốn
+                onClick={() => navigate("login")}
               >
-                Sử dụng ngay
+                Đăng nhập
               </Button>
-            ) : (
-              <>
-                <Button
-                  type="primary"
-                  className={styles["homecare__contact"]}
-                  onClick={() => navigate("login")}
-                >
-                  Đăng nhập
-                </Button>
-                <Button
-                  type="primary"
-                  className={styles["homecare__contact"]}
-                  onClick={() => navigate("register")}
-                >
-                  Đăng ký
-                </Button>
-              </>
-            )}
-          </div>
+              <Button
+                type="primary"
+                className={styles["homecare__contact"]}
+                onClick={() => navigate("register")}
+              >
+                Đăng ký
+              </Button>
+            </>
+          )}
         </div>
       </header>
 
@@ -137,6 +232,7 @@ const HomeCareLanding = () => {
             type="primary"
             size="large"
             className={styles["homecare__cta"]}
+            onClick={() => navigate("/home")} // hoặc route bạn muốn
           >
             Tư Vấn Ngay
           </Button>
