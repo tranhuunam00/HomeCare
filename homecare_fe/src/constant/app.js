@@ -133,7 +133,7 @@ export const ADMIN_INFO_LABELS_EN = {
   doctor: "DOCTOR",
   time: "Time",
   digital_signature: "Digital signature",
-  Medical_test_result: "MEDICAL TEST RESULT",
+  Medical_test_result: "MEDICAL REPORT",
 };
 
 export const LANGUAGES = {

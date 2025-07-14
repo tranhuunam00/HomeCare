@@ -577,7 +577,13 @@ const PrintPreview = ({
         >
           {imageList.map((item, idx) => (
             <section key={idx}>
-              <img src={item.url} alt={`img-${idx}`} width={150} height={150} />
+              <img
+                src={item.url}
+                alt={`img-${idx}`}
+                width={300}
+                height={300}
+                style={{ objectFit: "contain", backgroundColor: "#ccc" }}
+              />
               <p style={{ width: 150 }}>{item.caption}</p>
             </section>
           ))}
@@ -612,10 +618,10 @@ const PrintPreview = ({
             </div>
           </section>
           <section>
-            <img src={doctor?.avatar_url} alt="" width={100} height={100} />
+            <img src={doctor?.signature_url} alt="" width={100} height={100} />
           </section>
           <section>
-            <img src={doctor?.signature_url} alt="" width={100} height={100} />
+            <img src={doctor?.avatar_url} alt="" width={100} height={100} />
           </section>
         </div>
       </Card>

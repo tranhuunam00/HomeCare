@@ -8,7 +8,7 @@ const StatusButtonPatientDiagnose = ({ id, status }) => {
 
   const buttonStatus = useMemo(() => {
     return {
-      canRead: status === 1 || status === 2,
+      canRead: status === 1,
       isReading: status === 2,
       canConfirm: status === 3,
       canPrint: status === 4,
@@ -57,6 +57,7 @@ const StatusButtonPatientDiagnose = ({ id, status }) => {
           Xác nhận kết quả
         </Button>
       </Col>
+
       <Col span={3}>
         <Button
           type="default"

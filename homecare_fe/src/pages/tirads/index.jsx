@@ -6,6 +6,15 @@ import { Header } from "../recist/Header.jsx";
 import { exportPDF, generatePDF } from "../utils/exportPDF";
 import { Button, Space } from "antd";
 import { Link } from "react-router-dom";
+import { PatientForm } from "../recist/index.jsx";
+
+export const ULTRASOUND_CHARACTERISTICS = {
+  COMPOSITION: "Thành phần",
+  SHAPE: "Hình dạng",
+  ECHOGENICITY: "Cấu trúc âm",
+  MARGIN: "Bờ viền",
+  ECHOGENICFOCI: "Vôi hóa",
+};
 
 const options = {
   composition: [
@@ -137,11 +146,16 @@ export default function TiradPage() {
           TIRADS SỬ DỤNG CHO CÁC NỐT, KHỐI TRONG TUYẾN GIÁP
         </h2>
 
+        <PatientForm />
+
         <div className="categories tirads-categories-section">
           {Object.entries(options).map(([category, opts]) => (
             <div className="category" key={category}>
               <h3 className="category-title">
-                {category.replace(/([A-Z])/g, " $1").toUpperCase()}
+                <h3 className="category-title">
+                  {ULTRASOUND_CHARACTERISTICS[category.toUpperCase()] ||
+                    category}
+                </h3>
               </h3>
               <em className="no-print">
                 {category === "echogenicFoci"

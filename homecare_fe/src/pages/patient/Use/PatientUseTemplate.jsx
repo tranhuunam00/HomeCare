@@ -369,9 +369,9 @@ const PatientUseTemplate = () => {
     </style>
     <h3 style="color: #4299d4">QUY TRÌNH VÀ KĨ THUẬT</h3>
     ${replaceInputsInHtml(template?.description || "", inputsRender)}
-    <h3 style="color: #4299d4">KẾT LUẬN CHẨN ĐOÁN</h3>
+    <h3 style="color: #4299d4">MÔ TẢ HÌNH ẢNH</h3>
     ${replaceInputsInHtml(template?.result || "", inputsRender)}
-    <h3 style="color: #4299d4">KHUYẾN NGHỊ</h3>
+    <h3 style="color: #4299d4">KẾT LUẬN CHẨN ĐOÁN</h3>
     ${replaceInputsInHtml(template?.recommendation || "", inputsRender)}
   `;
     setCombinedHtml(html);
@@ -661,7 +661,23 @@ const PatientUseTemplate = () => {
                   setPatientDiagnose({ ...patientDiagnose, status: 2 });
                 }
               }}
+              handleReset={() => {
+                const confirm = window.confirm(
+                  "Bạn có chắc chắn muốn reset quả đọc không?\n"
+                );
+                if (!confirm) return;
+              }}
+              handleCancelResult={async () => {
+                const res = await updateStatusPatientDiagnose(2);
+                if (res) {
+                  setPatientDiagnose({ ...patientDiagnose, status: 2 });
+                }
+              }}
               handleCancelRead={async () => {
+                const confirm = window.confirm(
+                  "Bạn có chắc chắn muốn quay về trạng thái đọc quả không?\n"
+                );
+                if (!confirm) return;
                 const res = await updateStatusPatientDiagnose(1);
                 if (res) {
                   setPatientDiagnose({ ...patientDiagnose, status: 1 });
@@ -848,6 +864,17 @@ const PatientUseTemplate = () => {
               isTranslateAll={isTranslateAll}
               statusCode={patientDiagnose?.status}
               handlePrint={handlePrint}
+              handleCancelVerify={async () => {
+                console.log("hehe");
+                const confirm = window.confirm(
+                  "Bạn có chắc chắn muốn hủy kết quả duyệt không?\n"
+                );
+                if (!confirm) return;
+                const res = await updateStatusPatientDiagnose(3);
+                if (res) {
+                  setPatientDiagnose({ ...patientDiagnose, status: 3 });
+                }
+              }}
             />
           </Card>
         );

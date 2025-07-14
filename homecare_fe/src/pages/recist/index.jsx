@@ -35,7 +35,7 @@ const qrValue = `http://222.255.214.218:3003/home/recist`;
 
 const { Title } = Typography;
 
-const PatientForm = () => {
+export const PatientForm = () => {
   const [form] = Form.useForm();
   const [gender, setGender] = useState(1);
   const [contrast, setContrast] = useState(1);

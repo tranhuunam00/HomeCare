@@ -20,6 +20,9 @@ const CompletionActionsDiagnose = ({
   handleSend,
   handleTranslate,
   isTrans = false,
+  handleCancelResult,
+  handleCancelVerify,
+  handleReset,
 }) => {
   const navigate = useNavigate();
   const [status, setStatus] = useState(1);
@@ -35,6 +38,10 @@ const CompletionActionsDiagnose = ({
         >
           Hủy
         </Button>
+
+        {/* <Button style={{ marginLeft: 8 }} onClick={() => handleReset()}>
+          Reset
+        </Button> */}
 
         {/* Trạng thái 1: Chỉ hiện Đọc kết quả */}
         {status === PATIENT_DIAGNOSE_STATUS_NAME.NEW && (
@@ -65,12 +72,21 @@ const CompletionActionsDiagnose = ({
         {/* Trạng thái 3: Chỉ hiện Xác nhận */}
         {status === PATIENT_DIAGNOSE_STATUS_NAME.WAITING && (
           <Button
-            style={{ marginLeft: 8 }}
+            style={{ marginLeft: 8, backgroundColor: "#cfc" }}
             type="dashed"
             danger
             onClick={handleConfirm}
           >
             Xác nhận kết quả
+          </Button>
+        )}
+
+        {status === PATIENT_DIAGNOSE_STATUS_NAME.WAITING && (
+          <Button
+            style={{ marginLeft: 8, backgroundColor: "#cfc" }}
+            onClick={handleCancelResult}
+          >
+            Hủy kết quả đã đọc
           </Button>
         )}
 
@@ -89,6 +105,20 @@ const CompletionActionsDiagnose = ({
           </Button>
         )}
 
+        {status === 4 && (
+          <Button
+            style={{
+              marginLeft: 8,
+              backgroundColor: "#c7f",
+              color: "#fff",
+              border: "none",
+            }}
+            onClick={handleCancelVerify}
+          >
+            Hủy kết quả đã duyệt
+          </Button>
+        )}
+
         {(status == PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESS ||
           status == PATIENT_DIAGNOSE_STATUS_NAME.WAITING) &&
           isTrans && (
@@ -101,7 +131,7 @@ const CompletionActionsDiagnose = ({
               }}
               onClick={handleTranslate}
             >
-              Bắt đầu dịch
+              Dịch sang tiếng Anh
             </Button>
           )}
       </Form.Item>
