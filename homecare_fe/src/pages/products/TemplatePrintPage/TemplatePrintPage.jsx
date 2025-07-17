@@ -113,7 +113,7 @@ const TemplatePrintPreview = () => {
           <style>
             body { font-family: Arial, sans-serif; padding: 20px; }
             table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-            th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+            th, td { border: 1px solid #ccc; padding: 2px; text-align: left; }
             h3 { margin-top: 24px; }
           </style>
         </head>

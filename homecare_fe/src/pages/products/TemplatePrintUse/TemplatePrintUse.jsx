@@ -170,7 +170,7 @@ const TemplatePrintUse = () => {
           <style>
             body { font-family: Arial, sans-serif; padding: 20px; }
             table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-            th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+            th, td { border: 1px solid #ccc; padding: 4px; text-align: left; }
             h3 { margin-top: 24px; }
           </style>
         </head>
@@ -187,7 +187,7 @@ const TemplatePrintUse = () => {
     const html = `
     <style>
       table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-      th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+      th, td { border: 1px solid #ccc; padding: 2px; text-align: left; }
       h3 {margin-bottom: 20px; margin-top: 40px;}
     </style>
     <h3 style="color: #4299d4">QUY TRÌNH VÀ KĨ THUẬT</h3>
@@ -367,7 +367,7 @@ const TemplatePrintUse = () => {
             <h3>THÔNG TIN HÀNH CHÍNH</h3>
             <div
               style={{
-                marginBottom: 10,
+                marginBottom: 4,
                 display: "flex",
                 justifyContent: "space-between",
               }}
@@ -421,7 +421,7 @@ const TemplatePrintUse = () => {
 
             <div
               style={{
-                marginBottom: 10,
+                marginBottom: 4,
                 display: "flex",
                 justifyContent: "space-between",
               }}
@@ -479,7 +479,7 @@ const TemplatePrintUse = () => {
 
             <div
               style={{
-                marginBottom: 10,
+                marginBottom: 4,
                 display: "flex",
                 justifyContent: "space-between",
               }}
@@ -526,7 +526,7 @@ const TemplatePrintUse = () => {
 
             <div
               style={{
-                marginBottom: 10,
+                marginBottom: 4,
                 display: "flex",
                 justifyContent: "space-between",
               }}
@@ -557,7 +557,7 @@ const TemplatePrintUse = () => {
 
             <div
               style={{
-                marginBottom: 10,
+                marginBottom: 4,
                 display: "flex",
                 justifyContent: "space-between",
               }}
@@ -576,7 +576,7 @@ const TemplatePrintUse = () => {
             </div>
             <div
               style={{
-                marginBottom: 10,
+                marginBottom: 4,
                 display: "flex",
                 justifyContent: "space-between",
               }}
@@ -595,7 +595,7 @@ const TemplatePrintUse = () => {
             </div>
             <div
               style={{
-                marginBottom: 10,
+                marginBottom: 4,
                 display: "flex",
                 justifyContent: "space-between",
               }}
@@ -615,7 +615,7 @@ const TemplatePrintUse = () => {
 
             <div
               style={{
-                marginBottom: 10,
+                marginBottom: 4,
                 display: "flex",
                 justifyContent: "space-between",
               }}

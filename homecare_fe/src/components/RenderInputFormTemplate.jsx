@@ -37,7 +37,7 @@ export const renderDynamicAntdFields = (
         : field.defaultValue);
 
     const commonStyle = {
-      fontSize: 11,
+      fontSize: 14,
       marginBottom: 8,
       width: 600,
       marginRight: 30,
@@ -65,7 +65,7 @@ export const renderDynamicAntdFields = (
               size="small"
               placeholder={field.label}
               onChange={(e) => updateValue(e.target.value)}
-              style={{ fontSize: 11 }}
+              style={{ fontSize: 16 }}
             />
           </div>
         );
@@ -96,7 +96,7 @@ export const renderDynamicAntdFields = (
             <InputNumber
               value={value}
               size="small"
-              style={{ width: "100%", fontSize: 11 }}
+              style={{ width: "100%", fontSize: 6 }}
               placeholder={field.label}
               onChange={(val) => updateValue(val)}
             />
@@ -190,7 +190,7 @@ export const renderDynamicAntdFields = (
               <Button
                 size="small"
                 icon={<UploadOutlined />}
-                style={{ fontSize: 11 }}
+                style={{ fontSize: 16 }}
               >
                 Tải lên ảnh
               </Button>

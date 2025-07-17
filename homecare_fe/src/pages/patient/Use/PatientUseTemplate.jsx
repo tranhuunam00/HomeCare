@@ -116,7 +116,7 @@ const PatientUseTemplate = () => {
   const [inputsRender, setInputsRender] = useState({});
   const [inputsAddon, setInputsAddon] = useState([]);
 
-  const [isOpenPreview, setIsOpenPreview] = useState(true);
+  const [isOpenPreview, setIsOpenPreview] = useState(false);
 
   const [htmlTranslate, setHtmlTranslate] = useState("");
   const [isTrans, setIsTrans] = useState("");
@@ -364,7 +364,7 @@ const PatientUseTemplate = () => {
     const html = `
     <style>
       table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-      th, td { border: 0px solid #ccc; padding: 8px; text-align: left; }
+      th, td { border: 0px solid #ccc; padding: 2px; text-align: left; }
       h3 {margin-bottom: 20px; margin-top: 40px;}
     </style>
     <h3 style="color: #4299d4">QUY TRÌNH VÀ KĨ THUẬT</h3>
@@ -381,7 +381,7 @@ const PatientUseTemplate = () => {
     const html = `
     <style>
       table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-      th, td { border: 0px solid #ccc; padding: 8px; text-align: left; }
+      th, td { border: 0px solid #ccc; padding: 2px; text-align: left; }
       h3 {margin-bottom: 20px; margin-top: 40px;}
     </style>
     <h3 style="color: #4299d4">MEDICAL AND PROTOCOL</h3>
@@ -507,7 +507,7 @@ const PatientUseTemplate = () => {
           <style>
             body { font-family: Arial, sans-serif; padding: 20px; }
             table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-            th, td { border: 0px solid #ccc; padding: 8px; text-align: left; font-size: 13px}
+            th, td { border: 0px solid #ccc; padding: 4px; text-align: left; font-size: 13px}
             h3 { margin-top: 24px; }
           </style>
         </head>

@@ -45,7 +45,7 @@ const ViewTemplateProduct = () => {
           const html = `
             <style>
               table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-              th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+              th, td { border: 1px solid #ccc; padding: 2px; text-align: left; }
               h3 {margin-bottom: 20px; margin-top: 40px;}
             </style>
             <h3>QUY TRÌNH KĨ THUẬT</h3>

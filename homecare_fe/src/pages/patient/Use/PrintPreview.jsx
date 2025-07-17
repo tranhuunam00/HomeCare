@@ -107,7 +107,7 @@ const PrintPreview = ({
           </h3>
           <div
             style={{
-              marginBottom: 10,
+              marginBottom: 6,
               display: "flex",
               justifyContent: "space-between",
             }}
@@ -161,7 +161,7 @@ const PrintPreview = ({
 
           <div
             style={{
-              marginBottom: 10,
+              marginBottom: 6,
               display: "flex",
               justifyContent: "space-between",
             }}
@@ -221,7 +221,7 @@ const PrintPreview = ({
 
           <div
             style={{
-              marginBottom: 10,
+              marginBottom: 6,
               display: "flex",
               justifyContent: "space-between",
             }}
@@ -295,7 +295,7 @@ const PrintPreview = ({
           </div>
           <div
             style={{
-              marginBottom: 10,
+              marginBottom: 6,
               display: "flex",
               justifyContent: "space-between",
             }}
@@ -354,7 +354,7 @@ const PrintPreview = ({
           </div>
           <div
             style={{
-              marginBottom: 10,
+              marginBottom: 6,
               display: "flex",
               justifyContent: "space-between",
             }}
@@ -413,7 +413,7 @@ const PrintPreview = ({
 
           <div
             style={{
-              marginBottom: 10,
+              marginBottom: 6,
               display: "flex",
               justifyContent: "space-between",
             }}
@@ -445,7 +445,7 @@ const PrintPreview = ({
           </div>
           <div
             style={{
-              marginBottom: 10,
+              marginBottom: 6,
               display: "flex",
               justifyContent: "space-between",
             }}
@@ -502,7 +502,7 @@ const PrintPreview = ({
 
           <div
             style={{
-              marginBottom: 10,
+              marginBottom: 6,
               display: "flex",
               justifyContent: "space-between",
             }}
@@ -592,25 +592,25 @@ const PrintPreview = ({
 
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <section>
-            <div style={{ display: "flex", marginBottom: 10, fontSize: 14 }}>
+            <div style={{ display: "flex", marginBottom: 6, fontSize: 14 }}>
               <div style={{ width: 150 }}>
                 <strong>{LABELS_ADDON.full_name}:</strong>
               </div>
               {doctor.full_name}
             </div>
-            <div style={{ display: "flex", marginBottom: 10, fontSize: 14 }}>
+            <div style={{ display: "flex", marginBottom: 6, fontSize: 14 }}>
               <div style={{ width: 150 }}>
                 <strong>{LABELS_ADDON.phoneNumber}:</strong>
               </div>
               {doctor.phone_number}
             </div>
-            <div style={{ display: "flex", marginBottom: 10, fontSize: 14 }}>
+            <div style={{ display: "flex", marginBottom: 6, fontSize: 14 }}>
               <div style={{ width: 150 }}>
                 <strong>{LABELS_ADDON.time}:</strong>
               </div>
               {dayjs().format("DD-MM-YYYY HH:mm")}
             </div>
-            <div style={{ display: "flex", marginBottom: 10, fontSize: 14 }}>
+            <div style={{ display: "flex", marginBottom: 6, fontSize: 14 }}>
               <div style={{ width: 150 }}>
                 <strong>{LABELS_ADDON.digital_signature}:</strong>
               </div>

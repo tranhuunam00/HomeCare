@@ -60,7 +60,7 @@ const AddonInputSection = ({
       <div
         style={{
           width: "100%",
-          fontSize: 11,
+          fontSize: 16,
           padding: 8,
           display: "flex",
           flexWrap: "wrap",
@@ -72,7 +72,7 @@ const AddonInputSection = ({
         <div
           style={{
             marginBottom: 8,
-            fontSize: 11,
+            fontSize: 16,
             maxWidth: 600,
             flex: "1 1 100%",
           }}
@@ -84,7 +84,7 @@ const AddonInputSection = ({
             name="symptoms"
             value={inputsAddon.symptoms}
             onChange={handleAddonChange}
-            style={{ fontSize: 11 }}
+            style={{ fontSize: 16 }}
           />
         </div>
 
@@ -92,7 +92,7 @@ const AddonInputSection = ({
         <div
           style={{
             marginBottom: 8,
-            fontSize: 11,
+            fontSize: 16,
             maxWidth: 600,
             flex: "1 1 100%",
           }}
@@ -103,7 +103,7 @@ const AddonInputSection = ({
             name="progress"
             value={inputsAddon.progress}
             onChange={handleAddonChange}
-            style={{ fontSize: 11 }}
+            style={{ fontSize: 16 }}
           />
         </div>
 
@@ -111,7 +111,7 @@ const AddonInputSection = ({
         <div
           style={{
             marginBottom: 8,
-            fontSize: 11,
+            fontSize: 16,
             maxWidth: 600,
             flex: "1 1 100%",
           }}
@@ -122,33 +122,33 @@ const AddonInputSection = ({
             name="medical_history"
             value={inputsAddon.medical_history}
             onChange={handleAddonChange}
-            style={{ fontSize: 11 }}
+            style={{ fontSize: 16 }}
           />
         </div>
 
         {/* Compare link + Old date --------------------------------------- */}
         <Row gutter={12} style={{ maxWidth: 600, flex: "1 1 100%" }}>
           <Col span={16}>
-            <div style={{ marginBottom: 8, fontSize: 11 }}>
+            <div style={{ marginBottom: 8, fontSize: 16 }}>
               <div style={{ marginBottom: 4 }}>Link so sánh:</div>
               <Input
                 size="small"
                 name="compare_link"
                 value={inputsAddon.compare_link}
                 onChange={handleAddonChange}
-                style={{ fontSize: 11 }}
+                style={{ fontSize: 16 }}
               />
             </div>
           </Col>
           <Col span={8}>
-            <div style={{ marginBottom: 8, fontSize: 11 }}>
+            <div style={{ marginBottom: 8, fontSize: 16 }}>
               <div style={{ marginBottom: 4 }}>Có kết quả cũ:</div>
               <Input
                 size="small"
                 name="old_date"
                 value={inputsAddon.old_date}
                 onChange={handleAddonChange}
-                style={{ fontSize: 11 }}
+                style={{ fontSize: 16 }}
               />
             </div>
           </Col>
