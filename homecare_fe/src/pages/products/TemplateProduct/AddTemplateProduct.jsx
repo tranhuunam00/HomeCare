@@ -109,6 +109,68 @@ const AddOrEditTemplateProduct = () => {
       formData.append("id_user", user?.id || 3);
       formData.append("id_clinic", 1);
       formData.append("updated_at", Date.now().toString());
+      Object.entries(values).forEach(([key, value]) => {
+        if (
+          key !== "images" &&
+          key !== "imagesDesc" &&
+          value !== undefined &&
+          value !== null
+        ) {
+          formData.append(key, value);
+        }
+      });
+
+      if (!id) {
+        formData.append("createdAt", Date.now().toString());
+
+        // Bước 2: Gắn các trường thông thường (trừ ảnh)
+
+        // Bước 3: Gắn ảnh
+        if (imageList?.length) {
+          imageList.forEach((file) => {
+            formData.append("images", file.file); // same field name for multiple images
+          });
+        }
+
+        // Bước 4: Tạo imagesDesc từ imageList + links
+        const imagesDesc = [];
+        imageList.forEach((img, index) => {
+          imagesDesc.push({
+            description: img.caption,
+            attachment_url: links[index],
+          });
+        });
+
+        if (imagesDesc.length) {
+          formData.append("imagesDesc", JSON.stringify(imagesDesc));
+        }
+      }
+      // Bước 5: Gửi API
+      if (id) {
+        await API_CALL.patchForm(`/templates/${id}`, formData);
+      } else {
+        await API_CALL.postForm("/templates", formData);
+      }
+
+      showSuccess("Đã lưu thành công");
+      navigate("/home/templates");
+    } catch (err) {
+      console.error("❌ Lỗi khi gửi:", err);
+      showError("Gửi mẫu kết quả thất bại: " + err?.response?.data?.message);
+    }
+  };
+
+  const onFinishWithImage = async (values) => {
+    values = form.getFieldsValue();
+    try {
+      const user = storage.get("USER");
+
+      // Bước 1: Chuẩn bị FormData
+      const formData = new FormData();
+
+      formData.append("id_user", user?.id || 3);
+      formData.append("id_clinic", 1);
+      formData.append("updated_at", Date.now().toString());
       if (!id) {
         formData.append("createdAt", Date.now().toString());
       }
@@ -160,9 +222,6 @@ const AddOrEditTemplateProduct = () => {
     }
   };
 
-  console.log("des", resultText);
-
-  console.log(extractDynamicFieldsFromHtml(resultText));
   return (
     <div style={{ display: "flex" }}>
       <Card
@@ -213,7 +272,14 @@ const AddOrEditTemplateProduct = () => {
             <Form.Item label="Mô tả ngắn gọn" name="short_description">
               <Input />
             </Form.Item>
-
+            <Button
+              onClick={onFinishWithImage}
+              type="dashed"
+              style={{ marginTop: 16, backgroundColor: "burlywood" }}
+              disabled={!id}
+            >
+              Cập nhật ảnh
+            </Button>
             <Form.Item label="Hình ảnh minh họa">
               <ImageWithCaptionInput
                 value={imageList}
