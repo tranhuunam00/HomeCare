@@ -34,7 +34,7 @@ import CompletionActionsDiagnose from "../../../components/CompletionActionsDiag
 import StatusButtonPatientDiagnose from "../../../components/Status2ButtonPatientDiagnose.jsx";
 import PrintPreview from "./PrintPreview.jsx";
 import AddonInputSection from "./InputsAdon.jsx";
-import CustomSunEditor from "../../../components/Suneditor/CustomSunEditor.jsx";
+import ImageWithCaptionInput from "../../products/ImageWithCaptionInput/ImageWithCaptionInput.jsx";
 
 const urlToFile = async (url, fallbackName = "image") => {
   const res = await fetch(url);
@@ -95,6 +95,8 @@ const PatientUseTemplate = () => {
   const [idPrintTemplate, setIdPrintTemplate] = useState();
 
   const [idTemplate, setIdTemplate] = useState();
+  const [idTemplateOrigin, setIdTemplateOrigin] = useState();
+
   const [relatedTemplates, setRelatedTemplates] = useState([]);
 
   const [relatedTemplateChoose, setRelatedTemplatesChoose] = useState([]);
@@ -113,6 +115,10 @@ const PatientUseTemplate = () => {
 
   const [template, setTemplate] = useState({});
   const [imageList, setImageList] = useState([]);
+  const [imageListForm, setImageListForm] = useState([]);
+
+  const [links, setLinks] = useState([]);
+
   const [inputsRender, setInputsRender] = useState({});
   const [inputsAddon, setInputsAddon] = useState([]);
 
@@ -197,6 +203,9 @@ const PatientUseTemplate = () => {
     const inputsRenderTrans = {};
     const imageListTrans = [];
 
+    const imageListForm = [];
+    const links = [];
+
     template.doctor_print_template_images?.forEach((img) => {
       console.log("img", img);
       if (img.type === "ADDON") {
@@ -227,6 +236,13 @@ const PatientUseTemplate = () => {
           url: img.link,
           name: img.link.split("/").pop(),
         };
+      } else if (img.type === "FORM") {
+        imageListForm.push({
+          url: img.link,
+          rawUrl: img.link,
+          caption: img.description,
+        });
+        links.push(img.attachment_);
       }
     });
 
@@ -248,6 +264,8 @@ const PatientUseTemplate = () => {
       inputsAddonTrans,
       imageListTrans,
       inputsRenderTrans,
+      imageListForm,
+      links,
     };
   };
 
@@ -307,7 +325,39 @@ const PatientUseTemplate = () => {
     setPrintTemplate(exist);
     setIdPrintTemplate(exist?.id);
   }, [printTemplateList, patientDiagnose]);
-  console.log("inputsRender", inputsRender);
+
+  useEffect(() => {
+    const fetchTemplateImages = async () => {
+      if (template) {
+        const template_images = template?.template_images || [];
+        const newImageListForm = [];
+        const newLink = [];
+
+        for (const img of template_images) {
+          newLink.push(img.attachment_url);
+
+          try {
+            newImageListForm.push({
+              url: img.url,
+              caption: img.description,
+              attachment_url: img.attachment_url,
+              rawUrl: img.url,
+            });
+          } catch (error) {
+            console.error("Lỗi tải ảnh từ URL:", img.url, error);
+          }
+        }
+
+        if (idTemplate !== idTemplateOrigin) {
+          setLinks(newLink);
+          setImageListForm(newImageListForm);
+        }
+      }
+    };
+
+    fetchTemplateImages();
+  }, [template]);
+
   useEffect(() => {
     if (idTemplate) {
       API_CALL.get(`/templates/${idTemplate}`)
@@ -371,24 +421,41 @@ const PatientUseTemplate = () => {
     ${replaceInputsInHtml(template?.description || "", inputsRender)}
     <div style="display: flex; justify-content: center; gap: 40px; margin-top: 50px;">
       <div style="text-align: center; width: 300px;">
-        <img src="https://images.pexels.com/photos/414612/pexels-photo-414612.jpeg?cs=srgb&dl=pexels-souvenirpixels-414612.jpg&fm=jpg" alt="Minh họa cấu trúc giải phẫu bụng" style="width: 100%; border-radius: 5px;">
-        <p style="margin: 8px 0 4px; font-weight: bold;">Minh họa cấu trúc giải phẫu bụng</p>
-        <a href="#" style="color: #007bff; text-decoration: none;">Chỉ định & Chống chỉ định</a>
+        <img
+          src="${imageListForm[0]?.url}"
+          alt=""
+          style="width: 300px; height: 200px; object-fit: cover; border-radius: 5px;"
+        >
+        <p style="margin: 8px 0 4px; font-weight: bold;">${
+          imageListForm[0]?.caption
+        }</p>
+        <a href="#" style="color: #007bff; text-decoration: none;">${
+          links[0]
+        }</a>
       </div>
 
       <div style="text-align: center; width: 300px;">
-        <img src="https://images.pexels.com/photos/414612/pexels-photo-414612.jpeg?cs=srgb&dl=pexels-souvenirpixels-414612.jpg&fm=jpg" alt="Minh họa quy trình chụp MRI" style="width: 100%; border-radius: 5px;">
-        <p style="margin: 8px 0 4px; font-weight: bold;">Minh họa quy trình chụp MRI</p>
-        <a href="#" style="color: #007bff; text-decoration: none;">Quy trình kỹ thuật</a>
+        <img
+          src="${imageListForm[1]?.url}"
+          alt="Minh họa quy trình chụp MRI"
+          style="width: 300px; height: 200px; object-fit: cover; border-radius: 5px;"
+        >
+        <p style="margin: 8px 0 4px; font-weight: bold;">${
+          imageListForm[1]?.caption
+        }</p>
+        <a href="#" style="color: #007bff; text-decoration: none;">${
+          links[1]
+        }</a>
       </div>
     </div>
+
     <h3 style="color: #4299d4">MÔ TẢ HÌNH ẢNH</h3>
     ${replaceInputsInHtml(template?.result || "", inputsRender)}
     <h3 style="color: #4299d4">KẾT LUẬN CHẨN ĐOÁN</h3>
     ${replaceInputsInHtml(template?.recommendation || "", inputsRender)}
   `;
     setCombinedHtml(html);
-  }, [template, inputsRender]);
+  }, [template, inputsRender, imageListForm, links]);
 
   useEffect(() => {
     const html = `
@@ -402,12 +469,41 @@ const PatientUseTemplate = () => {
       relatedTemplateChoose?.description || "",
       inputsRenderTrans
     )}
-    <h3 style="color: #4299d4">RESULT</h3>
+    <div style="display: flex; justify-content: center; gap: 40px; margin-top: 50px;">
+      <div style="text-align: center; width: 300px;">
+        <img
+          src="${imageListForm[0]?.url}"
+          alt=""
+          style="width: 300px; height: 200px; object-fit: cover; border-radius: 5px;"
+        >
+        <p style="margin: 8px 0 4px; font-weight: bold;">${
+          imageListForm[0]?.caption
+        }</p>
+        <a href="#" style="color: #007bff; text-decoration: none;">${
+          links[0]
+        }</a>
+      </div>
+
+      <div style="text-align: center; width: 300px;">
+        <img
+          src="${imageListForm[1]?.url}"
+          alt="Minh họa quy trình chụp MRI"
+          style="width: 300px; height: 200px; object-fit: cover; border-radius: 5px;"
+        >
+        <p style="margin: 8px 0 4px; font-weight: bold;">${
+          imageListForm[1]?.caption
+        }</p>
+        <a href="#" style="color: #007bff; text-decoration: none;">${
+          links[1]
+        }</a>
+      </div>
+    </div>
+    <h3 style="color: #4299d4">IMAGES DESCRIPTION</h3>
     ${replaceInputsInHtml(
       relatedTemplateChoose?.result || "",
       inputsRenderTrans
     )}
-    <h3 style="color: #4299d4">RECOMMENDATION</h3>
+    <h3 style="color: #4299d4">RESULT</h3>
     ${replaceInputsInHtml(
       relatedTemplateChoose?.recommendation || "",
       inputsRenderTrans
@@ -458,8 +554,6 @@ const PatientUseTemplate = () => {
     setSelectedDistrict(patientDiagnose?.district_code);
   }, [patientDiagnose]);
 
-  console.log("----------inputsRenderTrans--------", inputsRenderTrans);
-
   useEffect(() => {
     if (id_patient_diagnose) {
       setLoading(true);
@@ -484,6 +578,8 @@ const PatientUseTemplate = () => {
               inputsRenderTrans,
               inputsAddonTrans,
               imageListTrans,
+              imageListForm,
+              links,
             } = normalizeDoctorPrintTemplateData(doctor_print_templates);
 
             console.log("doctor_print_templates", doctor_print_templates);
@@ -497,11 +593,15 @@ const PatientUseTemplate = () => {
             setInputsAddon(inputsAddon);
             setInputsRender(inputsRender);
 
+            setImageListForm(imageListForm);
+            setLinks(links);
+
             setInputsRenderTrans(inputsRenderTrans);
             setInputsAddonTrans(inputsAddonTrans);
             setImageListTrans(imageListTrans);
 
             setIdTemplate(doctor_print_templates.id_template);
+            setIdTemplateOrigin(doctor_print_templates.id_template);
             setHtmlTranslate(doctor_print_templates.htmlTranslate);
           }
         })
@@ -634,6 +734,17 @@ const PatientUseTemplate = () => {
         JSON.stringify(replaceLabels.join("{{D}}"))
       );
 
+      for (let i = 0; i < imageListForm.length; i++) {
+        formData.append("imagesForm", imageListForm[i].file);
+      }
+
+      formData.append(
+        "imagesFormDesc",
+        JSON.stringify(
+          imageListForm.map((dc, i) => ({ ...dc, attachment_url: links[i] }))
+        )
+      );
+
       // Gửi API
       const res = await API_CALL.post("/doctor-print-template", formData, {
         headers: {
@@ -649,6 +760,8 @@ const PatientUseTemplate = () => {
       return false;
     }
   };
+
+  console.log("imageListForm", imageListForm);
 
   const renderDiagnoseContent = () => {
     switch (+patientDiagnose?.status) {
@@ -850,6 +963,18 @@ const PatientUseTemplate = () => {
                 }
               </p>
             </div>
+
+            <Form.Item label="Hình ảnh minh họa FORM">
+              <ImageWithCaptionInput
+                value={imageListForm}
+                onChange={setImageListForm}
+                valueTrans={imageListForm}
+                onChangeTrans={setImageListForm}
+                links={links}
+                setLinks={setLinks}
+                max={2}
+              />
+            </Form.Item>
 
             <AddonInputSection
               inputsAddon={!isTrans ? inputsAddon : inputsAddonTrans}

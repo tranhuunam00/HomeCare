@@ -1,6 +1,6 @@
 // src/components/ImageWithCaptionInput.jsx
 import React, { useEffect, useState } from "react";
-import { Upload, Input, Button, Row, Col, Form, message } from "antd";
+import { Upload, Input, Button, Row, Col } from "antd";
 import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
 
 const ImageWithCaptionInput = ({
@@ -41,6 +41,9 @@ const ImageWithCaptionInput = ({
 
     newList[index].url = preview;
     newListTrans[index].url = preview;
+
+    newList[index].rawUrl = "";
+    newListTrans[index].rawUrl = "";
 
     setImages(newList);
     setImagesTrans(newListTrans);
