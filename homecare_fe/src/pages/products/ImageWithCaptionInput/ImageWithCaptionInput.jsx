@@ -8,13 +8,16 @@ const ImageWithCaptionInput = ({
   onChange,
   valueTrans = [],
   onChangeTrans,
+  links,
+  setLinks = () => {},
+  max,
 }) => {
   const [images, setImages] = useState(value);
   const [imagesTrans, setImagesTrans] = useState(valueTrans);
 
   useEffect(() => {
-    setImages(value);
-    setImagesTrans(valueTrans);
+    if (value) setImages(value);
+    if (valueTrans) setImagesTrans(valueTrans);
   }, [value, valueTrans]);
 
   const handleAddImage = () => {
@@ -78,6 +81,7 @@ const ImageWithCaptionInput = ({
         icon={<PlusOutlined />}
         onClick={handleAddImage}
         style={{ marginBottom: 12 }}
+        disabled={images.length >= max}
       >
         Thêm ảnh
       </Button>
@@ -111,6 +115,20 @@ const ImageWithCaptionInput = ({
                 rows={3}
                 style={{ marginTop: 8 }}
               />
+
+              {links && (
+                <Input.TextArea
+                  placeholder="Link đính kèm"
+                  value={links[index]}
+                  onChange={(e) => {
+                    const newLink = [...links];
+                    newLink[index] = e.target.value;
+                    setLinks(newLink);
+                  }}
+                  rows={3}
+                  style={{ marginTop: 8 }}
+                />
+              )}
               <Button
                 danger
                 type="text"

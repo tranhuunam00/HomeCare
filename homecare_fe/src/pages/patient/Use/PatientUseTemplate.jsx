@@ -369,6 +369,19 @@ const PatientUseTemplate = () => {
     </style>
     <h3 style="color: #4299d4">QUY TRÌNH VÀ KĨ THUẬT</h3>
     ${replaceInputsInHtml(template?.description || "", inputsRender)}
+    <div style="display: flex; justify-content: center; gap: 40px; margin-top: 50px;">
+      <div style="text-align: center; width: 300px;">
+        <img src="https://images.pexels.com/photos/414612/pexels-photo-414612.jpeg?cs=srgb&dl=pexels-souvenirpixels-414612.jpg&fm=jpg" alt="Minh họa cấu trúc giải phẫu bụng" style="width: 100%; border-radius: 5px;">
+        <p style="margin: 8px 0 4px; font-weight: bold;">Minh họa cấu trúc giải phẫu bụng</p>
+        <a href="#" style="color: #007bff; text-decoration: none;">Chỉ định & Chống chỉ định</a>
+      </div>
+
+      <div style="text-align: center; width: 300px;">
+        <img src="https://images.pexels.com/photos/414612/pexels-photo-414612.jpeg?cs=srgb&dl=pexels-souvenirpixels-414612.jpg&fm=jpg" alt="Minh họa quy trình chụp MRI" style="width: 100%; border-radius: 5px;">
+        <p style="margin: 8px 0 4px; font-weight: bold;">Minh họa quy trình chụp MRI</p>
+        <a href="#" style="color: #007bff; text-decoration: none;">Quy trình kỹ thuật</a>
+      </div>
+    </div>
     <h3 style="color: #4299d4">MÔ TẢ HÌNH ẢNH</h3>
     ${replaceInputsInHtml(template?.result || "", inputsRender)}
     <h3 style="color: #4299d4">KẾT LUẬN CHẨN ĐOÁN</h3>

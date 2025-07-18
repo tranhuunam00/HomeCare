@@ -19,6 +19,7 @@ import useToast from "../../../hooks/useToast";
 import { extractDynamicFieldsFromHtml, USER_ROLE } from "../../../constant/app";
 import { renderDynamicAntdFields } from "../../../components/RenderInputFormTemplate";
 import { useGlobalAuth } from "../../../contexts/AuthContext";
+import ImageWithCaptionInput from "../ImageWithCaptionInput/ImageWithCaptionInput";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -33,6 +34,8 @@ const AddOrEditTemplateProduct = () => {
   const [resultText, setResultText] = useState("");
   const [descriptionText, setDescriptionText] = useState("");
   const [recommendationText, setRecommendationText] = useState("");
+  const [imageList, setImageList] = useState([]);
+  const [links, setLinks] = useState([]);
 
   const { user, doctor } = useGlobalAuth();
   useEffect(() => {
@@ -54,7 +57,7 @@ const AddOrEditTemplateProduct = () => {
     if (id) {
       setLoading(true);
       API_CALL.get(`/templates/${id}`)
-        .then((res) => {
+        .then(async (res) => {
           const data = res.data.data;
 
           const isAdmin = user?.id_role == USER_ROLE.ADMIN;
@@ -64,7 +67,31 @@ const AddOrEditTemplateProduct = () => {
             message.error("Bạn không có quyền chỉnh sửa mẫu này");
             return navigate("/home/templates");
           }
+          const template_images = data.template_images;
+          const newImageList = [];
+          const newLink = [];
 
+          for (const img of template_images) {
+            newLink.push(img.attachment_url);
+
+            try {
+              const response = await fetch(img.url);
+              const blob = await response.blob();
+
+              const filename = img.url.split("/").pop() || "image.jpg";
+              const file = new File([blob], filename, { type: blob.type });
+
+              newImageList.push({
+                url: img.url,
+                caption: img.description,
+                file, // để gán vào `Upload` hoặc form
+              });
+            } catch (error) {
+              console.error("Lỗi tải ảnh từ URL:", img.url, error);
+            }
+          }
+          setLinks(newLink);
+          setImageList(newImageList);
           form.setFieldsValue(data);
         })
         .catch(() => message.error("Không thể tải dữ liệu chi tiết"))
@@ -76,22 +103,56 @@ const AddOrEditTemplateProduct = () => {
     try {
       const user = storage.get("USER");
 
-      const payload = {
-        ...values,
-        id_user: user?.id || 3,
-        id_clinic: 1,
-        updated_at: Date.now(),
-      };
-      if (!id) payload.createdAt = Date.now();
+      // Bước 1: Chuẩn bị FormData
+      const formData = new FormData();
 
-      console.log("📤 Payload gửi lên:", payload);
-
-      if (id) {
-        await API_CALL.patch(`/templates/${id}`, payload);
-      } else {
-        await API_CALL.post("/templates", payload);
+      formData.append("id_user", user?.id || 3);
+      formData.append("id_clinic", 1);
+      formData.append("updated_at", Date.now().toString());
+      if (!id) {
+        formData.append("createdAt", Date.now().toString());
       }
-      showSuccess("Đã thêm thành công");
+
+      // Bước 2: Gắn các trường thông thường (trừ ảnh)
+      Object.entries(values).forEach(([key, value]) => {
+        if (
+          key !== "images" &&
+          key !== "imagesDesc" &&
+          value !== undefined &&
+          value !== null
+        ) {
+          formData.append(key, value);
+        }
+      });
+
+      // Bước 3: Gắn ảnh
+      if (imageList?.length) {
+        imageList.forEach((file) => {
+          formData.append("images", file.file); // same field name for multiple images
+        });
+      }
+
+      // Bước 4: Tạo imagesDesc từ imageList + links
+      const imagesDesc = [];
+      imageList.forEach((img, index) => {
+        imagesDesc.push({
+          description: img.caption,
+          attachment_url: links[index],
+        });
+      });
+
+      if (imagesDesc.length) {
+        formData.append("imagesDesc", JSON.stringify(imagesDesc));
+      }
+
+      // Bước 5: Gửi API
+      if (id) {
+        await API_CALL.patchForm(`/templates/${id}`, formData);
+      } else {
+        await API_CALL.postForm("/templates", formData);
+      }
+
+      showSuccess("Đã lưu thành công");
       navigate("/home/templates");
     } catch (err) {
       console.error("❌ Lỗi khi gửi:", err);
@@ -151,6 +212,18 @@ const AddOrEditTemplateProduct = () => {
 
             <Form.Item label="Mô tả ngắn gọn" name="short_description">
               <Input />
+            </Form.Item>
+
+            <Form.Item label="Hình ảnh minh họa">
+              <ImageWithCaptionInput
+                value={imageList}
+                onChange={setImageList}
+                valueTrans={imageList}
+                onChangeTrans={setImageList}
+                links={links}
+                setLinks={setLinks}
+                max={2}
+              />
             </Form.Item>
 
             <Form.Item label=" QUY TRÌNH KỸ THUẬT" name="description">

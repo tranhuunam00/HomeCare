@@ -104,6 +104,15 @@ const postForm = withErrorToast(
   "Lỗi khi upload form"
 );
 
+const patchForm = withErrorToast(
+  (url, data, config) =>
+    axiosInstance.patch(url, data, {
+      headers: { "Content-Type": "multipart/form-data" },
+      ...config,
+    }),
+  "Lỗi khi upload form"
+);
+
 const putForm = withErrorToast(
   (url, data, config) =>
     axiosInstance.put(url, data, {
@@ -126,6 +135,7 @@ const API_CALL = {
   patch,
   postForm,
   putForm,
+  patchForm,
 };
 
 export default API_CALL;
