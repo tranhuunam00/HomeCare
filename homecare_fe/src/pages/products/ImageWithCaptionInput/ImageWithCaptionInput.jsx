@@ -37,6 +37,8 @@ const ImageWithCaptionInput = ({
     const newListTrans = [...imagesTrans];
 
     newList[index].file = file;
+
+    newListTrans[index] = { ...newListTrans[index] };
     newListTrans[index].file = file;
 
     newList[index].url = preview;
@@ -57,6 +59,7 @@ const ImageWithCaptionInput = ({
     const newList = [...images];
     const newListTrans = [...imagesTrans];
 
+    newListTrans[index] = { ...newListTrans[index] };
     newList[index].caption = e.target.value;
     newListTrans[index].caption = e.target.value;
 
@@ -71,6 +74,7 @@ const ImageWithCaptionInput = ({
     const newList = images.filter((_, i) => i !== index);
     const newListTrans = imagesTrans.filter((_, i) => i !== index);
 
+    newListTrans[index] = { ...newListTrans[index] };
     setImages(newList);
     setImagesTrans(newListTrans);
 

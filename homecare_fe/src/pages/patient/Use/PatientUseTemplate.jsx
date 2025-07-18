@@ -117,6 +117,8 @@ const PatientUseTemplate = () => {
   const [imageList, setImageList] = useState([]);
   const [imageListForm, setImageListForm] = useState([]);
 
+  const [imageListFormTrans, setImageListFormTrans] = useState([]);
+
   const [links, setLinks] = useState([]);
 
   const [inputsRender, setInputsRender] = useState({});
@@ -351,6 +353,7 @@ const PatientUseTemplate = () => {
         if (idTemplate !== idTemplateOrigin) {
           setLinks(newLink);
           setImageListForm(newImageListForm);
+          setImageListFormTrans([...newImageListForm]);
         }
       }
     };
@@ -472,12 +475,12 @@ const PatientUseTemplate = () => {
     <div style="display: flex; justify-content: center; gap: 40px; margin-top: 50px;">
       <div style="text-align: center; width: 300px;">
         <img
-          src="${imageListForm[0]?.url}"
+          src="${imageListFormTrans[0]?.url}"
           alt=""
           style="width: 300px; height: 200px; object-fit: cover; border-radius: 5px;"
         >
         <p style="margin: 8px 0 4px; font-weight: bold;">${
-          imageListForm[0]?.caption
+          imageListFormTrans[0]?.caption
         }</p>
         <a href="#" style="color: #007bff; text-decoration: none;">${
           links[0]
@@ -486,12 +489,12 @@ const PatientUseTemplate = () => {
 
       <div style="text-align: center; width: 300px;">
         <img
-          src="${imageListForm[1]?.url}"
+          src="${imageListFormTrans[1]?.url}"
           alt="Minh họa quy trình chụp MRI"
           style="width: 300px; height: 200px; object-fit: cover; border-radius: 5px;"
         >
         <p style="margin: 8px 0 4px; font-weight: bold;">${
-          imageListForm[1]?.caption
+          imageListFormTrans[1]?.caption
         }</p>
         <a href="#" style="color: #007bff; text-decoration: none;">${
           links[1]
@@ -510,7 +513,7 @@ const PatientUseTemplate = () => {
     )}
   `;
     setHtmlTranslate(html);
-  }, [relatedTemplateChoose, inputsRenderTrans]);
+  }, [relatedTemplateChoose, inputsRenderTrans, imageListFormTrans, links]);
 
   const printRef = useRef();
 
@@ -594,6 +597,7 @@ const PatientUseTemplate = () => {
             setInputsRender(inputsRender);
 
             setImageListForm(imageListForm);
+            setImageListFormTrans([...imageListForm]);
             setLinks(links);
 
             setInputsRenderTrans(inputsRenderTrans);
@@ -760,8 +764,6 @@ const PatientUseTemplate = () => {
       return false;
     }
   };
-
-  console.log("imageListForm", imageListForm);
 
   const renderDiagnoseContent = () => {
     switch (+patientDiagnose?.status) {
@@ -965,15 +967,27 @@ const PatientUseTemplate = () => {
             </div>
 
             <Form.Item label="Hình ảnh minh họa FORM">
-              <ImageWithCaptionInput
-                value={imageListForm}
-                onChange={setImageListForm}
-                valueTrans={imageListForm}
-                onChangeTrans={setImageListForm}
-                links={links}
-                setLinks={setLinks}
-                max={2}
-              />
+              {isTrans ? (
+                <ImageWithCaptionInput
+                  value={imageListFormTrans}
+                  onChange={setImageListFormTrans}
+                  valueTrans={imageListFormTrans}
+                  onChangeTrans={setImageListFormTrans}
+                  links={links}
+                  setLinks={setLinks}
+                  max={2}
+                />
+              ) : (
+                <ImageWithCaptionInput
+                  value={imageListForm}
+                  onChange={setImageListForm}
+                  valueTrans={imageListFormTrans}
+                  onChangeTrans={setImageListFormTrans}
+                  links={links}
+                  setLinks={setLinks}
+                  max={2}
+                />
+              )}
             </Form.Item>
 
             <AddonInputSection

@@ -255,6 +255,8 @@ const TemplatePrintUse = () => {
               <ImageWithCaptionInput
                 value={imageList}
                 onChange={setImageList}
+                valueTrans={imageList}
+                onChangeTrans={setImageList}
               />
             </Form.Item>
 
