@@ -1,16 +1,6 @@
 // src/pages/templates/TemplateList.jsx
 import React, { useEffect, useState } from "react";
-import {
-  Table,
-  Input,
-  Row,
-  Col,
-  Card,
-  Select,
-  Spin,
-  Button,
-  Modal,
-} from "antd";
+import { Table, Input, Row, Col, Select, Spin, Button } from "antd";
 import {
   EditOutlined,
   EyeOutlined,
@@ -32,9 +22,17 @@ const TemplateList = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
-  const [searchName, setSearchName] = useState("");
+
   const [clinicMap, setClinicMap] = useState({});
   const [serviceMap, setServiceMap] = useState({});
+
+  const [filter, setFilter] = useState({
+    id: "",
+    name: "",
+    id_clinic: null,
+    id_template_service: null,
+  });
+  const [submittedFilter, setSubmittedFilter] = useState(null);
 
   const { user } = useGlobalAuth();
   const navigate = useNavigate();
@@ -48,6 +46,8 @@ const TemplateList = () => {
       res.data.data.data.forEach((clinic) => {
         map[clinic.id] = clinic.name;
       });
+
+      map[-1] = "Dùng chung";
       setClinicMap(map);
     } catch (err) {
       console.error("Lỗi khi lấy clinic:", err);
@@ -56,8 +56,6 @@ const TemplateList = () => {
 
   const fetchServices = async () => {
     try {
-      setLoading(true);
-
       const res = await API_CALL.get("/ts", {
         params: { page: 1, limit: 100 },
       });
@@ -68,17 +66,16 @@ const TemplateList = () => {
       setServiceMap(map);
     } catch (err) {
       console.error("Lỗi khi lấy service:", err);
-    } finally {
-      setLoading(false);
     }
   };
 
   const fetchTemplates = async () => {
+    if (!submittedFilter) return;
     setLoading(true);
     try {
       const res = await API_CALL.get("/templates", {
         params: {
-          name: searchName,
+          ...submittedFilter,
           page,
           limit,
         },
@@ -95,18 +92,25 @@ const TemplateList = () => {
   useEffect(() => {
     fetchClinics();
     fetchServices();
+
+    // Auto fetch once when page loads
+    setSubmittedFilter({
+      id: "",
+      name: "",
+      id_clinic: null,
+      id_template_service: null,
+    });
   }, []);
 
   useEffect(() => {
     fetchTemplates();
-  }, [page, limit, searchName]);
+  }, [page, limit, submittedFilter]);
 
   const handleDeleteTemplate = async (id) => {
     const confirmed = window.confirm("Bạn có chắc chắn muốn xóa mẫu này?");
     if (!confirmed) return;
     try {
       setLoading(true);
-
       await API_CALL.del(`/templates/${id}`);
       toast.success("Đã xóa thành công");
       fetchTemplates();
@@ -132,15 +136,11 @@ const TemplateList = () => {
         name: name || `${record.name} - Copy ${timestamp}`,
         createdAt: Date.now(),
         updated_at: Date.now(),
-        parentId: parentId,
-        language: language ?? record.language,
+        parentId,
+        language,
         isClone: true,
       };
-
-      console.log("payload", payload);
-      await API_CALL.post("/templates", payload, {
-        timeout: 120000, // 120.000 ms = 2 phút
-      });
+      await API_CALL.post("/templates", payload, { timeout: 120000 });
       toast.success("Đã clone mẫu thành công");
       fetchTemplates();
     } catch (err) {
@@ -243,31 +243,87 @@ const TemplateList = () => {
     <Spin spinning={loading} tip="Đang tải dữ liệu...">
       <div className={styles.TemplateList}>
         <h2 className={styles.title}>Danh sách Template Mẫu</h2>
-        <Button
-          style={{ margin: 30 }}
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={() => navigate("/home/templates/add")}
+        <Row
+          gutter={16}
+          align="middle"
+          style={{ marginBottom: 24, flexWrap: "wrap" }}
         >
-          Thêm mới
-        </Button>
-        <Row gutter={16} className={styles.filterGroup}>
-          <Col span={8}>
-            <Card
-              size="small"
-              title={
-                <>
-                  <FilterOutlined /> Bộ lọc
-                </>
+          <Col>
+            <Input
+              placeholder="ID..."
+              value={filter.id}
+              onChange={(e) =>
+                setFilter((prev) => ({ ...prev, id: e.target.value }))
               }
+              allowClear
+              style={{ width: 150 }}
+            />
+          </Col>
+          <Col>
+            <Input
+              placeholder="Tên template..."
+              value={filter.name}
+              onChange={(e) =>
+                setFilter((prev) => ({ ...prev, name: e.target.value }))
+              }
+              allowClear
+              style={{ width: 200 }}
+            />
+          </Col>
+          <Col>
+            <Select
+              value={filter.id_clinic}
+              onChange={(val) =>
+                setFilter((prev) => ({ ...prev, id_clinic: val }))
+              }
+              allowClear
+              placeholder="Phòng khám"
+              style={{ width: 180 }}
             >
-              <Input
-                placeholder="Tên template..."
-                value={searchName}
-                onChange={(e) => setSearchName(e.target.value)}
-                allowClear
-              />
-            </Card>
+              {Object.entries(clinicMap).map(([id, name]) => (
+                <Option key={id} value={id}>
+                  {name}
+                </Option>
+              ))}
+            </Select>
+          </Col>
+          <Col>
+            <Select
+              value={filter.id_template_service}
+              onChange={(val) =>
+                setFilter((prev) => ({ ...prev, id_template_service: val }))
+              }
+              allowClear
+              placeholder="Dịch vụ"
+              style={{ width: 180 }}
+            >
+              {Object.entries(serviceMap).map(([id, name]) => (
+                <Option key={id} value={id}>
+                  {name}
+                </Option>
+              ))}
+            </Select>
+          </Col>
+          <Col>
+            <Button
+              type="primary"
+              icon={<FilterOutlined />}
+              onClick={() => {
+                setPage(1);
+                setSubmittedFilter(filter);
+              }}
+            >
+              Tìm kiếm
+            </Button>
+          </Col>
+          <Col flex="auto" style={{ textAlign: "right" }}>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => navigate("/home/templates/add")}
+            >
+              Thêm mới
+            </Button>
           </Col>
         </Row>
 

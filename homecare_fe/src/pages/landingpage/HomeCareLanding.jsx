@@ -119,7 +119,13 @@ const HomeCareLanding = () => {
             alignItems: "center",
           }}
         >
-          <img src="cropped-logo-png-01-scaled-1.png" alt="" width={200} />
+          <img
+            onClick={() => (window.location.href = "https://home-care.vn/")}
+            src="cropped-logo-png-01-scaled-1.png"
+            alt=""
+            width={200}
+            style={{ cursor: "pointer" }}
+          />
           <h2 style={{ color: "#1b8415", fontWeight: 450 }}>
             BỆNH VIỆN TẠI NHÀ HOMECARE
           </h2>
@@ -197,7 +203,7 @@ const HomeCareLanding = () => {
               className={styles["homecare__contact"]}
               onClick={() => navigate("/home")} // hoặc route bạn muốn
             >
-              Tư vấn ngay
+              Sử dụng ngay
             </Button>
           ) : (
             <>
@@ -234,7 +240,7 @@ const HomeCareLanding = () => {
             className={styles["homecare__cta"]}
             onClick={() => navigate("/home")} // hoặc route bạn muốn
           >
-            Tư Vấn Ngay
+            Sử dụng ngay
           </Button>
         </div>
       </section>

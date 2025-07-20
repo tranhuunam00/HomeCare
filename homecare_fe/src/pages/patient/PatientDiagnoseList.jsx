@@ -20,12 +20,13 @@ import {
   UserAddOutlined,
   DeleteOutlined,
   CopyOutlined,
+  EditOutlined,
 } from "@ant-design/icons";
 import debounce from "lodash.debounce";
 import { useNavigate } from "react-router-dom";
 import API_CALL from "../../services/axiosClient";
 import { useGlobalAuth } from "../../contexts/AuthContext";
-import { USER_ROLE } from "../../constant/app";
+import { PATIENT_DIAGNOSE_STATUS_CODE, USER_ROLE } from "../../constant/app";
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
 const { RangePicker } = DatePicker;
@@ -181,6 +182,14 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
             record.createdBy === user?.id) && (
             <Space>
               <Button
+                icon={<EditOutlined />} // 👉 Nút cập nhật
+                type="text"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate("/home/patients-diagnose/edit/" + record.id);
+                }}
+              />
+              <Button
                 icon={<DeleteOutlined />}
                 type="text"
                 danger
@@ -189,6 +198,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
                   handleDelete(record.id);
                 }}
               />
+
               <Button
                 icon={<CopyOutlined />}
                 type="text"
@@ -265,6 +275,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         ...record,
         id: undefined,
         name: `${record.name} - Copy ${timestamp}`,
+        status: PATIENT_DIAGNOSE_STATUS_CODE.NEW,
       };
       await API_CALL.post("/patient-diagnose", payload);
       toast.success("Đã clone thành công");

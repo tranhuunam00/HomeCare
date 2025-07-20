@@ -39,7 +39,7 @@ const SidebarMenu = ({ onSelect, selected }) => {
       label: "Mẫu in kết quả",
       children: [
         { key: "home/templates-print", label: "Danh sách" },
-        { key: "home/doctor-used", label: "Sử dụng" },
+        // { key: "home/doctor-used", label: "Sử dụng" },
       ],
     },
     user?.id_role === USER_ROLE.ADMIN && {

@@ -3,6 +3,7 @@ import { Outlet, useNavigate } from "react-router-dom";
 import { Avatar, Layout, Menu } from "antd";
 import {
   AppstoreOutlined,
+  ArrowLeftOutlined,
   MailOutlined,
   SettingOutlined,
 } from "@ant-design/icons";
@@ -58,6 +59,7 @@ const Sidebar = ({ collapsed }) => {
 const Home = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [logo, setLogo] = useState("/logo_home_care.jpg");
+  const navigate = useNavigate();
 
   return (
     <>
@@ -109,7 +111,18 @@ const Home = () => {
             <Sidebar collapsed={collapsed} />
           </Sider>
 
-          <Content style={{ padding: 24, background: "#fff" }}>
+          <Content style={{ padding: 16, background: "#fff" }}>
+            <div style={{ marginBottom: 8 }}>
+              <ArrowLeftOutlined
+                onClick={() => navigate(-1)} // quay lại trang trước
+                style={{
+                  fontSize: 20,
+                  cursor: "pointer",
+                  color: "#1890ff",
+                }}
+              />
+            </div>
+
             <Outlet />
           </Content>
         </>

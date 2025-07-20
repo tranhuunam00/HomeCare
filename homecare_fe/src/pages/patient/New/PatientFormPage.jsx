@@ -16,7 +16,12 @@ import dayjs from "dayjs";
 import useVietnamAddress from "../../../hooks/useVietnamAddress";
 import API_CALL from "../../../services/axiosClient";
 import { useGlobalAuth } from "../../../contexts/AuthContext";
-import { USER_ROLE } from "../../../constant/app";
+import {
+  PATIENT_DIAGNOSE_STATUS,
+  PATIENT_DIAGNOSE_STATUS_CODE,
+  USER_ROLE,
+} from "../../../constant/app";
+import { toast } from "react-toastify";
 
 const { Option } = Select;
 
@@ -28,6 +33,7 @@ const PatientFormPage = () => {
   const [countries, setCountries] = useState([]);
   const [clinics, setClinics] = useState([]);
   const { user, doctor, examParts, templateServices } = useGlobalAuth();
+  const [initialValues, setInitialValues] = useState(null);
 
   const fetchClinics = async () => {
     try {
@@ -67,6 +73,53 @@ const PatientFormPage = () => {
     fetchCountries();
   }, []);
 
+  useEffect(() => {
+    if (id) {
+      const fetchData = async () => {
+        try {
+          const res = await API_CALL.get(`/patient-diagnose/${id}`);
+          const data = res.data.data;
+
+          // Gán giá trị vào form
+          const dataMapping = {
+            name: data.name,
+            pid: data.PID,
+            sid: data.SID,
+            Indication: data.Indication,
+            gender: data.gender,
+            cccd: data.CCCD,
+            phone: data.phoneNumber,
+            email: data.email,
+            detail: data.address,
+            country: data.countryCode,
+            province: data.province_code
+              ? Number(data.province_code)
+              : undefined,
+            district: data.district_code
+              ? Number(data.district_code)
+              : undefined,
+            ward: data.ward_code ? Number(data.ward_code) : undefined,
+            id_clinic: data.id_clinic,
+            dob: data.dob ? dayjs(data.dob) : null,
+            age: data.dob ? dayjs().diff(dayjs(data.dob), "year") : undefined,
+            id_template_service: data.id_template_service,
+            id_exam_part: data.id_exam_part,
+            status: data.status,
+          };
+          form.setFieldsValue(dataMapping);
+          setInitialValues(dataMapping);
+
+          setSelectedProvince(Number(data.province_code));
+          setSelectedDistrict(Number(data.district_code));
+        } catch (err) {
+          message.error("Không thể tải thông tin bệnh nhân");
+          console.error(err);
+        }
+      };
+      fetchData();
+    }
+  }, [id]);
+
   const handleDobChange = (date) => {
     if (date) {
       const today = dayjs();
@@ -99,14 +152,27 @@ const PatientFormPage = () => {
         ward_code: values.ward + "",
         id_clinic: values.id_clinic,
         createdBy: user?.id,
-        status: 1,
+        status: PATIENT_DIAGNOSE_STATUS_CODE.NEW, // c
         dob: values.dob,
         id_template_service: values.id_template_service,
         id_exam_part: values.id_exam_part,
       };
 
-      await API_CALL.post("/patient-diagnose", payload);
-      message.success("Tạo mới ca chẩn đoán thành công");
+      if (id) {
+        console.log("initialValues.status ", initialValues.status);
+        if (initialValues.status != PATIENT_DIAGNOSE_STATUS_CODE.NEW) {
+          toast.warn("Bạn chỉ được cập nhật khi trạng thái là mới");
+          return;
+        }
+        // Update
+        await API_CALL.put(`/patient-diagnose/${id}`, payload);
+        message.success("Cập nhật thành công");
+      } else {
+        // Create
+        await API_CALL.post("/patient-diagnose", payload);
+        message.success("Tạo mới thành công");
+      }
+
       navigate("/home/patients-diagnose");
     } catch (err) {
       message.error("Có lỗi xảy ra, vui lòng thử lại");
@@ -370,7 +436,23 @@ const PatientFormPage = () => {
           </Row>
 
           {/* Nút Submit */}
-          <Row justify="end">
+          <Row justify="end" gutter={8}>
+            <Col>
+              <Form.Item>
+                <Button
+                  onClick={() => {
+                    if (initialValues) {
+                      form.setFieldsValue(initialValues);
+                      setSelectedProvince(initialValues.province);
+                      setSelectedDistrict(initialValues.district);
+                    }
+                  }}
+                  disabled={!initialValues}
+                >
+                  Reset
+                </Button>
+              </Form.Item>
+            </Col>
             <Col>
               <Form.Item>
                 <Button type="primary" htmlType="submit" loading={loading}>

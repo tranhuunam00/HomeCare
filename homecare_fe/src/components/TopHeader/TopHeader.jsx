@@ -152,9 +152,8 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
           </div>
           <SidebarMenu
             onSelect={(key) => {
-              setSelectedMenu(key); // vẫn dùng cho các mục nội bộ
-
-              window.open(`/${key}`, "_blank"); // hoặc navigate(`/${key}`)
+              setSelectedMenu(key);
+              navigate(`/${key}`); // ✅ Điều hướng nội bộ, không mở tab mới
             }}
             selected={selectedMenu}
           />
