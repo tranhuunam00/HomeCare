@@ -422,7 +422,7 @@ const PatientUseTemplate = () => {
     </style>
     <h3 style="color: #4299d4">QUY TRÌNH VÀ KĨ THUẬT</h3>
     ${replaceInputsInHtml(template?.description || "", inputsRender)}
-    <div style="display: flex; justify-content: center; gap: 40px; margin-top: 50px;">
+    <div style="display: flex; justify-content: center; gap: 40px; margin-top: 50px; font-size: 13px">
       <div style="text-align: center; width: 300px;">
         <img
           src="${imageListForm[0]?.url}"
@@ -437,16 +437,16 @@ const PatientUseTemplate = () => {
         }</a>
       </div>
 
-      <div style="text-align: center; width: 300px;">
+      <div style="text-align: center; width: 300px; font-size: 13px">
         <img
           src="${imageListForm[1]?.url}"
           alt="Minh họa quy trình chụp MRI"
           style="width: 300px; height: 200px; object-fit: cover; border-radius: 5px;"
         >
-        <p style="margin: 8px 0 4px; font-weight: bold;">${
+        <p style="margin: 8px 0 4px; font-weight: bold; font-size: 13px">${
           imageListForm[1]?.caption
         }</p>
-        <a href="#" style="color: #007bff; text-decoration: none;">${
+        <a href="#" style="color: #007bff; text-decoration: none; font-size: 13px">${
           links[1]
         }</a>
       </div>
@@ -473,7 +473,7 @@ const PatientUseTemplate = () => {
       inputsRenderTrans
     )}
     <div style="display: flex; justify-content: center; gap: 40px; margin-top: 50px;">
-      <div style="text-align: center; width: 300px;">
+      <div style="text-align: center; width: 300px; font-size: 13px">
         <img
           src="${imageListFormTrans[0]?.url}"
           alt=""
@@ -487,7 +487,7 @@ const PatientUseTemplate = () => {
         }</a>
       </div>
 
-      <div style="text-align: center; width: 300px;">
+      <div style="text-align: center; width: 300px; font-size: 13px">
         <img
           src="${imageListFormTrans[1]?.url}"
           alt="Minh họa quy trình chụp MRI"
@@ -573,6 +573,9 @@ const PatientUseTemplate = () => {
           const doctor_print_templates = data?.doctor_print_templates?.find(
             (d) => d.status == data?.status
           );
+          if (data.status == PATIENT_DIAGNOSE_STATUS_CODE.VERIFY) {
+            setIsOpenPreview(true);
+          }
           if (doctor_print_templates) {
             const {
               imageList,
@@ -618,19 +621,36 @@ const PatientUseTemplate = () => {
     const printContents = printRef.current.innerHTML;
     const newWindow = window.open("", "_blank", "width=800,height=600");
     newWindow.document.write(`
-      <html>
-        <head>
-          <title>HOMECARE</title>
-          <style>
-            body { font-family: Arial, sans-serif; padding: 20px; }
-            table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-            th, td { border: 0px solid #ccc; padding: 4px; text-align: left; font-size: 13px}
-            h3 { margin-top: 24px; }
-          </style>
-        </head>
-        <body>${printContents}</body>
-      </html>
-    `);
+    <html>
+      <head>
+        <title>HOMECARE</title>
+        <style>
+          /* Font toàn trang */
+          * {
+            font-family: 'Arial', sans-serif !important;
+          }
+          body { padding: 20px; }
+         
+          table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-bottom: 16px; 
+          }
+          th, td { 
+            border: 0px solid #ccc; 
+            padding: 4px; 
+            text-align: left; 
+            font-size: 13px 
+          }
+          h3 { margin-top: 24px; font-size: 16px !important }
+          // .logoImg{
+          //   height: 60px !important
+          // }
+        </style>
+      </head>
+      <body>${printContents}</body>
+    </html>
+  `);
     newWindow.document.close();
     newWindow.focus();
     newWindow.print();
@@ -779,98 +799,7 @@ const PatientUseTemplate = () => {
               Hiện có: {patientDiagnose?.doctor_print_templates?.length || 0}{" "}
               bản ghi{" "}
             </Title>
-            <CompletionActionsDiagnose
-              isTrans={isTrans}
-              isOpenPreview={isOpenPreview}
-              statusCode={patientDiagnose?.status}
-              handleRead={async () => {
-                const res = await updateStatusPatientDiagnose(2);
-                if (res) {
-                  setPatientDiagnose({ ...patientDiagnose, status: 2 });
-                }
-              }}
-              handleReset={() => {
-                const confirm = window.confirm(
-                  "Bạn có chắc chắn muốn reset quả đọc không?\n"
-                );
-                if (!confirm) return;
-              }}
-              handleCancelResult={async () => {
-                const res = await updateStatusPatientDiagnose(2);
-                if (res) {
-                  setPatientDiagnose({ ...patientDiagnose, status: 2 });
-                }
-              }}
-              handleCancelRead={async () => {
-                const confirm = window.confirm(
-                  "Bạn có chắc chắn muốn quay về trạng thái đọc quả không?\n"
-                );
-                if (!confirm) return;
-                const res = await updateStatusPatientDiagnose(1);
-                if (res) {
-                  setPatientDiagnose({ ...patientDiagnose, status: 1 });
-                }
-              }}
-              handleConfirm={async () => {
-                const confirm = window.confirm(
-                  "Bạn có chắc chắn muốn chốt kết quả không?\nSau khi chốt sẽ không thể sửa."
-                );
-                if (confirm) {
-                  try {
-                    const data = await createDoctorPrintTemplate(
-                      PATIENT_DIAGNOSE_STATUS_CODE.VERIFY
-                    );
 
-                    if (data) {
-                      toast.success("Chốt kết quả thành công!");
-                      setPatientDiagnose({
-                        ...patientDiagnose,
-                        status: PATIENT_DIAGNOSE_STATUS_CODE.VERIFY,
-                      });
-                      navigate("/home/patients-diagnose");
-                    }
-                  } catch (error) {
-                    console.error("Lỗi khi chốt kết quả:", error);
-                    toast.error("Chốt kết quả thất bại!");
-                  }
-                }
-              }}
-              handlePrint={handlePrint}
-              handleSend={async () => {
-                const confirm = window.confirm(
-                  "Bạn có chắc chắn muốn chốt kết quả không?\nSau khi chốt sẽ không thể sửa."
-                );
-                if (confirm) {
-                  try {
-                    const data = await createDoctorPrintTemplate(
-                      PATIENT_DIAGNOSE_STATUS_CODE.WAIT
-                    );
-
-                    if (data) {
-                      toast.success("Chốt kết quả thành công!");
-                      setPatientDiagnose({
-                        ...patientDiagnose,
-                        status: PATIENT_DIAGNOSE_STATUS_CODE.WAIT,
-                      });
-                      navigate("/home/patients-diagnose");
-                    }
-                  } catch (error) {
-                    console.error("Lỗi khi chốt kết quả:", error);
-                    toast.error("Chốt kết quả thất bại!");
-                  }
-                }
-              }}
-              handleTranslate={async () => {
-                const confirmed = window.confirm(
-                  "Bạn có chắc chắn muốn bắt đầu dịch nội dung không?"
-                );
-                if (!confirmed) return;
-
-                setIsTrans(true);
-                toast.success("Bắt đầu dịch");
-                await handleTranslateInputs();
-              }}
-            />
             <Title level={3}>Phiếu kết quả</Title>
 
             <div style={{ marginBottom: 20 }}>
@@ -1006,6 +935,99 @@ const PatientUseTemplate = () => {
               setImageListTrans={setImageListTrans}
               renderDynamicAntdFields={renderDynamicAntdFields}
               extractDynamicFieldsFromHtml={extractDynamicFieldsFromHtml}
+            />
+
+            <CompletionActionsDiagnose
+              isTrans={isTrans}
+              isOpenPreview={isOpenPreview}
+              statusCode={patientDiagnose?.status}
+              handleRead={async () => {
+                const res = await updateStatusPatientDiagnose(2);
+                if (res) {
+                  setPatientDiagnose({ ...patientDiagnose, status: 2 });
+                }
+              }}
+              handleReset={() => {
+                const confirm = window.confirm(
+                  "Bạn có chắc chắn muốn reset quả đọc không?\n"
+                );
+                if (!confirm) return;
+              }}
+              handleCancelResult={async () => {
+                const res = await updateStatusPatientDiagnose(2);
+                if (res) {
+                  setPatientDiagnose({ ...patientDiagnose, status: 2 });
+                }
+              }}
+              handleCancelRead={async () => {
+                const confirm = window.confirm(
+                  "Bạn có chắc chắn muốn quay về trạng thái đọc quả không?\n"
+                );
+                if (!confirm) return;
+                const res = await updateStatusPatientDiagnose(1);
+                if (res) {
+                  setPatientDiagnose({ ...patientDiagnose, status: 1 });
+                }
+              }}
+              handleConfirm={async () => {
+                const confirm = window.confirm(
+                  "Bạn có chắc chắn muốn chốt kết quả không?\nSau khi chốt sẽ không thể sửa."
+                );
+                if (confirm) {
+                  try {
+                    const data = await createDoctorPrintTemplate(
+                      PATIENT_DIAGNOSE_STATUS_CODE.VERIFY
+                    );
+
+                    if (data) {
+                      toast.success("Chốt kết quả thành công!");
+                      setPatientDiagnose({
+                        ...patientDiagnose,
+                        status: PATIENT_DIAGNOSE_STATUS_CODE.VERIFY,
+                      });
+                      navigate("/home/patients-diagnose");
+                    }
+                  } catch (error) {
+                    console.error("Lỗi khi chốt kết quả:", error);
+                    toast.error("Chốt kết quả thất bại!");
+                  }
+                }
+              }}
+              handlePrint={handlePrint}
+              handleSend={async () => {
+                const confirm = window.confirm(
+                  "Bạn có chắc chắn muốn chốt kết quả không?\nSau khi chốt sẽ không thể sửa."
+                );
+                if (confirm) {
+                  try {
+                    const data = await createDoctorPrintTemplate(
+                      PATIENT_DIAGNOSE_STATUS_CODE.WAIT
+                    );
+
+                    if (data) {
+                      toast.success("Chốt kết quả thành công!");
+                      setPatientDiagnose({
+                        ...patientDiagnose,
+                        status: PATIENT_DIAGNOSE_STATUS_CODE.WAIT,
+                      });
+                      navigate("/home/patients-diagnose");
+                    }
+                  } catch (error) {
+                    console.error("Lỗi khi chốt kết quả:", error);
+                    toast.error("Chốt kết quả thất bại!");
+                  }
+                }
+              }}
+              handleTranslate={async () => {
+                const confirmed = window.confirm(
+                  "Bạn có chắc chắn muốn bắt đầu dịch nội dung không?"
+                );
+                if (!confirmed) return;
+
+                setIsTrans(true);
+                toast.success("Bắt đầu dịch");
+                await handleTranslateInputs();
+              }}
             />
           </Card>
         );

@@ -1,74 +1,78 @@
-import { useMemo } from "react";
-import { Button, Row, Col } from "antd";
 import { useNavigate } from "react-router-dom";
-import { PATIENT_DIAGNOSE_COLOR } from "../constant/app";
+import { Steps, message } from "antd";
+import {
+  PlusCircleOutlined,
+  FileSearchOutlined,
+  LoadingOutlined,
+  CheckCircleOutlined,
+  PrinterOutlined,
+  SolutionOutlined,
+  ReadOutlined,
+} from "@ant-design/icons";
 
 const StatusButtonPatientDiagnose = ({ id, status }) => {
   const navigate = useNavigate();
 
-  const buttonStatus = useMemo(() => {
-    return {
-      canRead: status === 1,
-      isReading: status === 2,
-      canConfirm: status === 3,
-      canPrint: status === 4,
-      translate: status == 5,
-    };
-  }, [status]);
+  const steps = [
+    {
+      title: "Tạo bản ghi",
+      icon: <PlusCircleOutlined />,
+      statusValue: 0, // luôn click được
+      alwaysEnabled: true,
+    },
+    {
+      title: "Đọc kết quả",
+      icon: <FileSearchOutlined />,
+      statusValue: 1,
+    },
+    {
+      title: "Đang đọc",
+      icon: <ReadOutlined />,
+      statusValue: 2,
+    },
+    {
+      title: "Xác nhận kết quả",
+      icon: <CheckCircleOutlined />,
+      statusValue: 3,
+    },
+    {
+      title: "In kết quả",
+      icon: <PrinterOutlined />,
+      statusValue: 4,
+    },
+  ];
 
-  const getStyle = (enabled, color) => ({
-    backgroundColor: enabled ? color : "#d9d9d9",
-    borderColor: enabled ? color : "#aaa",
-    color: enabled ? "#fff" : "#888",
-    opacity: enabled ? 1 : 0.8,
-  });
+  // Tìm step tương ứng với status để xác định current
+  const currentStepIndex = steps.findIndex(
+    (step) => step.statusValue === status
+  );
+  const safeCurrent = currentStepIndex >= 0 ? currentStepIndex : 0;
+
+  const handleStepClick = (stepIndex) => {
+    const clickedStep = steps[stepIndex];
+
+    if (clickedStep.alwaysEnabled || clickedStep.statusValue <= status) {
+      navigate("/home/patients-diagnose/use/" + id);
+    } else {
+      message.warning(
+        "Không thể chuyển bước này khi chưa hoàn tất bước trước."
+      );
+    }
+  };
 
   return (
-    <Row gutter={24} style={{ marginTop: 16 }}>
-      <Col span={4}>
-        <Button
-          type="primary"
-          disabled={!buttonStatus.canRead}
-          onClick={() => navigate("/home/patients-diagnose/use/" + id)}
-          style={getStyle(buttonStatus.canRead, PATIENT_DIAGNOSE_COLOR[1])}
-        >
-          Đọc kết quả
-        </Button>
-      </Col>
-      <Col span={4}>
-        <Button
-          type="primary"
-          disabled={!buttonStatus.isReading}
-          onClick={() => navigate("/home/patients-diagnose/use/" + id)}
-          style={getStyle(buttonStatus.isReading, PATIENT_DIAGNOSE_COLOR[2])}
-        >
-          Đang đọc
-        </Button>
-      </Col>
-
-      <Col span={5}>
-        <Button
-          type="dashed"
-          danger
-          onClick={() => navigate("/home/patients-diagnose/use/" + id)}
-          disabled={!buttonStatus.canConfirm}
-          style={getStyle(buttonStatus.canConfirm, PATIENT_DIAGNOSE_COLOR[3])}
-        >
-          Xác nhận kết quả
-        </Button>
-      </Col>
-
-      <Col span={3}>
-        <Button
-          type="default"
-          disabled={!buttonStatus.canPrint}
-          style={getStyle(buttonStatus.canPrint, PATIENT_DIAGNOSE_COLOR[4])}
-          onClick={() => navigate("/home/patients-diagnose/use/" + id)}
-        >
-          In kết quả
-        </Button>
-      </Col>
-    </Row>
+    <div style={{ marginTop: 16 }}>
+      <Steps
+        current={safeCurrent}
+        onChange={handleStepClick}
+        items={steps.map((step) => ({
+          title: step.title,
+          icon: step.icon,
+        }))}
+        responsive={false}
+        size="small"
+      />
+    </div>
   );
 };
 

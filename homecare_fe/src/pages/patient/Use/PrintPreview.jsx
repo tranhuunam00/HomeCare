@@ -36,40 +36,44 @@ const PrintPreview = ({
             gap: 20,
           }}
         >
-          <img
-            style={{
-              marginTop: 10,
-              objectFit: "cover",
-              alignContent: "center",
-            }}
-            src={
-              printTemplate?.logo_url ||
-              "https://via.placeholder.com/150x100?text=Logo"
-            }
-            alt="Logo"
-            width={100}
-            height={100}
-          />
-          <div style={{ maxWidth: "350px" }}>
-            <p style={{ fontWeight: 600, color: "red", fontSize: 16 }}>
+          <div style={{ maxWidth: "350px", flex: 1 }}>
+            <img
+              style={{
+                marginTop: 10,
+                objectFit: "cover",
+                alignContent: "center",
+              }}
+              src={
+                printTemplate?.logo_url ||
+                "https://via.placeholder.com/150x100?text=Logo"
+              }
+              className="logoImg"
+              alt="Logo"
+              width={80}
+              height={80}
+            />
+          </div>
+
+          <div style={{ maxWidth: "350px", flex: 2 }}>
+            <p style={{ fontWeight: 600, color: "red", fontSize: 14 }}>
               {printTemplate?.clinic_name || "[Tên phòng khám]"}
             </p>
-            <p style={{ fontSize: 14 }}>
+            <p style={{ fontSize: 13 }}>
               <strong>Khoa:</strong> {printTemplate?.department_name || "-"}
             </p>
-            <p style={{ fontSize: 14 }}>
+            <p style={{ fontSize: 13 }}>
               <strong>Địa chỉ:</strong> {printTemplate?.address || "-"}
             </p>
           </div>
-          <div style={{ maxWidth: "280px" }}>
-            <p style={{ fontSize: 14 }}>
+          <div style={{ maxWidth: "280px", flex: 2 }}>
+            <p style={{ fontSize: 13 }}>
               <strong>Website:</strong>{" "}
               <i>{printTemplate?.website || "http://..."}</i>
             </p>
-            <p style={{ fontSize: 14 }}>
+            <p style={{ fontSize: 13 }}>
               <strong>Hotline:</strong> {printTemplate?.phone || "..."}
             </p>
-            <p style={{ fontSize: 14 }}>
+            <p style={{ fontSize: 13 }}>
               <strong>Email:</strong>
               <i>{printTemplate?.email || "example@email.com"}</i>
             </p>

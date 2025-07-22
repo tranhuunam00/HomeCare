@@ -12,8 +12,8 @@ import FurnitureCarousel from "../../components/slick/FurnitureCarousel";
 import { motion } from "framer-motion";
 import { products } from "./products";
 import { useGlobalAuth } from "../../contexts/AuthContext";
-import dayjs from "dayjs";
 import DropdownNav from "../../components/DropdownNav";
+import { toast } from "react-toastify";
 
 const textVariants = {
   hidden: { opacity: 0, x: 30 },
@@ -30,84 +30,42 @@ const textVariants = {
   }),
 };
 
-const veHomecareItems = [
-  {
-    label: "VỀ HOMECARE",
-    onClick: () =>
-      (window.location.href = "https://home-care.vn/category/about-us/"),
-  },
-  {
-    label: "BÁC SĨ HOMECARE",
-    onClick: () =>
-      (window.location.href =
-        "https://home-care.vn/category/about-us/bac-si-homecare/"),
-  },
-  {
-    label: "DỊCH VỤ HOMECARE",
-    onClick: () =>
-      (window.location.href =
-        "https://home-care.vn/category/about-us/dich-vu-homecare/"),
-  },
-  {
-    label: "QUẢN LÝ CHẤT LƯỢNG",
-    onClick: () =>
-      (window.location.href =
-        "https://home-care.vn/category/about-us/quan-ly-chat-luong/"),
-  },
-  {
-    label: "TẠI SAO CHỌN HOMECARE",
-    onClick: () =>
-      (window.location.href =
-        "https://home-care.vn/category/about-us/tai-sao-chon-homecare/"),
-  },
-];
-
-const dichVuItems = [
-  {
-    label: "TƯ VẤN HOMECARE",
-    onClick: () =>
-      (window.location.href =
-        "https://home-care.vn/product-category/dich-vu-homecare/tu-van-homecare/"),
-  },
-  {
-    label: "KHÁM HOMECARE",
-    onClick: () =>
-      (window.location.href =
-        "https://home-care.vn/product-category/dich-vu-homecare/kham-homecare/"),
-  },
-  {
-    label: "XÉT NGHIỆM HOMECARE",
-    onClick: () =>
-      (window.location.href =
-        "https://home-care.vn/product-category/dich-vu-homecare/xet-nghiem-homecare/"),
-  },
-  {
-    label: "ĐIỀU TRỊ HOMECARE",
-    onClick: () =>
-      (window.location.href =
-        "https://home-care.vn/product-category/dich-vu-homecare/dieu-tri-homecare/"),
-  },
-];
 const HomeCareLanding = () => {
   const navigate = useNavigate();
+  const { isLoggedIn } = useGlobalAuth();
+
+  const productsItem = [
+    {
+      label: "D-RADS",
+      onClick: () =>
+        isLoggedIn
+          ? navigate("/home/templates")
+          : toast.warning("Vui lòng đăng nhập để xem chi tiết!"),
+    },
+    {
+      label: "Tirads".toUpperCase(),
+      onClick: () =>
+        isLoggedIn
+          ? navigate("/home/Tirads")
+          : toast.warning("Vui lòng đăng nhập để xem chi tiết!"),
+    },
+    {
+      label: "DỊCH VỤ HOMECARE".toUpperCase(),
+      onClick: () =>
+        isLoggedIn
+          ? navigate("/home/Recist")
+          : toast.warning("Vui lòng đăng nhập để xem chi tiết!"),
+    },
+  ];
+
   const [isContactOpen, setIsContactOpen] = useState(false);
 
-  const showContactModal = () => setIsContactOpen(true);
   const handleContactCancel = () => setIsContactOpen(false);
 
   const topRef = useRef(null);
   const aboutRef = useRef(null);
   const serviceRef = useRef(null);
 
-  const { showError, showSuccess } = useToast();
-
-  const { isLoggedIn } = useGlobalAuth();
-
-  const scrollToSection = (ref) => {
-    if (ref.current) {
-      ref.current.scrollIntoView({ behavior: "smooth" });
-    }
-  };
   return (
     <div className={styles["homecare"]}>
       <header className={styles["homecare__header"]}>
@@ -152,40 +110,8 @@ const HomeCareLanding = () => {
               >
                 HOME
               </Menu.Item>
-              <Menu.Item
-                key="about"
-                onClick={() =>
-                  (window.location.href =
-                    "https://home-care.vn/category/tin-tuc/")
-                }
-              >
-                TIN TỨC
-              </Menu.Item>
-              <Menu.Item
-                key="service"
-                onClick={() =>
-                  (window.location.href = "https://home-care.vn/contact-us/")
-                }
-              >
-                LIÊN HỆ
-              </Menu.Item>
 
-              <DropdownNav
-                onClickTitle={() =>
-                  (window.location.href =
-                    "https://home-care.vn/category/about-us/")
-                }
-                title="VỀ HOMECARE"
-                items={veHomecareItems}
-              />
-              <DropdownNav
-                title="DỊCH VỤ HOMECARE"
-                items={dichVuItems}
-                onClickTitle={() =>
-                  (window.location.href =
-                    "https://home-care.vn/product-category/dich-vu-homecare/")
-                }
-              />
+              <DropdownNav title="SẢN PHẨM" items={productsItem} />
             </Menu>
           </div>
         </div>
