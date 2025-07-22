@@ -10,6 +10,8 @@ import {
   CloseCircleOutlined,
   TranslationOutlined,
   RollbackOutlined,
+  UpOutlined,
+  DownOutlined,
 } from "@ant-design/icons";
 
 // Màu chuẩn theo status
@@ -153,6 +155,43 @@ const CompletionActionsDiagnose = ({
               </Button>
             </>
           )}
+
+          <Button
+            type="primary"
+            shape="circle"
+            icon={<UpOutlined />}
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            style={{
+              position: "fixed",
+              bottom: 24,
+              right: 24,
+              zIndex: 1000,
+              backgroundColor: "#1890ff",
+              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.2)",
+            }}
+            title="Lên đầu trang"
+          />
+
+          <Button
+            type="primary"
+            shape="circle"
+            icon={<DownOutlined />}
+            onClick={() =>
+              window.scrollTo({
+                top: document.body.scrollHeight,
+                behavior: "smooth",
+              })
+            }
+            style={{
+              position: "fixed",
+              top: 24,
+              right: 24,
+              zIndex: 1000,
+              backgroundColor: "#1890ff",
+              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.2)",
+            }}
+            title="Kéo xuống cuối trang"
+          />
 
           {/* 🌐 Dịch kết quả (status 2 hoặc 3) */}
           {(status === PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESS ||
