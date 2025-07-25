@@ -34,6 +34,7 @@ import ViewTemplateProduct from "./pages/products/TemplateProduct/ViewTemplatePr
 import TemplateServiceList from "./pages/template_service/TemplateServiceList";
 import ExamPartList from "./pages/template_service/ExamPart/ExamPartList";
 import TiradsForm from "./pages/advance/Tirad/TiradsForm";
+import LungRADSForm from "./pages/advance/LungRADS/LungRadForm";
 
 function App() {
   useAuthInitializer();
@@ -45,6 +46,7 @@ function App() {
         <Route path="/login" element={<LoginForm />} />
         <Route path="/register" element={<RegisterForm />} />
         <Route path="/tirad" element={<TiradsForm />} />
+        <Route path="/lungrad" element={<LungRADSForm />} />
 
         <Route
           path="/home"

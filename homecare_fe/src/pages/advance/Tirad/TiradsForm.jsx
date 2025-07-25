@@ -1,35 +1,35 @@
 // tiradsConstants.js
 export const COMPOSITION_OPTIONS = [
-  { label: "Nang dịch", value: 0 },
-  { label: "Bọt biển", value: 1 },
-  { label: "Hỗn hợp", value: 2 },
-  { label: "Tổ chức đặc", value: 3 },
+  { label: "Nang dịch (0 điểm)", value: 0 },
+  { label: "Bọt biển (1 điểm)", value: 1 },
+  { label: "Hỗn hợp (2 điểm)", value: 2 },
+  { label: "Tổ chức đặc (3 điểm)", value: 3 },
 ];
 
 export const STRUCTURE_OPTIONS = [
-  { label: "Trống âm", value: 0 },
-  { label: "Đồng âm", value: 1 },
-  { label: "Giảm âm", value: 2 },
-  { label: "Rất giảm âm", value: 3 },
+  { label: "Trống âm (0 điểm)", value: 0 },
+  { label: "Đồng âm (1 điểm)", value: 1 },
+  { label: "Giảm âm (2 điểm)", value: 2 },
+  { label: "Rất giảm âm (3 điểm)", value: 3 },
 ];
 
 export const SHAPE_OPTIONS = [
-  { label: "Trục dài song song bề mặt da", value: 0 },
-  { label: "Trục dài vuông góc bề mặt da", value: 3 },
+  { label: "Trục dài song song bề mặt da (0 điểm)", value: 0 },
+  { label: "Trục dài vuông góc bề mặt da (3 điểm)", value: 3 },
 ];
 
 export const MARGIN_OPTIONS = [
-  { label: "Nhẵn", value: 0 },
-  { label: "Không rõ", value: 1 },
-  { label: "Không đều", value: 2 },
-  { label: "Mất liên tục", value: 3 },
+  { label: "Nhẵn (0 điểm)", value: 0 },
+  { label: "Không rõ (1 điểm)", value: 1 },
+  { label: "Không đều (2 điểm)", value: 2 },
+  { label: "Mất liên tục (3 điểm)", value: 3 },
 ];
 
 export const CALCIFICATION_OPTIONS = [
-  { label: "Không", value: 0 },
-  { label: "Mảnh thô", value: 1 },
-  { label: "Vôi hóa vỏ", value: 2 },
-  { label: "Vi vôi hóa", value: 3 },
+  { label: "Không (0 điểm)", value: 0 },
+  { label: "Mảnh thô (1 điểm)", value: 1 },
+  { label: "Vôi hóa vỏ (2 điểm)", value: 2 },
+  { label: "Vi vôi hóa (3 điểm)", value: 3 },
 ];
 
 // TiradsForm.jsx
@@ -47,6 +47,7 @@ import {
 } from "antd";
 import { CopyOutlined, ReloadOutlined } from "@ant-design/icons";
 import styles from "./TiradsForm.module.scss";
+import { toast } from "react-toastify";
 
 const { Text } = Typography;
 
@@ -159,6 +160,7 @@ const TiradsForm = () => {
           border: 1px solid #ccc;
           padding: 8px 12px;
           text-align: left;
+          font-size: 16px;
         }
         th {
           background-color: #f5f5f5;
@@ -174,9 +176,10 @@ const TiradsForm = () => {
         <caption>Đánh giá TIRADS</caption>
         <tr><th>Thông tin</th><th>Giá trị</th></tr>
         <tr><td>Vị trí tổn thương</td><td>${values.location || ""}</td></tr>
-        <tr><td>Kích thước (mm)</td><td>${values.D1 || ""} x ${
-        values.D2 || ""
-      } x ${values.D3 || ""}</td></tr>
+        
+        <tr><td>Kích thước D1(mm)</td><td>${values.D1 || ""} mm</td></tr>
+        <tr><td>Kích thước D2(mm)</td><td>${values.D2 || ""} mm</td></tr>
+        <tr><td>Kích thước D3(mm)</td><td>${values.D3 || ""} mm</td></tr>
         <tr><td>Đặc điểm thành phần</td><td>${getLabelWithScore(
           COMPOSITION_OPTIONS,
           values.composition
@@ -207,10 +210,10 @@ const TiradsForm = () => {
         }),
       ]);
 
-      message.success("Đã copy bảng HTML vào clipboard!");
+      toast.success("Đã copy bảng HTML vào clipboard!");
     } catch (error) {
       console.error(error);
-      message.error("Vui lòng điền đầy đủ thông tin hợp lệ!");
+      toast.error("Vui lòng điền đầy đủ thông tin hợp lệ!");
     }
   };
 
@@ -245,6 +248,7 @@ const TiradsForm = () => {
                 >
                   <InputNumber
                     style={{ width: "100%" }}
+                    placeholder="Nhập kích thước"
                     onChange={() => {
                       const { D1, D2, D3 } = form.getFieldsValue();
                       const v = (D1 || 0) * (D2 || 0) * (D3 || 0) * 0.52;

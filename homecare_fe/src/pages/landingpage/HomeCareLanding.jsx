@@ -63,6 +63,10 @@ const HomeCareLanding = () => {
       label: "TIRADs",
       onClick: () => navigate("tirad"),
     },
+    {
+      label: "LungRADs",
+      onClick: () => navigate("lungrad"),
+    },
   ];
 
   const [isContactOpen, setIsContactOpen] = useState(false);
