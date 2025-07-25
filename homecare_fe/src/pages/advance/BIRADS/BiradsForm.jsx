@@ -308,10 +308,7 @@ const BiradsForm = () => {
                 label="Tuyến vú khảo sát"
                 rules={[{ required: true }]}
               >
-                <Select
-                  options={BREAST_SIDE_OPTIONS}
-                  placeholder="Chọn bên vú"
-                />
+                <Radio.Group options={BREAST_SIDE_OPTIONS} />
               </Form.Item>
             </Col>
 
@@ -321,7 +318,7 @@ const BiradsForm = () => {
                 label="Mật độ tuyến vú"
                 rules={[{ required: true }]}
               >
-                <Select options={DENSITY_OPTIONS} placeholder="Chọn mật độ" />
+                <Radio.Group options={DENSITY_OPTIONS} />
               </Form.Item>
             </Col>
 
@@ -331,7 +328,7 @@ const BiradsForm = () => {
                 label="Vị trí tổn thương"
                 rules={[{ required: true }]}
               >
-                <Select options={LOCATION_OPTIONS} placeholder="Chọn vị trí" />
+                <Radio.Group options={LOCATION_OPTIONS} />
               </Form.Item>
             </Col>
           </Row>
@@ -376,21 +373,21 @@ const BiradsForm = () => {
             label="Hình dạng tổn thương"
             rules={[{ required: true }]}
           >
-            <Select options={SHAPE_OPTIONS} />
+            <Radio.Group options={SHAPE_OPTIONS} />
           </Form.Item>
           <Form.Item
             name="margin"
             label="Bờ viền tổn thương"
             rules={[{ required: true }]}
           >
-            <Select options={MARGIN_OPTIONS} />
+            <Radio.Group options={MARGIN_OPTIONS} />
           </Form.Item>
           <Form.Item
             name="echogenicity"
             label="Đậm độ tổn thương"
             rules={[{ required: true }]}
           >
-            <Select options={ECHOGENICITY_OPTIONS} />
+            <Radio.Group options={ECHOGENICITY_OPTIONS} />
           </Form.Item>
 
           <Form.Item
@@ -418,11 +415,7 @@ const BiradsForm = () => {
             <Checkbox.Group options={OTHER_SUSPICIOUS_SIGNS} />
           </Form.Item>
 
-          <Form.Item
-            name="birads"
-            label="Phân loại BIRADS"
-            rules={[{ required: true }]}
-          >
+          <Form.Item name="birads" label="Phân loại BIRADS">
             <Select
               options={[
                 { label: "BIRADS 1", value: "BIRADS 1" },
