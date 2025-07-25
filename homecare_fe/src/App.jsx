@@ -36,6 +36,7 @@ import ExamPartList from "./pages/template_service/ExamPart/ExamPartList";
 import TiradsForm from "./pages/advance/Tirad/TiradsForm";
 import LungRADSForm from "./pages/advance/LungRADS/LungRadForm";
 import BiradsForm from "./pages/advance/BIRADS/BiradsForm";
+import BoneAgeForm from "./pages/advance/BONEAGE/BoneAgeForm";
 
 function App() {
   useAuthInitializer();
@@ -49,6 +50,7 @@ function App() {
         <Route path="/tirad" element={<TiradsForm />} />
         <Route path="/lungrad" element={<LungRADSForm />} />
         <Route path="/birad" element={<BiradsForm />} />
+        <Route path="/boneage" element={<BoneAgeForm />} />
 
         <Route
           path="/home"

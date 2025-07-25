@@ -143,11 +143,18 @@ const TiradsForm = () => {
         Math.max(values.D1 || 0, values.D2 || 0, values.D3 || 0)
       );
 
-      const calcDisplay = Array.isArray(values.calcification)
-        ? values.calcification
-            .map((v) => getLabelWithScore(CALCIFICATION_OPTIONS, v))
-            .join(", ")
-        : "Không";
+      const calcDisplay =
+        Array.isArray(values.calcification) && values.calcification.length > 0
+          ? `
+        <ul style="padding-left: 16px; margin: 0;">
+          ${values.calcification
+            .map(
+              (v) => `<li>${getLabelWithScore(CALCIFICATION_OPTIONS, v)}</li>`
+            )
+            .join("")}
+        </ul>
+      `
+          : "Không";
 
       const html = `
       <style>
@@ -161,6 +168,9 @@ const TiradsForm = () => {
           padding: 8px 12px;
           text-align: left;
           font-size: 16px;
+          vertical-align: top;
+          word-wrap: break-word;
+          white-space: pre-wrap;
         }
         th {
           background-color: #f5f5f5;
@@ -170,16 +180,16 @@ const TiradsForm = () => {
           font-weight: bold;
           font-size: 18px;
           margin-bottom: 10px;
+          text-align: left;
         }
       </style>
       <table>
         <caption>Đánh giá TIRADS</caption>
         <tr><th>Thông tin</th><th>Giá trị</th></tr>
         <tr><td>Vị trí tổn thương</td><td>${values.location || ""}</td></tr>
-        
-        <tr><td>Kích thước D1(mm)</td><td>${values.D1 || ""} mm</td></tr>
-        <tr><td>Kích thước D2(mm)</td><td>${values.D2 || ""} mm</td></tr>
-        <tr><td>Kích thước D3(mm)</td><td>${values.D3 || ""} mm</td></tr>
+        <tr><td>Kích thước D1 (mm)</td><td>${values.D1 || ""}</td></tr>
+        <tr><td>Kích thước D2 (mm)</td><td>${values.D2 || ""}</td></tr>
+        <tr><td>Kích thước D3 (mm)</td><td>${values.D3 || ""}</td></tr>
         <tr><td>Đặc điểm thành phần</td><td>${getLabelWithScore(
           COMPOSITION_OPTIONS,
           values.composition
