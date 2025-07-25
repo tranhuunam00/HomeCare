@@ -198,7 +198,7 @@ const PatientDiagnoiseDetailPage = () => {
         </Row>
         <Row gutter={24} style={{ marginTop: 40 }}>
           <h3>
-            Người tạo:{" "}
+            Người tạo:
             <p style={{ color: "cadetblue" }}>
               {data?.createdBy_user?.doctors[0]?.full_name}
             </p>

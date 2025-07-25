@@ -262,7 +262,7 @@ export default function TiradPage() {
               (key) =>
                 selected[key] && (
                   <li key={key}>
-                    {key.charAt(0).toUpperCase() + key.slice(1)}:{" "}
+                    {key.charAt(0).toUpperCase() + key.slice(1)}:
                     {selected[key].label} ({selected[key].value} điểm)
                   </li>
                 )

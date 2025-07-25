@@ -63,7 +63,7 @@ const MyWallet = () => {
             <Checkbox defaultChecked>Thanh toán để sử dụng</Checkbox>
           </div>
           <Checkbox defaultChecked style={{ marginTop: 16 }}>
-            Phạm vi sử dụng:{" "}
+            Phạm vi sử dụng:
             <Text type="secondary">Sử dụng cho tất cả dịch vụ</Text>
           </Checkbox>
         </div>

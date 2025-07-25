@@ -7,6 +7,9 @@ import {
   Button,
   Typography,
   message,
+  Col,
+  Row,
+  Tooltip,
 } from "antd";
 import styles from "./LungRADSForm.module.scss";
 import { toast } from "react-toastify";
@@ -411,28 +414,61 @@ const LungRADSForm = () => {
             />
           </Form.Item>
 
-          <Form.Item
-            name="D1"
-            label="D1 (mm) – Đường kính lớn nhất"
-            rules={[{ required: true }]}
-          >
-            <InputNumber placeholder="Nhập kích thước" min={0} />
-          </Form.Item>
-          <Form.Item
-            name="D2"
-            label="D2 (mm) – Đường kính bé nhất"
-            rules={[{ required: true }]}
-          >
-            <InputNumber placeholder="Nhập kích thước" min={0} />
-          </Form.Item>
-          <Form.Item
-            name="D3"
-            label="D3 (mm) – Đường kính còn lại"
-            rules={[{ required: true }]}
-          >
-            <InputNumber placeholder="Nhập kích thước" min={0} />
-          </Form.Item>
+          <Row gutter={16}>
+            <Col span={8}>
+              <Form.Item
+                name="D1"
+                label={
+                  <Tooltip title="Đường kính lớn nhất">
+                    <span>D1 (mm)</span>
+                  </Tooltip>
+                }
+                rules={[{ required: true }]}
+              >
+                <InputNumber
+                  placeholder="Nhập kích thước"
+                  min={0}
+                  style={{ width: "100%" }}
+                />
+              </Form.Item>
+            </Col>
 
+            <Col span={8}>
+              <Form.Item
+                name="D2"
+                label={
+                  <Tooltip title="Đường kính bé nhất">
+                    <span>D2 (mm)</span>
+                  </Tooltip>
+                }
+                rules={[{ required: true }]}
+              >
+                <InputNumber
+                  placeholder="Nhập kích thước"
+                  min={0}
+                  style={{ width: "100%" }}
+                />
+              </Form.Item>
+            </Col>
+
+            <Col span={8}>
+              <Form.Item
+                name="D3"
+                label={
+                  <Tooltip title="Đường kính còn lại">
+                    <span>D3 (mm)</span>
+                  </Tooltip>
+                }
+                rules={[{ required: true }]}
+              >
+                <InputNumber
+                  placeholder="Nhập kích thước"
+                  min={0}
+                  style={{ width: "100%" }}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
           <Form.Item label="D4 (mm) – Trung bình">
             <InputNumber value={parseFloat(calcD4(D1, D2, D3))} readOnly />
           </Form.Item>

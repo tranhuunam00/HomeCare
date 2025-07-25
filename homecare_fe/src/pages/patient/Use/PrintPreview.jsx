@@ -67,7 +67,7 @@ const PrintPreview = ({
           </div>
           <div style={{ maxWidth: "280px", flex: 2 }}>
             <p style={{ fontSize: 13 }}>
-              <strong>Website:</strong>{" "}
+              <strong>Website:</strong>
               <i>{printTemplate?.website || "http://..."}</i>
             </p>
             <p style={{ fontSize: 13 }}>
@@ -106,7 +106,6 @@ const PrintPreview = ({
               color: "#4299d4",
             }}
           >
-            {" "}
             {LABELS_ADDON.section_title}
           </h3>
           <div

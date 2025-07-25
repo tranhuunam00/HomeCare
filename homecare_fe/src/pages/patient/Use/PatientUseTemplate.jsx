@@ -796,8 +796,8 @@ const PatientUseTemplate = () => {
             />
 
             <Title level={3}>
-              Hiện có: {patientDiagnose?.doctor_print_templates?.length || 0}{" "}
-              bản ghi{" "}
+              Hiện có: {patientDiagnose?.doctor_print_templates?.length || 0}
+              bản ghi
             </Title>
 
             <Title level={3}>Phiếu kết quả</Title>

@@ -21,7 +21,7 @@ const ProfileSection = () => (
       <b>Điện thoại:</b> 0936944427
     </p>
     <p>
-      <b>Email:</b>{" "}
+      <b>Email:</b>
     </p>
     <p>
       <b>Ngày sinh:</b> 01-01-1990
@@ -30,7 +30,7 @@ const ProfileSection = () => (
       <b>Ngày tham gia:</b> 12-05-2025
     </p>
     <p>
-      <b>Địa chỉ:</b>{" "}
+      <b>Địa chỉ:</b>
     </p>
   </Card>
 );

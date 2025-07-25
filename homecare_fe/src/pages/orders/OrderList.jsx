@@ -165,8 +165,8 @@ const OrderList = () => {
             <Row justify="space-between" gutter={24}>
               <Col span={16}>
                 <p>
-                  <b>Đơn hàng:</b> {selectedOrder.orderCode} | <b>Thời gian:</b>{" "}
-                  {selectedOrder.createdAt} | <b>NV tư vấn:</b>{" "}
+                  <b>Đơn hàng:</b> {selectedOrder.orderCode} | <b>Thời gian:</b>
+                  {selectedOrder.createdAt} | <b>NV tư vấn:</b>
                   {selectedOrder.consultant} - {selectedOrder.email}
                 </p>
               </Col>
@@ -266,7 +266,7 @@ const OrderList = () => {
                 {selectedOrder.payment.coupon.value.toLocaleString()} đ)
               </Descriptions.Item>
               <Descriptions.Item label="Điểm thưởng">
-                +{selectedOrder.payment.rewardPointsEarned.toLocaleString()}{" "}
+                +{selectedOrder.payment.rewardPointsEarned.toLocaleString()}
                 điểm
               </Descriptions.Item>
               <Descriptions.Item label="Dùng điểm">

@@ -164,7 +164,7 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
               Liên hệ <strong>0961 766 816</strong>
             </p>
             <div className={styles.socials}>
-              <a href="#">Zalo</a> · <a href="#">Facebook</a> ·{" "}
+              <a href="#">Zalo</a> · <a href="#">Facebook</a> ·
               <a href="https://www.daogroup.vn/">Website</a>
             </div>
           </div>

@@ -353,14 +353,14 @@ const TemplatePrintUse = () => {
             </div>
             <div style={{ maxWidth: "280px" }}>
               <p style={{ fontSize: 14 }}>
-                <strong>Website:</strong>{" "}
+                <strong>Website:</strong>
                 <i>{headerInfo.website || "http://..."}</i>
               </p>
               <p style={{ fontSize: 14 }}>
                 <strong>Hotline:</strong> {headerInfo.phone || "..."}
               </p>
               <p style={{ fontSize: 14 }}>
-                <strong>Email:</strong>{" "}
+                <strong>Email:</strong>
                 <i>{headerInfo.email || "example@email.com"}</i>
               </p>
             </div>

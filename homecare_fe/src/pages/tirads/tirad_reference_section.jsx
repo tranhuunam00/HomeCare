@@ -8,7 +8,7 @@ const TiradsReferenceSection = () => {
         <h2>TIRADS là gì?</h2>
         <p>
           TIRADS (Thyroid Imaging Reporting and Data System) là hệ thống chấm
-          điểm 5 mức cho các nhân giáp trên siêu âm, được phát triển bởi{" "}
+          điểm 5 mức cho các nhân giáp trên siêu âm, được phát triển bởi
           <a href="https://www.acr.org/">Hiệp hội X-quang Hoa Kỳ (ACR)</a>. Hệ
           thống này giúp xác định nhân giáp là lành tính hay ác tính bằng cách
           kết hợp nhiều đặc điểm trên hình ảnh siêu âm.
@@ -17,18 +17,18 @@ const TiradsReferenceSection = () => {
         <h3>Cách tính điểm TIRADS cho nhân giáp bằng công cụ này</h3>
         <ul className="tirads-description-list left-align">
           <li>
-            Bước #1: Thực hiện siêu âm theo đúng hướng dẫn. Đọc kỹ{" "}
+            Bước #1: Thực hiện siêu âm theo đúng hướng dẫn. Đọc kỹ
             <a href="https://pubs.rsna.org/doi/pdf/10.1148/radiol.12120637">
               whitepaper
-            </a>{" "}
-            và{" "}
+            </a>
+            và
             <a href="https://www.acr.org/-/media/ACR/Files/Clinical-Resources/TIRADS/TIRADS_White_Paper.pdf">
               bài viết TIRADS
-            </a>{" "}
-            rút gọn. Có thể sử dụng{" "}
+            </a>
+            rút gọn. Có thể sử dụng
             <a href="https://www.acr.org/-/media/ACR/Files/Clinical-Resources/TIRADS/Worksheet.pdf">
               phiếu ghi chú cho kỹ thuật viên siêu âm
-            </a>{" "}
+            </a>
             để ghi lại các đặc điểm.
           </li>
           <li>
@@ -39,10 +39,10 @@ const TiradsReferenceSection = () => {
             TIRADS ở cuối công cụ.
           </li>
           <li>
-            Bước #4: Sử dụng{" "}
+            Bước #4: Sử dụng
             <a href="https://www.acr.org/-/media/ACR/Files/Clinical-Resources/TIRADS/Template.docx">
               mẫu báo cáo siêu âm
-            </a>{" "}
+            </a>
             để tạo báo cáo.
           </li>
           <li>

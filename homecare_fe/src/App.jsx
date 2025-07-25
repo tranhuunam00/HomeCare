@@ -35,6 +35,7 @@ import TemplateServiceList from "./pages/template_service/TemplateServiceList";
 import ExamPartList from "./pages/template_service/ExamPart/ExamPartList";
 import TiradsForm from "./pages/advance/Tirad/TiradsForm";
 import LungRADSForm from "./pages/advance/LungRADS/LungRadForm";
+import BiradsForm from "./pages/advance/BIRADS/BiradsForm";
 
 function App() {
   useAuthInitializer();
@@ -47,6 +48,7 @@ function App() {
         <Route path="/register" element={<RegisterForm />} />
         <Route path="/tirad" element={<TiradsForm />} />
         <Route path="/lungrad" element={<LungRADSForm />} />
+        <Route path="/birad" element={<BiradsForm />} />
 
         <Route
           path="/home"
