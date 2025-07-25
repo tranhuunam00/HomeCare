@@ -33,6 +33,7 @@ import PatientUseTemplate from "./pages/patient/Use/PatientUseTemplate";
 import ViewTemplateProduct from "./pages/products/TemplateProduct/ViewTemplateProduct";
 import TemplateServiceList from "./pages/template_service/TemplateServiceList";
 import ExamPartList from "./pages/template_service/ExamPart/ExamPartList";
+import TiradsForm from "./pages/advance/Tirad/TiradsForm";
 
 function App() {
   useAuthInitializer();
@@ -43,6 +44,7 @@ function App() {
         <Route path="/" element={<HomeCareLanding />} />
         <Route path="/login" element={<LoginForm />} />
         <Route path="/register" element={<RegisterForm />} />
+        <Route path="/tirad" element={<TiradsForm />} />
 
         <Route
           path="/home"

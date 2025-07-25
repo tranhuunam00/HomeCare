@@ -58,6 +58,13 @@ const HomeCareLanding = () => {
     },
   ];
 
+  const trialItem = [
+    {
+      label: "TIRADs",
+      onClick: () => navigate("tirad"),
+    },
+  ];
+
   const [isContactOpen, setIsContactOpen] = useState(false);
 
   const handleContactCancel = () => setIsContactOpen(false);
@@ -112,6 +119,7 @@ const HomeCareLanding = () => {
               </Menu.Item>
 
               <DropdownNav title="SẢN PHẨM" items={productsItem} />
+              <DropdownNav title="TRẢI NGHIỆM" items={trialItem} />
             </Menu>
           </div>
         </div>
