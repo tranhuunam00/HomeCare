@@ -302,7 +302,7 @@ const BiradsForm = () => {
       <div className={styles.formContainer}>
         <Form form={form} layout="vertical" onValuesChange={handleCalcVolume}>
           <Row gutter={16}>
-            <Col span={8}>
+            <Col span={6}>
               <Form.Item
                 name="breastSide"
                 label="Tuyến vú khảo sát"
@@ -312,7 +312,7 @@ const BiradsForm = () => {
               </Form.Item>
             </Col>
 
-            <Col span={8}>
+            <Col span={9}>
               <Form.Item
                 name="density"
                 label="Mật độ tuyến vú"
@@ -322,7 +322,7 @@ const BiradsForm = () => {
               </Form.Item>
             </Col>
 
-            <Col span={8}>
+            <Col span={9}>
               <Form.Item
                 name="location"
                 label="Vị trí tổn thương"
@@ -371,16 +371,34 @@ const BiradsForm = () => {
           <Form.Item
             name="shape"
             label="Hình dạng tổn thương"
-            rules={[{ required: true }]}
+            rules={[
+              { required: true, message: "Vui lòng chọn hình dạng tổn thương" },
+            ]}
           >
-            <Radio.Group options={SHAPE_OPTIONS} />
+            <Radio.Group>
+              <Row gutter={[12, 12]}>
+                {SHAPE_OPTIONS.map((opt) => (
+                  <Col key={opt.value} span={16}>
+                    <Radio value={opt.value}>{opt.label}</Radio>
+                  </Col>
+                ))}
+              </Row>
+            </Radio.Group>
           </Form.Item>
           <Form.Item
             name="margin"
             label="Bờ viền tổn thương"
-            rules={[{ required: true }]}
+            rules={[{ required: true, message: "Vui lòng chọn bờ viền" }]}
           >
-            <Radio.Group options={MARGIN_OPTIONS} />
+            <Radio.Group>
+              <Row gutter={[12, 12]}>
+                {MARGIN_OPTIONS.map((option) => (
+                  <Col key={option.value} span={12}>
+                    <Radio value={option.value}>{option.label}</Radio>
+                  </Col>
+                ))}
+              </Row>
+            </Radio.Group>
           </Form.Item>
           <Form.Item
             name="echogenicity"
@@ -393,16 +411,32 @@ const BiradsForm = () => {
           <Form.Item
             name="benignCalc"
             label="Vôi hóa lành tính"
-            rules={[{ required: true }]}
+            rules={[{ required: true, message: "Bắt buộc chọn một mục" }]}
           >
-            <Radio.Group options={BENIGN_CALCIFICATION_OPTIONS} />
+            <Radio.Group>
+              <Row gutter={[12, 12]}>
+                {BENIGN_CALCIFICATION_OPTIONS.map((option, index) => (
+                  <Col key={option.value} span={12}>
+                    <Radio value={option.value}>{option.label}</Radio>
+                  </Col>
+                ))}
+              </Row>
+            </Radio.Group>
           </Form.Item>
           <Form.Item
             name="suspiciousCalc"
             label="Vôi hóa nghi ngờ"
-            rules={[{ required: true }]}
+            rules={[{ required: true, message: "Bắt buộc chọn một mục" }]}
           >
-            <Radio.Group options={SUSPICIOUS_CALCIFICATION_OPTIONS} />
+            <Radio.Group>
+              <Row gutter={[12, 12]}>
+                {SUSPICIOUS_CALCIFICATION_OPTIONS.map((option) => (
+                  <Col key={option.value} span={12}>
+                    <Radio value={option.value}>{option.label}</Radio>
+                  </Col>
+                ))}
+              </Row>
+            </Radio.Group>
           </Form.Item>
           <Form.Item
             name="calcDist"
@@ -412,7 +446,15 @@ const BiradsForm = () => {
             <Select options={CALC_DISTRIBUTION_OPTIONS} />
           </Form.Item>
           <Form.Item name="suspiciousSigns" label="Dấu hiệu nghi ngờ khác">
-            <Checkbox.Group options={OTHER_SUSPICIOUS_SIGNS} />
+            <Checkbox.Group>
+              <Row gutter={[12, 12]}>
+                {OTHER_SUSPICIOUS_SIGNS.map((option) => (
+                  <Col key={option.value} span={12}>
+                    <Checkbox value={option.value}>{option.label}</Checkbox>
+                  </Col>
+                ))}
+              </Row>
+            </Checkbox.Group>
           </Form.Item>
 
           <Form.Item name="birads" label="Phân loại BIRADS">

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Form,
   Input,
@@ -37,16 +37,18 @@ const COT_HOA_STAGES = [
   { label: "11 – Đầu dưới xương quay phát triển rõ", value: 11, range: [8, 9] },
   { label: "12 – Sụn tiếp hợp mờ dần", value: 12, range: [10, 11] },
   {
-    label: "13 – Đầu xương bắt đầu dính với thân xương",
-    value: 13,
-    range: [12, 13],
-  },
-  { label: "14 – Hầu hết sụn tiếp hợp đóng (nữ)", value: 14, range: [14, 15] },
-  {
-    label: "15 – Xương hoàn thiện (nữ), dính hoàn toàn (nam)",
+    label: "15 – Xương hoàn thiện (nữ)",
     value: 15,
+    gender: "female",
     range: [16, 17],
   },
+  {
+    label: "15 – Xương dính hoàn toàn (nam)",
+    value: 15,
+    gender: "male",
+    range: [16, 17],
+  },
+
   { label: "16 – Trưởng thành hoàn toàn", value: 16, range: [">18"] },
 ];
 
@@ -55,6 +57,16 @@ const BoneAgeForm = () => {
   const ossificationSelected = Form.useWatch("ossificationPoints", form);
   const [boneAgeRange, setBoneAgeRange] = useState(null);
   const [physiologicalAge, setPhysiologicalAge] = useState(null);
+
+  const gender = Form.useWatch("gender", form);
+
+  const visibleStages = useMemo(() => {
+    return COT_HOA_STAGES.filter((item) => {
+      if (item.value === 14 && gender !== "female") return false;
+      if (item.gender && item.gender !== gender) return false;
+      return true;
+    });
+  }, [gender]);
 
   useEffect(() => {
     if (!ossificationSelected?.length) {
@@ -302,7 +314,15 @@ const BoneAgeForm = () => {
             }
             name="ossificationPoints"
           >
-            <Checkbox.Group options={COT_HOA_STAGES} />
+            <Checkbox.Group disabled={!gender}>
+              <Row gutter={[12, 12]}>
+                {visibleStages.map((opt) => (
+                  <Col key={opt.value} span={12}>
+                    <Checkbox value={opt.value}>{opt.label}</Checkbox>
+                  </Col>
+                ))}
+              </Row>
+            </Checkbox.Group>
           </Form.Item>
 
           <Form.Item
