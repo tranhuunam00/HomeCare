@@ -64,7 +64,7 @@ const HomeCareLanding = () => {
       onClick: () => navigate("tirad"),
     },
     {
-      label: "LungRADs",
+      label: " D-LungRADS",
       onClick: () => navigate("lungrad"),
     },
     {
@@ -287,7 +287,7 @@ const HomeCareLanding = () => {
             <p>
               Một trong những giải pháp đột phá hiện nay là hệ thống phần mềm hỗ
               trợ đánh giá tổn thương theo các hệ thống phân loại chuẩn quốc tế:
-              TIRADS, LI-RADS, BI-RADS, PI-RADS, Lung-RADS, RECIST...
+              TIRADS, LI-RADS, BI-RADS, PI-RADS, D-LungRADS, RECIST...
             </p>
           </div>
           <div className={styles["homecare__articles-image"]}>

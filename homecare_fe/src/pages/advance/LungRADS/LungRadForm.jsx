@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Form,
   InputNumber,
@@ -10,30 +10,37 @@ import {
   Col,
   Row,
   Tooltip,
+  DatePicker,
+  Input,
+  Checkbox,
 } from "antd";
 import styles from "./LungRADSForm.module.scss";
 import { toast } from "react-toastify";
+import dayjs from "dayjs";
 
 const { Title } = Typography;
 const { Option } = Select;
 
 const COMPARE_OPTIONS = [
   {
-    label:
-      "Chưa từng chụp hoặc đã từng chụp nhưng không có thông tin đối chiếu.",
-    value: "none",
+    label: "Không có thông tin kết quả cũ",
+    value: "no-info",
   },
   {
-    label: "Đã chụp trước đó nhưng không thấy tổn thương.",
+    label: "Kết quả cũ không thấy tổn thương",
     value: "no-lesion",
+  },
+  {
+    label: "Kết quả cũ có thấy tổn thương",
+    value: "has-lesion",
   },
 ];
 
 export const BENIGN_OPTIONS = [
-  { label: "Nốt có vôi hóa", value: "calc" },
-  { label: "Nốt chứa mỡ", value: "fat" },
-  { label: "Nốt cạnh màng phổi", value: "mp" },
-  { label: "Không có đặc điểm lành tính", value: "none" },
+  { label: "Nốt có vôi hóa (calcification)", value: "calc" },
+  { label: "Nốt chứa mỡ (fat)", value: "fat" },
+  { label: "Nốt cạnh màng phổi (juxtapleural).", value: "mp" },
+  { label: "Không có đặc điểm lành tính nào (none)", value: "none" },
 ];
 
 const LOCATION_OPTIONS = [
@@ -61,6 +68,54 @@ const LungRADSForm = () => {
   const [form] = Form.useForm();
   const [structure, setStructure] = useState();
   const [result, setResult] = useState(null);
+  const [compareMonths, setCompareMonths] = useState("");
+  const oldDate = Form.useWatch("old_result_date", form);
+  const currentDate = Form.useWatch("current_result_date", form);
+
+  const priorScanComparison = Form.useWatch("compare", form);
+  const compare = Form.useWatch("compare", form);
+
+  const getProgressionOptions = () => {
+    if (compare === "has-lesion") {
+      return [
+        { label: "Không thay đổi kích thước (Stable).", value: "stable" },
+        { label: "Tăng kích thước ≤ 1.5mm/12 tháng (Slow).", value: "slow" },
+        {
+          label: "Tăng kích thước >1.5mm/12 tháng (Growing).",
+          value: "growing",
+        },
+      ];
+    }
+
+    if (compare === "no-lesion") {
+      return [{ label: "Mới phát hiện (New).", value: "new" }];
+    }
+
+    if (compare === "no-info") {
+      return [{ label: "Mới phát hiện (Baseline).", value: "baseline" }];
+    }
+
+    return [];
+  };
+
+  useEffect(() => {
+    if (compare === "no-info") {
+      form.setFieldValue("progression", "baseline");
+    } else if (compare === "no-lesion") {
+      form.setFieldValue("progression", "new");
+    } else if (compare === "has-lesion") {
+      form.setFieldValue("progression", undefined); // bắt người dùng chọn
+    }
+  }, [compare]);
+
+  useEffect(() => {
+    if (oldDate && currentDate) {
+      const diffMonths = currentDate.diff(oldDate, "months", true).toFixed(1);
+      setCompareMonths(diffMonths);
+    } else {
+      setCompareMonths("");
+    }
+  }, [oldDate, currentDate]);
 
   const D1 = Form.useWatch("D1", form);
   const D2 = Form.useWatch("D2", form);
@@ -248,8 +303,25 @@ const LungRADSForm = () => {
       }
     </style>
     <table>
-      <caption>Đánh giá Lung-RADS</caption>
+      <caption>Đánh giá D-LungRADS</caption>
       <tr><th>Thông tin</th><th>Giá trị</th></tr>
+      <tr><td>Đối chiếu kết quả cũ</td><td>${getLabelFromOptions(
+        COMPARE_OPTIONS,
+        compare
+      )}</td></tr>
+     <tr><td>Ngày chụp kết quả hiện tại</td><td>${
+       form.getFieldValue("old_result_date")
+         ? dayjs(form.getFieldValue("old_result_date")).format("DD-MM-YYYY")
+         : "--"
+     }</td></tr>
+      <tr><td>Ngày chụp kết quả hiện tại</td><td>${
+        form.getFieldValue("current_result_date")
+          ? dayjs(form.getFieldValue("current_result_date")).format(
+              "DD-MM-YYYY"
+            )
+          : "--"
+      }</td></tr>
+      <tr><td>Thời gian đối chiếu</td><td>${compareMonths} tháng</td></tr>
       <tr><td>Vị trí tổn thương</td><td>${getLabelFromOptions(
         LOCATION_OPTIONS,
         location
@@ -258,45 +330,30 @@ const LungRADSForm = () => {
         STRUCTURE_OPTIONS,
         structure
       )}</td></tr>
-      <tr><td>Tiến triển</td><td>${getLabelFromOptions(
-        [
-          {
-            label: "Baseline - Không có kết quả chụp trước đó. Mới phát hiện",
-            value: "baseline",
-          },
-          {
-            label:
-              "New - Có kết quả chụp trước đó nhưng không thấy. Mới phát hiện.",
-            value: "new",
-          },
-          {
-            label:
-              "Stable - Có trong kết quả chụp trước đó nhưng không thay đổi kích thước.",
-            value: "stable",
-          },
-          {
-            label:
-              "Slow - Có trong kết quả chụp trước đó, tăng kích thước ≤ 1.5mm/12 tháng.",
-            value: "slow",
-          },
-          {
-            label:
-              "Growing - Có trong kết quả chụp trước đó, tăng kích thước >1.5mm/12 tháng.",
-            value: "growing",
-          },
-        ],
-        progression
-      )}</td></tr>
-      <tr><td>D1 (mm)</td><td>${D1 || ""}</td></tr>
-      <tr><td>D2 (mm)</td><td>${D2 || ""}</td></tr>
-      <tr><td>D3 (mm)</td><td>${D3 || ""}</td></tr>
-      <tr><td>D4 trung bình (mm)</td><td>${calcD4}</td></tr>
-      <tr><td>Thể tích (mm³)</td><td>${volume}</td></tr>
-      ${
-        structure === "part-solid"
-          ? `<tr><td>D5 phần đặc (mm)</td><td>${D5 || ""}</td></tr>`
-          : ""
-      }
+     <tr>
+          <td>Kích thước</td>
+          <td>
+            <table style="width: 100%; border-collapse: collapse; border: none;">
+              <tr>
+                <td style="text-align: center; border: none; padding: 0; border-right: 1px solid #ccc;">${
+                  D1 || ""
+                } mm</td>
+                <td style="text-align: center; border: none; padding: 0; border-right: 1px solid #ccc;">${
+                  D2 || ""
+                } mm</td>
+                <td style="text-align: center; border: none; padding: 0;">${
+                  D3 || ""
+                } mm</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      <tr><td>Kích thước trung bình</td><td style="text-align: center;">${calcD4} mm</td></tr>
+      <tr><td>Thể tích phần đặc</td><td style="text-align: center;">${
+        D5 || "--"
+      } mm</td></tr>
+
+      <tr><td>Thể tích tổn thương</td><td style="text-align: center;">${volume} mm³</td></tr>
       ${
         structure === "solid"
           ? `<tr><td>Dấu hiệu lành tính</td><td>${getLabelFromOptions(
@@ -310,7 +367,32 @@ const LungRADSForm = () => {
              }</td></tr>`
           : ""
       }
-      <tr><td><strong>Lung-RADS</strong></td><td><strong>Nhóm ${group}</strong></td></tr>
+       <tr><td>Theo dõi tiến triển</td><td>${getLabelFromOptions(
+         [
+           {
+             label: "Mới phát hiện (Baseline).",
+             value: "baseline",
+           },
+           {
+             label: "Mới phát hiện (New).",
+             value: "new",
+           },
+           {
+             label: "Không thay đổi kích thước (Stable).",
+             value: "stable",
+           },
+           {
+             label: "Tăng kích thước ≤ 1.5mm/12 tháng (Slow).",
+             value: "slow",
+           },
+           {
+             label: "Tăng kích thước >1.5mm/12 tháng (Growing).",
+             value: "growing",
+           },
+         ],
+         progression
+       )}</td></tr>
+      <tr><td><strong>Phân loại ACR -LungRADS</strong></td><td><strong>Nhóm ${group}</strong></td></tr>
       <tr><td>Khuyến nghị</td><td>${recommendation}</td></tr>
     </table>`;
 
@@ -340,12 +422,13 @@ const LungRADSForm = () => {
   return (
     <div className={styles.pageWrapper}>
       <div className={styles.formContainer}>
-        <Title level={3}>Đánh giá Lung-RADS</Title>
-        <Form form={form} layout="vertical" onFinish={onFinish}>
-          <Form.Item label="Mục đích" name="purpose">
-            <span>Sàng lọc chẩn đoán sớm ung thư phổi</span>
-          </Form.Item>
+        <Title level={3}>Đánh giá D-LungRADS</Title>
+        <h4>Lĩnh vực: cắt lớp vi tính</h4>
+        <h4 style={{ marginBottom: 40 }}>
+          Mục đích: sàng lọc chẩn đoán sớm ung thư phổ
+        </h4>
 
+        <Form form={form} layout="vertical" onFinish={onFinish}>
           <Form.Item
             name="compare"
             label="Đối chiếu kết quả cũ"
@@ -356,6 +439,35 @@ const LungRADSForm = () => {
               options={COMPARE_OPTIONS}
             />
           </Form.Item>
+
+          <Row gutter={16}>
+            <Col span={8}>
+              <Form.Item label="Ngày chụp kết quả cũ" name="old_result_date">
+                <DatePicker
+                  style={{ width: "100%" }}
+                  placeholder="Ngày chụp lần đầu tiên"
+                />
+              </Form.Item>
+            </Col>
+
+            <Col span={8}>
+              <Form.Item
+                label="Ngày chụp kết quả hiện tại"
+                name="current_result_date"
+              >
+                <DatePicker
+                  style={{ width: "100%" }}
+                  placeholder="Ngày chụp lần hiện tại"
+                />
+              </Form.Item>
+            </Col>
+
+            <Col span={8}>
+              <Form.Item label="Thời gian đối chiếu (số tháng)">
+                <Input value={compareMonths} disabled suffix="tháng" />
+              </Form.Item>
+            </Col>
+          </Row>
 
           <Form.Item
             name="location"
@@ -384,33 +496,8 @@ const LungRADSForm = () => {
           >
             <Select
               placeholder="Chọn loại"
-              options={[
-                {
-                  label:
-                    "Baseline - Không có kết quả chụp trước đó. Mới phát hiện",
-                  value: "baseline",
-                },
-                {
-                  label:
-                    "New - Có kết quả chụp trước đó nhưng không thấy. Mới phát hiện.",
-                  value: "new",
-                },
-                {
-                  label:
-                    "Stable - Có trong kết quả chụp trước đó nhưng không thay đổi kích thước.",
-                  value: "stable",
-                },
-                {
-                  label:
-                    "Slow - Có trong kết quả chụp trước đó, tăng kích thước ≤ 1.5mm/12 tháng.",
-                  value: "slow",
-                },
-                {
-                  label:
-                    "Growing - Có trong kết quả chụp trước đó, tăng kích thước  >1.5mm/12 tháng.",
-                  value: "growing",
-                },
-              ]}
+              disabled={compare !== "has-lesion"}
+              options={getProgressionOptions()}
             />
           </Form.Item>
 
@@ -419,7 +506,7 @@ const LungRADSForm = () => {
               <Form.Item
                 name="D1"
                 label={
-                  <Tooltip title="Đường kính lớn nhất">
+                  <Tooltip title=" Chiều dài">
                     <span>D1 (mm)</span>
                   </Tooltip>
                 }
@@ -437,7 +524,7 @@ const LungRADSForm = () => {
               <Form.Item
                 name="D2"
                 label={
-                  <Tooltip title="Đường kính bé nhất">
+                  <Tooltip title="Chiều rộng">
                     <span>D2 (mm)</span>
                   </Tooltip>
                 }
@@ -455,7 +542,7 @@ const LungRADSForm = () => {
               <Form.Item
                 name="D3"
                 label={
-                  <Tooltip title="Đường kính còn lại">
+                  <Tooltip title="Chiều cao">
                     <span>D3 (mm)</span>
                   </Tooltip>
                 }
@@ -494,17 +581,38 @@ const LungRADSForm = () => {
               <Form.Item
                 name="benign"
                 label="Dấu hiệu lành tính"
-                rules={[{ required: true }]}
+                rules={[{ required: true, message: "Bắt buộc chọn một mục" }]}
               >
-                <Radio.Group options={BENIGN_OPTIONS} />
+                <Radio.Group>
+                  <Row gutter={[12, 12]}>
+                    {BENIGN_OPTIONS.map((option) => (
+                      <Col key={option.value} span={12}>
+                        <Radio value={option.value}>{option.label}</Radio>
+                      </Col>
+                    ))}
+                  </Row>
+                </Radio.Group>
               </Form.Item>
 
-              <Form.Item name="riskSigns" label="Dấu hiệu nguy cơ">
-                <Select
-                  mode="multiple"
-                  placeholder="Chọn các dấu hiệu"
-                  options={RISK_SIGNS_OPTIONS}
-                />
+              <Form.Item
+                name="riskSigns"
+                label="Dấu hiệu nguy cơ"
+                rules={[
+                  {
+                    required: true,
+                    message: "Chọn ít nhất một dấu hiệu nguy cơ",
+                  },
+                ]}
+              >
+                <Checkbox.Group>
+                  <Row gutter={[12, 12]}>
+                    {RISK_SIGNS_OPTIONS.map((option) => (
+                      <Col key={option.value} span={16}>
+                        <Checkbox value={option.value}>{option.label}</Checkbox>
+                      </Col>
+                    ))}
+                  </Row>
+                </Checkbox.Group>
               </Form.Item>
             </>
           )}
@@ -537,7 +645,7 @@ const LungRADSForm = () => {
             <div className={styles.resultBox}>
               <Title level={4}>Kết quả đánh giá:</Title>
               <p>
-                <strong>Lung-RADS:</strong> Nhóm {result.group}
+                <strong>D-LungRADS:</strong> Nhóm {result.group}
               </p>
               <p>
                 <strong>Khuyến nghị:</strong> {result.recommendation}
