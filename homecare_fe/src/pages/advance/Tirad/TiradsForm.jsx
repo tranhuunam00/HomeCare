@@ -149,7 +149,11 @@ const TiradsForm = () => {
         <ul style="padding-left: 16px; margin: 0;">
           ${values.calcification
             .map(
-              (v) => `<li>${getLabelWithScore(CALCIFICATION_OPTIONS, v)}</li>`
+              (v) =>
+                `<li style="margin-bottom: 8px;">${getLabelWithScore(
+                  CALCIFICATION_OPTIONS,
+                  v
+                )}</li>`
             )
             .join("")}
         </ul>
@@ -187,9 +191,25 @@ const TiradsForm = () => {
         <caption>Đánh giá TIRADS</caption>
         <tr><th>Thông tin</th><th>Giá trị</th></tr>
         <tr><td>Vị trí tổn thương</td><td>${values.location || ""}</td></tr>
-        <tr><td>Kích thước D1 (mm)</td><td>${values.D1 || ""}</td></tr>
-        <tr><td>Kích thước D2 (mm)</td><td>${values.D2 || ""}</td></tr>
-        <tr><td>Kích thước D3 (mm)</td><td>${values.D3 || ""}</td></tr>
+        <tr>
+          <td>Kích thước</td>
+          <td>
+            <table style="width: 100%; border-collapse: collapse; border: none;">
+              <tr>
+                <td style="text-align: center; border: none; padding: 0; border-right: 1px solid #ccc;">${
+                  values.D1 || ""
+                } mm</td>
+                <td style="text-align: center; border: none; padding: 0; border-right: 1px solid #ccc;">${
+                  values.D2 || ""
+                } mm</td>
+                <td style="text-align: center; border: none; padding: 0;">${
+                  values.D3 || ""
+                } mm</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr><td>Thể tích</td><td style="text-align: center;">${volume} mm3 </td></tr>
         <tr><td>Đặc điểm thành phần</td><td>${getLabelWithScore(
           COMPOSITION_OPTIONS,
           values.composition
@@ -207,11 +227,11 @@ const TiradsForm = () => {
           values.margin
         )}</td></tr>
         <tr><td>Đặc điểm vôi hóa</td><td>${calcDisplay}</td></tr>
-        <tr><td><strong>Tổng điểm</strong></td><td><strong>${score}</strong></td></tr>
-        <tr><td>Phân loại</td><td>${tirads}</td></tr>
+        <tr><td><strong>Tổng điểm</strong></td><td style="text-align: center;">${score}</td></tr>
+        <tr><td>Phân loại (ACR-TIRADS)</td><td><strong style="text-align: center;">${tirads}</strong></td></tr>
         <tr><td>Khuyến nghị</td><td>${recommendation}</td></tr>
+        <tr><td>Ghi chú</td><td><em>${"home-care"}</em></td></tr>
       </table>
-      home-care
     `;
 
       await navigator.clipboard.write([
@@ -231,7 +251,10 @@ const TiradsForm = () => {
     <div className={styles.pageWrapper}>
       <div className={styles.formContainer}>
         <Form form={form} layout="vertical" initialValues={defaultValues}>
-          <h2 style={{ marginBottom: 24 }}>TIRADs HOME-CARE</h2>
+          <h2 style={{ marginBottom: 24 }}>D-TIRADS HOME-CARE</h2>
+          <h4>Lĩnh vực: siêu âm</h4>
+          <h4>Mục đích: sàng lọc chẩn đoán sớm ung thư tuyến giáp</h4>
+          <div style={{ marginBottom: 50 }}></div>
           <Row gutter={24}>
             <Col span={12}>
               <Form.Item

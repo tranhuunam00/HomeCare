@@ -60,7 +60,7 @@ const HomeCareLanding = () => {
 
   const trialItem = [
     {
-      label: "TIRADs",
+      label: "D-TIRADS",
       onClick: () => navigate("tirad"),
     },
     {
