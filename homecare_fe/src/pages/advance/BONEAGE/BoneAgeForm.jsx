@@ -19,7 +19,7 @@ const { Option } = Select;
 import styles from "./BoneAgeForm.module.scss";
 import { toast } from "react-toastify";
 
-const COT_HOA_STAGES = [
+export const COT_HOA_STAGES = [
   {
     label: "1 – Xương quay, trụ; xương bàn tay, đốt ngón",
     value: 1,
@@ -37,19 +37,35 @@ const COT_HOA_STAGES = [
   { label: "11 – Đầu dưới xương quay phát triển rõ", value: 11, range: [8, 9] },
   { label: "12 – Sụn tiếp hợp mờ dần", value: 12, range: [10, 11] },
   {
-    label: "15 – Xương hoàn thiện (nữ)",
+    label: "13 – Đầu xương bắt đầu dính với thân xương",
+    value: 13,
+    range: [12, 13],
+  },
+  {
+    label: "14 – Hầu hết sụn tiếp hợp đóng (nữ)",
+    value: 14,
+    gender: "female",
+    range: [14, 15],
+  },
+  {
+    label: "15 – Dính đầu xương – thân xương hoàn toàn (nữ)",
     value: 15,
     gender: "female",
     range: [16, 17],
   },
   {
-    label: "15 – Xương dính hoàn toàn (nam)",
-    value: 15,
+    label: "16 – Hầu hết sụn tiếp hợp đóng (nam)",
+    value: 16,
     gender: "male",
-    range: [16, 17],
+    range: [15, 16],
   },
-
-  { label: "16 – Trưởng thành hoàn toàn", value: 16, range: [">18"] },
+  {
+    label: "17 – Dính đầu xương – thân xương hoàn toàn (nam)",
+    value: 17,
+    gender: "male",
+    range: [17, 18],
+  },
+  { label: "18 – Trưởng thành hoàn toàn", value: 18, range: [18] },
 ];
 
 const BoneAgeForm = () => {
@@ -113,22 +129,27 @@ const BoneAgeForm = () => {
         conclusion,
       } = values;
 
-      const selectedStages = `
-      <ul style="padding-left: 16px; margin: 0;">
-        ${COT_HOA_STAGES.filter((s) => ossificationPoints?.includes(s.value))
-          .map((s) => `<li>${s.label}</li>`)
-          .join("")}
-      </ul>
-    `;
+      const selectedStageRows = COT_HOA_STAGES.map((stage) => {
+        const isSelected = ossificationPoints?.includes(stage.value);
+        const rangeDisplay = Array.isArray(stage.range)
+          ? stage.range.join(" – ")
+          : stage.range;
+        return `
+        <tr>
+          <td>${stage.label}</td>
+          <td>${rangeDisplay}</td>
+          <td style="text-align: center;">${isSelected ? "✔️" : ""}</td>
+        </tr>
+      `;
+      }).join("");
 
       const html = `
       <style>
         table {
           width: 100%;
-          table-layout: fixed;
           border-collapse: collapse;
           font-family: Arial, sans-serif;
-          margin-top: 12px;
+          margin-top: 16px;
         }
         th, td {
           border: 1px solid #ccc;
@@ -136,53 +157,57 @@ const BoneAgeForm = () => {
           font-size: 15px;
           text-align: left;
           vertical-align: top;
-          word-wrap: break-word;
-          white-space: pre-wrap;
         }
         th {
           background-color: #f0f0f0;
           font-weight: bold;
         }
         caption {
-          font-size: 17px;
+          font-size: 18px;
           font-weight: bold;
-          margin-bottom: 10px;
+          margin: 12px 0 8px;
           text-align: left;
         }
-        th:first-child, td:first-child {
-          width: 45%;
+        .multiline {
+          white-space: pre-wrap;
+          word-break: break-word;
         }
-        th:last-child, td:last-child {
-          width: 55%;
+        .center {
+          text-align: center;
         }
       </style>
+
+      <!-- Table 1: Thông tin hành chính -->
       <table>
-        <caption>Đánh giá tuổi xương – Bone Age</caption>
-        <tr><th>Thông tin</th><th>Giá trị</th></tr>
-        <tr><td>Vị trí đánh giá</td><td>${position}</td></tr>
-        <tr><td>Phương tiện</td><td>${way}</td></tr>
-        <tr><td>Phương pháp</td><td>${method}</td></tr>
-        <tr><td>Năm sinh</td><td>${birthYear?.year?.()}</td></tr>
-        <tr><td>Tuổi sinh lý (năm)</td><td>${physiologicalAge}</td></tr>
-        <tr><td>Giới tính</td><td>${gender === "male" ? "Nam" : "Nữ"}</td></tr>
-        <tr><td>Điểm cốt hóa mới xuất hiện</td><td>${selectedStages}</td></tr>
-        <tr>
-          <td>Kết quả</td>
-          <td>
-            <div style="max-width: 100%; word-wrap: break-word; white-space: pre-wrap;">
-              ${boneAge?.replace(/<[^>]*>/g, "")}
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td>Kết luận</td>
-          <td>
-            <div style="max-width: 100%; word-wrap: break-word; white-space: pre-wrap;">
-              ${conclusion}
-            </div>
-          </td>
-        </tr>
+        <caption>Thông tin kỹ thuật và hành chính</caption>
+        <tr><th>Vị trí đánh giá</th><td>${position}</td></tr>
+        <tr><th>Phương tiện</th><td>${way}</td></tr>
+        <tr><th>Phương pháp</th><td>${method}</td></tr>
+        <tr><th>Năm sinh</th><td>${birthYear?.year?.()}</td></tr>
+        <tr><th>Tuổi sinh lý</th><td>${physiologicalAge} năm</td></tr>
+        <tr><th>Giới tính</th><td>${gender === "male" ? "Nam" : "Nữ"}</td></tr>
       </table>
+
+      <!-- Table 2: Các điểm cốt hóa -->
+      <table>
+        <caption>Đánh giá các điểm cốt hóa</caption>
+        <tr>
+          <th>Các điểm cốt hóa mới xuất hiện</th>
+          <th>Tuổi xương (Năm)</th>
+          <th class="center">Tick</th>
+        </tr>
+        ${selectedStageRows}
+      </table>
+
+      <!-- Table 3: Kết quả -->
+      <div style="margin-top: 20px;">
+        <h3 style="margin-bottom: 8px;">Kết luận</h3>
+        <div style="text-align: center; font-size: 15px; line-height: 1.6;">
+          Hình ảnh chụp X quang bàn tay trái đánh giá tuổi xương theo phương pháp Greulich & Pyle cho thấy tuổi xương tương đương
+          <div style="font-size: 28px; font-weight: bold; margin: 8px 0;">${physiologicalAge}</div>
+          <div style="font-size: 15px;">Năm</div>
+        </div>
+      </div>
     `;
 
       if (navigator.clipboard?.write) {
@@ -217,6 +242,10 @@ const BoneAgeForm = () => {
   return (
     <div className={styles.pageWrapper}>
       <div className={styles.formContainer}>
+        <h2 style={{ marginBottom: 24 }}>D-BONEAGE</h2>
+        <h4>Lĩnh vực: X quang</h4>
+        <h4>Mục đích: chẩn đoán tuổi xương</h4>
+        <div style={{ marginBottom: 50 }}></div>
         <Form layout="vertical" form={form}>
           <Row gutter={16}>
             <Col span={8}>
