@@ -79,6 +79,10 @@ const HomeCareLanding = () => {
       label: "D-IPSS",
       onClick: () => navigate("dipss"),
     },
+    {
+      label: "D-CVRIS",
+      onClick: () => navigate("cvris"),
+    },
   ];
 
   const [isContactOpen, setIsContactOpen] = useState(false);

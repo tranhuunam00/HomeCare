@@ -38,6 +38,7 @@ import LungRADSForm from "./pages/advance/LungRADS/LungRadForm";
 import BiradsForm from "./pages/advance/BIRADS/BiradsForm";
 import BoneAgeForm from "./pages/advance/BONEAGE/BoneAgeForm";
 import DipssForm from "./pages/advance/D-IPSS/DipssForm";
+import CVRISForm from "./pages/advance/CVRIS/CvrisForm";
 
 function App() {
   useAuthInitializer();
@@ -53,6 +54,7 @@ function App() {
         <Route path="/birad" element={<BiradsForm />} />
         <Route path="/boneage" element={<BoneAgeForm />} />
         <Route path="/dipss" element={<DipssForm />} />
+        <Route path="/cvris" element={<CVRISForm />} />
 
         <Route
           path="/home"
