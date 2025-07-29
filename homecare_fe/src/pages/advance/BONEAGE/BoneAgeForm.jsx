@@ -78,7 +78,6 @@ const BoneAgeForm = () => {
 
   const visibleStages = useMemo(() => {
     return COT_HOA_STAGES.filter((item) => {
-      if (item.value === 14 && gender !== "female") return false;
       if (item.gender && item.gender !== gender) return false;
       return true;
     });
@@ -126,22 +125,23 @@ const BoneAgeForm = () => {
         gender,
         ossificationPoints,
         boneAge,
-        conclusion,
       } = values;
 
-      const selectedStageRows = COT_HOA_STAGES.map((stage) => {
-        const isSelected = ossificationPoints?.includes(stage.value);
-        const rangeDisplay = Array.isArray(stage.range)
-          ? stage.range.join(" – ")
-          : stage.range;
-        return `
+      const selectedStageRows = visibleStages
+        .map((stage) => {
+          const isSelected = ossificationPoints?.includes(stage.value);
+          const rangeDisplay = Array.isArray(stage.range)
+            ? stage.range.join(" – ")
+            : stage.range;
+          return `
         <tr>
           <td>${stage.label}</td>
           <td>${rangeDisplay}</td>
           <td style="text-align: center;">${isSelected ? "✔️" : ""}</td>
         </tr>
       `;
-      }).join("");
+        })
+        .join("");
 
       const html = `
       <style>

@@ -68,11 +68,11 @@ const HomeCareLanding = () => {
       onClick: () => navigate("lungrad"),
     },
     {
-      label: "BiRADs",
+      label: "D-BIRADS MM",
       onClick: () => navigate("birad"),
     },
     {
-      label: "BoneAge",
+      label: "D-BONEAGE",
       onClick: () => navigate("boneage"),
     },
   ];
