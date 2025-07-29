@@ -28,6 +28,13 @@ export const SHAPE_OPTIONS = [
   },
 ];
 
+export const TYPE_OF_LESION_OPTIONS = [
+  { label: "Nốt, khối, đám", value: "mass" },
+  { label: "Vôi tính chất lành tính", value: "benign-calcification" },
+  { label: "Vi vôi hóa nghi ngờ", value: "microcalcification" },
+  { label: "Tổn thương khác", value: "other" },
+];
+
 export const MARGIN_OPTIONS = [
   {
     label: "Bờ rõ nét – circumscribe (BR2; BR3)",
@@ -69,6 +76,7 @@ export const BENIGN_CALCIFICATION_OPTIONS = [
   { label: "Vôi hóa hình vỏ trứng (BR2)", value: "egg", score: 2 },
   { label: "Vôi hóa dạng sữa calci (BR2)", value: "milk", score: 2 },
   { label: "Vôi hóa mảng do loạn dưỡng (BR2)", value: "dystrophic", score: 2 },
+  { label: "Không thấy", value: "none", score: 0, isOther: true },
 ];
 
 export const SUSPICIOUS_CALCIFICATION_OPTIONS = [
@@ -93,6 +101,12 @@ export const SUSPICIOUS_CALCIFICATION_OPTIONS = [
     value: "branching",
     score: 5,
   },
+  {
+    label: "Không thấy",
+    value: "none",
+    score: 0,
+    isOther: true,
+  },
 ];
 
 export const CALC_DISTRIBUTION_OPTIONS = [
@@ -114,6 +128,7 @@ export const OTHER_SUSPICIOUS_SIGNS = [
     score: 3,
   },
   { label: "Hạch bệnh lý hố nách (BR3; BR4)", value: "lymph-node", score: 4 },
+  { label: "Không thấy", value: "none", score: 0, isOther: true },
 ];
 
 // src/pages/dbirads/BiradsForm.jsx
@@ -139,6 +154,7 @@ const BiradsForm = () => {
   const [form] = Form.useForm();
   const [volume, setVolume] = useState(0);
   const [recommendation, setRecommendation] = useState("");
+  const [typeOfLesion, setTypeOfLesion] = useState(null);
 
   const biradsValue = Form.useWatch("birads", form);
 
@@ -156,6 +172,26 @@ const BiradsForm = () => {
   };
 
   useEffect(() => {
+    if (!typeOfLesion?.includes("benign-calcification")) {
+      form.setFieldValue("benignCalc", "none");
+    } else {
+      form.setFieldValue("benignCalc", undefined);
+    }
+
+    if (!typeOfLesion?.includes("microcalcification")) {
+      form.setFieldValue("suspiciousCalc", "none");
+    } else {
+      form.setFieldValue("suspiciousCalc", undefined);
+    }
+
+    if (!typeOfLesion?.includes("other")) {
+      form.setFieldValue("suspiciousSigns", ["none"]);
+    } else {
+      form.setFieldValue("suspiciousSigns", undefined);
+    }
+  }, [typeOfLesion, form]);
+
+  useEffect(() => {
     setRecommendation(getRecommendationFromBirads(biradsValue));
   }, [biradsValue]);
 
@@ -171,17 +207,32 @@ const BiradsForm = () => {
     );
   const handleCalcVolume = () => {
     const values = form.getFieldsValue();
-    const v = (values.D1 || 0) * (values.D2 || 0) * (values.D3 || 0) * 0.52;
+    const v = ((values.D1 || 0) + (values.D2 || 0)) * 0.5;
     setVolume(Number.isNaN(v) ? 0 : Math.round(v * 100) / 100);
   };
 
   const getLabelFromValue = (options, value) => {
-    if (Array.isArray(value)) {
-      return value
-        .map((v) => options.find((o) => o.value === v)?.label || v)
-        .join(", ");
+    if (Array.isArray(value) && value.length > 0) {
+      return `
+      <ul style="padding-left: 16px; margin: 0;">
+        ${value
+          .map(
+            (v) =>
+              `<li style="margin-bottom: 6px;">${
+                options.find((o) => o.value === v)?.label || v
+              }</li>`
+          )
+          .join("")}
+      </ul>
+    `;
     }
-    return options.find((o) => o.value === value)?.label || value;
+
+    if (typeof value === "string") {
+      const label = options.find((o) => o.value === value)?.label || value;
+      return `${label}`;
+    }
+
+    return "--";
   };
   const onCopy = async () => {
     try {
@@ -210,39 +261,109 @@ const BiradsForm = () => {
           LOCATION_OPTIONS,
           values.location
         )}</td></tr>
-        <tr><td>D1</td><td>${values.D1 || 0} mm</td></tr>
-        <tr><td>D2</td><td>${values.D2 || 0} mm</td></tr>
-        <tr><td>D3</td><td>${values.D3 || 0} mm</td></tr>
-        <tr><td>Thể tích tổn thương</td><td>${volume} mm³</td></tr>
-        <tr><td>Hình dạng</td><td>${getLabelFromValue(
-          SHAPE_OPTIONS,
-          values.shape
+        <tr><td>Loại tổn thương</td><td>${getLabelFromValue(
+          TYPE_OF_LESION_OPTIONS,
+          values.type_of_lesion
         )}</td></tr>
-        <tr><td>Bờ viền</td><td>${getLabelFromValue(
-          MARGIN_OPTIONS,
-          values.margin
-        )}</td></tr>
-        <tr><td>Đậm độ</td><td>${getLabelFromValue(
-          ECHOGENICITY_OPTIONS,
-          values.echogenicity
-        )}</td></tr>
+        
+        
+      
+      
+        ${
+          typeOfLesion?.includes("mass")
+            ? `
+              <tr>
+                <th colspan="2">Đặc điểm của nốt, khối, đám</th>
+              </tr>
+              <tr>
+                <td>Kích thước</td>
+                <td>
+                  <table style="width: 100%; border-collapse: collapse; border: none;">
+                    <tr>
+                      <td style="text-align: center; border: none; padding: 0; border-right: 1px solid #ccc;">${
+                        values.D1 || ""
+                      } mm</td>
+                      <td style="text-align: center; border: none; padding: 0; border-right: 1px solid #ccc;">${
+                        values.D2 || ""
+                      } mm</td>
+                    
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            `
+            : ""
+        }
+      
+
+       
+        ${
+          typeOfLesion?.includes("mass")
+            ? `<tr><td>D3</td><td style="text-align: center;">${
+                volume || 0
+              } mm</td></tr>`
+            : ""
+        }
+        
+        
+
+        ${
+          typeOfLesion?.includes("mass")
+            ? `<tr><td>Hình dạng</td><td>${getLabelFromValue(
+                SHAPE_OPTIONS,
+                values.shape
+              )}</td></tr>`
+            : ""
+        }  
+        ${
+          typeOfLesion?.includes("mass")
+            ? ` <tr><td>Bờ viền</td><td>${getLabelFromValue(
+                MARGIN_OPTIONS,
+                values.margin
+              )}</td></tr>`
+            : ""
+        }  
+        
+        ${
+          typeOfLesion?.includes("mass")
+            ? `<tr><td>Đậm độ</td><td>${getLabelFromValue(
+                ECHOGENICITY_OPTIONS,
+                values.echogenicity
+              )}</td></tr>`
+            : ""
+        }  
+
+        <tr>
+          <th colspan="2">
+          </th>
+        </tr>
+       
         <tr><td>Vôi hóa lành tính</td><td>${getLabelFromValue(
           BENIGN_CALCIFICATION_OPTIONS,
           values.benignCalc
         )}</td></tr>
+        
+       <tr><td>Vôi hóa lành tính</td><td>${getLabelFromValue(
+         BENIGN_CALCIFICATION_OPTIONS,
+         values.benignCalc
+       )}</td></tr>
+        
         <tr><td>Vôi hóa nghi ngờ</td><td>${getLabelFromValue(
           SUSPICIOUS_CALCIFICATION_OPTIONS,
           values.suspiciousCalc
         )}</td></tr>
+        
         <tr><td>Phân bố vôi hóa</td><td>${getLabelFromValue(
           CALC_DISTRIBUTION_OPTIONS,
-          values.calcDist
+          values.calcDistribution
         )}</td></tr>
+        
         <tr><td>Dấu hiệu nghi ngờ khác</td><td>${getLabelFromValue(
           OTHER_SUSPICIOUS_SIGNS,
           values.suspiciousSigns || []
         )}</td></tr>
-        <tr><td>Phân loại BIRADS</td><td><strong>${
+        
+        <tr><td><strong>Phân loại BIRADS</strong></td><td><strong>${
           values.birads
         }</strong></td></tr>
         <tr><td>Khuyến nghị</td><td>${getRecommendationFromBirads(
@@ -266,6 +387,7 @@ const BiradsForm = () => {
 
   const onReset = () => {
     form.resetFields();
+    setTypeOfLesion([]);
     setVolume(0);
   };
 
@@ -300,6 +422,12 @@ const BiradsForm = () => {
   return (
     <div className={styles.pageWrapper}>
       <div className={styles.formContainer}>
+        <h2>D-BIRADS</h2>
+        <h4>Lĩnh vực: X quang</h4>
+        <h4 style={{ marginBottom: 40 }}>
+          Mục đích: sàng lọc chẩn đoán sớm ung thư vú
+        </h4>
+
         <Form form={form} layout="vertical" onValuesChange={handleCalcVolume}>
           <Row gutter={16}>
             <Col span={6}>
@@ -333,80 +461,109 @@ const BiradsForm = () => {
             </Col>
           </Row>
 
-          <Row gutter={16}>
-            <Col span={6}>
-              <Form.Item name="D1" label="D1 (mm)">
-                <InputNumber
-                  placeholder="Nhập kích thước"
-                  min={0}
-                  style={{ width: "100%" }}
-                />
-              </Form.Item>
-            </Col>
-            <Col span={6}>
-              <Form.Item name="D2" label="D2 (mm)">
-                <InputNumber
-                  placeholder="Nhập kích thước"
-                  min={0}
-                  style={{ width: "100%" }}
-                />
-              </Form.Item>
-            </Col>
-            <Col span={6}>
-              <Form.Item name="D3" label="D3 (mm)">
-                <InputNumber
-                  placeholder="Nhập kích thước"
-                  min={0}
-                  style={{ width: "100%" }}
-                />
-              </Form.Item>
-            </Col>
-            <Col span={6}>
-              <Form.Item label="Thể tích (mm³)">
-                <Input disabled value={volume} />
-              </Form.Item>
-            </Col>
-          </Row>
-
           <Form.Item
-            name="shape"
-            label="Hình dạng tổn thương"
+            name="type_of_lesion"
+            label="Loại tổn thương"
             rules={[
-              { required: true, message: "Vui lòng chọn hình dạng tổn thương" },
+              {
+                required: true,
+                message: "Bắt buộc chọn ít nhất 1 loại tổn thương",
+              },
             ]}
           >
-            <Radio.Group>
-              <Row gutter={[12, 12]}>
-                {SHAPE_OPTIONS.map((opt) => (
-                  <Col key={opt.value} span={16}>
-                    <Radio value={opt.value}>{opt.label}</Radio>
-                  </Col>
-                ))}
+            <Select
+              mode="multiple"
+              placeholder="Chọn một hoặc nhiều loại tổn thương"
+              onChange={(values) => setTypeOfLesion(values)}
+              options={TYPE_OF_LESION_OPTIONS}
+            />
+          </Form.Item>
+          {typeOfLesion?.includes("mass") && (
+            <>
+              <Row gutter={16}>
+                <Col span={6}>
+                  <Form.Item name="D1" label="D1 (mm) chiều dài">
+                    <InputNumber
+                      placeholder="Nhập kích thước"
+                      min={0}
+                      style={{ width: "100%" }}
+                    />
+                  </Form.Item>
+                </Col>
+                <Col span={6}>
+                  <Form.Item name="D2" label="D2 (mm) chiều rộng">
+                    <InputNumber
+                      placeholder="Nhập kích thước"
+                      min={0}
+                      style={{ width: "100%" }}
+                    />
+                  </Form.Item>
+                </Col>
+
+                <Col span={6}>
+                  <Form.Item label="D3 (mm) trung bình">
+                    <Input disabled value={volume} />
+                  </Form.Item>
+                </Col>
               </Row>
-            </Radio.Group>
-          </Form.Item>
-          <Form.Item
-            name="margin"
-            label="Bờ viền tổn thương"
-            rules={[{ required: true, message: "Vui lòng chọn bờ viền" }]}
-          >
-            <Radio.Group>
-              <Row gutter={[12, 12]}>
-                {MARGIN_OPTIONS.map((option) => (
-                  <Col key={option.value} span={12}>
-                    <Radio value={option.value}>{option.label}</Radio>
-                  </Col>
-                ))}
-              </Row>
-            </Radio.Group>
-          </Form.Item>
-          <Form.Item
-            name="echogenicity"
-            label="Đậm độ tổn thương"
-            rules={[{ required: true }]}
-          >
-            <Radio.Group options={ECHOGENICITY_OPTIONS} />
-          </Form.Item>
+              <Form.Item
+                name="shape"
+                label="Hình dạng tổn thương"
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng chọn hình dạng tổn thương",
+                  },
+                ]}
+              >
+                <Radio.Group>
+                  <Row gutter={[12, 12]}>
+                    {SHAPE_OPTIONS.map((opt) => (
+                      <Col key={opt.value} span={16}>
+                        <Radio value={opt.value}>{opt.label}</Radio>
+                      </Col>
+                    ))}
+                  </Row>
+                </Radio.Group>
+              </Form.Item>
+              <Form.Item
+                name="margin"
+                label="Bờ viền tổn thương"
+                rules={[{ required: true, message: "Vui lòng chọn bờ viền" }]}
+              >
+                <Radio.Group>
+                  <Row gutter={[12, 12]}>
+                    {MARGIN_OPTIONS.map((option) => (
+                      <Col key={option.value} span={12}>
+                        <Radio value={option.value}>{option.label}</Radio>
+                      </Col>
+                    ))}
+                  </Row>
+                </Radio.Group>
+              </Form.Item>
+
+              <Form.Item
+                name="echogenicity"
+                label="Đậm độ tổn thương"
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng chọn đậm độ tổn thương",
+                  },
+                ]}
+              >
+                <Radio.Group>
+                  <Row gutter={[12, 12]}>
+                    {ECHOGENICITY_OPTIONS.map((option) => (
+                      <Col key={option.value} span={12}>
+                        <Radio value={option.value}>{option.label}</Radio>
+                      </Col>
+                    ))}
+                  </Row>
+                </Radio.Group>
+              </Form.Item>
+            </>
+          )}
 
           <Form.Item
             name="benignCalc"
@@ -415,44 +572,84 @@ const BiradsForm = () => {
           >
             <Radio.Group>
               <Row gutter={[12, 12]}>
-                {BENIGN_CALCIFICATION_OPTIONS.map((option, index) => (
-                  <Col key={option.value} span={12}>
+                {BENIGN_CALCIFICATION_OPTIONS.filter(
+                  (s) =>
+                    !!s.isOther !=
+                    !!typeOfLesion?.includes("benign-calcification")
+                ).map((option, index) =>
+                  option.value != "none" ? (
+                    <Col key={option.value} span={12}>
+                      <Radio value={option.value}>{option.label}</Radio>
+                    </Col>
+                  ) : (
                     <Radio value={option.value}>{option.label}</Radio>
-                  </Col>
-                ))}
+                  )
+                )}
               </Row>
             </Radio.Group>
           </Form.Item>
           <Form.Item
             name="suspiciousCalc"
-            label="Vôi hóa nghi ngờ"
+            label="Vi vôi hóa"
             rules={[{ required: true, message: "Bắt buộc chọn một mục" }]}
           >
             <Radio.Group>
               <Row gutter={[12, 12]}>
-                {SUSPICIOUS_CALCIFICATION_OPTIONS.map((option) => (
-                  <Col key={option.value} span={12}>
+                {SUSPICIOUS_CALCIFICATION_OPTIONS.filter(
+                  (s) =>
+                    !!s.isOther !=
+                    !!typeOfLesion?.includes("microcalcification")
+                ).map((option) =>
+                  option.value != "none" ? (
+                    <Col key={option.value} span={12}>
+                      <Radio value={option.value}>{option.label}</Radio>
+                    </Col>
+                  ) : (
                     <Radio value={option.value}>{option.label}</Radio>
-                  </Col>
-                ))}
+                  )
+                )}
               </Row>
             </Radio.Group>
           </Form.Item>
-          <Form.Item
-            name="calcDist"
-            label="Phân bố vôi hóa"
-            rules={[{ required: true }]}
-          >
-            <Select options={CALC_DISTRIBUTION_OPTIONS} />
-          </Form.Item>
+          {typeOfLesion?.includes("microcalcification") && (
+            <>
+              <Form.Item
+                name="calcDistribution"
+                label="Phân bố vôi hóa, vi vôi hóa"
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng chọn ít nhất một phân bố vôi hóa",
+                  },
+                ]}
+              >
+                <Checkbox.Group>
+                  <Row gutter={[12, 12]}>
+                    {CALC_DISTRIBUTION_OPTIONS.map((option) => (
+                      <Col key={option.value} span={12}>
+                        <Checkbox value={option.value}>{option.label}</Checkbox>
+                      </Col>
+                    ))}
+                  </Row>
+                </Checkbox.Group>
+              </Form.Item>
+            </>
+          )}
+
           <Form.Item name="suspiciousSigns" label="Dấu hiệu nghi ngờ khác">
             <Checkbox.Group>
               <Row gutter={[12, 12]}>
-                {OTHER_SUSPICIOUS_SIGNS.map((option) => (
-                  <Col key={option.value} span={12}>
+                {OTHER_SUSPICIOUS_SIGNS.filter(
+                  (s) => !!s.isOther != !!typeOfLesion?.includes("other")
+                ).map((option) =>
+                  option.value != "none" ? (
+                    <Col key={option.value} span={12}>
+                      <Checkbox value={option.value}>{option.label}</Checkbox>
+                    </Col>
+                  ) : (
                     <Checkbox value={option.value}>{option.label}</Checkbox>
-                  </Col>
-                ))}
+                  )
+                )}
               </Row>
             </Checkbox.Group>
           </Form.Item>
@@ -483,7 +680,7 @@ const BiradsForm = () => {
             </div>
           )}
           <Form.Item>
-            <Row gutter={16}>
+            <Row gutter={16} style={{ justifyContent: "flex-end" }}>
               <Col>
                 <Button onClick={onCalculate}>Tính điểm</Button>
               </Col>

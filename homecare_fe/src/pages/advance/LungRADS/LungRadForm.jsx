@@ -72,7 +72,6 @@ const LungRADSForm = () => {
   const oldDate = Form.useWatch("old_result_date", form);
   const currentDate = Form.useWatch("current_result_date", form);
 
-  const priorScanComparison = Form.useWatch("compare", form);
   const compare = Form.useWatch("compare", form);
 
   const getProgressionOptions = () => {
@@ -128,7 +127,7 @@ const LungRADSForm = () => {
 
   const onStructureChange = (value) => {
     setStructure(value);
-    form.resetFields(["D1", "D2", "D3", "D4", "D5", "progression"]);
+    form.resetFields(["D1", "D2", "D3", "D4", "D5"]);
   };
 
   const getLungRADS = (values) => {
@@ -309,19 +308,46 @@ const LungRADSForm = () => {
         COMPARE_OPTIONS,
         compare
       )}</td></tr>
-     <tr><td>Ngày chụp kết quả hiện tại</td><td>${
-       form.getFieldValue("old_result_date")
-         ? dayjs(form.getFieldValue("old_result_date")).format("DD-MM-YYYY")
-         : "--"
-     }</td></tr>
-      <tr><td>Ngày chụp kết quả hiện tại</td><td>${
-        form.getFieldValue("current_result_date")
-          ? dayjs(form.getFieldValue("current_result_date")).format(
-              "DD-MM-YYYY"
-            )
-          : "--"
-      }</td></tr>
-      <tr><td>Thời gian đối chiếu</td><td>${compareMonths} tháng</td></tr>
+     ${
+       compare !== "no-info"
+         ? `<tr>
+           <td>Ngày chụp kết quả hiện tại</td>
+           <td>
+             ${
+               form.getFieldValue("old_result_date")
+                 ? dayjs(form.getFieldValue("old_result_date")).format(
+                     "DD-MM-YYYY"
+                   )
+                 : "--"
+             }
+           </td>
+         </tr>`
+         : ""
+     }
+      ${
+        compare !== "no-info"
+          ? `<tr>
+            <td>Ngày chụp kết quả hiện tại</td>
+            <td>
+              ${
+                form.getFieldValue("current_result_date")
+                  ? dayjs(form.getFieldValue("current_result_date")).format(
+                      "DD-MM-YYYY"
+                    )
+                  : "--"
+              }
+            </td>
+          </tr>`
+          : ""
+      }
+     ${
+       compare !== "no-info"
+         ? `<tr>
+           <td>Thời gian đối chiếu</td>
+           <td>${compareMonths} tháng</td>
+         </tr>`
+         : ""
+     }
       <tr><td>Vị trí tổn thương</td><td>${getLabelFromOptions(
         LOCATION_OPTIONS,
         location
@@ -349,9 +375,14 @@ const LungRADSForm = () => {
           </td>
         </tr>
       <tr><td>Kích thước trung bình</td><td style="text-align: center;">${calcD4} mm</td></tr>
-      <tr><td>Thể tích phần đặc</td><td style="text-align: center;">${
-        D5 || "--"
-      } mm</td></tr>
+      ${
+        structure == "part-solid"
+          ? `<tr>
+            <td>Thể tích phần đặc</td>
+            <td style="text-align: center;">${D5 || "--"} mm</td>
+          </tr>`
+          : "hehe"
+      }
 
       <tr><td>Thể tích tổn thương</td><td style="text-align: center;">${volume} mm³</td></tr>
       ${
@@ -440,34 +471,36 @@ const LungRADSForm = () => {
             />
           </Form.Item>
 
-          <Row gutter={16}>
-            <Col span={8}>
-              <Form.Item label="Ngày chụp kết quả cũ" name="old_result_date">
-                <DatePicker
-                  style={{ width: "100%" }}
-                  placeholder="Ngày chụp lần đầu tiên"
-                />
-              </Form.Item>
-            </Col>
+          {compare !== "no-info" && (
+            <Row gutter={16}>
+              <Col span={8}>
+                <Form.Item label="Ngày chụp kết quả cũ" name="old_result_date">
+                  <DatePicker
+                    style={{ width: "100%" }}
+                    placeholder="Ngày chụp lần đầu tiên"
+                  />
+                </Form.Item>
+              </Col>
 
-            <Col span={8}>
-              <Form.Item
-                label="Ngày chụp kết quả hiện tại"
-                name="current_result_date"
-              >
-                <DatePicker
-                  style={{ width: "100%" }}
-                  placeholder="Ngày chụp lần hiện tại"
-                />
-              </Form.Item>
-            </Col>
+              <Col span={8}>
+                <Form.Item
+                  label="Ngày chụp kết quả hiện tại"
+                  name="current_result_date"
+                >
+                  <DatePicker
+                    style={{ width: "100%" }}
+                    placeholder="Ngày chụp lần hiện tại"
+                  />
+                </Form.Item>
+              </Col>
 
-            <Col span={8}>
-              <Form.Item label="Thời gian đối chiếu (số tháng)">
-                <Input value={compareMonths} disabled suffix="tháng" />
-              </Form.Item>
-            </Col>
-          </Row>
+              <Col span={8}>
+                <Form.Item label="Thời gian đối chiếu (số tháng)">
+                  <Input value={compareMonths} disabled suffix="tháng" />
+                </Form.Item>
+              </Col>
+            </Row>
+          )}
 
           <Form.Item
             name="location"
@@ -599,7 +632,7 @@ const LungRADSForm = () => {
                 label="Dấu hiệu nguy cơ"
                 rules={[
                   {
-                    required: true,
+                    required: false,
                     message: "Chọn ít nhất một dấu hiệu nguy cơ",
                   },
                 ]}
