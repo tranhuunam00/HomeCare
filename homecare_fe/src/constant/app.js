@@ -140,3 +140,27 @@ export const LANGUAGES = {
   vi: "vi",
   en: "en",
 };
+
+export const getLabelFromValue = (options, value) => {
+  if (Array.isArray(value) && value.length > 0) {
+    return `
+      <ul style="padding-left: 16px; margin: 0;">
+        ${value
+          .map(
+            (v) =>
+              `<li style="margin-bottom: 6px;">${
+                options.find((o) => o.value === v)?.label || v
+              }</li>`
+          )
+          .join("")}
+      </ul>
+    `;
+  }
+
+  if (typeof value === "string" || typeof value === "number") {
+    const label = options.find((o) => o.value === value)?.label || value;
+    return `${label}`;
+  }
+
+  return "--";
+};

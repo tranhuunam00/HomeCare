@@ -48,6 +48,7 @@ import {
 import { CopyOutlined, ReloadOutlined } from "@ant-design/icons";
 import styles from "./TiradsForm.module.scss";
 import { toast } from "react-toastify";
+import { getLabelFromValue } from "../../../constant/app";
 
 const { Text } = Typography;
 
@@ -59,6 +60,7 @@ const TiradsForm = () => {
     recommendation: "",
   });
   const [volume, setVolume] = useState(0);
+  const [geminiResponse, setGeminiResponse] = useState("");
 
   const defaultValues = {};
 
@@ -107,19 +109,74 @@ const TiradsForm = () => {
     return "";
   };
 
-  const getLabelWithScore = (options, value) => {
-    const found = options.find((opt) => opt.value === value);
-    return found ? `${found.label} (${value} điểm)` : `${value} điểm`;
-  };
-
   const onReset = () => {
     form.resetFields();
     setSummary({ score: 0, tirads: "", recommendation: "" });
   };
 
+  const genHtml = async ({ dataAddon }) => {
+    const values = await form.validateFields();
+    const score = getTotalScore(values);
+    const tirads = getTirads(score);
+    const recommendation = getRecommendation(
+      tirads,
+      Math.max(values.D1 || 0, values.D2 || 0, values.D3 || 0)
+    );
+
+    const html = `
+      <table>
+        <caption>Đánh giá TIRADS</caption>
+        <tr><th>Thông tin</th><th>Giá trị</th></tr>
+        <tr><td>Vị trí tổn thương</td><td>${values.location || ""}</td></tr>
+        <tr>
+          <td>Kích thước</td>
+          <td>
+            <table style="width: 100%; border-collapse: collapse; border: none;">
+              <tr>
+                <td style="text-align: center; border: none; padding: 0; border-right: 1px solid #ccc;">${
+                  values.D1 || ""
+                } mm</td>
+                <td style="text-align: center; border: none; padding: 0; border-right: 1px solid #ccc;">${
+                  values.D2 || ""
+                } mm</td>
+                <td style="text-align: center; border: none; padding: 0;">${
+                  values.D3 || ""
+                } mm</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr><td>Thể tích</td><td style="text-align: center;">${volume} mm3 </td></tr>
+        <tr><td>Đặc điểm thành phần</td><td>${getLabelFromValue(
+          COMPOSITION_OPTIONS,
+          values.composition
+        )}</td></tr>
+        <tr><td>Đặc điểm cấu trúc âm</td><td>${getLabelFromValue(
+          STRUCTURE_OPTIONS,
+          values.structure
+        )}</td></tr>
+        <tr><td>Đặc điểm hình dạng</td><td>${getLabelFromValue(
+          SHAPE_OPTIONS,
+          values.shape
+        )}</td></tr>
+        <tr><td>Đặc điểm bờ viền</td><td>${getLabelFromValue(
+          MARGIN_OPTIONS,
+          values.margin
+        )}</td></tr>
+        <tr><td>Đặc điểm vôi hóa</td><td>${getLabelFromValue(
+          CALCIFICATION_OPTIONS,
+          values.calcification
+        )}</td></tr>
+        <tr><td><strong>Tổng điểm</strong></td><td style="text-align: center;">${score}</td></tr>
+        <tr><td>Phân loại (ACR-TIRADS)</td><td><strong style="text-align: center;">${tirads}</strong></td></tr>
+        <tr><td>Khuyến nghị</td><td>${recommendation}</td></tr>
+      </table>
+    `;
+    return html;
+  };
+
   const onCalculate = async () => {
     try {
-      console.log("first", form.getFieldsValue());
       const values = await form.validateFields();
       const score = getTotalScore(values);
       const tirads = getTirads(score);
@@ -127,39 +184,24 @@ const TiradsForm = () => {
         tirads,
         Math.max(values.D1 || 0, values.D2 || 0, values.D3 || 0)
       );
+      const tableHtml = await genHtml();
+      const res = await fetch(
+        `https://api.home-care.vn/chatgpt/ask-gemini-recommendation?prompt=${encodeURIComponent(
+          tableHtml
+        )}`
+      );
+
+      const data = await res.json();
+      setGeminiResponse(data.data);
+
       setSummary({ score, tirads, recommendation });
     } catch {
-      message.error("Vui lòng điền đầy đủ thông tin hợp lệ!");
+      toast.error("Vui lòng điền đầy đủ thông tin hợp lệ!");
     }
   };
 
   const onCopy = async () => {
     try {
-      const values = await form.validateFields();
-      const score = getTotalScore(values);
-      const tirads = getTirads(score);
-      const recommendation = getRecommendation(
-        tirads,
-        Math.max(values.D1 || 0, values.D2 || 0, values.D3 || 0)
-      );
-
-      const calcDisplay =
-        Array.isArray(values.calcification) && values.calcification.length > 0
-          ? `
-        <ul style="padding-left: 16px; margin: 0;">
-          ${values.calcification
-            .map(
-              (v) =>
-                `<li style="margin-bottom: 8px;">${getLabelWithScore(
-                  CALCIFICATION_OPTIONS,
-                  v
-                )}</li>`
-            )
-            .join("")}
-        </ul>
-      `
-          : "Không";
-
       const html = `
       <style>
         table {
@@ -187,51 +229,7 @@ const TiradsForm = () => {
           text-align: left;
         }
       </style>
-      <table>
-        <caption>Đánh giá TIRADS</caption>
-        <tr><th>Thông tin</th><th>Giá trị</th></tr>
-        <tr><td>Vị trí tổn thương</td><td>${values.location || ""}</td></tr>
-        <tr>
-          <td>Kích thước</td>
-          <td>
-            <table style="width: 100%; border-collapse: collapse; border: none;">
-              <tr>
-                <td style="text-align: center; border: none; padding: 0; border-right: 1px solid #ccc;">${
-                  values.D1 || ""
-                } mm</td>
-                <td style="text-align: center; border: none; padding: 0; border-right: 1px solid #ccc;">${
-                  values.D2 || ""
-                } mm</td>
-                <td style="text-align: center; border: none; padding: 0;">${
-                  values.D3 || ""
-                } mm</td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-        <tr><td>Thể tích</td><td style="text-align: center;">${volume} mm3 </td></tr>
-        <tr><td>Đặc điểm thành phần</td><td>${getLabelWithScore(
-          COMPOSITION_OPTIONS,
-          values.composition
-        )}</td></tr>
-        <tr><td>Đặc điểm cấu trúc âm</td><td>${getLabelWithScore(
-          STRUCTURE_OPTIONS,
-          values.structure
-        )}</td></tr>
-        <tr><td>Đặc điểm hình dạng</td><td>${getLabelWithScore(
-          SHAPE_OPTIONS,
-          values.shape
-        )}</td></tr>
-        <tr><td>Đặc điểm bờ viền</td><td>${getLabelWithScore(
-          MARGIN_OPTIONS,
-          values.margin
-        )}</td></tr>
-        <tr><td>Đặc điểm vôi hóa</td><td>${calcDisplay}</td></tr>
-        <tr><td><strong>Tổng điểm</strong></td><td style="text-align: center;">${score}</td></tr>
-        <tr><td>Phân loại (ACR-TIRADS)</td><td><strong style="text-align: center;">${tirads}</strong></td></tr>
-        <tr><td>Khuyến nghị</td><td>${recommendation}</td></tr>
-        <tr><td>Ghi chú</td><td><em>${"home-care"}</em></td></tr>
-      </table>
+      ${await genHtml()}
     `;
 
       await navigator.clipboard.write([
@@ -359,6 +357,37 @@ const TiradsForm = () => {
               <Text>{summary.recommendation}</Text>
             </Col>
           </Row>
+          <Row
+            gutter={12}
+            className={styles.summaryRow}
+            style={{ maxWidth: 1000 }}
+          >
+            <Text strong>Khuyến nghị AI:</Text>
+            {geminiResponse && (
+              <Row>
+                <Col span={24}>
+                  <Text strong>Phản hồi từ hệ thống:</Text>
+                  <div
+                    style={{
+                      background: "#fafafa",
+                      padding: "12px",
+                      marginTop: 8,
+                      border: "1px solid #eee",
+                      whiteSpace: "pre-wrap", // 👈 giữ ngắt dòng
+                      fontFamily: "inherit",
+                      fontSize: "15px",
+                    }}
+                  >
+                    {geminiResponse
+                      .replace(/\*\*(.*?)\*\*/g, "$1") // bỏ **bôi đậm**
+                      .replace(/^\* /gm, "• ") // dòng bắt đầu bằng "* " → "• "
+                      .replace(/\n{2,}/g, "\n\n")}
+                  </div>
+                </Col>
+              </Row>
+            )}
+          </Row>
+
           <Divider />
           <div className={styles.buttonRow}>
             <Button icon={<ReloadOutlined />} onClick={onReset}>
