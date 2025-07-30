@@ -7,7 +7,6 @@ import { SiZalo } from "react-icons/si";
 import styles from "./HomeCareLanding.module.scss";
 import { useNavigate } from "react-router-dom";
 import ProductCard from "../products/productCard/ProductCard";
-import useToast from "../../hooks/useToast";
 import FurnitureCarousel from "../../components/slick/FurnitureCarousel";
 import { motion } from "framer-motion";
 import { products } from "./products";
@@ -80,8 +79,8 @@ const HomeCareLanding = () => {
       onClick: () => navigate("dipss"),
     },
     {
-      label: "D-CVRIS",
-      onClick: () => navigate("cvris"),
+      label: "D-COR",
+      onClick: () => navigate("D-COR"),
     },
   ];
 
