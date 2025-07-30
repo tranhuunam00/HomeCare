@@ -123,7 +123,7 @@ const CVRISForm = () => {
           onFinish={onFinish}
           initialValues={{ gender: "male", onHypertensionTreatment: false }}
         >
-          <Form.Item name="gender" label="1. Giới tính">
+          <Form.Item name="gender" label="Giới tính">
             <Radio.Group>
               <Radio.Button value="male">
                 <ManOutlined /> Nam
@@ -134,11 +134,7 @@ const CVRISForm = () => {
             </Radio.Group>
           </Form.Item>
 
-          <Form.Item
-            name="race"
-            label="2. Chủng tộc"
-            rules={[{ required: true }]}
-          >
+          <Form.Item name="race" label="Chủng tộc" rules={[{ required: true }]}>
             <Select placeholder="Chọn chủng tộc">
               <Option value="asian">Châu Á</Option>
               <Option value="white">Da trắng</Option>
@@ -147,7 +143,7 @@ const CVRISForm = () => {
             </Select>
           </Form.Item>
 
-          <Form.Item name="age" label="3. Tuổi" rules={[{ required: true }]}>
+          <Form.Item name="age" label="Tuổi" rules={[{ required: true }]}>
             <Slider
               style={{ width: 300 }}
               min={20}
@@ -158,7 +154,7 @@ const CVRISForm = () => {
 
           <Form.Item
             name="totalCholesterol"
-            label="4. Cholesterol toàn phần (mmol/L)"
+            label="Cholesterol toàn phần (mmol/L)"
             rules={[{ required: true }]}
           >
             <InputNumber min={0} step={0.1} style={{ width: "100%" }} />
@@ -166,7 +162,7 @@ const CVRISForm = () => {
 
           <Form.Item
             name="hdl"
-            label="5. HDL cholesterol (mmol/L)"
+            label="HDL cholesterol (mmol/L)"
             rules={[{ required: true }]}
           >
             <InputNumber min={0} step={0.1} style={{ width: "100%" }} />
@@ -182,7 +178,7 @@ const CVRISForm = () => {
 
           <Form.Item
             name="sbp"
-            label="7. Huyết áp tâm thu (mmHg)"
+            label="Huyết áp tâm thu (mmHg)"
             rules={[{ required: true }]}
           >
             <InputNumber min={80} max={250} style={{ width: "100%" }} />
@@ -190,7 +186,7 @@ const CVRISForm = () => {
 
           <Form.Item
             name="onHypertensionTreatment"
-            label="8. Đang điều trị tăng huyết áp"
+            label="Đang điều trị tăng huyết áp"
             valuePropName="checked"
           >
             <Radio.Group>
@@ -201,7 +197,7 @@ const CVRISForm = () => {
 
           <Form.Item
             name="diabetes"
-            label="10. Bị tiểu đường"
+            label="Bị tiểu đường"
             valuePropName="checked"
           >
             <Radio.Group>
@@ -212,7 +208,7 @@ const CVRISForm = () => {
 
           <Form.Item
             name="smoking"
-            label="9. Có hút thuốc lá"
+            label="Có hút thuốc lá"
             valuePropName="checked"
           >
             <Radio.Group>

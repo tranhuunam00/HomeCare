@@ -48,7 +48,7 @@ import {
 import { CopyOutlined, ReloadOutlined } from "@ant-design/icons";
 import styles from "./TiradsForm.module.scss";
 import { toast } from "react-toastify";
-import { getLabelFromValue } from "../../../constant/app";
+import { genAITextToHtml, getLabelFromValue } from "../../../constant/app";
 
 const { Text } = Typography;
 
@@ -170,29 +170,7 @@ const TiradsForm = () => {
         <tr><td><strong>Tổng điểm</strong></td><td style="text-align: center;">${score}</td></tr>
         <tr><td>Phân loại (ACR-TIRADS)</td><td><strong style="text-align: center;">${tirads}</strong></td></tr>
         <tr><td>Khuyến nghị</td><td>${recommendation}</td></tr>
-        ${
-          isCopy
-            ? `<tr>
-                <td>Khuyến nghị AI</td>
-                <td>
-                  <div style="
-                    background: #fafafa;
-                    padding: 12px;
-                    margin-top: 8px;
-                    border: 1px solid #eee;
-                    white-space: pre-wrap;
-                    font-family: Arial, sans-serif;
-                    font-size: 15px;
-                  ">
-                    ${geminiResponse
-                      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") // giữ định dạng đậm
-                      .replace(/^\* /gm, "• ") // dấu bullet
-                      .replace(/\n/g, "<br>")}
-                  </div>
-                </td>
-              </tr>`
-            : ""
-        }
+        ${isCopy ? genAITextToHtml(geminiResponse) : ""}
 
       </table>
     `;

@@ -132,7 +132,7 @@ export const OTHER_SUSPICIOUS_SIGNS = [
 ];
 
 // src/pages/dbirads/BiradsForm.jsx
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Form,
   Input,
@@ -141,20 +141,22 @@ import {
   Checkbox,
   Button,
   Radio,
-  Card,
-  message,
   Col,
   Row,
+  Typography,
 } from "antd";
+const { Text } = Typography;
 
 import styles from "./BiradsForm.module.scss";
 import { toast } from "react-toastify";
+import { genAITextToHtml } from "../../../constant/app";
 
 const BiradsForm = () => {
   const [form] = Form.useForm();
   const [volume, setVolume] = useState(0);
   const [recommendation, setRecommendation] = useState("");
   const [typeOfLesion, setTypeOfLesion] = useState(null);
+  const [geminiResponse, setGeminiResponse] = useState("");
 
   const biradsValue = Form.useWatch("birads", form);
 
@@ -234,18 +236,12 @@ const BiradsForm = () => {
 
     return "--";
   };
-  const onCopy = async () => {
-    try {
-      const values = await form.validateFields();
-      handleCalcVolume();
+  const genHtml = async ({ isCopy }) => {
+    const values = await form.validateFields();
+    handleCalcVolume();
 
-      const html = `
-      <style>
-        table { width: 100%; border-collapse: collapse; font-family: Arial; }
-        th, td { border: 1px solid #ccc; padding: 8px 12px; font-size: 16px; text-align: left; }
-        th { background-color: #f5f5f5; }
-        caption { font-weight: bold; font-size: 18px; margin-bottom: 10px; }
-      </style>
+    const html = `
+      
       <table>
         <caption>Đánh giá D-BIRADS MM</caption>
         <tr><th>Thông tin</th><th>Giá trị</th></tr>
@@ -369,7 +365,23 @@ const BiradsForm = () => {
         <tr><td>Khuyến nghị</td><td>${getRecommendationFromBirads(
           values.birads
         )}</td></tr>
+        ${isCopy ? genAITextToHtml(geminiResponse) : ""}
+        
       </table>
+    `;
+
+    return html;
+  };
+  const onCopy = async () => {
+    try {
+      const html = `
+      <style>
+        table { width: 100%; border-collapse: collapse; font-family: Arial; }
+        th, td { border: 1px solid #ccc; padding: 8px 12px; font-size: 16px; text-align: left; }
+        th { background-color: #f5f5f5; }
+        caption { font-weight: bold; font-size: 18px; margin-bottom: 10px; }
+      </style>
+      ${await genHtml({ isCopy: true })}
     `;
 
       await navigator.clipboard.write([
@@ -417,6 +429,21 @@ const BiradsForm = () => {
     } else {
       toast.success("Đã tính lại thể tích tổn thương!");
     }
+
+    const tableHtml = await genHtml({ isCopy: false });
+    const res = await fetch(
+      `https://api.home-care.vn/chatgpt/ask-gemini-recommendation?prompt=${encodeURIComponent(
+        tableHtml
+      )}`
+    );
+
+    const data = await res.json();
+    setGeminiResponse(
+      data.data
+        ?.replace(/\*\*(.*?)\*\*/g, "$1") // bỏ **bôi đậm**
+        .replace(/^\* /gm, "• ") // dòng bắt đầu bằng "* " → "• "
+        .replace(/\n{2,}/g, "\n\n")
+    );
   };
 
   return (
@@ -679,6 +706,33 @@ const BiradsForm = () => {
               <strong>Khuyến nghị:</strong> {recommendation}
             </div>
           )}
+          <Row
+            gutter={12}
+            className={styles.summaryRow}
+            style={{ maxWidth: 1000 }}
+          >
+            <Text strong>Khuyến nghị AI:</Text>
+            {geminiResponse && (
+              <Row>
+                <Col span={24}>
+                  <Text strong>Phản hồi từ hệ thống:</Text>
+                  <div
+                    style={{
+                      background: "#fafafa",
+                      padding: "12px",
+                      marginTop: 8,
+                      border: "1px solid #eee",
+                      whiteSpace: "pre-wrap", // 👈 giữ ngắt dòng
+                      fontFamily: "inherit",
+                      fontSize: "15px",
+                    }}
+                  >
+                    {geminiResponse}
+                  </div>
+                </Col>
+              </Row>
+            )}
+          </Row>
           <Form.Item>
             <Row gutter={16} style={{ justifyContent: "flex-end" }}>
               <Col>

@@ -4,6 +4,7 @@ import { Form, Select, Button, Typography, Divider, Row, Col } from "antd";
 import { ReloadOutlined, CopyOutlined } from "@ant-design/icons";
 
 import styles from "./DipssForm.module.scss";
+import { genAITextToHtml } from "../../../constant/app";
 
 const { Title, Text } = Typography;
 
@@ -42,6 +43,8 @@ export const IPSS_RECOMMENDATIONS = {
 
 const DipssForm = () => {
   const [form] = Form.useForm();
+  const [geminiResponse, setGeminiResponse] = useState("");
+
   const [summary, setSummary] = useState({
     total: 0,
     level: "",
@@ -69,11 +72,7 @@ const DipssForm = () => {
     setSummary({ total, level, recommendation });
   };
 
-  const onFinish = (values) => {
-    calculateScore(values);
-  };
-
-  const onCopy = async () => {
+  const genHtml = async ({ isCopy }) => {
     const values = await form.validateFields();
     const total = Object.values(values).reduce(
       (sum, v) => sum + Number(v || 0),
@@ -102,8 +101,46 @@ const DipssForm = () => {
         <tr><td colspan="2"><strong>Tổng điểm</strong></td><td>${total}</td></tr>
         <tr><td colspan="2"><strong>Phân độ</strong></td><td>${level}</td></tr>
         <tr><td colspan="2"><strong>Khuyến nghị</strong></td><td>${recommendation}</td></tr>
+        ${
+          isCopy
+            ? `<tr><td colspan="2">
+            <strong>Khuyến nghị</strong>
+            </td><td>${geminiResponse
+              .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") // giữ định dạng đậm
+              .replace(/^\* /gm, "• ") // dấu bullet
+              .replace(/\n/g, "<br>")}
+            </td></tr>
+`
+            : ""
+        }
+        </table>
+      <table>
       </table>
     `;
+
+    return html;
+  };
+
+  const onFinish = async (values) => {
+    calculateScore(values);
+    const tableHtml = await genHtml({ isCopy: false });
+    const res = await fetch(
+      `https://api.home-care.vn/chatgpt/ask-gemini-recommendation?prompt=${encodeURIComponent(
+        tableHtml
+      )}`
+    );
+
+    const data = await res.json();
+    setGeminiResponse(
+      data.data
+        ?.replace(/\*\*(.*?)\*\*/g, "$1") // bỏ **bôi đậm**
+        .replace(/^\* /gm, "• ") // dòng bắt đầu bằng "* " → "• "
+        .replace(/\n{2,}/g, "\n\n")
+    );
+  };
+
+  const onCopy = async () => {
+    const html = await genHtml({ isCopy: true });
 
     await navigator.clipboard.write([
       new ClipboardItem({
@@ -148,6 +185,33 @@ const DipssForm = () => {
               <Text strong>Khuyến nghị:</Text>{" "}
               <Text>{summary.recommendation}</Text>
             </Col>
+          </Row>
+          <Row
+            gutter={12}
+            className={styles.summaryRow}
+            style={{ maxWidth: 1000 }}
+          >
+            <Text strong>Khuyến nghị AI:</Text>
+            {geminiResponse && (
+              <Row>
+                <Col span={24}>
+                  <Text strong>Phản hồi từ hệ thống:</Text>
+                  <div
+                    style={{
+                      background: "#fafafa",
+                      padding: "12px",
+                      marginTop: 8,
+                      border: "1px solid #eee",
+                      whiteSpace: "pre-wrap", // 👈 giữ ngắt dòng
+                      fontFamily: "inherit",
+                      fontSize: "15px",
+                    }}
+                  >
+                    {geminiResponse}
+                  </div>
+                </Col>
+              </Row>
+            )}
           </Row>
           <Divider />
           <div className={styles.buttonRow}>

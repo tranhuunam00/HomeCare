@@ -164,3 +164,25 @@ export const getLabelFromValue = (options, value) => {
 
   return "--";
 };
+
+export const genAITextToHtml = (geminiResponse) => {
+  return `<tr>
+                <td>Khuyến nghị AI</td>
+                <td>
+                  <div style="
+                    background: #fafafa;
+                    padding: 12px;
+                    margin-top: 8px;
+                    border: 1px solid #eee;
+                    white-space: pre-wrap;
+                    font-family: Arial, sans-serif;
+                    font-size: 15px;
+                  ">
+                    ${geminiResponse
+                      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") // giữ định dạng đậm
+                      .replace(/^\* /gm, "• ") // dấu bullet
+                      .replace(/\n/g, "<br>")}
+                  </div>
+                </td>
+              </tr>`;
+};

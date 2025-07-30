@@ -113,36 +113,75 @@ const BoneAgeForm = () => {
     }
   }, [birthYear]);
 
-  const onCopy = async () => {
-    try {
-      const values = await form.validateFields();
-      const {
-        position,
-        way,
-        method,
-        birthYear,
-        physiologicalAge,
-        gender,
-        ossificationPoints,
-        boneAge,
-      } = values;
+  const genHtml = async ({ isCopy }) => {
+    const values = await form.validateFields();
+    const {
+      position,
+      way,
+      method,
+      birthYear,
+      physiologicalAge,
+      gender,
+      ossificationPoints,
+      boneAge,
+    } = values;
 
-      const selectedStageRows = visibleStages
-        .map((stage) => {
-          const isSelected = ossificationPoints?.includes(stage.value);
-          const rangeDisplay = Array.isArray(stage.range)
-            ? stage.range.join(" – ")
-            : stage.range;
-          return `
+    const selectedStageRows = visibleStages
+      .map((stage) => {
+        const isSelected = ossificationPoints?.includes(stage.value);
+        const rangeDisplay = Array.isArray(stage.range)
+          ? stage.range.join(" – ")
+          : stage.range;
+        return `
         <tr>
           <td>${stage.label}</td>
           <td>${rangeDisplay}</td>
           <td style="text-align: center;">${isSelected ? "✔️" : ""}</td>
         </tr>
       `;
-        })
-        .join("");
+      })
+      .join("");
 
+    const html = `
+      
+
+      <!-- Table 1: Thông tin hành chính -->
+      <table>
+        <caption>Thông tin kỹ thuật và hành chính</caption>
+        <tr><th>Vị trí đánh giá</th><td>${position}</td></tr>
+        <tr><th>Phương tiện</th><td>${way}</td></tr>
+        <tr><th>Phương pháp</th><td>${method}</td></tr>
+        <tr><th>Năm sinh</th><td>${birthYear?.year?.()}</td></tr>
+        <tr><th>Tuổi sinh lý</th><td>${physiologicalAge} năm</td></tr>
+        <tr><th>Giới tính</th><td>${gender === "male" ? "Nam" : "Nữ"}</td></tr>
+      </table>
+
+      <!-- Table 2: Các điểm cốt hóa -->
+      <table>
+        <caption>Đánh giá các điểm cốt hóa</caption>
+        <tr>
+          <th>Các điểm cốt hóa mới xuất hiện</th>
+          <th>Tuổi xương (Năm)</th>
+          <th class="center">Tick</th>
+        </tr>
+        ${selectedStageRows}
+      </table>
+
+      <!-- Table 3: Kết quả -->
+      <div style="margin-top: 20px;">
+        <h3 style="margin-bottom: 8px;">Kết luận</h3>
+        <div style="text-align: center; font-size: 15px; line-height: 1.6;">
+          Hình ảnh chụp X quang bàn tay trái đánh giá tuổi xương theo phương pháp Greulich & Pyle cho thấy tuổi xương tương đương
+          <div style="font-size: 28px; font-weight: bold; margin: 8px 0;">${physiologicalAge}</div>
+          <div style="font-size: 15px;">Năm</div>
+        </div>
+      </div>
+    `;
+
+    return html;
+  };
+  const onCopy = async () => {
+    try {
       const html = `
       <style>
         table {
@@ -177,37 +216,7 @@ const BoneAgeForm = () => {
         }
       </style>
 
-      <!-- Table 1: Thông tin hành chính -->
-      <table>
-        <caption>Thông tin kỹ thuật và hành chính</caption>
-        <tr><th>Vị trí đánh giá</th><td>${position}</td></tr>
-        <tr><th>Phương tiện</th><td>${way}</td></tr>
-        <tr><th>Phương pháp</th><td>${method}</td></tr>
-        <tr><th>Năm sinh</th><td>${birthYear?.year?.()}</td></tr>
-        <tr><th>Tuổi sinh lý</th><td>${physiologicalAge} năm</td></tr>
-        <tr><th>Giới tính</th><td>${gender === "male" ? "Nam" : "Nữ"}</td></tr>
-      </table>
-
-      <!-- Table 2: Các điểm cốt hóa -->
-      <table>
-        <caption>Đánh giá các điểm cốt hóa</caption>
-        <tr>
-          <th>Các điểm cốt hóa mới xuất hiện</th>
-          <th>Tuổi xương (Năm)</th>
-          <th class="center">Tick</th>
-        </tr>
-        ${selectedStageRows}
-      </table>
-
-      <!-- Table 3: Kết quả -->
-      <div style="margin-top: 20px;">
-        <h3 style="margin-bottom: 8px;">Kết luận</h3>
-        <div style="text-align: center; font-size: 15px; line-height: 1.6;">
-          Hình ảnh chụp X quang bàn tay trái đánh giá tuổi xương theo phương pháp Greulich & Pyle cho thấy tuổi xương tương đương
-          <div style="font-size: 28px; font-weight: bold; margin: 8px 0;">${physiologicalAge}</div>
-          <div style="font-size: 15px;">Năm</div>
-        </div>
-      </div>
+      ${await genHtml({ isCopy: true })}
     `;
 
       if (navigator.clipboard?.write) {

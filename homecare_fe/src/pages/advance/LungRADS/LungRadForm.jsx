@@ -17,6 +17,9 @@ import {
 import styles from "./LungRADSForm.module.scss";
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
+import { genAITextToHtml } from "../../../constant/app";
+
+const { Text } = Typography;
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -71,6 +74,7 @@ const LungRADSForm = () => {
   const [compareMonths, setCompareMonths] = useState("");
   const oldDate = Form.useWatch("old_result_date", form);
   const currentDate = Form.useWatch("current_result_date", form);
+  const [geminiResponse, setGeminiResponse] = useState("");
 
   const compare = Form.useWatch("compare", form);
 
@@ -237,12 +241,6 @@ const LungRADSForm = () => {
     }
   };
 
-  const onFinish = (values) => {
-    const group = getLungRADS(values);
-    const recommendation = getRecommendation(group);
-    setResult({ group, recommendation });
-  };
-
   const onReset = () => {
     form.resetFields();
     setResult(null);
@@ -253,54 +251,30 @@ const LungRADSForm = () => {
     return found ? found.label : value || "";
   };
 
-  const onCopy = async () => {
-    try {
-      const values = await form.validateFields();
-      const group = getLungRADS(values);
-      const recommendation = getRecommendation(group);
+  const genHtml = async ({ isCopy }) => {
+    const values = await form.validateFields();
+    const group = getLungRADS(values);
+    const recommendation = getRecommendation(group);
 
-      const {
-        location,
-        structure,
-        progression,
-        D1,
-        D2,
-        D3,
-        D4,
-        D5,
-        benign,
-        riskSigns = [],
-      } = values;
+    const {
+      location,
+      structure,
+      progression,
+      D1,
+      D2,
+      D3,
+      D4,
+      D5,
+      benign,
+      riskSigns = [],
+    } = values;
 
-      const calcD4 =
-        D4 || (D1 && D2 && D3 ? ((D1 + D2 + D3) * 0.33).toFixed(2) : "");
-      const volume = D1 && D2 && D3 ? (D1 * D2 * D3 * 0.52).toFixed(2) : "";
+    const calcD4 =
+      D4 || (D1 && D2 && D3 ? ((D1 + D2 + D3) * 0.33).toFixed(2) : "");
+    const volume = D1 && D2 && D3 ? (D1 * D2 * D3 * 0.52).toFixed(2) : "";
 
-      const html = `
-    <style>
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        font-family: Arial, sans-serif;
-        margin-top: 12px;
-      }
-      th, td {
-        border: 1px solid #ccc;
-        padding: 8px 12px;
-        font-size: 16px;
-        text-align: left;
-      }
-      th {
-        background-color: #f0f0f0;
-        font-weight: bold;
-      }
-      caption {
-        font-size: 18px;
-        font-weight: bold;
-        margin-bottom: 10px;
-        text-align: left;
-      }
-    </style>
+    const html = `
+    
     <table>
       <caption>Đánh giá D-LungRADS</caption>
       <tr><th>Thông tin</th><th>Giá trị</th></tr>
@@ -425,7 +399,41 @@ const LungRADSForm = () => {
        )}</td></tr>
       <tr><td><strong>Phân loại ACR -LungRADS</strong></td><td><strong>Nhóm ${group}</strong></td></tr>
       <tr><td>Khuyến nghị</td><td>${recommendation}</td></tr>
+      ${isCopy ? genAITextToHtml(geminiResponse) : ""}
     </table>`;
+
+    return html;
+  };
+
+  const onCopy = async () => {
+    try {
+      const html = `
+    <style>
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: Arial, sans-serif;
+        margin-top: 12px;
+      }
+      th, td {
+        border: 1px solid #ccc;
+        padding: 8px 12px;
+        font-size: 16px;
+        text-align: left;
+      }
+      th {
+        background-color: #f0f0f0;
+        font-weight: bold;
+      }
+      caption {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        text-align: left;
+      }
+    </style>
+    ${await genHtml({ isCopy: true })}
+    `;
 
       if (navigator.clipboard?.write) {
         await navigator.clipboard.write([
@@ -448,6 +456,26 @@ const LungRADSForm = () => {
       console.error(error);
       toast.error("Vui lòng điền đầy đủ thông tin hợp lệ trước khi sao chép.");
     }
+  };
+  const onFinish = async (values) => {
+    const group = getLungRADS(values);
+    const recommendation = getRecommendation(group);
+    const tableHtml = await genHtml({ isCopy: false });
+    const res = await fetch(
+      `https://api.home-care.vn/chatgpt/ask-gemini-recommendation?prompt=${encodeURIComponent(
+        tableHtml
+      )}`
+    );
+
+    const data = await res.json();
+    setGeminiResponse(
+      data.data
+        ?.replace(/\*\*(.*?)\*\*/g, "$1") // bỏ **bôi đậm**
+        .replace(/^\* /gm, "• ") // dòng bắt đầu bằng "* " → "• "
+        .replace(/\n{2,}/g, "\n\n")
+    );
+
+    setResult({ group, recommendation });
   };
 
   return (
@@ -685,6 +713,33 @@ const LungRADSForm = () => {
               </p>
             </div>
           )}
+          <Row
+            gutter={12}
+            className={styles.summaryRow}
+            style={{ maxWidth: 1000 }}
+          >
+            <Text strong>Khuyến nghị AI:</Text>
+            {geminiResponse && (
+              <Row>
+                <Col span={24}>
+                  <Text strong>Phản hồi từ hệ thống:</Text>
+                  <div
+                    style={{
+                      background: "#fafafa",
+                      padding: "12px",
+                      marginTop: 8,
+                      border: "1px solid #eee",
+                      whiteSpace: "pre-wrap", // 👈 giữ ngắt dòng
+                      fontFamily: "inherit",
+                      fontSize: "15px",
+                    }}
+                  >
+                    {geminiResponse}
+                  </div>
+                </Col>
+              </Row>
+            )}
+          </Row>
         </Form>
       </div>
     </div>
