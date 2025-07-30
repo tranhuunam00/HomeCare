@@ -114,7 +114,7 @@ const TiradsForm = () => {
     setSummary({ score: 0, tirads: "", recommendation: "" });
   };
 
-  const genHtml = async ({ dataAddon }) => {
+  const genHtml = async ({ isCopy }) => {
     const values = await form.validateFields();
     const score = getTotalScore(values);
     const tirads = getTirads(score);
@@ -170,6 +170,30 @@ const TiradsForm = () => {
         <tr><td><strong>Tổng điểm</strong></td><td style="text-align: center;">${score}</td></tr>
         <tr><td>Phân loại (ACR-TIRADS)</td><td><strong style="text-align: center;">${tirads}</strong></td></tr>
         <tr><td>Khuyến nghị</td><td>${recommendation}</td></tr>
+        ${
+          isCopy
+            ? `<tr>
+                <td>Khuyến nghị AI</td>
+                <td>
+                  <div style="
+                    background: #fafafa;
+                    padding: 12px;
+                    margin-top: 8px;
+                    border: 1px solid #eee;
+                    white-space: pre-wrap;
+                    font-family: Arial, sans-serif;
+                    font-size: 15px;
+                  ">
+                    ${geminiResponse
+                      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") // giữ định dạng đậm
+                      .replace(/^\* /gm, "• ") // dấu bullet
+                      .replace(/\n/g, "<br>")}
+                  </div>
+                </td>
+              </tr>`
+            : ""
+        }
+
       </table>
     `;
     return html;
@@ -177,6 +201,7 @@ const TiradsForm = () => {
 
   const onCalculate = async () => {
     try {
+      console.log("hehe");
       const values = await form.validateFields();
       const score = getTotalScore(values);
       const tirads = getTirads(score);
@@ -184,7 +209,7 @@ const TiradsForm = () => {
         tirads,
         Math.max(values.D1 || 0, values.D2 || 0, values.D3 || 0)
       );
-      const tableHtml = await genHtml();
+      const tableHtml = await genHtml({ isCopy: false });
       const res = await fetch(
         `https://api.home-care.vn/chatgpt/ask-gemini-recommendation?prompt=${encodeURIComponent(
           tableHtml
@@ -192,10 +217,16 @@ const TiradsForm = () => {
       );
 
       const data = await res.json();
-      setGeminiResponse(data.data);
+      setGeminiResponse(
+        data.data
+          ?.replace(/\*\*(.*?)\*\*/g, "$1") // bỏ **bôi đậm**
+          .replace(/^\* /gm, "• ") // dòng bắt đầu bằng "* " → "• "
+          .replace(/\n{2,}/g, "\n\n")
+      );
 
       setSummary({ score, tirads, recommendation });
-    } catch {
+    } catch (err) {
+      console.log("err", err);
       toast.error("Vui lòng điền đầy đủ thông tin hợp lệ!");
     }
   };
@@ -229,7 +260,7 @@ const TiradsForm = () => {
           text-align: left;
         }
       </style>
-      ${await genHtml()}
+      ${await genHtml({ isCopy: true })}
     `;
 
       await navigator.clipboard.write([
@@ -378,10 +409,7 @@ const TiradsForm = () => {
                       fontSize: "15px",
                     }}
                   >
-                    {geminiResponse
-                      .replace(/\*\*(.*?)\*\*/g, "$1") // bỏ **bôi đậm**
-                      .replace(/^\* /gm, "• ") // dòng bắt đầu bằng "* " → "• "
-                      .replace(/\n{2,}/g, "\n\n")}
+                    {geminiResponse}
                   </div>
                 </Col>
               </Row>
