@@ -49,7 +49,7 @@ const HomeCareLanding = () => {
           : toast.warning("Vui lòng đăng nhập để xem chi tiết!"),
     },
     {
-      label: "DỊCH VỤ HOMECARE".toUpperCase(),
+      label: "Recist".toUpperCase(),
       onClick: () =>
         isLoggedIn
           ? navigate("/home/Recist")
