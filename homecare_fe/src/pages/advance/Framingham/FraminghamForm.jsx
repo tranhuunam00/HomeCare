@@ -9,6 +9,7 @@ import {
   Slider,
   Row,
   message,
+  Col,
 } from "antd";
 import {
   ManOutlined,
@@ -18,6 +19,8 @@ import {
 } from "@ant-design/icons";
 import copy from "copy-to-clipboard";
 import styles from "./FraminghamForm.module.scss";
+import { genAITextToHtml } from "../../../constant/app";
+const { Text } = Typography;
 
 const { Title } = Typography;
 
@@ -172,10 +175,101 @@ const getFraminghamRisk = (score, isMale) => {
 const FraminghamForm = () => {
   const [form] = Form.useForm();
   const [result, setResult] = useState(null);
+  const [geminiResponse, setGeminiResponse] = useState("");
 
-  const onFinish = (values) => {
+  const genHtml = async ({ isCopy }) => {
+    const values = await form.validateFields();
     const score = calculateFraminghamScore(values);
     const risk = getFraminghamRisk(score, values.gender === "male");
+
+    const html = `
+    <table>
+      <caption>Đánh giá nguy cơ tim mạch theo Framingham</caption>
+      <tr><th>Thông tin</th><th>Giá trị</th></tr>
+      <tr><td>Giới tính</td><td>${
+        values.gender === "male" ? "Nam" : "Nữ"
+      }</td></tr>
+      <tr><td>Tuổi</td><td>${values.age}</td></tr>
+      <tr><td>Cholesterol toàn phần</td><td>${
+        values.totalCholesterol
+      } mmol/L</td></tr>
+      <tr><td>HDL-C</td><td>${values.hdl} mg/dL</td></tr>
+      <tr><td>Huyết áp tâm thu</td><td>${values.sbp} mmHg</td></tr>
+      <tr><td>Đang điều trị tăng huyết áp</td><td>${
+        values.onHypertensionTreatment ? "Có" : "Không"
+      }</td></tr>
+      <tr><td>Hút thuốc</td><td>${values.smoking ? "Có" : "Không"}</td></tr>
+      <tr><td><strong>Tổng điểm</strong></td><td><strong>${score}</strong></td></tr>
+      <tr><td><strong>Nguy cơ 10 năm</strong></td><td><strong>${risk}</strong></td></tr>
+      ${isCopy ? genAITextToHtml(geminiResponse) : ""}
+    </table>
+  `;
+
+    return html;
+  };
+
+  const onCopy = async () => {
+    try {
+      const html = `
+      <style>
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          font-family: Arial, sans-serif;
+        }
+        th, td {
+          border: 1px solid #ccc;
+          padding: 8px 12px;
+          text-align: left;
+          font-size: 16px;
+          vertical-align: top;
+          word-wrap: break-word;
+          white-space: pre-wrap;
+        }
+        th {
+          background-color: #f5f5f5;
+        }
+        caption {
+          caption-side: top;
+          font-weight: bold;
+          font-size: 18px;
+          margin-bottom: 10px;
+          text-align: left;
+        }
+      </style>
+      ${await genHtml({ isCopy: true })}
+    `;
+
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          "text/html": new Blob([html], { type: "text/html" }),
+        }),
+      ]);
+
+      message.success("Đã sao chép bảng đánh giá vào clipboard!");
+    } catch (error) {
+      console.error("Copy failed:", error);
+      message.error("Lỗi khi sao chép.");
+    }
+  };
+
+  const onFinish = async (values) => {
+    const score = calculateFraminghamScore(values);
+    const risk = getFraminghamRisk(score, values.gender === "male");
+    const tableHtml = await genHtml({ isCopy: false });
+    const res = await fetch(
+      `https://api.home-care.vn/chatgpt/ask-gemini-recommendation?prompt=${encodeURIComponent(
+        tableHtml
+      )}`
+    );
+
+    const data = await res.json();
+    setGeminiResponse(
+      data.data
+        ?.replace(/\*\*(.*?)\*\*/g, "$1") // bỏ **bôi đậm**
+        .replace(/^\* /gm, "• ") // dòng bắt đầu bằng "* " → "• "
+        .replace(/\n{2,}/g, "\n\n")
+    );
     setResult(
       `Tổng điểm: ${score} → Nguy cơ mắc bệnh tim mạch trong 10 năm: ${risk}`
     );
@@ -185,6 +279,17 @@ const FraminghamForm = () => {
     <div className={styles.pageWrapper}>
       <div className={styles.formContainer}>
         <h2>Framingham Risk Score</h2>
+        <h4>
+          Công cụ đánh giá nguy cơ tim mạch lâu đời và được sử dụng rộng rãi
+          nhất
+        </h4>
+        <h4>
+          Chẩn đoán nguy cơ mắc bệnh lý tim mạch trong vòng 10 năm tới cho người
+          bệnh.
+        </h4>
+        <h4 style={{ marginBottom: 40 }}>
+          Được phát triển từ Nghiên cứu Tim Framingham
+        </h4>
         <Form
           form={form}
           layout="vertical"
@@ -266,15 +371,7 @@ const FraminghamForm = () => {
               >
                 Đặt lại
               </Button>
-              <Button
-                icon={<CopyOutlined />}
-                onClick={() => {
-                  if (result) {
-                    copy(result);
-                    message.success("Đã sao chép kết quả!");
-                  }
-                }}
-              >
+              <Button icon={<CopyOutlined />} onClick={onCopy}>
                 Sao chép
               </Button>
             </Row>
@@ -284,6 +381,33 @@ const FraminghamForm = () => {
               <Title level={4}>{result}</Title>
             </Form.Item>
           )}
+          <Row
+            gutter={12}
+            className={styles.summaryRow}
+            style={{ maxWidth: 1000 }}
+          >
+            <Text strong>Khuyến nghị AI:</Text>
+            {geminiResponse && (
+              <Row>
+                <Col span={24}>
+                  <Text strong>Phản hồi từ hệ thống:</Text>
+                  <div
+                    style={{
+                      background: "#fafafa",
+                      padding: "12px",
+                      marginTop: 8,
+                      border: "1px solid #eee",
+                      whiteSpace: "pre-wrap", // 👈 giữ ngắt dòng
+                      fontFamily: "inherit",
+                      fontSize: "15px",
+                    }}
+                  >
+                    {geminiResponse}
+                  </div>
+                </Col>
+              </Row>
+            )}
+          </Row>
         </Form>
       </div>
     </div>
