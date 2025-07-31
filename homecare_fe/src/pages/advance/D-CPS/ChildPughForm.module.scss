@@ -1,0 +1,43 @@
+.pageWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; // hoặc center nếu muốn dọc giữa luôn
+  min-height: 100vh;
+  padding: 40px;
+  background-color: #f0f2f5;
+  width: 100vw;
+}
+
+.formContainer {
+  background: #fff;
+  padding: 32px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  font-size: 16px;
+  min-width: 700px;
+}
+
+.ant-form-item-label > label {
+  font-weight: 500;
+  font-size: 15px;
+}
+
+.summaryRow {
+  margin-top: 24px;
+  background: #f6f9fc;
+  padding: 16px;
+  border-radius: 8px;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.summaryRow span {
+  font-weight: 500;
+}
+
+.buttonRow {
+  margin-top: 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
