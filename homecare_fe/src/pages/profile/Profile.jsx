@@ -63,6 +63,8 @@ const Profile = () => {
       setLoading(true);
       const res = await API_CALL.get(`/doctor/${id}`);
       const data = res.data.data;
+
+      console.log("data?.avatar_url", data?.avatar_url);
       setAvatarUrl(data?.avatar_url);
       setSignatureUrl(data.signature_url);
       form.setFieldsValue({

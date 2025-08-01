@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import useToast from "../../hooks/useToast";
 import API_CALL from "../../services/axiosClient";
 import { USER_ROLE } from "../../constant/app";
+import { GoogleLogin } from "@react-oauth/google";
+import { useGlobalAuth } from "../../contexts/AuthContext";
 
 const { Title } = Typography;
 
@@ -12,6 +14,7 @@ const RegisterPage = () => {
   const { showError, showSuccess } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [logo] = useState("/logo_home_care.jpg");
+  const { handleLoginContext } = useGlobalAuth();
 
   const onFinish = async ({ email, password, confirmPassword, fullName }) => {
     if (password !== confirmPassword) {
@@ -154,26 +157,30 @@ const RegisterPage = () => {
 
           <Divider plain>Hoặc</Divider>
 
-          <Button
-            type="default"
-            style={{
-              width: "100%",
-              backgroundColor: "#fff",
-              border: "1px solid #d9d9d9",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "8px",
+          <GoogleLogin
+            onSuccess={async (credentialResponse) => {
+              try {
+                const id_token = credentialResponse.credential;
+                const res = await API_CALL.post("/auth/google-login", {
+                  id_token,
+                });
+
+                const { token, user, doctor } = res.data.data;
+                handleLoginContext({ token, user, doctor });
+                showSuccess(`Đăng nhập thành công! Xin chào ${user.name}`);
+                navigate("/");
+              } catch (err) {
+                const message =
+                  err?.response?.data?.message || "Đăng nhập Google thất bại!";
+                showError(message);
+              }
             }}
-            onClick={handleGoogleLogin}
-          >
-            <img
-              src="https://developers.google.com/identity/images/g-logo.png"
-              alt="Google"
-              style={{ width: 18, height: 18 }}
-            />
-            Đăng nhập bằng Google
-          </Button>
+            onError={() => {
+              showError("Google đăng nhập thất bại!");
+            }}
+            width="100%"
+            locale="vi"
+          />
         </Card>
       </div>
     </div>

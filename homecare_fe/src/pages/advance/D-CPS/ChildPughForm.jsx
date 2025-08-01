@@ -13,7 +13,7 @@ export const CHILD_PUGH_QUESTIONS = [
   { key: "bilirubin", label: "Bilirubin toàn phần (micromol/L)" },
   { key: "albumin", label: "Albumin huyết thanh (g/L)" },
   { key: "inr", label: "INR" },
-  { key: "ascites", label: "Báng bụng" },
+  { key: "ascites", label: "Dịch tự do ổ bụng" },
   { key: "encephalopathy", label: "Bệnh não gan" },
 ];
 
