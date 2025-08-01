@@ -143,6 +143,10 @@ const HomeCareLanding = () => {
 
               <DropdownNav title="SẢN PHẨM" items={productsItem} />
               <DropdownNav title="TRẢI NGHIỆM" items={trialItem} />
+
+              <Menu.Item key="contact" onClick={() => navigate("/contact")}>
+                LIÊN HỆ
+              </Menu.Item>
             </Menu>
           </div>
         </div>

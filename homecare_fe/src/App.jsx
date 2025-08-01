@@ -40,6 +40,8 @@ import BoneAgeForm from "./pages/advance/BONEAGE/BoneAgeForm";
 import DipssForm from "./pages/advance/D-IPSS/DipssForm";
 import FraminghamForm from "./pages/advance/Framingham/FraminghamForm";
 import ChildPughForm from "./pages/advance/D-CPS/ChildPughForm";
+import ContactForm from "./pages/contacts/ContactForm";
+import ContactAdminList from "./pages/contacts/list/ContactList";
 
 function App() {
   useAuthInitializer();
@@ -57,6 +59,7 @@ function App() {
         <Route path="/dipss" element={<DipssForm />} />
         <Route path="/D-COR" element={<FraminghamForm />} />
         <Route path="/D-CPS" element={<ChildPughForm />} />
+        <Route path="/contact" element={<ContactForm />} />
 
         <Route
           path="/home"
@@ -111,6 +114,8 @@ function App() {
           <Route path="orders" element={<OrderList />} />
           <Route path="staffs" element={<StaffPage />} />
           <Route path="clinics" element={<ClinicList />} />
+          <Route path="contacts-admin" element={<ContactAdminList />} />
+
           <Route path="patients-diagnose" element={<PatientTablePage />} />
           <Route
             path="patients-diagnose/create"

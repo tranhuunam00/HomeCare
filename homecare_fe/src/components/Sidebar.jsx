@@ -67,6 +67,18 @@ const SidebarMenu = ({ onSelect, selected }) => {
         { key: "home/exam-parts", label: "Bộ phận thăm khám" },
       ],
     },
+
+    user?.id_role === USER_ROLE.ADMIN && {
+      key: "Liên hệ",
+      icon: (
+        <Avatar
+          src="https://daihocnguyentrai.edu.vn/wp-content/uploads/2021/12/anhlienhe.png"
+          size={40}
+        />
+      ),
+      label: "Liên hệ",
+      children: [{ key: "home/contacts-admin", label: "Tất cả" }],
+    },
     user?.id_role === USER_ROLE.ADMIN && {
       key: "Bác sĩ",
       icon: (
