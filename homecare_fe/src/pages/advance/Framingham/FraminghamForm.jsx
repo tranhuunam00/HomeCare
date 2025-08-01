@@ -19,7 +19,7 @@ import {
 } from "@ant-design/icons";
 import copy from "copy-to-clipboard";
 import styles from "./FraminghamForm.module.scss";
-import { genAITextToHtml } from "../../../constant/app";
+import { genAITextToHtml, STYLE_COPY } from "../../../constant/app";
 const { Text } = Typography;
 
 const { Title } = Typography;
@@ -211,32 +211,7 @@ const FraminghamForm = () => {
   const onCopy = async () => {
     try {
       const html = `
-      <style>
-        table {
-          width: 100%;
-          border-collapse: collapse;
-          font-family: Arial, sans-serif;
-        }
-        th, td {
-          border: 1px solid #ccc;
-          padding: 8px 12px;
-          text-align: left;
-          font-size: 16px;
-          vertical-align: top;
-          word-wrap: break-word;
-          white-space: pre-wrap;
-        }
-        th {
-          background-color: #f5f5f5;
-        }
-        caption {
-          caption-side: top;
-          font-weight: bold;
-          font-size: 18px;
-          margin-bottom: 10px;
-          text-align: left;
-        }
-      </style>
+      ${STYLE_COPY}
       ${await genHtml({ isCopy: true })}
     `;
 
@@ -360,7 +335,7 @@ const FraminghamForm = () => {
           <Form.Item>
             <Row style={{ justifyContent: "flex-end", gap: 20 }}>
               <Button type="primary" htmlType="submit">
-                Tính điểm
+                Kết quả
               </Button>
               <Button
                 icon={<ReloadOutlined />}
@@ -369,10 +344,10 @@ const FraminghamForm = () => {
                   setResult(null);
                 }}
               >
-                Đặt lại
+                Reset
               </Button>
               <Button icon={<CopyOutlined />} onClick={onCopy}>
-                Sao chép
+                Copy kết quả
               </Button>
             </Row>
           </Form.Item>

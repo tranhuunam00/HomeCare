@@ -73,7 +73,6 @@ export const BENIGN_CALCIFICATION_OPTIONS = [
   { label: "Vôi hóa hình vỏ trứng (BR2)", value: "egg-shell", score: 2 },
   { label: "Vôi hóa hình que lớn (BR2)", value: "large-rod", score: 2 },
   { label: "Vôi hóa hình tròn (BR2)", value: "round", score: 2 },
-  { label: "Vôi hóa hình vỏ trứng (BR2)", value: "egg", score: 2 },
   { label: "Vôi hóa dạng sữa calci (BR2)", value: "milk", score: 2 },
   { label: "Vôi hóa mảng do loạn dưỡng (BR2)", value: "dystrophic", score: 2 },
   { label: "Không thấy", value: "none", score: 0, isOther: true },
@@ -149,7 +148,7 @@ const { Text } = Typography;
 
 import styles from "./BiradsForm.module.scss";
 import { toast } from "react-toastify";
-import { genAITextToHtml } from "../../../constant/app";
+import { genAITextToHtml, STYLE_COPY } from "../../../constant/app";
 
 const BiradsForm = () => {
   const [form] = Form.useForm();
@@ -375,12 +374,7 @@ const BiradsForm = () => {
   const onCopy = async () => {
     try {
       const html = `
-      <style>
-        table { width: 100%; border-collapse: collapse; font-family: Arial; }
-        th, td { border: 1px solid #ccc; padding: 8px 12px; font-size: 16px; text-align: left; }
-        th { background-color: #f5f5f5; }
-        caption { font-weight: bold; font-size: 18px; margin-bottom: 10px; }
-      </style>
+      ${STYLE_COPY}
       ${await genHtml({ isCopy: true })}
     `;
 
@@ -528,7 +522,7 @@ const BiradsForm = () => {
                 </Col>
 
                 <Col span={6}>
-                  <Form.Item label="D3 (mm) trung bình">
+                  <Form.Item label="D3 (mm) – Kích thước trung bình">
                     <Input disabled value={volume} />
                   </Form.Item>
                 </Col>
@@ -736,7 +730,7 @@ const BiradsForm = () => {
           <Form.Item>
             <Row gutter={16} style={{ justifyContent: "flex-end" }}>
               <Col>
-                <Button onClick={onCalculate}>Tính điểm</Button>
+                <Button onClick={onCalculate}>Kết quả</Button>
               </Col>
               <Col>
                 <Button onClick={onReset} danger>
@@ -745,7 +739,7 @@ const BiradsForm = () => {
               </Col>
               <Col>
                 <Button type="primary" onClick={onCopy}>
-                  Copy
+                  Copy kết quả
                 </Button>
               </Col>
             </Row>

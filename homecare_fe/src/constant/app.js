@@ -186,3 +186,31 @@ export const genAITextToHtml = (geminiResponse) => {
                 </td>
               </tr>`;
 };
+export const STYLE_COPY = `
+<style>
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          font-family: Arial, sans-serif;
+        }
+        th, td {
+          border: 1px solid #ccc;
+          padding: 2px 12px;
+          text-align: left;
+          font-size: 16px;
+          vertical-align: middle;
+          word-wrap: break-word;
+          white-space: pre-wrap;
+        }
+        th {
+          background-color: #f5f5f5;
+        }
+        caption {
+          caption-side: top;
+          font-weight: bold;
+          font-size: 18px;
+          margin-bottom: 10px;
+          text-align: left;
+        }
+      </style>
+      `;

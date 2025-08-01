@@ -5,7 +5,7 @@ import { ReloadOutlined, CopyOutlined } from "@ant-design/icons";
 
 import styles from "./ChildPughForm.module.scss";
 import { toast } from "react-toastify";
-import { genAITextToHtml } from "../../../constant/app";
+import { genAITextToHtml, STYLE_COPY } from "../../../constant/app";
 
 const { Title, Text } = Typography;
 
@@ -109,32 +109,7 @@ const ChildPughForm = () => {
   const onCopy = async () => {
     try {
       const html = `
-        <style>
-          table {
-            width: 100%;
-            border-collapse: collapse;
-            font-family: Arial, sans-serif;
-          }
-          th, td {
-            border: 1px solid #ccc;
-            padding: 8px 12px;
-            text-align: left;
-            font-size: 16px;
-            vertical-align: top;
-            word-wrap: break-word;
-            white-space: pre-wrap;
-          }
-          th {
-            background-color: #f5f5f5;
-          }
-          caption {
-            caption-side: top;
-            font-weight: bold;
-            font-size: 18px;
-            margin-bottom: 10px;
-            text-align: left;
-          }
-        </style>
+        ${STYLE_COPY}
         ${await genHtml({ isCopy: true })}
       `;
 
@@ -245,10 +220,10 @@ const ChildPughForm = () => {
               Reset
             </Button>
             <Button type="primary" htmlType="submit">
-              Tính điểm
+              Kết quả
             </Button>
             <Button icon={<CopyOutlined />} onClick={onCopy}>
-              Copy bảng
+              Copy kết quả
             </Button>
           </div>
         </Form>

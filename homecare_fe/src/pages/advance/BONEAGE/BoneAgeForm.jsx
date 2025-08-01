@@ -18,6 +18,7 @@ const { Option } = Select;
 
 import styles from "./BoneAgeForm.module.scss";
 import { toast } from "react-toastify";
+import { STYLE_COPY } from "../../../constant/app";
 
 export const COT_HOA_STAGES = [
   {
@@ -183,38 +184,7 @@ const BoneAgeForm = () => {
   const onCopy = async () => {
     try {
       const html = `
-      <style>
-        table {
-          width: 100%;
-          border-collapse: collapse;
-          font-family: Arial, sans-serif;
-          margin-top: 16px;
-        }
-        th, td {
-          border: 1px solid #ccc;
-          padding: 8px 12px;
-          font-size: 15px;
-          text-align: left;
-          vertical-align: top;
-        }
-        th {
-          background-color: #f0f0f0;
-          font-weight: bold;
-        }
-        caption {
-          font-size: 18px;
-          font-weight: bold;
-          margin: 12px 0 8px;
-          text-align: left;
-        }
-        .multiline {
-          white-space: pre-wrap;
-          word-break: break-word;
-        }
-        .center {
-          text-align: center;
-        }
-      </style>
+      ${STYLE_COPY}
 
       ${await genHtml({ isCopy: true })}
     `;
@@ -382,12 +352,12 @@ const BoneAgeForm = () => {
           <Row gutter={12} justify="end">
             <Col>
               <Button icon={<RedoOutlined />} onClick={handleReset}>
-                Đặt lại
+                Reset
               </Button>
             </Col>
             <Col>
               <Button type="primary" icon={<CopyOutlined />} onClick={onCopy}>
-                Sao chép
+                Copy kết quả
               </Button>
             </Col>
           </Row>

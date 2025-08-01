@@ -726,7 +726,7 @@ export default function Recist() {
             KẾT QUẢ ĐÁNH GIÁ THEO DÕI ĐÁP ỨNG ĐIỀU TRỊ KHỐI U ĐẶC THEO TIÊU
             CHUẨN RECIST 1.1
           </h2>
-          <PatientForm />
+          {/* <PatientForm /> */}
         </div>
 
         {/* Hướng dẫn RECIST */}

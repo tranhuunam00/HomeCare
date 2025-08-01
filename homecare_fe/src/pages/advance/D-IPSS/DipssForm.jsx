@@ -219,10 +219,10 @@ const DipssForm = () => {
               Reset
             </Button>
             <Button type="primary" htmlType="submit">
-              Tính điểm
+              Kết quả
             </Button>
             <Button icon={<CopyOutlined />} onClick={onCopy}>
-              Copy toàn bộ
+              Copy kết quả
             </Button>
           </div>
         </Form>

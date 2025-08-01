@@ -17,7 +17,7 @@ import {
 import styles from "./LungRADSForm.module.scss";
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
-import { genAITextToHtml } from "../../../constant/app";
+import { genAITextToHtml, STYLE_COPY } from "../../../constant/app";
 
 const { Text } = Typography;
 
@@ -408,30 +408,7 @@ const LungRADSForm = () => {
   const onCopy = async () => {
     try {
       const html = `
-    <style>
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        font-family: Arial, sans-serif;
-        margin-top: 12px;
-      }
-      th, td {
-        border: 1px solid #ccc;
-        padding: 8px 12px;
-        font-size: 16px;
-        text-align: left;
-      }
-      th {
-        background-color: #f0f0f0;
-        font-weight: bold;
-      }
-      caption {
-        font-size: 18px;
-        font-weight: bold;
-        margin-bottom: 10px;
-        text-align: left;
-      }
-    </style>
+    ${STYLE_COPY}
     ${await genHtml({ isCopy: true })}
     `;
 
@@ -692,7 +669,7 @@ const LungRADSForm = () => {
 
           <Form.Item style={{ textAlign: "right" }}>
             <Button type="primary" htmlType="submit" style={{ marginRight: 8 }}>
-              Tính điểm
+              Kết quả
             </Button>
             <Button onClick={onReset} style={{ marginRight: 8 }}>
               Reset
