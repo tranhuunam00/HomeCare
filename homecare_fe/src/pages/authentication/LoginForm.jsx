@@ -6,6 +6,7 @@ import API_CALL from "../../services/axiosClient";
 import STORAGE from "../../services/storage";
 import { useGlobalAuth } from "../../contexts/AuthContext";
 const { Title } = Typography;
+import { GoogleLogin } from "@react-oauth/google";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -113,6 +114,30 @@ const LoginPage = () => {
               </Button>
             </Form.Item>
           </Form>
+          <GoogleLogin
+            onSuccess={async (credentialResponse) => {
+              try {
+                const id_token = credentialResponse.credential;
+                const res = await API_CALL.post("/auth/google-login", {
+                  id_token,
+                });
+
+                const { token, user, doctor } = res.data.data;
+                handleLoginContext({ token, user, doctor });
+                showSuccess(`Đăng nhập thành công! Xin chào ${user.name}`);
+                navigate("/");
+              } catch (err) {
+                const message =
+                  err?.response?.data?.message || "Đăng nhập Google thất bại!";
+                showError(message);
+              }
+            }}
+            onError={() => {
+              showError("Google đăng nhập thất bại!");
+            }}
+            width="100%"
+            locale="vi"
+          />
         </Card>
       </div>
     </div>
