@@ -14,7 +14,7 @@ import {
 import { FilterOutlined, EditOutlined } from "@ant-design/icons";
 import API_CALL from "../../../services/axiosClient";
 import { toast } from "react-toastify";
-import styles from "./ContactAdminList.module.scss";
+import styles from "./contactAdminList.module.scss";
 
 const { Option } = Select;
 
