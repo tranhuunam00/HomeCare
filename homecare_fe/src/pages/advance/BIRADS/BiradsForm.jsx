@@ -450,8 +450,8 @@ const BiradsForm = () => {
         </h4>
 
         <Form form={form} layout="vertical" onValuesChange={handleCalcVolume}>
-          <Row gutter={16}>
-            <Col span={6}>
+          <Row gutter={[16, 16]}>
+            <Col xs={24} md={8}>
               <Form.Item
                 name="breastSide"
                 label="Tuyến vú khảo sát"
@@ -461,7 +461,7 @@ const BiradsForm = () => {
               </Form.Item>
             </Col>
 
-            <Col span={9}>
+            <Col xs={24} md={8}>
               <Form.Item
                 name="density"
                 label="Mật độ tuyến vú"
@@ -471,7 +471,7 @@ const BiradsForm = () => {
               </Form.Item>
             </Col>
 
-            <Col span={9}>
+            <Col xs={24} md={8}>
               <Form.Item
                 name="location"
                 label="Vị trí tổn thương"

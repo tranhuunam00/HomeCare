@@ -226,21 +226,22 @@ const BoneAgeForm = () => {
         <h4>Mục đích: chẩn đoán tuổi xương</h4>
         <div style={{ marginBottom: 50 }}></div>
         <Form layout="vertical" form={form}>
-          <Row gutter={16}>
-            <Col span={8}>
+          <Row gutter={[16, 16]}>
+            <Col xs={24} md={8}>
               <Form.Item
-                label={<span>Vị trí đánh giá</span>}
+                label="Vị trí đánh giá"
                 name="position"
                 initialValue="Bàn tay trái"
               >
                 <Input disabled />
               </Form.Item>
             </Col>
-            <Col span={8}>
+
+            <Col xs={24} md={8}>
               <Form.Item
                 label={
                   <Tooltip title="Phương pháp đánh giá tuổi xương theo tiêu chuẩn">
-                    <span>Phương tiện đánh giá</span>
+                    Phương tiện đánh giá
                   </Tooltip>
                 }
                 name="way"
@@ -249,11 +250,12 @@ const BoneAgeForm = () => {
                 <Input disabled />
               </Form.Item>
             </Col>
-            <Col span={8}>
+
+            <Col xs={24} md={8}>
               <Form.Item
                 label={
                   <Tooltip title="Phương pháp đánh giá tuổi xương theo tiêu chuẩn">
-                    <span>Phương pháp đánh giá</span>
+                    Phương pháp đánh giá
                   </Tooltip>
                 }
                 name="method"
@@ -263,8 +265,9 @@ const BoneAgeForm = () => {
               </Form.Item>
             </Col>
           </Row>
-          <Row gutter={16}>
-            <Col span={8}>
+
+          <Row gutter={[16, 16]}>
+            <Col xs={24} md={12}>
               <Form.Item
                 label="Năm sinh"
                 name="birthYear"
@@ -274,11 +277,11 @@ const BoneAgeForm = () => {
               </Form.Item>
             </Col>
 
-            <Col span={8}>
+            <Col xs={24} md={12}>
               <Form.Item
                 label={
                   <Tooltip title="Tuổi tính theo ngày chụp – năm sinh">
-                    <span>Tuổi sinh lý (năm)</span>
+                    Tuổi sinh lý (năm)
                   </Tooltip>
                 }
                 name="physiologicalAge"
@@ -322,13 +325,25 @@ const BoneAgeForm = () => {
             }
             name="ossificationPoints"
           >
-            <Checkbox.Group disabled={!gender}>
-              <Row gutter={[12, 12]}>
-                {visibleStages.map((opt) => (
-                  <Col key={opt.value} span={12}>
-                    <Checkbox value={opt.value}>{opt.label}</Checkbox>
-                  </Col>
-                ))}
+            <Checkbox.Group disabled={!gender} style={{ width: "100%" }}>
+              <Row
+                gutter={[12, 12]}
+                style={{ justifyContent: "space-between" }}
+              >
+                <Col xs={24} md={12}>
+                  {visibleStages.slice(0, 8).map((opt) => (
+                    <div key={opt.value} style={{ marginBottom: 8 }}>
+                      <Checkbox value={opt.value}>{opt.label}</Checkbox>
+                    </div>
+                  ))}
+                </Col>
+                <Col xs={24} md={12} style={{}}>
+                  {visibleStages.slice(8).map((opt) => (
+                    <div key={opt.value} style={{ marginBottom: 8 }}>
+                      <Checkbox value={opt.value}>{opt.label}</Checkbox>
+                    </div>
+                  ))}
+                </Col>
               </Row>
             </Checkbox.Group>
           </Form.Item>
