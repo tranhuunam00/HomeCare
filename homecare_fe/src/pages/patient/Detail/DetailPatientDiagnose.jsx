@@ -14,6 +14,13 @@ import { useGlobalAuth } from "../../../contexts/AuthContext";
 
 const { Title, Text } = Typography;
 
+const calculateAge = (dob) => {
+  if (!dob) return "";
+  const today = dayjs();
+  const birthDate = dayjs(dob);
+  return today.diff(birthDate, "year");
+};
+
 const PatientDiagnoiseDetailPage = () => {
   const { id } = useParams();
   const [data, setData] = useState(null);
@@ -101,7 +108,7 @@ const PatientDiagnoiseDetailPage = () => {
           </Col>
           <Col span={2}>
             <Title level={5}>Tuổi:</Title>
-            <Text>{data.age}</Text>
+            <Text>{calculateAge(data.dob)}</Text>
           </Col>
           <Col span={2}>
             <Title level={5}>PID:</Title>
