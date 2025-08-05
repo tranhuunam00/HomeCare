@@ -568,7 +568,7 @@ const PatientUseTemplate = () => {
           setPatientDiagnose(data);
           setIdTemplateService(data?.id_template_service);
           setInputsRender({
-            "{{{text: Bộ phận thăm khám}}}": examParts?.find(
+            "{{{text:Bộ phận thăm khám}}}": examParts?.find(
               (ex) => data?.id_exam_part == ex.id
             )?.name,
           });
