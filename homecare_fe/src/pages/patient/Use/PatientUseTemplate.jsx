@@ -429,12 +429,13 @@ const PatientUseTemplate = () => {
           alt=""
           style="width: 300px; height: 200px; object-fit: cover; border-radius: 5px;"
         >
-        <p style="margin: 8px 0 4px; font-weight: bold;">${
-          imageListForm[0]?.caption
-        }</p>
-        <a href="#" style="color: #007bff; text-decoration: none;">${
+       <p style="margin: 8px 0 4px;">
+        <a href="${
           links[0]
-        }</a>
+        }" target="_blank" rel="noopener noreferrer" style="color: #007bff; text-decoration: underline; font-weight: bold;">
+          ${imageListForm[0]?.caption || ""}
+        </a>
+      </p>
       </div>
 
       <div style="text-align: center; width: 300px; font-size: 13px">
@@ -443,12 +444,13 @@ const PatientUseTemplate = () => {
           alt="Minh họa quy trình chụp MRI"
           style="width: 300px; height: 200px; object-fit: cover; border-radius: 5px;"
         >
-        <p style="margin: 8px 0 4px; font-weight: bold; font-size: 13px">${
-          imageListForm[1]?.caption
-        }</p>
-        <a href="#" style="color: #007bff; text-decoration: none; font-size: 13px">${
+        <p style="margin: 8px 0 4px;">
+        <a href="${
           links[1]
-        }</a>
+        }" target="_blank" rel="noopener noreferrer" style="color: #007bff; text-decoration: underline; font-weight: bold;">
+          ${imageListForm[1]?.caption || ""}
+        </a>
+      </p>
       </div>
     </div>
 
