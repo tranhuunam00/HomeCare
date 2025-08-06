@@ -20,6 +20,7 @@ import { extractDynamicFieldsFromHtml, USER_ROLE } from "../../../constant/app";
 import { renderDynamicAntdFields } from "../../../components/RenderInputFormTemplate";
 import { useGlobalAuth } from "../../../contexts/AuthContext";
 import ImageWithCaptionInput from "../ImageWithCaptionInput/ImageWithCaptionInput";
+import { QuestionCircleOutlined } from "@ant-design/icons";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -230,6 +231,19 @@ const AddOrEditTemplateProduct = () => {
           marginRight: 60,
         }}
       >
+        <Button
+          type="primary"
+          icon={<QuestionCircleOutlined />}
+          onClick={() => {
+            window.open(
+              "https://yellow-isthmus-373.notion.site/H-ng-d-n-ch-nh-s-a-form-m-u-Version1-2455c809eb7e8000807de91f191ddd8e",
+              "_blank"
+            );
+          }}
+        >
+          Hướng dẫn chỉnh sửa
+        </Button>
+
         <Title level={3}>{id ? "Chỉnh sửa" : "Thêm mới"} mẫu kết quả</Title>
         <Spin spinning={loading}>
           <Form layout="vertical" form={form} onFinish={onFinish}>
