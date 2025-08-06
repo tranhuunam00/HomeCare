@@ -147,9 +147,7 @@ const LungRADSForm = () => {
       progression,
     } = values;
 
-    // Kiểm tra dữ liệu đầu vào
-    if (!structure || !progression) return "Không xác định";
-
+    // Kiểm tra thông tin thiếu → Lung-RADS 0
     const d1 = Number(D1 || 0);
     const d2 = Number(D2 || 0);
     const d3 = Number(D3 || 0);
@@ -157,89 +155,125 @@ const LungRADSForm = () => {
     const d5 = Number(D5 || 0);
     const hasRisk = Array.isArray(riskSigns) && riskSigns.length > 0;
 
-    if (d4 === 0) return "Không xác định";
+    if (!structure || !progression || !d1 || !d2 || !d3) {
+      return "0"; // Không đủ thông tin, cần hình ảnh bổ sung
+    }
 
     const rules = [];
 
-    // ===== RULES CHO SOLID =====
+    // ===== Lung-RADS 1: Không có nốt hoặc có đặc điểm lành tính rõ ràng
+    if (
+      benign === "calc" || // Vôi hóa toàn bộ/trung tâm
+      benign === "fat" // Có mỡ
+    ) {
+      rules.push({ group: "1", score: 1 });
+    }
+
+    // ===== Lung-RADS 2: các tổn thương lành tính hoặc rất nhỏ
     if (structure === "solid") {
-      if (benign === "calc" || benign === "fat")
-        rules.push({ group: "1", score: 1 });
-      if (benign === "mp" && d4 < 10) rules.push({ group: "2", score: 2 });
-      if (benign === "mp" && d4 >= 10) rules.push({ group: "3", score: 3 });
-
-      if (["baseline", "new"].includes(progression)) {
-        if (d4 < 6) rules.push({ group: "2", score: 2 });
-        else if (d4 >= 6 && d4 <= 8) rules.push({ group: "3", score: 3 });
-        else if (d4 > 8 && d4 <= 15) rules.push({ group: "4A", score: 4 });
-        else if (d4 > 15) rules.push({ group: "4B", score: 5 });
-      }
-
-      if (progression === "growing") {
-        if (d4 < 8) rules.push({ group: "4A", score: 4 });
-        else rules.push({ group: "4B", score: 5 });
-      }
-
-      if (["stable", "slow"].includes(progression)) {
-        if (d4 < 6) rules.push({ group: "2", score: 2 });
-        else if (d4 >= 6 && d4 <= 8) rules.push({ group: "3", score: 3 });
-        else if (d4 > 8 && d4 <= 15) rules.push({ group: "4A", score: 4 });
-        else if (d4 > 15) rules.push({ group: "4B", score: 5 });
-      }
+      if (progression === "baseline" && d4 < 6)
+        rules.push({ group: "2", score: 2 });
+      if (progression === "new" && d4 < 4) rules.push({ group: "2", score: 2 });
     }
 
-    // ===== RULES CHO PART-SOLID =====
     if (structure === "part-solid") {
-      if (["baseline"].includes(progression)) {
-        if (d4 < 6) rules.push({ group: "2", score: 2 });
-        if (d4 >= 6 && d5 < 6) rules.push({ group: "3", score: 3 });
-        if (d4 >= 6 && d5 >= 6 && d5 <= 8)
-          rules.push({ group: "4A", score: 4 });
-        if (d5 > 8) rules.push({ group: "4B", score: 5 });
-      }
-
-      if (progression === "new") {
-        if (d4 < 6) rules.push({ group: "3", score: 3 });
-        if (d5 < 4) rules.push({ group: "4A", score: 4 });
-        if (d5 >= 5) rules.push({ group: "4B", score: 5 });
-      }
-
-      if (progression === "growing") {
-        if (d5 < 4) rules.push({ group: "4A", score: 4 });
-        if (d5 >= 5) rules.push({ group: "4B", score: 5 });
-      }
-
-      if (["stable", "slow"].includes(progression)) {
-        if (d4 < 6) rules.push({ group: "2", score: 2 });
-        if (d4 >= 6 && d5 < 6) rules.push({ group: "3", score: 3 });
-        if (d4 >= 6 && d5 >= 6 && d5 <= 8)
-          rules.push({ group: "4A", score: 4 });
-        if (d5 > 8) rules.push({ group: "4B", score: 5 });
-      }
+      if (progression === "baseline" && d4 < 6)
+        rules.push({ group: "2", score: 2 });
     }
 
-    // ===== RULES CHO NON-SOLID =====
     if (structure === "non-solid") {
-      if (["baseline", "new"].includes(progression)) {
-        if (d4 < 30) rules.push({ group: "2", score: 2 });
-        else rules.push({ group: "3", score: 3 });
-      }
-
-      if (["stable", "slow"].includes(progression)) {
+      if (
+        ["baseline", "new", "stable", "slow"].includes(progression) &&
+        d4 < 30
+      ) {
         rules.push({ group: "2", score: 2 });
       }
-
-      if (progression === "growing") {
-        if (d4 < 30) rules.push({ group: "3", score: 3 });
-        else rules.push({ group: "4A", score: 4 });
-      }
     }
 
-    // ===== XỬ LÝ MODIFIER 4X =====
+    // ===== Lung-RADS 3
+    if (structure === "solid") {
+      if (progression === "baseline" && d4 >= 6 && d4 < 8)
+        rules.push({ group: "3", score: 3 });
+      if (progression === "new" && d4 >= 4 && d4 < 6)
+        rules.push({ group: "3", score: 3 });
+      if (["stable", "slow"].includes(progression) && d4 >= 6 && d4 < 8)
+        rules.push({ group: "3", score: 3 });
+    }
+
+    if (structure === "part-solid") {
+      if (progression === "baseline" && d4 >= 6 && d5 < 6)
+        rules.push({ group: "3", score: 3 });
+      if (progression === "new" && d4 < 6) rules.push({ group: "3", score: 3 });
+      if (["stable", "slow"].includes(progression) && d4 >= 6 && d5 < 6)
+        rules.push({ group: "3", score: 3 });
+    }
+
+    if (structure === "non-solid") {
+      if (progression === "baseline" && d4 >= 30)
+        rules.push({ group: "3", score: 3 });
+      if (progression === "new" && d4 >= 30)
+        rules.push({ group: "3", score: 3 });
+      if (progression === "growing" && d4 < 30)
+        rules.push({ group: "3", score: 3 });
+    }
+
+    // ===== Lung-RADS 4A
+    if (structure === "solid") {
+      if (progression === "baseline" && d4 >= 8 && d4 < 15)
+        rules.push({ group: "4A", score: 4 });
+      if (progression === "new" && d4 >= 6 && d4 < 8)
+        rules.push({ group: "4A", score: 4 });
+      if (progression === "growing" && d4 < 8)
+        rules.push({ group: "4A", score: 4 });
+      if (["stable", "slow"].includes(progression) && d4 >= 8 && d4 < 15)
+        rules.push({ group: "4A", score: 4 });
+    }
+
+    if (structure === "part-solid") {
+      if (progression === "baseline" && d5 >= 6 && d5 < 8)
+        rules.push({ group: "4A", score: 4 });
+      if (progression === "new" && d5 < 4)
+        rules.push({ group: "4A", score: 4 });
+      if (progression === "growing" && d5 < 4)
+        rules.push({ group: "4A", score: 4 });
+      if (["stable", "slow"].includes(progression) && d5 >= 6 && d5 < 8)
+        rules.push({ group: "4A", score: 4 });
+    }
+
+    if (structure === "non-solid") {
+      if (progression === "growing" && d4 >= 30)
+        rules.push({ group: "4A", score: 4 });
+    }
+
+    // ===== Lung-RADS 4B
+    if (structure === "solid") {
+      if (progression === "baseline" && d4 >= 15)
+        rules.push({ group: "4B", score: 5 });
+      if (progression === "new" && d4 >= 8)
+        rules.push({ group: "4B", score: 5 });
+      if (progression === "growing" && d4 >= 8)
+        rules.push({ group: "4B", score: 5 });
+      if (["stable", "slow"].includes(progression) && d4 >= 15)
+        rules.push({ group: "4B", score: 5 });
+    }
+
+    if (structure === "part-solid") {
+      if (progression === "baseline" && d5 >= 8)
+        rules.push({ group: "4B", score: 5 });
+      if (progression === "new" && d5 >= 5)
+        rules.push({ group: "4B", score: 5 });
+      if (progression === "growing" && d5 >= 5)
+        rules.push({ group: "4B", score: 5 });
+      if (["stable", "slow"].includes(progression) && d5 >= 8)
+        rules.push({ group: "4B", score: 5 });
+    }
+
+    // ===== Chọn nhóm nguy cơ cao nhất
     const highest = rules.sort((a, b) => b.score - a.score)[0];
 
     if (!highest) return "Không xác định";
 
+    // ===== Lung-RADS 4X
     if ((highest.group === "3" || highest.group.startsWith("4")) && hasRisk) {
       return "4X";
     }
