@@ -43,6 +43,7 @@ import ChildPughForm from "./pages/advance/D-CPS/ChildPughForm";
 import ContactForm from "./pages/contacts/ContactForm";
 import ContactAdminList from "./pages/contacts/list/ContactList";
 import ModifiedCTSIForm from "./pages/advance/CTSI/CtsiForm";
+import AASTKidneyForm from "./pages/advance/AASTKidneyForm/AASTKidneyForm";
 
 function App() {
   useAuthInitializer();
@@ -62,6 +63,7 @@ function App() {
         <Route path="/D-CPS" element={<ChildPughForm />} />
         <Route path="/contact" element={<ContactForm />} />
         <Route path="/D-BALTHAZA" element={<ModifiedCTSIForm />} />
+        <Route path="/D-VOTHAN" element={<AASTKidneyForm />} />
 
         <Route
           path="/home"
