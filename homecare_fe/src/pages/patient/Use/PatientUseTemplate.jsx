@@ -481,12 +481,13 @@ const PatientUseTemplate = () => {
           alt=""
           style="width: 300px; height: 200px; object-fit: cover; border-radius: 5px;"
         >
-        <p style="margin: 8px 0 4px; font-weight: bold;">${
-          imageListFormTrans[0]?.caption
-        }</p>
-        <a href="#" style="color: #007bff; text-decoration: none;">${
+        <p style="margin: 8px 0 4px;">
+        <a href="${
           links[0]
-        }</a>
+        }" target="_blank" rel="noopener noreferrer" style="color: #007bff; text-decoration: underline; font-weight: bold;">
+          ${imageListFormTrans[0]?.caption || ""}
+        </a>
+      </p>
       </div>
 
       <div style="text-align: center; width: 300px; font-size: 13px">
@@ -495,12 +496,13 @@ const PatientUseTemplate = () => {
           alt="Minh họa quy trình chụp MRI"
           style="width: 300px; height: 200px; object-fit: cover; border-radius: 5px;"
         >
-        <p style="margin: 8px 0 4px; font-weight: bold;">${
-          imageListFormTrans[1]?.caption
-        }</p>
-        <a href="#" style="color: #007bff; text-decoration: none;">${
+        <p style="margin: 8px 0 4px;">
+        <a href="${
           links[1]
-        }</a>
+        }" target="_blank" rel="noopener noreferrer" style="color: #007bff; text-decoration: underline; font-weight: bold;">
+          ${imageListFormTrans[1]?.caption || ""}
+        </a>
+      </p>
       </div>
     </div>
     <h3 style="color: #4299d4">IMAGES DESCRIPTION</h3>
@@ -650,13 +652,17 @@ const PatientUseTemplate = () => {
           // }
         </style>
       </head>
-      <body>${printContents}</body>
+     <body ">
+        ${printContents}
+      </body>
     </html>
   `);
     newWindow.document.close();
-    newWindow.focus();
-    newWindow.print();
-    newWindow.close();
+    newWindow.onload = () => {
+      newWindow.focus();
+      newWindow.print();
+      newWindow.close();
+    };
   };
 
   const updateStatusPatientDiagnose = async (status) => {
