@@ -73,7 +73,6 @@ const PatientFormPage = () => {
         try {
           const res = await API_CALL.get(`/patient-diagnose/${id}`);
           const data = res.data.data;
-
           // Gán giá trị vào form
           const dataMapping = {
             name: data.name,
@@ -86,13 +85,8 @@ const PatientFormPage = () => {
             email: data.email,
             detail: data.address,
             country: data.countryCode,
-            province: data.province_code
-              ? Number(data.province_code)
-              : undefined,
-            district: data.district_code
-              ? Number(data.district_code)
-              : undefined,
-            ward: data.ward_code ? Number(data.ward_code) : undefined,
+            province: data.province_code || undefined,
+            ward: data.ward_code || undefined,
             id_clinic: data.id_clinic,
             dob: data.dob ? dayjs(data.dob) : null,
             age: data.dob ? dayjs().diff(dayjs(data.dob), "year") : undefined,
@@ -103,8 +97,7 @@ const PatientFormPage = () => {
           form.setFieldsValue(dataMapping);
           setInitialValues(dataMapping);
 
-          setSelectedProvince(Number(data.province_code));
-          // setSelectedDistrict(Number(data.district_code));
+          setSelectedProvince(data.province_code);
         } catch (err) {
           message.error("Không thể tải thông tin bệnh nhân");
           console.error(err);
@@ -337,7 +330,6 @@ const PatientFormPage = () => {
                   onChange={(val) => {
                     form.setFieldsValue({
                       province: val,
-                      district: undefined,
                       ward: undefined,
                     });
                     setSelectedProvince(val);

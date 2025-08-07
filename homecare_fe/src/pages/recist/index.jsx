@@ -142,15 +142,12 @@ const { provinces, wards, setSelectedProvince } = useVietnamAddress();
 
 // Hàm để render các trường thông tin bệnh nhân
 const renderPatientInfoFields = ({
-  gender,
   handleGenderChange,
   handleDobChange,
   handleAgeChange,
   form,
   setSelectedProvince,
   provinces,
-  setSelectedDistrict,
-  districts,
   wards,
 }) => (
   <>
@@ -227,23 +224,6 @@ const renderPatientInfoFields = ({
         </Select>
       </Form.Item>
 
-      <Form.Item label="Huyện" name="district" style={{ width: "31%" }}>
-        <Select
-          placeholder="Chọn Huyện/Quận"
-          onChange={(val) => {
-            form.setFieldsValue({ ward: undefined });
-            setSelectedDistrict(val);
-          }}
-          disabled={!districts.length}
-          style={{ fontSize: 12 }}
-        >
-          {districts.map((dist) => (
-            <Option key={dist.code} value={dist.code}>
-              {dist.name}
-            </Option>
-          ))}
-        </Select>
-      </Form.Item>
 
       <Form.Item label="Xã" name="ward" style={{ width: "31%" }}>
         <Select placeholder="Chọn Xã / Phường" disabled={!wards.length}>
