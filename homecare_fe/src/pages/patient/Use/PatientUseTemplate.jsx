@@ -548,17 +548,10 @@ const PatientUseTemplate = () => {
         toast.error("Tải file thất bại!", err?.response?.data?.message);
       });
   };
-  const {
-    provinces,
-    districts,
-    setSelectedProvince,
-    wards,
-    setSelectedDistrict,
-  } = useVietnamAddress();
+  const { provinces, wards, setSelectedProvince } = useVietnamAddress();
 
   useEffect(() => {
     setSelectedProvince(patientDiagnose?.province_code);
-    setSelectedDistrict(patientDiagnose?.district_code);
   }, [patientDiagnose]);
 
   useEffect(() => {
@@ -1159,7 +1152,7 @@ const PatientUseTemplate = () => {
             imageList={imageList}
             doctor={doctor}
             provinces={provinces}
-            districts={districts}
+            // districts={districts}
             wards={wards}
             calculateAge={calculateAge}
             lang={LANGUAGES.vi}
@@ -1179,7 +1172,7 @@ const PatientUseTemplate = () => {
             imageList={imageListTrans}
             doctor={doctor}
             provinces={provinces}
-            districts={districts}
+            // districts={districts}
             wards={wards}
             calculateAge={calculateAge}
             lang={LANGUAGES.en}

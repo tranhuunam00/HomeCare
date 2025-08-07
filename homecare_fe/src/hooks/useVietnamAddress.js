@@ -1,48 +1,40 @@
 // hooks/useVietnamAddress.js
 import { useEffect, useState } from "react";
-import axios from "axios";
-
-const API_BASE = "https://provinces.open-api.vn/api";
+import vietnamData from "../dataJson/full_json_generated_data_vn_units.json";
 
 export default function useVietnamAddress() {
   const [provinces, setProvinces] = useState([]);
-  const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
 
   const [selectedProvince, setSelectedProvince] = useState(null);
-  const [selectedDistrict, setSelectedDistrict] = useState(null);
 
-  // Load Tỉnh
+  // Load danh sách tỉnh
   useEffect(() => {
-    axios.get(`${API_BASE}/p/`).then((res) => {
-      setProvinces(res.data);
-    });
+    const provs = vietnamData.map((item) => ({
+      code: item.Code,
+      name: item.Name,
+    }));
+    setProvinces(provs);
   }, []);
 
-  // Load Quận khi chọn Tỉnh
+  // Load danh sách xã/phường khi chọn tỉnh
   useEffect(() => {
-    if (selectedProvince) {
-      axios.get(`${API_BASE}/p/${selectedProvince}?depth=2`).then((res) => {
-        setDistricts(res.data.districts || []);
-        setWards([]); // reset xã
-      });
-    }
-  }, [selectedProvince]);
+    if (!selectedProvince) return;
+    const province = vietnamData.find((p) => p.Code === selectedProvince);
+    const wardsList = province?.Wards || [];
 
-  // Load Xã khi chọn Quận
-  useEffect(() => {
-    if (selectedDistrict) {
-      axios.get(`${API_BASE}/d/${selectedDistrict}?depth=2`).then((res) => {
-        setWards(res.data.wards || []);
-      });
-    }
-  }, [selectedDistrict]);
+    setWards(
+      wardsList.map((w) => ({
+        code: w.Code,
+        name: w.Name,
+      }))
+    );
+  }, [selectedProvince]);
 
   return {
     provinces,
-    districts,
     wards,
+    selectedProvince,
     setSelectedProvince,
-    setSelectedDistrict,
   };
 }

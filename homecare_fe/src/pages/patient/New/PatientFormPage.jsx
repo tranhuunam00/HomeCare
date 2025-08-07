@@ -49,13 +49,7 @@ const PatientFormPage = () => {
     fetchClinics();
   }, []);
 
-  const {
-    provinces,
-    districts,
-    wards,
-    setSelectedProvince,
-    setSelectedDistrict,
-  } = useVietnamAddress(form);
+  const { provinces, wards, setSelectedProvince } = useVietnamAddress();
 
   // Call API lấy danh sách quốc gia
   useEffect(() => {
@@ -79,7 +73,6 @@ const PatientFormPage = () => {
         try {
           const res = await API_CALL.get(`/patient-diagnose/${id}`);
           const data = res.data.data;
-
           // Gán giá trị vào form
           const dataMapping = {
             name: data.name,
@@ -92,13 +85,8 @@ const PatientFormPage = () => {
             email: data.email,
             detail: data.address,
             country: data.countryCode,
-            province: data.province_code
-              ? Number(data.province_code)
-              : undefined,
-            district: data.district_code
-              ? Number(data.district_code)
-              : undefined,
-            ward: data.ward_code ? Number(data.ward_code) : undefined,
+            province: data.province_code || undefined,
+            ward: data.ward_code || undefined,
             id_clinic: data.id_clinic,
             dob: data.dob ? dayjs(data.dob) : null,
             age: data.dob ? dayjs().diff(dayjs(data.dob), "year") : undefined,
@@ -109,8 +97,7 @@ const PatientFormPage = () => {
           form.setFieldsValue(dataMapping);
           setInitialValues(dataMapping);
 
-          setSelectedProvince(Number(data.province_code));
-          setSelectedDistrict(Number(data.district_code));
+          setSelectedProvince(data.province_code);
         } catch (err) {
           message.error("Không thể tải thông tin bệnh nhân");
           console.error(err);
@@ -157,7 +144,6 @@ const PatientFormPage = () => {
         id_template_service: values.id_template_service,
         id_exam_part: values.id_exam_part,
       };
-
       if (id) {
         console.log("initialValues.status ", initialValues.status);
         if (initialValues.status != PATIENT_DIAGNOSE_STATUS_CODE.NEW) {
@@ -344,7 +330,6 @@ const PatientFormPage = () => {
                   onChange={(val) => {
                     form.setFieldsValue({
                       province: val,
-                      district: undefined,
                       ward: undefined,
                     });
                     setSelectedProvince(val);
@@ -353,28 +338,6 @@ const PatientFormPage = () => {
                   {provinces.map((prov) => (
                     <Option key={prov.code} value={prov.code}>
                       {prov.name}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-            <Col span={8}>
-              <Form.Item
-                name="district"
-                label="Quận/Huyện"
-                rules={[{ required: true }]}
-              >
-                <Select
-                  placeholder="Chọn Quận/Huyện"
-                  onChange={(val) => {
-                    form.setFieldsValue({ ward: undefined, district: val });
-                    setSelectedDistrict(val);
-                  }}
-                  disabled={!districts.length}
-                >
-                  {districts.map((dist) => (
-                    <Option key={dist.code} value={dist.code}>
-                      {dist.name}
                     </Option>
                   ))}
                 </Select>
@@ -444,7 +407,6 @@ const PatientFormPage = () => {
                     if (initialValues) {
                       form.setFieldsValue(initialValues);
                       setSelectedProvince(initialValues.province);
-                      setSelectedDistrict(initialValues.district);
                     }
                   }}
                   disabled={!initialValues}

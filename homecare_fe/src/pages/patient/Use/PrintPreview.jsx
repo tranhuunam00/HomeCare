@@ -16,7 +16,6 @@ const PrintPreview = ({
   imageList,
   doctor,
   provinces,
-  districts,
   wards,
   calculateAge,
   lang = LANGUAGES.vi,
@@ -289,10 +288,6 @@ const PrintPreview = ({
                 }}
               >
                 {LABELS_ADDON.district}:
-              </p>
-              <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
-                {districts.find((s) => s.code == patientDiagnose?.district_code)
-                  ?.name || "-"}
               </p>
             </div>
           </div>

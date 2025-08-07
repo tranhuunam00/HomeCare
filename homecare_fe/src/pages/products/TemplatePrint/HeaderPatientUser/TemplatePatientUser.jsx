@@ -4,8 +4,6 @@ import { Form, Input, Row, Col, Typography, Select, DatePicker } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import styles from "./TemplatePatientUser.module.scss";
 import dayjs from "dayjs";
-import useVietnamAddress from "../../../../hooks/useVietnamAddress";
-
 const { Option } = Select;
 const { Text } = Typography;
 
@@ -24,14 +22,6 @@ const TemplatePatientUser = ({ value = {}, onChange }) => {
       });
     }
   }, [value]);
-
-  const {
-    provinces,
-    districts,
-    wards,
-    setSelectedProvince,
-    setSelectedDistrict,
-  } = useVietnamAddress();
 
   return (
     <Form
