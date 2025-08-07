@@ -46,14 +46,7 @@ export const PatientForm = () => {
       "Xử lý tái tạo ảnh: MPR, VRT"
   );
 
-  const {
-    provinces,
-    districts,
-    wards,
-    setSelectedProvince,
-    setSelectedDistrict,
-  } = useVietnamAddress();
-
+const { provinces, wards, setSelectedProvince } = useVietnamAddress();
   const currentYear = moment().year(); // hoặc new Date().getFullYear()
 
   const handleDobChange = (value) => {
@@ -114,8 +107,6 @@ export const PatientForm = () => {
             form,
             setSelectedProvince,
             provinces,
-            setSelectedDistrict,
-            districts,
             wards,
           })}
         </div>

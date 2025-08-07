@@ -81,7 +81,7 @@ const TemplatePrintUse = () => {
         toast.error("Tải file thất bại!", err?.response?.data?.message);
       });
   };
-  const { provinces, districts, setSelectedProvince } = useVietnamAddress();
+const { provinces, wards, setSelectedProvince } = useVietnamAddress();
 
   useEffect(() => {
     setSelectedProvince(patient.province);
@@ -514,7 +514,7 @@ const TemplatePrintUse = () => {
                     <strong>Quận/Huyện</strong>
                   </div>
                   <div>
-                    {districts.find((s) => s.code == patient.district)?.name}
+                    {wards.find((s) => s.code == patient.wards)?.name}
                   </div>
                 </div>
                 <div>

@@ -126,12 +126,6 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         width: 140,
       },
       {
-        title: "Quận/Huyện",
-        dataIndex: "district_code",
-        key: "district_code",
-        width: 140,
-      },
-      {
         title: "Phường/Xã",
         dataIndex: "ward_code",
         key: "ward_code",

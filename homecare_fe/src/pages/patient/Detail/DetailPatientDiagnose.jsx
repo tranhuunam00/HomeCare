@@ -29,13 +29,7 @@ const PatientDiagnoiseDetailPage = () => {
   const navigate = useNavigate();
   const { user, doctor, examParts, templateServices } = useGlobalAuth();
 
-  const {
-    provinces,
-    districts,
-    wards,
-    setSelectedProvince,
-    setSelectedDistrict,
-  } = useVietnamAddress();
+  const { provinces, wards, setSelectedProvince } = useVietnamAddress();
 
   // Lấy dữ liệu bệnh nhân theo ID
   useEffect(() => {
@@ -77,11 +71,6 @@ const PatientDiagnoiseDetailPage = () => {
     }
   }, [data, provinces]);
 
-  useEffect(() => {
-    if (data && districts.length > 0) {
-      setSelectedDistrict(data.district_code);
-    }
-  }, [data, districts]);
 
   const getNameByCode = (list, code) => {
     const item = list.find((x) => x.code == code);
@@ -170,10 +159,7 @@ const PatientDiagnoiseDetailPage = () => {
             <Title level={5}>Phường/Xã:</Title>
             <Text>{getNameByCode(wards, data.ward_code)}</Text>
           </Col>
-          <Col span={4}>
-            <Title level={5}>Quận/Huyện:</Title>
-            <Text>{getNameByCode(districts, data.district_code)}</Text>
-          </Col>
+
           <Col span={6}>
             <Title level={5}>Tỉnh/Thành phố:</Title>
             <Text>{getNameByCode(provinces, data.province_code)}</Text>
