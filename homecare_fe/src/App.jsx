@@ -45,6 +45,7 @@ import ContactAdminList from "./pages/contacts/list/ContactList";
 import ModifiedCTSIForm from "./pages/advance/CTSI/CtsiForm";
 import AASTKidneyForm from "./pages/advance/AASTKidneyForm/AASTKidneyForm";
 import AASTLiverForm from "./pages/advance/AASTLiverForm/AASTLiverForm";
+import BosniakForm from "./pages/advance/BosniakForm/BosniakForm";
 
 function App() {
   useAuthInitializer();
@@ -66,6 +67,7 @@ function App() {
         <Route path="/D-BALTHAZA" element={<ModifiedCTSIForm />} />
         <Route path="/D-VOTHAN" element={<AASTKidneyForm />} />
         <Route path="/D-VOGAN" element={<AASTLiverForm />} />
+        <Route path="/D-BOSNIAK" element={<BosniakForm />} />
 
         <Route
           path="/home"

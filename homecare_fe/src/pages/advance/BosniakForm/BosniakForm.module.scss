@@ -1,0 +1,76 @@
+// TiradsForm.module.scss
+.pageWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 40px;
+  background-color: #f0f2f5;
+  width: 100vw;
+
+  @media (max-width: 575px) {
+    padding: 16px;
+  }
+}
+
+.formContainer {
+  background: #fff;
+  padding: 32px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  font-size: 16px;
+  min-width: 700px;
+
+  @media (max-width: 768px) {
+    min-width: 100%;
+    padding: 24px;
+  }
+
+  @media (max-width: 575px) {
+    min-width: 100%;
+    padding: 16px;
+  }
+}
+
+.ant-form-item-label > label {
+  font-weight: 500;
+  font-size: 15px;
+}
+
+.summaryRow {
+  margin-top: 24px;
+  background: #f6f9fc;
+  padding: 16px;
+  border-radius: 8px;
+  font-size: 16px;
+  line-height: 1.7;
+
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  span {
+    font-weight: 500;
+    flex: 1 1 100%;
+
+    @media (min-width: 576px) {
+      flex: 1 1 33%;
+    }
+  }
+}
+
+.buttonRow {
+  margin-top: 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+
+  button {
+    flex: 1 1 100%;
+
+    @media (min-width: 576px) {
+      flex: none;
+    }
+  }
+}
