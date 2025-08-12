@@ -205,53 +205,86 @@ const LIRADSForm = () => {
   // Tính phần 2: Untreated + applies === "none"
   // Thay toàn bộ hàm computeUntreatedPart2 bằng bản này
   const computeUntreatedPart2 = ({ features, apheVal, sizeVal, ancillary }) => {
-    // Ancillary + APHE + Size đều phải có (features có thể rỗng)
+    // Ancillary + APHE + Size là bắt buộc (features có thể rỗng)
     if (!ancillary || !apheVal || !sizeVal) return { lr: "", rec: "" };
 
     const featCount = Array.isArray(features) ? features.length : 0;
-    const hasAnyFeature = featCount > 0;
-
-    // QUY TẮC ƯU TIÊN CAO: APHE=Yes + size (10–19 hoặc ≥20) + ≥1 feature → LR‑5
+    console.log("sizeVal", sizeVal);
+    // ƯU TIÊN CAO NHẤT (đÃ CHỈ RÀNG CHO ancillary = malig):
+    // ancillary = malig + APHE = yes + size (10–19 hoặc ≥20) + ≥1 feature → LR‑5
     if (
+      ancillary === "malig" &&
       apheVal === "yes" &&
       (sizeVal === "10-19" || sizeVal === ">=20") &&
-      hasAnyFeature
+      featCount >= 1
+    ) {
+      return { lr: "LR‑5", rec: REC.CONS_MGMT };
+    }
+
+    if (
+      ancillary === "benign" &&
+      apheVal === "yes" &&
+      (sizeVal === "10-19" || sizeVal === ">=20") &&
+      featCount >= 1
     ) {
       return { lr: "LR‑4", rec: REC.CONS_MGMT };
     }
 
-    // Base theo ancillary (đáp ứng yêu cầu "benign ít nhất LR-2")
+    if (
+      (ancillary === "both" || ancillary === "neither") &&
+      apheVal === "yes" &&
+      sizeVal === "10-19" &&
+      featCount >= 2
+    ) {
+      return { lr: "LR‑5", rec: REC.CONS_MGMT };
+    }
+
+    if (
+      ancillary === "neither" &&
+      apheVal === "yes" &&
+      sizeVal === "10-19" &&
+      featCount >= 1
+    ) {
+      return { lr: "LR‑5", rec: REC.CONS_MGMT };
+    }
+    // Base theo ancillary
     let baseLR = "";
     if (ancillary === "malig") {
       baseLR = "LR-4";
     } else if (ancillary === "benign") {
+      // Ít nhất LR-2
       baseLR = "LR-2";
-      // Ngoại lệ đã yêu cầu: benign + APHE=Yes + size >=20 → LR‑3
+      // Ngoại lệ: APHE = yes + size ≥20 → LR-3
       if (apheVal === "yes" && sizeVal === ">=20") {
         baseLR = "LR-3";
       }
     } else if (ancillary === "both" || ancillary === "neither") {
+      // Tối thiểu LR-3
       baseLR = "LR-3";
-      // Ngoại lệ cũ: APHE=Yes + size >=20 → LR‑4
+      // Ngoại lệ: APHE = yes + size ≥20 → LR-4
       if (apheVal === "yes" && sizeVal === ">=20") {
         baseLR = "LR-4";
       }
     }
 
-    // BUMP +1 theo yêu cầu mới:
-    // - (feat >= 1 && APHE = yes)  OR  (feat >= 2 && APHE = no)
-    const shouldBump =
-      (apheVal === "yes" && featCount >= 1) ||
-      (apheVal === "no" && featCount >= 2);
+    // BUMP +1 theo yêu cầu:
+    // - Nếu APHE = yes và có ≥1 feature → +1 bậc
+    // - HOẶC APHE = no và có ≥2 feature → +1 bậc
+    if (ancillary != "malig") {
+      const shouldBump =
+        (apheVal === "yes" && featCount >= 1) ||
+        (apheVal === "no" && featCount >= 2);
 
-    if (shouldBump) {
-      baseLR = bumpOne(baseLR);
+      if (shouldBump) {
+        baseLR = bumpOne(baseLR);
+      }
     }
 
-    // Gán khuyến nghị theo LR cuối cùng (không giữ rec cũ sau khi bump)
-    const finalRec = getRecByLR(baseLR);
+    // Khuyến nghị khớp với LR cuối cùng sau bump
+    const finalLR = baseLR.replace("LR-", "LR‑");
+    const finalRec = finalLR === "LR‑5" ? REC.CONS_MGMT : getRecByLR(finalLR);
 
-    return { lr: baseLR.replace("LR-", "LR‑"), rec: finalRec };
+    return { lr: finalLR, rec: finalRec };
   };
 
   // Tính tổng theo các tham số (dùng cho realtime và override)
