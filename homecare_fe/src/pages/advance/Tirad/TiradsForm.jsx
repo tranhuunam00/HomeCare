@@ -53,6 +53,7 @@ import {
   getLabelFromValue,
   STYLE_COPY,
 } from "../../../constant/app";
+import AIRecommendationEditor from "../../../components/AIRecommendationEditor";
 
 const { Text } = Typography;
 
@@ -174,11 +175,15 @@ const TiradsForm = () => {
         <tr><td><strong>Tổng điểm</strong></td><td style="text-align: center;">${score}</td></tr>
         <tr><td>Phân loại (ACR-TIRADS)</td><td><strong style="text-align: center;">${tirads}</strong></td></tr>
         <tr><td>Khuyến nghị</td><td>${recommendation}</td></tr>
-        ${isCopy ? genAITextToHtml(geminiResponse) : ""}
 
       </table>
     `;
-    return html;
+    return isCopy
+      ? html +
+          `<div style="margin-top:16px;">${genAITextToHtml(
+            geminiResponse
+          )}</div>`
+      : html;
   };
 
   const onCalculate = async () => {
@@ -348,29 +353,12 @@ const TiradsForm = () => {
           <Row
             gutter={12}
             className={styles.summaryRow}
-            style={{ maxWidth: 1000 }}
+            style={{ maxWidth: 1000, marginTop: 24 }}
           >
-            <Text strong>Khuyến nghị AI:</Text>
-            {geminiResponse && (
-              <Row>
-                <Col span={24}>
-                  <Text strong>Phản hồi từ hệ thống:</Text>
-                  <div
-                    style={{
-                      background: "#fafafa",
-                      padding: "12px",
-                      marginTop: 8,
-                      border: "1px solid #eee",
-                      whiteSpace: "pre-wrap", // 👈 giữ ngắt dòng
-                      fontFamily: "inherit",
-                      fontSize: "15px",
-                    }}
-                  >
-                    {geminiResponse}
-                  </div>
-                </Col>
-              </Row>
-            )}
+            <AIRecommendationEditor
+              value={geminiResponse}
+              onChange={setGeminiResponse}
+            />
           </Row>
 
           <Divider />

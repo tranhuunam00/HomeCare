@@ -12,6 +12,7 @@ import {
 import { ReloadOutlined, CopyOutlined } from "@ant-design/icons";
 import styles from "./CtsiForm.module.scss";
 import { getLabelFromValue, STYLE_COPY } from "../../../constant/app";
+import AIRecommendationEditor from "../../../components/AIRecommendationEditor";
 
 const { Title, Text } = Typography;
 
@@ -235,26 +236,16 @@ const ModifiedCTSIForm = () => {
               <Text type="danger">{summary.total}</Text>
             </Col>
           </Row>
-          {geminiResponse && (
-            <Row gutter={12} className={styles.summaryRow}>
-              <Col span={24}>
-                <Text strong>Khuyến nghị AI:</Text>
-                <div
-                  style={{
-                    background: "#fafafa",
-                    padding: "12px",
-                    marginTop: 8,
-                    border: "1px solid #eee",
-                    whiteSpace: "pre-wrap",
-                    fontFamily: "inherit",
-                    fontSize: "15px",
-                  }}
-                >
-                  {geminiResponse}
-                </div>
-              </Col>
-            </Row>
-          )}
+          <Row
+            gutter={12}
+            className={styles.summaryRow}
+            style={{ maxWidth: 1000, marginTop: 24 }}
+          >
+            <AIRecommendationEditor
+              value={geminiResponse}
+              onChange={setGeminiResponse}
+            />
+          </Row>
 
           <Divider />
           <div className={styles.buttonRow}>

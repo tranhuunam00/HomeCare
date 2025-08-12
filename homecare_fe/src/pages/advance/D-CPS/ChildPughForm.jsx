@@ -6,6 +6,7 @@ import { ReloadOutlined, CopyOutlined } from "@ant-design/icons";
 import styles from "./ChildPughForm.module.scss";
 import { toast } from "react-toastify";
 import { genAITextToHtml, STYLE_COPY } from "../../../constant/app";
+import AIRecommendationEditor from "../../../components/AIRecommendationEditor";
 
 const { Title, Text } = Typography;
 
@@ -89,21 +90,17 @@ const ChildPughForm = () => {
         }).join("")}
         <tr><td colspan="2"><strong>Tổng điểm</strong></td><td>${total}</td></tr>
         <tr><td colspan="2"><strong>Phân độ</strong></td><td>${level}</td></tr>
-        ${
-          isCopy
-            ? `
-        <tr><td colspan="2"><strong>Khuyến nghị AI</strong></td><td>${geminiResponse
-          .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") // giữ định dạng đậm
-          .replace(/^\* /gm, "• ") // dấu bullet
-          .replace(/\n/g, "<br>")}</td></tr>
-          `
-            : ""
-        }
+        
 
       </table>
     `;
 
-    return html;
+    return isCopy
+      ? html +
+          `<div style="margin-top:16px;">${genAITextToHtml(
+            geminiResponse
+          )}</div>`
+      : html;
   };
 
   const onCopy = async () => {
@@ -189,29 +186,12 @@ const ChildPughForm = () => {
           <Row
             gutter={12}
             className={styles.summaryRow}
-            style={{ maxWidth: 1000 }}
+            style={{ maxWidth: 1000, marginTop: 24 }}
           >
-            <Text strong>Khuyến nghị AI:</Text>
-            {geminiResponse && (
-              <Row>
-                <Col span={24}>
-                  <Text strong>Phản hồi từ hệ thống:</Text>
-                  <div
-                    style={{
-                      background: "#fafafa",
-                      padding: "12px",
-                      marginTop: 8,
-                      border: "1px solid #eee",
-                      whiteSpace: "pre-wrap", // 👈 giữ ngắt dòng
-                      fontFamily: "inherit",
-                      fontSize: "15px",
-                    }}
-                  >
-                    {geminiResponse}
-                  </div>
-                </Col>
-              </Row>
-            )}
+            <AIRecommendationEditor
+              value={geminiResponse}
+              onChange={setGeminiResponse}
+            />
           </Row>
 
           <Divider />

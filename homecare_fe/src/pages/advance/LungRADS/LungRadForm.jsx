@@ -18,6 +18,7 @@ import styles from "./LungRADSForm.module.scss";
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
 import { genAITextToHtml, STYLE_COPY } from "../../../constant/app";
+import AIRecommendationEditor from "../../../components/AIRecommendationEditor";
 
 const { Text } = Typography;
 
@@ -456,10 +457,15 @@ const LungRADSForm = () => {
        )}</td></tr>
       <tr><td><strong>Phân loại ACR -LungRADS</strong></td><td><strong>Nhóm ${group}</strong></td></tr>
       <tr><td>Khuyến nghị</td><td>${recommendation}</td></tr>
-      ${isCopy ? genAITextToHtml(geminiResponse) : ""}
+     
     </table>`;
 
-    return html;
+    return isCopy
+      ? html +
+          `<div style="margin-top:16px;">${genAITextToHtml(
+            geminiResponse
+          )}</div>`
+      : html;
   };
 
   const onCopy = async () => {
@@ -750,29 +756,12 @@ const LungRADSForm = () => {
           <Row
             gutter={12}
             className={styles.summaryRow}
-            style={{ maxWidth: 1000 }}
+            style={{ maxWidth: 1000, marginTop: 24 }}
           >
-            <Text strong>Khuyến nghị AI:</Text>
-            {geminiResponse && (
-              <Row>
-                <Col span={24}>
-                  <Text strong>Phản hồi từ hệ thống:</Text>
-                  <div
-                    style={{
-                      background: "#fafafa",
-                      padding: "12px",
-                      marginTop: 8,
-                      border: "1px solid #eee",
-                      whiteSpace: "pre-wrap", // 👈 giữ ngắt dòng
-                      fontFamily: "inherit",
-                      fontSize: "15px",
-                    }}
-                  >
-                    {geminiResponse}
-                  </div>
-                </Col>
-              </Row>
-            )}
+            <AIRecommendationEditor
+              value={geminiResponse}
+              onChange={setGeminiResponse}
+            />
           </Row>
         </Form>
       </div>

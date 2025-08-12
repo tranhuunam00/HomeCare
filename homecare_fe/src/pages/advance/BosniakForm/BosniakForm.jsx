@@ -10,6 +10,7 @@ import {
   genAITextToHtml,
   STYLE_COPY,
 } from "../../../constant/app";
+import AIRecommendationEditor from "../../../components/AIRecommendationEditor";
 
 const { Text } = Typography;
 
@@ -550,13 +551,17 @@ const BosniakForm = () => {
         <tr>
           <td><strong>Kết luận Bosniak</strong></td>
           <td><strong>${result}</strong></td>
-          ${isCopy ? genAITextToHtml(geminiResponse) : ""}
-        </tr>
+        
       </table>
     `;
 
     setBosniak(result);
-    return html;
+    return isCopy
+      ? html +
+          `<div style="margin-top:16px;">${genAITextToHtml(
+            geminiResponse
+          )}</div>`
+      : html;
   };
 
   const onCalculate = async () => {
@@ -1145,29 +1150,12 @@ const BosniakForm = () => {
           <Row
             gutter={12}
             className={styles.summaryRow}
-            style={{ maxWidth: 1000, marginTop: 16 }}
+            style={{ maxWidth: 1000, marginTop: 24 }}
           >
-            <Text strong>Khuyến nghị AI:</Text>
-            {geminiResponse && (
-              <Row style={{ width: "100%" }}>
-                <Col span={24}>
-                  <Text strong>Phản hồi từ hệ thống:</Text>
-                  <div
-                    style={{
-                      background: "#fafafa",
-                      padding: 12,
-                      marginTop: 8,
-                      border: "1px solid #eee",
-                      whiteSpace: "pre-wrap",
-                      fontFamily: "inherit",
-                      fontSize: 15,
-                    }}
-                  >
-                    {geminiResponse}
-                  </div>
-                </Col>
-              </Row>
-            )}
+            <AIRecommendationEditor
+              value={geminiResponse}
+              onChange={setGeminiResponse}
+            />
           </Row>
 
           <Divider />

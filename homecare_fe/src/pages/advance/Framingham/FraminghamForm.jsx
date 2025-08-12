@@ -20,6 +20,7 @@ import {
 import copy from "copy-to-clipboard";
 import styles from "./FraminghamForm.module.scss";
 import { genAITextToHtml, STYLE_COPY } from "../../../constant/app";
+import AIRecommendationEditor from "../../../components/AIRecommendationEditor";
 const { Text } = Typography;
 
 const { Title } = Typography;
@@ -201,11 +202,15 @@ const FraminghamForm = () => {
       <tr><td>Hút thuốc</td><td>${values.smoking ? "Có" : "Không"}</td></tr>
       <tr><td><strong>Tổng điểm</strong></td><td><strong>${score}</strong></td></tr>
       <tr><td><strong>Nguy cơ 10 năm</strong></td><td><strong>${risk}</strong></td></tr>
-      ${isCopy ? genAITextToHtml(geminiResponse) : ""}
+
     </table>
   `;
-
-    return html;
+    return isCopy
+      ? html +
+          `<div style="margin-top:16px;">${genAITextToHtml(
+            geminiResponse
+          )}</div>`
+      : html;
   };
 
   const onCopy = async () => {
@@ -359,29 +364,12 @@ const FraminghamForm = () => {
           <Row
             gutter={12}
             className={styles.summaryRow}
-            style={{ maxWidth: 1000 }}
+            style={{ maxWidth: 1000, marginTop: 24 }}
           >
-            <Text strong>Khuyến nghị AI:</Text>
-            {geminiResponse && (
-              <Row>
-                <Col span={24}>
-                  <Text strong>Phản hồi từ hệ thống:</Text>
-                  <div
-                    style={{
-                      background: "#fafafa",
-                      padding: "12px",
-                      marginTop: 8,
-                      border: "1px solid #eee",
-                      whiteSpace: "pre-wrap", // 👈 giữ ngắt dòng
-                      fontFamily: "inherit",
-                      fontSize: "15px",
-                    }}
-                  >
-                    {geminiResponse}
-                  </div>
-                </Col>
-              </Row>
-            )}
+            <AIRecommendationEditor
+              value={geminiResponse}
+              onChange={setGeminiResponse}
+            />
           </Row>
         </Form>
       </div>

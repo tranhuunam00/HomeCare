@@ -5,6 +5,7 @@ import { ReloadOutlined, CopyOutlined } from "@ant-design/icons";
 
 import styles from "./DipssForm.module.scss";
 import { genAITextToHtml } from "../../../constant/app";
+import AIRecommendationEditor from "../../../components/AIRecommendationEditor";
 
 const { Title, Text } = Typography;
 
@@ -101,24 +102,18 @@ const DipssForm = () => {
         <tr><td colspan="2"><strong>Tổng điểm</strong></td><td>${total}</td></tr>
         <tr><td colspan="2"><strong>Phân độ</strong></td><td>${level}</td></tr>
         <tr><td colspan="2"><strong>Khuyến nghị</strong></td><td>${recommendation}</td></tr>
-        ${
-          isCopy
-            ? `<tr><td colspan="2">
-            <strong>Khuyến nghị</strong>
-            </td><td>${geminiResponse
-              .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") // giữ định dạng đậm
-              .replace(/^\* /gm, "• ") // dấu bullet
-              .replace(/\n/g, "<br>")}
-            </td></tr>
-`
-            : ""
-        }
+        
         </table>
       <table>
       </table>
     `;
 
-    return html;
+    return isCopy
+      ? html +
+          `<div style="margin-top:16px;">${genAITextToHtml(
+            geminiResponse
+          )}</div>`
+      : html;
   };
 
   const onFinish = async (values) => {
@@ -189,29 +184,12 @@ const DipssForm = () => {
           <Row
             gutter={12}
             className={styles.summaryRow}
-            style={{ maxWidth: 1000 }}
+            style={{ maxWidth: 1000, marginTop: 24 }}
           >
-            <Text strong>Khuyến nghị AI:</Text>
-            {geminiResponse && (
-              <Row>
-                <Col span={24}>
-                  <Text strong>Phản hồi từ hệ thống:</Text>
-                  <div
-                    style={{
-                      background: "#fafafa",
-                      padding: "12px",
-                      marginTop: 8,
-                      border: "1px solid #eee",
-                      whiteSpace: "pre-wrap", // 👈 giữ ngắt dòng
-                      fontFamily: "inherit",
-                      fontSize: "15px",
-                    }}
-                  >
-                    {geminiResponse}
-                  </div>
-                </Col>
-              </Row>
-            )}
+            <AIRecommendationEditor
+              value={geminiResponse}
+              onChange={setGeminiResponse}
+            />
           </Row>
           <Divider />
           <div className={styles.buttonRow}>

@@ -15,6 +15,7 @@ import { CopyOutlined, ReloadOutlined } from "@ant-design/icons";
 import styles from "./AASTLiverForm.module.scss";
 import { toast } from "react-toastify";
 import { genAITextToHtml, getLabelFromValue } from "../../../constant/app";
+import AIRecommendationEditor from "../../../components/AIRecommendationEditor";
 
 const { Text } = Typography;
 
@@ -236,7 +237,6 @@ const AASTLiverForm = () => {
         <tr>
           <td><strong>Độ tổn thương (AAST)</strong></td>
           <td><strong>Độ ${computeMaxGrade()}</strong></td>
-          ${isCopy ? genAITextToHtml(geminiResponse) : ""}
         </tr>
       </table>
     `;
@@ -248,7 +248,12 @@ const AASTLiverForm = () => {
       console.log("e", e);
     }
 
-    return html;
+    return isCopy
+      ? html +
+          `<div style="margin-top:16px;">${genAITextToHtml(
+            geminiResponse
+          )}</div>`
+      : html;
   };
 
   const onCopy = async () => {
@@ -389,29 +394,12 @@ const AASTLiverForm = () => {
           <Row
             gutter={12}
             className={styles.summaryRow}
-            style={{ maxWidth: 1000 }}
+            style={{ maxWidth: 1000, marginTop: 24 }}
           >
-            <Text strong>Khuyến nghị AI:</Text>
-            {geminiResponse && (
-              <Row>
-                <Col span={24}>
-                  <Text strong>Phản hồi từ hệ thống:</Text>
-                  <div
-                    style={{
-                      background: "#fafafa",
-                      padding: 12,
-                      marginTop: 8,
-                      border: "1px solid #eee",
-                      whiteSpace: "pre-wrap",
-                      fontFamily: "inherit",
-                      fontSize: 15,
-                    }}
-                  >
-                    {geminiResponse}
-                  </div>
-                </Col>
-              </Row>
-            )}
+            <AIRecommendationEditor
+              value={geminiResponse}
+              onChange={setGeminiResponse}
+            />
           </Row>
 
           <Divider />

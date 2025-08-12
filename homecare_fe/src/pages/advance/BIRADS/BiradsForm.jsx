@@ -129,9 +129,8 @@ export const OTHER_SUSPICIOUS_SIGNS = [
   { label: "Hạch bệnh lý hố nách (BR3; BR4)", value: "lymph-node", score: 4 },
   { label: "Không thấy", value: "none", score: 0, isOther: true },
 ];
-
 // src/pages/dbirads/BiradsForm.jsx
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Form,
   Input,
@@ -144,22 +143,37 @@ import {
   Row,
   Typography,
 } from "antd";
-const { Text } = Typography;
-
 import styles from "./BiradsForm.module.scss";
 import { toast } from "react-toastify";
 import { genAITextToHtml, STYLE_COPY } from "../../../constant/app";
+import AIRecommendationEditor from "../../../components/AIRecommendationEditor";
+
+// ⬇️ Giả định các constants đã được export từ cùng file constants hoặc ở trên scope hiện tại
+// import {
+//   BREAST_SIDE_OPTIONS,
+//   DENSITY_OPTIONS,
+//   LOCATION_OPTIONS,
+//   TYPE_OF_LESION_OPTIONS,
+//   SHAPE_OPTIONS,
+//   MARGIN_OPTIONS,
+//   ECHOGENICITY_OPTIONS,
+//   BENIGN_CALCIFICATION_OPTIONS,
+//   SUSPICIOUS_CALCIFICATION_OPTIONS,
+//   CALC_DISTRIBUTION_OPTIONS,
+//   OTHER_SUSPICIOUS_SIGNS,
+// } from "./dbiradsConstants";
+
+const { Text } = Typography;
 
 const BiradsForm = () => {
   const [form] = Form.useForm();
-  const [volume, setVolume] = useState(0);
-  const [recommendation, setRecommendation] = useState("");
-  const [typeOfLesion, setTypeOfLesion] = useState(null);
+  const [volume, setVolume] = useState(0); // D3
+  const [typeOfLesion, setTypeOfLesion] = useState([]);
   const [geminiResponse, setGeminiResponse] = useState("");
 
-  const biradsValue = Form.useWatch("birads", form);
-
+  // ====== Helpers ======
   const getRecommendationFromBirads = (birads = "") => {
+    if (!birads) return "Không rõ";
     if (birads.startsWith("BIRADS 1") || birads.startsWith("BIRADS 2")) {
       return "Theo dõi định kỳ 12 tháng";
     }
@@ -172,7 +186,86 @@ const BiradsForm = () => {
     return "Không rõ";
   };
 
+  const getScore = (options, value) =>
+    options.find((opt) => opt.value === value)?.score || 0;
+
+  const getMaxScoreFromCheckbox = (options, selectedValues) =>
+    Math.max(
+      0,
+      ...((selectedValues || []).map(
+        (v) => options.find((o) => o.value === v)?.score || 0
+      ) || [0])
+    );
+
+  const getLabelFromValue = (options, value) => {
+    if (Array.isArray(value) && value.length > 0) {
+      return `
+        <ul style="padding-left: 16px; margin: 0;">
+          ${value
+            .map(
+              (v) =>
+                `<li style="margin-bottom: 6px;">${
+                  options.find((o) => o.value === v)?.label || v
+                }</li>`
+            )
+            .join("")}
+        </ul>
+      `;
+    }
+    if (typeof value === "string") {
+      const label = options.find((o) => o.value === value)?.label || value;
+      return `${label}`;
+    }
+    return "--";
+  };
+
+  // ====== Recalc every change ======
+  const recalcAll = (all) => {
+    // --- Tính D3 ---
+    const v = ((Number(all.D1) || 0) + (Number(all.D2) || 0)) * 0.5;
+    setVolume(Number.isNaN(v) ? 0 : Math.round(v * 100) / 100);
+
+    // --- Tính điểm theo max score ---
+    const shapeScore = getScore(SHAPE_OPTIONS, all.shape);
+    const marginScore = getScore(MARGIN_OPTIONS, all.margin);
+    const echoScore = getScore(ECHOGENICITY_OPTIONS, all.echogenicity);
+    const suspiciousCalcScore = getScore(
+      SUSPICIOUS_CALCIFICATION_OPTIONS,
+      all.suspiciousCalc
+    );
+    const otherSignsScore = getMaxScoreFromCheckbox(
+      OTHER_SUSPICIOUS_SIGNS,
+      all.suspiciousSigns
+    );
+
+    const maxScore = Math.max(
+      0,
+      shapeScore,
+      marginScore,
+      echoScore,
+      suspiciousCalcScore,
+      otherSignsScore
+    );
+
+    if (maxScore >= 1 && maxScore <= 5) {
+      const biradsLabel = `BIRADS ${maxScore}`;
+      if (all.birads !== biradsLabel) {
+        form.setFieldValue("birads", biradsLabel);
+      }
+    }
+  };
+
+  // Khuyến nghị = derive từ birads hiện tại -> không cần state, dùng useWatch + useMemo
+  const allValues = Form.useWatch([], form); // watch toàn form
+  const recommendation = useMemo(
+    () => getRecommendationFromBirads(allValues?.birads || ""),
+    [allValues?.birads]
+  );
+
+  // ====== Phụ thuộc theo type_of_lesion ======
   useEffect(() => {
+    // Reset các field phụ thuộc khi loại tổn thương thay đổi
+    // (setFieldValue là async — gọi recalc sau một nhịp)
     if (!typeOfLesion?.includes("benign-calcification")) {
       form.setFieldValue("benignCalc", "none");
     } else {
@@ -181,6 +274,7 @@ const BiradsForm = () => {
 
     if (!typeOfLesion?.includes("microcalcification")) {
       form.setFieldValue("suspiciousCalc", "none");
+      form.setFieldValue("calcDistribution", []);
     } else {
       form.setFieldValue("suspiciousCalc", undefined);
     }
@@ -190,57 +284,22 @@ const BiradsForm = () => {
     } else {
       form.setFieldValue("suspiciousSigns", undefined);
     }
-  }, [typeOfLesion, form]);
 
+    setTimeout(() => recalcAll(form.getFieldsValue()), 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [typeOfLesion]);
+
+  // Khởi tạo
   useEffect(() => {
-    setRecommendation(getRecommendationFromBirads(biradsValue));
-  }, [biradsValue]);
+    recalcAll(form.getFieldsValue());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const getScore = (options, value) =>
-    options.find((opt) => opt.value === value)?.score || 0;
-
-  const getMaxScoreFromCheckbox = (options, selectedValues) =>
-    Math.max(
-      0,
-      ...selectedValues.map(
-        (v) => options.find((o) => o.value === v)?.score || 0
-      )
-    );
-  const handleCalcVolume = () => {
-    const values = form.getFieldsValue();
-    const v = ((values.D1 || 0) + (values.D2 || 0)) * 0.5;
-    setVolume(Number.isNaN(v) ? 0 : Math.round(v * 100) / 100);
-  };
-
-  const getLabelFromValue = (options, value) => {
-    if (Array.isArray(value) && value.length > 0) {
-      return `
-      <ul style="padding-left: 16px; margin: 0;">
-        ${value
-          .map(
-            (v) =>
-              `<li style="margin-bottom: 6px;">${
-                options.find((o) => o.value === v)?.label || v
-              }</li>`
-          )
-          .join("")}
-      </ul>
-    `;
-    }
-
-    if (typeof value === "string") {
-      const label = options.find((o) => o.value === value)?.label || value;
-      return `${label}`;
-    }
-
-    return "--";
-  };
+  // ====== HTML xuất kết quả ======
   const genHtml = async ({ isCopy }) => {
     const values = await form.validateFields();
-    handleCalcVolume();
 
     const html = `
-      
       <table>
         <caption>Đánh giá D-BIRADS MM</caption>
         <tr><th>Thông tin</th><th>Giá trị</th></tr>
@@ -260,10 +319,7 @@ const BiradsForm = () => {
           TYPE_OF_LESION_OPTIONS,
           values.type_of_lesion
         )}</td></tr>
-        
-        
-      
-      
+
         ${
           typeOfLesion?.includes("mass")
             ? `
@@ -275,119 +331,89 @@ const BiradsForm = () => {
                 <td>
                   <table style="width: 100%; border-collapse: collapse; border: none;">
                     <tr>
-                      <td style="text-align: center; border: none; padding: 0; border-right: 1px solid #ccc;">${
-                        values.D1 || ""
-                      } mm</td>
-                      <td style="text-align: center; border: none; padding: 0; border-right: 1px solid #ccc;">${
-                        values.D2 || ""
-                      } mm</td>
-                    
+                      <td style="text-align: center; border: none; padding: 0; border-right: 1px solid #ccc;">
+                        ${values.D1 || ""} mm
+                      </td>
+                      <td style="text-align: center; border: none; padding: 0;">
+                        ${values.D2 || ""} mm
+                      </td>
                     </tr>
                   </table>
                 </td>
               </tr>
+              <tr>
+                <td>D3 (TB)</td>
+                <td style="text-align: center;">${volume || 0} mm</td>
+              </tr>
+              <tr><td>Hình dạng</td><td>${getLabelFromValue(
+                SHAPE_OPTIONS,
+                values.shape
+              )}</td></tr>
+              <tr><td>Bờ viền</td><td>${getLabelFromValue(
+                MARGIN_OPTIONS,
+                values.margin
+              )}</td></tr>
+              <tr><td>Đậm độ</td><td>${getLabelFromValue(
+                ECHOGENICITY_OPTIONS,
+                values.echogenicity
+              )}</td></tr>
             `
             : ""
         }
-      
 
-       
-        ${
-          typeOfLesion?.includes("mass")
-            ? `<tr><td>D3</td><td style="text-align: center;">${
-                volume || 0
-              } mm</td></tr>`
-            : ""
-        }
-        
-        
-
-        ${
-          typeOfLesion?.includes("mass")
-            ? `<tr><td>Hình dạng</td><td>${getLabelFromValue(
-                SHAPE_OPTIONS,
-                values.shape
-              )}</td></tr>`
-            : ""
-        }  
-        ${
-          typeOfLesion?.includes("mass")
-            ? ` <tr><td>Bờ viền</td><td>${getLabelFromValue(
-                MARGIN_OPTIONS,
-                values.margin
-              )}</td></tr>`
-            : ""
-        }  
-        
-        ${
-          typeOfLesion?.includes("mass")
-            ? `<tr><td>Đậm độ</td><td>${getLabelFromValue(
-                ECHOGENICITY_OPTIONS,
-                values.echogenicity
-              )}</td></tr>`
-            : ""
-        }  
-
-        <tr>
-          <th colspan="2">
-          </th>
-        </tr>
-       
         <tr><td>Vôi hóa lành tính</td><td>${getLabelFromValue(
           BENIGN_CALCIFICATION_OPTIONS,
           values.benignCalc
         )}</td></tr>
-        
-       <tr><td>Vôi hóa lành tính</td><td>${getLabelFromValue(
-         BENIGN_CALCIFICATION_OPTIONS,
-         values.benignCalc
-       )}</td></tr>
-        
-        <tr><td>Vôi hóa nghi ngờ</td><td>${getLabelFromValue(
+
+        <tr><td>Vi vôi hóa nghi ngờ</td><td>${getLabelFromValue(
           SUSPICIOUS_CALCIFICATION_OPTIONS,
           values.suspiciousCalc
         )}</td></tr>
-        
+
         <tr><td>Phân bố vôi hóa</td><td>${getLabelFromValue(
           CALC_DISTRIBUTION_OPTIONS,
           values.calcDistribution
         )}</td></tr>
-        
+
         <tr><td>Dấu hiệu nghi ngờ khác</td><td>${getLabelFromValue(
           OTHER_SUSPICIOUS_SIGNS,
           values.suspiciousSigns || []
         )}</td></tr>
-        
+
         <tr><td><strong>Phân loại BIRADS</strong></td><td><strong>${
-          values.birads
+          values.birads || ""
         }</strong></td></tr>
         <tr><td>Khuyến nghị</td><td>${getRecommendationFromBirads(
-          values.birads
+          values.birads || ""
         )}</td></tr>
-        ${isCopy ? genAITextToHtml(geminiResponse) : ""}
-        
+
       </table>
     `;
-
-    return html;
+    return isCopy
+      ? html +
+          `<div style="margin-top:16px;">${genAITextToHtml(
+            geminiResponse
+          )}</div>`
+      : html;
   };
+
+  // ====== Actions ======
   const onCopy = async () => {
     try {
       const html = `
-      ${STYLE_COPY}
-      ${await genHtml({ isCopy: true })}
-    `;
-
+        ${STYLE_COPY}
+        ${await genHtml({ isCopy: true })}
+      `;
       await navigator.clipboard.write([
         new ClipboardItem({
           "text/html": new Blob([html], { type: "text/html" }),
         }),
       ]);
-
       toast.success("Đã copy bảng D-BIRADS vào clipboard!");
     } catch (err) {
       console.error(err);
-      toast.error("Vui lòng điền đầy đủ và hợp lệ!", err);
+      toast.error("Vui lòng điền đầy đủ và hợp lệ!");
     }
   };
 
@@ -395,49 +421,30 @@ const BiradsForm = () => {
     form.resetFields();
     setTypeOfLesion([]);
     setVolume(0);
+    setGeminiResponse("");
+    // Sau reset, recalc trạng thái trống
+    setTimeout(() => recalcAll(form.getFieldsValue()), 0);
   };
 
   const onCalculate = async () => {
-    const values = await form.validateFields();
-    handleCalcVolume();
-
-    const scores = [
-      getScore(SHAPE_OPTIONS, values.shape),
-      getScore(MARGIN_OPTIONS, values.margin),
-      getScore(ECHOGENICITY_OPTIONS, values.echogenicity),
-      getScore(SUSPICIOUS_CALCIFICATION_OPTIONS, values.suspiciousCalc),
-      getMaxScoreFromCheckbox(
-        OTHER_SUSPICIOUS_SIGNS,
-        values.suspiciousSigns || []
-      ),
-    ];
-
-    const maxScore = Math.max(...scores);
-    let biradsLabel = "";
-
-    // Ánh xạ score → label BIRADS
-    if (maxScore >= 1 && maxScore <= 5) {
-      biradsLabel = `BIRADS ${maxScore}`;
-      form.setFieldValue("birads", biradsLabel);
-      toast.success(`Đã tính lại thể tích và gợi ý phân loại ${biradsLabel}`);
-    } else {
-      toast.success("Đã tính lại thể tích tổn thương!");
+    try {
+      // Chỉ gọi AI; tính điểm/khuyến nghị đã tự động rồi
+      const tableHtml = await genHtml({ isCopy: false });
+      const res = await fetch(
+        `https://api.home-care.vn/chatgpt/ask-gemini-recommendation?prompt=${encodeURIComponent(
+          tableHtml
+        )}`
+      );
+      const data = await res.json();
+      setGeminiResponse(
+        data?.data
+          ?.replace(/\*\*(.*?)\*\*/g, "$1")
+          .replace(/^\* /gm, "• ")
+          .replace(/\n{2,}/g, "\n\n") || ""
+      );
+    } catch (e) {
+      toast.error("Không gọi được AI. Vui lòng thử lại!");
     }
-
-    const tableHtml = await genHtml({ isCopy: false });
-    const res = await fetch(
-      `https://api.home-care.vn/chatgpt/ask-gemini-recommendation?prompt=${encodeURIComponent(
-        tableHtml
-      )}`
-    );
-
-    const data = await res.json();
-    setGeminiResponse(
-      data.data
-        ?.replace(/\*\*(.*?)\*\*/g, "$1") // bỏ **bôi đậm**
-        .replace(/^\* /gm, "• ") // dòng bắt đầu bằng "* " → "• "
-        .replace(/\n{2,}/g, "\n\n")
-    );
   };
 
   return (
@@ -449,7 +456,13 @@ const BiradsForm = () => {
           Mục đích: sàng lọc chẩn đoán sớm ung thư vú
         </h4>
 
-        <Form form={form} layout="vertical" onValuesChange={handleCalcVolume}>
+        <Form
+          form={form}
+          layout="vertical"
+          onValuesChange={(_, all) => {
+            recalcAll(all); // ⬅️ mọi thay đổi đều tính lại
+          }}
+        >
           <Row gutter={[16, 16]}>
             <Col xs={24} md={8}>
               <Form.Item
@@ -499,43 +512,31 @@ const BiradsForm = () => {
               options={TYPE_OF_LESION_OPTIONS}
             />
           </Form.Item>
+
           {typeOfLesion?.includes("mass") && (
             <>
               <Row gutter={16}>
                 <Col span={6}>
                   <Form.Item name="D1" label="D1 (mm) chiều dài">
-                    <InputNumber
-                      placeholder="Nhập kích thước"
-                      min={0}
-                      style={{ width: "100%" }}
-                    />
+                    <InputNumber min={0} style={{ width: "100%" }} />
                   </Form.Item>
                 </Col>
                 <Col span={6}>
                   <Form.Item name="D2" label="D2 (mm) chiều rộng">
-                    <InputNumber
-                      placeholder="Nhập kích thước"
-                      min={0}
-                      style={{ width: "100%" }}
-                    />
+                    <InputNumber min={0} style={{ width: "100%" }} />
                   </Form.Item>
                 </Col>
-
                 <Col span={6}>
                   <Form.Item label="D3 (mm) – Kích thước trung bình">
                     <Input disabled value={volume} />
                   </Form.Item>
                 </Col>
               </Row>
+
               <Form.Item
                 name="shape"
                 label="Hình dạng tổn thương"
-                rules={[
-                  {
-                    required: true,
-                    message: "Vui lòng chọn hình dạng tổn thương",
-                  },
-                ]}
+                rules={[{ required: true, message: "Vui lòng chọn hình dạng" }]}
               >
                 <Radio.Group>
                   <Row gutter={[12, 12]}>
@@ -547,6 +548,7 @@ const BiradsForm = () => {
                   </Row>
                 </Radio.Group>
               </Form.Item>
+
               <Form.Item
                 name="margin"
                 label="Bờ viền tổn thương"
@@ -566,12 +568,7 @@ const BiradsForm = () => {
               <Form.Item
                 name="echogenicity"
                 label="Đậm độ tổn thương"
-                rules={[
-                  {
-                    required: true,
-                    message: "Vui lòng chọn đậm độ tổn thương",
-                  },
-                ]}
+                rules={[{ required: true, message: "Vui lòng chọn đậm độ" }]}
               >
                 <Radio.Group>
                   <Row gutter={[12, 12]}>
@@ -595,20 +592,23 @@ const BiradsForm = () => {
               <Row gutter={[12, 12]}>
                 {BENIGN_CALCIFICATION_OPTIONS.filter(
                   (s) =>
-                    !!s.isOther !=
+                    !!s.isOther !==
                     !!typeOfLesion?.includes("benign-calcification")
-                ).map((option, index) =>
-                  option.value != "none" ? (
+                ).map((option) =>
+                  option.value !== "none" ? (
                     <Col key={option.value} span={12}>
                       <Radio value={option.value}>{option.label}</Radio>
                     </Col>
                   ) : (
-                    <Radio value={option.value}>{option.label}</Radio>
+                    <Radio key={option.value} value={option.value}>
+                      {option.label}
+                    </Radio>
                   )
                 )}
               </Row>
             </Radio.Group>
           </Form.Item>
+
           <Form.Item
             name="suspiciousCalc"
             label="Vi vôi hóa"
@@ -618,57 +618,60 @@ const BiradsForm = () => {
               <Row gutter={[12, 12]}>
                 {SUSPICIOUS_CALCIFICATION_OPTIONS.filter(
                   (s) =>
-                    !!s.isOther !=
+                    !!s.isOther !==
                     !!typeOfLesion?.includes("microcalcification")
                 ).map((option) =>
-                  option.value != "none" ? (
+                  option.value !== "none" ? (
                     <Col key={option.value} span={12}>
                       <Radio value={option.value}>{option.label}</Radio>
                     </Col>
                   ) : (
-                    <Radio value={option.value}>{option.label}</Radio>
+                    <Radio key={option.value} value={option.value}>
+                      {option.label}
+                    </Radio>
                   )
                 )}
               </Row>
             </Radio.Group>
           </Form.Item>
+
           {typeOfLesion?.includes("microcalcification") && (
-            <>
-              <Form.Item
-                name="calcDistribution"
-                label="Phân bố vôi hóa, vi vôi hóa"
-                rules={[
-                  {
-                    required: true,
-                    message: "Vui lòng chọn ít nhất một phân bố vôi hóa",
-                  },
-                ]}
-              >
-                <Checkbox.Group>
-                  <Row gutter={[12, 12]}>
-                    {CALC_DISTRIBUTION_OPTIONS.map((option) => (
-                      <Col key={option.value} span={12}>
-                        <Checkbox value={option.value}>{option.label}</Checkbox>
-                      </Col>
-                    ))}
-                  </Row>
-                </Checkbox.Group>
-              </Form.Item>
-            </>
+            <Form.Item
+              name="calcDistribution"
+              label="Phân bố vôi hóa, vi vôi hóa"
+              rules={[
+                {
+                  required: true,
+                  message: "Vui lòng chọn ít nhất một phân bố",
+                },
+              ]}
+            >
+              <Checkbox.Group>
+                <Row gutter={[12, 12]}>
+                  {CALC_DISTRIBUTION_OPTIONS.map((option) => (
+                    <Col key={option.value} span={12}>
+                      <Checkbox value={option.value}>{option.label}</Checkbox>
+                    </Col>
+                  ))}
+                </Row>
+              </Checkbox.Group>
+            </Form.Item>
           )}
 
           <Form.Item name="suspiciousSigns" label="Dấu hiệu nghi ngờ khác">
             <Checkbox.Group>
               <Row gutter={[12, 12]}>
                 {OTHER_SUSPICIOUS_SIGNS.filter(
-                  (s) => !!s.isOther != !!typeOfLesion?.includes("other")
+                  (s) => !!s.isOther !== !!typeOfLesion?.includes("other")
                 ).map((option) =>
-                  option.value != "none" ? (
+                  option.value !== "none" ? (
                     <Col key={option.value} span={12}>
                       <Checkbox value={option.value}>{option.label}</Checkbox>
                     </Col>
                   ) : (
-                    <Checkbox value={option.value}>{option.label}</Checkbox>
+                    <Checkbox key={option.value} value={option.value}>
+                      {option.label}
+                    </Checkbox>
                   )
                 )}
               </Row>
@@ -688,6 +691,7 @@ const BiradsForm = () => {
               ]}
             />
           </Form.Item>
+
           {recommendation && (
             <div
               style={{
@@ -700,32 +704,16 @@ const BiradsForm = () => {
               <strong>Khuyến nghị:</strong> {recommendation}
             </div>
           )}
+
           <Row
             gutter={12}
             className={styles.summaryRow}
-            style={{ maxWidth: 1000 }}
+            style={{ maxWidth: 1000, marginTop: 24 }}
           >
-            <Text strong>Khuyến nghị AI:</Text>
-            {geminiResponse && (
-              <Row>
-                <Col span={24}>
-                  <Text strong>Phản hồi từ hệ thống:</Text>
-                  <div
-                    style={{
-                      background: "#fafafa",
-                      padding: "12px",
-                      marginTop: 8,
-                      border: "1px solid #eee",
-                      whiteSpace: "pre-wrap", // 👈 giữ ngắt dòng
-                      fontFamily: "inherit",
-                      fontSize: "15px",
-                    }}
-                  >
-                    {geminiResponse}
-                  </div>
-                </Col>
-              </Row>
-            )}
+            <AIRecommendationEditor
+              value={geminiResponse}
+              onChange={setGeminiResponse}
+            />
           </Row>
           <Form.Item>
             <Row gutter={16} style={{ justifyContent: "flex-end" }}>
