@@ -102,6 +102,10 @@ const HomeCareLanding = () => {
       label: "D-BOSNIAK",
       onClick: () => navigate("D-BOSNIAK"),
     },
+    {
+      label: "D-LIRADS",
+      onClick: () => navigate("D-LIRADS"),
+    },
   ];
 
   const [isContactOpen, setIsContactOpen] = useState(false);
