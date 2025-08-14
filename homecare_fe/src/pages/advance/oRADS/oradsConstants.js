@@ -167,6 +167,61 @@ export const DILATED_TUBE_CONTENTS = [
   },
 ];
 
+export const US_MODES = [
+  { label: "MRI", value: "mri" },
+  { label: "Ultrasound", value: "us" },
+];
+
+// Loại tổn thương ở US
+export const US_LESION_TYPES = [
+  {
+    value: "no_lesions",
+    label: "No lesions",
+    img: "/product/orads/us-no-lesion.png",
+  },
+  {
+    value: "physiologic_cyst",
+    label: "Physiologic cyst: follicle* or corpus luteum**",
+    img: "/product/orads/us-physiologic.png",
+  },
+  {
+    value: "typical_extraovarian",
+    label:
+      "Typical benign extra-ovarian lesion: Paraovarian cyst / PIC †† / Hydrosalpinx §",
+    img: "/product/orads/us-extraovarian.png",
+  },
+  {
+    value: "typical_benign_ovarian",
+    label:
+      "Typical benign ovarian lesions: Typical Hemorrhagic / Dermoid / Endometrioma",
+    img: "/product/orads/us-benign-ovarian.png",
+  },
+  {
+    value: "other_ovarian",
+    label: "Other ovarian lesions",
+    img: "/product/orads/us-other.png",
+  },
+];
+
+// 3 lựa chọn “benign ovarian”
+export const US_BENIGN_OVARIAN_OPTIONS = [
+  {
+    value: "hemorrhagic",
+    label: "Typical hemorrhagic cyst *",
+    img: "/product/orads/orads-2-us-typical-hemorrhagic-cyst.webp",
+  },
+  {
+    value: "dermoid",
+    label: "Typical dermoid cyst **",
+    img: "/product/orads/orads-2-us-typical-dermoid-cyst.webp",
+  },
+  {
+    value: "endometrioma",
+    label: "Typical endometrioma §",
+    img: "/product/orads/orads-2-us-typical-endometrioma.webp",
+  },
+];
+
 // Nhớ đảm bảo ABN_OPTIONS đã có:
 // { value: "dilated_tube", label: "Dilated fallopian tube (without a solid lesion)", img: "...", note: "" },
 // { value: "para_ovarian", label: "Para-ovarian cyst", img: "..."},
