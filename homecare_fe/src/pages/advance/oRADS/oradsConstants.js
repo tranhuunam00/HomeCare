@@ -1,122 +1,121 @@
-// ======= Options & Helpers cho O-RADS (MRI) =======
+// ======= Tuỳ chọn & Helper cho O-RADS (MRI/US) =======
 
-export const CYST_STRUCT_WITH_SOLID_VALUE = "with_solid"; // nhớ dùng đúng value này trong CYST_STRUCTURE
+export const CYST_STRUCT_WITH_SOLID_VALUE = "with_solid"; // giữ đúng value này nếu dùng trong CYST_STRUCTURE
 
 export const MODALITY = [
   { label: "MRI", value: "mri" },
-  { label: "Ultrasound", value: "us" }, // để sẵn, chưa triển khai
+  { label: "Siêu âm", value: "us" },
 ];
 
 export const ABN_OPTIONS = [
   {
     value: "cystic",
-    label: "Cystic lesion",
+    label: "Tổn thương dạng nang",
     img: "/product/orads/O-RADS-Unilocular-cyst-RadAide.jpg",
   },
   {
     value: "cystic_solid",
-    label: "Cystic lesion with a solid* component",
+    label: "Nang có thành phần đặc*",
     img: "/product/orads/O-RADS-solid-cystic-RadAide.jpg",
     note: "*",
   },
   {
     value: "solid",
-    label: "Solid lesion **",
+    label: "Tổn thương đặc **",
     img: "/product/orads/O-RADS-solid-RadAide.jpg",
     note: "**",
   },
   {
     value: "dilated_tube",
-    label: "Dilated fallopian tube (without a solid lesion)",
+    label: "Ống dẫn trứng giãn (không có thành phần đặc)",
     img: "/product/orads/radaide-orads-fallopiantube2.jpg",
   },
   {
     value: "para_ovarian",
-    label: "Para-ovarian cyst",
+    label: "Nang cạnh buồng trứng",
     img: "/product/orads/radaide-orads-paraovariancyst.jpg",
   },
   {
     value: "none",
-    label: "None of the above have been identified",
+    label: "Không có lựa chọn nào ở trên",
     img: "/product/orads/cancel-no-center-256.webp",
   },
 ];
 
 export const CYST_STRUCTURE = [
-  { value: "uni_no_enh", label: "Unilocular, without wall enhancement" },
+  { value: "uni_no_enh", label: "Nang đơn thùy, KHÔNG tăng bắt thuốc thành" },
   {
     value: "uni_smooth_enh",
-    label: "Unilocular, with smooth wall enhancement",
+    label: "Nang đơn thùy, thành tăng bắt thuốc trơn láng",
   },
-  { value: "multilocular", label: "Multilocular" },
+  { value: "multilocular", label: "Nang đa thùy" },
 ];
 
-// 5 loại dịch trong nang (đổi path ảnh theo dự án của bạn)
+// 5 loại dịch trong nang
 export const CYST_CONTENTS = [
   {
     value: "simple",
-    label: "Simple fluid *",
+    label: "Dịch đơn thuần *",
     img: "/product/orads/O-RADS-simple-fluid-radaide.jpg",
   },
   {
     value: "hemorrhagic",
-    label: "Hemorrhagic fluid **",
+    label: "Dịch xuất huyết **",
     img: "/product/orads/O-RADS-hemorrhagic-fluid-radaide.jpg",
   },
   {
     value: "endometrial",
-    label: "Endometrial fluid †",
+    label: "Dịch nội mạc tử cung †",
     img: "/product/orads/O-RADS-endometrial-fluid-radaide.jpg",
   },
   {
     value: "protein_mucin",
-    label: "Proteinaceous or mucinous fluid ††",
+    label: "Dịch giàu protein hoặc nhầy ††",
     img: "/product/orads/O-RADS-protein-fluid-radaide.jpg",
   },
   {
     value: "lipid",
-    label: "Lipid/fat §",
+    label: "Mỡ §",
     img: "/product/orads/O-RADS-fat-radaide.jpg",
   },
 ];
 
 export const RISK_LABEL = {
-  1: "Normal Ovaries",
-  2: "Almost certainly benign",
-  3: "Low risk",
-  4: "Intermediate risk",
-  5: "High risk",
+  1: "Buồng trứng bình thường",
+  2: "Gần như chắc chắn lành tính",
+  3: "Nguy cơ thấp",
+  4: "Nguy cơ trung gian",
+  5: "Nguy cơ cao",
 };
 
-// === THÊM MỚI: solid component flow ===
-
+// === Dòng chảy cho thành phần đặc (solid) ===
 export const DARK_T2_DWI_OPTIONS = [
-  { label: "Yes", value: true },
-  { label: "No", value: false },
+  { label: "Có", value: true },
+  { label: "Không", value: false },
 ];
 
 export const DCE_RISK_CURVE = [
   {
     value: "low",
-    label: "Low risk time* intensity curve",
-    img: "/product/orads/radaide-orads-riskcurve-low.jpg", // đặt đúng đường dẫn ảnh bạn có
-    note: "* Minimal/gradual increase; no plateau/shoulder",
+    label: "Đường cong cường độ theo thời gian – nguy cơ thấp*",
+    img: "/product/orads/radaide-orads-riskcurve-low.jpg",
+    note: "* Tăng tín hiệu nhẹ/từ từ; không có vai/không plateau.",
   },
   {
     value: "intermediate",
-    label: "Intermediate risk time** intensity curve",
+    label: "Đường cong cường độ theo thời gian – nguy cơ trung gian**",
     img: "/product/orads/radaide-orads-riskcurve-intermediate.jpg",
-    note: "** Initial slope < myometrium; moderate ↑ with plateau",
+    note: "** Độ dốc ban đầu < cơ tử cung; tăng vừa, có plateau.",
   },
   {
     value: "high",
-    label: "High risk time*** intensity curve",
+    label: "Đường cong cường độ theo thời gian – nguy cơ cao***",
     img: "/product/orads/radaide-orads-riskcurve-high.jpg",
-    note: "*** Initial slope > myometrium; marked ↑ with plateau",
+    note: "*** Độ dốc ban đầu > cơ tử cung; tăng mạnh, có plateau.",
   },
   {
     value: "not_available",
-    label: "DCE MRI is not available",
+    label: "Không có DCE MRI",
     img: "/product/orads/cancel-no-center-256.webp",
   },
 ];
@@ -124,12 +123,12 @@ export const DCE_RISK_CURVE = [
 export const LARGE_VOL_LIPID_OPTIONS = [
   {
     value: true,
-    label: "Yes",
+    label: "Có",
     img: "/product/orads/radaide-orads-solidlesion-fat.jpg",
   },
   {
     value: false,
-    label: "No",
+    label: "Không",
     img: "/product/orads/cancel-no-center-256.webp",
   },
 ];
@@ -137,68 +136,69 @@ export const LARGE_VOL_LIPID_OPTIONS = [
 export const NON_DCE_ENH_AT_30S = [
   {
     value: "lte_myometrium",
-    label: "Less than or equal to the outer myometrium",
+    label: "≤ lớp cơ tử cung ngoài",
     img: "/product/orads/radaide-orads-lowdce.jpg",
   },
   {
     value: "gt_myometrium",
-    label: "Greater than the outer myometrium",
+    label: "> lớp cơ tử cung ngoài",
     img: "/product/orads/radaide-orads-highdce.jpg",
   },
 ];
 
-// --- Dilated fallopian tube (without a solid lesion)
+// --- Ống dẫn trứng giãn (không có thành phần đặc)
 export const DILATED_TUBE_WALLS = [
-  { label: "Thin (<3mm)", value: "thin" },
-  { label: "Thick (>3mm)", value: "thick" },
+  { label: "Thành mỏng (<3 mm)", value: "thin" },
+  { label: "Thành dày (>3 mm)", value: "thick" },
 ];
 
 export const DILATED_TUBE_CONTENTS = [
   {
     value: "simple_fluid",
-    label: "Simple fluid*",
-    img: "/product/orads/radaide-orads-fallopian-simple.jpg", // đặt đúng path ảnh của bạn
-    note: "* Fluid content that follows CSF or urine on all sequences: hyperintense on T2WI and hypointense on T1WI.",
+    label: "Dịch đơn thuần*",
+    img: "/product/orads/radaide-orads-fallopian-simple.jpg",
+    note: "* Dịch giống DNT hoặc nước tiểu trên mọi chuỗi: tăng tín hiệu T2WI và giảm tín hiệu T1WI.",
   },
   {
     value: "non_simple_fluid",
-    label: "Non-simple fluid",
-    img: "/product/orads/radaide-orads-fallopian-complex.jpg", // đặt đúng path ảnh của bạn
+    label: "Dịch không đơn thuần",
+    img: "/product/orads/radaide-orads-fallopian-complex.jpg",
   },
 ];
 
+// (Tuỳ chọn) Nhãn cho chế độ
 export const US_MODES = [
   { label: "MRI", value: "mri" },
-  { label: "Ultrasound", value: "us" },
+  { label: "Siêu âm", value: "us" },
 ];
 
-// Loại tổn thương ở US
+// Loại tổn thương trên siêu âm
 export const US_LESION_TYPES = [
   {
     value: "no_lesions",
-    label: "No lesions",
+    label: "Không có tổn thương",
     img: "/product/orads/us-no-lesion.png",
   },
   {
     value: "physiologic_cyst",
-    label: "Physiologic cyst: follicle* or corpus luteum**",
+    label: "Nang sinh lý: nang noãn* hoặc hoàng thể**",
     img: "/product/orads/us-physiologic.png",
   },
   {
     value: "typical_extraovarian",
     label:
-      "Typical benign extra-ovarian lesion: Paraovarian cyst / PIC †† / Hydrosalpinx §",
+      "Lành tính ngoài buồng trứng điển hình: nang cạnh buồng trứng / nang dính phúc mạc†† / ứ dịch vòi trứng §",
     img: "/product/orads/us-extraovarian.png",
   },
   {
     value: "typical_benign_ovarian",
     label:
-      "Typical benign ovarian lesions: Typical Hemorrhagic / Dermoid / Endometrioma",
+      "Lành tính buồng trứng điển hình: nang xuất huyết / u bì (dermoid) / endometrioma",
     img: "/product/orads/us-benign-ovarian.png",
   },
   {
     value: "other_ovarian",
-    label: "Other ovarian lesions",
+    label: "Tổn thương buồng trứng khác",
     img: "/product/orads/us-other.png",
   },
 ];
@@ -207,111 +207,107 @@ export const US_LESION_TYPES = [
 export const US_BENIGN_OVARIAN_OPTIONS = [
   {
     value: "hemorrhagic",
-    label: "Typical hemorrhagic cyst *",
+    label: "Nang xuất huyết điển hình *",
     img: "/product/orads/orads-2-us-typical-hemorrhagic-cyst.webp",
   },
   {
     value: "dermoid",
-    label: "Typical dermoid cyst **",
+    label: "Nang bì (dermoid) điển hình **",
     img: "/product/orads/orads-2-us-typical-dermoid-cyst.webp",
   },
   {
     value: "endometrioma",
-    label: "Typical endometrioma §",
+    label: "Endometrioma điển hình §",
     img: "/product/orads/orads-2-us-typical-endometrioma.webp",
   },
 ];
 
-// Nhớ đảm bảo ABN_OPTIONS đã có:
-// { value: "dilated_tube", label: "Dilated fallopian tube (without a solid lesion)", img: "...", note: "" },
-// { value: "para_ovarian", label: "Para-ovarian cyst", img: "..."},
-// { value: "none", label: "None of the above have been identified", img: "..."},
-
-// ==== US: Other ovarian lesions ====
+// ==== US: Tổn thương buồng trứng khác ====
 export const US_OTHER_COMPOSITION = [
   {
     value: "cystic_no_solid",
-    label: "Cystic* lesion WITHOUT solid component(s)",
+    label: "Tổn thương dạng nang* KHÔNG có thành phần đặc",
     img: "/product/orads/Cyst_1.webp",
-    note: "Cystic* = with or without internal echoes or incomplete septations",
+    note: "Nang* = có hoặc không có hồi âm trong lòng hay vách không hoàn toàn",
   },
   {
     value: "cystic_with_solid",
-    label: "Cystic* lesion WITH solid component(s)",
+    label: "Tổn thương dạng nang* CÓ thành phần đặc",
     img: "/product/orads/O-RADS-cyst-with-solid-component_1.webp",
   },
   {
     value: "solid_or_solid_appearing",
-    label: "Solid/Solid-appearing lesion (≥ 80% solid)",
+    label: "Tổn thương đặc/giống đặc (≥80% đặc)",
     img: "/product/orads/o-rads-solid-lesion-1.webp",
   },
 ];
 
 export const US_OTHER_CHAMBERS = [
-  { value: "uni", label: "1 (i.e., unilocular)" },
-  { value: "bi", label: "2 (i.e., bilocular)" },
-  { value: "multi", label: "3 or more (i.e., multilocular)" },
+  { value: "uni", label: "1 (tức đơn thùy)" },
+  { value: "bi", label: "2 (tức hai thùy)" },
+  { value: "multi", label: "3 trở lên (tức đa thùy)" },
 ];
 
 export const US_OTHER_CONTOUR = [
   {
     value: "smooth",
-    label: "Smooth",
+    label: "Trơn láng",
     img: "/product/orads/orads-3-us-smooth-walls.webp",
   },
   {
     value: "irregular",
-    label: "Irregular (i.e., not smooth)",
+    label: "Không đều (không trơn láng)",
     img: "/product/orads/orads-4-us-irregular-walls.webp",
   },
 ];
 
 export const US_OTHER_ECHO_SEPT = [
-  { value: "internal_echoes", label: "Internal echoes" },
-  { value: "incomplete_septations", label: "Incomplete septations" },
-  { value: "both", label: "Both internal echoes and incomplete septations" },
-  { value: "neither", label: "Neither" },
+  { value: "internal_echoes", label: "Có hồi âm trong lòng" },
+  { value: "incomplete_septations", label: "Vách không hoàn toàn" },
+  { value: "both", label: "Cả hồi âm trong lòng và vách không hoàn toàn" },
+  { value: "neither", label: "Không có" },
 ];
 
 export const US_MENOPAUSAL = [
-  { value: "pre", label: "Pre-menopausal" },
-  { value: "post", label: "Post-menopausal" },
+  { value: "pre", label: "Tiền mãn kinh" },
+  { value: "post", label: "Hậu mãn kinh" },
 ];
 
 export const US_COLOR_SCORE = [
   {
     value: 1,
-    label: "1 (i.e., no flow)",
+    label: "1 (không tưới máu)",
     img: "/product/orads/color-doppler-1.jpg",
   },
   {
     value: 2,
-    label: "2 (i.e., minimal flow)",
+    label: "2 (tưới máu tối thiểu)",
     img: "/product/orads/color-doppler-2.jpg",
   },
   {
     value: 3,
-    label: "3 (i.e., moderate flow)",
+    label: "3 (tưới máu trung bình)",
     img: "/product/orads/color-doppler-3.jpg",
   },
   {
     value: 4,
-    label: "4 (i.e., very strong flow)",
+    label: "4 (tưới máu rất mạnh)",
     img: "/product/orads/color-doppler-4.jpg",
   },
 ];
 
-// ===== US: Other ovarian (bổ sung cho WITH solid & SOLID-appearing) =====
+// ===== US: bổ sung cho nhánh CÓ thành phần đặc & GIỐNG đặc =====
 export const US_PAPILLARY_COUNT = [
-  { value: "1_3", label: "1, 2, or 3" },
-  { value: "ge4", label: "4 or more" },
-  { value: "non_papillary", label: "There are non-papillary solid components" },
+  { value: "1_3", label: "1, 2 hoặc 3" },
+  { value: "ge4", label: "≥ 4" },
+  { value: "non_papillary", label: "Có thành phần đặc không phải nhú" },
 ];
 
 export const US_YES_NO = [
-  { value: true, label: "Yes" },
-  { value: false, label: "No" },
+  { value: true, label: "Có" },
+  { value: false, label: "Không" },
 ];
 
+// Helper
 export const getLabelFromValue = (options, value) =>
   options.find((o) => o.value === value)?.label || "";

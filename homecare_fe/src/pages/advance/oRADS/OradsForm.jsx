@@ -78,6 +78,43 @@ export default function OradsForm() {
   });
   const [aiText, setAiText] = useState("");
 
+  // giữ nguyên các import & state khác
+
+  const resetAllExceptModality = useCallback(() => {
+    // KHÔNG gọi form.resetFields()
+    // chỉ xóa các state còn lại
+    // MRI
+    setPeritoneal(null);
+    setAbn(null);
+    setCystStruct(null);
+    setCystContent(null);
+    setCystSmallPrem(null);
+    setMultilocHasFat(null);
+    setSolidDark(null);
+    setDceCurve(null);
+    setSolidLipid(null);
+    setNonDceEnh(null);
+    setTubeWall(null);
+    setTubeContents(null);
+    // US
+    setUsAdequate(null);
+    setUsType(null);
+    setUsBenignType(null);
+    setUsMaxDiameter(null);
+    setUsOtherComposition(null);
+    setUsOtherChambers(null);
+    setUsOtherContour(null);
+    setUsOtherEchoSept(null);
+    setUsOtherMenopause(null);
+    setUsColorScore(null);
+    setUsPapillaryCount(null);
+    setUsShadowing(null);
+
+    // summary & AI
+    setSummary({ orads: "", risk: "", ppv: "", recommendation: "" });
+    setAiText("");
+  }, []);
+
   // ===== Reset helpers =====
   const resetMRI = useCallback(() => {
     setPeritoneal(null);
@@ -415,9 +452,9 @@ export default function OradsForm() {
               value={modality}
               onChange={(e) => {
                 const v = e.target.value;
-                setModality(v);
-                resetAll();
-                setModality(v);
+                setModality(v); // cập nhật state
+                resetAllExceptModality(); // chỉ reset các field khác
+                form.setFieldsValue({ modality: v }); // đảm bảo Form value khớp
               }}
             />
           </Form.Item>
