@@ -47,6 +47,7 @@ import AASTKidneyForm from "./pages/advance/AASTKidneyForm/AASTKidneyForm";
 import AASTLiverForm from "./pages/advance/AASTLiverForm/AASTLiverForm";
 import BosniakForm from "./pages/advance/BosniakForm/BosniakForm";
 import LIRADSForm from "./pages/advance/Lirad/LIRADSForm";
+import ORADSModalityOnly from "./pages/advance/oRADS/OradsForm";
 
 function App() {
   useAuthInitializer();
@@ -70,6 +71,7 @@ function App() {
         <Route path="/D-VOGAN" element={<AASTLiverForm />} />
         <Route path="/D-BOSNIAK" element={<BosniakForm />} />
         <Route path="/D-LIRADS" element={<LIRADSForm />} />
+        <Route path="/D-ORADS" element={<ORADSModalityOnly />} />
 
         <Route
           path="/home"
