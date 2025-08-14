@@ -147,5 +147,30 @@ export const NON_DCE_ENH_AT_30S = [
   },
 ];
 
+// --- Dilated fallopian tube (without a solid lesion)
+export const DILATED_TUBE_WALLS = [
+  { label: "Thin (<3mm)", value: "thin" },
+  { label: "Thick (>3mm)", value: "thick" },
+];
+
+export const DILATED_TUBE_CONTENTS = [
+  {
+    value: "simple_fluid",
+    label: "Simple fluid*",
+    img: "/product/orads/radaide-orads-fallopian-simple.jpg", // đặt đúng path ảnh của bạn
+    note: "* Fluid content that follows CSF or urine on all sequences: hyperintense on T2WI and hypointense on T1WI.",
+  },
+  {
+    value: "non_simple_fluid",
+    label: "Non-simple fluid",
+    img: "/product/orads/radaide-orads-fallopian-complex.jpg", // đặt đúng path ảnh của bạn
+  },
+];
+
+// Nhớ đảm bảo ABN_OPTIONS đã có:
+// { value: "dilated_tube", label: "Dilated fallopian tube (without a solid lesion)", img: "...", note: "" },
+// { value: "para_ovarian", label: "Para-ovarian cyst", img: "..."},
+// { value: "none", label: "None of the above have been identified", img: "..."},
+
 export const getLabelFromValue = (options, value) =>
   options.find((o) => o.value === value)?.label || "";

@@ -8,17 +8,18 @@ import AIRecommendationEditor from "../../../components/AIRecommendationEditor";
 import ImageRadioCard from "./components/ImageRadioCard";
 import CysticLesionSection from "./components/CysticLesionSection";
 import CysticSolidSection from "./components/CysticSolidSection";
+import DilatedTubeSection from "./components/DilatedTubeSection";
 
 import {
   MODALITY,
-  ABN_OPTIONS, // phải có item value="cystic_solid" label="Cystic lesion with a solid* component"
+  ABN_OPTIONS, // phải có value "cystic", "cystic_solid", "dilated_tube", "para_ovarian", "solid", "none"
   CYST_STRUCTURE, // KHÔNG chứa 'with_solid'
   getLabelFromValue,
 } from "./oradsConstants";
 
 import { computeORADS } from "./oradsUtils";
 
-const { Title, Text } = Typography;
+const { Text, Paragraph } = Typography;
 
 export default function OradsForm() {
   const [form] = Form.useForm();
@@ -40,6 +41,10 @@ export default function OradsForm() {
   const [solidLipid, setSolidLipid] = useState(null);
   const [nonDceEnh, setNonDceEnh] = useState(null);
 
+  // dilated tube
+  const [tubeWall, setTubeWall] = useState(null);
+  const [tubeContents, setTubeContents] = useState(null);
+
   // summary + AI
   const [summary, setSummary] = useState({
     orads: "",
@@ -49,7 +54,7 @@ export default function OradsForm() {
   });
   const [aiText, setAiText] = useState("");
 
-  // ===== reset helpers =====
+  // ===== RESET HELPERS =====
   const resetCystic = useCallback(() => {
     setCystStruct(null);
     setCystContent(null);
@@ -64,17 +69,23 @@ export default function OradsForm() {
     setNonDceEnh(null);
   }, []);
 
+  const resetDilatedTube = useCallback(() => {
+    setTubeWall(null);
+    setTubeContents(null);
+  }, []);
+
   const resetAllExceptModality = useCallback(() => {
     form.resetFields();
     setPeritoneal(null);
     setAbn(null);
     resetCystic();
     resetCysticSolid();
+    resetDilatedTube();
     setSummary({ orads: "", risk: "", ppv: "", recommendation: "" });
     setAiText("");
-  }, [form, resetCystic, resetCysticSolid]);
+  }, [form, resetCystic, resetCysticSolid, resetDilatedTube]);
 
-  // ===== auto-calc =====
+  // ===== AUTO-CALC =====
   const recalcSummary = useCallback(() => {
     const res = computeORADS({
       modality,
@@ -90,6 +101,9 @@ export default function OradsForm() {
       dce_curve: dceCurve,
       solid_large_lipid: solidLipid,
       non_dce_30s_enh: nonDceEnh,
+
+      tube_wall_thickness: tubeWall,
+      tube_contents: tubeContents,
     });
 
     if (!res?.orads) {
@@ -114,51 +128,72 @@ export default function OradsForm() {
     dceCurve,
     solidLipid,
     nonDceEnh,
+    tubeWall,
+    tubeContents,
   ]);
 
   useEffect(() => {
     recalcSummary();
   }, [recalcSummary]);
 
-  // ===== html copy =====
+  // ===== HTML COPY =====
   const genHtml = async ({ isCopy }) => {
-    const title = "Đánh giá O‑RADS (MRI)";
+    const title = "Đánh giá O-RADS (MRI)";
+
     const rowsForCystic =
       abn === "cystic"
         ? `
-          <tr><td>Cấu trúc nang</td><td>${
-            getLabelFromValue(CYST_STRUCTURE, cystStruct) || "--"
-          }</td></tr>
-          <tr><td>Thành phần dịch</td><td>${cystContent || "--"}</td></tr>
-          <tr><td>≤3cm & tiền mãn kinh?</td><td>${
-            cystSmallPrem === true
-              ? "Yes"
-              : cystSmallPrem === false
-              ? "No"
-              : "--"
-          }</td></tr>
-          <tr><td>Multilocular có mỡ?</td><td>${
-            multilocHasFat === true
-              ? "Yes"
-              : multilocHasFat === false
-              ? "No"
-              : "--"
-          }</td></tr>
-        `
+        <tr><td>Cấu trúc nang</td><td>${
+          getLabelFromValue(CYST_STRUCTURE, cystStruct) || "--"
+        }</td></tr>
+        <tr><td>Thành phần dịch</td><td>${cystContent || "--"}</td></tr>
+        <tr><td>≤3cm & tiền mãn kinh?</td><td>${
+          cystSmallPrem === true ? "Yes" : cystSmallPrem === false ? "No" : "--"
+        }</td></tr>
+        <tr><td>Multilocular có mỡ?</td><td>${
+          multilocHasFat === true
+            ? "Yes"
+            : multilocHasFat === false
+            ? "No"
+            : "--"
+        }</td></tr>
+      `
         : "";
 
     const rowsForCysticSolid =
       abn === "cystic_solid"
         ? `
-          <tr><td>Dark T2 & Dark DWI?</td><td>${
-            solidDark === true ? "Yes" : solidDark === false ? "No" : "--"
-          }</td></tr>
-          <tr><td>DCE curve</td><td>${dceCurve || "--"}</td></tr>
-          <tr><td>Large volume enhancing with lipid?</td><td>${
-            solidLipid === true ? "Yes" : solidLipid === false ? "No" : "--"
-          }</td></tr>
-          <tr><td>non‑DCE 30–40s</td><td>${nonDceEnh || "--"}</td></tr>
-        `
+        <tr><td>Dark T2 & Dark DWI?</td><td>${
+          solidDark === true ? "Yes" : solidDark === false ? "No" : "--"
+        }</td></tr>
+        <tr><td>DCE curve</td><td>${dceCurve || "--"}</td></tr>
+        <tr><td>Large volume enhancing with lipid?</td><td>${
+          solidLipid === true ? "Yes" : solidLipid === false ? "No" : "--"
+        }</td></tr>
+        <tr><td>non-DCE 30–40s</td><td>${nonDceEnh || "--"}</td></tr>
+      `
+        : "";
+
+    const rowsForDilatedTube =
+      abn === "dilated_tube"
+        ? `
+        <tr><td>Tube walls / endosalpingeal folds</td><td>${
+          tubeWall === "thin"
+            ? "Thin (<3mm)"
+            : tubeWall === "thick"
+            ? "Thick (>3mm)"
+            : "--"
+        }</td></tr>
+        <tr><td>Tube contents</td><td>${
+          tubeWall === "thin"
+            ? tubeContents === "simple_fluid"
+              ? "Simple fluid*"
+              : tubeContents === "non_simple_fluid"
+              ? "Non-simple fluid"
+              : "--"
+            : "--"
+        }</td></tr>
+      `
         : "";
 
     const html = `
@@ -179,10 +214,11 @@ export default function OradsForm() {
           }</td></tr>
           ${rowsForCystic}
           ${rowsForCysticSolid}
+          ${rowsForDilatedTube}
         `
             : ""
         }
-        <tr><td><strong>Phân loại (O‑RADS)</strong></td><td><strong>${
+        <tr><td><strong>Phân loại (O-RADS)</strong></td><td><strong>${
           summary?.orads || "Không xác định"
         }</strong></td></tr>
         <tr><td>PPV</td><td>${summary?.ppv || "--"}</td></tr>
@@ -194,10 +230,10 @@ export default function OradsForm() {
       : html;
   };
 
-  // ===== actions =====
+  // ===== ACTIONS =====
   const onCalculate = async () => {
     if (!summary?.orads) {
-      toast.error("Vui lòng hoàn thành các lựa chọn cần thiết để tính O‑RADS!");
+      toast.error("Vui lòng hoàn thành các lựa chọn cần thiết để tính O-RADS!");
       return;
     }
     try {
@@ -214,7 +250,9 @@ export default function OradsForm() {
           .replace(/^\* /gm, "• ")
           .replace(/\n{2,}/g, "\n\n") || ""
       );
-    } catch {}
+    } catch {
+      // optional
+    }
   };
 
   const onCopy = async () => {
@@ -233,7 +271,7 @@ export default function OradsForm() {
 
   const onReset = () => resetAllExceptModality();
 
-  // ===== render =====
+  // ===== RENDER =====
   return (
     <div className={styles.pageWrapper}>
       <div className={styles.formContainer}>
@@ -243,7 +281,7 @@ export default function OradsForm() {
           initialValues={{ modality }}
           onValuesChange={recalcSummary}
         >
-          <h2 style={{ marginBottom: 24 }}>D‑O‑RADS HOME‑CARE</h2>
+          <h2 style={{ marginBottom: 24 }}>D-O-RADS HOME-CARE</h2>
           <h4>Lĩnh vực: MRI phụ khoa</h4>
           <div style={{ marginBottom: 24 }} />
 
@@ -252,6 +290,7 @@ export default function OradsForm() {
             name="modality"
             label="Imaging modality"
             rules={[{ required: true }]}
+            colon={false}
           >
             <Radio.Group
               options={MODALITY}
@@ -266,64 +305,76 @@ export default function OradsForm() {
           </Form.Item>
 
           {/* Peritoneal nodularity */}
-          <Title level={4} style={{ color: "#fff", margin: "8px 0 12px" }}>
-            Is there peritoneal, mesenteric or omental nodularity or irregular
-            thickening (+/− ascites)? *
-          </Title>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(2, minmax(260px, 320px))",
-              gap: 20,
-            }}
+          <Form.Item
+            label="Is there peritoneal, mesenteric or omental nodularity or irregular thickening (+/− ascites)?"
+            required
+            colon={false}
+            style={{ marginTop: 8, marginBottom: 8 }}
           >
-            <ImageRadioCard
-              selected={peritoneal === true}
-              image={"/product/orads/radaide-orads-peritoneal-nodularity.jpg"}
-              label="Yes"
-              onClick={() => {
-                setPeritoneal(true);
-                setAbn(null);
-                resetCystic();
-                resetCysticSolid();
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(2, minmax(260px, 320px))",
+                gap: 20,
               }}
-            />
-            <ImageRadioCard
-              selected={peritoneal === false}
-              image={"/product/orads/cancel-no-center-256.webp"}
-              label="No"
-              onClick={() => setPeritoneal(false)}
-            />
-          </div>
+            >
+              <ImageRadioCard
+                selected={peritoneal === true}
+                image={"/product/orads/radaide-orads-peritoneal-nodularity.jpg"}
+                label="Yes"
+                onClick={() => {
+                  setPeritoneal(true);
+                  setAbn(null);
+                  resetCystic();
+                  resetCysticSolid();
+                  resetDilatedTube();
+                }}
+              />
+              <ImageRadioCard
+                selected={peritoneal === false}
+                image={"/product/orads/cancel-no-center-256.webp"}
+                label="No"
+                onClick={() => setPeritoneal(false)}
+              />
+            </div>
+          </Form.Item>
 
           {/* Abnormality */}
           {peritoneal === false && (
             <>
-              <Title level={4} style={{ color: "#fff", margin: "28px 0 12px" }}>
-                Which abnormality have you identified? *
-              </Title>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(3, minmax(240px, 320px))",
-                  gap: 20,
-                }}
+              <Form.Item
+                label="Which abnormality have you identified?"
+                required
+                colon={false}
+                style={{ marginTop: 20, marginBottom: 8 }}
               >
-                {ABN_OPTIONS.map((o) => (
-                  <ImageRadioCard
-                    key={o.value}
-                    selected={abn === o.value}
-                    image={o.img}
-                    label={o.label}
-                    note={o.note}
-                    onClick={() => {
-                      setAbn(o.value);
-                      resetCystic();
-                      resetCysticSolid();
-                    }}
-                  />
-                ))}
-              </div>
+                <Paragraph style={{ color: "#9aa3af", marginTop: 0 }}>
+                  Chọn một loại tổn thương phù hợp nhất với quan sát của bạn.
+                </Paragraph>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(3, minmax(240px, 320px))",
+                    gap: 20,
+                  }}
+                >
+                  {ABN_OPTIONS.map((o) => (
+                    <ImageRadioCard
+                      key={o.value}
+                      selected={abn === o.value}
+                      image={o.img}
+                      label={o.label}
+                      note={o.note}
+                      onClick={() => {
+                        setAbn(o.value);
+                        resetCystic();
+                        resetCysticSolid();
+                        resetDilatedTube();
+                      }}
+                    />
+                  ))}
+                </div>
+              </Form.Item>
 
               {/* Cystic (không-solid) */}
               {abn === "cystic" && (
@@ -355,6 +406,29 @@ export default function OradsForm() {
                   setSolidLipid={setSolidLipid}
                   nonDceEnh={nonDceEnh}
                   setNonDceEnh={setNonDceEnh}
+                />
+              )}
+
+              {abn === "solid" && (
+                <CysticSolidSection
+                  solidDark={solidDark}
+                  setSolidDark={setSolidDark}
+                  dceCurve={dceCurve}
+                  setDceCurve={setDceCurve}
+                  solidLipid={solidLipid}
+                  setSolidLipid={setSolidLipid}
+                  nonDceEnh={nonDceEnh}
+                  setNonDceEnh={setNonDceEnh}
+                />
+              )}
+
+              {/* Dilated fallopian tube (without a solid lesion) */}
+              {abn === "dilated_tube" && (
+                <DilatedTubeSection
+                  tubeWall={tubeWall}
+                  setTubeWall={setTubeWall}
+                  tubeContents={tubeContents}
+                  setTubeContents={setTubeContents}
                 />
               )}
             </>

@@ -1,5 +1,5 @@
 import React from "react";
-import { Typography, Radio, Row, Col } from "antd";
+import { Form, Typography, Radio, Row, Col } from "antd";
 import ImageRadioCard from "./ImageRadioCard";
 import {
   DARK_T2_DWI_OPTIONS,
@@ -8,7 +8,7 @@ import {
   NON_DCE_ENH_AT_30S,
 } from "../oradsConstants";
 
-const { Title } = Typography;
+const { Paragraph } = Typography;
 
 /**
  * Flow cho "Cystic lesion with a solid* component"
@@ -35,66 +35,79 @@ export default function CysticSolidSection({
   return (
     <>
       {/* Q1: Dark T2 & Dark DWI */}
-      <Title level={4} style={{ color: "#fff", margin: "12px 0 12px" }}>
-        Is the solid tissue homogeneously hypointense on T2 and DWI (i.e. Dark
-        T2 and Dark DWI)? *
-      </Title>
-      <Radio.Group
-        value={solidDark}
-        onChange={(e) => {
-          setSolidDark(e.target.value);
-          // reset các nhánh sau
-          setDceCurve(null);
-          setSolidLipid(null);
-          setNonDceEnh(null);
-        }}
+      <Form.Item
+        label="Is the solid tissue homogeneously hypointense on T2 and DWI (i.e. Dark T2 and Dark DWI)?"
+        required
+        colon={false}
+        style={{ marginBottom: 12 }}
       >
-        <Row gutter={[12, 12]}>
-          {DARK_T2_DWI_OPTIONS.map((o) => (
-            <Col key={String(o.value)} span={24}>
-              <Radio value={o.value}>{o.label}</Radio>
-            </Col>
-          ))}
-        </Row>
-      </Radio.Group>
+        <Radio.Group
+          value={solidDark}
+          onChange={(e) => {
+            setSolidDark(e.target.value);
+            // reset các nhánh sau
+            setDceCurve(null);
+            setSolidLipid(null);
+            setNonDceEnh(null);
+          }}
+        >
+          <Row gutter={[12, 12]}>
+            {DARK_T2_DWI_OPTIONS.map((o) => (
+              <Col key={String(o.value)} span={24}>
+                <Radio value={o.value}>{o.label}</Radio>
+              </Col>
+            ))}
+          </Row>
+        </Radio.Group>
+      </Form.Item>
 
       {/* Nếu Yes -> đủ điều kiện O-RADS 2, không hỏi tiếp */}
       {solidDark === false && (
         <>
           {/* Q2: DCE curve */}
-          <Title level={4} style={{ color: "#fff", margin: "20px 0 12px" }}>
-            How does the lesion’s risk curve on DCE MRI? *
-          </Title>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(2, minmax(260px, 320px))",
-              gap: 20,
-            }}
+          <Form.Item
+            label="How does the lesion’s risk curve on DCE MRI?"
+            required
+            colon={false}
+            style={{ marginTop: 20, marginBottom: 8 }}
           >
-            {DCE_RISK_CURVE.map((o) => (
-              <ImageRadioCard
-                key={o.value}
-                selected={dceCurve === o.value}
-                image={o.img}
-                label={o.label}
-                note={o.note}
-                onClick={() => {
-                  setDceCurve(o.value);
-                  // reset nhánh con
-                  setSolidLipid(null);
-                  setNonDceEnh(null);
-                }}
-              />
-            ))}
-          </div>
+            <Paragraph style={{ color: "#9aa3af", marginTop: 0 }}>
+              Chọn dạng đường cong tín hiệu theo thời gian (time–intensity
+              curve).
+            </Paragraph>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(2, minmax(260px, 320px))",
+                gap: 20,
+              }}
+            >
+              {DCE_RISK_CURVE.map((o) => (
+                <ImageRadioCard
+                  key={o.value}
+                  selected={dceCurve === o.value}
+                  image={o.img}
+                  label={o.label}
+                  note={o.note}
+                  onClick={() => {
+                    setDceCurve(o.value);
+                    // reset nhánh con
+                    setSolidLipid(null);
+                    setNonDceEnh(null);
+                  }}
+                />
+              ))}
+            </div>
+          </Form.Item>
 
           {/* Nếu chọn Low risk → hỏi ảnh 2 (lipid, large volume?) */}
           {dceCurve === "low" && (
-            <>
-              <Title level={4} style={{ color: "#fff", margin: "20px 0 12px" }}>
-                Is the solid tissue large volume enhancing with lipid content? *
-              </Title>
+            <Form.Item
+              label="Is the solid tissue large-volume enhancing with lipid content?"
+              required
+              colon={false}
+              style={{ marginTop: 20, marginBottom: 0 }}
+            >
               <div
                 style={{
                   display: "grid",
@@ -112,16 +125,17 @@ export default function CysticSolidSection({
                   />
                 ))}
               </div>
-            </>
+            </Form.Item>
           )}
 
-          {/* Nếu DCE not available → hỏi ảnh 3 (non‑DCE 30–40s) */}
+          {/* Nếu DCE not available → hỏi ảnh 3 (non-DCE 30–40s) */}
           {dceCurve === "not_available" && (
-            <>
-              <Title level={4} style={{ color: "#fff", margin: "20px 0 12px" }}>
-                How is the lesion’s enhancement on non‑DCE MRI at 30–40 seconds
-                post‑injection? *
-              </Title>
+            <Form.Item
+              label="How is the lesion’s enhancement on non-DCE MRI at 30–40 seconds post-injection?"
+              required
+              colon={false}
+              style={{ marginTop: 20, marginBottom: 0 }}
+            >
               <div
                 style={{
                   display: "grid",
@@ -139,7 +153,7 @@ export default function CysticSolidSection({
                   />
                 ))}
               </div>
-            </>
+            </Form.Item>
           )}
         </>
       )}

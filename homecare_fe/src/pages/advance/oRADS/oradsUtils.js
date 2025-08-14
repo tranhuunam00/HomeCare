@@ -1,13 +1,37 @@
+// oradsUtils.js
 import { RISK_LABEL } from "./oradsConstants";
 
+/**
+ * Helper
+ */
 const pack = (orads, risk, ppv, rec) => ({ orads, risk, ppv, rec });
 const empty = () => ({ orads: null, risk: "", ppv: "", rec: "" });
 
 /**
+ * computeORADS(input)
  * Trả về { orads, risk, ppv, rec }
- * - MRI only
- * - Flow cystic: uni_no_enh / uni_smooth_enh / multilocular
- * - Flow cystic_solid: Dark T2/DWI → DCE curve → lipid | non‑DCE 30–40s
+ *
+ * input:
+ *  - modality: 'mri'
+ *  - peritoneal: true | false | null
+ *  - abnormality:
+ *      'cystic' | 'cystic_solid' | 'dilated_tube' | 'para_ovarian' | 'solid' | 'none'
+ *
+ *  // CYSTIC (không có solid component)
+ *  - cyst_structure: 'uni_no_enh' | 'uni_smooth_enh' | 'multilocular' | null
+ *  - cyst_contents: 'simple' | 'hemorrhagic' | 'endometrial' | 'protein_mucin' | 'lipid' | null
+ *  - cyst_small_premenop: boolean|null            // chỉ dùng khi uni_no_enh + (simple|hemorrhagic)
+ *  - multiloc_has_fat: boolean|null               // chỉ dùng khi multilocular
+ *
+ *  // CYSTIC_SOLID
+ *  - solid_dark_t2dwi: boolean|null               // Dark T2 & Dark DWI ?
+ *  - dce_curve: 'low' | 'intermediate' | 'high' | 'not_available' | null
+ *  - solid_large_lipid: boolean|null              // chỉ khi dce_curve='low'
+ *  - non_dce_30s_enh: 'lte_myometrium' | 'gt_myometrium' | null   // chỉ khi dce_curve='not_available'
+ *
+ *  // DILATED TUBE
+ *  - tube_wall_thickness: 'thin' | 'thick' | null
+ *  - tube_contents: 'simple_fluid' | 'non_simple_fluid' | null     // chỉ khi thin
  */
 export function computeORADS(input = {}) {
   const {
@@ -15,22 +39,27 @@ export function computeORADS(input = {}) {
     peritoneal,
     abnormality,
 
-    // cystic (không-solid)
-    cyst_structure, // 'uni_no_enh' | 'uni_smooth_enh' | 'multilocular'
-    cyst_contents, // 'simple' | 'hemorrhagic' | 'endometrial' | 'protein_mucin' | 'lipid'
-    cyst_small_premenop, // boolean|null (chỉ với uni_no_enh + simple/hemorrhagic)
-    multiloc_has_fat, // boolean|null
+    // cystic (non-solid)
+    cyst_structure,
+    cyst_contents,
+    cyst_small_premenop,
+    multiloc_has_fat,
 
     // cystic_solid
-    solid_dark_t2dwi, // boolean|null
-    dce_curve, // 'low'|'intermediate'|'high'|'not_available'|null
-    solid_large_lipid, // boolean|null
-    non_dce_30s_enh, // 'lte_myometrium'|'gt_myometrium'|null
+    solid_dark_t2dwi,
+    dce_curve,
+    solid_large_lipid,
+    non_dce_30s_enh,
+
+    // dilated tube
+    tube_wall_thickness,
+    tube_contents,
   } = input;
 
+  // Chỉ áp dụng cho MRI
   if (modality !== "mri") return empty();
 
-  // 1) Có peritoneal/omental nodularity (+/- ascites) → O-RADS 5
+  // 1) Peritoneal / omental nodularity (+/− ascites) → O-RADS 5
   if (peritoneal === true) {
     return pack(
       5,
@@ -39,12 +68,13 @@ export function computeORADS(input = {}) {
       "Nghi ngờ cao ác tính. Hội chẩn phụ khoa/ung bướu, đánh giá giai đoạn và lập kế hoạch điều trị."
     );
   }
-  if (peritoneal !== false) return empty(); // chưa chọn
+  if (peritoneal !== false) return empty(); // chưa chọn Yes/No
 
   // 2) Không có peritoneal → theo abnormality
-  // ===== CYSTIC (không-solid) =====
+  // =====================================================================
+  // A. CYSTIC (không có solid component)
   if (abnormality === "cystic") {
-    // 2.1) Unilocular, WITHOUT wall enhancement
+    // A1) Unilocular, WITHOUT wall enhancement
     if (cyst_structure === "uni_no_enh") {
       if (["simple", "hemorrhagic"].includes(cyst_contents)) {
         if (cyst_small_premenop === true) {
@@ -60,11 +90,12 @@ export function computeORADS(input = {}) {
             2,
             RISK_LABEL[2],
             "<0.5%",
-            "Gần như chắc chắn lành tính. Theo dõi định kỳ."
+            "Gần như chắc chắn lành tính. Theo dõi định kỳ theo triệu chứng/kích thước."
           );
         }
-        return empty();
+        return empty(); // cần trả lời câu phụ (≤3cm & tiền mãn kinh?)
       }
+
       if (["endometrial", "protein_mucin", "lipid"].includes(cyst_contents)) {
         return pack(
           2,
@@ -76,7 +107,7 @@ export function computeORADS(input = {}) {
       return empty();
     }
 
-    // 2.2) Unilocular, WITH smooth wall enhancement
+    // A2) Unilocular, WITH smooth wall enhancement
     if (cyst_structure === "uni_smooth_enh") {
       const map = {
         simple: { orads: 2, ppv: "<0.5%" },
@@ -97,7 +128,7 @@ export function computeORADS(input = {}) {
       );
     }
 
-    // 2.3) Multilocular
+    // A3) Multilocular
     if (cyst_structure === "multilocular") {
       if (multiloc_has_fat === true) {
         return pack(
@@ -117,11 +148,13 @@ export function computeORADS(input = {}) {
       }
       return empty();
     }
+
+    return empty();
   }
 
-  // ===== CYSTIC LESION WITH A SOLID* COMPONENT =====
-  if (abnormality === "cystic_solid") {
-    // Q1: Dark T2 & Dark DWI?
+  // B. CYSTIC LESION WITH A SOLID* COMPONENT
+  if (abnormality === "cystic_solid" || abnormality == "solid") {
+    // B1) Dark T2 & Dark DWI?
     if (solid_dark_t2dwi === true) {
       return pack(
         2,
@@ -131,10 +164,11 @@ export function computeORADS(input = {}) {
       );
     }
     if (solid_dark_t2dwi === false) {
-      // Q2: DCE curve
+      // B2) DCE curve?
       if (!dce_curve) return empty();
 
       if (dce_curve === "low") {
+        // B2a) Hỏi thêm large volume enhancing with lipid?
         if (solid_large_lipid === true) {
           return pack(
             4,
@@ -173,6 +207,7 @@ export function computeORADS(input = {}) {
       }
 
       if (dce_curve === "not_available") {
+        // B2b) Không có DCE → dùng non-DCE 30–40s
         if (non_dce_30s_enh === "lte_myometrium") {
           return pack(
             4,
@@ -195,7 +230,55 @@ export function computeORADS(input = {}) {
     return empty();
   }
 
-  // ===== Các nhóm khác (rút gọn) =====
+  // C. DILATED FALLOPIAN TUBE (without a solid lesion)
+  if (abnormality === "dilated_tube") {
+    if (!tube_wall_thickness) return empty();
+
+    if (tube_wall_thickness === "thick") {
+      // Thick (>3mm)
+      return pack(
+        3,
+        RISK_LABEL[3],
+        "~5%",
+        "Low risk. Theo dõi sát/đánh giá thêm theo lâm sàng."
+      );
+    }
+
+    if (tube_wall_thickness === "thin") {
+      // Thin (<3mm) → hỏi contents
+      if (!tube_contents) return empty();
+
+      if (tube_contents === "simple_fluid") {
+        return pack(
+          2,
+          RISK_LABEL[2],
+          "<0.5%",
+          "Almost certainly benign. Theo dõi định kỳ."
+        );
+      }
+      if (tube_contents === "non_simple_fluid") {
+        return pack(
+          3,
+          RISK_LABEL[3],
+          "~5%",
+          "Low risk. Theo dõi sát hoặc đánh giá thêm."
+        );
+      }
+    }
+    return empty();
+  }
+
+  // D. PARA-OVARIAN CYST
+  if (abnormality === "para_ovarian") {
+    return pack(
+      2,
+      RISK_LABEL[2],
+      "<0.5%",
+      "Almost certainly benign. Theo dõi theo triệu chứng."
+    );
+  }
+
+  // E. SOLID LESION (nhóm rút gọn)
   if (abnormality === "solid") {
     return pack(
       5,
@@ -205,17 +288,9 @@ export function computeORADS(input = {}) {
     );
   }
 
-  if (abnormality === "dilated_tube" || abnormality === "para_ovarian") {
-    return pack(
-      2,
-      RISK_LABEL[2],
-      "<0.5%",
-      "Tổn thương lành tính thường gặp. Theo dõi theo triệu chứng."
-    );
-  }
-
+  // F. NONE OF THE ABOVE
   if (abnormality === "none") {
-    return pack(1, RISK_LABEL[1], "Not-applicable", "Bình thường.");
+    return pack(1, RISK_LABEL[1], "Not-applicable", "Normal ovaries.");
   }
 
   return empty();
