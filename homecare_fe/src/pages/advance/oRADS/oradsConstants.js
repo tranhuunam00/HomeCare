@@ -227,5 +227,91 @@ export const US_BENIGN_OVARIAN_OPTIONS = [
 // { value: "para_ovarian", label: "Para-ovarian cyst", img: "..."},
 // { value: "none", label: "None of the above have been identified", img: "..."},
 
+// ==== US: Other ovarian lesions ====
+export const US_OTHER_COMPOSITION = [
+  {
+    value: "cystic_no_solid",
+    label: "Cystic* lesion WITHOUT solid component(s)",
+    img: "/product/orads/Cyst_1.webp",
+    note: "Cystic* = with or without internal echoes or incomplete septations",
+  },
+  {
+    value: "cystic_with_solid",
+    label: "Cystic* lesion WITH solid component(s)",
+    img: "/product/orads/O-RADS-cyst-with-solid-component_1.webp",
+  },
+  {
+    value: "solid_or_solid_appearing",
+    label: "Solid/Solid-appearing lesion (≥ 80% solid)",
+    img: "/product/orads/o-rads-solid-lesion-1.webp",
+  },
+];
+
+export const US_OTHER_CHAMBERS = [
+  { value: "uni", label: "1 (i.e., unilocular)" },
+  { value: "bi", label: "2 (i.e., bilocular)" },
+  { value: "multi", label: "3 or more (i.e., multilocular)" },
+];
+
+export const US_OTHER_CONTOUR = [
+  {
+    value: "smooth",
+    label: "Smooth",
+    img: "/product/orads/orads-3-us-smooth-walls.webp",
+  },
+  {
+    value: "irregular",
+    label: "Irregular (i.e., not smooth)",
+    img: "/product/orads/orads-4-us-irregular-walls.webp",
+  },
+];
+
+export const US_OTHER_ECHO_SEPT = [
+  { value: "internal_echoes", label: "Internal echoes" },
+  { value: "incomplete_septations", label: "Incomplete septations" },
+  { value: "both", label: "Both internal echoes and incomplete septations" },
+  { value: "neither", label: "Neither" },
+];
+
+export const US_MENOPAUSAL = [
+  { value: "pre", label: "Pre-menopausal" },
+  { value: "post", label: "Post-menopausal" },
+];
+
+export const US_COLOR_SCORE = [
+  {
+    value: 1,
+    label: "1 (i.e., no flow)",
+    img: "/product/orads/color-doppler-1.jpg",
+  },
+  {
+    value: 2,
+    label: "2 (i.e., minimal flow)",
+    img: "/product/orads/color-doppler-2.jpg",
+  },
+  {
+    value: 3,
+    label: "3 (i.e., moderate flow)",
+    img: "/product/orads/color-doppler-3.jpg",
+  },
+  {
+    value: 4,
+    label: "4 (i.e., very strong flow)",
+    img: "/product/orads/color-doppler-4.jpg",
+  },
+];
+
+// ===== US: Other ovarian (bổ sung cho WITH solid & SOLID-appearing) =====
+export const US_PAPILLARY_COUNT = [
+  { value: "1_3", label: "1, 2, or 3" },
+  { value: "ge4", label: "4 or more" },
+  { value: "non_papillary", label: "There are non-papillary solid components" },
+];
+
+export const US_YES_NO = [
+  { value: true, label: "Yes" },
+  { value: false, label: "No" },
+];
+
 export const getLabelFromValue = (options, value) =>
   options.find((o) => o.value === value)?.label || "";

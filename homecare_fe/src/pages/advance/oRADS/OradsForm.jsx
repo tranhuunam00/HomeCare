@@ -1,3 +1,4 @@
+// OradsForm.jsx
 import React, { useState, useEffect, useCallback } from "react";
 import { Form, Radio, Typography, Row, Col, Button, Divider } from "antd";
 import styles from "./OradsForm.module.scss";
@@ -12,35 +13,41 @@ import DilatedTubeSection from "./components/DilatedTubeSection";
 import UltrasoundSection from "./components/UltrasoundSection";
 
 import {
-  US_MODES as MODALITY, // dùng chung cho MRI + US
-  ABN_OPTIONS,
-  CYST_STRUCTURE,
+  MODALITY, // [{label:'MRI', value:'mri'}, {label:'Ultrasound', value:'us'}]
+  ABN_OPTIONS, // MRI abnormality cards
+  CYST_STRUCTURE, // for MRI cystic branch
+  US_LESION_TYPES, // US main types (radio)
+  US_BENIGN_OVARIAN_OPTIONS, // US benign ovarian cards
   getLabelFromValue,
-  US_LESION_TYPES,
-  US_BENIGN_OVARIAN_OPTIONS,
 } from "./oradsConstants";
 
 import { computeORADS } from "./oradsUtils";
 
-const { Text, Paragraph } = Typography;
+const { Text } = Typography;
 
 export default function OradsForm() {
   const [form] = Form.useForm();
 
-  // ===== CORE =====
+  // ===== Modality =====
   const [modality, setModality] = useState("mri");
 
   // ===== MRI states =====
   const [peritoneal, setPeritoneal] = useState(null);
   const [abn, setAbn] = useState(null);
+
+  // MRI → cystic (no solid)
   const [cystStruct, setCystStruct] = useState(null);
   const [cystContent, setCystContent] = useState(null);
   const [cystSmallPrem, setCystSmallPrem] = useState(null);
   const [multilocHasFat, setMultilocHasFat] = useState(null);
+
+  // MRI → cystic + solid
   const [solidDark, setSolidDark] = useState(null);
   const [dceCurve, setDceCurve] = useState(null);
   const [solidLipid, setSolidLipid] = useState(null);
   const [nonDceEnh, setNonDceEnh] = useState(null);
+
+  // MRI → dilated tube
   const [tubeWall, setTubeWall] = useState(null);
   const [tubeContents, setTubeContents] = useState(null);
 
@@ -50,7 +57,19 @@ export default function OradsForm() {
   const [usBenignType, setUsBenignType] = useState(null);
   const [usMaxDiameter, setUsMaxDiameter] = useState(null);
 
-  // summary + AI
+  // US → Other ovarian (shared)
+  const [usOtherComposition, setUsOtherComposition] = useState(null);
+  const [usOtherChambers, setUsOtherChambers] = useState(null);
+  const [usOtherContour, setUsOtherContour] = useState(null);
+  const [usOtherEchoSept, setUsOtherEchoSept] = useState(null);
+  const [usOtherMenopause, setUsOtherMenopause] = useState(null);
+  const [usColorScore, setUsColorScore] = useState(null);
+
+  // US → Other ovarian (WITH solid & SOLID-appearing)
+  const [usPapillaryCount, setUsPapillaryCount] = useState(null); // '1_3'|'ge4'|'non_papillary'
+  const [usShadowing, setUsShadowing] = useState(null); // boolean
+
+  // ===== Summary & AI =====
   const [summary, setSummary] = useState({
     orads: "",
     risk: "",
@@ -59,7 +78,7 @@ export default function OradsForm() {
   });
   const [aiText, setAiText] = useState("");
 
-  // ===== reset helpers =====
+  // ===== Reset helpers =====
   const resetMRI = useCallback(() => {
     setPeritoneal(null);
     setAbn(null);
@@ -74,12 +93,22 @@ export default function OradsForm() {
     setTubeWall(null);
     setTubeContents(null);
   }, []);
+
   const resetUS = useCallback(() => {
     setUsAdequate(null);
     setUsType(null);
     setUsBenignType(null);
     setUsMaxDiameter(null);
+    setUsOtherComposition(null);
+    setUsOtherChambers(null);
+    setUsOtherContour(null);
+    setUsOtherEchoSept(null);
+    setUsOtherMenopause(null);
+    setUsColorScore(null);
+    setUsPapillaryCount(null);
+    setUsShadowing(null);
   }, []);
+
   const resetAll = useCallback(() => {
     form.resetFields();
     resetMRI();
@@ -88,7 +117,7 @@ export default function OradsForm() {
     setAiText("");
   }, [form, resetMRI, resetUS]);
 
-  // ===== auto-calc =====
+  // ===== Auto-calc summary =====
   const recalcSummary = useCallback(() => {
     const res = computeORADS({
       modality,
@@ -107,14 +136,26 @@ export default function OradsForm() {
       tube_wall_thickness: tubeWall,
       tube_contents: tubeContents,
 
-      // US
+      // US – core
       usAdequate,
       usType,
       usBenignType,
       usMaxDiameter,
+
+      // US – other ovarian (shared)
+      usOtherComposition,
+      usOtherChambers,
+      usOtherContour,
+      usOtherEchoSept,
+      usOtherMenopause,
+      usColorScore,
+
+      // US – with-solid & solid-appearing
+      usPapillaryCount,
+      usShadowing,
     });
 
-    if (!res?.orads && res?.orads !== 0) {
+    if (res.orads == null) {
       setSummary({ orads: "", risk: "", ppv: "", recommendation: "" });
       return;
     }
@@ -142,16 +183,25 @@ export default function OradsForm() {
     usType,
     usBenignType,
     usMaxDiameter,
+    usOtherComposition,
+    usOtherChambers,
+    usOtherContour,
+    usOtherEchoSept,
+    usOtherMenopause,
+    usColorScore,
+    usPapillaryCount,
+    usShadowing,
   ]);
 
   useEffect(() => {
     recalcSummary();
   }, [recalcSummary]);
 
-  // ===== html copy =====
+  // ===== HTML for copy =====
   const genHtml = async ({ isCopy }) => {
     const title = `Đánh giá O-RADS (${modality === "mri" ? "MRI" : "US"})`;
 
+    // MRI detail rows
     const rowsMRI =
       modality === "mri"
         ? `
@@ -226,9 +276,11 @@ export default function OradsForm() {
         }
       `
           : ""
-      }`
+      }
+    `
         : "";
 
+    // US detail rows
     const rowsUS =
       modality === "us"
         ? `
@@ -249,6 +301,27 @@ export default function OradsForm() {
               ?.label || "--"
           }</td></tr>
           <tr><td>Max diameter (cm)</td><td>${usMaxDiameter ?? "--"}</td></tr>
+        `
+            : ""
+        }
+        ${
+          usType === "other_ovarian"
+            ? `
+          <tr><td>Other composition</td><td>${
+            usOtherComposition || "--"
+          }</td></tr>
+          <tr><td>Max diameter (cm)</td><td>${usMaxDiameter ?? "--"}</td></tr>
+          <tr><td>Chambers</td><td>${usOtherChambers || "--"}</td></tr>
+          <tr><td>Contour</td><td>${usOtherContour || "--"}</td></tr>
+          <tr><td>Echo/Septations</td><td>${usOtherEchoSept || "--"}</td></tr>
+          <tr><td>Menopause</td><td>${usOtherMenopause || "--"}</td></tr>
+          <tr><td>Papillary projections</td><td>${
+            usPapillaryCount || "--"
+          }</td></tr>
+          <tr><td>Shadowing</td><td>${
+            usShadowing === true ? "Yes" : usShadowing === false ? "No" : "--"
+          }</td></tr>
+          <tr><td>Color score</td><td>${usColorScore ?? "--"}</td></tr>
         `
             : ""
         }
@@ -279,9 +352,9 @@ export default function OradsForm() {
       : html;
   };
 
-  // ===== actions =====
+  // ===== Actions =====
   const onCalculate = async () => {
-    if (summary?.orads === "") {
+    if (!summary?.orads) {
       toast.error("Vui lòng hoàn thành các lựa chọn cần thiết để tính O-RADS!");
       return;
     }
@@ -318,7 +391,7 @@ export default function OradsForm() {
 
   const onReset = () => resetAll();
 
-  // ===== render =====
+  // ===== Render =====
   return (
     <div className={styles.pageWrapper}>
       <div className={styles.formContainer}>
@@ -329,7 +402,6 @@ export default function OradsForm() {
           onValuesChange={recalcSummary}
         >
           <h2 style={{ marginBottom: 24 }}>D-O-RADS HOME-CARE</h2>
-          <div style={{ marginBottom: 8 }} />
 
           {/* Modality */}
           <Form.Item
@@ -344,17 +416,16 @@ export default function OradsForm() {
               onChange={(e) => {
                 const v = e.target.value;
                 setModality(v);
-                form.resetFields();
                 resetAll();
                 setModality(v);
               }}
             />
           </Form.Item>
 
-          {/* Flow theo modality */}
+          {/* FLOW */}
           {modality === "mri" ? (
             <>
-              {/* Peritoneal */}
+              {/* Peritoneal nodularity */}
               <Form.Item
                 label="Is there peritoneal, mesenteric or omental nodularity or irregular thickening (+/− ascites)?"
                 required
@@ -397,6 +468,7 @@ export default function OradsForm() {
                 </div>
               </Form.Item>
 
+              {/* Abnormality */}
               {peritoneal === false && (
                 <>
                   <Form.Item
@@ -405,9 +477,6 @@ export default function OradsForm() {
                     colon={false}
                     style={{ marginTop: 8 }}
                   >
-                    <Paragraph style={{ color: "#9aa3af", marginTop: 0 }}>
-                      Chọn loại tổn thương phù hợp nhất.
-                    </Paragraph>
                     <div
                       style={{
                         display: "grid",
@@ -470,7 +539,6 @@ export default function OradsForm() {
                       setNonDceEnh={setNonDceEnh}
                     />
                   )}
-
                   {abn === "solid" && (
                     <CysticSolidSection
                       solidDark={solidDark}
@@ -497,14 +565,34 @@ export default function OradsForm() {
             </>
           ) : (
             <UltrasoundSection
+              // chung
               usAdequate={usAdequate}
               setUsAdequate={setUsAdequate}
               usType={usType}
               setUsType={setUsType}
+              // benign ovarian
               usBenignType={usBenignType}
               setUsBenignType={setUsBenignType}
               usMaxDiameter={usMaxDiameter}
               setUsMaxDiameter={setUsMaxDiameter}
+              // other ovarian shared
+              usOtherComposition={usOtherComposition}
+              setUsOtherComposition={setUsOtherComposition}
+              usOtherChambers={usOtherChambers}
+              setUsOtherChambers={setUsOtherChambers}
+              usOtherContour={usOtherContour}
+              setUsOtherContour={setUsOtherContour}
+              usOtherEchoSept={usOtherEchoSept}
+              setUsOtherEchoSept={setUsOtherEchoSept}
+              usOtherMenopause={usOtherMenopause}
+              setUsOtherMenopause={setUsOtherMenopause}
+              usColorScore={usColorScore}
+              setUsColorScore={setUsColorScore}
+              // with-solid & solid-appearing
+              usPapillaryCount={usPapillaryCount}
+              setUsPapillaryCount={setUsPapillaryCount}
+              usShadowing={usShadowing}
+              setUsShadowing={setUsShadowing}
             />
           )}
 
