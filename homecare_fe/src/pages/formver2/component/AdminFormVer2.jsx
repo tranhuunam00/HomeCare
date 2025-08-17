@@ -21,7 +21,7 @@ const mkTable = () => ({
   columnLabels: ensureColumnLabels([], 1),
 });
 
-export default function AdminFormVer2() {
+export default function AdminFormVer2({ onChange }) {
   // Quản lý NHIỀU bảng
   const [tables, setTables] = useState([mkTable()]);
 
@@ -29,17 +29,27 @@ export default function AdminFormVer2() {
 
   /* ======================= Helpers cập nhật theo tid ======================= */
   const updateTable = (tid, updater) =>
-    setTables((prev) =>
-      prev.map((t) => (t.tid === tid ? updater(structuredClone(t)) : t))
-    );
+    setTables((prev) => {
+      const next = prev.map((t) =>
+        t.tid === tid ? updater(structuredClone(t)) : t
+      );
+      onChange?.(next); // 🔥 notify parent
+      return next;
+    });
 
-  const addTable = () => setTables((prev) => [...prev, mkTable()]);
+  const addTable = () =>
+    setTables((prev) => {
+      const next = [...prev, mkTable()];
+      onChange?.(next);
+      return next;
+    });
+
   const removeTable = (tid) =>
-    setTables((prev) =>
-      prev.length > 1 ? prev.filter((t) => t.tid !== tid) : prev
-    );
-
-  /* ======================= HÀNG ======================= */
+    setTables((prev) => {
+      const next = prev.length > 1 ? prev.filter((t) => t.tid !== tid) : prev;
+      onChange?.(next);
+      return next;
+    });
   const addRow = (tid) =>
     updateTable(tid, (t) => {
       t.rows.push({ id: mkId(), inputs: [""], label: "" });

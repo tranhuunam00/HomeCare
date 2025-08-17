@@ -109,3 +109,35 @@ export const getTemplateRowsAndLabels = () => {
   }
   return null;
 };
+
+export const handleAction = ({ pendingAction, key, form }) => {
+  pendingAction.current = key;
+
+  // Các action cần validate + gom dữ liệu → submit form
+  if (["save", "approve", "export", "print"].includes(key)) {
+    console.log("---");
+    form.submit(); // ⬅️ sẽ kích hoạt onFinish nếu validate pass
+    return;
+  }
+
+  // Các action không cần submit
+  if (key === "reset") {
+    form.resetFields();
+    console.log("Đã RESET biểu mẫu.");
+    return;
+  }
+  if (key === "preview") {
+    // TODO: mở modal preview
+    console.log("PREVIEW (demo).");
+    return;
+  }
+  if (key === "edit") {
+    console.log("EDIT (demo).");
+    return;
+  }
+  if (key === "exit") {
+    // TODO: điều hướng/đóng
+    console.log("EXIT (demo).");
+    return;
+  }
+};

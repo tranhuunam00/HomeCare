@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import {
   Form,
   Input,
@@ -19,31 +19,11 @@ import ImageBlock from "./component/ImageBlock";
 import AdminFormVer2 from "./component/AdminFormVer2";
 import { useGlobalAuth } from "../../contexts/AuthContext";
 import FormActionBar from "./component/FormActionBar";
+import { handleAction } from "./utils";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 const { Dragger } = Upload;
-
-/* ================== CONSTANTS ================== */
-const TECHNIQUE_OPTIONS = [
-  { label: "XQ", value: "XQ" },
-  { label: "SA", value: "SA" },
-  { label: "CT", value: "CT" },
-  { label: "MR", value: "MR" },
-  { label: "IR", value: "IR" },
-  { label: "CN", value: "CN" },
-];
-
-const BODY_PART_OPTIONS = [
-  { label: "HN", value: "HN" },
-  { label: "CH", value: "CH" },
-  { label: "AB", value: "AB" },
-  { label: "SP", value: "SP" },
-  { label: "UL", value: "UL" },
-  { label: "LL", value: "LL" },
-  { label: "SM", value: "SM" },
-  { label: "OB", value: "OB" },
-];
 
 const LANGUAGE_OPTIONS = [
   { label: "VI", value: "vi" },
@@ -65,6 +45,8 @@ const todayLabel = () => {
 /* ============== COMPONENT ============== */
 export default function DFormVer2() {
   const [form] = Form.useForm();
+
+  const pendingAction = useRef(null);
   const autoId = useMemo(() => generateAutoId(), []);
 
   const { user, doctor, examParts, templateServices } = useGlobalAuth();
@@ -76,19 +58,47 @@ export default function DFormVer2() {
     "https://via.placeholder.com/640x360?text=Minh+hoa+quy+trinh+thuc+hi%C3%AAn"
   );
 
+  const [tablesData, setTablesData] = useState([]);
+
   const onFinish = (values) => {
+    console.log("onFinish");
     const payload = {
       ...values,
       autoCode: autoId,
       ngayThucHien: todayLabel(),
       nguoiThucHien: "Login",
-      images: {
-        anatomy: imgAnatomy,
-        procedure: imgProcedure,
-      },
+      images: { anatomy: imgAnatomy, procedure: imgProcedure },
+      tables: tablesData,
+      _action: pendingAction.current, // biết submit vì nút nào
     };
+
     console.log("D-FORM payload", payload);
-    message.success("Đã lưu dữ liệu mẫu (console)");
+
+    // Tuỳ hành động mà xử lý thêm
+    switch (pendingAction.current) {
+      case "save":
+        message.success("Đã SAVE");
+        break;
+      case "approve":
+        message.success("Đã APPROVE");
+        break;
+      case "export":
+        message.success("Đã EXPORT (log console)");
+        // TODO: nếu muốn, xuất file JSON tại đây
+        break;
+      case "print":
+        window.print();
+        break;
+      default:
+        message.success("Submit thành công");
+    }
+
+    pendingAction.current = null;
+  };
+
+  const onFinishFailed = (err) => {
+    console.log("[onFinishFailed] errors:", err?.errorFields);
+    message.error("Vui lòng kiểm tra các trường còn thiếu/không hợp lệ.");
   };
 
   return (
@@ -106,12 +116,13 @@ export default function DFormVer2() {
         colon={false}
         onFinish={onFinish}
         initialValues={{ language: "vi" }}
+        onFinishFailed={onFinishFailed}
       >
         <Row gutter={16}>
           <Col xs={24} md={12}>
             <Form.Item
               label="Kỹ thuật (1)"
-              name="technique"
+              name="id_template_service"
               rules={[{ required: true, message: "Chọn kỹ thuật" }]}
             >
               <Select placeholder="Chọn bộ phận thăm khám">
@@ -126,7 +137,7 @@ export default function DFormVer2() {
           <Col xs={24} md={12}>
             <Form.Item
               label="Bộ phận (2)"
-              name="bodyPart"
+              name="id_exam-parts"
               rules={[{ required: true, message: "Chọn bộ phận" }]}
             >
               <Select placeholder="Chọn bộ phận thăm khám">
@@ -204,7 +215,7 @@ export default function DFormVer2() {
           <Col xs={24} md={12}>
             <ImageBlock
               form={form}
-              namePrefix="anatomy"
+              namePrefix="ImageLeft"
               src="https://via.placeholder.com/640x360?text=Minh+hoa+giai+phau"
               title="Minh hoạ giải phẫu (cố định, có mô tả & link)"
             />
@@ -212,7 +223,7 @@ export default function DFormVer2() {
           <Col xs={24} md={12}>
             <ImageBlock
               form={form}
-              namePrefix="procedure"
+              namePrefix="ImageRight"
               src="https://via.placeholder.com/640x360?text=Minh+hoa+quy+trinh+thuc+hien"
               title="Minh hoạ quy trình thực hiện (cố định, có mô tả & link)"
             />
@@ -247,7 +258,7 @@ export default function DFormVer2() {
           MÔ TẢ HÌNH ẢNH
         </Title>
 
-        <AdminFormVer2 />
+        <AdminFormVer2 onChange={setTablesData} />
 
         <Title
           level={4}
@@ -315,7 +326,9 @@ export default function DFormVer2() {
           />
         </Form.Item>
 
-        <FormActionBar />
+        <FormActionBar
+          onAction={(key) => handleAction({ key, form, pendingAction })}
+        />
       </Form>
     </div>
   );

@@ -1,3 +1,4 @@
+// FormActionBar.jsx
 import React from "react";
 import { Button } from "antd";
 import {
@@ -23,7 +24,7 @@ const items = [
   { key: "exit", label: "EXIT", icon: <LogoutOutlined /> },
 ];
 
-export default function FormActionBar() {
+export default function FormActionBar({ onAction }) {
   return (
     <div className={styles.actionBar}>
       <div className={styles.actionGrid}>
@@ -33,6 +34,7 @@ export default function FormActionBar() {
             className={`${styles.btn} ${styles[it.key]}`}
             icon={it.icon}
             block
+            onClick={() => onAction?.(it.key)}
           >
             {it.label}
           </Button>
