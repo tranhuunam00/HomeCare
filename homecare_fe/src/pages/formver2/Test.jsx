@@ -77,9 +77,9 @@ const clearDraft = () => localStorage.removeItem(STORAGE_KEYS.DRAFT);
 export default function FormVer2WorkflowPage() {
   // ----- rows layout state -----
   const [rows, setRows] = useState([
-    { id: mkId(), inputs: [""], label: "Short text:" },
-    { id: mkId(), inputs: ["", ""], label: "Short text:" },
-    { id: mkId(), inputs: ["", "", ""], label: "Short text:" },
+    { id: mkId(), inputs: [""], label: "" },
+    { id: mkId(), inputs: ["", ""], label: "" },
+    { id: mkId(), inputs: ["", "", ""], label: "" },
   ]);
 
   // dynamic max columns across rows
@@ -122,10 +122,7 @@ export default function FormVer2WorkflowPage() {
 
   // ====== HÀNG ======
   const addRow = () =>
-    setRows((prev) => [
-      ...prev,
-      { id: mkId(), inputs: [""], label: "Short text:" },
-    ]);
+    setRows((prev) => [...prev, { id: mkId(), inputs: [""], label: "" }]);
   const removeRow = (id) => setRows((prev) => prev.filter((r) => r.id !== id));
   const onRowDragStart = (_e, rowId) => (dragRowSrcIdRef.current = rowId);
   const onRowDragOver = (e) => e.preventDefault();

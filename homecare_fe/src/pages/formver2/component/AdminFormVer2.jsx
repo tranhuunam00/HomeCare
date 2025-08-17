@@ -17,7 +17,7 @@ const { Title } = Typography;
 /* Tạo 1 "bảng" mới (form) với state riêng */
 const mkTable = () => ({
   tid: mkId(),
-  rows: [{ id: mkId(), inputs: [""], label: "Short text:" }],
+  rows: [{ id: mkId(), inputs: [""], label: "" }],
   columnLabels: ensureColumnLabels([], 1),
 });
 
@@ -40,7 +40,7 @@ export default function AdminFormVer2() {
   /* ======================= HÀNG ======================= */
   const addRow = (tid) =>
     updateTable(tid, (t) => {
-      t.rows.push({ id: mkId(), inputs: [""], label: "Short text:" });
+      t.rows.push({ id: mkId(), inputs: [""], label: "" });
       const nMax = computeNMax(t.rows);
       t.columnLabels = ensureColumnLabels(t.columnLabels, nMax);
       return t;
