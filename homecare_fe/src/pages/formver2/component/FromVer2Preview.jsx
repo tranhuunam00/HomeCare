@@ -1,7 +1,29 @@
-// ImageDescriptionPreview.jsx (in/print view)
+// FormVer2Preview.jsx
 import React from "react";
 
-export default function FormVer2Preview({ data = [] }) {
+/**
+ * FormVer2Preview
+ * - Hiển thị bảng preview/in với header cột theo `columnLabels`
+ * - Mỗi hàng merge cột theo số cột tối đa (nMax = columnLabels.length)
+ *
+ * Props:
+ *  - data: Array<{ id: string, label: string, inputs: string[] }>
+ *  - columnLabels: string[]  // số lượng = số cột tối đa (nMax)
+ */
+export default function FormVer2Preview({ data = [], columnLabels = [] }) {
+  // nMax = tổng cột tối đa; mỗi hàng sẽ merge để tổng colSpan == nMax
+  const nMax = Math.max(1, columnLabels?.length || 1);
+  const safeLabel = (i) => columnLabels?.[i] ?? `Cột ${i + 1}`;
+
+  // Chia đều nMax cho k ô, DỒN PHẦN DƯ về Ô CUỐI (đẹp mắt từ trái→phải)
+  const buildSpans = (k) => {
+    const kk = Math.max(1, Math.min(k || 1, nMax));
+    const base = Math.floor(nMax / kk);
+    const rem = nMax % kk;
+    // ví dụ nMax=5, kk=2 => [2,3]; kk=3 => [1,2,2]
+    return Array.from({ length: kk }, (_, i) => base + (i >= kk - rem ? 1 : 0));
+  };
+
   return (
     <div style={{ overflowX: "auto" }}>
       <table
@@ -17,69 +39,65 @@ export default function FormVer2Preview({ data = [] }) {
             <th
               style={{
                 border: "1px solid #d9d9d9",
-                padding: "8px",
-                width: "260px",
+                padding: 8,
+                width: 260,
                 background: "#fafafa",
                 textAlign: "left",
               }}
             >
               Tiêu đề
             </th>
-            <th
-              style={{
-                border: "1px solid #d9d9d9",
-                padding: "8px",
-                background: "#fafafa",
-                textAlign: "left",
-              }}
-            >
-              Giá trị
-            </th>
+            {Array.from({ length: nMax }).map((_, i) => (
+              <th
+                key={`h-${i}`}
+                style={{
+                  border: "1px solid #d9d9d9",
+                  padding: 8,
+                  background: "#fafafa",
+                  textAlign: "left",
+                }}
+              >
+                {safeLabel(i)}
+              </th>
+            ))}
           </tr>
         </thead>
+
         <tbody>
-          {data.map((r) => {
-            const n = Math.max(1, r.inputs?.length || 0);
+          {data.map((row) => {
+            const valuesRaw = Array.isArray(row.inputs) ? row.inputs : [""];
+            // Nếu > nMax thì cắt để không tràn
+            const values = valuesRaw.slice(0, nMax);
+            const spans = buildSpans(values.length);
+
             return (
-              <tr key={r.id}>
+              <tr key={row.id}>
                 <td
                   style={{
                     border: "1px solid #d9d9d9",
-                    padding: "8px",
+                    padding: 8,
                     verticalAlign: "top",
-                    width: "260px",
+                    width: 260,
                     fontWeight: 600,
                   }}
                 >
-                  {r.label || ""}
+                  {row.label || ""}
                 </td>
-                <td style={{ padding: 0, border: "1px solid #d9d9d9" }}>
-                  <div
+
+                {values.map((val, i) => (
+                  <td
+                    key={`c-${row.id}-${i}`}
+                    colSpan={spans[i]}
                     style={{
-                      display: "grid",
-                      gridTemplateColumns: `repeat(${n}, 1fr)`,
-                      gap: 0,
-                      width: "100%",
+                      border: "1px solid #d9d9d9",
+                      padding: 8,
+                      minHeight: 40,
+                      wordBreak: "break-word",
                     }}
                   >
-                    {(r.inputs && r.inputs.length ? r.inputs : [""]).map(
-                      (val, i) => (
-                        <div
-                          key={i}
-                          style={{
-                            borderRight:
-                              i < n - 1 ? "1px solid #d9d9d9" : "none",
-                            padding: "8px",
-                            minHeight: 40,
-                            wordBreak: "break-word",
-                          }}
-                        >
-                          {val || ""}
-                        </div>
-                      )
-                    )}
-                  </div>
-                </td>
+                    {val || ""}
+                  </td>
+                ))}
               </tr>
             );
           })}

@@ -1,14 +1,6 @@
-// FormVer2 — admin → user → print (localStorage, Ant Design)
-// Single-file demo that shows the full workflow:
-// 1) Admin designs the form layout & default values, then saves as a template.
-// 2) User loads the saved template, fills inputs (labels locked), autosaves to draft.
-// 3) User previews/prints.
-//
-// Notes:
-// - Uses localStorage keys FORM_VER2_TEMPLATE and FORM_VER2_DRAFT.
-// - Max columns per row = 5.
-// - In USER mode: hide all structure-editing controls and disable label fields.
-// - You can remove DnD fully by hiding handlers + not passing DnD callbacks.
+// FormVer2 — admin → user → print (localStorage, Ant Design) + COLUMN LABELS
+// Adds global column labels whose count equals the maximum number of columns among rows.
+// Admin can edit these labels; User sees them locked. Preview prints them as table headers.
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -38,18 +30,20 @@ import {
   ClearOutlined,
   PrinterOutlined,
 } from "@ant-design/icons";
+import FormVer2Preview from "./component/FromVer2Preview";
+import CreateFormVer2 from "./component/CreateFormVer2";
 
 /* ========================= Helpers & Storage ========================= */
 const { Title, Text } = Typography;
 const mkId = () => Math.random().toString(36).slice(2, 9);
 const MAX_COLS = 5;
 const STORAGE_KEYS = {
-  TEMPLATE: "FORM_VER2_TEMPLATE",
-  DRAFT: "FORM_VER2_DRAFT",
+  TEMPLATE: "FORM_VER2_TEMPLATE", // JSON: { rows, columnLabels }
+  DRAFT: "FORM_VER2_DRAFT", // JSON: { rows, columnLabels }
 };
 
-const saveTemplate = (rows) => {
-  localStorage.setItem(STORAGE_KEYS.TEMPLATE, JSON.stringify(rows || []));
+const saveTemplate = (payload) => {
+  localStorage.setItem(STORAGE_KEYS.TEMPLATE, JSON.stringify(payload || {}));
   return true;
 };
 const loadTemplate = () => {
@@ -63,8 +57,8 @@ const loadTemplate = () => {
 };
 const clearTemplate = () => localStorage.removeItem(STORAGE_KEYS.TEMPLATE);
 
-const saveDraft = (data) => {
-  localStorage.setItem(STORAGE_KEYS.DRAFT, JSON.stringify(data || []));
+const saveDraft = (payload) => {
+  localStorage.setItem(STORAGE_KEYS.DRAFT, JSON.stringify(payload || {}));
 };
 const loadDraft = () => {
   try {
@@ -77,375 +71,7 @@ const loadDraft = () => {
 };
 const clearDraft = () => localStorage.removeItem(STORAGE_KEYS.DRAFT);
 
-/* ========================= Preview (Print view) ========================= */
-function FormVer2Preview({ data = [] }) {
-  return (
-    <div style={{ overflowX: "auto" }}>
-      <table
-        style={{
-          width: "100%",
-          borderCollapse: "collapse",
-          tableLayout: "fixed",
-          border: "1px solid #d9d9d9",
-        }}
-      >
-        <thead>
-          <tr>
-            <th
-              style={{
-                border: "1px solid #d9d9d9",
-                padding: 8,
-                width: 260,
-                background: "#fafafa",
-                textAlign: "left",
-              }}
-            >
-              Tiêu đề
-            </th>
-            <th
-              style={{
-                border: "1px solid #d9d9d9",
-                padding: 8,
-                background: "#fafafa",
-                textAlign: "left",
-              }}
-            >
-              Giá trị
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((r) => {
-            const n = Math.max(1, r.inputs?.length || 0);
-            return (
-              <tr key={r.id}>
-                <td
-                  style={{
-                    border: "1px solid #d9d9d9",
-                    padding: 8,
-                    verticalAlign: "top",
-                    width: 260,
-                    fontWeight: 600,
-                  }}
-                >
-                  {r.label || ""}
-                </td>
-                <td style={{ padding: 0, border: "1px solid #d9d9d9" }}>
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: `repeat(${n}, 1fr)`,
-                      gap: 0,
-                      width: "100%",
-                    }}
-                  >
-                    {(r.inputs && r.inputs.length ? r.inputs : [""]).map(
-                      (val, i) => (
-                        <div
-                          key={i}
-                          style={{
-                            borderRight:
-                              i < n - 1 ? "1px solid #d9d9d9" : "none",
-                            padding: 8,
-                            minHeight: 40,
-                            wordBreak: "break-word",
-                          }}
-                        >
-                          {val || ""}
-                        </div>
-                      )
-                    )}
-                  </div>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
 /* ========================= Form builder / filler ========================= */
-function CreateFormVer2({
-  mode = "admin", // 'admin' | 'user'
-  rows,
-  addRow,
-  removeRow,
-  addColumn,
-  removeColumn,
-  // DnD hàng
-  onRowDragStart,
-  onRowDragOver,
-  onRowDrop,
-  onRowDragEnd,
-  // DnD cột
-  onColDragStart,
-  onColDragOver,
-  onColDrop,
-  onColDragEnd,
-  maxCols = 5,
-  onPreview,
-  onAutosaveDraft,
-}) {
-  const [form] = Form.useForm();
-  const isAdmin = mode === "admin";
-
-  // submit (nếu cần lưu backend)
-  const onFinish = (values) => {
-    console.log("Submit:", values.rows);
-  };
-
-  // tạo dữ liệu preview theo thứ tự layout hiện tại
-  const handlePreview = async () => {
-    await form.validateFields();
-    const values = form.getFieldsValue();
-    const ordered = rows.map((r) => {
-      const payload = values?.rows?.[r.id] || {};
-      return {
-        id: r.id,
-        label: payload.label ?? r.label ?? "",
-        inputs: Array.isArray(payload.inputs) ? payload.inputs : [],
-      };
-    });
-    onPreview?.(ordered);
-  };
-
-  // autosave draft when user typing (USER mode)
-  const handleValuesChange = (_, allValues) => {
-    if (!isAdmin) {
-      const ordered = rows.map((r) => {
-        const payload = allValues?.rows?.[r.id] || {};
-        return {
-          id: r.id,
-          label: r.label, // user cannot change
-          inputs: Array.isArray(payload.inputs) ? payload.inputs : [],
-        };
-      });
-      onAutosaveDraft?.(ordered);
-    }
-  };
-
-  // ensure initial values reflect current rows defaults
-  const initialValues = useMemo(() => {
-    const v = { rows: {} };
-    rows.forEach((r) => {
-      v.rows[r.id] = {
-        label: r.label,
-        inputs: r.inputs && r.inputs.length ? r.inputs : [""],
-      };
-    });
-    return v;
-  }, [rows]);
-
-  return (
-    <Form
-      form={form}
-      layout="vertical"
-      onFinish={onFinish}
-      onValuesChange={handleValuesChange}
-      initialValues={initialValues}
-    >
-      <Space direction="vertical" style={{ width: "100%" }} size={12}>
-        {rows.map((row, idx) => (
-          <div
-            key={row.id}
-            draggable={isAdmin}
-            onDragStart={
-              isAdmin ? (e) => onRowDragStart?.(e, row.id) : undefined
-            }
-            onDragOver={isAdmin ? onRowDragOver : undefined}
-            onDrop={isAdmin ? (e) => onRowDrop?.(e, row.id) : undefined}
-            onDragEnd={isAdmin ? onRowDragEnd : undefined}
-            style={{
-              padding: 12,
-              border: "1px solid #f0f0f0",
-              borderRadius: 10,
-              background: "#fff",
-              cursor: isAdmin ? "grab" : "default",
-            }}
-          >
-            <Row gutter={[12, 8]} align="middle">
-              {/* Tiêu đề + handle hàng */}
-              <Col xs={24} md={6}>
-                <Space align="start" style={{ width: "100%" }}>
-                  {isAdmin && (
-                    <Tooltip title="Kéo để sắp xếp hàng">
-                      <HolderOutlined style={{ fontSize: 18, color: "#999" }} />
-                    </Tooltip>
-                  )}
-                  <Form.Item
-                    name={["rows", row.id, "label"]}
-                    label={<Text strong>Tiêu đề</Text>}
-                    initialValue={row.label}
-                    rules={[{ required: true, message: "Nhập tiêu đề" }]}
-                    style={{ flex: 1, marginBottom: 0 }}
-                  >
-                    <Input placeholder="Short text:" disabled={!isAdmin} />
-                  </Form.Item>
-                </Space>
-              </Col>
-
-              {/* Các input – grid luôn n cột */}
-              <Col xs={24} md={18}>
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: `repeat(${
-                      row.inputs.length || 1
-                    }, minmax(0, 1fr))`,
-                    gap: 12,
-                  }}
-                >
-                  {(row.inputs || []).map((_, i) => (
-                    <div
-                      key={i}
-                      onDragOver={isAdmin ? onColDragOver : undefined}
-                      onDrop={
-                        isAdmin
-                          ? (e) =>
-                              onColDrop?.(e, row.id, i, (from, to) => {
-                                // sync order inside Form when DnD
-                                const v = form.getFieldsValue();
-                                const rowV = v?.rows?.[row.id];
-                                if (!rowV?.inputs) return;
-                                const copy = [...rowV.inputs];
-                                const [m] = copy.splice(from, 1);
-                                copy.splice(to, 0, m);
-                                form.setFieldsValue({
-                                  ...v,
-                                  rows: {
-                                    ...v.rows,
-                                    [row.id]: { ...rowV, inputs: copy },
-                                  },
-                                });
-                              })
-                          : undefined
-                      }
-                    >
-                      <Form.Item
-                        name={["rows", row.id, "inputs", i]}
-                        label={
-                          <Space>
-                            {isAdmin && (
-                              <Tooltip title="Kéo để sắp xếp cột">
-                                <Button
-                                  size="small"
-                                  type="text"
-                                  icon={<HolderOutlined />}
-                                  draggable
-                                  onDragStart={(e) =>
-                                    onColDragStart?.(e, row.id, i)
-                                  }
-                                  onDragEnd={onColDragEnd}
-                                  style={{ cursor: "grab" }}
-                                />
-                              </Tooltip>
-                            )}
-                            {i === 0 ? (
-                              <Text strong>Giá trị</Text>
-                            ) : (
-                              <span>&nbsp;</span>
-                            )}
-                            {isAdmin && row.inputs.length > 1 && (
-                              <Tooltip title="Xóa cột này">
-                                <Button
-                                  size="small"
-                                  type="text"
-                                  danger
-                                  icon={<CloseOutlined />}
-                                  onClick={() => removeColumn?.(row.id, i)}
-                                />
-                              </Tooltip>
-                            )}
-                          </Space>
-                        }
-                        initialValue={row.inputs?.[i] ?? ""}
-                        rules={[{ required: true, message: "Nhập nội dung" }]}
-                        style={{ marginBottom: 0 }}
-                      >
-                        <Input placeholder="Short text" />
-                      </Form.Item>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Thêm cột */}
-                {isAdmin && (
-                  <div style={{ marginTop: 8 }}>
-                    <Tooltip
-                      title={
-                        row.inputs.length >= maxCols
-                          ? `Tối đa ${maxCols} cột`
-                          : "Thêm cột"
-                      }
-                    >
-                      <Button
-                        type="dashed"
-                        icon={<PlusOutlined />}
-                        size="small"
-                        onClick={() => addColumn?.(row.id)}
-                        disabled={row.inputs.length >= maxCols}
-                      >
-                        Thêm cột
-                      </Button>
-                    </Tooltip>
-                  </div>
-                )}
-              </Col>
-
-              {/* Xóa hàng */}
-              {isAdmin && (
-                <Col xs={24} style={{ textAlign: "right", marginTop: 8 }}>
-                  <Popconfirm
-                    title="Xóa hàng này?"
-                    okText="Xóa"
-                    cancelText="Hủy"
-                    onConfirm={() => removeRow?.(row.id)}
-                  >
-                    <Button danger icon={<DeleteOutlined />} size="small">
-                      Xóa hàng
-                    </Button>
-                  </Popconfirm>
-                </Col>
-              )}
-            </Row>
-
-            {idx < rows.length - 1 && (
-              <Divider style={{ margin: "12px 0 0" }} />
-            )}
-          </div>
-        ))}
-
-        {/* Action */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            marginTop: 8,
-          }}
-        >
-          {isAdmin ? (
-            <Button type="dashed" icon={<PlusOutlined />} onClick={addRow}>
-              Thêm hàng
-            </Button>
-          ) : (
-            <span />
-          )}
-
-          <Space>
-            <Button icon={<EyeOutlined />} onClick={handlePreview}>
-              Xem kết quả
-            </Button>
-            <Button type="primary" htmlType="submit">
-              Lưu mô tả
-            </Button>
-          </Space>
-        </div>
-      </Space>
-    </Form>
-  );
-}
 
 /* ========================= Page: Admin/User/Print flow ========================= */
 export default function FormVer2WorkflowPage() {
@@ -455,6 +81,29 @@ export default function FormVer2WorkflowPage() {
     { id: mkId(), inputs: ["", ""], label: "Short text:" },
     { id: mkId(), inputs: ["", "", ""], label: "Short text:" },
   ]);
+
+  // dynamic max columns across rows
+  const nMax = useMemo(
+    () => Math.max(1, ...rows.map((r) => r.inputs?.length || 1)),
+    [rows]
+  );
+
+  // Global column labels with length = nMax
+  const [columnLabels, setColumnLabels] = useState(() =>
+    Array.from({ length: nMax }, (_, i) => `Cột ${i + 1}`)
+  );
+  // Keep labels array synced with nMax (preserve existing values)
+  useEffect(() => {
+    setColumnLabels((prev) => {
+      const next = [...prev];
+      if (nMax > prev.length) {
+        for (let i = prev.length; i < nMax; i++) next.push(`Cột ${i + 1}`);
+      } else if (nMax < prev.length) {
+        next.length = nMax;
+      }
+      return next;
+    });
+  }, [nMax]);
 
   // Which mode are we in? (for the demo UI)
   const [mode, setMode] = useState("admin"); // 'admin' | 'user'
@@ -543,28 +192,29 @@ export default function FormVer2WorkflowPage() {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewData, setPreviewData] = useState([]);
 
-  const handleOpenPreview = (orderedValues) => {
-    setPreviewData(orderedValues);
-    setPreviewOpen(true);
-  };
-
   // ===================== Admin actions (Template) =====================
   const handleSaveTemplate = () => {
     // Normalize rows: ensure at least one input per row
-    const normalized = rows.map((r) => ({
+    const normalizedRows = rows.map((r) => ({
       ...r,
       inputs: r.inputs?.length ? r.inputs : [""],
     }));
-    saveTemplate(normalized);
+    saveTemplate({ rows: normalizedRows, columnLabels });
     message.success("Đã lưu mẫu (template) vào trình duyệt");
   };
   const handleLoadTemplate = () => {
     const tpl = loadTemplate();
-    if (!tpl || !Array.isArray(tpl) || !tpl.length) {
+    if (!tpl || !Array.isArray(tpl.rows)) {
       message.warning("Chưa có mẫu nào trong trình duyệt");
       return;
     }
-    setRows(tpl);
+    setRows(tpl.rows);
+    setColumnLabels(
+      Array.from(
+        { length: Math.max(1, tpl.columnLabels?.length || 1) },
+        (_, i) => tpl.columnLabels?.[i] || `Cột ${i + 1}`
+      )
+    );
     message.success("Đã tải mẫu");
   };
   const handleClearTemplate = () => {
@@ -574,19 +224,36 @@ export default function FormVer2WorkflowPage() {
 
   // ===================== User actions (Draft) =====================
   const handleAutosaveDraft = (ordered) => {
-    saveDraft(ordered);
+    saveDraft({ rows: ordered, columnLabels });
   };
   const handleLoadDraft = () => {
     const d = loadDraft();
-    if (d && Array.isArray(d) && d.length) {
+    if (d && Array.isArray(d.rows) && d.rows.length) {
       setRows(
-        d.map((r) => ({ ...r, inputs: r.inputs?.length ? r.inputs : [""] }))
+        d.rows.map((r) => ({
+          ...r,
+          inputs: r.inputs?.length ? r.inputs : [""],
+        }))
+      );
+      setColumnLabels(
+        Array.from(
+          { length: Math.max(1, d.columnLabels?.length || 1) },
+          (_, i) => d.columnLabels?.[i] || `Cột ${i + 1}`
+        )
       );
       message.success("Đã tải bản nháp từ trình duyệt");
     } else {
       message.info("Không có bản nháp, sẽ tải mẫu thay thế nếu có");
       const tpl = loadTemplate();
-      if (tpl && tpl.length) setRows(tpl);
+      if (tpl && tpl.rows) {
+        setRows(tpl.rows);
+        setColumnLabels(
+          Array.from(
+            { length: Math.max(1, tpl.columnLabels?.length || 1) },
+            (_, i) => tpl.columnLabels?.[i] || `Cột ${i + 1}`
+          )
+        );
+      }
     }
   };
   const handleClearDraft = () => {
@@ -599,18 +266,31 @@ export default function FormVer2WorkflowPage() {
     if (mode === "user") {
       // Load draft first, else template
       const d = loadDraft();
-      if (d && Array.isArray(d) && d.length) {
-        setRows(d);
+      if (d && Array.isArray(d.rows) && d.rows.length) {
+        setRows(d.rows);
+        setColumnLabels(
+          Array.from(
+            { length: Math.max(1, d.columnLabels?.length || 1) },
+            (_, i) => d.columnLabels?.[i] || `Cột ${i + 1}`
+          )
+        );
       } else {
         const tpl = loadTemplate();
-        if (tpl && tpl.length) setRows(tpl);
+        if (tpl && Array.isArray(tpl.rows)) {
+          setRows(tpl.rows);
+          setColumnLabels(
+            Array.from(
+              { length: Math.max(1, tpl.columnLabels?.length || 1) },
+              (_, i) => tpl.columnLabels?.[i] || `Cột ${i + 1}`
+            )
+          );
+        }
       }
     }
   }, [mode]);
 
   // Print handler (print current preview data)
   const handlePrint = () => {
-    // If preview not opened yet, build from current rows
     if (!previewOpen) {
       const ordered = rows.map((r) => ({
         id: r.id,
@@ -619,7 +299,6 @@ export default function FormVer2WorkflowPage() {
       }));
       setPreviewData(ordered);
       setPreviewOpen(true);
-      // Give modal a tick to render before print
       setTimeout(() => window.print(), 100);
     } else {
       window.print();
@@ -667,7 +346,18 @@ export default function FormVer2WorkflowPage() {
           </Button>
           <Button
             icon={<UndoOutlined />}
-            onClick={() => setRows(loadTemplate() || rows)}
+            onClick={() => {
+              const tpl = loadTemplate();
+              if (tpl && tpl.rows) {
+                setRows(tpl.rows);
+                setColumnLabels(
+                  Array.from(
+                    { length: Math.max(1, tpl.columnLabels?.length || 1) },
+                    (_, i) => tpl.columnLabels?.[i] || `Cột ${i + 1}`
+                  )
+                );
+              }
+            }}
           >
             Hoàn tác về mẫu
           </Button>
@@ -689,6 +379,8 @@ export default function FormVer2WorkflowPage() {
       <CreateFormVer2
         mode={mode}
         rows={rows}
+        columnLabels={columnLabels}
+        setColumnLabels={setColumnLabels}
         addRow={mode === "admin" ? addRow : undefined}
         removeRow={mode === "admin" ? removeRow : undefined}
         addColumn={mode === "admin" ? addColumn : undefined}
@@ -708,17 +400,20 @@ export default function FormVer2WorkflowPage() {
           setPreviewData(ordered);
           setPreviewOpen(true);
         }}
-        onAutosaveDraft={mode === "user" ? handleAutosaveDraft : undefined}
+        onAutosaveDraft={
+          mode === "user"
+            ? (ordered) => handleAutosaveDraft(ordered)
+            : undefined
+        }
       />
 
       <Modal
-        title="Kết quả mô tả"
         open={previewOpen}
         onCancel={() => setPreviewOpen(false)}
-        footer={<Button onClick={() => setPreviewOpen(false)}>Đóng</Button>}
+        footer={null}
         width={1100}
       >
-        <FormVer2Preview data={previewData} />
+        <FormVer2Preview data={previewData} columnLabels={columnLabels} />
       </Modal>
     </div>
   );
