@@ -1,4 +1,4 @@
-// CreateFormVer2.jsx (chỉ lo phần tạo form)
+// CreateFormVer2.jsx – chỉ lo phần tạo form (React + AntD)
 import React, { useMemo } from "react";
 import {
   Button,
@@ -15,12 +15,12 @@ import {
 import {
   CloseOutlined,
   DeleteOutlined,
-  EyeOutlined,
   HolderOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
 
 const { Text } = Typography;
+const { TextArea } = Input;
 
 export default function CreateFormVer2({
   mode = "admin", // 'admin' | 'user'
@@ -36,11 +36,7 @@ export default function CreateFormVer2({
   onRowDragOver,
   onRowDrop,
   onRowDragEnd,
-  // DnD cột
-  onColDragStart,
-  onColDragOver,
-  onColDrop,
-  onColDragEnd,
+  // ❌ bỏ kéo thả cột
   maxCols = 5,
   onPreview,
   onAutosaveDraft,
@@ -48,12 +44,8 @@ export default function CreateFormVer2({
   const [form] = Form.useForm();
   const isAdmin = mode === "admin";
 
-  // submit (nếu cần lưu backend)
-  const onFinish = (values) => {
-    console.log("Submit:", values.rows);
-  };
+  const onFinish = () => {};
 
-  // tạo dữ liệu preview theo thứ tự layout hiện tại
   const handlePreview = async () => {
     await form.validateFields();
     const values = form.getFieldsValue();
@@ -68,7 +60,6 @@ export default function CreateFormVer2({
     onPreview?.(ordered);
   };
 
-  // autosave draft when user typing (USER mode)
   const handleValuesChange = (_, allValues) => {
     if (!isAdmin) {
       const ordered = rows.map((r) => {
@@ -83,27 +74,30 @@ export default function CreateFormVer2({
     }
   };
 
-  // ensure initial values reflect current rows defaults
   const initialValues = useMemo(() => {
     const v = { rows: {} };
     rows.forEach((r) => {
       v.rows[r.id] = {
-        label: r.label,
+        label: r.label ?? "",
         inputs: r.inputs && r.inputs.length ? r.inputs : [""],
       };
     });
     return v;
   }, [rows]);
 
+  const labelCols = Math.max(
+    1,
+    Math.min(maxCols, columnLabels.length || maxCols)
+  );
+
   return (
     <>
-      {/* ========== COLUMN LABELS ========== */}
+      {/* ========== COLUMN LABELS (thụt trái như inputs) ========== */}
       <Row style={{ marginBottom: 12 }} gutter={[12, 8]} align="top">
         <Col xs={24} md={6}>
-          <Text strong>Nhãn cột (tự động bằng số cột tối đa)</Text>
+          <Text strong></Text>
         </Col>
         <Col xs={24} md={18}>
-          {/* Use CSS Grid to force all labels on one row (e.g., 5 cols) */}
           <div
             style={{
               background: "#fff",
@@ -112,27 +106,24 @@ export default function CreateFormVer2({
               padding: 12,
             }}
           >
-            <Text strong>Nhãn cột (tự động bằng số cột tối đa)</Text>
             <div
               style={{
-                marginTop: 8,
                 display: "grid",
-                gridTemplateColumns: `repeat(${Math.max(
-                  1,
-                  columnLabels.length
-                )}, minmax(0, 1fr))`,
+                gridTemplateColumns: `repeat(${labelCols}, minmax(0, 1fr))`,
                 gap: 12,
               }}
             >
-              {columnLabels.map((lbl, i) => (
+              {Array.from({ length: labelCols }).map((_, i) => (
                 <Input
                   key={i}
-                  value={lbl}
+                  value={columnLabels?.[i] ?? ""}
                   placeholder={`Nhãn cột ${i + 1}`}
                   onChange={(e) =>
                     isAdmin &&
                     setColumnLabels?.((prev) => {
-                      const copy = [...prev];
+                      const copy = [...(prev || [])];
+                      for (let k = copy.length; k < labelCols; k++)
+                        copy[k] = "";
                       copy[i] = e.target.value;
                       return copy;
                     })
@@ -145,6 +136,7 @@ export default function CreateFormVer2({
         </Col>
       </Row>
 
+      {/* ========================= FORM ========================= */}
       <Form
         form={form}
         layout="vertical"
@@ -153,201 +145,227 @@ export default function CreateFormVer2({
         initialValues={initialValues}
       >
         <Space direction="vertical" style={{ width: "100%" }} size={12}>
-          {rows.map((row, idx) => (
-            <div
-              key={row.id}
-              draggable={isAdmin}
-              onDragStart={
-                isAdmin ? (e) => onRowDragStart?.(e, row.id) : undefined
-              }
-              onDragOver={isAdmin ? onRowDragOver : undefined}
-              onDrop={isAdmin ? (e) => onRowDrop?.(e, row.id) : undefined}
-              onDragEnd={isAdmin ? onRowDragEnd : undefined}
-              style={{
-                padding: 12,
-                border: "1px solid #f0f0f0",
-                borderRadius: 10,
-                background: "#fff",
-                cursor: isAdmin ? "grab" : "default",
-              }}
-            >
-              <Row gutter={[12, 8]} align="middle">
-                {/* Tiêu đề + handle hàng */}
-                <Col xs={24} md={6}>
-                  <Space align="start" style={{ width: "100%" }}>
-                    {isAdmin && (
-                      <Tooltip title="Kéo để sắp xếp hàng">
-                        <HolderOutlined
-                          style={{ fontSize: 18, color: "#999" }}
-                        />
-                      </Tooltip>
-                    )}
-                    <Form.Item
-                      name={["rows", row.id, "label"]}
-                      label={<Text strong>Tiêu đề</Text>}
-                      initialValue={row.label}
-                      rules={[{ required: true, message: "Nhập tiêu đề" }]}
-                      style={{ flex: 1, marginBottom: 0 }}
-                    >
-                      <Input placeholder="Short text:" disabled={!isAdmin} />
-                    </Form.Item>
-                  </Space>
-                </Col>
-
-                {/* Các input – grid luôn n cột của hàng (không bắt buộc nMax) */}
-                <Col xs={24} md={18}>
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: `repeat(${
-                        row.inputs.length || 1
-                      }, minmax(0, 1fr))`,
-                      gap: 12,
-                    }}
-                  >
-                    {(row.inputs || []).map((_, i) => (
-                      <div
-                        key={i}
-                        onDragOver={isAdmin ? onColDragOver : undefined}
-                        onDrop={
-                          isAdmin
-                            ? (e) =>
-                                onColDrop?.(e, row.id, i, (from, to) => {
-                                  // sync order inside Form when DnD
-                                  const v = form.getFieldsValue();
-                                  const rowV = v?.rows?.[row.id];
-                                  if (!rowV?.inputs) return;
-                                  const copy = [...rowV.inputs];
-                                  const [m] = copy.splice(from, 1);
-                                  copy.splice(to, 0, m);
-                                  form.setFieldsValue({
-                                    ...v,
-                                    rows: {
-                                      ...v.rows,
-                                      [row.id]: { ...rowV, inputs: copy },
-                                    },
-                                  });
-                                })
-                            : undefined
-                        }
+          {rows.map((row, idx) => {
+            const card = (
+              <div
+                key={row.id}
+                draggable={isAdmin}
+                onDragStart={
+                  isAdmin ? (e) => onRowDragStart?.(e, row.id) : undefined
+                }
+                onDragOver={isAdmin ? onRowDragOver : undefined}
+                onDrop={isAdmin ? (e) => onRowDrop?.(e, row.id) : undefined}
+                onDragEnd={isAdmin ? onRowDragEnd : undefined}
+                style={{
+                  padding: 12,
+                  border: "1px solid #f0f0f0",
+                  borderRadius: 10,
+                  background: "#fff",
+                  cursor: isAdmin ? "grab" : "default",
+                }}
+              >
+                <Row gutter={[12, 8]} align="top">
+                  {/* Tiêu đề */}
+                  <Col xs={24} md={6}>
+                    <Space align="start" style={{ width: "100%" }}>
+                      {isAdmin && (
+                        <Tooltip title="Kéo để sắp xếp hàng">
+                          <HolderOutlined
+                            style={{ fontSize: 18, color: "#999" }}
+                          />
+                        </Tooltip>
+                      )}
+                      <Form.Item
+                        name={["rows", row.id, "label"]}
+                        initialValue={row.label}
+                        rules={[{ required: true, message: "Nhập tiêu đề" }]}
+                        style={{ flex: 1, marginBottom: 8 }}
                       >
-                        <Form.Item
-                          name={["rows", row.id, "inputs", i]}
-                          label={
-                            <Space>
-                              {isAdmin && (
-                                <Tooltip title="Kéo để sắp xếp cột">
-                                  <Button
-                                    size="small"
-                                    type="text"
-                                    icon={<HolderOutlined />}
-                                    draggable
-                                    onDragStart={(e) =>
-                                      onColDragStart?.(e, row.id, i)
-                                    }
-                                    onDragEnd={onColDragEnd}
-                                    style={{ cursor: "grab" }}
-                                  />
-                                </Tooltip>
-                              )}
-                              <Text type="secondary">
-                                {columnLabels?.[i] || `Cột ${i + 1}`}
-                              </Text>
-                              {isAdmin && row.inputs.length > 1 && (
-                                <Tooltip title="Xóa cột này">
-                                  <Button
-                                    size="small"
-                                    type="text"
-                                    danger
-                                    icon={<CloseOutlined />}
-                                    onClick={() => removeColumn?.(row.id, i)}
-                                  />
-                                </Tooltip>
-                              )}
-                            </Space>
-                          }
-                          initialValue={row.inputs?.[i] ?? ""}
-                          rules={[{ required: true, message: "Nhập nội dung" }]}
-                          style={{ marginBottom: 0 }}
-                        >
-                          <Input placeholder="Short text" />
-                        </Form.Item>
-                      </div>
-                    ))}
-                  </div>
+                        <Input placeholder="Short text:" disabled={!isAdmin} />
+                      </Form.Item>
+                    </Space>
+                  </Col>
 
-                  {/* Thêm cột */}
+                  {/* Inputs theo số cột của hàng */}
+                  <Col xs={24} md={18}>
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: `repeat(${
+                          row.inputs?.length || 1
+                        }, minmax(0, 1fr))`,
+                        gap: 12,
+                      }}
+                    >
+                      {(row.inputs || []).map((_, i) => {
+                        const isLast = i === (row.inputs?.length ?? 1) - 1;
+                        return (
+                          <div key={i}>
+                            <Form.Item
+                              name={["rows", row.id, "inputs", i]}
+                              label={
+                                <Space wrap>
+                                  {/* X — xóa cột */}
+                                  {isAdmin && row.inputs.length > 1 && (
+                                    <Tooltip title="Xóa cột này">
+                                      <Button
+                                        size="small"
+                                        type="text"
+                                        danger
+                                        icon={<CloseOutlined />}
+                                        onClick={() => {
+                                          removeColumn?.(row.id, i);
+                                          const v = form.getFieldsValue();
+                                          const rowV = v?.rows?.[row.id];
+                                          if (rowV?.inputs?.length) {
+                                            const copy = [...rowV.inputs];
+                                            copy.splice(i, 1);
+                                            form.setFieldsValue({
+                                              ...v,
+                                              rows: {
+                                                ...v.rows,
+                                                [row.id]: {
+                                                  ...rowV,
+                                                  inputs: copy,
+                                                },
+                                              },
+                                            });
+                                          }
+                                        }}
+                                      />
+                                    </Tooltip>
+                                  )}
+
+                                  {/* + — thêm cột, chỉ ở cột cuối */}
+                                  {isAdmin && isLast && (
+                                    <Tooltip
+                                      title={
+                                        row.inputs.length >= maxCols
+                                          ? `Tối đa ${maxCols} cột`
+                                          : "Thêm cột"
+                                      }
+                                    >
+                                      <Button
+                                        size="small"
+                                        type="text"
+                                        icon={<PlusOutlined />}
+                                        disabled={row.inputs.length >= maxCols}
+                                        onClick={() => {
+                                          addColumn?.(row.id);
+                                          const v = form.getFieldsValue();
+                                          const rowV = v?.rows?.[row.id] || {};
+                                          const nextInputs = Array.isArray(
+                                            rowV.inputs
+                                          )
+                                            ? [...rowV.inputs, ""]
+                                            : [""];
+                                          form.setFieldsValue({
+                                            ...v,
+                                            rows: {
+                                              ...v.rows,
+                                              [row.id]: {
+                                                ...rowV,
+                                                inputs: nextInputs,
+                                              },
+                                            },
+                                          });
+                                        }}
+                                      />
+                                    </Tooltip>
+                                  )}
+                                </Space>
+                              }
+                              initialValue={row.inputs?.[i] ?? ""}
+                              rules={[
+                                { required: true, message: "Nhập nội dung" },
+                              ]}
+                              style={{ marginBottom: 8 }}
+                            >
+                              {/* Enter để xuống dòng & auto giãn */}
+                              <TextArea
+                                placeholder="Short text"
+                                autoSize={{ minRows: 1, maxRows: 10 }}
+                              />
+                            </Form.Item>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </Col>
+                </Row>
+              </div>
+            );
+
+            // Wrapper hàng: card bên trái, cột thao tác (xóa) bên phải, KHÔNG chồng lên nội dung
+            return (
+              <React.Fragment key={`${row.id}-frag`}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: 8,
+                    width: "100%",
+                  }}
+                >
+                  <div style={{ flex: 1 }}>{card}</div>
+
+                  {/* ===== XÓA HÀNG: đặt ngoài phạm vi card, sát bên phải ===== */}
                   {isAdmin && (
-                    <div style={{ marginTop: 8 }}>
-                      <Tooltip
-                        title={
-                          row.inputs.length >= maxCols
-                            ? `Tối đa ${maxCols} cột`
-                            : "Thêm cột"
-                        }
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 8,
+                        alignItems: "flex-end",
+                      }}
+                      onMouseDown={(e) => e.stopPropagation()}
+                    >
+                      <Popconfirm
+                        title="Xóa hàng này?"
+                        okText="Xóa"
+                        cancelText="Hủy"
+                        onConfirm={() => removeRow?.(row.id)}
                       >
                         <Button
-                          type="dashed"
-                          icon={<PlusOutlined />}
+                          danger
+                          icon={<DeleteOutlined />}
                           size="small"
-                          onClick={() => addColumn?.(row.id)}
-                          disabled={row.inputs.length >= maxCols}
-                        >
-                          Thêm cột
-                        </Button>
-                      </Tooltip>
+                        ></Button>
+                      </Popconfirm>
                     </div>
                   )}
-                </Col>
+                </div>
 
-                {/* Xóa hàng */}
-                {isAdmin && (
-                  <Col xs={24} style={{ textAlign: "right", marginTop: 8 }}>
-                    <Popconfirm
-                      title="Xóa hàng này?"
-                      okText="Xóa"
-                      cancelText="Hủy"
-                      onConfirm={() => removeRow?.(row.id)}
-                    >
-                      <Button danger icon={<DeleteOutlined />} size="small">
-                        Xóa hàng
-                      </Button>
-                    </Popconfirm>
-                  </Col>
+                {/* Divider giữa các hàng */}
+                {idx < rows.length - 1 && (
+                  <Divider style={{ margin: "8px 0 0" }} />
                 )}
-              </Row>
 
-              {idx < rows.length - 1 && (
-                <Divider style={{ margin: "12px 0 0" }} />
-              )}
-            </div>
-          ))}
-
-          {/* Action */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              marginTop: 8,
-            }}
-          >
-            {isAdmin ? (
-              <Button type="dashed" icon={<PlusOutlined />} onClick={addRow}>
-                Thêm hàng
-              </Button>
-            ) : (
-              <span />
-            )}
-
-            <Space>
-              <Button icon={<EyeOutlined />} onClick={handlePreview}>
-                Xem kết quả
-              </Button>
-              <Button type="primary" htmlType="submit">
-                Lưu mô tả
-              </Button>
-            </Space>
-          </div>
+                {/* ===== THÊM HÀNG: chỉ hiển thị ở HÀNG CUỐI ===== */}
+                {isAdmin && idx === rows.length - 1 && (
+                  <div
+                    style={{
+                      marginTop: 8,
+                      display: "flex",
+                      justifyContent: "flex-end",
+                      width: "100%",
+                    }}
+                  >
+                    <Tooltip title="Thêm hàng mới">
+                      <Button
+                        type="dashed"
+                        icon={<PlusOutlined />}
+                        size="small"
+                        onClick={addRow}
+                      >
+                        Thêm hàng
+                      </Button>
+                    </Tooltip>
+                  </div>
+                )}
+              </React.Fragment>
+            );
+          })}
         </Space>
       </Form>
     </>

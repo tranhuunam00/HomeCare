@@ -1,0 +1,128 @@
+$brand-navy: #001f5b;
+$brand-blue: #2f6db8;
+
+$clr-reset: #0ea5e9; // sky
+$clr-save: #2563eb; // blue
+$clr-edit: #b45309; // amber
+$clr-approve: #16a34a; // green
+$clr-preview: #7c3aed; // purple
+$clr-export: #0f766e; // teal
+$clr-print: #334155; // slate
+$clr-exit: #b91c1c; // red
+
+.actionBar {
+  margin: 32px 0 8px;
+}
+
+.actionGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+
+  @media (max-width: 992px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  @media (max-width: 576px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.btn {
+  // AntD Button custom
+  height: 56px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  border-width: 1px;
+  border-style: solid;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: transparent;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
+  transition: transform 0.18s ease, box-shadow 0.18s ease,
+    background-color 0.18s ease;
+
+  // icon size & spacing
+  :global(.ant-btn-icon) {
+    font-size: 18px;
+    margin-right: 10px;
+  }
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  }
+}
+
+// ===== Variants (màu + hover) =====
+.reset {
+  color: $clr-reset;
+  border-color: rgba($clr-reset, 0.35);
+  background-color: rgba($clr-reset, 0.06);
+  &:hover {
+    background-color: rgba($clr-reset, 0.12);
+  }
+}
+
+.save {
+  color: $clr-save;
+  border-color: rgba($clr-save, 0.35);
+  background-color: rgba($clr-save, 0.06);
+  &:hover {
+    background-color: rgba($clr-save, 0.12);
+  }
+}
+
+.edit {
+  color: $clr-edit;
+  border-color: rgba($clr-edit, 0.35);
+  background-color: rgba($clr-edit, 0.06);
+  &:hover {
+    background-color: rgba($clr-edit, 0.12);
+  }
+}
+
+.approve {
+  color: $clr-approve;
+  border-color: rgba($clr-approve, 0.35);
+  background-color: rgba($clr-approve, 0.06);
+  &:hover {
+    background-color: rgba($clr-approve, 0.12);
+  }
+}
+
+.preview {
+  color: $clr-preview;
+  border-color: rgba($clr-preview, 0.35);
+  background-color: rgba($clr-preview, 0.06);
+  &:hover {
+    background-color: rgba($clr-preview, 0.12);
+  }
+}
+
+.export {
+  color: $clr-export;
+  border-color: rgba($clr-export, 0.35);
+  background-color: rgba($clr-export, 0.06);
+  &:hover {
+    background-color: rgba($clr-export, 0.12);
+  }
+}
+
+.print {
+  color: $clr-print;
+  border-color: rgba($clr-print, 0.35);
+  background-color: rgba($clr-print, 0.06);
+  &:hover {
+    background-color: rgba($clr-print, 0.12);
+  }
+}
+
+.exit {
+  color: $clr-exit;
+  border-color: rgba($clr-exit, 0.35);
+  background-color: rgba($clr-exit, 0.06);
+  &:hover {
+    background-color: rgba($clr-exit, 0.12);
+  }
+}

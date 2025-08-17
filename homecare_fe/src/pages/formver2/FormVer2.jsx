@@ -1,420 +1,322 @@
-// FormVer2 — admin → user → print (localStorage, Ant Design) + COLUMN LABELS
-// Adds global column labels whose count equals the maximum number of columns among rows.
-// Admin can edit these labels; User sees them locked. Preview prints them as table headers.
-
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
-  Button,
-  Col,
-  Divider,
   Form,
   Input,
-  Modal,
-  Popconfirm,
-  Row,
-  Segmented,
-  Space,
-  Tooltip,
+  Select,
+  DatePicker,
+  Button,
+  Divider,
   Typography,
+  Row,
+  Col,
+  Upload,
+  Image,
   message,
+  Tooltip,
 } from "antd";
-import {
-  CloseOutlined,
-  DeleteOutlined,
-  EyeOutlined,
-  HolderOutlined,
-  PlusOutlined,
-  SaveOutlined,
-  UndoOutlined,
-  CloudDownloadOutlined,
-  ClearOutlined,
-  PrinterOutlined,
-} from "@ant-design/icons";
-import FormVer2Preview from "./component/FromVer2Preview";
-import CreateFormVer2 from "./component/CreateFormVer2";
+import { InboxOutlined, QuestionCircleOutlined } from "@ant-design/icons";
+import ImageBlock from "./component/ImageBlock";
+import AdminFormVer2 from "./component/AdminFormVer2";
+import { useGlobalAuth } from "../../contexts/AuthContext";
+import FormActionBar from "./component/FormActionBar";
 
-/* ========================= Helpers & Storage ========================= */
 const { Title, Text } = Typography;
-const mkId = () => Math.random().toString(36).slice(2, 9);
-const MAX_COLS = 5;
-const STORAGE_KEYS = {
-  TEMPLATE: "FORM_VER2_TEMPLATE", // JSON: { rows, columnLabels }
-  DRAFT: "FORM_VER2_DRAFT", // JSON: { rows, columnLabels }
+const { TextArea } = Input;
+const { Dragger } = Upload;
+
+/* ================== CONSTANTS ================== */
+const TECHNIQUE_OPTIONS = [
+  { label: "XQ", value: "XQ" },
+  { label: "SA", value: "SA" },
+  { label: "CT", value: "CT" },
+  { label: "MR", value: "MR" },
+  { label: "IR", value: "IR" },
+  { label: "CN", value: "CN" },
+];
+
+const BODY_PART_OPTIONS = [
+  { label: "HN", value: "HN" },
+  { label: "CH", value: "CH" },
+  { label: "AB", value: "AB" },
+  { label: "SP", value: "SP" },
+  { label: "UL", value: "UL" },
+  { label: "LL", value: "LL" },
+  { label: "SM", value: "SM" },
+  { label: "OB", value: "OB" },
+];
+
+const LANGUAGE_OPTIONS = [
+  { label: "VI", value: "vi" },
+  { label: "EN", value: "en" },
+];
+
+/* ============== HELPERS ============== */
+const generateAutoId = () => {
+  const d = new Date();
+
+  return `DFORM-tự động sinh`; // ví dụ: DFORM-2025-08-17-ABCD
 };
 
-const saveTemplate = (payload) => {
-  localStorage.setItem(STORAGE_KEYS.TEMPLATE, JSON.stringify(payload || {}));
-  return true;
+const todayLabel = () => {
+  const d = new Date();
+  return d.toLocaleDateString();
 };
-const loadTemplate = () => {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEYS.TEMPLATE);
-    return raw ? JSON.parse(raw) : null;
-  } catch (e) {
-    console.error(e);
-    return null;
-  }
-};
-const clearTemplate = () => localStorage.removeItem(STORAGE_KEYS.TEMPLATE);
 
-const saveDraft = (payload) => {
-  localStorage.setItem(STORAGE_KEYS.DRAFT, JSON.stringify(payload || {}));
-};
-const loadDraft = () => {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEYS.DRAFT);
-    return raw ? JSON.parse(raw) : null;
-  } catch (e) {
-    console.error(e);
-    return null;
-  }
-};
-const clearDraft = () => localStorage.removeItem(STORAGE_KEYS.DRAFT);
+/* ============== COMPONENT ============== */
+export default function DFormVer2() {
+  const [form] = Form.useForm();
+  const autoId = useMemo(() => generateAutoId(), []);
 
-/* ========================= Form builder / filler ========================= */
+  const { user, doctor, examParts, templateServices } = useGlobalAuth();
 
-/* ========================= Page: Admin/User/Print flow ========================= */
-export default function FormVer2WorkflowPage() {
-  // ----- rows layout state -----
-  const [rows, setRows] = useState([
-    { id: mkId(), inputs: [""], label: "Short text:" },
-    { id: mkId(), inputs: ["", ""], label: "Short text:" },
-    { id: mkId(), inputs: ["", "", ""], label: "Short text:" },
-  ]);
-
-  // dynamic max columns across rows
-  const nMax = useMemo(
-    () => Math.max(1, ...rows.map((r) => r.inputs?.length || 1)),
-    [rows]
+  const [imgAnatomy, setImgAnatomy] = useState(
+    "https://via.placeholder.com/640x360?text=Minh+hoa+giai+phau"
+  );
+  const [imgProcedure, setImgProcedure] = useState(
+    "https://via.placeholder.com/640x360?text=Minh+hoa+quy+trinh+thuc+hi%C3%AAn"
   );
 
-  // Global column labels with length = nMax
-  const [columnLabels, setColumnLabels] = useState(() =>
-    Array.from({ length: nMax }, (_, i) => `Cột ${i + 1}`)
-  );
-  // Keep labels array synced with nMax (preserve existing values)
-  useEffect(() => {
-    setColumnLabels((prev) => {
-      const next = [...prev];
-      if (nMax > prev.length) {
-        for (let i = prev.length; i < nMax; i++) next.push(`Cột ${i + 1}`);
-      } else if (nMax < prev.length) {
-        next.length = nMax;
-      }
-      return next;
-    });
-  }, [nMax]);
-
-  // Which mode are we in? (for the demo UI)
-  const [mode, setMode] = useState("admin"); // 'admin' | 'user'
-
-  // Drag & Drop Hàng / Cột (only active in admin)
-  const dragRowSrcIdRef = useRef(null);
-  const dragColRef = useRef({ rowId: null, colIndex: null });
-
-  // helpers
-  const reorderArray = (arr, from, to) => {
-    const copy = [...arr];
-    const [item] = copy.splice(from, 1);
-    copy.splice(to, 0, item);
-    return copy;
-  };
-
-  // ====== HÀNG ======
-  const addRow = () =>
-    setRows((prev) => [
-      ...prev,
-      { id: mkId(), inputs: [""], label: "Short text:" },
-    ]);
-  const removeRow = (id) => setRows((prev) => prev.filter((r) => r.id !== id));
-  const onRowDragStart = (_e, rowId) => (dragRowSrcIdRef.current = rowId);
-  const onRowDragOver = (e) => e.preventDefault();
-  const onRowDrop = (e, targetId) => {
-    e.preventDefault();
-    const srcId = dragRowSrcIdRef.current;
-    if (!srcId || srcId === targetId) return;
-    setRows((prev) => {
-      const srcIndex = prev.findIndex((r) => r.id === srcId);
-      const targetIndex = prev.findIndex((r) => r.id === targetId);
-      if (srcIndex < 0 || targetIndex < 0) return prev;
-      const next = [...prev];
-      const [moved] = next.splice(srcIndex, 1);
-      next.splice(targetIndex, 0, moved);
-      return next;
-    });
-    dragRowSrcIdRef.current = null;
-  };
-  const onRowDragEnd = () => (dragRowSrcIdRef.current = null);
-
-  // ====== CỘT ======
-  const addColumn = (rowId) =>
-    setRows((prev) =>
-      prev.map((r) =>
-        r.id === rowId && r.inputs.length < MAX_COLS
-          ? { ...r, inputs: [...r.inputs, ""] }
-          : r
-      )
-    );
-  const removeColumn = (rowId, colIndex) =>
-    setRows((prev) =>
-      prev.map((r) => {
-        if (r.id !== rowId) return r;
-        if (r.inputs.length <= 1) return r;
-        return { ...r, inputs: r.inputs.filter((_, i) => i !== colIndex) };
-      })
-    );
-
-  const onColDragStart = (_e, rowId, colIndex) =>
-    (dragColRef.current = { rowId, colIndex });
-  const onColDragOver = (e) => e.preventDefault();
-  const onColDrop = (e, rowId, targetIndex, sync) => {
-    e.preventDefault();
-    const { rowId: srcRowId, colIndex: srcIndex } = dragColRef.current || {};
-    if (srcRowId == null || srcIndex == null) return;
-    if (srcRowId !== rowId || srcIndex === targetIndex) {
-      dragColRef.current = { rowId: null, colIndex: null };
-      return;
-    }
-    setRows((prev) =>
-      prev.map((r) =>
-        r.id !== rowId
-          ? r
-          : { ...r, inputs: reorderArray(r.inputs, srcIndex, targetIndex) }
-      )
-    );
-    sync?.(srcIndex, targetIndex);
-    dragColRef.current = { rowId: null, colIndex: null };
-  };
-  const onColDragEnd = () =>
-    (dragColRef.current = { rowId: null, colIndex: null });
-
-  // ----- Preview state -----
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const [previewData, setPreviewData] = useState([]);
-
-  // ===================== Admin actions (Template) =====================
-  const handleSaveTemplate = () => {
-    // Normalize rows: ensure at least one input per row
-    const normalizedRows = rows.map((r) => ({
-      ...r,
-      inputs: r.inputs?.length ? r.inputs : [""],
-    }));
-    saveTemplate({ rows: normalizedRows, columnLabels });
-    message.success("Đã lưu mẫu (template) vào trình duyệt");
-  };
-  const handleLoadTemplate = () => {
-    const tpl = loadTemplate();
-    if (!tpl || !Array.isArray(tpl.rows)) {
-      message.warning("Chưa có mẫu nào trong trình duyệt");
-      return;
-    }
-    setRows(tpl.rows);
-    setColumnLabels(
-      Array.from(
-        { length: Math.max(1, tpl.columnLabels?.length || 1) },
-        (_, i) => tpl.columnLabels?.[i] || `Cột ${i + 1}`
-      )
-    );
-    message.success("Đã tải mẫu");
-  };
-  const handleClearTemplate = () => {
-    clearTemplate();
-    message.success("Đã xóa mẫu trong trình duyệt");
-  };
-
-  // ===================== User actions (Draft) =====================
-  const handleAutosaveDraft = (ordered) => {
-    saveDraft({ rows: ordered, columnLabels });
-  };
-  const handleLoadDraft = () => {
-    const d = loadDraft();
-    if (d && Array.isArray(d.rows) && d.rows.length) {
-      setRows(
-        d.rows.map((r) => ({
-          ...r,
-          inputs: r.inputs?.length ? r.inputs : [""],
-        }))
-      );
-      setColumnLabels(
-        Array.from(
-          { length: Math.max(1, d.columnLabels?.length || 1) },
-          (_, i) => d.columnLabels?.[i] || `Cột ${i + 1}`
-        )
-      );
-      message.success("Đã tải bản nháp từ trình duyệt");
-    } else {
-      message.info("Không có bản nháp, sẽ tải mẫu thay thế nếu có");
-      const tpl = loadTemplate();
-      if (tpl && tpl.rows) {
-        setRows(tpl.rows);
-        setColumnLabels(
-          Array.from(
-            { length: Math.max(1, tpl.columnLabels?.length || 1) },
-            (_, i) => tpl.columnLabels?.[i] || `Cột ${i + 1}`
-          )
-        );
-      }
-    }
-  };
-  const handleClearDraft = () => {
-    clearDraft();
-    message.success("Đã xóa bản nháp");
-  };
-
-  // Switch to USER auto-load template if available
-  useEffect(() => {
-    if (mode === "user") {
-      // Load draft first, else template
-      const d = loadDraft();
-      if (d && Array.isArray(d.rows) && d.rows.length) {
-        setRows(d.rows);
-        setColumnLabels(
-          Array.from(
-            { length: Math.max(1, d.columnLabels?.length || 1) },
-            (_, i) => d.columnLabels?.[i] || `Cột ${i + 1}`
-          )
-        );
-      } else {
-        const tpl = loadTemplate();
-        if (tpl && Array.isArray(tpl.rows)) {
-          setRows(tpl.rows);
-          setColumnLabels(
-            Array.from(
-              { length: Math.max(1, tpl.columnLabels?.length || 1) },
-              (_, i) => tpl.columnLabels?.[i] || `Cột ${i + 1}`
-            )
-          );
-        }
-      }
-    }
-  }, [mode]);
-
-  // Print handler (print current preview data)
-  const handlePrint = () => {
-    if (!previewOpen) {
-      const ordered = rows.map((r) => ({
-        id: r.id,
-        label: r.label,
-        inputs: r.inputs || [""],
-      }));
-      setPreviewData(ordered);
-      setPreviewOpen(true);
-      setTimeout(() => window.print(), 100);
-    } else {
-      window.print();
-    }
+  const onFinish = (values) => {
+    const payload = {
+      ...values,
+      autoCode: autoId,
+      ngayThucHien: todayLabel(),
+      nguoiThucHien: "Login",
+      images: {
+        anatomy: imgAnatomy,
+        procedure: imgProcedure,
+      },
+    };
+    console.log("D-FORM payload", payload);
+    message.success("Đã lưu dữ liệu mẫu (console)");
   };
 
   return (
-    <div style={{ maxWidth: 1400, margin: "0 auto", padding: 16 }}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 12,
-        }}
+    <div style={{ maxWidth: 980, margin: "0 auto", padding: 16 }}>
+      <Title level={3} style={{ textAlign: "center", marginBottom: 24 }}>
+        PHẦN MỀM NHẬP LIỆU BỘ MẪU KẾT QUẢ D‑FORM
+      </Title>
+
+      <Form
+        form={form}
+        layout="horizontal" // ⬅️ đổi từ "vertical" → "horizontal"
+        labelAlign="left"
+        labelCol={{ flex: "0 0 180px" }} // độ rộng cột label
+        wrapperCol={{ flex: "1 0 0" }} // cột input chiếm phần còn lại
+        colon={false}
+        onFinish={onFinish}
+        initialValues={{ language: "vi" }}
       >
-        <Title level={3} style={{ marginBottom: 12, color: "#2f6db8" }}>
-          MÔ TẢ HÌNH ẢNH — Quy trình Admin → User → In
+        <Row gutter={16}>
+          <Col xs={24} md={12}>
+            <Form.Item
+              label="Kỹ thuật (1)"
+              name="technique"
+              rules={[{ required: true, message: "Chọn kỹ thuật" }]}
+            >
+              <Select placeholder="Chọn bộ phận thăm khám">
+                {templateServices.map((s) => (
+                  <Option key={s.id} value={s.id}>
+                    {s.name}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={12}>
+            <Form.Item
+              label="Bộ phận (2)"
+              name="bodyPart"
+              rules={[{ required: true, message: "Chọn bộ phận" }]}
+            >
+              <Select placeholder="Chọn bộ phận thăm khám">
+                {examParts.map((s) => (
+                  <Option key={s.id} value={s.id}>
+                    {s.name}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col xs={24} md={12}>
+            <Form.Item
+              label="Ngôn ngữ (3)"
+              name="language"
+              rules={[{ required: true }]}
+            >
+              <Select options={LANGUAGE_OPTIONS} placeholder="VI / EN" />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={12}>
+            <Form.Item label="Mã số định danh mẫu (4)">
+              <Input value={autoId} readOnly disabled />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col xs={24} md={24}>
+            <Form.Item
+              label="Tên mẫu (5)"
+              name="tenMau"
+              rules={[{ required: true, message: "Nhập tên mẫu" }]}
+            >
+              <Input placeholder="Short text (VD: Siêu âm bụng tổng quát nam)" />
+            </Form.Item>
+          </Col>
+        </Row>
+        <Row gutter={16}>
+          <Col xs={24} md={12}>
+            <Form.Item label="Kết luận của mẫu (6)" name="ketLuan">
+              <Input placeholder="Short text (VD: U máu gan)" />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col xs={24} md={12}>
+            <Form.Item label="Ngày thực hiện (7)">
+              <Input value={todayLabel()} readOnly disabled />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={12}>
+            <Form.Item label="Người thực hiện (8)">
+              <Input value="Login" readOnly disabled />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Title
+          level={4}
+          style={{
+            color: "#2f6db8",
+            marginTop: 24,
+            marginBottom: 16,
+          }}
+        >
+          NỘI DUNG THỰC HIỆN
         </Title>
-        <Segmented
-          value={mode}
-          onChange={(v) => setMode(v)}
-          options={[
-            { label: "Admin", value: "admin" },
-            { label: "User", value: "user" },
-          ]}
-        />
-      </div>
 
-      {/* Toolbar theo mode */}
-      {mode === "admin" ? (
-        <Space style={{ marginBottom: 16 }} wrap>
-          <Button
-            icon={<SaveOutlined />}
-            type="primary"
-            onClick={handleSaveTemplate}
-          >
-            Lưu mẫu
-          </Button>
-          <Button icon={<CloudDownloadOutlined />} onClick={handleLoadTemplate}>
-            Tải mẫu
-          </Button>
-          <Button icon={<ClearOutlined />} danger onClick={handleClearTemplate}>
-            Xóa mẫu
-          </Button>
-          <Button
-            icon={<UndoOutlined />}
-            onClick={() => {
-              const tpl = loadTemplate();
-              if (tpl && tpl.rows) {
-                setRows(tpl.rows);
-                setColumnLabels(
-                  Array.from(
-                    { length: Math.max(1, tpl.columnLabels?.length || 1) },
-                    (_, i) => tpl.columnLabels?.[i] || `Cột ${i + 1}`
-                  )
-                );
-              }
-            }}
-          >
-            Hoàn tác về mẫu
-          </Button>
-        </Space>
-      ) : (
-        <Space style={{ marginBottom: 16 }} wrap>
-          <Button icon={<CloudDownloadOutlined />} onClick={handleLoadDraft}>
-            Tải bản nháp / mẫu
-          </Button>
-          <Button icon={<ClearOutlined />} danger onClick={handleClearDraft}>
-            Xóa bản nháp
-          </Button>
-          <Button icon={<PrinterOutlined />} onClick={handlePrint}>
-            In nhanh
-          </Button>
-        </Space>
-      )}
+        <Row gutter={[16, 16]}>
+          <Col xs={24} md={12}>
+            <ImageBlock
+              form={form}
+              namePrefix="anatomy"
+              src="https://via.placeholder.com/640x360?text=Minh+hoa+giai+phau"
+              title="Minh hoạ giải phẫu (cố định, có mô tả & link)"
+            />
+          </Col>
+          <Col xs={24} md={12}>
+            <ImageBlock
+              form={form}
+              namePrefix="procedure"
+              src="https://via.placeholder.com/640x360?text=Minh+hoa+quy+trinh+thuc+hien"
+              title="Minh hoạ quy trình thực hiện (cố định, có mô tả & link)"
+            />
+          </Col>
+        </Row>
 
-      <CreateFormVer2
-        mode={mode}
-        rows={rows}
-        columnLabels={columnLabels}
-        setColumnLabels={setColumnLabels}
-        addRow={mode === "admin" ? addRow : undefined}
-        removeRow={mode === "admin" ? removeRow : undefined}
-        addColumn={mode === "admin" ? addColumn : undefined}
-        removeColumn={mode === "admin" ? removeColumn : undefined}
-        // DnD hàng
-        onRowDragStart={mode === "admin" ? onRowDragStart : undefined}
-        onRowDragOver={mode === "admin" ? onRowDragOver : undefined}
-        onRowDrop={mode === "admin" ? onRowDrop : undefined}
-        onRowDragEnd={mode === "admin" ? onRowDragEnd : undefined}
-        // DnD cột
-        onColDragStart={mode === "admin" ? onColDragStart : undefined}
-        onColDragOver={mode === "admin" ? onColDragOver : undefined}
-        onColDrop={mode === "admin" ? onColDrop : undefined}
-        onColDragEnd={mode === "admin" ? onColDragEnd : undefined}
-        maxCols={MAX_COLS}
-        onPreview={(ordered) => {
-          setPreviewData(ordered);
-          setPreviewOpen(true);
-        }}
-        onAutosaveDraft={
-          mode === "user"
-            ? (ordered) => handleAutosaveDraft(ordered)
-            : undefined
-        }
-      />
+        <Title
+          level={4}
+          style={{
+            color: "#2f6db8",
+            marginTop: 24,
+            marginBottom: 16,
+          }}
+        >
+          QUY TRÌNH KỸ THUẬT
+        </Title>
 
-      <Modal
-        open={previewOpen}
-        onCancel={() => setPreviewOpen(false)}
-        footer={null}
-        width={1100}
-      >
-        <FormVer2Preview data={previewData} columnLabels={columnLabels} />
-      </Modal>
+        <Form.Item name="quyTrinh" label="Mô tả quy trình" tooltip="Short text">
+          <TextArea
+            autoSize={{ minRows: 4, maxRows: 10 }}
+            placeholder="Nhập mô tả quy trình kỹ thuật..."
+          />
+        </Form.Item>
+        <Title
+          level={4}
+          style={{
+            color: "#2f6db8",
+            marginTop: 24,
+            marginBottom: 16,
+          }}
+        >
+          MÔ TẢ HÌNH ẢNH
+        </Title>
+
+        <AdminFormVer2 />
+
+        <Title
+          level={4}
+          style={{
+            color: "#2f6db8",
+            marginTop: 24,
+            marginBottom: 16,
+          }}
+        >
+          KẾT LUẬN, CHẨN ĐOÁN
+        </Title>
+
+        <Form.Item
+          label="Kết luận (6)"
+          name="ketLuan"
+          rules={[{ required: true, message: "Nhập kết luận" }]}
+        >
+          <Input placeholder="Short text (VD: U máu gan)" />
+        </Form.Item>
+
+        <Form.Item
+          label={
+            <span>
+              Phân loại ICD-10
+              <Tooltip title="Tra cứu ICD-10">
+                <a
+                  href="https://icd.kcb.vn/icd-10/icd10"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ marginLeft: 4 }}
+                >
+                  <QuestionCircleOutlined />
+                </a>
+              </Tooltip>
+            </span>
+          }
+          name="icd10"
+        >
+          <Input placeholder="Tự động sinh link ICD-10" readOnly />
+        </Form.Item>
+
+        <Form.Item label="Phân độ, phân loại" name="phanDoLoai">
+          <Input placeholder="Short text" />
+        </Form.Item>
+
+        <Form.Item label="Chẩn đoán phân biệt" name="chanDoanPhanBiet">
+          <Input placeholder="Short text" />
+        </Form.Item>
+
+        <Title
+          level={4}
+          style={{
+            color: "#2f6db8",
+            marginTop: 24,
+            marginBottom: 16,
+          }}
+        >
+          KHUYẾN NGHỊ & TƯ VẤN (10)
+        </Title>
+
+        <Form.Item name="khuyenNghi" tooltip="Có thể tích hợp ChatGPT D-RADS">
+          <TextArea
+            autoSize={{ minRows: 4, maxRows: 10 }}
+            placeholder="Nhập khuyến nghị & tư vấn..."
+          />
+        </Form.Item>
+
+        <FormActionBar />
+      </Form>
     </div>
   );
 }
