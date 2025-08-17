@@ -31,7 +31,7 @@ import {
   PrinterOutlined,
 } from "@ant-design/icons";
 import FormVer2Preview from "./component/FromVer2Preview";
-import CreateFormVer2 from "./component/CreateFormVer2";
+import CreateFormVer2 from "./component/CreateFormVer2Plain/CreateFormVer2Plain";
 
 /* ========================= Helpers & Storage ========================= */
 const { Title, Text } = Typography;

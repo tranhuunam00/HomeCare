@@ -10,7 +10,7 @@ import {
   computeNMax,
   ensureColumnLabels,
 } from "../utils.js";
-import CreateFormVer2 from "./CreateFormVer2.jsx";
+import CreateFormVer2 from "./CreateFormVer2Plain/CreateFormVer2Plain.jsx";
 
 const { Title } = Typography;
 
@@ -24,6 +24,8 @@ const mkTable = () => ({
 export default function AdminFormVer2() {
   // Quản lý NHIỀU bảng
   const [tables, setTables] = useState([mkTable()]);
+
+  console.log("tables", tables[0].rows);
 
   /* ======================= Helpers cập nhật theo tid ======================= */
   const updateTable = (tid, updater) =>
@@ -97,6 +99,25 @@ export default function AdminFormVer2() {
       });
       const nMax = computeNMax(t.rows);
       t.columnLabels = ensureColumnLabels(t.columnLabels, nMax);
+      return t;
+    });
+
+  const setRowLabel = (tid, rowId, nextLabel) =>
+    updateTable(tid, (t) => {
+      t.rows = t.rows.map((r) =>
+        r.id === rowId ? { ...r, label: nextLabel } : r
+      );
+      return t;
+    });
+
+  const setCellValue = (tid, rowId, colIndex, nextValue) =>
+    updateTable(tid, (t) => {
+      t.rows = t.rows.map((r) => {
+        if (r.id !== rowId) return r;
+        const inputs = [...r.inputs];
+        inputs[colIndex] = nextValue;
+        return { ...r, inputs };
+      });
       return t;
     });
 
@@ -195,6 +216,12 @@ export default function AdminFormVer2() {
                 maxCols={MAX_COLS}
                 onPreview={undefined}
                 onAutosaveDraft={undefined}
+                onChangeLabel={(rowId, nextLabel) =>
+                  setRowLabel(t.tid, rowId, nextLabel)
+                }
+                onChangeInput={(rowId, colIndex, nextValue) =>
+                  setCellValue(t.tid, rowId, colIndex, nextValue)
+                }
               />
 
               {/* Nút "Thêm bảng" giữa các bảng (tuỳ thích). Có thể bỏ nếu không cần */}

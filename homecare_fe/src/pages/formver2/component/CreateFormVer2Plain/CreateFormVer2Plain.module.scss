@@ -1,0 +1,196 @@
+/* A4 wrapper (giữ mềm như bản gốc; nếu muốn A4 cố định dùng width: 794px) */
+.a4 {
+  max-width: 100%;
+  margin: 0 0;
+}
+
+/* layout helpers */
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+}
+
+.rowMain {
+  flex: 1;
+}
+
+.card {
+  flex: 1;
+  padding: 0;
+  border: 1px solid #f0f0f0;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.draggable {
+  cursor: grab;
+}
+
+.cardInner {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 0; /* giống bản gốc */
+}
+
+/* 25% / 75% như trước */
+.labelCol {
+  width: 25%;
+}
+
+.inputsCol {
+  width: 75%;
+}
+
+/* grid động dùng CSS var --cols */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  gap: 8px;
+}
+
+/* textareas & inputs */
+.input,
+.labelArea,
+.colLabelInput {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #d9d9d9;
+  font-size: 14px;
+  line-height: 1.4;
+  background: #fff;
+}
+
+.input,
+.labelArea {
+  min-height: 60px; /* labelArea sẽ override xuống dưới */
+  resize: vertical;
+  overflow: hidden; /* hỗ trợ autoGrow mượt hơn */
+}
+
+.labelArea {
+  min-height: 80px;
+}
+
+.headerStrip {
+  background: #fff;
+  border: 1px solid #f0f0f0;
+  border-radius: 10px;
+  padding: 0;
+}
+
+/* Column labels section */
+.colLabelsWrap {
+  margin-bottom: 12px;
+}
+
+.colLabelsRow {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.colLabelsLeft {
+  width: 25%;
+}
+
+.colLabelsRight {
+  width: 75%;
+}
+
+.colLabelInput {
+  /* đã khai báo chung ở trên */
+}
+
+/* toolbars & buttons */
+.toolbarRight {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.inputToolbar {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0;
+}
+
+.inputToolbarLeft {
+  display: flex;
+  gap: 6px;
+}
+
+.addRowWrap {
+  margin-top: 0;
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 1px 4px;
+  border-radius: 8px;
+  border: 1px solid #d9d9d9;
+  background: #fafafa;
+  cursor: pointer;
+  font-size: 13px;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+.btnDanger {
+  background: #fff5f5;
+  border: 1px solid #ffccc7;
+  color: #cf1322;
+}
+
+.btnGhost {
+  background: #fff;
+}
+
+.icon {
+  font-size: 16px;
+  opacity: 0.75;
+  user-select: none;
+}
+
+.smallNote {
+  font-size: 12px;
+  color: #999;
+}
+
+.hr {
+  border: none;
+  border-top: 1px dashed #eee;
+  margin: 10px 0 0;
+}
+
+.labelWrap {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+/* Optional: actionBar nếu bật lại */
+.actionBar {
+  margin-top: 24px;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
