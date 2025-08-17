@@ -48,6 +48,7 @@ import AASTLiverForm from "./pages/advance/AASTLiverForm/AASTLiverForm";
 import BosniakForm from "./pages/advance/BosniakForm/BosniakForm";
 import LIRADSForm from "./pages/advance/Lirad/LIRADSForm";
 import ORADSModalityOnly from "./pages/advance/oRADS/OradsForm";
+import FormVer2 from "./pages/formver2/FormVer2";
 
 function App() {
   useAuthInitializer();
@@ -86,6 +87,8 @@ function App() {
 
           <Route path="products" element={<ProductList />} />
           <Route path="templates" element={<TemplateList />} />
+          <Route path="form-v2" element={<FormVer2 />} />
+
           <Route
             path="/home/templates/add"
             element={<AddOrEditTemplateProduct />}
