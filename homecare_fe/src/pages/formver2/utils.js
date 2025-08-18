@@ -141,3 +141,33 @@ export const handleAction = ({ pendingAction, key, form }) => {
     return;
   }
 };
+
+export function normalizeTablesFromApi(apiTables) {
+  // API có thể ở 1 trong 3 dạng:
+  // A) { table_json: { tid, rows, columnLabels } }
+  // B) { table_json: { tid, table_json: { tid, rows, columnLabels } } }  // lồng
+  // C) { tid, rows, columnLabels }
+  return (apiTables || []).map((it) => {
+    let raw = it?.table_json ?? it;
+    if (raw?.table_json) raw = raw.table_json; // bóc lớp lồng
+    const t = {
+      id: it?.id ?? null, // giữ id của record trên server để PUT/PATCH nếu cần
+      tid: raw?.tid ?? `t-${Math.random().toString(36).slice(2, 8)}`,
+      rows: Array.isArray(raw?.rows) ? raw.rows : [],
+      columnLabels: Array.isArray(raw?.columnLabels) ? raw.columnLabels : [],
+    };
+    return t;
+  });
+}
+
+export function buildTablesPayload(feTables) {
+  // BE kỳ vọng [{ table_json: { tid, rows, columnLabels }, id? }]
+  return (feTables || []).map((t) => ({
+    ...(t.id ? { id: t.id } : {}),
+    table_json: {
+      tid: t.tid,
+      rows: t.rows,
+      columnLabels: t.columnLabels,
+    },
+  }));
+}

@@ -1,55 +1,39 @@
 // src/pages/AdminFormVer2.jsx
-import React, { useEffect, useMemo, useState } from "react";
-import { Button, Space, Segmented, Typography, Divider } from "antd";
+import React from "react";
+import { Button, Space, Segmented, Divider } from "antd";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 
-import {
-  MAX_COLS,
-  mkId,
-  reorderArray,
-  computeNMax,
-  ensureColumnLabels,
-} from "../utils.js";
+import { MAX_COLS, mkId, computeNMax, ensureColumnLabels } from "../utils.js";
 import CreateFormVer2 from "./CreateFormVer2Plain/CreateFormVer2Plain.jsx";
-
-const { Title } = Typography;
 
 /* Tạo 1 "bảng" mới (form) với state riêng */
 const mkTable = () => ({
+  id: null, // giữ chỗ server id nếu có
   tid: mkId(),
   rows: [{ id: mkId(), inputs: [""], label: "" }],
   columnLabels: ensureColumnLabels([], 1),
 });
 
-export default function AdminFormVer2({ onChange }) {
-  // Quản lý NHIỀU bảng
-  const [tables, setTables] = useState([mkTable()]);
+export default function AdminFormVer2({ value = [], onChange }) {
+  const tables = value.length ? value : [mkTable()];
 
-  console.log("tables", tables[0].rows);
+  const emit = (next) => onChange?.(structuredClone(next));
 
   /* ======================= Helpers cập nhật theo tid ======================= */
-  const updateTable = (tid, updater) =>
-    setTables((prev) => {
-      const next = prev.map((t) =>
-        t.tid === tid ? updater(structuredClone(t)) : t
-      );
-      onChange?.(next); // 🔥 notify parent
-      return next;
-    });
+  const updateTable = (tid, updater) => {
+    const next = tables.map((t) =>
+      t.tid === tid ? updater(structuredClone(t)) : t
+    );
+    emit(next);
+  };
 
-  const addTable = () =>
-    setTables((prev) => {
-      const next = [...prev, mkTable()];
-      onChange?.(next);
-      return next;
-    });
+  const addTable = () => emit([...tables, mkTable()]);
 
-  const removeTable = (tid) =>
-    setTables((prev) => {
-      const next = prev.length > 1 ? prev.filter((t) => t.tid !== tid) : prev;
-      onChange?.(next);
-      return next;
-    });
+  const removeTable = (tid) => {
+    if (tables.length <= 1) return; // không xoá hết
+    emit(tables.filter((t) => t.tid !== tid));
+  };
+
   const addRow = (tid) =>
     updateTable(tid, (t) => {
       t.rows.push({ id: mkId(), inputs: [""], label: "" });
@@ -78,10 +62,10 @@ export default function AdminFormVer2({ onChange }) {
       const srcIndex = t.rows.findIndex((r) => r.id === srcId);
       const targetIndex = t.rows.findIndex((r) => r.id === targetId);
       if (srcIndex < 0 || targetIndex < 0) return t;
-      const next = [...t.rows];
-      const [moved] = next.splice(srcIndex, 1);
-      next.splice(targetIndex, 0, moved);
-      t.rows = next;
+      const nextRows = [...t.rows];
+      const [moved] = nextRows.splice(srcIndex, 1);
+      nextRows.splice(targetIndex, 0, moved);
+      t.rows = nextRows;
       return t;
     });
   const onRowDragEnd = (tid) =>
@@ -131,8 +115,6 @@ export default function AdminFormVer2({ onChange }) {
       return t;
     });
 
-  // (CreateFormVer2 đã bỏ kéo-thả cột, nên KHÔNG cần onColDrag* nữa)
-
   /* ======================= UI ======================= */
   return (
     <div style={{ maxWidth: 1400, margin: "0 auto", padding: 16 }}>
@@ -150,103 +132,89 @@ export default function AdminFormVer2({ onChange }) {
           options={[{ label: "Admin", value: "admin" }]}
           disabled
         />
-        {/* Nút thêm bảng toàn cục */}
         <Button type="dashed" icon={<PlusOutlined />} onClick={addTable}>
           Thêm bảng
         </Button>
       </div>
 
       <Space direction="vertical" style={{ width: "100%" }} size={20}>
-        {tables.map((t, idx) => {
-          const nMax = computeNMax(t.rows);
-
-          return (
+        {tables.map((t, idx) => (
+          <div
+            key={t.tid}
+            style={{
+              border: "1px solid #eaeaea",
+              borderRadius: 10,
+              padding: 12,
+              background: "#fff",
+            }}
+          >
+            {/* Header mỗi bảng */}
             <div
-              key={t.tid}
               style={{
-                border: "1px solid #eaeaea",
-                borderRadius: 10,
-                padding: 12,
-                background: "#fff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginBottom: 8,
               }}
             >
-              {/* Header mỗi bảng */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  marginBottom: 8,
-                }}
-              >
-                <Space>
-                  <Button
-                    danger
-                    icon={<DeleteOutlined />}
-                    size="small"
-                    onClick={() => removeTable(t.tid)}
-                    disabled={tables.length <= 1}
-                  >
-                    Xóa bảng
-                  </Button>
-                </Space>
-              </div>
-
-              {/* Form builder cho bảng này */}
-              <CreateFormVer2
-                mode="admin"
-                rows={t.rows}
-                columnLabels={t.columnLabels}
-                setColumnLabels={(updater) =>
-                  updateTable(t.tid, (tt) => {
-                    tt.columnLabels =
-                      typeof updater === "function"
-                        ? updater(tt.columnLabels)
-                        : updater;
-                    // đảm bảo đủ độ dài theo nMax hiện tại
-                    tt.columnLabels = ensureColumnLabels(
-                      tt.columnLabels,
-                      computeNMax(tt.rows)
-                    );
-                    return tt;
-                  })
-                }
-                addRow={() => addRow(t.tid)}
-                removeRow={(rowId) => removeRow(t.tid, rowId)}
-                addColumn={(rowId) => addColumn(t.tid, rowId)}
-                removeColumn={(rowId, colIndex) =>
-                  removeColumn(t.tid, rowId, colIndex)
-                }
-                // DnD hàng
-                onRowDragStart={(e, rowId) => onRowDragStart(t.tid, e, rowId)}
-                onRowDragOver={onRowDragOver}
-                onRowDrop={(e, targetRowId) => onRowDrop(t.tid, e, targetRowId)}
-                onRowDragEnd={() => onRowDragEnd(t.tid)}
-                // (CreateFormVer2 không nhận onColDrag* nữa)
-                maxCols={MAX_COLS}
-                onPreview={undefined}
-                onAutosaveDraft={undefined}
-                onChangeLabel={(rowId, nextLabel) =>
-                  setRowLabel(t.tid, rowId, nextLabel)
-                }
-                onChangeInput={(rowId, colIndex, nextValue) =>
-                  setCellValue(t.tid, rowId, colIndex, nextValue)
-                }
-              />
-
-              {/* Nút "Thêm bảng" giữa các bảng (tuỳ thích). Có thể bỏ nếu không cần */}
-              {/* <div style={{ textAlign: "right", marginTop: 8 }}>
-                <Button type="dashed" icon={<PlusOutlined />} onClick={addTable}>
-                  Thêm bảng
+              <Space>
+                <Button
+                  danger
+                  icon={<DeleteOutlined />}
+                  size="small"
+                  onClick={() => removeTable(t.tid)}
+                  disabled={tables.length <= 1}
+                >
+                  Xóa bảng
                 </Button>
-              </div> */}
-
-              {idx < tables.length - 1 && (
-                <Divider style={{ margin: "12px 0 0" }} />
-              )}
+              </Space>
             </div>
-          );
-        })}
+
+            {/* Form builder cho bảng này */}
+            <CreateFormVer2
+              mode="admin"
+              rows={t.rows}
+              columnLabels={t.columnLabels}
+              setColumnLabels={(updater) =>
+                updateTable(t.tid, (tt) => {
+                  tt.columnLabels =
+                    typeof updater === "function"
+                      ? updater(tt.columnLabels)
+                      : updater;
+                  tt.columnLabels = ensureColumnLabels(
+                    tt.columnLabels,
+                    computeNMax(tt.rows)
+                  );
+                  return tt;
+                })
+              }
+              addRow={() => addRow(t.tid)}
+              removeRow={(rowId) => removeRow(t.tid, rowId)}
+              addColumn={(rowId) => addColumn(t.tid, rowId)}
+              removeColumn={(rowId, colIndex) =>
+                removeColumn(t.tid, rowId, colIndex)
+              }
+              // DnD hàng
+              onRowDragStart={(e, rowId) => onRowDragStart(t.tid, e, rowId)}
+              onRowDragOver={onRowDragOver}
+              onRowDrop={(e, targetRowId) => onRowDrop(t.tid, e, targetRowId)}
+              onRowDragEnd={() => onRowDragEnd(t.tid)}
+              maxCols={MAX_COLS}
+              onPreview={undefined}
+              onAutosaveDraft={undefined}
+              onChangeLabel={(rowId, nextLabel) =>
+                setRowLabel(t.tid, rowId, nextLabel)
+              }
+              onChangeInput={(rowId, colIndex, nextValue) =>
+                setCellValue(t.tid, rowId, colIndex, nextValue)
+              }
+            />
+
+            {idx < tables.length - 1 && (
+              <Divider style={{ margin: "12px 0 0" }} />
+            )}
+          </div>
+        ))}
       </Space>
     </div>
   );

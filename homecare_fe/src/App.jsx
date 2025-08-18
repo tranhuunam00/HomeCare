@@ -50,6 +50,8 @@ import LIRADSForm from "./pages/advance/Lirad/LIRADSForm";
 import ORADSModalityOnly from "./pages/advance/oRADS/OradsForm";
 import FormVer2 from "./pages/formver2/Test";
 import DFormVer2 from "./pages/formver2/FormVer2";
+import FormVer2List from "./pages/formver2/list/FormVer2List";
+import DFormVer2Detail from "./pages/formver2/detail/DFormVer2Detail";
 
 function App() {
   useAuthInitializer();
@@ -88,7 +90,10 @@ function App() {
 
           <Route path="products" element={<ProductList />} />
           <Route path="templates" element={<TemplateList />} />
+
+          <Route path="form-v2/detail/:id" element={<DFormVer2 />} />
           <Route path="form-v2" element={<DFormVer2 />} />
+          <Route path="form-v2-list" element={<FormVer2List />} />
 
           <Route
             path="/home/templates/add"

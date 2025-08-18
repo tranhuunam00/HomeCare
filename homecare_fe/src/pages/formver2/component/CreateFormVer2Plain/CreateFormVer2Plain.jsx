@@ -1,11 +1,11 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React from "react";
 import styles from "./CreateFormVer2Plain.module.scss";
 
 export default function CreateFormVer2Plain({
   mode = "admin", // 'admin' | 'user'
   rows = [],
   columnLabels = [],
-  setColumnLabels, // only used in admin
+  setColumnLabels,
   addRow,
   removeRow,
   addColumn,
@@ -15,93 +15,19 @@ export default function CreateFormVer2Plain({
   onRowDragOver,
   onRowDrop,
   onRowDragEnd,
-  // ❌ bỏ kéo thả cột
   maxCols = 5,
   onPreview,
-  onAutosaveDraft,
-  onChangeLabel: onChangeLabelUp, // NEW
+  onAutosaveDraft, // không dùng khi controlled, nhưng giữ prop cho tương thích
+  onChangeLabel: onChangeLabelUp,
   onChangeInput: onChangeInputUp,
 }) {
   const isAdmin = mode === "admin";
-
-  // ========= Local form state (thay cho AntD Form) =========
-  // formData: { [rowId]: { label: string, inputs: string[] } }
-  const [formData, setFormData] = useState(() => {
-    const v = {};
-    rows.forEach((r) => {
-      v[r.id] = {
-        label: r.label ?? "",
-        inputs: r.inputs?.length ? [...r.inputs] : [""],
-      };
-    });
-    return v;
-  });
-
-  // Sync khi props.rows thay đổi (thêm/xóa hàng, thêm/xóa cột từ ngoài)
-  useEffect(() => {
-    setFormData((prev) => {
-      const next = { ...prev };
-      const existIds = new Set(Object.keys(prev));
-      const newIds = new Set();
-      rows.forEach((r) => {
-        newIds.add(r.id);
-        if (!next[r.id]) {
-          next[r.id] = {
-            label: r.label ?? "",
-            inputs: r.inputs?.length ? [...r.inputs] : [""],
-          };
-        } else {
-          // giữ giá trị người dùng đã gõ, nhưng đảm bảo số cột khớp
-          const want = r.inputs?.length || 1;
-          const cur = next[r.id].inputs ?? [];
-          if (cur.length < want) {
-            next[r.id].inputs = [...cur, ...Array(want - cur.length).fill("")];
-          } else if (cur.length > want) {
-            next[r.id].inputs = cur.slice(0, want);
-          }
-          if (next[r.id].label === "" && r.label) next[r.id].label = r.label;
-        }
-      });
-      // xóa những row không còn
-      existIds.forEach((id) => {
-        if (!newIds.has(id)) delete next[id];
-      });
-      return next;
-    });
-  }, [rows]);
-
-  // Autosave ở mode user (thay cho onValuesChange)
-  useEffect(() => {
-    if (!isAdmin) {
-      const ordered = rows.map((r) => ({
-        id: r.id,
-        label: r.label, // user không sửa nhãn
-        inputs: formData[r.id]?.inputs || [],
-      }));
-      onAutosaveDraft?.(ordered);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData, isAdmin]);
 
   const labelCols = Math.max(
     1,
     Math.min(maxCols, columnLabels.length || maxCols)
   );
 
-  const handlePreview = () => {
-    // Giống validate nhẹ: đảm bảo mọi ô đều là string
-    const ordered = rows.map((r) => {
-      const payload = formData[r.id] || { label: "", inputs: [] };
-      return {
-        id: r.id,
-        label: payload.label ?? r.label ?? "",
-        inputs: Array.isArray(payload.inputs) ? payload.inputs : [],
-      };
-    });
-    onPreview?.(ordered);
-  };
-
-  // ====== helpers ======
   const autoGrow = (el) => {
     if (!el) return;
     el.style.height = "auto";
@@ -110,42 +36,12 @@ export default function CreateFormVer2Plain({
 
   const onChangeLabel = (rowId, val) => {
     const capped = (val ?? "").slice(0, 100);
-    setFormData((prev) => ({
-      ...prev,
-      [rowId]: { ...prev[rowId], label: capped },
-    }));
-    // đẩy lên parent
     onChangeLabelUp?.(rowId, capped);
   };
 
   const onChangeInput = (rowId, idx, val) => {
     const capped = (val ?? "").slice(0, 300);
-    setFormData((prev) => {
-      const row = prev[rowId] || { label: "", inputs: [] };
-      const nextInputs = [...(row.inputs || [])];
-      nextInputs[idx] = capped;
-      return { ...prev, [rowId]: { ...row, inputs: nextInputs } };
-    });
-    // đẩy lên parent
     onChangeInputUp?.(rowId, idx, capped);
-  };
-  const onRemoveColumn = (rowId, idx) => {
-    removeColumn?.(rowId, idx);
-    setFormData((prev) => {
-      const row = prev[rowId] || { inputs: [] };
-      const next = [...(row.inputs || [])];
-      next.splice(idx, 1);
-      return { ...prev, [rowId]: { ...row, inputs: next } };
-    });
-  };
-
-  const onAddColumn = (rowId) => {
-    addColumn?.(rowId);
-    setFormData((prev) => {
-      const row = prev[rowId] || { inputs: [] };
-      const next = Array.isArray(row.inputs) ? [...row.inputs, ""] : [""];
-      return { ...prev, [rowId]: { ...row, inputs: next } };
-    });
   };
 
   return (
@@ -153,7 +49,7 @@ export default function CreateFormVer2Plain({
       {/* ======= NHÃN CỘT (thụt trái như inputs) ======= */}
       <div className={styles.colLabelsWrap}>
         <div className={styles.colLabelsRow}>
-          <div className={styles.colLabelsLeft}>{/* chừa trống */}</div>
+          <div className={styles.colLabelsLeft} />
           <div className={styles.colLabelsRight}>
             <div className={styles.headerStrip}>
               <div className={styles.grid} style={{ ["--cols"]: labelCols }}>
@@ -165,8 +61,8 @@ export default function CreateFormVer2Plain({
                     placeholder={`Nhãn cột ${i + 1}`}
                     onChange={(e) =>
                       isAdmin &&
-                      setColumnLabels?.((prev) => {
-                        const copy = [...(prev || [])];
+                      setColumnLabels?.((prev = []) => {
+                        const copy = [...prev];
                         for (let k = copy.length; k < labelCols; k++)
                           copy[k] = "";
                         copy[i] = e.target.value ?? "";
@@ -189,8 +85,10 @@ export default function CreateFormVer2Plain({
       {/* ========================= FORM BODY ========================= */}
       <div className={styles.stack}>
         {rows.map((row, idx) => {
-          const rData = formData[row.id] || { label: "", inputs: [""] };
-          const nCols = rData.inputs?.length || 1;
+          const nCols =
+            Array.isArray(row.inputs) && row.inputs.length > 0
+              ? row.inputs.length
+              : 1;
 
           const card = (
             <div
@@ -216,7 +114,7 @@ export default function CreateFormVer2Plain({
                     <textarea
                       placeholder="Tiêu đề"
                       disabled={!isAdmin}
-                      value={rData.label}
+                      value={row.label ?? ""}
                       onChange={(e) => onChangeLabel(row.id, e.target.value)}
                       onInput={(e) => autoGrow(e.currentTarget)}
                       maxLength={100}
@@ -228,7 +126,10 @@ export default function CreateFormVer2Plain({
                 {/* Inputs (phải) */}
                 <div className={styles.inputsCol}>
                   <div className={styles.grid} style={{ ["--cols"]: nCols }}>
-                    {(rData.inputs || []).map((val, i) => {
+                    {(row.inputs?.length
+                      ? row.inputs
+                      : Array.from({ length: 1 }, () => "")
+                    )?.map((val, i) => {
                       const isLast = i === nCols - 1;
                       return (
                         <div key={i}>
@@ -238,7 +139,7 @@ export default function CreateFormVer2Plain({
                                 <button
                                   type="button"
                                   title="Xóa cột này"
-                                  onClick={() => onRemoveColumn(row.id, i)}
+                                  onClick={() => removeColumn?.(row.id, i)}
                                   className={`${styles.btn} ${styles.btnDanger}`}
                                 >
                                   ✕
@@ -253,7 +154,7 @@ export default function CreateFormVer2Plain({
                                       : "Thêm cột"
                                   }
                                   disabled={nCols >= maxCols}
-                                  onClick={() => onAddColumn(row.id)}
+                                  onClick={() => addColumn?.(row.id)}
                                   className={styles.btn}
                                 >
                                   ＋
@@ -265,7 +166,7 @@ export default function CreateFormVer2Plain({
                           <textarea
                             placeholder="Nội dung:"
                             disabled={!isAdmin}
-                            value={val}
+                            value={val ?? ""}
                             onChange={(e) =>
                               onChangeInput(row.id, i, e.target.value)
                             }
@@ -325,17 +226,6 @@ export default function CreateFormVer2Plain({
           );
         })}
       </div>
-
-      {/* Action bar đơn giản (nếu cần) */}
-      {/* <div className={styles.actionBar}>
-        <button
-          type="button"
-          onClick={handlePreview}
-          className={`${styles.btn} ${styles.btnGhost}`}
-        >
-          👁 Xem trước
-        </button>
-      </div> */}
     </div>
   );
 }
