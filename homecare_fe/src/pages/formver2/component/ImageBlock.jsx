@@ -66,17 +66,25 @@ export default function ImageBlock({
   };
 
   return (
-    <div style={{ width: "100%" }}>
+    <div
+      style={{
+        width: "100%",
+      }}
+    >
       {/* Ảnh hiển thị – bấm để mở link */}
       <div
-        style={{ cursor: linkVal ? "pointer" : "default" }}
+        style={{
+          cursor: linkVal ? "pointer" : "default",
+          display: "flex",
+          justifyContent: "center",
+        }}
         onClick={() => safeOpen(linkVal)}
       >
         <Image
           src={previewSrc}
           alt={title}
           style={{
-            width: "100%",
+            width: 450,
             height: 300,
             objectFit: "cover",
             borderRadius: 8,

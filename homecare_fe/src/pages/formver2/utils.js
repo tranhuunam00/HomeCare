@@ -194,6 +194,7 @@ export function buildFormData(values, extra) {
   fd.append("icd10", values.icd10 ?? "");
   fd.append("phanDoLoai", values.phanDoLoai ?? "");
   fd.append("chanDoanPhanBiet", values.chanDoanPhanBiet ?? "");
+  fd.append("ketQuaChanDoan", values.ketQuaChanDoan ?? "");
   fd.append("khuyenNghi", values.khuyenNghi ?? "");
   fd.append("ngayThucHien", extra?.ngayThucHienISO ?? "");
 

@@ -42,7 +42,7 @@ function mapApiToForm(api) {
   // ảnh (left/right)
   const left = api?.image_form_ver2s?.find((x) => x.kind === "left");
   const right = api?.image_form_ver2s?.find((x) => x.kind === "right");
-
+  console.log("right", right);
   return {
     id_template_service: api?.id_template_service ?? undefined,
     id_exam_part: api?.id_exam_part ?? undefined,
@@ -53,68 +53,15 @@ function mapApiToForm(api) {
     icd10: api?.icd10 ?? "",
     phanDoLoai: api?.phan_do_loai ?? "",
     chanDoanPhanBiet: api?.chan_doan_phan_biet ?? "",
+    ketQuaChanDoan: api?.ket_qua_chan_doan ?? "",
     khuyenNghi: api?.khuyen_nghi ?? "",
     ImageLeftDesc: left?.desc || "",
-    ImageLeftLink: left?.link || "",
+    ImageLeftDescLink: left?.link || "",
     ImageRightDesc: right?.desc || "",
-    ImageRightLink: right?.link || "",
+    ImageRightDescLink: right?.link || "",
   };
 }
 
-// Map Form values → payload cho API
-function mapFormToPayload(values, extra) {
-  const {
-    id_template_service,
-    id_exam_part, // <-- key đúng theo BE
-    language,
-    tenMau,
-    ketLuan,
-    quyTrinh,
-    icd10,
-    phanDoLoai,
-    chanDoanPhanBiet,
-    khuyenNghi,
-    ImageLeftDesc,
-    ImageLeftLink,
-    ImageRightDesc,
-    ImageRightLink,
-  } = values;
-
-  return {
-    id_template_service: Number(id_template_service),
-    id_exam_part: Number(id_exam_part),
-    language,
-    ten_mau: tenMau?.trim() || "",
-    ket_luan: ketLuan?.trim() || "",
-    quy_trinh_url: quyTrinh?.trim() || "",
-    icd10: icd10?.trim() || "",
-    phan_do_loai: phanDoLoai?.trim() || "",
-    chan_doan_phan_biet: chanDoanPhanBiet?.trim() || "",
-    khuyen_nghi: khuyenNghi?.trim() || "",
-    ngay_thuc_hien: extra?.ngayThucHienISO || toISODate(),
-    // ảnh: gửi đúng cấu trúc BE đang trả về
-    images: [
-      {
-        kind: "left",
-        type: "image",
-        url: ImageLeftLink?.trim() || "",
-        desc: ImageLeftDesc?.trim() || "",
-      },
-      {
-        kind: "right",
-        type: "image",
-        url: ImageRightLink?.trim() || "",
-        desc: ImageRightDesc?.trim() || "",
-      },
-    ],
-    // bảng: giữ dạng hiện tại của bạn (BE của bạn đang để table_form_ver2s = [])
-    // nếu BE yêu cầu field khác, đổi ở đây.
-    tables: extra?.tables || [],
-    auto_code: extra?.autoCode,
-  };
-}
-
-/* ============== COMPONENT ============== */
 export default function DFormVer2() {
   const [form] = Form.useForm();
   const navigate = useNavigate();
@@ -336,7 +283,7 @@ export default function DFormVer2() {
             NỘI DUNG THỰC HIỆN
           </Title>
 
-          <Row gutter={[16, 16]}>
+          <Row gutter={[16, 16]} style={{ justifyContent: "space-between" }}>
             <Col xs={24} md={12}>
               <ImageBlock
                 form={form}
@@ -390,8 +337,7 @@ export default function DFormVer2() {
             KẾT LUẬN, CHẨN ĐOÁN
           </Title>
           <Form.Item
-            label="Kết luận (6)"
-            name="ketLuan"
+            name="ketQuaChanDoan"
             rules={[{ required: true, message: "Nhập kết luận" }]}
           >
             <Input placeholder="VD: U máu gan" />
