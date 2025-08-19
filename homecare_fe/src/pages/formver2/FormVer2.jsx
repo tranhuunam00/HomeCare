@@ -18,7 +18,7 @@ import AdminFormVer2 from "./component/AdminFormVer2";
 import FormActionBar from "./component/FormActionBar";
 import { useGlobalAuth } from "../../contexts/AuthContext";
 import API_CALL from "../../services/axiosClient"; // axios instance của bạn
-import { buildFormData, handleAction, normalizeTablesFromApi } from "./utils";
+import { buildFormData, mapApiToForm, normalizeTablesFromApi } from "./utils";
 import { toast } from "react-toastify";
 
 const { Title } = Typography;
@@ -38,31 +38,8 @@ const toISODate = (d = new Date()) => new Date(d).toISOString().slice(0, 10); //
 
 /* ============== MAPPERS ============== */
 // Map API → Form initialValues
-function mapApiToForm(api) {
-  // ảnh (left/right)
-  const left = api?.image_form_ver2s?.find((x) => x.kind === "left");
-  const right = api?.image_form_ver2s?.find((x) => x.kind === "right");
-  console.log("right", right);
-  return {
-    id_template_service: api?.id_template_service ?? undefined,
-    id_exam_part: api?.id_exam_part ?? undefined,
-    language: api?.language ?? "vi",
-    tenMau: api?.ten_mau ?? "",
-    ketLuan: api?.ket_luan ?? "",
-    quyTrinh: api?.quy_trinh_url ?? "",
-    icd10: api?.icd10 ?? "",
-    phanDoLoai: api?.phan_do_loai ?? "",
-    chanDoanPhanBiet: api?.chan_doan_phan_biet ?? "",
-    ketQuaChanDoan: api?.ket_qua_chan_doan ?? "",
-    khuyenNghi: api?.khuyen_nghi ?? "",
-    ImageLeftDesc: left?.desc || "",
-    ImageLeftDescLink: left?.link || "",
-    ImageRightDesc: right?.desc || "",
-    ImageRightDescLink: right?.link || "",
-  };
-}
 
-export default function DFormVer2() {
+export default function DFormVer2({}) {
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const { id } = useParams(); // nếu có id → update mode
@@ -85,8 +62,6 @@ export default function DFormVer2() {
   const [tablesData, setTablesData] = useState([]); // lấy từ AdminFormVer2
   const [loading, setLoading] = useState(isEdit); // chỉ load khi edit
 
-  console.log("tablesData", tablesData);
-
   // ====== Fetch when edit ======
   useEffect(() => {
     if (!isEdit) return;
@@ -100,7 +75,6 @@ export default function DFormVer2() {
         if (!apiData) throw new Error("Không đọc được dữ liệu form");
         // fill form
         form.setFieldsValue(mapApiToForm(apiData));
-        console.log("-------1---");
         setTablesData(normalizeTablesFromApi(apiData?.table_form_ver2s));
 
         // ảnh để xem trước (không bắt buộc)
@@ -120,8 +94,6 @@ export default function DFormVer2() {
     })();
   }, [isEdit, id, form]);
 
-  // ====== Submit ======
-  // ====== Submit ======
   const onFinish = async (values) => {
     try {
       const fd = buildFormData(values, {

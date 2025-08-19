@@ -217,3 +217,27 @@ export function buildFormData(values, extra) {
 
   return fd;
 }
+
+export function mapApiToForm(api) {
+  // ảnh (left/right)
+  const left = api?.image_form_ver2s?.find((x) => x.kind === "left");
+  const right = api?.image_form_ver2s?.find((x) => x.kind === "right");
+  console.log("right", right);
+  return {
+    id_template_service: api?.id_template_service ?? undefined,
+    id_exam_part: api?.id_exam_part ?? undefined,
+    language: api?.language ?? "vi",
+    tenMau: api?.ten_mau ?? "",
+    ketLuan: api?.ket_luan ?? "",
+    quyTrinh: api?.quy_trinh_url ?? "",
+    icd10: api?.icd10 ?? "",
+    phanDoLoai: api?.phan_do_loai ?? "",
+    chanDoanPhanBiet: api?.chan_doan_phan_biet ?? "",
+    ketQuaChanDoan: api?.ket_qua_chan_doan ?? "",
+    khuyenNghi: api?.khuyen_nghi ?? "",
+    ImageLeftDesc: left?.desc || "",
+    ImageLeftDescLink: left?.link || "",
+    ImageRightDesc: right?.desc || "",
+    ImageRightDescLink: right?.link || "",
+  };
+}
