@@ -18,7 +18,8 @@ import AdminFormVer2 from "./component/AdminFormVer2";
 import FormActionBar from "./component/FormActionBar";
 import { useGlobalAuth } from "../../contexts/AuthContext";
 import API_CALL from "../../services/axiosClient"; // axios instance của bạn
-import { handleAction, normalizeTablesFromApi } from "./utils";
+import { buildFormData, handleAction, normalizeTablesFromApi } from "./utils";
+import { toast } from "react-toastify";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -54,9 +55,9 @@ function mapApiToForm(api) {
     chanDoanPhanBiet: api?.chan_doan_phan_biet ?? "",
     khuyenNghi: api?.khuyen_nghi ?? "",
     ImageLeftDesc: left?.desc || "",
-    ImageLeftLink: left?.url || "",
+    ImageLeftLink: left?.link || "",
     ImageRightDesc: right?.desc || "",
-    ImageRightLink: right?.url || "",
+    ImageRightLink: right?.link || "",
   };
 }
 
@@ -173,44 +174,43 @@ export default function DFormVer2() {
   }, [isEdit, id, form]);
 
   // ====== Submit ======
+  // ====== Submit ======
   const onFinish = async (values) => {
-    console.log("values", values);
-    console.log("tablesData", tablesData);
-    const payload = mapFormToPayload(values, {
-      autoCode: autoId,
-      ngayThucHienISO,
-      tables: tablesData,
-    });
-
     try {
+      const fd = buildFormData(values, {
+        tablesData,
+        autoId,
+        ngayThucHienISO,
+      });
+
       if (isEdit) {
-        await API_CALL.put(`/api/form-ver2/${id}`, payload);
-        message.success("Đã cập nhật mẫu thành công");
+        await API_CALL.patchForm(`/form-ver2/${id}`, fd, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        toast.success("Đã cập nhật mẫu thành công");
       } else {
-        const res = await API_CALL.post(`/api/form-ver2`, payload);
+        const res = await API_CALL.postForm(`/form-ver2`, fd, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
         const newId = res?.data?.data?.data?.id;
-        message.success("Đã tạo mẫu thành công");
+        toast.success("Đã tạo mẫu thành công");
         if (newId) navigate(`/form-ver2/${newId}`);
       }
 
       switch (pendingAction.current) {
         case "approve":
-          message.success("Đã APPROVE");
+          toast.success("Đã APPROVE");
           break;
         case "export":
-          console.log("[EXPORT payload]", payload);
-          message.success("Đã EXPORT (xem Console)");
+          toast.success("Đã EXPORT (payload form-data đã gửi)");
           break;
         case "print":
           window.print();
           break;
-        default:
-          // 'save' hoặc submit thường
-          break;
       }
     } catch (e) {
       console.error(e);
-      message.error("Lưu thất bại. Kiểm tra dữ liệu hoặc thử lại sau.");
+      toast.error("Lưu thất bại. Kiểm tra dữ liệu hoặc thử lại sau.");
     } finally {
       pendingAction.current = null;
     }
@@ -218,7 +218,7 @@ export default function DFormVer2() {
 
   const onFinishFailed = (err) => {
     console.log("[onFinishFailed] errors:", err?.errorFields);
-    message.error("Vui lòng kiểm tra các trường còn thiếu/không hợp lệ.");
+    toast.error("Vui lòng kiểm tra các trường còn thiếu/không hợp lệ.");
   };
 
   return (

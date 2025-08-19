@@ -171,3 +171,48 @@ export function buildTablesPayload(feTables) {
     },
   }));
 }
+
+export const appendIfExists = (fd, key, val) => {
+  if (val === undefined || val === null) return;
+  // cho phép chuỗi rỗng khi bạn muốn "Send empty value"
+  fd.append(key, typeof val === "number" ? String(val) : String(val));
+};
+
+// Nếu bạn có file upload từ ImageBlock, đặt name form là ImageLeftFile / ImageRightFile
+// (nếu không có file, cứ gửi link/mô tả cũng được)
+// utils.ts
+export function buildFormData(values, extra) {
+  const fd = new FormData();
+
+  // ---- Header & fields thường
+  fd.append("id_template_service", String(values.id_template_service ?? ""));
+  fd.append("id_exam_part", String(values.id_exam_part ?? ""));
+  fd.append("language", values.language ?? "vi");
+  fd.append("tenMau", values.tenMau ?? "");
+  fd.append("ketLuan", values.ketLuan ?? "");
+  fd.append("quyTrinh", values.quyTrinh ?? "");
+  fd.append("icd10", values.icd10 ?? "");
+  fd.append("phanDoLoai", values.phanDoLoai ?? "");
+  fd.append("chanDoanPhanBiet", values.chanDoanPhanBiet ?? "");
+  fd.append("khuyenNghi", values.khuyenNghi ?? "");
+  fd.append("ngayThucHien", extra?.ngayThucHienISO ?? "");
+
+  // ---- Ảnh: text fields (đúng key BE)
+  fd.append("ImageLeftDesc", values.ImageLeftDesc ?? "");
+  fd.append("ImageLeftDescLink", values.ImageLeftDescLink ?? "");
+  fd.append("ImageRightDesc", values.ImageRightDesc ?? "");
+  fd.append("ImageRightDescLink", values.ImageRightDescLink ?? "");
+
+  // ---- Ảnh: FILE (đúng key BE: ImageFormLeft / ImageFormRight)
+  const leftFileObj = values.ImageLeftFile?.[0]?.originFileObj;
+  if (leftFileObj) fd.append("ImageFormLeft", leftFileObj);
+
+  const rightFileObj = values.ImageRightFile?.[0]?.originFileObj;
+  if (rightFileObj) fd.append("ImageFormRight", rightFileObj);
+
+  fd.append("tables", JSON.stringify(extra?.tablesData ?? []));
+
+  // ---- auto_code nếu cần
+
+  return fd;
+}
