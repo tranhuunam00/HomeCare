@@ -45,8 +45,10 @@ export default function DFormVer2({
   onFormChange,
   onTablesChange,
   onPrint,
+  onPreview,
 }) {
   const [form] = Form.useForm();
+
   const navigate = useNavigate();
   const { id: idFromParam } = useParams();
   const editId = id_form_ver2 ?? idFromParam;
@@ -114,43 +116,45 @@ export default function DFormVer2({
   }, [isEdit, editId, form]);
 
   const onFinish = async (values) => {
-    try {
-      const fd = buildFormData(values, {
-        tablesData,
-        autoId,
-        ngayThucHienISO,
-      });
-
-      if (isEdit) {
-        await API_CALL.patchForm(`/form-ver2/${editId}`, fd, {
-          headers: { "Content-Type": "multipart/form-data" },
+    if (!isDoctor) {
+      try {
+        const fd = buildFormData(values, {
+          tablesData,
+          autoId,
+          ngayThucHienISO,
         });
-        toast.success("Đã cập nhật mẫu thành công");
-      } else {
-        const res = await API_CALL.postForm(`/form-ver2`, fd, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-        const newId = res?.data?.data?.data?.id;
-        toast.success("Đã tạo mẫu thành công");
-        if (newId) navigate(`/form-ver2/${newId}`);
-      }
 
-      switch (pendingAction.current) {
-        case "approve":
-          toast.success("Đã APPROVE");
-          break;
-        case "export":
-          toast.success("Đã EXPORT (payload form-data đã gửi)");
-          break;
-        case "print":
-          window.print();
-          break;
+        if (isEdit) {
+          await API_CALL.patchForm(`/form-ver2/${editId}`, fd, {
+            headers: { "Content-Type": "multipart/form-data" },
+          });
+          toast.success("Đã cập nhật mẫu thành công");
+        } else {
+          const res = await API_CALL.postForm(`/form-ver2`, fd, {
+            headers: { "Content-Type": "multipart/form-data" },
+          });
+          const newId = res?.data?.data?.data?.id;
+          toast.success("Đã tạo mẫu thành công");
+          if (newId) navigate(`/form-ver2/${newId}`);
+        }
+
+        switch (pendingAction.current) {
+          case "approve":
+            toast.success("Đã APPROVE");
+            break;
+          case "export":
+            toast.success("Đã EXPORT (payload form-data đã gửi)");
+            break;
+          case "print":
+            window.print();
+            break;
+        }
+      } catch (e) {
+        console.error(e);
+        toast.error("Lưu thất bại. Kiểm tra dữ liệu hoặc thử lại sau.");
+      } finally {
+        pendingAction.current = null;
       }
-    } catch (e) {
-      console.error(e);
-      toast.error("Lưu thất bại. Kiểm tra dữ liệu hoặc thử lại sau.");
-    } finally {
-      pendingAction.current = null;
     }
   };
 
@@ -397,6 +401,7 @@ export default function DFormVer2({
             }}
             onPrint={onPrint}
             onReset={() => form.resetFields()}
+            onPreview={onPreview}
           />
         </Form>
       )}

@@ -17,10 +17,10 @@ const DoctorChooseForm = () => {
   const printRef = useRef();
 
   const [data, setData] = useState(null);
-  const navigate = useNavigate();
   const { examParts, templateServices } = useGlobalAuth();
   const [dataFormVer2List, setDataFormVer2List] = useState([]);
   const [printTemplateList, setPrintTemplateList] = useState([]);
+  const [isPreview, setIspreview] = useState(false);
 
   const [idFormVer2Choose, setIdFormVer2Choose] = useState();
   const [idTemplatePrintChoose, setIdTemplatePrintChoose] = useState();
@@ -156,18 +156,21 @@ const DoctorChooseForm = () => {
           onFormChange={setFormSnapshot}
           onTablesChange={setTablesSnapshot}
           onPrint={() => handlePrint(printRef)}
+          onPreview={() => setIspreview(!isPreview)}
         />
-        <PrintPreviewVer2
-          printRef={printRef}
-          patientDiagnose={data}
-          printTemplate={printTemplateList?.find(
-            (t) => t.id == idTemplatePrintChoose
-          )}
-          formSnapshot={formSnapshot}
-          tablesSnapshot={tablesSnapshot}
-          selectedExamPart={selectedExamPart}
-          selectedTemplateService={selectedTemplateService}
-        />
+        {isPreview && (
+          <PrintPreviewVer2
+            printRef={printRef}
+            patientDiagnose={data}
+            printTemplate={printTemplateList?.find(
+              (t) => t.id == idTemplatePrintChoose
+            )}
+            formSnapshot={formSnapshot}
+            tablesSnapshot={tablesSnapshot}
+            selectedExamPart={selectedExamPart}
+            selectedTemplateService={selectedTemplateService}
+          />
+        )}
       </div>
     </div>
   );

@@ -14,27 +14,42 @@ import {
 import styles from "./FormActionBar.module.scss";
 import { useNavigate } from "react-router-dom";
 
-export default function FormActionBar({ onAction, onPrint, onReset }) {
+export default function FormActionBar({
+  onAction,
+  onPrint,
+  onReset,
+  onPreview,
+}) {
   const navigate = useNavigate();
-
+  const emptyF = () => {};
   const items = [
     {
       key: "reset",
       label: "RESET",
       icon: <ReloadOutlined />,
-      onClick: onReset,
+      onClick: onReset ?? emptyF,
     },
     { key: "save", label: "SAVE", icon: <SaveOutlined /> },
     { key: "edit", label: "EDIT", icon: <EditOutlined /> },
     { key: "approve", label: "APPROVE", icon: <CheckCircleOutlined /> },
-    { key: "preview", label: "PREVIEW", icon: <EyeOutlined /> },
+    {
+      key: "preview",
+      label: "PREVIEW",
+      icon: <EyeOutlined />,
+      onClick: onPreview ?? emptyF,
+    },
     {
       key: "export",
       label: "EXPORT",
       icon: <ExportOutlined />,
-      onClick: onPrint,
+      onClick: onPrint ?? emptyF,
     },
-    { key: "print", label: "PRINT", icon: <PrinterOutlined /> },
+    {
+      key: "print",
+      label: "PRINT",
+      icon: <PrinterOutlined />,
+      onClick: onPrint || emptyF,
+    },
     {
       key: "exit",
       label: "EXIT",
