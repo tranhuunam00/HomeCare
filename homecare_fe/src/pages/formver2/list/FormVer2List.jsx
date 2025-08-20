@@ -20,6 +20,7 @@ import {
   ReloadOutlined,
   PrinterOutlined,
   SearchOutlined,
+  FileAddFilled,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import styles from "./FormVer2List.module.scss";
@@ -213,6 +214,16 @@ export default function FormVer2List() {
         <Title level={3} style={{ margin: 0 }}>
           Danh sách FormVer2
         </Title>
+        <Space>
+          <Button
+            icon={<FileAddFilled />}
+            onClick={() => {
+              navigate(`/home/form-v2`);
+            }}
+          >
+            Thêm mới
+          </Button>
+        </Space>
         <Space>
           <Button
             icon={<ReloadOutlined />}

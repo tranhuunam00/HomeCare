@@ -12,19 +12,38 @@ import {
   LogoutOutlined,
 } from "@ant-design/icons";
 import styles from "./FormActionBar.module.scss";
+import { useNavigate } from "react-router-dom";
 
-const items = [
-  { key: "reset", label: "RESET", icon: <ReloadOutlined /> },
-  { key: "save", label: "SAVE", icon: <SaveOutlined /> },
-  { key: "edit", label: "EDIT", icon: <EditOutlined /> },
-  { key: "approve", label: "APPROVE", icon: <CheckCircleOutlined /> },
-  { key: "preview", label: "PREVIEW", icon: <EyeOutlined /> },
-  { key: "export", label: "EXPORT", icon: <ExportOutlined /> },
-  { key: "print", label: "PRINT", icon: <PrinterOutlined /> },
-  { key: "exit", label: "EXIT", icon: <LogoutOutlined /> },
-];
+export default function FormActionBar({ onAction, onPrint, onReset }) {
+  const navigate = useNavigate();
 
-export default function FormActionBar({ onAction }) {
+  const items = [
+    {
+      key: "reset",
+      label: "RESET",
+      icon: <ReloadOutlined />,
+      onClick: onReset,
+    },
+    { key: "save", label: "SAVE", icon: <SaveOutlined /> },
+    { key: "edit", label: "EDIT", icon: <EditOutlined /> },
+    { key: "approve", label: "APPROVE", icon: <CheckCircleOutlined /> },
+    { key: "preview", label: "PREVIEW", icon: <EyeOutlined /> },
+    {
+      key: "export",
+      label: "EXPORT",
+      icon: <ExportOutlined />,
+      onClick: onPrint,
+    },
+    { key: "print", label: "PRINT", icon: <PrinterOutlined /> },
+    {
+      key: "exit",
+      label: "EXIT",
+      icon: <LogoutOutlined />,
+      onClick: () => {
+        navigate(-1);
+      },
+    },
+  ];
   return (
     <div className={styles.actionBar}>
       <div className={styles.actionGrid}>
@@ -34,7 +53,7 @@ export default function FormActionBar({ onAction }) {
             className={`${styles.btn} ${styles[it.key]}`}
             icon={it.icon}
             block
-            onClick={() => onAction?.(it.key)}
+            onClick={() => (it.onClick ? it.onClick() : onAction?.(it.key))}
           >
             {it.label}
           </Button>

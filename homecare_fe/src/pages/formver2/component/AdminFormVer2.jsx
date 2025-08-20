@@ -117,7 +117,7 @@ export default function AdminFormVer2({ value = [], onChange }) {
 
   /* ======================= UI ======================= */
   return (
-    <div style={{ maxWidth: 1400, margin: "0 auto", padding: 16 }}>
+    <div style={{ maxWidth: 1400, margin: "0 auto", padding: 0 }}>
       <div
         style={{
           display: "flex",

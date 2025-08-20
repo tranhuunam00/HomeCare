@@ -32,18 +32,25 @@ const LANGUAGE_OPTIONS = [
 ];
 
 // random-ish auto code (bạn có thể giữ cách cũ nếu muốn)
-const generateAutoId = () => `DFORM-${Date.now().toString(36).slice(-6)}`;
+const generateAutoId = () => `Tự động`;
 
 const toISODate = (d = new Date()) => new Date(d).toISOString().slice(0, 10); // YYYY-MM-DD
 
 /* ============== MAPPERS ============== */
 // Map API → Form initialValues
 
-export default function DFormVer2({}) {
+export default function DFormVer2({
+  id_form_ver2,
+  isDoctor = false,
+  onFormChange,
+  onTablesChange,
+  onPrint,
+}) {
   const [form] = Form.useForm();
   const navigate = useNavigate();
-  const { id } = useParams(); // nếu có id → update mode
-  const isEdit = Boolean(id);
+  const { id: idFromParam } = useParams();
+  const editId = id_form_ver2 ?? idFromParam;
+  const isEdit = editId != null && editId !== "";
 
   const pendingAction = useRef(null);
   const autoId = useMemo(() => generateAutoId(), []);
@@ -52,15 +59,27 @@ export default function DFormVer2({}) {
   const { examParts, templateServices } = useGlobalAuth();
 
   // preview images (chỉ để xem), dữ liệu save lấy từ form
-  const [imgAnatomy, setImgAnatomy] = useState(
+  const [ImageLeftUrl, setImageLeftUrl] = useState(
     "https://via.placeholder.com/640x360?text=Minh+hoa+giai+phau"
   );
-  const [imgProcedure, setImgProcedure] = useState(
+  const [ImageRightUrl, setImageRightUrl] = useState(
     "https://via.placeholder.com/640x360?text=Minh+hoa+quy+trinh+thuc+hi%C3%AAn"
   );
 
-  const [tablesData, setTablesData] = useState([]); // lấy từ AdminFormVer2
-  const [loading, setLoading] = useState(isEdit); // chỉ load khi edit
+  const [tablesData, setTablesData] = useState([]);
+  const [loading, setLoading] = useState(isEdit);
+
+  useEffect(() => {
+    onTablesChange?.(tablesData);
+  }, [tablesData, onTablesChange]);
+
+  useEffect(() => {
+    onFormChange?.({
+      ...form.getFieldsValue(),
+      ImageLeftUrl,
+      ImageRightUrl,
+    });
+  }, [ImageLeftUrl, ImageRightUrl]);
 
   // ====== Fetch when edit ======
   useEffect(() => {
@@ -69,7 +88,7 @@ export default function DFormVer2({}) {
       try {
         setLoading(true);
         const res = await API_CALL.get(
-          `/form-ver2/${id}?withTables=true&withImages=true&includeDeleted=false`
+          `/form-ver2/${editId}?withTables=true&withImages=true&includeDeleted=false`
         );
         const apiData = res?.data?.data?.data; // theo response bạn gửi
         if (!apiData) throw new Error("Không đọc được dữ liệu form");
@@ -82,8 +101,8 @@ export default function DFormVer2({}) {
         const right = apiData?.image_form_ver2s?.find(
           (x) => x.kind === "right"
         );
-        if (left?.url) setImgAnatomy(left.url);
-        if (right?.url) setImgProcedure(right.url);
+        if (left?.url) setImageLeftUrl(left.url);
+        if (right?.url) setImageRightUrl(right.url);
         // bảng (nếu có)
       } catch (e) {
         console.error(e);
@@ -92,7 +111,7 @@ export default function DFormVer2({}) {
         setLoading(false);
       }
     })();
-  }, [isEdit, id, form]);
+  }, [isEdit, editId, form]);
 
   const onFinish = async (values) => {
     try {
@@ -103,7 +122,7 @@ export default function DFormVer2({}) {
       });
 
       if (isEdit) {
-        await API_CALL.patchForm(`/form-ver2/${id}`, fd, {
+        await API_CALL.patchForm(`/form-ver2/${editId}`, fd, {
           headers: { "Content-Type": "multipart/form-data" },
         });
         toast.success("Đã cập nhật mẫu thành công");
@@ -141,7 +160,7 @@ export default function DFormVer2({}) {
   };
 
   return (
-    <div style={{ maxWidth: 980, margin: "0 auto", padding: 16 }}>
+    <div style={{ maxWidth: 980, margin: "0 auto", padding: 0 }}>
       <Title level={3} style={{ textAlign: "center", marginBottom: 24 }}>
         {isEdit
           ? "CẬP NHẬT BỘ MẪU KẾT QUẢ D-FORM"
@@ -163,6 +182,13 @@ export default function DFormVer2({}) {
           onFinish={onFinish}
           onFinishFailed={onFinishFailed}
           initialValues={{ language: "vi" }}
+          onValuesChange={(_, allValues) => {
+            onFormChange?.({
+              ...allValues,
+              ImageLeftUrl,
+              ImageRightUrl,
+            });
+          }}
         >
           {/* Hàng 1 */}
           <Row gutter={16}>
@@ -172,7 +198,7 @@ export default function DFormVer2({}) {
                 name="id_template_service"
                 rules={[{ required: true, message: "Chọn kỹ thuật" }]}
               >
-                <Select placeholder="Chọn kỹ thuật">
+                <Select placeholder="Chọn kỹ thuật" disabled={isDoctor}>
                   {templateServices.map((s) => (
                     <Option key={s.id} value={s.id}>
                       {s.name}
@@ -187,7 +213,10 @@ export default function DFormVer2({}) {
                 name="id_exam_part" // ✅ key đúng BE
                 rules={[{ required: true, message: "Chọn bộ phận" }]}
               >
-                <Select placeholder="Chọn bộ phận thăm khám">
+                <Select
+                  placeholder="Chọn bộ phận thăm khám"
+                  disabled={isDoctor}
+                >
                   {examParts.map((s) => (
                     <Option key={s.id} value={s.id}>
                       {s.name}
@@ -260,16 +289,22 @@ export default function DFormVer2({}) {
               <ImageBlock
                 form={form}
                 namePrefix="ImageLeft"
-                src={imgAnatomy}
+                src={ImageLeftUrl}
                 title="Minh hoạ giải phẫu (cố định, có mô tả & link)"
+                onChange={(value) => {
+                  setImageLeftUrl(value);
+                }}
               />
             </Col>
             <Col xs={24} md={12}>
               <ImageBlock
                 form={form}
                 namePrefix="ImageRight"
-                src={imgProcedure}
+                src={ImageRightUrl}
                 title="Minh hoạ quy trình thực hiện (cố định, có mô tả & link)"
+                onChange={(value) => {
+                  setImageRightUrl(value);
+                }}
               />
             </Col>
           </Row>
@@ -312,7 +347,7 @@ export default function DFormVer2({}) {
             name="ketQuaChanDoan"
             rules={[{ required: true, message: "Nhập kết luận" }]}
           >
-            <Input placeholder="VD: U máu gan" />
+            <TextArea style={{ height: 200 }} placeholder="VD: U máu gan" />
           </Form.Item>
 
           <Form.Item
@@ -360,6 +395,8 @@ export default function DFormVer2({}) {
               pendingAction.current = key;
               form.submit();
             }}
+            onPrint={onPrint}
+            onReset={() => form.resetFields()}
           />
         </Form>
       )}

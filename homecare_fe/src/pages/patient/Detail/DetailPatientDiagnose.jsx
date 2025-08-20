@@ -11,6 +11,7 @@ import {
 import PatientTablePage from "../PatientDiagnoseList";
 import StatusButtonPatientDiagnose from "../../../components/Status2ButtonPatientDiagnose";
 import { useGlobalAuth } from "../../../contexts/AuthContext";
+import GroupProcessPatientDiagnoiseFormVer2 from "../../../components/GroupProcessPatientDiagnoiseFormVer2";
 
 const { Title, Text } = Typography;
 
@@ -70,7 +71,6 @@ const PatientDiagnoiseDetailPage = () => {
       setSelectedProvince(data.province_code);
     }
   }, [data, provinces]);
-
 
   const getNameByCode = (list, code) => {
     const item = list.find((x) => x.code == code);
@@ -185,6 +185,13 @@ const PatientDiagnoiseDetailPage = () => {
           <h2>Hành động</h2>
         </Row>
         <StatusButtonPatientDiagnose id={data.id} status={data.status} />
+        <Row gutter={24} style={{ marginTop: 40 }}>
+          <h2>Hành động phiên bản 2</h2>
+        </Row>
+        <GroupProcessPatientDiagnoiseFormVer2
+          id={data.id}
+          status={data.status}
+        />
 
         <Row gutter={24} style={{ marginTop: 40 }}>
           <h2>Lịch sử</h2>

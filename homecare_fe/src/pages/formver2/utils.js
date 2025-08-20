@@ -1,5 +1,7 @@
 // src/utils/formVer2.js
 
+import dayjs from "dayjs";
+
 /* ========================= Constants ========================= */
 export const MAX_COLS = 5;
 
@@ -112,7 +114,12 @@ export const getTemplateRowsAndLabels = () => {
 
 export const handleAction = ({ pendingAction, key, form }) => {
   pendingAction.current = key;
-
+  // Các action không cần submit
+  if (key === "reset") {
+    console.log('"hehehe"', "hehehe");
+    form.resetFields();
+    return;
+  }
   // Các action cần validate + gom dữ liệu → submit form
   if (["save", "approve", "export", "print"].includes(key)) {
     console.log("---");
@@ -120,12 +127,6 @@ export const handleAction = ({ pendingAction, key, form }) => {
     return;
   }
 
-  // Các action không cần submit
-  if (key === "reset") {
-    form.resetFields();
-    console.log("Đã RESET biểu mẫu.");
-    return;
-  }
   if (key === "preview") {
     // TODO: mở modal preview
     console.log("PREVIEW (demo).");
@@ -222,6 +223,7 @@ export function mapApiToForm(api) {
   // ảnh (left/right)
   const left = api?.image_form_ver2s?.find((x) => x.kind === "left");
   const right = api?.image_form_ver2s?.find((x) => x.kind === "right");
+
   console.log("right", right);
   return {
     id_template_service: api?.id_template_service ?? undefined,
@@ -239,5 +241,57 @@ export function mapApiToForm(api) {
     ImageLeftDescLink: left?.link || "",
     ImageRightDesc: right?.desc || "",
     ImageRightDescLink: right?.link || "",
+    ImageRightUrl: right?.url || "",
+    ImageLeftUrl: left?.url || "",
   };
 }
+export const calculateAge = (dob) => {
+  if (!dob) return "";
+  const today = dayjs();
+  const birthDate = dayjs(dob);
+  return today.diff(birthDate, "year");
+};
+
+export const handlePrint = (printRef) => {
+  const printContents = printRef.current.innerHTML;
+  const newWindow = window.open("", "_blank", "width=800,height=600");
+  newWindow.document.write(`
+    <html>
+      <head>
+        <title>HOMECARE</title>
+        <style>
+          /* Font toàn trang */
+          * {
+            font-family: 'Arial', sans-serif !important;
+          }
+          body { padding: 20px; }
+         
+          table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-bottom: 16px; 
+          }
+          th, td { 
+            border: 0px solid #ccc; 
+            padding: 4px; 
+            text-align: left; 
+            font-size: 13px 
+          }
+          h3 { margin-top: 24px; font-size: 16px !important }
+          // .logoImg{
+          //   height: 60px !important
+          // }
+        </style>
+      </head>
+     <body ">
+        ${printContents}
+      </body>
+    </html>
+  `);
+  newWindow.document.close();
+  newWindow.onload = () => {
+    newWindow.focus();
+    newWindow.print();
+    newWindow.close();
+  };
+};

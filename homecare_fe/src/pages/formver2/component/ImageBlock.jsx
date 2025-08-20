@@ -9,7 +9,7 @@ import {
   message,
 } from "antd";
 import { InboxOutlined } from "@ant-design/icons";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 const { Text } = Typography;
 const { Dragger } = Upload;
@@ -32,21 +32,62 @@ export default function ImageBlock({
   namePrefix, // "ImageLeft" | "ImageRight"
   src,
   title,
+  onChange,
 }) {
   const descName = `${namePrefix}Desc`;
   const linkName = `${namePrefix}DescLink`; // ⚠️ đồng bộ với BE: ...DescLink
   const fileName = `${namePrefix}File`; // gửi file qua field này
 
+  console.log("first", form.getFieldsValue());
   const linkVal = Form.useWatch(linkName, form);
   const descVal = Form.useWatch(descName, form);
   const fileList = Form.useWatch(fileName, form) || [];
 
-  // preview ảnh: ưu tiên file mới chọn, fallback props.src
-  const previewSrc = useMemo(() => {
-    const f = fileList?.[0]?.originFileObj;
-    if (f) return URL.createObjectURL(f);
-    return src;
-  }, [fileList, src]);
+  const [previewSrc, setPreviewSrc] = useState(src || "");
+  const currentUrlRef = useRef(null);
+
+  const firstFileObj = fileList?.[0]?.originFileObj || null;
+  const firstFileUid = fileList?.[0]?.uid || null;
+  useEffect(() => {
+    if (firstFileObj) return; // đang dùng blob của file => bỏ qua src prop
+
+    // revoke blob cũ nếu có
+    if (currentUrlRef.current?.startsWith?.("blob:")) {
+      URL.revokeObjectURL(currentUrlRef.current);
+    }
+
+    currentUrlRef.current = src || "";
+    setPreviewSrc(src || "");
+    onChange?.(src || "");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [src, firstFileObj]);
+
+  /* ✅ Effect 2: tạo blob URL khi file đầu tiên thay đổi */
+  useEffect(() => {
+    if (!firstFileObj) return;
+
+    const newBlobUrl = URL.createObjectURL(firstFileObj);
+
+    // nếu URL không đổi thì bỏ
+    if (newBlobUrl === currentUrlRef.current) return;
+
+    // revoke cũ nếu là blob
+    if (currentUrlRef.current?.startsWith?.("blob:")) {
+      URL.revokeObjectURL(currentUrlRef.current);
+    }
+
+    currentUrlRef.current = newBlobUrl;
+    setPreviewSrc(newBlobUrl);
+    onChange?.(newBlobUrl);
+
+    // cleanup khi file thay/unmount
+    return () => {
+      if (newBlobUrl && newBlobUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(newBlobUrl);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [firstFileUid]);
 
   // Dragger config — không auto upload
   const draggerProps = {
@@ -84,8 +125,8 @@ export default function ImageBlock({
           src={previewSrc}
           alt={title}
           style={{
-            width: 450,
-            height: 300,
+            width: 300,
+            height: 220,
             objectFit: "cover",
             borderRadius: 8,
           }}
