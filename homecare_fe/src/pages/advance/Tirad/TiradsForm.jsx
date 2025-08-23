@@ -138,20 +138,17 @@ const TiradsForm = () => {
           <td>
             <table style="width: 100%; border-collapse: collapse; border: none;">
               <tr>
-                <td style="text-align: center; border: none; padding: 0; border-right: 1px solid #ccc;">${
-                  values.D1 || ""
-                } mm</td>
-                <td style="text-align: center; border: none; padding: 0; border-right: 1px solid #ccc;">${
-                  values.D2 || ""
-                } mm</td>
-                <td style="text-align: center; border: none; padding: 0;">${
-                  values.D3 || ""
-                } mm</td>
+                <td style="text-align: center; border: none; padding: 0; border-right: 1px solid #ccc;">
+                D1 = ${values.D1 || ""} mm</td>
+                <td style="text-align: center; border: none; padding: 0; border-right: 1px solid #ccc;">
+                D2 = ${values.D2 || ""} mm</td>
+                <td style="text-align: center; border: none; padding: 0;">
+                D3 = ${values.D3 || ""} mm</td>
               </tr>
             </table>
           </td>
         </tr>
-        <tr><td>Thể tích</td><td style="text-align: center;">${volume} mm3 </td></tr>
+        <tr><td>Thể tích</td><td style="text-align: center;">V = ${volume} mm3 </td></tr>
         <tr><td>Đặc điểm thành phần</td><td>${getLabelFromValue(
           COMPOSITION_OPTIONS,
           values.composition
@@ -174,7 +171,7 @@ const TiradsForm = () => {
         )}</td></tr>
         <tr><td><strong>Tổng điểm</strong></td><td style="text-align: center;">${score}</td></tr>
         <tr><td>Phân loại (ACR-TIRADS)</td><td><strong style="text-align: center;">${tirads}</strong></td></tr>
-        <tr><td>Khuyến nghị</td><td>${recommendation}</td></tr>
+        <tr><td>Khuyến nghị</td><td style="font-size:14px">${recommendation}</td></tr>
 
       </table>
     `;
@@ -188,7 +185,6 @@ const TiradsForm = () => {
 
   const onCalculate = async () => {
     try {
-      console.log("hehe");
       const values = await form.validateFields();
       const score = getTotalScore(values);
       const tirads = getTirads(score);

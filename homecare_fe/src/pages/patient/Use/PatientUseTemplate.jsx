@@ -1040,7 +1040,6 @@ const PatientUseTemplate = () => {
               statusCode={patientDiagnose?.status}
               handlePrint={handlePrint}
               handleCancelVerify={async () => {
-                console.log("hehe");
                 const confirm = window.confirm(
                   "Bạn có chắc chắn muốn hủy kết quả duyệt không?\n"
                 );

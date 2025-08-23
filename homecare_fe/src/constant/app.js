@@ -167,7 +167,7 @@ export const getLabelFromValue = (options, value) => {
 
 export const genAITextToHtml = (geminiResponse) => {
   return `<tr>
-                <td>Khuyến nghị AI</td>
+                <td>Khuyến nghị</td>
                 <td>
                   <div style="
                     background: #fafafa;
@@ -176,7 +176,7 @@ export const genAITextToHtml = (geminiResponse) => {
                     border: 1px solid #eee;
                     white-space: pre-wrap;
                     font-family: Arial, sans-serif;
-                    font-size: 15px;
+                    font-size: 13px;
                   ">
                     ${geminiResponse
                       .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") // giữ định dạng đậm
@@ -195,9 +195,9 @@ export const STYLE_COPY = `
         }
         th, td {
           border: 1px solid #ccc;
-          padding: 2px 12px;
+          padding: 2px 6px;
           text-align: left;
-          font-size: 16px;
+          font-size: 14px;
           vertical-align: middle;
           word-wrap: break-word;
           white-space: pre-wrap;
@@ -208,9 +208,12 @@ export const STYLE_COPY = `
         caption {
           caption-side: top;
           font-weight: bold;
-          font-size: 18px;
+          font-size: 16px;
           margin-bottom: 10px;
           text-align: left;
+        }
+        p {
+          font-size: 14px;
         }
       </style>
       `;

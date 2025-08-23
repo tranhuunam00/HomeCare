@@ -116,7 +116,6 @@ export const handleAction = ({ pendingAction, key, form }) => {
   pendingAction.current = key;
   // Các action không cần submit
   if (key === "reset") {
-    console.log('"hehehe"', "hehehe");
     form.resetFields();
     return;
   }

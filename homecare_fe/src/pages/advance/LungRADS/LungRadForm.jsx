@@ -41,10 +41,26 @@ const COMPARE_OPTIONS = [
 ];
 
 export const BENIGN_OPTIONS = [
-  { label: "Nốt có vôi hóa (calcification)", value: "calc" },
-  { label: "Nốt chứa mỡ (fat)", value: "fat" },
-  { label: "Nốt cạnh màng phổi (juxtapleural).", value: "mp" },
-  { label: "Không có đặc điểm lành tính nào (none)", value: "none" },
+  {
+    label: "Nốt có vôi hóa (calcification)",
+    value: "calc",
+    printName: "Nốt có vôi hóa",
+  },
+  {
+    label: "Nốt chứa mỡ (fat)",
+    value: "fat",
+    printName: "Nốt chứa mỡ",
+  },
+  {
+    label: "Nốt cạnh màng phổi (juxtapleural).",
+    value: "mp",
+    printName: "Nốt cạnh màng phổi",
+  },
+  {
+    label: "Không có đặc điểm lành tính nào (none)",
+    value: "none",
+    printName: "Không có đặc điểm lành tính nào",
+  },
 ];
 
 const LOCATION_OPTIONS = [
@@ -57,15 +73,32 @@ const LOCATION_OPTIONS = [
 ];
 
 const STRUCTURE_OPTIONS = [
-  { label: "Nốt đặc (solid)", value: "solid" },
-  { label: "Nốt bán đặc (part-solid)", value: "part-solid" },
-  { label: "Nốt kính mờ (non-solid)", value: "non-solid" },
+  { label: "Nốt đặc (solid)", value: "solid", printName: "Nốt đặc" },
+  {
+    label: "Nốt bán đặc (part-solid)",
+    value: "part-solid",
+    printName: "Nốt bán đặc",
+  },
+  {
+    label: "Nốt kính mờ (non-solid)",
+    value: "non-solid",
+    printName: "Nốt kính mờ",
+  },
 ];
 
 const RISK_SIGNS_OPTIONS = [
-  { label: "Bờ tua gai", value: "spiculated" },
-  { label: "Hạch to trung thất", value: "lymph" },
-  { label: "Tiền sử ung thư", value: "cancerHistory" },
+  {
+    label: "Bờ tua gai",
+    value: "spiculated",
+  },
+  {
+    label: "Hạch to trung thất",
+    value: "lymph",
+  },
+  {
+    label: "Tiền sử ung thư",
+    value: "cancerHistory",
+  },
 ];
 
 const LungRADSForm = () => {
@@ -306,7 +339,7 @@ const LungRADSForm = () => {
 
   const getLabelFromOptions = (options, value) => {
     const found = options.find((item) => item.value === value);
-    return found ? found.label : value || "";
+    return found ? found.printName || found.label : value || "";
   };
 
   const genHtml = async ({ isCopy }) => {
@@ -393,30 +426,27 @@ const LungRADSForm = () => {
           <td>
             <table style="width: 100%; border-collapse: collapse; border: none;">
               <tr>
-                <td style="text-align: center; border: none; padding: 0; border-right: 1px solid #ccc;">${
-                  D1 || ""
-                } mm</td>
-                <td style="text-align: center; border: none; padding: 0; border-right: 1px solid #ccc;">${
-                  D2 || ""
-                } mm</td>
-                <td style="text-align: center; border: none; padding: 0;">${
-                  D3 || ""
-                } mm</td>
+                <td style="text-align: center; border: none; padding: 0; border-right: 1px solid #ccc;">
+                D1 = ${D1 || ""} mm</td>
+                <td style="text-align: center; border: none; padding: 0; border-right: 1px solid #ccc;">
+                D2 = ${D2 || ""} mm</td>
+                <td style="text-align: center; border: none; padding: 0;">
+                D3 = ${D3 || ""} mm</td>
               </tr>
             </table>
           </td>
         </tr>
-      <tr><td>Kích thước trung bình</td><td style="text-align: center;">${calcD4} mm</td></tr>
+      <tr><td>Kích thước trung bình</td><td style="text-align: center;">D4 = ${calcD4} mm</td></tr>
       ${
         structure == "part-solid"
           ? `<tr>
             <td>Thể tích phần đặc</td>
-            <td style="text-align: center;">${D5 || "--"} mm</td>
+            <td style="text-align: center;">D5 = ${D5 || "--"} mm</td>
           </tr>`
-          : "hehe"
+          : ""
       }
 
-      <tr><td>Thể tích tổn thương</td><td style="text-align: center;">${volume} mm³</td></tr>
+      <tr><td>Thể tích tổn thương</td><td style="text-align: center;">V = ${volume} mm³</td></tr>
       ${
         structure === "solid"
           ? `<tr><td>Dấu hiệu lành tính</td><td>${getLabelFromOptions(
@@ -435,27 +465,32 @@ const LungRADSForm = () => {
            {
              label: "Mới phát hiện (Baseline).",
              value: "baseline",
+             printName: "Mới phát hiện",
            },
            {
              label: "Mới phát hiện (New).",
+             printName: "Mới phát hiện",
              value: "new",
            },
            {
              label: "Không thay đổi kích thước (Stable).",
+             printName: "Không thay đổi kích thước",
              value: "stable",
            },
            {
              label: "Tăng kích thước ≤ 1.5mm/12 tháng (Slow).",
+             printName: "Tăng kích thước ≤ 1.5mm/12 tháng",
              value: "slow",
            },
            {
              label: "Tăng kích thước >1.5mm/12 tháng (Growing).",
+             printName: "Tăng kích thước >1.5mm/12 tháng",
              value: "growing",
            },
          ],
          progression
        )}</td></tr>
-      <tr><td><strong>Phân loại ACR -LungRADS</strong></td><td><strong>Nhóm ${group}</strong></td></tr>
+      <tr><td><strong>Phân loại ACR</strong></td><td><strong> LungRADS ${group}</strong></td></tr>
       <tr><td>Khuyến nghị</td><td>${recommendation}</td></tr>
      
     </table>`;

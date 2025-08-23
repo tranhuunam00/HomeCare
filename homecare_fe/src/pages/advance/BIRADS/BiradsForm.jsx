@@ -11,28 +11,75 @@ export const DENSITY_OPTIONS = [
 ];
 
 export const LOCATION_OPTIONS = [
-  { label: "Góc phần tư trên ngoài - UOQ", value: "UOQ" },
-  { label: "Góc phần tư dưới ngoài - LOQ", value: "LOQ" },
-  { label: "Góc phần tư trên trong - UIQ", value: "UIQ" },
-  { label: "Góc phần tư dưới trong – LIQ", value: "LIQ" },
-  { label: "Lan tỏa, không xác định được", value: "diffuse" },
+  {
+    label: "Góc phần tư trên ngoài - UOQ",
+    value: "UOQ",
+    printName: "Góc phần tư trên ngoài",
+  },
+  {
+    label: "Góc phần tư dưới ngoài - LOQ",
+    value: "LOQ",
+    printName: "Góc phần tư dưới ngoài",
+  },
+  {
+    label: "Góc phần tư trên trong - UIQ",
+    value: "UIQ",
+    printName: "Góc phần tư trên trong",
+  },
+  {
+    label: "Góc phần tư dưới trong – LIQ",
+    value: "LIQ",
+    printName: "Góc phần tư dưới trong",
+  },
+  {
+    label: "Lan tỏa, không xác định được",
+    value: "diffuse",
+    printName: "Lan tỏa, không xác định được",
+  },
 ];
 
 export const SHAPE_OPTIONS = [
-  { label: "Tròn – round (BR2)", value: "round", score: 2 },
-  { label: "Bầu dục – oval (BR2)", value: "oval", score: 2 },
+  {
+    label: "Tròn – round (BR2)",
+    value: "round",
+    score: 2,
+    printName: "Tròn",
+  },
+  {
+    label: "Bầu dục – oval (BR2)",
+    value: "oval",
+    score: 2,
+    printName: "Bầu dục",
+  },
   {
     label: "Không xác định – irregular (BR4; BR5)",
     value: "irregular",
     score: 5,
+    printName: "Không xác định",
   },
 ];
 
 export const TYPE_OF_LESION_OPTIONS = [
-  { label: "Nốt, khối, đám", value: "mass" },
-  { label: "Vôi tính chất lành tính", value: "benign-calcification" },
-  { label: "Vi vôi hóa nghi ngờ", value: "microcalcification" },
-  { label: "Tổn thương khác", value: "other" },
+  {
+    label: "Nốt, khối, đám",
+    value: "mass",
+    printName: "Nốt, khối, đám",
+  },
+  {
+    label: "Vôi tính chất lành tính",
+    value: "benign-calcification",
+    printName: "Vôi tính chất lành tính",
+  },
+  {
+    label: "Vi vôi hóa nghi ngờ",
+    value: "microcalcification",
+    printName: "Vi vôi hóa nghi ngờ",
+  },
+  {
+    label: "Tổn thương khác",
+    value: "other",
+    printName: "Tổn thương khác",
+  },
 ];
 
 export const MARGIN_OPTIONS = [
@@ -40,42 +87,117 @@ export const MARGIN_OPTIONS = [
     label: "Bờ rõ nét – circumscribe (BR2; BR3)",
     value: "circumscribe",
     score: 3,
+    printName: "Bờ rõ nét",
   },
-  { label: "Bờ che lấp – obscured (BR3)", value: "obscured", score: 3 },
+  {
+    label: "Bờ che lấp – obscured (BR3)",
+    value: "obscured",
+    score: 3,
+    printName: "Bờ che lấp",
+  },
   {
     label: "Bờ đa cung nhỏ – microlobulated (BR4)",
     value: "microlobulated",
     score: 4,
+    printName: "Bờ đa cung nhỏ",
   },
   {
     label: "Bờ tua gai – spiculated (BR4; BR5)",
     value: "spiculated",
     score: 5,
+    printName: "Bờ tua gai",
   },
   {
     label: "Không xác định – indistinct (BR4; BR5)",
     value: "indistinct",
     score: 5,
+    printName: "Không xác định",
   },
 ];
 
 export const ECHOGENICITY_OPTIONS = [
-  { label: "Rất giảm – tương đương mỡ (BR2)", value: "very-low", score: 2 },
-  { label: "Giảm đậm độ - low (BR2)", value: "low", score: 2 },
-  { label: "Đồng đậm độ - equal (BR3)", value: "equal", score: 3 },
-  { label: "Tăng đậm độ - high (BR4; BR5)", value: "high", score: 5 },
+  {
+    label: "Rất giảm – tương đương mỡ (BR2)",
+    value: "very-low",
+    score: 2,
+    printName: "Rất giảm – tương đương mỡ",
+  },
+  {
+    label: "Giảm đậm độ - low (BR2)",
+    value: "low",
+    score: 2,
+    printName: "Giảm đậm độ",
+  },
+  {
+    label: "Đồng đậm độ - equal (BR3)",
+    value: "equal",
+    score: 3,
+    printName: "Đồng đậm độ",
+  },
+  {
+    label: "Tăng đậm độ - high (BR4; BR5)",
+    value: "high",
+    score: 5,
+    printName: "Tăng đậm độ",
+  },
 ];
 
 export const BENIGN_CALCIFICATION_OPTIONS = [
-  { label: "Vôi hóa da (BR2)", value: "skin", score: 2 },
-  { label: "Vôi hóa mạch máu (BR2)", value: "vascular", score: 2 },
-  { label: "Vôi hóa hình bỏng ngô (BR2)", value: "popcorn", score: 2 },
-  { label: "Vôi hóa hình vỏ trứng (BR2)", value: "egg-shell", score: 2 },
-  { label: "Vôi hóa hình que lớn (BR2)", value: "large-rod", score: 2 },
-  { label: "Vôi hóa hình tròn (BR2)", value: "round", score: 2 },
-  { label: "Vôi hóa dạng sữa calci (BR2)", value: "milk", score: 2 },
-  { label: "Vôi hóa mảng do loạn dưỡng (BR2)", value: "dystrophic", score: 2 },
-  { label: "Không thấy", value: "none", score: 0, isOther: true },
+  {
+    label: "Vôi hóa da (BR2)",
+    value: "skin",
+    score: 2,
+    printName: "Vôi hóa da",
+  },
+  {
+    label: "Vôi hóa mạch máu (BR2)",
+    value: "vascular",
+    score: 2,
+    printName: "Vôi hóa mạch máu",
+  },
+  {
+    label: "Vôi hóa hình bỏng ngô (BR2)",
+    value: "popcorn",
+    score: 2,
+    printName: "Vôi hóa hình bỏng ngô",
+  },
+  {
+    label: "Vôi hóa hình vỏ trứng (BR2)",
+    value: "egg-shell",
+    score: 2,
+    printName: "Vôi hóa hình vỏ trứng",
+  },
+  {
+    label: "Vôi hóa hình que lớn (BR2)",
+    value: "large-rod",
+    score: 2,
+    printName: "Vôi hóa hình que lớn",
+  },
+  {
+    label: "Vôi hóa hình tròn (BR2)",
+    value: "round",
+    score: 2,
+    printName: "Vôi hóa hình tròn",
+  },
+  {
+    label: "Vôi hóa dạng sữa calci (BR2)",
+    value: "milk",
+    score: 2,
+    printName: "Vôi hóa dạng sữa calci",
+  },
+  {
+    label: "Vôi hóa mảng do loạn dưỡng (BR2)",
+    value: "dystrophic",
+    score: 2,
+    printName: "Vôi hóa mảng do loạn dưỡng",
+  },
+  {
+    label: "Không thấy",
+    value: "none",
+    score: 0,
+    isOther: true,
+    printName: "Không thấy",
+  },
 ];
 
 export const SUSPICIOUS_CALCIFICATION_OPTIONS = [
@@ -83,51 +205,113 @@ export const SUSPICIOUS_CALCIFICATION_OPTIONS = [
     label: "Vi vôi hóa không định hình – amorphous (BR3; BR4)",
     value: "amorphous",
     score: 4,
+    printName: "Vi vôi hóa không định hình",
   },
   {
     label: "Vi vôi hóa thô – coarse (BR3)",
     value: "coarse",
     score: 3,
+    printName: "Vi vôi hóa thô",
   },
   {
     label: "Vi vôi hóa đa hình nhỏ – fine pleomorphic (BR4; BR5)",
     value: "pleomorphic",
     score: 5,
+    printName: "Vi vôi hóa đa hình nhỏ",
   },
   {
     label:
       "Vi vôi hóa dải mảnh, dải chia nhánh – fine linear, branching (BR4; BR5)",
     value: "branching",
     score: 5,
+    printName: "Vi vôi hóa dải mảnh, dải chia nhánh",
   },
   {
     label: "Không thấy",
     value: "none",
     score: 0,
     isOther: true,
+    printName: "Không thấy",
   },
 ];
 
 export const CALC_DISTRIBUTION_OPTIONS = [
-  { label: "Dạng lan tỏa – diffuse (BR3)", value: "diffuse", score: 3 },
-  { label: "Dạng vùng – regional (BR4)", value: "regional", score: 4 },
-  { label: "Dạng cụm – group (BR4)", value: "group", score: 4 },
-  { label: "Dạng dải – linear (BR3)", value: "linear", score: 3 },
-  { label: "Dạng thùy – segmental (BR3)", value: "segmental", score: 3 },
+  {
+    label: "Dạng lan tỏa – diffuse (BR3)",
+    value: "diffuse",
+    score: 3,
+    printName: "Dạng lan tỏa",
+  },
+  {
+    label: "Dạng vùng – regional (BR4)",
+    value: "regional",
+    score: 4,
+    printName: "Dạng vùng",
+  },
+  {
+    label: "Dạng cụm – group (BR4)",
+    value: "group",
+    score: 4,
+    printName: "Dạng cụm",
+  },
+  {
+    label: "Dạng dải – linear (BR3)",
+    value: "linear",
+    score: 3,
+    printName: "Dạng dải",
+  },
+  {
+    label: "Dạng thùy – segmental (BR3)",
+    value: "segmental",
+    score: 3,
+    printName: "Dạng thùy",
+  },
 ];
 
 export const OTHER_SUSPICIOUS_SIGNS = [
-  { label: "Phù nề, dày bề mặt da (BR4; BR5)", value: "edema", score: 5 },
-  { label: "Co kéo bề mặt da (BR4; BR5)", value: "skin-retraction", score: 5 },
-  { label: "Co kéo núm vú (BR4; BR5)", value: "nipple-retraction", score: 5 },
-  { label: "Bất đối xứng hai bên (BR3)", value: "asymmetry", score: 3 },
+  {
+    label: "Phù nề, dày bề mặt da (BR4; BR5)",
+    value: "edema",
+    score: 5,
+    printName: "Phù nề, dày bề mặt da",
+  },
+  {
+    label: "Co kéo bề mặt da (BR4; BR5)",
+    value: "skin-retraction",
+    score: 5,
+    printName: "Co kéo bề mặt da",
+  },
+  {
+    label: "Co kéo núm vú (BR4; BR5)",
+    value: "nipple-retraction",
+    score: 5,
+    printName: "Co kéo núm vú",
+  },
+  {
+    label: "Bất đối xứng hai bên (BR3)",
+    value: "asymmetry",
+    score: 3,
+    printName: "Bất đối xứng hai bên",
+  },
   {
     label: "Đảo lộn cấu trúc mô tuyến (BR3)",
     value: "disrupted-architecture",
     score: 3,
+    printName: "Đảo lộn cấu trúc mô tuyến",
   },
-  { label: "Hạch bệnh lý hố nách (BR3; BR4)", value: "lymph-node", score: 4 },
-  { label: "Không thấy", value: "none", score: 0, isOther: true },
+  {
+    label: "Hạch bệnh lý hố nách (BR3; BR4)",
+    value: "lymph-node",
+    score: 4,
+    printName: "Hạch bệnh lý hố nách",
+  },
+  {
+    label: "Không thấy",
+    value: "none",
+    score: 0,
+    isOther: true,
+    printName: "Không thấy",
+  },
 ];
 // src/pages/dbirads/BiradsForm.jsx
 import React, { useEffect, useMemo, useState } from "react";
@@ -205,7 +389,9 @@ const BiradsForm = () => {
             .map(
               (v) =>
                 `<li style="margin-bottom: 6px;">${
-                  options.find((o) => o.value === v)?.label || v
+                  options.find((o) => o.value === v)?.printName ||
+                  options.find((o) => o.value === v)?.label ||
+                  v
                 }</li>`
             )
             .join("")}
@@ -213,10 +399,13 @@ const BiradsForm = () => {
       `;
     }
     if (typeof value === "string") {
-      const label = options.find((o) => o.value === value)?.label || value;
+      const label =
+        options.find((o) => o.value === value)?.printName ||
+        options.find((o) => o.value === value)?.label ||
+        value;
       return `${label}`;
     }
-    return "--";
+    return "";
   };
 
   // ====== Recalc every change ======
@@ -301,7 +490,7 @@ const BiradsForm = () => {
 
     const html = `
       <table>
-        <caption>Đánh giá D-BIRADS MM</caption>
+        <caption>Đánh giá BIRADS</caption>
         <tr><th>Thông tin</th><th>Giá trị</th></tr>
         <tr><td>Tuyến vú khảo sát</td><td>${getLabelFromValue(
           BREAST_SIDE_OPTIONS,
@@ -332,18 +521,18 @@ const BiradsForm = () => {
                   <table style="width: 100%; border-collapse: collapse; border: none;">
                     <tr>
                       <td style="text-align: center; border: none; padding: 0; border-right: 1px solid #ccc;">
-                        ${values.D1 || ""} mm
+                        D1 = ${values.D1 || ""} mm
                       </td>
                       <td style="text-align: center; border: none; padding: 0;">
-                        ${values.D2 || ""} mm
+                        D2 =  ${values.D2 || ""} mm
                       </td>
                     </tr>
                   </table>
                 </td>
               </tr>
               <tr>
-                <td>D3 (TB)</td>
-                <td style="text-align: center;">${volume || 0} mm</td>
+                <td>Kích thước trung bình</td>
+                <td style="text-align: center;">D3 = ${volume || 0} mm</td>
               </tr>
               <tr><td>Hình dạng</td><td>${getLabelFromValue(
                 SHAPE_OPTIONS,
