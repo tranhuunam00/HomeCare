@@ -45,6 +45,8 @@ const buildParams = (f) => {
   };
   if (f.id_exam_part) params.id_exam_part = f.id_exam_part;
   if (f.id_template_service) params.id_template_service = f.id_template_service;
+  if (f.id_doctor) params.id_doctor = f.id_doctor;
+
   if (f.search?.trim()) params.search = f.search.trim();
   if (Array.isArray(f.range) && f.range[0] && f.range[1]) {
     params.date_from = f.range[0].format("YYYY-MM-DD");
@@ -71,6 +73,7 @@ const DEFAULT_FILTERS = {
   id_exam_part: undefined,
   id_template_service: undefined,
   search: "",
+  id_doctor: undefined,
   range: undefined, // [dayjs, dayjs]
   withTables: false,
   withImages: false,
@@ -127,7 +130,7 @@ export default function FormVer2List() {
     setFilters((prev) => ({
       ...prev,
       ...uiFilters,
-      page: 1, // reset về trang 1 khi tìm kiếm
+      page: 1,
     }));
 
   const resetUi = () => setUiFilters(DEFAULT_FILTERS);
@@ -173,22 +176,16 @@ export default function FormVer2List() {
         width: 140,
         align: "center",
       },
+
       {
-        title: "Created",
-        dataIndex: "createdAt",
-        key: "createdAt",
-        width: 170,
+        title: "Người thực hiện",
+        dataIndex: "doctor_name",
+        key: "doctor_name",
+        width: 140,
         align: "center",
-        render: (v) => (v ? dayjs(v).format("YYYY-MM-DD HH:mm") : "—"),
+        render: (_, record) => record.id_doctor_doctor?.full_name,
       },
-      {
-        title: "Updated",
-        dataIndex: "updatedAt",
-        key: "updatedAt",
-        width: 170,
-        align: "center",
-        render: (v) => (v ? dayjs(v).format("YYYY-MM-DD HH:mm") : "—"),
-      },
+
       {
         title: "Hành động",
         key: "actions",
@@ -259,17 +256,28 @@ export default function FormVer2List() {
             <Input
               allowClear
               placeholder="search"
-              prefix={<SearchOutlined />}
               value={uiFilters.search}
               onChange={(e) =>
                 setUiFilters((s) => ({ ...s, search: e.target.value }))
               }
-              onPressEnter={(e) => e.preventDefault()} // tránh enter tự tìm
+              onPressEnter={(e) => e.preventDefault()}
+            />
+          </Col>
+          <Col xs={24} md={8} lg={4}>
+            <Text>Nhập Id bác sĩ</Text>
+            <Input
+              placeholder="search"
+              value={uiFilters.id_doctor}
+              onChange={(e) =>
+                setUiFilters((s) => ({ ...s, id_doctor: e.target.value }))
+              }
+              type="number"
+              onPressEnter={(e) => e.preventDefault()}
             />
           </Col>
 
           <Col xs={12} md={8} lg={5}>
-            <Text>Exam Part</Text>
+            <Text>Bộ phận</Text>
             <Select
               allowClear
               style={{ width: "100%" }}
@@ -286,7 +294,7 @@ export default function FormVer2List() {
           </Col>
 
           <Col xs={12} md={8} lg={6}>
-            <Text>Template Service</Text>
+            <Text>Dịch vụ</Text>
             <Select
               allowClear
               style={{ width: "100%" }}
