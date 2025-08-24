@@ -212,6 +212,7 @@ export function buildFormData(values, extra) {
   if (rightFileObj) fd.append("ImageFormRight", rightFileObj);
 
   fd.append("tables", JSON.stringify(extra?.tablesData ?? []));
+  fd.append("imageDescEditor", JSON.stringify(extra?.imageDescEditor ?? []));
 
   // ---- auto_code nếu cần
 
@@ -223,7 +224,7 @@ export function mapApiToForm(api) {
   const left = api?.image_form_ver2s?.find((x) => x.kind === "left");
   const right = api?.image_form_ver2s?.find((x) => x.kind === "right");
 
-  console.log("right", right);
+  console.log("api", api);
   return {
     id_template_service: api?.id_template_service ?? undefined,
     id_exam_part: api?.id_exam_part ?? undefined,
@@ -242,6 +243,11 @@ export function mapApiToForm(api) {
     ImageRightDescLink: right?.link || "",
     ImageRightUrl: right?.url || "",
     ImageLeftUrl: left?.url || "",
+    id: "DFORM_" + (api.id ?? "tự động"),
+    doctor_name: api?.id_doctor_doctor?.full_name,
+    createdAt: dayjs(api?.updatedAt ?? api.createdAt ?? new Date()).format(
+      "DD-MM-YYYY"
+    ),
   };
 }
 export const calculateAge = (dob) => {

@@ -8,18 +8,18 @@ const apiEndPoint = `${
   import.meta.env.VITE_API_ENDPOINT || "http://localhost:3001/api/"
 }/api`;
 
-const CustomSunEditor = ({ value, onChange }) => {
+const CustomSunEditor = ({ value, onChange, className }) => {
   const token = storage.get("TOKEN");
 
   return (
-    <div className="editor-container">
+    <div className={`editor-container ${className}`}>
       <SunEditor
-        height="100%"
+        height="300"
         setContents={value}
         onChange={onChange}
         onImageUploadBefore={(files, info, uploadHandler) => {
           const formData = new FormData();
-          formData.append("fileUpload", files[0]); // 👈 field name expected by backend
+          formData.append("fileUpload", files[0]);
 
           fetch(`${apiEndPoint}/upload`, {
             method: "POST",

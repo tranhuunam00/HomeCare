@@ -10,6 +10,7 @@ import {
   ExportOutlined,
   PrinterOutlined,
   LogoutOutlined,
+  GatewayOutlined,
 } from "@ant-design/icons";
 import styles from "./FormActionBar.module.scss";
 import { useNavigate } from "react-router-dom";
@@ -19,7 +20,10 @@ export default function FormActionBar({
   onPrint,
   onReset,
   onPreview,
+  onGenAi,
+  keys,
 }) {
+  console.log("keys", keys);
   const navigate = useNavigate();
   const emptyF = () => {};
   const items = [
@@ -45,11 +49,19 @@ export default function FormActionBar({
       onClick: onPrint ?? emptyF,
     },
     {
+      key: "AI",
+      label: "AI GEN",
+      icon: <GatewayOutlined />,
+      onClick: onGenAi || emptyF,
+    },
+
+    {
       key: "print",
-      label: "PRINT",
+      label: "IN",
       icon: <PrinterOutlined />,
       onClick: onPrint || emptyF,
     },
+
     {
       key: "exit",
       label: "EXIT",
@@ -59,20 +71,26 @@ export default function FormActionBar({
       },
     },
   ];
+
+  const genButtonC = (it) => (
+    <Button
+      key={it.key}
+      className={`${styles.btn} ${styles[it.key]}`}
+      icon={it.icon}
+      block
+      onClick={() => (it.onClick ? it.onClick() : onAction?.(it.key))}
+    >
+      {it.label}
+    </Button>
+  );
   return (
     <div className={styles.actionBar}>
       <div className={styles.actionGrid}>
-        {items.map((it) => (
-          <Button
-            key={it.key}
-            className={`${styles.btn} ${styles[it.key]}`}
-            icon={it.icon}
-            block
-            onClick={() => (it.onClick ? it.onClick() : onAction?.(it.key))}
-          >
-            {it.label}
-          </Button>
-        ))}
+        {!keys?.length
+          ? items.map((it) => genButtonC(it))
+          : items
+              .filter((i) => keys.includes(i.key))
+              .map((it) => genButtonC(it))}
       </div>
     </div>
   );

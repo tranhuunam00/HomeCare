@@ -148,20 +148,15 @@ export default function ImageBlock({
         style={{ marginTop: 8 }}
       >
         <Dragger {...draggerProps}>
-          <p className="ant-upload-drag-icon">
-            <InboxOutlined />
-          </p>
           <p className="ant-upload-text">
             Kéo & thả ảnh vào đây, hoặc bấm để chọn
           </p>
-          <p className="ant-upload-hint">
-            PNG/JPG/JPEG/WEBP • 1 ảnh • Preview cục bộ
-          </p>
+          <p className="ant-upload-hint">PNG/JPG/JPEG/WEBP • 1 ảnh</p>
         </Dragger>
       </Form.Item>
 
       {/* Hai ô input: Mô tả & Link */}
-      <Row gutter={8} style={{ marginTop: 12 }}>
+      <Row gutter={8} style={{ marginTop: 0 }}>
         <Col span={24}>
           <Form.Item
             name={descName}
@@ -173,7 +168,7 @@ export default function ImageBlock({
         </Col>
       </Row>
 
-      <Row gutter={8} style={{ marginTop: 12 }}>
+      <Row gutter={8} style={{ marginTop: 0 }}>
         <Col span={24}>
           <Form.Item
             name={linkName}

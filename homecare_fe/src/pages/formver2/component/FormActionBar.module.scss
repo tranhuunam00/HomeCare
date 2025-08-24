@@ -7,7 +7,7 @@ $clr-edit: #b45309; // amber
 $clr-approve: #16a34a; // green
 $clr-preview: #7c3aed; // purple
 $clr-export: #0f766e; // teal
-$clr-print: #334155; // slate
+$clr-AI: #677721; // slate
 $clr-exit: #b91c1c; // red
 
 .actionBar {
@@ -109,12 +109,12 @@ $clr-exit: #b91c1c; // red
   }
 }
 
-.print {
-  color: $clr-print;
-  border-color: rgba($clr-print, 0.35);
-  background-color: rgba($clr-print, 0.06);
+.AI {
+  color: $clr-AI;
+  border-color: rgba($clr-AI, 0.35);
+  background-color: rgba($clr-AI, 0.06);
   &:hover {
-    background-color: rgba($clr-print, 0.12);
+    background-color: rgba($clr-AI, 0.12);
   }
 }
 
