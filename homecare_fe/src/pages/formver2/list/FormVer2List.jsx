@@ -14,6 +14,8 @@ import {
   Tag,
   Spin,
   Typography,
+  Tooltip,
+  InputNumber,
 } from "antd";
 import {
   FilterOutlined,
@@ -267,31 +269,30 @@ export default function FormVer2List() {
           Danh sách FormVer2
         </Title>
         <Space>
-          <Button
-            icon={<FileAddFilled />}
-            onClick={() => navigate(`/home/form-v2`)}
-          >
-            Thêm mới
-          </Button>
+          <Tooltip title="Thêm mới">
+            <Button
+              icon={<FileAddFilled />}
+              onClick={() => navigate(`/home/form-v2`)}
+            ></Button>
+          </Tooltip>
 
-          <Button
-            icon={<ReloadOutlined />}
-            onClick={() => setFilters({ ...filters })}
-          >
-            Tải lại
-          </Button>
-
+          <Tooltip title="Làm mới">
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={() => setFilters({ ...filters })}
+            ></Button>
+          </Tooltip>
           <Button
             type="primary"
             icon={<DownloadOutlined />}
             disabled={!selectedRowKeys.length}
             onClick={() => exportFormVer2({ ids: selectedRowKeys })}
           >
-            Export đã chọn ({selectedRowKeys.length})
+            Export ({selectedRowKeys.length})
           </Button>
 
-          <Button onClick={selectAllOnPage}>Chọn tất cả (trang này)</Button>
-          <Button onClick={unselectAllOnPage}>Bỏ chọn (trang này)</Button>
+          <Button onClick={selectAllOnPage}>Chọn tất cả</Button>
+          <Button onClick={unselectAllOnPage}>Bỏ chọn</Button>
           <Button onClick={clearAllSelections}>Xóa toàn bộ chọn</Button>
         </Space>
       </div>
@@ -319,13 +320,13 @@ export default function FormVer2List() {
           <Col xs={24} md={8} lg={6}>
             <Text>Từ khóa</Text>
             <Input
-              allowClear
               placeholder="search"
               value={uiFilters.search}
               onChange={(e) =>
                 setUiFilters((s) => ({ ...s, search: e.target.value }))
               }
               onPressEnter={(e) => e.preventDefault()}
+              type="text"
             />
           </Col>
           <Col xs={24} md={8} lg={4}>
@@ -363,7 +364,7 @@ export default function FormVer2List() {
             <Select
               allowClear
               style={{ width: "100%" }}
-              placeholder="Chọn template service"
+              placeholder="Chọn dịch vụ mẫu"
               value={uiFilters.id_template_service}
               onChange={(v) =>
                 setUiFilters((s) => ({ ...s, id_template_service: v }))
@@ -393,9 +394,9 @@ export default function FormVer2List() {
               value={uiFilters.orderBy}
               onChange={(v) => setUiFilters((s) => ({ ...s, orderBy: v }))}
               options={[
-                { value: "createdAt", label: "createdAt" },
-                { value: "updatedAt", label: "updatedAt" },
-                { value: "ngay_thuc_hien", label: "ngay_thuc_hien" },
+                { value: "createdAt", label: "Ngày tạo" },
+                { value: "updatedAt", label: "Ngày cập nhật" },
+                { value: "ngay_thuc_hien", label: "Ngày thực hiện" },
               ]}
             />
           </Col>
@@ -403,18 +404,20 @@ export default function FormVer2List() {
           <Col xs={12} md={6} lg={4}>
             <Text>Thứ tự</Text>
             <Select
-              style={{ width: "100%" }}
+              style={{
+                width: "100%",
+              }}
               value={uiFilters.orderDir}
               onChange={(v) => setUiFilters((s) => ({ ...s, orderDir: v }))}
               options={[
-                { value: "DESC", label: "DESC" },
-                { value: "ASC", label: "ASC" },
+                { value: "DESC", label: "Cũ nhất" },
+                { value: "ASC", label: "Mới nhất" },
               ]}
             />
           </Col>
 
-          <Col xs={8} md={6} lg={4}>
-            <Text>withTables</Text>
+          <Col xs={8} md={6} lg={2}>
+            <Text>Có bảng</Text>
             <div>
               <Switch
                 checked={uiFilters.withTables}
@@ -423,8 +426,8 @@ export default function FormVer2List() {
             </div>
           </Col>
 
-          <Col xs={8} md={6} lg={4}>
-            <Text>withImages</Text>
+          <Col xs={8} md={6} lg={2}>
+            <Text>Có hình ảnh</Text>
             <div>
               <Switch
                 checked={uiFilters.withImages}
@@ -433,8 +436,8 @@ export default function FormVer2List() {
             </div>
           </Col>
 
-          <Col xs={8} md={6} lg={4}>
-            <Text>includeDeleted</Text>
+          <Col xs={8} md={6} lg={2}>
+            <Text>Đã xoá</Text>
             <div>
               <Switch
                 checked={uiFilters.includeDeleted}
@@ -443,16 +446,6 @@ export default function FormVer2List() {
                 }
               />
             </div>
-          </Col>
-
-          <Col xs={12} md={6} lg={4}>
-            <Text>Page size</Text>
-            <Select
-              style={{ width: "100%" }}
-              value={uiFilters.limit}
-              onChange={(v) => setUiFilters((s) => ({ ...s, limit: v }))}
-              options={[10, 20, 50, 100].map((n) => ({ value: n, label: n }))}
-            />
           </Col>
         </Row>
       </Card>
@@ -470,6 +463,22 @@ export default function FormVer2List() {
             total,
             showSizeChanger: false,
             onChange: (page) => setFilters((s) => ({ ...s, page })),
+            showTotal: () => (
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <Text>Page size</Text>
+                <Select
+                  style={{ width: 80 }}
+                  value={filters.limit}
+                  onChange={(limit) =>
+                    setFilters((s) => ({ ...s, page: 1, limit }))
+                  }
+                  options={[10, 20, 50, 100].map((n) => ({
+                    value: n,
+                    label: n,
+                  }))}
+                />
+              </div>
+            ),
           }}
         />
       </Spin>
