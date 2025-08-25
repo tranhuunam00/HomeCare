@@ -7,7 +7,6 @@ import {
   Typography,
   Row,
   Col,
-  message,
   Tooltip,
   Spin,
   Modal,
@@ -25,6 +24,7 @@ import CustomSunEditor from "../../components/Suneditor/CustomSunEditor";
 
 import styles from "./FormVer2.module.scss";
 import PrintPreviewVer2NotDataDiagnose from "./PreviewVer2/PrintPreviewVer2NotDataDiagnose";
+import { USER_ROLE } from "../../constant/app";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -49,30 +49,34 @@ export default function DFormVer2({
   onPrint,
 }) {
   const [form] = Form.useForm();
+  const { examParts, templateServices, user, doctor } = useGlobalAuth();
 
   const navigate = useNavigate();
   const { id: idFromParam } = useParams();
+
+  const [initialSnap, setInitialSnap] = useState({
+    formValues: null,
+    tables: null,
+    imageDesc: null,
+    left: null,
+    right: null,
+    apiData: null,
+  });
   const editId = id_form_ver2 ?? idFromParam;
-  const isEdit = editId != null && editId !== "";
 
   const pendingAction = useRef(null);
   const ngayThucHienISO = useMemo(() => toISODate(new Date()), []);
   const [previewOpen, setPreviewOpen] = useState(false);
 
-  const { examParts, templateServices, user } = useGlobalAuth();
-
   // preview images (chỉ để xem), dữ liệu save lấy từ form
-  const [ImageLeftUrl, setImageLeftUrl] = useState(
-    "https://via.placeholder.com/640x360?text=Minh+hoa+giai+phau"
-  );
-  const [ImageRightUrl, setImageRightUrl] = useState(
-    "https://via.placeholder.com/640x360?text=Minh+hoa+quy+trinh+thuc+hi%C3%AAn"
-  );
+  const [ImageLeftUrl, setImageLeftUrl] = useState("");
+  const [ImageRightUrl, setImageRightUrl] = useState("");
 
   const [imageDescEditor, setImageDescEditor] = useState("");
 
   const [tablesData, setTablesData] = useState([]);
-  const [loading, setLoading] = useState(isEdit);
+  const [loading, setLoading] = useState(editId);
+  const [isEdit, setIsEdit] = useState(false);
 
   useEffect(() => {
     onTablesChange?.(tablesData);
@@ -88,39 +92,42 @@ export default function DFormVer2({
 
   // ====== Fetch when edit ======
   useEffect(() => {
-    if (!isEdit) return;
+    if (!editId) return;
     (async () => {
+      setLoading(true);
       try {
-        setLoading(true);
         const res = await API_CALL.get(
           `/form-ver2/${editId}?withTables=true&withImages=true&includeDeleted=false`
         );
-        const apiData = res?.data?.data?.data; // theo response bạn gửi
+        const apiData = res?.data?.data?.data;
         if (!apiData) throw new Error("Không đọc được dữ liệu form");
-        // fill form
-        form.setFieldsValue(mapApiToForm(apiData));
-        setTablesData(normalizeTablesFromApi(apiData?.table_form_ver2s));
 
-        setImageDescEditor(
-          apiData?.imageDescEditor ? JSON.parse(apiData.imageDescEditor) : ""
-        );
+        const formValues = mapApiToForm(apiData);
+        const tables = normalizeTablesFromApi(apiData?.table_form_ver2s);
+        const imageDesc = apiData?.imageDescEditor
+          ? JSON.parse(apiData.imageDescEditor)
+          : "";
 
-        // ảnh để xem trước (không bắt buộc)
-        const left = apiData?.image_form_ver2s?.find((x) => x.kind === "left");
-        const right = apiData?.image_form_ver2s?.find(
-          (x) => x.kind === "right"
-        );
-        if (left?.url) setImageLeftUrl(left.url);
-        if (right?.url) setImageRightUrl(right.url);
-        // bảng (nếu có)
+        const left =
+          apiData?.image_form_ver2s?.find((x) => x.kind === "left")?.url || "";
+        const right =
+          apiData?.image_form_ver2s?.find((x) => x.kind === "right")?.url || "";
+
+        // set form state hiển thị
+        form.setFieldsValue(formValues);
+        setTablesData(tables);
+        setImageDescEditor(imageDesc);
+        setImageLeftUrl(left);
+        setImageRightUrl(right);
+
+        setInitialSnap({ formValues, tables, imageDesc, left, right, apiData });
       } catch (e) {
-        console.error(e);
-        message.error("Không tải được dữ liệu. Vui lòng thử lại.");
+        toast.error("Không tải được dữ liệu. Vui lòng thử lại.");
       } finally {
         setLoading(false);
       }
     })();
-  }, [isEdit, editId, form]);
+  }, [editId, form]);
 
   const onFinish = async (values) => {
     if (!isDoctor) {
@@ -131,7 +138,7 @@ export default function DFormVer2({
           imageDescEditor,
         });
 
-        if (isEdit) {
+        if (editId) {
           await API_CALL.patchForm(`/form-ver2/${editId}`, fd, {
             headers: { "Content-Type": "multipart/form-data" },
           });
@@ -170,10 +177,23 @@ export default function DFormVer2({
     toast.error("Vui lòng kiểm tra các trường còn thiếu/không hợp lệ.");
   };
 
+  const restoreFromSnapshot = () => {
+    if (!initialSnap) return;
+    const { formValues, tables, imageDesc, left, right } = initialSnap;
+
+    form.resetFields();
+    form.setFieldsValue(formValues);
+
+    setTablesData(tables);
+    setImageDescEditor(imageDesc);
+    setImageLeftUrl(left);
+    setImageRightUrl(right);
+  };
+
   return (
     <div style={{ maxWidth: 980, margin: "0 auto", padding: 0 }}>
       <Title level={3} style={{ textAlign: "center", marginBottom: 24 }}>
-        {isEdit
+        {editId
           ? "CẬP NHẬT BỘ MẪU KẾT QUẢ D-FORM"
           : "TẠO MỚI BỘ MẪU KẾT QUẢ D-FORM"}
       </Title>
@@ -209,7 +229,10 @@ export default function DFormVer2({
                 name="id_template_service"
                 rules={[{ required: true, message: "Chọn kỹ thuật" }]}
               >
-                <Select placeholder="Chọn kỹ thuật" disabled={isDoctor}>
+                <Select
+                  placeholder="Chọn kỹ thuật"
+                  disabled={isDoctor || !isEdit}
+                >
                   {templateServices.map((s) => (
                     <Option key={s.id} value={s.id}>
                       {s.name}
@@ -226,7 +249,7 @@ export default function DFormVer2({
               >
                 <Select
                   placeholder="Chọn bộ phận thăm khám"
-                  disabled={isDoctor}
+                  disabled={isDoctor || !isEdit}
                 >
                   {examParts.map((s) => (
                     <Option key={s.id} value={s.id}>
@@ -246,7 +269,11 @@ export default function DFormVer2({
                 name="language"
                 rules={[{ required: true }]}
               >
-                <Select options={LANGUAGE_OPTIONS} placeholder="VI / EN" />
+                <Select
+                  disabled={!isEdit}
+                  options={LANGUAGE_OPTIONS}
+                  placeholder="VI / EN"
+                />
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
@@ -263,7 +290,10 @@ export default function DFormVer2({
                 name="tenMau"
                 rules={[{ required: true, message: "Nhập tên mẫu" }]}
               >
-                <Input placeholder="VD: Siêu âm bụng tổng quát nam" />
+                <Input
+                  disabled={!isEdit}
+                  placeholder="VD: Siêu âm bụng tổng quát nam"
+                />
               </Form.Item>
             </Col>
           </Row>
@@ -271,7 +301,7 @@ export default function DFormVer2({
           <Row gutter={16}>
             <Col xs={24} md={24}>
               <Form.Item label="Kết luận của mẫu" name="ketLuan">
-                <Input placeholder="VD: U máu gan" />
+                <Input disabled={!isEdit} placeholder="VD: U máu gan" />
               </Form.Item>
             </Col>
           </Row>
@@ -305,6 +335,7 @@ export default function DFormVer2({
                 onChange={(value) => {
                   setImageLeftUrl(value);
                 }}
+                disabled={!isEdit}
               />
             </Col>
             <Col xs={24} md={12}>
@@ -316,6 +347,7 @@ export default function DFormVer2({
                 onChange={(value) => {
                   setImageRightUrl(value);
                 }}
+                disabled={!isEdit}
               />
             </Col>
           </Row>
@@ -326,6 +358,7 @@ export default function DFormVer2({
           </Title>
           <Form.Item name="quyTrinh" label="" tooltip="Short text">
             <TextArea
+              disabled={!isEdit}
               autoSize={{ minRows: 4, maxRows: 10 }}
               placeholder="Nhập mô tả quy trình kỹ thuật..."
             />
@@ -349,6 +382,7 @@ export default function DFormVer2({
             value={imageDescEditor}
             onChange={setImageDescEditor}
             className={styles.formVer2Editor}
+            disabled={!isEdit}
           />
 
           {/* Kết luận */}
@@ -359,7 +393,11 @@ export default function DFormVer2({
             name="ketQuaChanDoan"
             rules={[{ required: true, message: "Nhập kết luận" }]}
           >
-            <TextArea style={{ height: 200 }} placeholder="VD: U máu gan" />
+            <TextArea
+              disabled={!isEdit}
+              style={{ height: 200 }}
+              placeholder="VD: U máu gan"
+            />
           </Form.Item>
 
           <Form.Item
@@ -380,39 +418,56 @@ export default function DFormVer2({
             }
             name="icd10"
           >
-            <Input placeholder="Link/Code ICD-10" />
+            <Input disabled={!isEdit} placeholder="Link/Code ICD-10" />
           </Form.Item>
 
           <Form.Item label="Phân độ, phân loại" name="phanDoLoai">
-            <Input placeholder="Short text" />
+            <Input disabled={!isEdit} placeholder="Short text" />
           </Form.Item>
 
           <Form.Item label="Chẩn đoán phân biệt" name="chanDoanPhanBiet">
-            <Input placeholder="Short text" />
+            <Input disabled={!isEdit} placeholder="Short text" />
           </Form.Item>
 
           <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
             KHUYẾN NGHỊ & TƯ VẤN
           </Title>
-          <Form.Item name="khuyenNghi" tooltip="Có thể tích hợp ChatGPT D-RADS">
+          <Form.Item
+            disabled={!isEdit}
+            name="khuyenNghi"
+            tooltip="Có thể tích hợp ChatGPT D-RADS"
+          >
             <TextArea
+              disabled={!isEdit}
               autoSize={{ minRows: 4, maxRows: 10 }}
               placeholder="Nhập khuyến nghị & tư vấn..."
             />
           </Form.Item>
 
           {/* Action bar */}
-          <FormActionBar
-            onAction={(key) => {
-              pendingAction.current = key;
-              form.submit();
-            }}
-            onPrint={onPrint}
-            onReset={() => {
-              form.resetFields();
-            }}
-            onPreview={() => setPreviewOpen(!previewOpen)}
-          />
+          {(initialSnap.apiData?.id_doctor == doctor.id ||
+            user.id_role == USER_ROLE.ADMIN) && (
+            <FormActionBar
+              onAction={(key) => {
+                pendingAction.current = key;
+                form.submit();
+              }}
+              onPrint={onPrint}
+              onReset={restoreFromSnapshot}
+              onPreview={() => setPreviewOpen(!previewOpen)}
+              isEdit={isEdit}
+              onEdit={() => {
+                if (isEdit == true) {
+                  setIsEdit(false);
+                } else {
+                  setIsEdit(
+                    initialSnap.apiData?.id_doctor == doctor.id ||
+                      user.id_role == USER_ROLE.ADMIN
+                  );
+                }
+              }}
+            />
+          )}
         </Form>
       )}
 

@@ -33,6 +33,7 @@ export default function ImageBlock({
   src,
   title,
   onChange,
+  disabled,
 }) {
   const descName = `${namePrefix}Desc`;
   const linkName = `${namePrefix}DescLink`; // ⚠️ đồng bộ với BE: ...DescLink
@@ -49,9 +50,7 @@ export default function ImageBlock({
   const firstFileObj = fileList?.[0]?.originFileObj || null;
   const firstFileUid = fileList?.[0]?.uid || null;
   useEffect(() => {
-    if (firstFileObj) return; // đang dùng blob của file => bỏ qua src prop
-
-    // revoke blob cũ nếu có
+    if (firstFileObj) return;
     if (currentUrlRef.current?.startsWith?.("blob:")) {
       URL.revokeObjectURL(currentUrlRef.current);
     }
@@ -147,7 +146,7 @@ export default function ImageBlock({
         getValueFromEvent={normFileList}
         style={{ marginTop: 8 }}
       >
-        <Dragger {...draggerProps}>
+        <Dragger disabled={disabled} {...draggerProps}>
           <p className="ant-upload-text">
             Kéo & thả ảnh vào đây, hoặc bấm để chọn
           </p>
@@ -163,7 +162,7 @@ export default function ImageBlock({
             label="Mô tả"
             rules={[{ required: true, message: "Nhập mô tả ngắn" }]}
           >
-            <Input placeholder="Nhập mô tả ảnh" />
+            <Input disabled={disabled} placeholder="Nhập mô tả ảnh" />
           </Form.Item>
         </Col>
       </Row>
@@ -184,7 +183,10 @@ export default function ImageBlock({
               }),
             ]}
           >
-            <Input placeholder="https://... hoặc domain.com/..." />
+            <Input
+              disabled={disabled}
+              placeholder="https://... hoặc domain.com/..."
+            />
           </Form.Item>
         </Col>
       </Row>

@@ -15,6 +15,18 @@ import {
 import styles from "./FormActionBar.module.scss";
 import { useNavigate } from "react-router-dom";
 
+export const KEY_ACTION_BUTTON = {
+  reset: "reset",
+  save: "save",
+  edit: "edit",
+  approve: "approve",
+  preview: "preview",
+  export: "export",
+  AI: "AI",
+  print: "print",
+  exit: "exit",
+};
+
 export default function FormActionBar({
   onAction,
   onPrint,
@@ -22,6 +34,8 @@ export default function FormActionBar({
   onPreview,
   onGenAi,
   keys,
+  onEdit,
+  isEdit = false,
 }) {
   console.log("keys", keys);
   const navigate = useNavigate();
@@ -34,8 +48,13 @@ export default function FormActionBar({
       onClick: onReset ?? emptyF,
     },
     { key: "save", label: "SAVE", icon: <SaveOutlined /> },
-    { key: "edit", label: "EDIT", icon: <EditOutlined /> },
-    { key: "approve", label: "APPROVE", icon: <CheckCircleOutlined /> },
+    { key: "edit", label: "EDIT", icon: <EditOutlined />, onClick: onEdit },
+    {
+      key: "approve",
+      label: "APPROVE",
+      icon: <CheckCircleOutlined />,
+      disabled: !isEdit,
+    },
     {
       key: "preview",
       label: "PREVIEW",
@@ -79,6 +98,7 @@ export default function FormActionBar({
       icon={it.icon}
       block
       onClick={() => (it.onClick ? it.onClick() : onAction?.(it.key))}
+      disabled={it.disabled}
     >
       {it.label}
     </Button>

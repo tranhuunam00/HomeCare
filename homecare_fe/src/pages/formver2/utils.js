@@ -1,6 +1,8 @@
 // src/utils/formVer2.js
 
 import dayjs from "dayjs";
+import API_CALL from "../../services/axiosClient";
+// src/utils/exportFormVer2.js
 
 /* ========================= Constants ========================= */
 export const MAX_COLS = 5;
@@ -300,3 +302,83 @@ export const handlePrint = (printRef) => {
     newWindow.close();
   };
 };
+
+/** Lấy filename từ Content-Disposition nếu BE có set */
+const getFilenameFromDisposition = (disposition) => {
+  if (!disposition) return "";
+  const m = /filename\*=UTF-8''([^;]+)|filename="([^"]+)"/i.exec(disposition);
+  return decodeURIComponent(m?.[1] || m?.[2] || "");
+};
+
+/**
+ * Gọi API export FormVer2 và tải xuống ngay
+ * @param {Object} opts
+ * @param {number[]} [opts.ids]  - mảng ID; nếu có ids thì bỏ qua all/filters
+ * @param {boolean}  [opts.all]  - export theo filter (bỏ phân trang)
+ * @param {Object}   [opts.filters] - filter: id_exam_part,id_template_service,id_doctor,search,range,orderBy,orderDir,withTables,withImages,includeDeleted
+ * @param {string}   [opts.fileName] - custom filename
+ */
+export async function exportFormVer2({
+  ids,
+  all,
+  filters = {},
+  fileName,
+} = {}) {
+  // build params
+  const params = {};
+  if (Array.isArray(ids) && ids.length) {
+    params.ids = ids; // axios => ids=1&ids=2...
+    params.withImages = true;
+  } else if (all) {
+    params.all = true;
+    // các filter phổ biến khi export
+    if (filters.orderBy) params.orderBy = filters.orderBy;
+    if (filters.orderDir) params.orderDir = filters.orderDir;
+    params.withTables = !!filters.withTables;
+    params.withImages = true;
+    params.includeDeleted = !!filters.includeDeleted;
+
+    if (filters.id_exam_part) params.id_exam_part = filters.id_exam_part;
+    if (filters.id_template_service)
+      params.id_template_service = filters.id_template_service;
+    if (filters.id_doctor) params.id_doctor = filters.id_doctor;
+    if (filters.search?.trim()) params.search = filters.search.trim();
+
+    // RangePicker: [dayjs, dayjs]
+    if (Array.isArray(filters.range) && filters.range[0] && filters.range[1]) {
+      params.date_from = filters.range[0].format("YYYY-MM-DD");
+      params.date_to = filters.range[1].format("YYYY-MM-DD");
+    }
+  } else {
+    throw new Error("Thiếu ids hoặc all=true khi export FormVer2.");
+  }
+
+  if (fileName) params.fileName = fileName;
+
+  // Gọi API — nhận binary
+  const res = await API_CALL.get("/form-ver2/export", {
+    params,
+    responseType: "blob",
+  });
+
+  const headerName = getFilenameFromDisposition(
+    res.headers?.["content-disposition"]
+  );
+  const finalName =
+    headerName ||
+    fileName ||
+    `formver2_export_${dayjs().format("YYYYMMDD_HHmmss")}.xlsx`;
+
+  // Tạo link tải
+  const blob = new Blob([res.data], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = finalName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  window.URL.revokeObjectURL(url);
+}

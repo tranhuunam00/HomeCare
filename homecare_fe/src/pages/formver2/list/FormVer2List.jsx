@@ -21,12 +21,14 @@ import {
   PrinterOutlined,
   SearchOutlined,
   FileAddFilled,
+  DownloadOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import styles from "./FormVer2List.module.scss";
 import API_CALL from "../../../services/axiosClient";
 import { useGlobalAuth } from "../../../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { exportFormVer2 } from "../utils";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -85,6 +87,7 @@ export default function FormVer2List() {
 
   /* ======= Global options ======= */
   const { examParts = [], templateServices = [] } = useGlobalAuth();
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
   const getExamPartName = (id) =>
     examParts.find((e) => String(e.id) === String(id))?.name || id;
@@ -134,6 +137,49 @@ export default function FormVer2List() {
     }));
 
   const resetUi = () => setUiFilters(DEFAULT_FILTERS);
+
+  const selectAllOnPage = () => {
+    setSelectedRowKeys((prev) => {
+      const pageIds = rows.map((r) => r.id);
+      // Hợp nhất (giữ những id đã chọn ở trang khác)
+      const set = new Set([...prev, ...pageIds]);
+      return Array.from(set);
+    });
+  };
+
+  // Bỏ chọn tất cả trên TRANG HIỆN TẠI
+  const unselectAllOnPage = () => {
+    setSelectedRowKeys((prev) => {
+      const pageIds = new Set(rows.map((r) => r.id));
+      return prev.filter((id) => !pageIds.has(id));
+    });
+  };
+
+  const clearAllSelections = () => setSelectedRowKeys([]);
+
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: (keys) => setSelectedRowKeys(keys),
+    // Thêm menu nhanh: Chọn tất cả / đảo / bỏ chọn
+    selections: [
+      Table.SELECTION_ALL,
+      Table.SELECTION_INVERT,
+      Table.SELECTION_NONE,
+      {
+        key: "select-all-page",
+        text: "Chọn tất cả (trang này)",
+        onSelect: selectAllOnPage,
+      },
+      {
+        key: "unselect-all-page",
+        text: "Bỏ chọn (trang này)",
+        onSelect: unselectAllOnPage,
+      },
+    ],
+    // để checkbox nằm ở cột đầu
+    columnWidth: 48,
+    preserveSelectedRowKeys: true, // giữ selection khi đổi trang
+  };
 
   /* ======= Columns ======= */
   const columns = useMemo(
@@ -189,15 +235,24 @@ export default function FormVer2List() {
       {
         title: "Hành động",
         key: "actions",
-        width: 120,
+        width: 220,
         align: "center",
         render: (_, record) => (
-          <Button
-            type="link"
-            onClick={() => navigate(`/home/form-v2/detail/${record.id}`)}
-          >
-            Chi tiết
-          </Button>
+          <Space>
+            <Button
+              type="link"
+              onClick={() => navigate(`/home/form-v2/detail/${record.id}`)}
+            >
+              Chi tiết
+            </Button>
+            <Button
+              size="small"
+              icon={<DownloadOutlined />}
+              onClick={() => exportFormVer2({ ids: [record.id] })}
+            >
+              Export
+            </Button>
+          </Space>
         ),
       },
     ],
@@ -214,20 +269,30 @@ export default function FormVer2List() {
         <Space>
           <Button
             icon={<FileAddFilled />}
-            onClick={() => {
-              navigate(`/home/form-v2`);
-            }}
+            onClick={() => navigate(`/home/form-v2`)}
           >
             Thêm mới
           </Button>
-        </Space>
-        <Space>
+
           <Button
             icon={<ReloadOutlined />}
             onClick={() => setFilters({ ...filters })}
           >
             Tải lại
           </Button>
+
+          <Button
+            type="primary"
+            icon={<DownloadOutlined />}
+            disabled={!selectedRowKeys.length}
+            onClick={() => exportFormVer2({ ids: selectedRowKeys })}
+          >
+            Export đã chọn ({selectedRowKeys.length})
+          </Button>
+
+          <Button onClick={selectAllOnPage}>Chọn tất cả (trang này)</Button>
+          <Button onClick={unselectAllOnPage}>Bỏ chọn (trang này)</Button>
+          <Button onClick={clearAllSelections}>Xóa toàn bộ chọn</Button>
         </Space>
       </div>
 
@@ -398,11 +463,12 @@ export default function FormVer2List() {
           dataSource={rows}
           columns={columns}
           rowKey="id"
+          rowSelection={rowSelection} // <— NEW
           pagination={{
             current: filters.page,
             pageSize: filters.limit,
             total,
-            showSizeChanger: false, // size đổi bằng filter "Page size" + bấm Tìm kiếm
+            showSizeChanger: false,
             onChange: (page) => setFilters((s) => ({ ...s, page })),
           }}
         />

@@ -8,13 +8,14 @@ const apiEndPoint = `${
   import.meta.env.VITE_API_ENDPOINT || "http://localhost:3001/api/"
 }/api`;
 
-const CustomSunEditor = ({ value, onChange, className }) => {
+const CustomSunEditor = ({ value, onChange, className, disabled = false }) => {
   const token = storage.get("TOKEN");
 
   return (
     <div className={`editor-container ${className}`}>
       <SunEditor
         height="300"
+        disable={disabled}
         setContents={value}
         onChange={onChange}
         onImageUploadBefore={(files, info, uploadHandler) => {
