@@ -646,7 +646,11 @@ const PrintPreviewVer2 = ({
               style={{ objectFit: "cover", backgroundColor: "#ccc" }}
             />
             <p style={{ textAlign: "center" }}>
-              <a href={formSnapshot.ImageLeftDescLink}>
+              <a
+                href={formSnapshot.ImageLeftDescLink}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 {formSnapshot.ImageLeftDesc}
               </a>
             </p>
@@ -660,7 +664,11 @@ const PrintPreviewVer2 = ({
               style={{ objectFit: "cover", backgroundColor: "#ccc" }}
             />
             <p style={{ textAlign: "center" }}>
-              <a href={formSnapshot.ImageRightDescLink}>
+              <a
+                href={formSnapshot.ImageRightDescLink}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 {formSnapshot.ImageRightDesc}
               </a>
             </p>
