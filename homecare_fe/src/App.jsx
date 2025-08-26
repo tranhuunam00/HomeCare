@@ -52,6 +52,7 @@ import FormVer2 from "./pages/formver2/Test";
 import DFormVer2 from "./pages/formver2/FormVer2";
 import FormVer2List from "./pages/formver2/list/FormVer2List";
 import DoctorChooseForm from "./pages/doctor_use_form_ver2/DoctorChooseForm";
+import FormVer2NameList from "./pages/formver2/name/FormVer2NameList";
 
 function App() {
   useAuthInitializer();
@@ -94,6 +95,7 @@ function App() {
           <Route path="form-v2/detail/:id" element={<DFormVer2 />} />
           <Route path="form-v2" element={<DFormVer2 />} />
           <Route path="form-v2-list" element={<FormVer2List />} />
+          <Route path="form-ver2-names" element={<FormVer2NameList />} />
 
           <Route path="form-choose-form/:id" element={<DoctorChooseForm />} />
 
