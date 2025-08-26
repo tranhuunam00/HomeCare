@@ -205,6 +205,7 @@ export function buildFormData(values, extra) {
   fd.append("ImageLeftDescLink", values.ImageLeftDescLink ?? "");
   fd.append("ImageRightDesc", values.ImageRightDesc ?? "");
   fd.append("ImageRightDescLink", values.ImageRightDescLink ?? "");
+  fd.append("id_formver2_name", values.id_formver2_name ?? "");
 
   // ---- Ảnh: FILE (đúng key BE: ImageFormLeft / ImageFormRight)
   const leftFileObj = values.ImageLeftFile?.[0]?.originFileObj;
@@ -250,6 +251,7 @@ export function mapApiToForm(api) {
     createdAt: dayjs(api?.updatedAt ?? api.createdAt ?? new Date()).format(
       "DD-MM-YYYY"
     ),
+    id_formver2_name: api?.id_formver2_name,
   };
 }
 export const calculateAge = (dob) => {

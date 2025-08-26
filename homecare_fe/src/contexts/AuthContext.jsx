@@ -10,6 +10,7 @@ export const GlobalAuthProvider = ({ children }) => {
   const [doctor, setDoctor] = useState(() => storage.get("DOCTOR"));
   const [templateServices, setTemplateServices] = useState([]);
   const [examParts, setExamParts] = useState([]);
+  const [formVer2Names, setFormVer2Names] = useState([]);
 
   const handleLoginContext = ({ token, user, doctor }) => {
     storage.saveAuth({ token, user, doctor });
@@ -40,6 +41,8 @@ export const GlobalAuthProvider = ({ children }) => {
         templateServices,
         setExamParts,
         examParts,
+        setFormVer2Names,
+        formVer2Names,
       }}
     >
       {children}

@@ -36,6 +36,7 @@ export default function FormActionBar({
   keys,
   onEdit,
   isEdit = false,
+  editId,
 }) {
   console.log("keys", keys);
   const navigate = useNavigate();
@@ -47,13 +48,19 @@ export default function FormActionBar({
       icon: <ReloadOutlined />,
       onClick: onReset ?? emptyF,
     },
-    { key: "save", label: "SAVE", icon: <SaveOutlined /> },
-    { key: "edit", label: "EDIT", icon: <EditOutlined />, onClick: onEdit },
+    { key: "save", label: "SAVE", icon: <SaveOutlined />, disabled: editId },
+    {
+      key: "edit",
+      label: "EDIT",
+      icon: <EditOutlined />,
+      onClick: onEdit,
+      disabled: !editId,
+    },
     {
       key: "approve",
       label: "APPROVE",
       icon: <CheckCircleOutlined />,
-      disabled: !isEdit,
+      disabled: !isEdit || !editId,
     },
     {
       key: "preview",
@@ -66,6 +73,7 @@ export default function FormActionBar({
       label: "EXPORT",
       icon: <ExportOutlined />,
       onClick: onPrint ?? emptyF,
+      disabled: !editId,
     },
     {
       key: "AI",
@@ -79,6 +87,7 @@ export default function FormActionBar({
       label: "IN",
       icon: <PrinterOutlined />,
       onClick: onPrint || emptyF,
+      disabled: !editId,
     },
 
     {

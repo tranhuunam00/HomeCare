@@ -39,7 +39,6 @@ export default function ImageBlock({
   const linkName = `${namePrefix}DescLink`; // ⚠️ đồng bộ với BE: ...DescLink
   const fileName = `${namePrefix}File`; // gửi file qua field này
 
-  console.log("first", form.getFieldsValue());
   const linkVal = Form.useWatch(linkName, form);
   const descVal = Form.useWatch(descName, form);
   const fileList = Form.useWatch(fileName, form) || [];

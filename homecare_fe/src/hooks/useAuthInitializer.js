@@ -11,6 +11,7 @@ const useAuthInitializer = () => {
     handleLogoutGlobal,
     setExamParts,
     setTemplateServices,
+    setFormVer2Names,
   } = useGlobalAuth();
   const { showWarning } = useToast();
 
@@ -43,6 +44,14 @@ const useAuthInitializer = () => {
         })
         .catch(() => {
           showWarning("Không thể tải danh sách bộ phận thăm khám");
+        });
+
+      API_CALL.get("/form-ver2-names", { params: { page: 1, limit: 2000 } })
+        .then((res) => {
+          setFormVer2Names(res.data?.data.items);
+        })
+        .catch(() => {
+          showWarning("Không thể tải danh sách formver2");
         });
     }
   }, []);

@@ -49,7 +49,8 @@ export default function DFormVer2({
   onPrint,
 }) {
   const [form] = Form.useForm();
-  const { examParts, templateServices, user, doctor } = useGlobalAuth();
+  const { examParts, templateServices, user, doctor, formVer2Names } =
+    useGlobalAuth();
 
   const navigate = useNavigate();
   const { id: idFromParam } = useParams();
@@ -76,7 +77,7 @@ export default function DFormVer2({
 
   const [tablesData, setTablesData] = useState([]);
   const [loading, setLoading] = useState(editId);
-  const [isEdit, setIsEdit] = useState(false);
+  const [isEdit, setIsEdit] = useState(!editId);
 
   useEffect(() => {
     onTablesChange?.(tablesData);
@@ -112,7 +113,7 @@ export default function DFormVer2({
           apiData?.image_form_ver2s?.find((x) => x.kind === "left")?.url || "";
         const right =
           apiData?.image_form_ver2s?.find((x) => x.kind === "right")?.url || "";
-
+        console.log("formValues", formValues);
         // set form state hiển thị
         form.setFieldsValue(formValues);
         setTablesData(tables);
@@ -287,13 +288,21 @@ export default function DFormVer2({
             <Col xs={24} md={24}>
               <Form.Item
                 label="Tên mẫu"
-                name="tenMau"
-                rules={[{ required: true, message: "Nhập tên mẫu" }]}
+                name="id_formver2_name"
+                rules={[{ required: true, message: "Chọn tên mẫu" }]}
               >
-                <Input
+                <Select
                   disabled={!isEdit}
-                  placeholder="VD: Siêu âm bụng tổng quát nam"
-                />
+                  placeholder="Chọn tên mẫu"
+                  showSearch
+                  optionFilterProp="children"
+                >
+                  {formVer2Names?.map((item) => (
+                    <Option key={item.id} value={item.id}>
+                      {item.name}
+                    </Option>
+                  ))}
+                </Select>
               </Form.Item>
             </Col>
           </Row>
@@ -462,10 +471,12 @@ export default function DFormVer2({
                 } else {
                   setIsEdit(
                     initialSnap.apiData?.id_doctor == doctor.id ||
-                      user.id_role == USER_ROLE.ADMIN
+                      user.id_role == USER_ROLE.ADMIN ||
+                      !editId
                   );
                 }
               }}
+              editId={editId}
             />
           )}
         </Form>
