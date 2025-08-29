@@ -212,7 +212,7 @@ const FormVer2NameList = () => {
       formData.append("file", file);
 
       const res = await API_CALL.post(
-        "/formver2/import-formver2-name",
+        "/form-ver2-names/import-formver2-name",
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
