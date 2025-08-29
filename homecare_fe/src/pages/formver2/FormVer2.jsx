@@ -226,12 +226,12 @@ export default function DFormVer2({
           <Row gutter={16}>
             <Col xs={24} md={12}>
               <Form.Item
-                label="Kỹ thuật"
+                label="Phân hệ"
                 name="id_template_service"
                 rules={[{ required: true, message: "Chọn kỹ thuật" }]}
               >
                 <Select
-                  placeholder="Chọn kỹ thuật"
+                  placeholder="Chọn phân hệ"
                   disabled={isDoctor || !isEdit}
                 >
                   {templateServices.map((s) => (

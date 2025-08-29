@@ -8,6 +8,7 @@ import {
   Row,
   Col,
   message,
+  Radio,
 } from "antd";
 import { ReloadOutlined, CopyOutlined } from "@ant-design/icons";
 import styles from "./CtsiForm.module.scss";
@@ -167,23 +168,39 @@ const BalthazarForm = () => {
   return (
     <div className={styles.pageWrapper}>
       <div className={styles.formContainer}>
-        <Title level={2}>Thang điểm Balthazar (CTSI cổ điển)</Title>
+        <Title level={2}>D-CTSI</Title>
 
         <Form form={form} layout="vertical" onFinish={calcAndSet}>
           <Form.Item
             name="inflammation"
-            label="Tổn thương tụy/quanh tụy"
+            label="Đánh giá phù nề tụy (Tổn thương tụy / quanh tụy)"
             rules={[{ required: true, message: "Vui lòng chọn" }]}
           >
-            <Select options={INFLAMMATION_OPTIONS} placeholder="Chọn" />
+            <Radio.Group>
+              <Row gutter={[12, 12]}>
+                {INFLAMMATION_OPTIONS.map((option) => (
+                  <Col key={option.value} span={14}>
+                    <Radio value={option.value}>{option.label}</Radio>
+                  </Col>
+                ))}
+              </Row>
+            </Radio.Group>
           </Form.Item>
 
           <Form.Item
             name="necrosis"
-            label="Mức độ hoại tử tụy"
+            label="Đánh giá hoại tử tụy"
             rules={[{ required: true, message: "Vui lòng chọn" }]}
           >
-            <Select options={NECROSIS_OPTIONS} placeholder="Chọn" />
+            <Radio.Group>
+              <Row gutter={[12, 12]}>
+                {NECROSIS_OPTIONS.map((option) => (
+                  <Col key={option.value} span={14}>
+                    <Radio value={option.value}>{option.label}</Radio>
+                  </Col>
+                ))}
+              </Row>
+            </Radio.Group>
           </Form.Item>
 
           <Divider />
@@ -218,13 +235,13 @@ const BalthazarForm = () => {
           <Divider />
           <div className={styles.buttonRow}>
             <Button icon={<ReloadOutlined />} onClick={onReset}>
-              Làm lại
+              Reset
             </Button>
             <Button type="primary" htmlType="submit">
-              Tính kết quả
+              Kết quả
             </Button>
             <Button icon={<CopyOutlined />} onClick={onCopy}>
-              Sao chép bảng kết quả
+              Copy
             </Button>
           </div>
         </Form>
