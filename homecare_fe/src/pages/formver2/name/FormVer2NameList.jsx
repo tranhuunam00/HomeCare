@@ -53,10 +53,8 @@ const FormVer2NameList = () => {
   // filters
   const [q, setQ] = useState("");
   const [includeDeleted, setIncludeDeleted] = useState(false); // nếu sau này cần
-  const [selectedExamPartIds, setSelectedExamPartIds] = useState([]);
-  const [selectedTemplateServiceIds, setSelectedTemplateServiceIds] = useState(
-    []
-  );
+  const [selectedExamPartId, setSelectedExamPartId] = useState();
+  const [selectedTemplateServiceId, setSelectedTemplateServiceId] = useState();
 
   // modal
   const [open, setOpen] = useState(false);
@@ -84,18 +82,16 @@ const FormVer2NameList = () => {
       q: q?.trim() || undefined,
       includeDeleted: includeDeleted ? 1 : undefined,
       // truyền ID đa chọn lên BE (mảng). Axios sẽ serialize thành ?examPartIds=1&examPartIds=2...
-      examPartIds: selectedExamPartIds.length ? selectedExamPartIds : undefined,
-      templateServiceIds: selectedTemplateServiceIds.length
-        ? selectedTemplateServiceIds
-        : undefined,
+      id_exam_part: selectedExamPartId,
+      id_template_service: selectedTemplateServiceId,
     }),
     [
       page,
       limit,
       q,
       includeDeleted,
-      selectedExamPartIds,
-      selectedTemplateServiceIds,
+      selectedExamPartId,
+      selectedTemplateServiceId,
     ]
   );
 
@@ -127,8 +123,8 @@ const FormVer2NameList = () => {
 
   const onResetFilters = () => {
     setQ("");
-    setSelectedExamPartIds([]);
-    setSelectedTemplateServiceIds([]);
+    setSelectedExamPartId();
+    setSelectedTemplateServiceId();
     setPage(1);
     setLimit(20);
     fetchList();
@@ -424,17 +420,14 @@ const FormVer2NameList = () => {
                   allowClear
                 />
               </Col>
-
               <Col xs={24} sm={12} md={8} lg={6}>
                 <label>Bộ phận</label>
                 <Select
-                  mode="multiple"
                   allowClear
                   placeholder="Chọn bộ phận…"
-                  value={selectedExamPartIds}
-                  onChange={setSelectedExamPartIds}
+                  value={selectedExamPartId}
+                  onChange={setSelectedExamPartId}
                   style={{ width: "100%" }}
-                  maxTagCount="responsive"
                   optionFilterProp="children"
                   showSearch
                 >
@@ -449,13 +442,11 @@ const FormVer2NameList = () => {
               <Col xs={24} sm={12} md={8} lg={6}>
                 <label>Phân hệ</label>
                 <Select
-                  mode="multiple"
                   allowClear
                   placeholder="Chọn phân hệ…"
-                  value={selectedTemplateServiceIds}
-                  onChange={setSelectedTemplateServiceIds}
+                  value={selectedTemplateServiceId}
+                  onChange={setSelectedTemplateServiceId}
                   style={{ width: "100%" }}
-                  maxTagCount="responsive"
                   optionFilterProp="children"
                   showSearch
                 >
