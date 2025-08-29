@@ -10,6 +10,8 @@ import {
   Spin,
   Form,
   Popconfirm,
+  Select,
+  Tag,
 } from "antd";
 import {
   FilterOutlined,
@@ -24,11 +26,20 @@ import {
 import { toast } from "react-toastify";
 import styles from "./FormVer2NameList.module.scss";
 import API_CALL from "../../../services/axiosClient";
+import { useGlobalAuth } from "../../../contexts/AuthContext";
+
+const { Option } = Select;
 
 const FormVer2NameList = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+
+  // lấy từ context
+  const { examParts, templateServices, user, doctor, formVer2Names } =
+    useGlobalAuth();
+
+  console.log("templateServices", templateServices);
 
   // file input ref (ẩn) cho nút Import
   const fileInputRef = useRef(null);
@@ -42,10 +53,29 @@ const FormVer2NameList = () => {
   // filters
   const [q, setQ] = useState("");
   const [includeDeleted, setIncludeDeleted] = useState(false); // nếu sau này cần
+  const [selectedExamPartIds, setSelectedExamPartIds] = useState([]);
+  const [selectedTemplateServiceIds, setSelectedTemplateServiceIds] = useState(
+    []
+  );
 
   // modal
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
+
+  // map id -> name để render nhanh trên bảng
+  const examPartNameById = useMemo(() => {
+    const map = new Map();
+    (examParts || []).forEach((p) => map.set(p.id, p.name));
+    return map;
+  }, [examParts]);
+
+  const templateServiceNameById = useMemo(() => {
+    const map = new Map();
+    (templateServices || []).forEach((s) => map.set(s.id, s.name));
+    return map;
+  }, [templateServices]);
+
+  console.log("examPartNameById", examPartNameById, templateServiceNameById);
 
   const params = useMemo(
     () => ({
@@ -53,8 +83,20 @@ const FormVer2NameList = () => {
       limit,
       q: q?.trim() || undefined,
       includeDeleted: includeDeleted ? 1 : undefined,
+      // truyền ID đa chọn lên BE (mảng). Axios sẽ serialize thành ?examPartIds=1&examPartIds=2...
+      examPartIds: selectedExamPartIds.length ? selectedExamPartIds : undefined,
+      templateServiceIds: selectedTemplateServiceIds.length
+        ? selectedTemplateServiceIds
+        : undefined,
     }),
-    [page, limit, q, includeDeleted]
+    [
+      page,
+      limit,
+      q,
+      includeDeleted,
+      selectedExamPartIds,
+      selectedTemplateServiceIds,
+    ]
   );
 
   const fetchList = async () => {
@@ -85,6 +127,8 @@ const FormVer2NameList = () => {
 
   const onResetFilters = () => {
     setQ("");
+    setSelectedExamPartIds([]);
+    setSelectedTemplateServiceIds([]);
     setPage(1);
     setLimit(20);
     fetchList();
@@ -98,12 +142,19 @@ const FormVer2NameList = () => {
 
   const openEdit = async (record) => {
     setEditingId(record.id);
-    form.setFieldsValue({ name: record.name });
+    form.setFieldsValue({
+      name: record.name,
+      code: record.code,
+
+      id_exam_part: record.id_exam_part,
+      id_template_service: record.id_template_service,
+    });
     setOpen(true);
   };
 
   const handleSubmit = async (values) => {
     try {
+      // values sẽ có: { name, id_exam_part, id_template_service }
       if (editingId) {
         await API_CALL.patch(`/form-ver2-names/${editingId}`, values);
         toast.success("Cập nhật thành công");
@@ -141,12 +192,10 @@ const FormVer2NameList = () => {
     const file = e?.target?.files?.[0];
     if (!file) return;
 
-    // reset input để có thể chọn lại cùng 1 file lần sau
     const resetInput = () => {
       if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
-    // kiểm tra mimetype đơn giản
     const allowed = [
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       "application/vnd.ms-excel",
@@ -163,20 +212,14 @@ const FormVer2NameList = () => {
       formData.append("file", file);
 
       const res = await API_CALL.post(
-        "/form-ver2-names/import-formver2-name",
+        "/formver2/import-formver2-name",
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
 
       const data = res?.data?.data || {};
-      const {
-        totalRows,
-        created,
-        skipped,
-        createdServices,
-        createdExamParts,
-        errors,
-      } = data;
+      const { created, skipped, createdServices, createdExamParts, errors } =
+        data;
 
       toast.success(
         `Import xong: ${created || 0} tạo mới, ${skipped || 0} bỏ qua` +
@@ -199,7 +242,6 @@ const FormVer2NameList = () => {
   };
 
   const handleDownloadSample = () => {
-    // Tạo nhanh file CSV mẫu (dễ, không cần thêm thư viện XLSX)
     const header = ["Phân hệ", "Bộ phận", "Mã định danh", "Tên mẫu"];
     const rows = [
       [
@@ -228,17 +270,13 @@ const FormVer2NameList = () => {
     const escapeCsv = (v) => {
       if (v == null) return "";
       const s = String(v);
-      // escape dấu phẩy, xuống dòng, hoặc dấu ngoặc kép
-      if (/[",\n]/.test(s)) {
-        return `"${s.replace(/"/g, '""')}"`;
-      }
+      if (/[",\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
       return s;
     };
 
     const csv = [header, ...rows]
       .map((r) => r.map(escapeCsv).join(","))
       .join("\n");
-
     const blob = new Blob([`\ufeff${csv}`], {
       type: "text/csv;charset=utf-8;",
     });
@@ -256,11 +294,44 @@ const FormVer2NameList = () => {
 
   const columns = [
     { title: "ID", dataIndex: "id", key: "id", width: 80 },
-    { title: "Tên mẫu", dataIndex: "name", key: "name" },
+    {
+      title: "Tên mẫu",
+      dataIndex: "name",
+      key: "name",
+      render: (v) => v || "",
+    },
+    {
+      title: "Code",
+      dataIndex: "code",
+      key: "code",
+      render: (v) => v || "",
+    },
+    {
+      title: "Bộ phận",
+      dataIndex: "id_exam_part",
+      key: "id_exam_part",
+      width: 200,
+      render: (id) => examPartNameById.get(id) || id || "",
+    },
+    {
+      title: "Phân hệ",
+      dataIndex: "id_template_service",
+      key: "id_template_service",
+      width: 220,
+      render: (id) => templateServiceNameById.get(id) || id || "",
+    },
+    {
+      title: "Đã sử dụng?",
+      dataIndex: "isUsed",
+      key: "isUsed",
+      width: 140,
+      render: (val) =>
+        val ? <Tag color="green">Đã dùng</Tag> : <Tag>Chưa dùng</Tag>,
+    },
     {
       title: "Hành động",
       key: "actions",
-      width: 200,
+      width: 220,
       render: (_, record) => (
         <div className={styles.actions}>
           <Button
@@ -294,7 +365,6 @@ const FormVer2NameList = () => {
             Tải lại
           </Button>
 
-          {/* Nút Import & tải file mẫu */}
           <Button
             icon={<UploadOutlined />}
             loading={uploading}
@@ -338,7 +408,7 @@ const FormVer2NameList = () => {
               </div>
             }
           >
-            <Row gutter={16}>
+            <Row gutter={[16, 16]}>
               <Col xs={24} sm={12} md={8} lg={6}>
                 <label>Tên mẫu</label>
                 <Input
@@ -348,6 +418,48 @@ const FormVer2NameList = () => {
                   onPressEnter={onSearch}
                   allowClear
                 />
+              </Col>
+
+              <Col xs={24} sm={12} md={8} lg={6}>
+                <label>Bộ phận</label>
+                <Select
+                  mode="multiple"
+                  allowClear
+                  placeholder="Chọn bộ phận…"
+                  value={selectedExamPartIds}
+                  onChange={setSelectedExamPartIds}
+                  style={{ width: "100%" }}
+                  maxTagCount="responsive"
+                  optionFilterProp="children"
+                  showSearch
+                >
+                  {(examParts || []).map((p) => (
+                    <Option key={p.id} value={p.id}>
+                      {p.name}
+                    </Option>
+                  ))}
+                </Select>
+              </Col>
+
+              <Col xs={24} sm={12} md={8} lg={6}>
+                <label>Phân hệ</label>
+                <Select
+                  mode="multiple"
+                  allowClear
+                  placeholder="Chọn phân hệ…"
+                  value={selectedTemplateServiceIds}
+                  onChange={setSelectedTemplateServiceIds}
+                  style={{ width: "100%" }}
+                  maxTagCount="responsive"
+                  optionFilterProp="children"
+                  showSearch
+                >
+                  {(templateServices || []).map((s) => (
+                    <Option key={s.id} value={s.id}>
+                      {s.name}
+                    </Option>
+                  ))}
+                </Select>
               </Col>
             </Row>
           </Card>
@@ -396,6 +508,77 @@ const FormVer2NameList = () => {
           >
             <Input placeholder="VD: Mẫu siêu âm tuyến giáp" />
           </Form.Item>
+
+          <Form.Item
+            name="code"
+            label="Mã định danh (Code)"
+            rules={[
+              { required: true, message: "Vui lòng nhập code" },
+              { max: 30, message: "Tối đa 30 ký tự theo cú pháp DRAD-" },
+              {
+                pattern: /^DRAD-[A-Za-z0-9-]+$/,
+                message:
+                  "Code phải bắt đầu bằng DRAD- và chỉ gồm A–Z, 0–9, dấu gạch nối (-)",
+              },
+            ]}
+          >
+            <Input
+              placeholder="DRAD-IRSA-06"
+              allowClear
+              onChange={(e) =>
+                form.setFieldsValue({ code: e.target.value.toUpperCase() })
+              }
+              onBlur={(e) => {
+                let v = (e.target.value || "").trim().toUpperCase();
+                if (v && !v.startsWith("DRAD-"))
+                  v = `DRAD-${v.replace(/^DRAD-?/i, "")}`;
+                form.setFieldsValue({ code: v });
+              }}
+            />
+          </Form.Item>
+
+          <Row gutter={12}>
+            <Col span={12}>
+              <Form.Item
+                name="id_template_service"
+                label="Phân hệ"
+                rules={[{ required: true, message: "Vui lòng chọn phân hệ" }]}
+              >
+                <Select
+                  placeholder="Chọn phân hệ…"
+                  allowClear
+                  showSearch
+                  optionFilterProp="children"
+                >
+                  {(templateServices || []).map((s) => (
+                    <Select.Option key={s.id} value={s.id}>
+                      {s.name}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="id_exam_part"
+                label="Bộ phận"
+                rules={[{ required: true, message: "Vui lòng chọn bộ phận" }]}
+              >
+                <Select
+                  placeholder="Chọn bộ phận…"
+                  allowClear
+                  showSearch
+                  optionFilterProp="children"
+                >
+                  {(examParts || []).map((p) => (
+                    <Select.Option key={p.id} value={p.id}>
+                      {p.name}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
         </Form>
       </Modal>
     </div>

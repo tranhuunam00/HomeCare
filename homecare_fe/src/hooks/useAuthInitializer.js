@@ -30,7 +30,7 @@ const useAuthInitializer = () => {
           showWarning("Vui lòng đăng nhập lại ");
         });
 
-      API_CALL.get(`/ts`)
+      API_CALL.get(`/ts`, { params: { page: 1, limit: 1000 } })
         .then((res) => {
           setTemplateServices(res.data.data.data);
         })

@@ -65,6 +65,28 @@ export default function DFormVer2({
   });
   const editId = id_form_ver2 ?? idFromParam;
 
+  const selectedTemplateServiceId = Form.useWatch("id_template_service", form);
+  const selectedExamPartId = Form.useWatch("id_exam_part", form);
+
+  // Lọc local từ formVer2Names đã có sẵn trong context
+  const filteredFormVer2Names = useMemo(() => {
+    if (!selectedTemplateServiceId || !selectedExamPartId) return [];
+    return (formVer2Names || []).filter(
+      (n) =>
+        Number(n.id_template_service) === Number(selectedTemplateServiceId) &&
+        Number(n.id_exam_part) === Number(selectedExamPartId) &&
+        !n.isUsed
+    );
+  }, [formVer2Names, selectedTemplateServiceId, selectedExamPartId]);
+
+  // Nếu đổi Phân hệ/Bộ phận mà tên mẫu đang chọn không còn hợp lệ → reset
+  useEffect(() => {
+    const current = form.getFieldValue("id_formver2_name");
+    if (!current) return;
+    const stillValid = filteredFormVer2Names.some((x) => x.id === current);
+    if (!stillValid) form.setFieldsValue({ id_formver2_name: undefined });
+  }, [filteredFormVer2Names, form]);
+
   const pendingAction = useRef(null);
   const ngayThucHienISO = useMemo(() => toISODate(new Date()), []);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -226,7 +248,7 @@ export default function DFormVer2({
           <Row gutter={16}>
             <Col xs={24} md={12}>
               <Form.Item
-                label="Kỹ thuật"
+                label="Phân hệ"
                 name="id_template_service"
                 rules={[{ required: true, message: "Chọn kỹ thuật" }]}
               >
@@ -278,8 +300,14 @@ export default function DFormVer2({
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
-              <Form.Item label="Mã số định danh mẫu" name={"id"}>
-                <Input readOnly disabled />
+              <Form.Item label="Mã số định danh mẫu">
+                <Input
+                  value={
+                    initialSnap.apiData?.id_formver2_name_form_ver2_name?.code
+                  }
+                  readOnly
+                  disabled
+                />
               </Form.Item>
             </Col>
           </Row>
@@ -292,12 +320,23 @@ export default function DFormVer2({
                 rules={[{ required: true, message: "Chọn tên mẫu" }]}
               >
                 <Select
-                  disabled={!isEdit}
-                  placeholder="Chọn tên mẫu"
+                  disabled={
+                    !isEdit || !selectedTemplateServiceId || !selectedExamPartId
+                  }
+                  placeholder={
+                    !selectedTemplateServiceId || !selectedExamPartId
+                      ? "Chọn Phân hệ & Bộ phận trước"
+                      : "Chọn tên mẫu"
+                  }
                   showSearch
                   optionFilterProp="children"
+                  notFoundContent={
+                    selectedTemplateServiceId && selectedExamPartId
+                      ? "Không có tên mẫu phù hợp"
+                      : "Chưa đủ điều kiện để chọn"
+                  }
                 >
-                  {formVer2Names?.map((item) => (
+                  {filteredFormVer2Names.map((item) => (
                     <Option key={item.id} value={item.id}>
                       {item.name}
                     </Option>
