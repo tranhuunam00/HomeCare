@@ -214,10 +214,15 @@ const FormVer2NameList = () => {
       const res = await API_CALL.post(
         "/form-ver2-names/import-formver2-name",
         formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+          timeout: 300000, // 300s = 5 phút
+          timeoutErrorMessage: "Import quá thời gian chờ. Vui lòng thử lại.",
+        }
       );
 
-      const data = res?.data?.data || {};
+      const data = res?.data?.data?.data || {};
+
       const { created, skipped, createdServices, createdExamParts, errors } =
         data;
 
