@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import {
   Table,
   Input,
@@ -18,6 +18,8 @@ import {
   DeleteOutlined,
   ReloadOutlined,
   SearchOutlined,
+  UploadOutlined,
+  DownloadOutlined,
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import styles from "./FormVer2NameList.module.scss";
@@ -26,6 +28,10 @@ import API_CALL from "../../../services/axiosClient";
 const FormVer2NameList = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  // file input ref (ẩn) cho nút Import
+  const fileInputRef = useRef(null);
 
   // list + paging
   const [items, setItems] = useState([]);
@@ -55,7 +61,7 @@ const FormVer2NameList = () => {
     setLoading(true);
     try {
       const res = await API_CALL.get("/form-ver2-names", { params });
-      const data = res?.data.data;
+      const data = res?.data?.data;
       setItems(data?.items || []);
       setTotal(data?.total || 0);
       setPage(data?.page || 1);
@@ -116,10 +122,8 @@ const FormVer2NameList = () => {
 
   const handleDelete = async (id) => {
     try {
-      console.log("id", id);
       await API_CALL.del(`/form-ver2-names/${id}`);
       toast.success("Đã xoá");
-      // nếu xoá hết trang hiện tại, lùi về trang trước
       if ((items?.length || 0) <= 1 && page > 1) setPage(page - 1);
       else fetchList();
     } catch (err) {
@@ -127,13 +131,136 @@ const FormVer2NameList = () => {
     }
   };
 
+  // ================== IMPORT & DOWNLOAD SAMPLE ==================
+
+  const handleClickImport = () => {
+    if (fileInputRef.current) fileInputRef.current.click();
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e?.target?.files?.[0];
+    if (!file) return;
+
+    // reset input để có thể chọn lại cùng 1 file lần sau
+    const resetInput = () => {
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    };
+
+    // kiểm tra mimetype đơn giản
+    const allowed = [
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "application/vnd.ms-excel",
+    ];
+    if (!allowed.includes(file.type)) {
+      toast.error("Vui lòng chọn file Excel (.xlsx/.xls)");
+      resetInput();
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await API_CALL.post(
+        "/form-ver2-names/import-formver2-name",
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+
+      const data = res?.data?.data || {};
+      const {
+        totalRows,
+        created,
+        skipped,
+        createdServices,
+        createdExamParts,
+        errors,
+      } = data;
+
+      toast.success(
+        `Import xong: ${created || 0} tạo mới, ${skipped || 0} bỏ qua` +
+          (createdServices ? `, ${createdServices} phân hệ mới` : "") +
+          (createdExamParts ? `, ${createdExamParts} bộ phận mới` : "")
+      );
+
+      if (errors?.length) {
+        console.warn("Import errors:", errors);
+        toast.warn(`Có ${errors.length} dòng lỗi. Xem console để chi tiết.`);
+      }
+
+      fetchList();
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Import thất bại");
+    } finally {
+      setUploading(false);
+      resetInput();
+    }
+  };
+
+  const handleDownloadSample = () => {
+    // Tạo nhanh file CSV mẫu (dễ, không cần thêm thư viện XLSX)
+    const header = ["Phân hệ", "Bộ phận", "Mã định danh", "Tên mẫu"];
+    const rows = [
+      [
+        "ĐQCT",
+        "Bụng",
+        "DRAD-IRSA-02",
+        "Đốt sóng cao tần (RFA) u gan dưới CLVT",
+      ],
+      ["ĐQCT", "Bụng", "DRAD-IRSA-04", "Sinh thiết (Biopsy) gan dưới CLVT"],
+      ["ĐQCT", "Bụng", "DRAD-IRSA-05", "Sinh thiết (Biopsy) gan dưới CLVT"],
+      [
+        "ĐQCT",
+        "Bụng",
+        "DRAD-IRSA-06",
+        "Sinh thiết (Biopsy) hạch trong ổ bụng dưới CLVT",
+      ],
+      ["ĐQCT", "Bụng", "DRAD-IRSA-07", "Sinh thiết (Biopsy) lách dưới CLVT"],
+      [
+        "ĐQCT",
+        "Bụng",
+        "DRAD-IRSA-10",
+        "Sinh thiết (Biopsy) tạng hay khối ổ bụng dưới CLVT",
+      ],
+    ];
+
+    const escapeCsv = (v) => {
+      if (v == null) return "";
+      const s = String(v);
+      // escape dấu phẩy, xuống dòng, hoặc dấu ngoặc kép
+      if (/[",\n]/.test(s)) {
+        return `"${s.replace(/"/g, '""')}"`;
+      }
+      return s;
+    };
+
+    const csv = [header, ...rows]
+      .map((r) => r.map(escapeCsv).join(","))
+      .join("\n");
+
+    const blob = new Blob([`\ufeff${csv}`], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "formver2_name_import_sample.csv";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  // ==============================================================
+
   const columns = [
     { title: "ID", dataIndex: "id", key: "id", width: 80 },
     { title: "Tên mẫu", dataIndex: "name", key: "name" },
     {
       title: "Hành động",
       key: "actions",
-      width: 180,
+      width: 200,
       render: (_, record) => (
         <div className={styles.actions}>
           <Button
@@ -166,6 +293,27 @@ const FormVer2NameList = () => {
           <Button icon={<ReloadOutlined />} onClick={fetchList}>
             Tải lại
           </Button>
+
+          {/* Nút Import & tải file mẫu */}
+          <Button
+            icon={<UploadOutlined />}
+            loading={uploading}
+            onClick={handleClickImport}
+          >
+            Import file
+          </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".xlsx,.xls"
+            style={{ display: "none" }}
+            onChange={handleFileChange}
+          />
+
+          <Button icon={<DownloadOutlined />} onClick={handleDownloadSample}>
+            Tải file mẫu
+          </Button>
+
           <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
             Thêm mới
           </Button>
@@ -201,7 +349,6 @@ const FormVer2NameList = () => {
                   allowClear
                 />
               </Col>
-              {/* Nếu cần includeDeleted sau này thì thêm một Switch/Checkbox */}
             </Row>
           </Card>
         </Col>
