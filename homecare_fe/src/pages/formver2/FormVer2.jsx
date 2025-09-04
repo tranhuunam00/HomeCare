@@ -494,7 +494,8 @@ export default function DFormVer2({
 
           {/* Action bar */}
           {(initialSnap.apiData?.id_doctor == doctor.id ||
-            user.id_role == USER_ROLE.ADMIN) && (
+            user.id_role == USER_ROLE.ADMIN ||
+            !editId) && (
             <FormActionBar
               onAction={(key) => {
                 pendingAction.current = key;
