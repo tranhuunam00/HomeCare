@@ -294,19 +294,27 @@ const FormVer2NameList = () => {
   // ==============================================================
 
   const columns = [
-    { title: "ID", dataIndex: "id", key: "id", width: 80 },
+    {
+      title: "STT",
+      key: "stt",
+      width: 70,
+      align: "center",
+      render: (_, __, index) => (page - 1) * limit + index + 1,
+    },
+    {
+      title: "Code",
+      dataIndex: "code",
+      key: "code",
+      width: 130,
+      render: (v) => v || "",
+    },
     {
       title: "Tên mẫu",
       dataIndex: "name",
       key: "name",
       render: (v) => v || "",
     },
-    {
-      title: "Code",
-      dataIndex: "code",
-      key: "code",
-      render: (v) => v || "",
-    },
+
     {
       title: "Bộ phận",
       dataIndex: "id_exam_part",

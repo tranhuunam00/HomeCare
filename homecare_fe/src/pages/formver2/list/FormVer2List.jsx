@@ -158,7 +158,11 @@ export default function FormVer2List() {
   };
 
   const clearAllSelections = () => setSelectedRowKeys([]);
+  const getLinkedName = (record) =>
+    record?.id_formver2_name_form_ver2_name?.name || record?.ten_mau || "";
 
+  const getLinkedCode = (record) =>
+    record?.id_formver2_name_form_ver2_name?.code || "";
   const rowSelection = {
     selectedRowKeys,
     onChange: (keys) => setSelectedRowKeys(keys),
@@ -186,12 +190,34 @@ export default function FormVer2List() {
   /* ======= Columns ======= */
   const columns = useMemo(
     () => [
-      { title: "ID", dataIndex: "id", key: "id", width: 70, align: "center" },
+      {
+        title: "STT",
+        key: "stt",
+        width: 70,
+        align: "center",
+        render: (_, __, index) =>
+          (filters.page - 1) * filters.limit + index + 1,
+      },
+      {
+        title: "Code",
+        key: "code",
+        dataIndex: ["id_formver2_name_form_ver2_name", "code"],
+        width: 140,
+        ellipsis: true,
+        render: (_, record) =>
+          getLinkedCode(record) || <Text type="secondary">—</Text>,
+      },
       {
         title: "Tên mẫu",
         dataIndex: "ten_mau",
         key: "ten_mau",
-        render: (v) => v || <Text type="secondary">—</Text>,
+        width: 290,
+
+        ellipsis: true,
+        render: (_, record) => {
+          const name = getLinkedName(record);
+          return name ? name : <Text type="secondary">—</Text>;
+        },
       },
       {
         title: "Bộ phận thăm khám",
@@ -414,26 +440,6 @@ export default function FormVer2List() {
                 { value: "ASC", label: "Mới nhất" },
               ]}
             />
-          </Col>
-
-          <Col xs={8} md={6} lg={2}>
-            <Text>Có bảng</Text>
-            <div>
-              <Switch
-                checked={uiFilters.withTables}
-                onChange={(v) => setUiFilters((s) => ({ ...s, withTables: v }))}
-              />
-            </div>
-          </Col>
-
-          <Col xs={8} md={6} lg={2}>
-            <Text>Có hình ảnh</Text>
-            <div>
-              <Switch
-                checked={uiFilters.withImages}
-                onChange={(v) => setUiFilters((s) => ({ ...s, withImages: v }))}
-              />
-            </div>
           </Col>
 
           <Col xs={8} md={6} lg={2}>
