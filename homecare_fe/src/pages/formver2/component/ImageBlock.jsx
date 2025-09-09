@@ -131,25 +131,36 @@ export default function ImageBlock({
           preview={false}
         />
       </div>
-      <Text
-        type="secondary"
-        style={{ display: "block", marginTop: 8, textAlign: "center" }}
-      >
-        {title}
-      </Text>
 
       {/* Upload/Dragger: BỌC TRONG Form.Item để file vào form */}
       <Form.Item
         name={fileName}
         valuePropName="fileList"
         getValueFromEvent={normFileList}
-        style={{ marginTop: 8 }}
+        style={{
+          marginTop: 8,
+          display: "flex",
+          alignItems: "center", // căn giữa dọc
+          justifyContent: "center",
+        }}
       >
-        <Dragger disabled={disabled} {...draggerProps}>
-          <p className="ant-upload-text">
-            Kéo & thả ảnh vào đây, hoặc bấm để chọn
+        <Dragger
+          disabled={disabled}
+          {...draggerProps}
+          showUploadList={false}
+          style={{
+            height: 40,
+            borderRadius: 8,
+            padding: "0 0",
+            width: 150,
+          }}
+        >
+          <p
+            className="ant-upload-drag-icon"
+            style={{ margin: 0, lineHeight: 1, textAlign: "center" }}
+          >
+            <InboxOutlined style={{ fontSize: 32, color: "#1890ff" }} />
           </p>
-          <p className="ant-upload-hint">PNG/JPG/JPEG/WEBP • 1 ảnh</p>
         </Dragger>
       </Form.Item>
 
@@ -189,20 +200,6 @@ export default function ImageBlock({
           </Form.Item>
         </Col>
       </Row>
-
-      {/* Bấm vào mô tả cũng mở link */}
-      <div style={{ marginTop: -8 }}>
-        {descVal ? (
-          <a
-            onClick={() => safeOpen(linkVal)}
-            style={{ cursor: linkVal ? "pointer" : "not-allowed" }}
-          >
-            {descVal}
-          </a>
-        ) : (
-          <Text type="secondary">— Nhập mô tả để hiện link có thể bấm —</Text>
-        )}
-      </div>
     </div>
   );
 }

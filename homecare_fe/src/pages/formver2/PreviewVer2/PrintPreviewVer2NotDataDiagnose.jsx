@@ -10,6 +10,8 @@ import CustomSunEditor from "../../../components/Suneditor/CustomSunEditor";
 import FormActionBar from "../component/FormActionBar";
 import { handlePrint } from "../utils";
 import InnerHTMLFormEditor from "./InnerHTMLFormEditor";
+import dayjs from "dayjs";
+import { useGlobalAuth } from "../../../contexts/AuthContext";
 
 const SectionTitle = ({ children }) => (
   <h3 className={styles.sectionTitle}>{children}</h3>
@@ -31,7 +33,14 @@ const PrintPreviewVer2NotDataDiagnose = ({
   ImageLeftUrl,
   ImageRightUrl,
   imageDescEditor,
+  initialSnap,
+  currentFormVer2Name,
+  editId,
 }) => {
+  const { examParts, templateServices, user, doctor, formVer2Names } =
+    useGlobalAuth();
+
+  console.log("currentFormVer2Name", currentFormVer2Name);
   const LABELS = ADMIN_INFO_LABELS;
   const printRef = useRef();
 
@@ -41,7 +50,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
     <div>
       <div ref={printRef} className={styles.wrapper}>
         <Card bordered={false} className={styles.a4Page}>
-          <h2 className={styles.center}>KẾT QUẢ D-FORM</h2>
+          <h2 className={styles.center}>KẾT QUẢ D-FORM 2</h2>
           <div
             style={{
               marginBottom: 6,
@@ -121,7 +130,9 @@ const PrintPreviewVer2NotDataDiagnose = ({
             >
               {"Mã số định danh mẫu"}:
             </p>
-            <p style={{ fontSize: 14, margin: 0, padding: 0 }}>{"auto"}</p>
+            <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
+              {currentFormVer2Name?.code}
+            </p>
           </div>
           <div
             style={{
@@ -141,7 +152,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
               {"Tên mẫu"}:
             </p>
             <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
-              {formSnapshot?.tenMau}
+              {currentFormVer2Name?.name}
             </p>
           </div>
           <div
@@ -183,7 +194,9 @@ const PrintPreviewVer2NotDataDiagnose = ({
               {"Ngày thực hiện"}:
             </p>
             <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
-              {"Ngày thực hiện"}
+              {dayjs(initialSnap?.apiData?.createdAt || new Date()).format(
+                "DD-MM-YYYY"
+              )}
             </p>
           </div>
           <div
@@ -204,7 +217,8 @@ const PrintPreviewVer2NotDataDiagnose = ({
               {"Người thực hiện"}:
             </p>
             <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
-              {"Người thực hiện"}
+              {initialSnap?.apiData?.id_doctor_doctor?.full_name ||
+                doctor?.full_name}
             </p>
           </div>
 
@@ -284,7 +298,8 @@ const PrintPreviewVer2NotDataDiagnose = ({
       </div>
       <FormActionBar
         onPrint={() => handlePrint(printRef)}
-        keys={["export", "print"]}
+        keys={["print"]}
+        editId={editId}
       />
     </div>
   );

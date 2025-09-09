@@ -19,6 +19,7 @@ import { toast } from "react-toastify";
 import dayjs from "dayjs";
 import { genAITextToHtml, STYLE_COPY } from "../../../constant/app";
 import AIRecommendationEditor from "../../../components/AIRecommendationEditor";
+import { ThamKhaoLinkHomeCare } from "../component_common/Thamkhao";
 
 const { Text } = Typography;
 
@@ -556,11 +557,11 @@ const LungRADSForm = () => {
   return (
     <div className={styles.pageWrapper}>
       <div className={styles.formContainer}>
-        <Title level={3}>Đánh giá D-LungRADS</Title>
-        <h4>Lĩnh vực: cắt lớp vi tính</h4>
-        <h4 style={{ marginBottom: 40 }}>
-          Mục đích: sàng lọc chẩn đoán sớm ung thư phổ
-        </h4>
+        <ThamKhaoLinkHomeCare
+          link={"https://home-care.vn/product/phan-mem-d-lung/"}
+        />
+
+        <Title level={3}>Phần mềm D-LUNG</Title>
 
         <Form form={form} layout="vertical" onFinish={onFinish}>
           <Form.Item

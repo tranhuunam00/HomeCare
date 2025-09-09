@@ -15,10 +15,15 @@ import { QuestionCircleOutlined } from "@ant-design/icons";
 import { useNavigate, useParams } from "react-router-dom";
 import ImageBlock from "./component/ImageBlock";
 import AdminFormVer2 from "./component/AdminFormVer2";
-import FormActionBar from "./component/FormActionBar";
+import FormActionBar, { KEY_ACTION_BUTTON } from "./component/FormActionBar";
 import { useGlobalAuth } from "../../contexts/AuthContext";
 import API_CALL from "../../services/axiosClient"; // axios instance của bạn
-import { buildFormData, mapApiToForm, normalizeTablesFromApi } from "./utils";
+import {
+  buildFormData,
+  buildPrompt,
+  mapApiToForm,
+  normalizeTablesFromApi,
+} from "./utils";
 import { toast } from "react-toastify";
 import CustomSunEditor from "../../components/Suneditor/CustomSunEditor";
 
@@ -55,6 +60,8 @@ export default function DFormVer2({
   const navigate = useNavigate();
   const { id: idFromParam } = useParams();
 
+  const [filteredFormVer2Names, setFilteredFormVer2Names] = useState([]);
+
   const [initialSnap, setInitialSnap] = useState({
     formValues: null,
     tables: null,
@@ -67,25 +74,40 @@ export default function DFormVer2({
 
   const selectedTemplateServiceId = Form.useWatch("id_template_service", form);
   const selectedExamPartId = Form.useWatch("id_exam_part", form);
+  const selectedFormVer2NameId = Form.useWatch("id_formver2_name", form);
 
+  const currentFormVer2Name = useMemo(() => {
+    const byPick = (formVer2Names || []).find(
+      (n) => n.id === selectedFormVer2NameId
+    );
+    if (byPick) return byPick;
+
+    // fallback cho case edit khi chưa đổi select
+    const snap = initialSnap?.apiData?.id_formver2_name_form_ver2_name;
+    return snap ? { id: snap.id, name: snap.name, code: snap.code } : null;
+  }, [selectedFormVer2NameId, formVer2Names, initialSnap]);
   // Lọc local từ formVer2Names đã có sẵn trong context
-  const filteredFormVer2Names = useMemo(() => {
-    if (!selectedTemplateServiceId || !selectedExamPartId) return [];
-    return (formVer2Names || []).filter(
+  useEffect(() => {
+    if (!selectedTemplateServiceId || !selectedExamPartId) {
+      setFilteredFormVer2Names([]);
+      return;
+    }
+
+    const currentId = initialSnap?.apiData?.id_formver2_name_form_ver2_name?.id;
+    const filtered = (formVer2Names || []).filter(
       (n) =>
         Number(n.id_template_service) === Number(selectedTemplateServiceId) &&
         Number(n.id_exam_part) === Number(selectedExamPartId) &&
-        !n.isUsed
+        (!n.isUsed || n.id == currentId)
     );
-  }, [formVer2Names, selectedTemplateServiceId, selectedExamPartId]);
 
-  // Nếu đổi Phân hệ/Bộ phận mà tên mẫu đang chọn không còn hợp lệ → reset
-  useEffect(() => {
-    const current = form.getFieldValue("id_formver2_name");
-    if (!current) return;
-    const stillValid = filteredFormVer2Names.some((x) => x.id === current);
-    if (!stillValid) form.setFieldsValue({ id_formver2_name: undefined });
-  }, [filteredFormVer2Names, form]);
+    setFilteredFormVer2Names(filtered);
+  }, [
+    formVer2Names,
+    selectedTemplateServiceId,
+    selectedExamPartId,
+    initialSnap,
+  ]);
 
   const pendingAction = useRef(null);
   const ngayThucHienISO = useMemo(() => toISODate(new Date()), []);
@@ -235,7 +257,11 @@ export default function DFormVer2({
           colon={false}
           onFinish={onFinish}
           onFinishFailed={onFinishFailed}
-          initialValues={{ language: "vi" }}
+          initialValues={{
+            language: "vi",
+            createdAt: ngayThucHienISO,
+            doctor_name: doctor?.full_name,
+          }}
           onValuesChange={(_, allValues) => {
             onFormChange?.({
               ...allValues,
@@ -302,9 +328,7 @@ export default function DFormVer2({
             <Col xs={24} md={12}>
               <Form.Item label="Mã số định danh mẫu">
                 <Input
-                  value={
-                    initialSnap.apiData?.id_formver2_name_form_ver2_name?.code
-                  }
+                  value={currentFormVer2Name?.code || ""}
                   readOnly
                   disabled
                 />
@@ -379,7 +403,7 @@ export default function DFormVer2({
                 form={form}
                 namePrefix="ImageLeft"
                 src={ImageLeftUrl}
-                title="Minh hoạ giải phẫu (cố định, có mô tả & link)"
+                title="Ảnh minh họa 1"
                 onChange={(value) => {
                   setImageLeftUrl(value);
                 }}
@@ -391,7 +415,7 @@ export default function DFormVer2({
                 form={form}
                 namePrefix="ImageRight"
                 src={ImageRightUrl}
-                title="Minh hoạ quy trình thực hiện (cố định, có mô tả & link)"
+                title="Ảnh minh họa 2"
                 onChange={(value) => {
                   setImageRightUrl(value);
                 }}
@@ -497,6 +521,15 @@ export default function DFormVer2({
             user.id_role == USER_ROLE.ADMIN ||
             !editId) && (
             <FormActionBar
+              keys={[
+                KEY_ACTION_BUTTON.reset,
+                KEY_ACTION_BUTTON.save,
+                KEY_ACTION_BUTTON.edit,
+                KEY_ACTION_BUTTON.approve,
+                KEY_ACTION_BUTTON.preview,
+                KEY_ACTION_BUTTON.AI,
+                KEY_ACTION_BUTTON.exit,
+              ]}
               onAction={(key) => {
                 pendingAction.current = key;
                 form.submit();
@@ -517,6 +550,41 @@ export default function DFormVer2({
                 }
               }}
               editId={editId}
+              onGenAi={async () => {
+                const handleGenAi = async () => {
+                  try {
+                    const v = form.getFieldsValue();
+                    const selectedExamPart = examParts?.find(
+                      (ex) => ex.id == form.getFieldValue("id_exam_part")
+                    );
+                    const selectedTemplateService = templateServices?.find(
+                      (ex) => ex.id == form.getFieldValue("id_template_service")
+                    );
+
+                    const prompt = buildPrompt({
+                      v,
+                      selectedExamPart,
+                      selectedTemplateService,
+                      currentFormVer2Name,
+                      imageDescHTML: imageDescEditor || "", // lấy từ state của bạn
+                    });
+
+                    const url = `https://api.home-care.vn/chatgpt/ask-gemini-recommendation?prompt=${encodeURIComponent(
+                      prompt
+                    )}`;
+                    const res = await API_CALL.get(url);
+                    const text = await res.text()?.data;
+
+                    // Đổ thẳng vào "Khuyến nghị & tư vấn"
+                    form.setFieldsValue({ khuyenNghi: text });
+                  } catch (e) {
+                    console.error(e);
+                    toast.error("Gọi AI thất bại.");
+                  }
+                };
+
+                await handleGenAi();
+              }}
             />
           )}
         </Form>
@@ -539,6 +607,9 @@ export default function DFormVer2({
           ImageLeftUrl={ImageLeftUrl}
           ImageRightUrl={ImageRightUrl}
           imageDescEditor={imageDescEditor}
+          initialSnap={initialSnap}
+          currentFormVer2Name={currentFormVer2Name}
+          editId={editId}
         />
       </Modal>
     </div>

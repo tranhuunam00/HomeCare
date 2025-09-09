@@ -54,6 +54,7 @@ import {
   STYLE_COPY,
 } from "../../../constant/app";
 import AIRecommendationEditor from "../../../components/AIRecommendationEditor";
+import { ThamKhaoLinkHomeCare } from "../component_common/Thamkhao";
 
 const { Text } = Typography;
 
@@ -238,9 +239,9 @@ const TiradsForm = () => {
     <div className={styles.pageWrapper}>
       <div className={styles.formContainer}>
         <Form form={form} layout="vertical" initialValues={defaultValues}>
-          <h2 style={{ marginBottom: 24 }}>D-TIRADS HOME-CARE</h2>
-          <h4>Lĩnh vực: siêu âm</h4>
-          <h4>Mục đích: sàng lọc chẩn đoán sớm ung thư tuyến giáp</h4>
+          <ThamKhaoLinkHomeCare />
+
+          <h2 style={{ marginBottom: 24 }}>Phần mềm D-TIRADS</h2>
           <div style={{ marginBottom: 50 }}></div>
           <Row gutter={24}>
             <Col span={12}>

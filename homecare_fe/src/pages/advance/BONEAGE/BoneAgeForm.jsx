@@ -19,6 +19,7 @@ const { Option } = Select;
 import styles from "./BoneAgeForm.module.scss";
 import { toast } from "react-toastify";
 import { STYLE_COPY } from "../../../constant/app";
+import { ThamKhaoLinkHomeCare } from "../component_common/Thamkhao";
 
 export const COT_HOA_STAGES = [
   {
@@ -221,9 +222,12 @@ const BoneAgeForm = () => {
   return (
     <div className={styles.pageWrapper}>
       <div className={styles.formContainer}>
-        <h2 style={{ marginBottom: 24 }}>D-BONEAGE</h2>
-        <h4>Lĩnh vực: X quang</h4>
-        <h4>Mục đích: chẩn đoán tuổi xương</h4>
+        <ThamKhaoLinkHomeCare
+          link={"https://home-care.vn/product/phan-mem-d-bone/"}
+        />
+
+        <h2 style={{ marginBottom: 24 }}>Phần mềm D-BONE</h2>
+
         <div style={{ marginBottom: 50 }}></div>
         <Form layout="vertical" form={form}>
           <Row gutter={[16, 16]}>

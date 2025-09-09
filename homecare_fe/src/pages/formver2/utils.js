@@ -198,14 +198,17 @@ export function buildFormData(values, extra) {
   fd.append("chanDoanPhanBiet", values.chanDoanPhanBiet ?? "");
   fd.append("ketQuaChanDoan", values.ketQuaChanDoan ?? "");
   fd.append("khuyenNghi", values.khuyenNghi ?? "");
-  fd.append("ngayThucHien", extra?.ngayThucHienISO ?? "");
+  fd.append("ngayThucHien", extra?.ngayThucHienISO);
 
   // ---- Ảnh: text fields (đúng key BE)
   fd.append("ImageLeftDesc", values.ImageLeftDesc ?? "");
   fd.append("ImageLeftDescLink", values.ImageLeftDescLink ?? "");
   fd.append("ImageRightDesc", values.ImageRightDesc ?? "");
   fd.append("ImageRightDescLink", values.ImageRightDescLink ?? "");
-  fd.append("id_formver2_name", values.id_formver2_name ?? "");
+  fd.append(
+    "id_formver2_name",
+    values.id_formver2_name ?? values?.id_formver2_name_form_ver2_name?.id ?? ""
+  );
 
   // ---- Ảnh: FILE (đúng key BE: ImageFormLeft / ImageFormRight)
   const leftFileObj = values.ImageLeftFile?.[0]?.originFileObj;
@@ -251,7 +254,8 @@ export function mapApiToForm(api) {
     createdAt: dayjs(api?.updatedAt ?? api.createdAt ?? new Date()).format(
       "DD-MM-YYYY"
     ),
-    id_formver2_name: api?.id_formver2_name,
+    id_formver2_name:
+      api?.id_formver2_name || api?.id_formver2_name_form_ver2_name?.id,
   };
 }
 export const calculateAge = (dob) => {
@@ -384,3 +388,39 @@ export async function exportFormVer2({
   a.remove();
   window.URL.revokeObjectURL(url);
 }
+
+export const buildPrompt = ({
+  v,
+  selectedExamPart,
+  selectedTemplateService,
+  currentFormVer2Name,
+  imageDescHTML,
+}) => {
+  return `
+Hệ kỹ thuật: ${selectedTemplateService?.name || ""}
+Bộ phận: ${selectedExamPart?.name || ""}
+Tên mẫu: ${currentFormVer2Name?.name || ""} (${currentFormVer2Name?.code || ""})
+Ngôn ngữ: ${v?.language || "vi"}
+Ngày thực hiện: ${v?.createdAt || ""}
+Người thực hiện: ${v?.doctor_name || ""}
+ICD-10: ${v?.icd10 || ""}
+
+[KẾT LUẬN CỦA MẪU]
+${v?.ketLuan || ""}
+
+[QUY TRÌNH KỸ THUẬT]
+${v?.quyTrinh || ""}
+
+[MÔ TẢ HÌNH ẢNH]
+${imageDescHTML || ""}
+
+[KẾT LUẬN / CHẨN ĐOÁN]
+${v?.ketQuaChanDoan || ""}
+
+YÊU CẦU: Tạo phần "Khuyến nghị & Tư vấn" cho bệnh nhân bằng ${
+    v?.language === "en" ? "English" : "Tiếng Việt"
+  }.
+Dạng Markdown, ngắn gọn, rõ ràng (theo dõi, xét nghiệm bổ sung, điều trị/lối sống, thời điểm tái khám/cấp cứu, lưu ý giới hạn).
+Chỉ trả về nội dung "Khuyến nghị & Tư vấn", không lặp lại dữ liệu đầu vào.
+`.trim();
+};
