@@ -42,72 +42,66 @@ const HomeCareLanding = () => {
           : toast.warning("Vui lòng đăng nhập để xem chi tiết!"),
     },
     {
-      label: "Tirads".toUpperCase(),
-      onClick: () =>
-        isLoggedIn
-          ? navigate("/home/Tirads")
-          : toast.warning("Vui lòng đăng nhập để xem chi tiết!"),
+      label: "Phần mềm D-Tirads".toUpperCase(),
+      onClick: () => navigate("/tirads_nn"),
     },
     {
-      label: "Recist".toUpperCase(),
-      onClick: () =>
-        isLoggedIn
-          ? navigate("/home/Recist")
-          : toast.warning("Vui lòng đăng nhập để xem chi tiết!"),
+      label: "Phần mềm D-RECIST".toUpperCase(),
+      onClick: () => navigate("/recist_nn"),
     },
   ];
 
   const trialItem = [
     {
-      label: "D-TIRADS",
+      label: "Phần mềm D-TIRADS",
       onClick: () => navigate("tirad"),
     },
     {
-      label: " D-LungRADS",
+      label: "Phần mềm D-LUNG",
       onClick: () => navigate("lungrad"),
     },
     {
-      label: "D-BIRADS MM",
+      label: "Phần mềm D-BIRADS",
       onClick: () => navigate("birad"),
     },
     {
-      label: "D-BONEAGE",
+      label: "Phần mềm D-BONE",
       onClick: () => navigate("boneage"),
     },
     {
-      label: "D-IPSS",
+      label: "Phần mềm D-IPSS",
       onClick: () => navigate("dipss"),
     },
     {
-      label: "D-COR",
+      label: "Phần mềm D-COR",
       onClick: () => navigate("D-COR"),
     },
     {
-      label: "D-CPS",
+      label: "Phần mềm D-CPS",
       onClick: () => navigate("D-CPS"),
     },
     {
-      label: "D-BALTHAZA",
+      label: "Phần mềm D-CTSI",
       onClick: () => navigate("D-BALTHAZA"),
     },
     {
-      label: "D-VOTHAN",
+      label: "Phần mềm D-KIDNEY",
       onClick: () => navigate("D-VOTHAN"),
     },
     {
-      label: "D-VOGAN",
+      label: "Phần mềm D-LIVER",
       onClick: () => navigate("D-VOGAN"),
     },
     {
-      label: "D-BOSNIAK",
+      label: "Phần mềm D-Bosniak",
       onClick: () => navigate("D-BOSNIAK"),
     },
     {
-      label: "D-LIRADS",
+      label: "Phần mềm D-LIRADS",
       onClick: () => navigate("D-LIRADS"),
     },
     {
-      label: "D-ORADS",
+      label: "Phần mềm D-ORADS",
       onClick: () => navigate("D-ORADS"),
     },
   ];

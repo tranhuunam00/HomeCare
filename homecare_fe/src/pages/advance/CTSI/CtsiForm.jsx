@@ -13,6 +13,7 @@ import { ReloadOutlined, CopyOutlined } from "@ant-design/icons";
 import styles from "./CtsiForm.module.scss";
 import { genAITextToHtml } from "../../../constant/app";
 import AIRecommendationEditor from "../../../components/AIRecommendationEditor";
+import { ThamKhaoLinkHomeCare } from "../component_common/Thamkhao";
 
 const { Title, Text } = Typography;
 
@@ -167,7 +168,10 @@ const BalthazarForm = () => {
   return (
     <div className={styles.pageWrapper}>
       <div className={styles.formContainer}>
-        <Title level={2}>Thang điểm Balthazar (CTSI cổ điển)</Title>
+        <ThamKhaoLinkHomeCare
+          link={"https://home-care.vn/product/phan-mem-d-ctsi/"}
+        />
+        <Title level={2}>Phần mềm D-CTSI</Title>
 
         <Form form={form} layout="vertical" onFinish={calcAndSet}>
           <Form.Item

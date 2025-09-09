@@ -46,7 +46,7 @@ export const PatientForm = () => {
       "Xử lý tái tạo ảnh: MPR, VRT"
   );
 
-const { provinces, wards, setSelectedProvince } = useVietnamAddress();
+  const { provinces, wards, setSelectedProvince } = useVietnamAddress();
   const currentYear = moment().year(); // hoặc new Date().getFullYear()
 
   const handleDobChange = (value) => {
@@ -223,7 +223,6 @@ const renderPatientInfoFields = ({
           ))}
         </Select>
       </Form.Item>
-
 
       <Form.Item label="Xã" name="ward" style={{ width: "31%" }}>
         <Select placeholder="Chọn Xã / Phường" disabled={!wards.length}>
@@ -648,18 +647,19 @@ export default function Recist() {
   };
 
   return (
-    <div className="a4-page">
-      <div>
-        <Space
-          style={{
-            marginBottom: 16,
-            justifyContent: "space-between",
-            width: "100%",
-          }}
-        >
-          <Link to=""></Link>
-          <div style={{ display: "flex", gap: 8 }}>
-            {/* <Button
+    <div style={{ display: "flex", justifyContent: "center", width: "100vw" }}>
+      <div className="a4-page">
+        <div>
+          <Space
+            style={{
+              marginBottom: 16,
+              justifyContent: "space-between",
+              width: "100%",
+            }}
+          >
+            <Link to=""></Link>
+            <div style={{ display: "flex", gap: 8 }}>
+              {/* <Button
               type="primary"
               onClick={handleExportPDF}
               loading={loading}
@@ -667,170 +667,175 @@ export default function Recist() {
             >
               {loading ? "Đang xuất file PDF..." : "Xuất PDF"}
             </Button> */}
-            <Button onClick={handlePrint} loading={loading} disabled={loading}>
-              Xuất PDF
-            </Button>
-          </div>
-        </Space>
-      </div>
-
-      <div
-        ref={printRef}
-        id="report-container"
-        style={{
-          maxWidth: "1100px",
-          margin: "0 auto",
-          padding: "20px",
-        }}
-      >
-        {/* Thông tin bệnh nhân */}
-        <div className="print-section">
-          {/* Thêm Header vào đây */}
-          <Header />
-          <h2
-            style={{
-              textAlign: "center",
-              marginBottom: "20px",
-              color: "#0000FF",
-            }}
-          >
-            KẾT QUẢ ĐÁNH GIÁ THEO DÕI ĐÁP ỨNG ĐIỀU TRỊ KHỐI U ĐẶC THEO TIÊU
-            CHUẨN RECIST 1.1
-          </h2>
-          {/* <PatientForm /> */}
+              <Button
+                onClick={handlePrint}
+                loading={loading}
+                disabled={loading}
+              >
+                Xuất PDF
+              </Button>
+            </div>
+          </Space>
         </div>
 
-        {/* Hướng dẫn RECIST */}
-        <div className="print-section">
-          <GuildLine
-            title={
-              "Chú thích minh họa các phân thùy gan và một số viết tắt, quy ước của RECIST 1.1"
-            }
-          />
-        </div>
-
-        {/* Thêm component ExaminationResults */}
-        {/* <div className="print-section">
-          <ExaminationResults />
-        </div> */}
-        {/* Các bảng tổn thương */}
-        <div className="print-section">
-          <div
-            style={{
-              paddingLeft: "24px",
-              display: "flex",
-              alignItems: "center",
-            }}
-          >
-            <Title
-              level={4}
+        <div
+          ref={printRef}
+          id="report-container"
+          style={{
+            maxWidth: "1100px",
+            margin: "0 auto",
+            padding: "20px",
+          }}
+        >
+          {/* Thông tin bệnh nhân */}
+          <div className="print-section">
+            {/* Thêm Header vào đây */}
+            <Header />
+            <h2
               style={{
-                marginBottom: 15,
                 textAlign: "center",
-                width: "100%",
-                color: "#1890ff",
+                marginBottom: "20px",
+                color: "#0000FF",
               }}
             >
-              KẾT QUẢ PHÂN TÍCH THEO TIÊU CHUẨN RESCIST 1.1
-            </Title>
+              KẾT QUẢ ĐÁNH GIÁ THEO DÕI ĐÁP ỨNG ĐIỀU TRỊ KHỐI U ĐẶC THEO TIÊU
+              CHUẨN RECIST 1.1
+            </h2>
+            {/* <PatientForm /> */}
           </div>
 
-          {/* Bảng ngày tháng chung */}
-          <div style={{ marginBottom: "24px" }}>
-            <TargetLesionsDateTable
-              dataDate={dataDate}
-              onChangeDate={onChangeDate}
-            />
-          </div>
-
-          {/* Bảng tổn thương đích */}
-          <div style={{ marginBottom: "24px" }}>
-            <Title level={4} style={{ textAlign: "left", color: "#1890ff" }}>
-              TỔN THƯƠNG ĐÍCH (TARGET LESIONS)
-            </Title>
-            <TargetLesionsMainTable
-              data={targetData}
-              onChange={onTargetChange}
-              onAddRow={onAddTargetRow}
-              onDeleteRow={onDeleteTargetRow}
-              dataDate={dataDate}
-              onReset={onResetTarget}
-            />
-            <TargetLesionsTotalTable
-              data={targetData}
-              dataDate={dataDate}
-              onChange={onTargetChange}
-            />
-          </div>
-
-          {/* Bảng tổn thương ngoài đích */}
-          <div style={{ marginBottom: "24px" }}>
-            <Title level={4} style={{ textAlign: "left", color: "#1890ff" }}>
-              TỔN THƯƠNG NGOÀI ĐÍCH (NON-TARGET LESIONS)
-            </Title>
-            <TargetLesionsMainTable
-              data={nonTargetData}
-              onChange={onNonTargetChange}
-              onAddRow={onAddNonTargetRow}
-              onDeleteRow={onDeleteNonTargetRow}
-              dataDate={dataDate}
-              onReset={onResetNonTarget}
-            />
-            <TargetLesionsTotalTable
-              data={nonTargetData}
-              dataDate={dataDate}
-              onChange={onNonTargetChange}
-            />
-          </div>
-
-          {/* Bảng tổn thương mới */}
-          <div style={{ marginBottom: "24px" }} className="print-section">
-            <Title level={4} style={{ textAlign: "left", color: "#1890ff" }}>
-              TỔN THƯƠNG MỚI
-            </Title>
-            <TargetLesionsMainTable
-              data={newLesionData}
-              onChange={onNewChange}
-              onAddRow={onAddNewRow}
-              onDeleteRow={onDeleteNewRow}
-              dataDate={dataDate}
-              onReset={onResetNew}
-            />
-            <TargetLesionsTotalTable
-              data={newLesionData}
-              dataDate={dataDate}
-              onChange={onNewChange}
-            />
-          </div>
-
-          {/* Các biểu đồ */}
-          <div style={{ marginTop: "48px" }} className="print-section">
-            <TargetLesionsChart
-              data={targetData}
-              dataDate={dataDate}
-              name_chart={"Hình 1: Đồ thị minh họa thay đổi tổn thương đích"}
-            />
-            <TargetLesionsChart
-              data={nonTargetData}
-              dataDate={dataDate}
-              name_chart={
-                "Hình 2: Đồ thị minh họa thay đổi tổn thương ngoài đích"
+          {/* Hướng dẫn RECIST */}
+          <div className="print-section">
+            <GuildLine
+              title={
+                "Chú thích minh họa các phân thùy gan và một số viết tắt, quy ước của RECIST 1.1"
               }
             />
-            {/* <TargetLesionsChart
+          </div>
+
+          {/* Thêm component ExaminationResults */}
+          {/* <div className="print-section">
+          <ExaminationResults />
+        </div> */}
+          {/* Các bảng tổn thương */}
+          <div className="print-section">
+            <div
+              style={{
+                paddingLeft: "24px",
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              <Title
+                level={4}
+                style={{
+                  marginBottom: 15,
+                  textAlign: "center",
+                  width: "100%",
+                  color: "#1890ff",
+                }}
+              >
+                KẾT QUẢ PHÂN TÍCH THEO TIÊU CHUẨN RESCIST 1.1
+              </Title>
+            </div>
+
+            {/* Bảng ngày tháng chung */}
+            <div style={{ marginBottom: "24px" }}>
+              <TargetLesionsDateTable
+                dataDate={dataDate}
+                onChangeDate={onChangeDate}
+              />
+            </div>
+
+            {/* Bảng tổn thương đích */}
+            <div style={{ marginBottom: "24px" }}>
+              <Title level={4} style={{ textAlign: "left", color: "#1890ff" }}>
+                TỔN THƯƠNG ĐÍCH (TARGET LESIONS)
+              </Title>
+              <TargetLesionsMainTable
+                data={targetData}
+                onChange={onTargetChange}
+                onAddRow={onAddTargetRow}
+                onDeleteRow={onDeleteTargetRow}
+                dataDate={dataDate}
+                onReset={onResetTarget}
+              />
+              <TargetLesionsTotalTable
+                data={targetData}
+                dataDate={dataDate}
+                onChange={onTargetChange}
+              />
+            </div>
+
+            {/* Bảng tổn thương ngoài đích */}
+            <div style={{ marginBottom: "24px" }}>
+              <Title level={4} style={{ textAlign: "left", color: "#1890ff" }}>
+                TỔN THƯƠNG NGOÀI ĐÍCH (NON-TARGET LESIONS)
+              </Title>
+              <TargetLesionsMainTable
+                data={nonTargetData}
+                onChange={onNonTargetChange}
+                onAddRow={onAddNonTargetRow}
+                onDeleteRow={onDeleteNonTargetRow}
+                dataDate={dataDate}
+                onReset={onResetNonTarget}
+              />
+              <TargetLesionsTotalTable
+                data={nonTargetData}
+                dataDate={dataDate}
+                onChange={onNonTargetChange}
+              />
+            </div>
+
+            {/* Bảng tổn thương mới */}
+            <div style={{ marginBottom: "24px" }} className="print-section">
+              <Title level={4} style={{ textAlign: "left", color: "#1890ff" }}>
+                TỔN THƯƠNG MỚI
+              </Title>
+              <TargetLesionsMainTable
+                data={newLesionData}
+                onChange={onNewChange}
+                onAddRow={onAddNewRow}
+                onDeleteRow={onDeleteNewRow}
+                dataDate={dataDate}
+                onReset={onResetNew}
+              />
+              <TargetLesionsTotalTable
+                data={newLesionData}
+                dataDate={dataDate}
+                onChange={onNewChange}
+              />
+            </div>
+
+            {/* Các biểu đồ */}
+            <div style={{ marginTop: "48px" }} className="print-section">
+              <TargetLesionsChart
+                data={targetData}
+                dataDate={dataDate}
+                name_chart={"Hình 1: Đồ thị minh họa thay đổi tổn thương đích"}
+              />
+              <TargetLesionsChart
+                data={nonTargetData}
+                dataDate={dataDate}
+                name_chart={
+                  "Hình 2: Đồ thị minh họa thay đổi tổn thương ngoài đích"
+                }
+              />
+              {/* <TargetLesionsChart
               data={newLesionData}
               dataDate={dataDate}
               name_chart={"Hình 3: Đồ thị minh họa thay đổi tổn thương mới"}
             /> */}
+            </div>
           </div>
-        </div>
 
-        <div className="print-section">
-          <ConclusionTable />
-        </div>
+          <div className="print-section">
+            <ConclusionTable />
+          </div>
 
-        <div className="print-section">
-          <ImageGallery />
+          <div className="print-section">
+            <ImageGallery />
+          </div>
         </div>
       </div>
     </div>

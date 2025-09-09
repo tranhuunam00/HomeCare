@@ -16,6 +16,7 @@ import styles from "./AASTLiverForm.module.scss";
 import { toast } from "react-toastify";
 import { genAITextToHtml, getLabelFromValue } from "../../../constant/app";
 import AIRecommendationEditor from "../../../components/AIRecommendationEditor";
+import { ThamKhaoLinkHomeCare } from "../component_common/Thamkhao";
 
 const { Text } = Typography;
 
@@ -275,7 +276,10 @@ const AASTLiverForm = () => {
     <div className={styles.pageWrapper}>
       <div className={styles.formContainer}>
         <Form form={form} layout="vertical">
-          <h2>AAST Liver Trauma Grading & Score Calculator</h2>
+          <ThamKhaoLinkHomeCare
+            link={"https://home-care.vn/product/phan-mem-d-liver/"}
+          />
+          <h2>Phần mềm D-LIVER</h2>
 
           {/* Nhóm chính */}
           <Form.Item

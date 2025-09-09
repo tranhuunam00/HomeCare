@@ -7,6 +7,7 @@ import styles from "./AASTKidneyForm.module.scss";
 import { toast } from "react-toastify";
 import { genAITextToHtml, getLabelFromValue } from "../../../constant/app";
 import AIRecommendationEditor from "../../../components/AIRecommendationEditor";
+import { ThamKhaoLinkHomeCare } from "../component_common/Thamkhao";
 
 const { Text } = Typography;
 
@@ -263,7 +264,10 @@ const AASTKidneyForm = () => {
     <div className={styles.pageWrapper}>
       <div className={styles.formContainer}>
         <Form form={form} layout="vertical">
-          <h2>Thang điểm tổn thương thận AAST</h2>
+          <ThamKhaoLinkHomeCare
+            link={"https://home-care.vn/product/phan-mem-d-kidney/"}
+          />
+          <h2>Phần mềm D-KIDNEY</h2>
           <Form.Item
             name="injuries"
             label="Chọn các loại tổn thương đã xác định (có thể chọn nhiều)"

@@ -7,6 +7,7 @@ import styles from "./ChildPughForm.module.scss";
 import { toast } from "react-toastify";
 import { genAITextToHtml, STYLE_COPY } from "../../../constant/app";
 import AIRecommendationEditor from "../../../components/AIRecommendationEditor";
+import { ThamKhaoLinkHomeCare } from "../component_common/Thamkhao";
 
 const { Title, Text } = Typography;
 
@@ -155,7 +156,10 @@ const ChildPughForm = () => {
   return (
     <div className={styles.pageWrapper}>
       <div className={styles.formContainer}>
-        <Title level={3}>Child-Pugh Score</Title>
+        <ThamKhaoLinkHomeCare
+          link={"https://home-care.vn/product/phan-mem-d-cps/"}
+        />
+        <h2>Phần mềm D-CPS</h2>
         <Form form={form} layout="vertical" onFinish={onFinish}>
           {CHILD_PUGH_QUESTIONS.map((q) => (
             <Form.Item

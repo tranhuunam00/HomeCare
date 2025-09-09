@@ -7,6 +7,7 @@ import styles from "./LIRADSForm.module.scss";
 import CTMRIForm from "./CtMriForm";
 import CEUSForm from "./CEUSForm";
 import USSurveillanceForm from "./USSurveillanceForm";
+import { ThamKhaoLinkHomeCare } from "../component_common/Thamkhao";
 
 /* ====================== OPTIONS ====================== */
 const MODALITY_OPTIONS = [
@@ -28,9 +29,10 @@ const LIRADSForm = () => {
     <div className={styles.pageWrapper}>
       <div className={styles.formContainer}>
         <Form form={form} layout="vertical" onFinish={() => {}}>
-          <h2>
-            LI-RADS – CT/MRI, CEUS & US Surveillance (Tiếng Việt, realtime)
-          </h2>
+          <ThamKhaoLinkHomeCare
+            link={"https://home-care.vn/product/phan-mem-d-lirads/"}
+          />
+          <h2>Phần mềm D-LIRADS</h2>
 
           {/* Modality */}
           <Form.Item label="Chọn phương thức chẩn đoán hình ảnh:" required>

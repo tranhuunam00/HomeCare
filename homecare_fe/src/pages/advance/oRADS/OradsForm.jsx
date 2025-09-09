@@ -22,6 +22,7 @@ import {
 } from "./oradsConstants";
 
 import { computeORADS } from "./oradsUtils";
+import { ThamKhaoLinkHomeCare } from "../component_common/Thamkhao";
 
 const { Text } = Typography;
 
@@ -438,7 +439,10 @@ export default function OradsForm() {
           initialValues={{ modality }}
           onValuesChange={recalcSummary}
         >
-          <h2 style={{ marginBottom: 24 }}>D-O-RADS HOME-CARE</h2>
+          <ThamKhaoLinkHomeCare
+            link={"https://home-care.vn/product/phan-mem-d-orads/"}
+          />
+          <h2 style={{ marginBottom: 24 }}>Phần mềm D-ORADS</h2>
 
           {/* Modality */}
           <Form.Item

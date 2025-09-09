@@ -331,6 +331,7 @@ import styles from "./BiradsForm.module.scss";
 import { toast } from "react-toastify";
 import { genAITextToHtml, STYLE_COPY } from "../../../constant/app";
 import AIRecommendationEditor from "../../../components/AIRecommendationEditor";
+import { ThamKhaoLinkHomeCare } from "../component_common/Thamkhao";
 
 // ⬇️ Giả định các constants đã được export từ cùng file constants hoặc ở trên scope hiện tại
 // import {
@@ -639,11 +640,10 @@ const BiradsForm = () => {
   return (
     <div className={styles.pageWrapper}>
       <div className={styles.formContainer}>
-        <h2>D-BIRADS</h2>
-        <h4>Lĩnh vực: X quang</h4>
-        <h4 style={{ marginBottom: 40 }}>
-          Mục đích: sàng lọc chẩn đoán sớm ung thư vú
-        </h4>
+        <ThamKhaoLinkHomeCare
+          link={"https://home-care.vn/product/phan-mem-d-birads/"}
+        />
+        <h2>Phần mềm D-BIRADS</h2>
 
         <Form
           form={form}

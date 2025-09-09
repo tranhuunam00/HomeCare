@@ -21,6 +21,7 @@ import copy from "copy-to-clipboard";
 import styles from "./FraminghamForm.module.scss";
 import { genAITextToHtml, STYLE_COPY } from "../../../constant/app";
 import AIRecommendationEditor from "../../../components/AIRecommendationEditor";
+import { ThamKhaoLinkHomeCare } from "../component_common/Thamkhao";
 const { Text } = Typography;
 
 const { Title } = Typography;
@@ -258,18 +259,11 @@ const FraminghamForm = () => {
   return (
     <div className={styles.pageWrapper}>
       <div className={styles.formContainer}>
-        <h2>Framingham Risk Score</h2>
-        <h4>
-          Công cụ đánh giá nguy cơ tim mạch lâu đời và được sử dụng rộng rãi
-          nhất
-        </h4>
-        <h4>
-          Chẩn đoán nguy cơ mắc bệnh lý tim mạch trong vòng 10 năm tới cho người
-          bệnh.
-        </h4>
-        <h4 style={{ marginBottom: 40 }}>
-          Được phát triển từ Nghiên cứu Tim Framingham
-        </h4>
+        <ThamKhaoLinkHomeCare
+          link={"https://home-care.vn/product/phan-mem-d-cor/"}
+        />
+        <h2>Phần mềm D-COR</h2>
+
         <Form
           form={form}
           layout="vertical"

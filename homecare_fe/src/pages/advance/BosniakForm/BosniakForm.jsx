@@ -11,6 +11,7 @@ import {
   STYLE_COPY,
 } from "../../../constant/app";
 import AIRecommendationEditor from "../../../components/AIRecommendationEditor";
+import { ThamKhaoLinkHomeCare } from "../component_common/Thamkhao";
 
 const { Text } = Typography;
 
@@ -613,7 +614,10 @@ const BosniakForm = () => {
     <div className={styles.pageWrapper}>
       <div className={styles.formContainer}>
         <Form form={form} layout="vertical">
-          <h2>Máy tính phân loại Bosniak cho khối dạng nang thận</h2>
+          <ThamKhaoLinkHomeCare
+            link={"https://home-care.vn/product/phan-mem-d-bosniak/"}
+          />
+          <h2>Phần mềm D-Bosniak</h2>
 
           {/* Modality */}
           <Form.Item label="Bạn muốn báo cáo theo phương thức nào? *">

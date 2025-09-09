@@ -109,20 +109,21 @@ export default function TiradPage() {
     setLoading(false);
   };
   return (
-    <div className="tirads-page-wrapper print-section a4-page">
-      <div className="tirads-container main-content">
-        <div className="tirads-toolbar no-print">
-          <div>
-            <Space
-              style={{
-                marginBottom: 16,
-                justifyContent: "space-between",
-                width: "100%",
-              }}
-            >
-              <Link to=""></Link>
-              <div style={{ display: "flex", gap: 8 }}>
-                {/* <Button
+    <div style={{ display: "flex", justifyContent: "center", width: "100vw" }}>
+      <div className="tirads-page-wrapper print-section a4-page">
+        <div className="tirads-container main-content">
+          <div className="tirads-toolbar no-print">
+            <div>
+              <Space
+                style={{
+                  marginBottom: 16,
+                  justifyContent: "space-between",
+                  width: "100%",
+                }}
+              >
+                <Link to=""></Link>
+                <div style={{ display: "flex", gap: 8 }}>
+                  {/* <Button
                   type="primary"
                   onClick={handleExportPDF}
                   loading={loading}
@@ -130,162 +131,164 @@ export default function TiradPage() {
                 >
                   {loading ? "Đang xuất file PDF..." : "Xuất PDF"}
                 </Button> */}
-                <Button
-                  onClick={handlePrint}
-                  loading={loading}
-                  disabled={loading}
-                >
-                  Xuất PDF
-                </Button>
-              </div>
-            </Space>
-          </div>
-        </div>
-        <Header />
-        <h2 className="title">
-          TIRADS SỬ DỤNG CHO CÁC NỐT, KHỐI TRONG TUYẾN GIÁP
-        </h2>
-
-        <PatientForm />
-
-        <div className="categories tirads-categories-section">
-          {Object.entries(options).map(([category, opts]) => (
-            <div className="category" key={category}>
-              <h3 className="category-title">
-                <h3 className="category-title">
-                  {ULTRASOUND_CHARACTERISTICS[category.toUpperCase()] ||
-                    category}
-                </h3>
-              </h3>
-              <em className="no-print">
-                {category === "echogenicFoci"
-                  ? "(Chọn tất cả các áp dụng)"
-                  : "(Chọn 1)"}
-              </em>
-              {opts.map((opt, i) => (
-                <h2 className="option" key={i}>
-                  <input
-                    type={category === "echogenicFoci" ? "checkbox" : "radio"}
-                    name={`radio-${category}`}
-                    checked={
-                      category === "echogenicFoci"
-                        ? selected[category].includes(opt)
-                        : selected[category] === opt
-                    }
-                    onChange={() =>
-                      category === "echogenicFoci"
-                        ? handleFociChange(opt)
-                        : handleSelect(category, opt)
-                    }
-                  />
-                  {opt.label} <span className="points">({opt.value} điểm)</span>
-                </h2>
-              ))}
+                  <Button
+                    onClick={handlePrint}
+                    loading={loading}
+                    disabled={loading}
+                  >
+                    Xuất PDF
+                  </Button>
+                </div>
+              </Space>
             </div>
-          ))}
-        </div>
+          </div>
+          <Header />
+          <h2 className="title">
+            TIRADS SỬ DỤNG CHO CÁC NỐT, KHỐI TRONG TUYẾN GIÁP
+          </h2>
 
-        <div className="total tirads-total-section">
-          Tổng điểm: {totalScore}
-        </div>
+          <PatientForm />
 
-        <div className="tirads-result tirads-result-section print-section">
-          <div className="tr-boxes">
-            {[1, 2, 3, 4, 5].map((tr) => (
-              <div
-                key={tr}
-                className={`tr-box ${
-                  (Math.floor(totalScore) === 0 && tr === 1) ||
-                  (tr === 2 && totalScore >= 1 && totalScore <= 2) ||
-                  (tr === 3 && totalScore === 3) ||
-                  (tr === 4 && totalScore >= 4 && totalScore <= 6) ||
-                  (tr === 5 && totalScore >= 7)
-                    ? "active"
-                    : ""
-                }`}
-              >
-                TR{tr}
-                <br />
-                <strong>
-                  {
-                    {
-                      1: "Lành tính",
-                      2: "Không nghi ngờ",
-                      3: "Nghi ngờ thấp",
-                      4: "Nghi ngờ vừa",
-                      5: "Nghi ngờ cao",
-                    }[tr]
-                  }
-                </strong>
-                <br />
-                {{
-                  1: "Không FNA",
-                  2: "Không FNA",
-                  3: "FNA ≥ 2.5cm\nTheo dõi ≥ 1.5cm",
-                  4: "FNA ≥ 1.5cm\nTheo dõi ≥ 1cm",
-                  5: "FNA ≥ 1cm\nTheo dõi ≥ 0.5cm",
-                }[tr]
-                  .split("\n")
-                  .map((line, i) => (
-                    <div key={i}>{line}</div>
-                  ))}
+          <div className="categories tirads-categories-section">
+            {Object.entries(options).map(([category, opts]) => (
+              <div className="category" key={category}>
+                <h3 className="category-title">
+                  <h3 className="category-title">
+                    {ULTRASOUND_CHARACTERISTICS[category.toUpperCase()] ||
+                      category}
+                  </h3>
+                </h3>
+                <em className="no-print">
+                  {category === "echogenicFoci"
+                    ? "(Chọn tất cả các áp dụng)"
+                    : "(Chọn 1)"}
+                </em>
+                {opts.map((opt, i) => (
+                  <h2 className="option" key={i}>
+                    <input
+                      type={category === "echogenicFoci" ? "checkbox" : "radio"}
+                      name={`radio-${category}`}
+                      checked={
+                        category === "echogenicFoci"
+                          ? selected[category].includes(opt)
+                          : selected[category] === opt
+                      }
+                      onChange={() =>
+                        category === "echogenicFoci"
+                          ? handleFociChange(opt)
+                          : handleSelect(category, opt)
+                      }
+                    />
+                    {opt.label}{" "}
+                    <span className="points">({opt.value} điểm)</span>
+                  </h2>
+                ))}
               </div>
             ))}
           </div>
 
-          <button
-            className="reset-button no-print"
-            onClick={() =>
-              setSelected({
-                composition: null,
-                echogenicity: null,
-                shape: null,
-                margin: null,
-                echogenicFoci: [],
-              })
-            }
-          >
-            Xóa tất cả
-          </button>
-        </div>
-
-        <div className="findings tirads-findings-section">
-          <h3>Kết quả:</h3>
-          <p>
-            <strong>TIRADS Score:</strong> {totalScore}
-          </p>
-          <p>
-            <strong>Phân loại:</strong> {getCategory()}
-          </p>
-          <ul>
-            {["composition", "echogenicity", "shape", "margin"].map(
-              (key) =>
-                selected[key] && (
-                  <li key={key}>
-                    {key.charAt(0).toUpperCase() + key.slice(1)}:
-                    {selected[key].label} ({selected[key].value} điểm)
-                  </li>
-                )
-            )}
-            {selected.echogenicFoci.length > 0 && (
-              <li>
-                Echogenic foci:
-                <ul>
-                  {selected.echogenicFoci.map((f, i) => (
-                    <li key={i}>
-                      {f.label} ({f.value} điểm)
-                    </li>
-                  ))}
-                </ul>
-              </li>
-            )}
-          </ul>
-          <div className="recommendation">
-            <strong>Khuyến nghị:</strong> {getRecommendation()}
+          <div className="total tirads-total-section">
+            Tổng điểm: {totalScore}
           </div>
-        </div>
-        <div className="print-section">
-          <TiradsReferenceSection />
+
+          <div className="tirads-result tirads-result-section print-section">
+            <div className="tr-boxes">
+              {[1, 2, 3, 4, 5].map((tr) => (
+                <div
+                  key={tr}
+                  className={`tr-box ${
+                    (Math.floor(totalScore) === 0 && tr === 1) ||
+                    (tr === 2 && totalScore >= 1 && totalScore <= 2) ||
+                    (tr === 3 && totalScore === 3) ||
+                    (tr === 4 && totalScore >= 4 && totalScore <= 6) ||
+                    (tr === 5 && totalScore >= 7)
+                      ? "active"
+                      : ""
+                  }`}
+                >
+                  TR{tr}
+                  <br />
+                  <strong>
+                    {
+                      {
+                        1: "Lành tính",
+                        2: "Không nghi ngờ",
+                        3: "Nghi ngờ thấp",
+                        4: "Nghi ngờ vừa",
+                        5: "Nghi ngờ cao",
+                      }[tr]
+                    }
+                  </strong>
+                  <br />
+                  {{
+                    1: "Không FNA",
+                    2: "Không FNA",
+                    3: "FNA ≥ 2.5cm\nTheo dõi ≥ 1.5cm",
+                    4: "FNA ≥ 1.5cm\nTheo dõi ≥ 1cm",
+                    5: "FNA ≥ 1cm\nTheo dõi ≥ 0.5cm",
+                  }[tr]
+                    .split("\n")
+                    .map((line, i) => (
+                      <div key={i}>{line}</div>
+                    ))}
+                </div>
+              ))}
+            </div>
+
+            <button
+              className="reset-button no-print"
+              onClick={() =>
+                setSelected({
+                  composition: null,
+                  echogenicity: null,
+                  shape: null,
+                  margin: null,
+                  echogenicFoci: [],
+                })
+              }
+            >
+              Xóa tất cả
+            </button>
+          </div>
+
+          <div className="findings tirads-findings-section">
+            <h3>Kết quả:</h3>
+            <p>
+              <strong>TIRADS Score:</strong> {totalScore}
+            </p>
+            <p>
+              <strong>Phân loại:</strong> {getCategory()}
+            </p>
+            <ul>
+              {["composition", "echogenicity", "shape", "margin"].map(
+                (key) =>
+                  selected[key] && (
+                    <li key={key}>
+                      {key.charAt(0).toUpperCase() + key.slice(1)}:
+                      {selected[key].label} ({selected[key].value} điểm)
+                    </li>
+                  )
+              )}
+              {selected.echogenicFoci.length > 0 && (
+                <li>
+                  Echogenic foci:
+                  <ul>
+                    {selected.echogenicFoci.map((f, i) => (
+                      <li key={i}>
+                        {f.label} ({f.value} điểm)
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              )}
+            </ul>
+            <div className="recommendation">
+              <strong>Khuyến nghị:</strong> {getRecommendation()}
+            </div>
+          </div>
+          <div className="print-section">
+            <TiradsReferenceSection />
+          </div>
         </div>
       </div>
     </div>

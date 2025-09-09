@@ -77,6 +77,8 @@ function App() {
         <Route path="/D-BOSNIAK" element={<BosniakForm />} />
         <Route path="/D-LIRADS" element={<LIRADSForm />} />
         <Route path="/D-ORADS" element={<ORADSModalityOnly />} />
+        <Route path="tirads_nn" element={<TiradPage />} />
+        <Route path="recist_nn" element={<Recist />} />
 
         <Route
           path="/home"
@@ -87,7 +89,6 @@ function App() {
           }
         >
           <Route index element={<PatientTablePage />} />
-          <Route path="tirads" element={<TiradPage />} />
 
           <Route path="products" element={<ProductList />} />
           <Route path="templates" element={<TemplateList />} />
@@ -129,7 +130,6 @@ function App() {
             path="templates-print/use/:id_print_template"
             element={<TemplatePrintUse />}
           />
-          <Route path="recist" element={<Recist />} />
           <Route path="profile" element={<Profile />} />
           <Route path="profile/:idDoctor" element={<Profile />} />
           <Route path="account" element={<AccountPage />} />

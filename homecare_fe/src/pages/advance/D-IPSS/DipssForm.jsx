@@ -6,6 +6,7 @@ import { ReloadOutlined, CopyOutlined } from "@ant-design/icons";
 import styles from "./DipssForm.module.scss";
 import { genAITextToHtml } from "../../../constant/app";
 import AIRecommendationEditor from "../../../components/AIRecommendationEditor";
+import { ThamKhaoLinkHomeCare } from "../component_common/Thamkhao";
 
 const { Title, Text } = Typography;
 
@@ -147,15 +148,11 @@ const DipssForm = () => {
   return (
     <div className={styles.pageWrapper}>
       <div className={styles.formContainer}>
-        <h2>D-IPSS</h2>
-        <h4>
-          Phát hiện sớm các trường hợp có nguy cơ cao mắc bệnh phì đại tuyến
-          tiền liệt (BPH).
-        </h4>
-        <h4>Đánh giá mức độ nghiêm trọng của triệu chứng.</h4>
-        <h4 style={{ marginBottom: 40 }}>
-          Theo dõi hiệu quả điều trị BPH theo thời gian.
-        </h4>
+        <ThamKhaoLinkHomeCare
+          link={"https://home-care.vn/product/phan-mem-d-ipss/"}
+        />
+        <h2>Phần mềm D-IPSS</h2>
+
         <Form form={form} layout="vertical" onFinish={onFinish}>
           {IPSS_QUESTIONS.map((q) => (
             <Form.Item
