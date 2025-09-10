@@ -282,7 +282,9 @@ const PrintPreviewVer2NotDataDiagnose = ({
           </div>
 
           <h4>QUY TRÌNH KỸ THUẬT</h4>
-          <p className={styles.paragraph}>{formSnapshot.quyTrinh}</p>
+          <p className={styles.paragraph}>
+            {formSnapshot.quyTrinh || formSnapshot.quy_trinh_url}
+          </p>
 
           <h4>MÔ TẢ HÌNH ẢNH</h4>
           <TablesSnapshotPreview tablesSnapshot={tablesSnapshot} />
@@ -305,7 +307,9 @@ const PrintPreviewVer2NotDataDiagnose = ({
           </div>
 
           <h4>KHUYẾN NGHỊ & TƯ VẤN</h4>
-          <p className={styles.paragraph}>{formSnapshot.khuyenNghi}</p>
+          <p className={styles.paragraph}>
+            {formSnapshot.khuyenNghi || formSnapshot.khuyen_nghi}
+          </p>
         </Card>
       </div>
       <FormActionBar
