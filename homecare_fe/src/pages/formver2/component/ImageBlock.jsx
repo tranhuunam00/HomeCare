@@ -183,10 +183,11 @@ export default function ImageBlock({
             name={linkName}
             label="Link"
             tooltip="Nhập URL (vd: https://...)"
+            required={true}
             rules={[
               ({ getFieldValue }) => ({
                 validator: async (_, v) => {
-                  if (!v) return;
+                  if (!v) throw new Error("Link không hợp lệ");
                   const ok = /^(https?:\/\/)?[\w.-]+(\.[\w.-]+)+\S*$/i.test(v);
                   if (!ok) throw new Error("Link không hợp lệ");
                 },

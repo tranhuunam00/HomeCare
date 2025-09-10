@@ -307,31 +307,33 @@ export default function DFormVer2({
                 </Select>
               </Form.Item>
             </Col>
-            <Form.Item
-              label="Bộ phận"
-              name="id_exam_part"
-              rules={[{ required: true, message: "Chọn bộ phận" }]}
-            >
-              <Select
-                placeholder="Chọn bộ phận thăm khám"
-                disabled={isDoctor || !isEdit || !selectedTemplateServiceId}
-                allowClear
-                onChange={() => {
-                  form.setFieldsValue({ id_formver2_name: undefined });
-                }}
-                notFoundContent={
-                  selectedTemplateServiceId
-                    ? "Không có bộ phận cho phân hệ này"
-                    : "Chọn Phân hệ trước"
-                }
+            <Col xs={24} md={12}>
+              <Form.Item
+                label="Bộ phận"
+                name="id_exam_part"
+                rules={[{ required: true, message: "Chọn bộ phận" }]}
               >
-                {filteredExamParts.map((s) => (
-                  <Option key={s.id} value={s.id}>
-                    {s.name}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
+                <Select
+                  placeholder="Chọn bộ phận thăm khám"
+                  disabled={isDoctor || !isEdit || !selectedTemplateServiceId}
+                  allowClear
+                  onChange={() => {
+                    form.setFieldsValue({ id_formver2_name: undefined });
+                  }}
+                  notFoundContent={
+                    selectedTemplateServiceId
+                      ? "Không có bộ phận cho phân hệ này"
+                      : "Chọn Phân hệ trước"
+                  }
+                >
+                  {filteredExamParts.map((s) => (
+                    <Option key={s.id} value={s.id}>
+                      {s.name}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
           </Row>
 
           {/* Hàng 2 */}
