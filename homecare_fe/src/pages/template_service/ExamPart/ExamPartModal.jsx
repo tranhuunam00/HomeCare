@@ -1,8 +1,11 @@
 import React, { useEffect } from "react";
-import { Modal, Form, Input, Switch } from "antd";
+import { Modal, Form, Input, Switch, Select } from "antd";
+import { useGlobalAuth } from "../../../contexts/AuthContext";
 
 const ExamPartModal = ({ open, onCancel, onSubmit, initialValues, isEdit }) => {
   const [form] = Form.useForm();
+
+  const { templateServices } = useGlobalAuth();
 
   useEffect(() => {
     if (open && initialValues) {
@@ -56,6 +59,31 @@ const ExamPartModal = ({ open, onCancel, onSubmit, initialValues, isEdit }) => {
           rules={[{ required: true, message: "Vui lòng nhập mã code" }]}
         >
           <Input placeholder="Nhập mã code" />
+        </Form.Item>
+
+        <Form.Item label="Trạng thái" name="status" valuePropName="checked">
+          <Switch
+            checkedChildren="Hoạt động"
+            unCheckedChildren="Ẩn"
+            defaultChecked
+          />
+        </Form.Item>
+
+        {/* Select Template Service */}
+        <Form.Item
+          label="Template Service"
+          name="id_template_service"
+          rules={[
+            { required: true, message: "Vui lòng chọn Template Service" },
+          ]}
+        >
+          <Select placeholder="Chọn template service">
+            {templateServices?.map((ts) => (
+              <Select.Option key={ts.id} value={ts.id}>
+                {ts.name}
+              </Select.Option>
+            ))}
+          </Select>
         </Form.Item>
 
         <Form.Item label="Trạng thái" name="status" valuePropName="checked">

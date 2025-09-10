@@ -55,6 +55,7 @@ const PATIENT_DIAGNOSE_COLOR = {
 };
 
 const defaultVisibleKeys = [
+  "STT",
   "id",
   "name",
   "id_template_service",
@@ -79,6 +80,13 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
 
   const allColumns = useMemo(
     () => [
+      {
+        title: "STT",
+        key: "index",
+        align: "center",
+        width: 70,
+        render: (_, __, index) => (page - 1) * 10 + index + 1,
+      },
       {
         title: "ID",
         dataIndex: "id",

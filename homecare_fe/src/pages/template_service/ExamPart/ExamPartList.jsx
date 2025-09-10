@@ -1,12 +1,36 @@
 import React, { useEffect, useState } from "react";
-import { Table, Input, Row, Col, Card, Spin, Button } from "antd";
-import { EditOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  Table,
+  Input,
+  Row,
+  Col,
+  Card,
+  Spin,
+  Button,
+  Popconfirm,
+  Tooltip,
+} from "antd";
+import {
+  DeleteOutlined,
+  EditOutlined,
+  FilterOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
 import { toast } from "react-toastify";
 import styles from "./ExamPartList.module.scss";
 import ExamPartModal from "./ExamPartModal";
 import API_CALL from "../../../services/axiosClient";
+import { useGlobalAuth } from "../../../contexts/AuthContext";
 
 const ExamPartList = () => {
+  const { templateServices } = useGlobalAuth();
+
+  const serviceNameMap = React.useMemo(() => {
+    const m = new Map();
+    (templateServices || []).forEach((s) => m.set(s.id, s.name));
+    return m;
+  }, [templateServices]);
+
   const [parts, setParts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
@@ -72,10 +96,39 @@ const ExamPartList = () => {
     fetchParts();
   }, [page, limit, searchName]);
 
+  const handleDelete = async (id) => {
+    try {
+      setLoading(true);
+      await API_CALL.del(`/ts/exam-parts/${id}`);
+      toast.success("Đã xoá thành công");
+      await fetchParts();
+    } catch (err) {
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const columns = [
+    {
+      title: "STT",
+      key: "index",
+      align: "center",
+      render: (_, __, index) => (page - 1) * limit + index + 1,
+      width: 70,
+    },
     { title: "ID", dataIndex: "id", key: "id", align: "center" },
-    { title: "Tên", dataIndex: "name", key: "name" },
-    { title: "Tên rút gọn", dataIndex: "short_name", key: "short_name" },
+    { title: "Tên", dataIndex: "name", key: "name", width: 150 },
+    {
+      title: "Phân hệ",
+      key: "service",
+      dataIndex: "id_template_service",
+      width: 200,
+      render: (_, record) =>
+        serviceNameMap.get(record.id_template_service) ||
+        record?.id_template_service_template_service?.name ||
+        "—",
+    },
+    // { title: "Tên rút gọn", dataIndex: "short_name", key: "short_name" },
     { title: "Mã code", dataIndex: "code", key: "code" },
     {
       title: "Trạng thái",
@@ -86,14 +139,36 @@ const ExamPartList = () => {
     {
       title: "Thao tác",
       key: "action",
+      align: "center",
       render: (_, record) => (
-        <Button
-          icon={<EditOutlined />}
-          type="link"
-          onClick={() => openEditModal(record)}
-        >
-          Chỉnh sửa
-        </Button>
+        <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
+          <Tooltip title="Chỉnh sửa">
+            <Button
+              icon={<EditOutlined />}
+              type="text"
+              shape="circle"
+              onClick={() => openEditModal(record)}
+            />
+          </Tooltip>
+
+          <Popconfirm
+            title="Xoá mục này?"
+            description={`Bạn chắc chắn muốn xoá "${record.name}"?`}
+            okText="Xoá"
+            cancelText="Huỷ"
+            okButtonProps={{ danger: true }}
+            onConfirm={() => handleDelete(record.id)}
+          >
+            <Tooltip title="Xoá">
+              <Button
+                icon={<DeleteOutlined />}
+                type="text"
+                danger
+                shape="circle"
+              />
+            </Tooltip>
+          </Popconfirm>
+        </div>
       ),
     },
   ];

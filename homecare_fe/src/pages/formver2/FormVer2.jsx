@@ -70,6 +70,7 @@ export default function DFormVer2({
     right: null,
     apiData: null,
   });
+
   const editId = id_form_ver2 ?? idFromParam;
 
   const selectedTemplateServiceId = Form.useWatch("id_template_service", form);
@@ -134,6 +135,13 @@ export default function DFormVer2({
       ImageRightUrl,
     });
   }, [ImageLeftUrl, ImageRightUrl]);
+
+  const filteredExamParts = useMemo(() => {
+    if (!selectedTemplateServiceId) return [];
+    return (examParts || []).filter(
+      (p) => Number(p.id_template_service) === Number(selectedTemplateServiceId)
+    );
+  }, [examParts, selectedTemplateServiceId]);
 
   // ====== Fetch when edit ======
   useEffect(() => {
@@ -281,6 +289,15 @@ export default function DFormVer2({
                 <Select
                   placeholder="Chọn kỹ thuật"
                   disabled={isDoctor || !isEdit}
+                  allowClear
+                  onChange={() => {
+                    // Clear các field phụ thuộc khi đổi phân hệ
+                    form.setFieldsValue({
+                      id_exam_part: undefined,
+                      id_formver2_name: undefined,
+                    });
+                    setFilteredFormVer2Names([]); // làm sạch danh sách tên mẫu lọc theo
+                  }}
                 >
                   {templateServices.map((s) => (
                     <Option key={s.id} value={s.id}>
@@ -290,24 +307,31 @@ export default function DFormVer2({
                 </Select>
               </Form.Item>
             </Col>
-            <Col xs={24} md={12}>
-              <Form.Item
-                label="Bộ phận"
-                name="id_exam_part" // ✅ key đúng BE
-                rules={[{ required: true, message: "Chọn bộ phận" }]}
+            <Form.Item
+              label="Bộ phận"
+              name="id_exam_part"
+              rules={[{ required: true, message: "Chọn bộ phận" }]}
+            >
+              <Select
+                placeholder="Chọn bộ phận thăm khám"
+                disabled={isDoctor || !isEdit || !selectedTemplateServiceId}
+                allowClear
+                onChange={() => {
+                  form.setFieldsValue({ id_formver2_name: undefined });
+                }}
+                notFoundContent={
+                  selectedTemplateServiceId
+                    ? "Không có bộ phận cho phân hệ này"
+                    : "Chọn Phân hệ trước"
+                }
               >
-                <Select
-                  placeholder="Chọn bộ phận thăm khám"
-                  disabled={isDoctor || !isEdit}
-                >
-                  {examParts.map((s) => (
-                    <Option key={s.id} value={s.id}>
-                      {s.name}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
+                {filteredExamParts.map((s) => (
+                  <Option key={s.id} value={s.id}>
+                    {s.name}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
           </Row>
 
           {/* Hàng 2 */}

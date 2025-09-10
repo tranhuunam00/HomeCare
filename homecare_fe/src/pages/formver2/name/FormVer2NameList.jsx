@@ -302,6 +302,13 @@ const FormVer2NameList = () => {
       render: (_, __, index) => (page - 1) * limit + index + 1,
     },
     {
+      title: "ID",
+      width: 70,
+      dataIndex: "id",
+      key: "id",
+      align: "center",
+    },
+    {
       title: "Code",
       dataIndex: "code",
       key: "code",

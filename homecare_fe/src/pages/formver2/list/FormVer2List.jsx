@@ -199,6 +199,13 @@ export default function FormVer2List() {
           (filters.page - 1) * filters.limit + index + 1,
       },
       {
+        title: "ID",
+        width: 70,
+        dataIndex: "id",
+        key: "id",
+        align: "center",
+      },
+      {
         title: "Code",
         key: "code",
         dataIndex: ["id_formver2_name_form_ver2_name", "code"],

@@ -1,10 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { Table, Input, Row, Col, Card, Spin, Button } from "antd";
+import {
+  Table,
+  Input,
+  Row,
+  Col,
+  Card,
+  Spin,
+  Button,
+  Tooltip,
+  Popconfirm,
+} from "antd";
 import {
   EditOutlined,
   FilterOutlined,
   CopyOutlined,
   PlusOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import styles from "./TemplateList.module.scss";
@@ -79,45 +90,23 @@ const TemplateServiceList = () => {
   }, [page, searchName]);
 
   const handleDelete = async (id) => {
-    const confirmDelete = window.confirm(
-      "Bạn có chắc chắn muốn xóa dịch vụ này?"
-    );
-    if (!confirmDelete) return;
-
     try {
-      await API_CALL.del(`/template-service/${id}`);
+      await API_CALL.del(`/ts/${id}`); // đổi del -> delete
       toast.success("Đã xóa thành công");
       fetchServices();
     } catch (err) {
-      toast.error("Xóa thất bại");
-      console.error(err);
-    }
-  };
-
-  const handleClone = async (record) => {
-    const confirmClone = window.confirm("Bạn có muốn clone mẫu dịch vụ này?");
-    if (!confirmClone) return;
-
-    try {
-      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-      const payload = {
-        ...record,
-        id: undefined,
-        name: `${record.name} - Copy ${timestamp}`,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      };
-
-      await API_CALL.post("/template-service", payload);
-      toast.success("Đã clone thành công");
-      fetchServices();
-    } catch (err) {
-      toast.error("Clone thất bại");
       console.error(err);
     }
   };
 
   const columns = [
+    {
+      title: "STT",
+      key: "index",
+      align: "center",
+      width: 70,
+      render: (_, __, index) => (page - 1) * 10 + index + 1,
+    },
     { title: "ID", dataIndex: "id", key: "id", align: "center" },
     { title: "Tên", dataIndex: "name", key: "name" },
     { title: "Tên rút gọn", dataIndex: "short_name", key: "short_name" },
@@ -125,16 +114,37 @@ const TemplateServiceList = () => {
     {
       title: "Thao tác",
       key: "action",
+      align: "center",
+      width: 140,
       render: (_, record) => (
-        <>
-          <Button
-            icon={<EditOutlined />}
-            type="link"
-            onClick={() => openEditModal(record)}
+        <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
+          <Tooltip title="Chỉnh sửa">
+            <Button
+              icon={<EditOutlined />}
+              type="text"
+              shape="circle"
+              onClick={() => openEditModal(record)}
+            />
+          </Tooltip>
+
+          <Popconfirm
+            title="Xoá mẫu dịch vụ?"
+            description={`Bạn chắc chắn muốn xoá "${record.name}"?`}
+            okText="Xoá"
+            cancelText="Huỷ"
+            okButtonProps={{ danger: true }}
+            onConfirm={() => handleDelete(record.id)}
           >
-            Chỉnh sửa
-          </Button>
-        </>
+            <Tooltip title="Xoá">
+              <Button
+                icon={<DeleteOutlined />}
+                type="text"
+                danger
+                shape="circle"
+              />
+            </Tooltip>
+          </Popconfirm>
+        </div>
       ),
     },
   ];
