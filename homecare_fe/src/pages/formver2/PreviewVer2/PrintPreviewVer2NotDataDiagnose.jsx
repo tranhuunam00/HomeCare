@@ -241,11 +241,17 @@ const PrintPreviewVer2NotDataDiagnose = ({
               />
               <p style={{ textAlign: "center" }}>
                 <a
-                  href={formSnapshot?.ImageLeftDescLink}
+                  href={
+                    formSnapshot?.ImageLeftDescLink ||
+                    formSnapshot.image_form_ver2s.find((i) => i.kind == "left")
+                      ?.link
+                  }
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  {formSnapshot?.ImageLeftDesc}
+                  {formSnapshot?.ImageLeftDesc ||
+                    formSnapshot.image_form_ver2s.find((i) => i.kind == "left")
+                      ?.desc}
                 </a>
               </p>
             </section>
@@ -259,11 +265,17 @@ const PrintPreviewVer2NotDataDiagnose = ({
               />
               <p style={{ textAlign: "center" }}>
                 <a
-                  href={formSnapshot?.ImageRightDescLink}
+                  href={
+                    formSnapshot?.ImageRightDescLink ||
+                    formSnapshot.image_form_ver2s.find((i) => i.kind == "right")
+                      ?.link
+                  }
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  {formSnapshot?.ImageRightDesc}
+                  {formSnapshot?.ImageRightDesc ||
+                    formSnapshot.image_form_ver2s.find((i) => i.kind == "right")
+                      ?.link}
                 </a>
               </p>
             </section>

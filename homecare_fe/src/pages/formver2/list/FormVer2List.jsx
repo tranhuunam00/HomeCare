@@ -31,6 +31,7 @@ import API_CALL from "../../../services/axiosClient";
 import { useGlobalAuth } from "../../../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { exportFormVer2 } from "../utils";
+import FormVer2PreviewModal from "./FormVer2PreviewModal";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -101,6 +102,8 @@ export default function FormVer2List() {
   const [loading, setLoading] = useState(false);
   const [rows, setRows] = useState([]);
   const [total, setTotal] = useState(0);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewId, setPreviewId] = useState(null);
 
   // filters đang áp dụng để fetch
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
@@ -469,7 +472,13 @@ export default function FormVer2List() {
           dataSource={rows}
           columns={columns}
           rowKey="id"
-          rowSelection={rowSelection} // <— NEW
+          rowSelection={rowSelection}
+          onRow={(record) => ({
+            onClick: () => {
+              setPreviewId(record.id); // lấy id row
+              setPreviewOpen(true);
+            },
+          })}
           pagination={{
             current: filters.page,
             pageSize: filters.limit,
@@ -493,6 +502,11 @@ export default function FormVer2List() {
               </div>
             ),
           }}
+        />
+        <FormVer2PreviewModal
+          open={previewOpen}
+          onClose={() => setPreviewOpen(false)}
+          id={previewId}
         />
       </Spin>
     </div>

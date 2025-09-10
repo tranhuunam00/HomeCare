@@ -269,6 +269,10 @@ export default function DFormVer2({
             language: "vi",
             createdAt: ngayThucHienISO,
             doctor_name: doctor?.full_name,
+            ImageLeftDesc: "Cấu trúc giải phẫu",
+            ImageRightDesc: "Quy trình kỹ thuật",
+            ImageRightDescLink: "https://home-care.vn/",
+            ImageLeftDescLink: "https://home-care.vn/",
           }}
           onValuesChange={(_, allValues) => {
             onFormChange?.({
