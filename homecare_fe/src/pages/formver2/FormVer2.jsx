@@ -185,6 +185,18 @@ export default function DFormVer2({
   const onFinish = async (values) => {
     if (!isDoctor) {
       try {
+        if (!editId) {
+          const leftFile = values.ImageLeftFile?.[0]?.originFileObj;
+          const rightFile = values.ImageRightFile?.[0]?.originFileObj;
+
+          if (!leftFile || !rightFile) {
+            toast.error(
+              "Vui lòng tải lên đủ 2 ảnh (trái và phải) trước khi lưu"
+            );
+            return; // dừng luôn
+          }
+        }
+
         const fd = buildFormData(values, {
           tablesData,
           ngayThucHienISO,
