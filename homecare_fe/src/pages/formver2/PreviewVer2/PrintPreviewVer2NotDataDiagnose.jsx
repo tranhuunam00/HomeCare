@@ -40,17 +40,16 @@ const PrintPreviewVer2NotDataDiagnose = ({
   const { examParts, templateServices, user, doctor, formVer2Names } =
     useGlobalAuth();
 
-  console.log("currentFormVer2Name", currentFormVer2Name);
   const LABELS = ADMIN_INFO_LABELS;
   const printRef = useRef();
-
-  console.log("imageDescEditor", imageDescEditor);
 
   return (
     <div>
       <div ref={printRef} className={styles.wrapper}>
         <Card bordered={false} className={styles.a4Page}>
-          <h2 className={styles.center}>KẾT QUẢ D-FORM 2</h2>
+          <h2 className={styles.center}>
+            BỘ MẪU KẾT QUẢ CHẨN ĐOÁN HÌNH ẢNH D-RAD
+          </h2>
           <div
             style={{
               marginBottom: 6,
@@ -66,10 +65,13 @@ const PrintPreviewVer2NotDataDiagnose = ({
                 marginRight: 10,
               }}
             >
-              {"Kỹ thuật"}:
+              {"Phân hệ"}:
             </p>
             <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
-              {selectedExamPart?.name}
+              {selectedExamPart?.name ||
+                templateServices?.find(
+                  (t) => t.id == formSnapshot.id_template_service
+                )?.name}
             </p>
           </div>
           <div
@@ -90,7 +92,8 @@ const PrintPreviewVer2NotDataDiagnose = ({
               {"Bộ phận"}:
             </p>
             <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
-              {selectedTemplateService?.name}
+              {selectedTemplateService?.name ||
+                examParts?.find((t) => t.id == formSnapshot.id_exam_part)?.name}
             </p>
           </div>
 
@@ -281,7 +284,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
             </section>
           </div>
 
-          <h4>QUY TRÌNH KỸ THUẬT</h4>
+          <h4>QUY TRÌNH KỸ THUẬT / LINK</h4>
           <p className={styles.paragraph}>
             {formSnapshot.quyTrinh || formSnapshot.quy_trinh_url}
           </p>

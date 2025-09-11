@@ -55,6 +55,7 @@ const FormVer2NameList = () => {
   const [includeDeleted, setIncludeDeleted] = useState(false); // nếu sau này cần
   const [selectedExamPartId, setSelectedExamPartId] = useState();
   const [selectedTemplateServiceId, setSelectedTemplateServiceId] = useState();
+  const [isUsedFilter, setIsUsedFilter] = useState(); // ✅ thêm state
 
   // modal
   const [open, setOpen] = useState(false);
@@ -73,8 +74,6 @@ const FormVer2NameList = () => {
     return map;
   }, [templateServices]);
 
-  console.log("examPartNameById", examPartNameById, templateServiceNameById);
-
   const params = useMemo(
     () => ({
       page,
@@ -84,6 +83,7 @@ const FormVer2NameList = () => {
       // truyền ID đa chọn lên BE (mảng). Axios sẽ serialize thành ?examPartIds=1&examPartIds=2...
       id_exam_part: selectedExamPartId,
       id_template_service: selectedTemplateServiceId,
+      isUsed: isUsedFilter,
     }),
     [
       page,
@@ -92,6 +92,7 @@ const FormVer2NameList = () => {
       includeDeleted,
       selectedExamPartId,
       selectedTemplateServiceId,
+      isUsedFilter,
     ]
   );
 
@@ -126,6 +127,7 @@ const FormVer2NameList = () => {
     setSelectedExamPartId();
     setSelectedTemplateServiceId();
     setPage(1);
+    setIsUsedFilter();
     setLimit(20);
     fetchList();
   };
@@ -434,6 +436,20 @@ const FormVer2NameList = () => {
                   onPressEnter={onSearch}
                   allowClear
                 />
+              </Col>
+              <Col xs={24} sm={12} md={8} lg={6}>
+                <label>Đã sử dụng?</label>
+                <Select
+                  allowClear
+                  placeholder="Chọn trạng thái…"
+                  value={isUsedFilter}
+                  onChange={setIsUsedFilter}
+                  style={{ width: "100%" }}
+                >
+                  <Option value={"true"}>Đã dùng</Option>
+                  <Option value={"false"}>Chưa dùng</Option>
+                  <Option value={"all"}>Tất cả</Option>
+                </Select>
               </Col>
               <Col xs={24} sm={12} md={8} lg={6}>
                 <label>Bộ phận</label>
