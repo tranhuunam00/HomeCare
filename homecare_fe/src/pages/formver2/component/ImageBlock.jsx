@@ -140,28 +140,55 @@ export default function ImageBlock({
         style={{
           marginTop: 8,
           display: "flex",
-          alignItems: "center", // căn giữa dọc
+          alignItems: "center",
           justifyContent: "center",
         }}
       >
-        <Dragger
-          disabled={disabled}
-          {...draggerProps}
-          showUploadList={false}
-          style={{
-            height: 40,
-            borderRadius: 8,
-            padding: "0 0",
-            width: 150,
+        <div
+          onPaste={(e) => {
+            const items = e.clipboardData?.items;
+            if (!items) return;
+            for (let i = 0; i < items.length; i++) {
+              const item = items[i];
+              if (item.type.indexOf("image") !== -1) {
+                const file = item.getAsFile();
+                if (file) {
+                  form.setFieldsValue({
+                    [fileName]: [
+                      {
+                        uid: Date.now().toString(),
+                        originFileObj: file,
+                        name: file.name,
+                      },
+                    ],
+                  });
+                }
+              }
+            }
           }}
         >
-          <p
-            className="ant-upload-drag-icon"
-            style={{ margin: 0, lineHeight: 1, textAlign: "center" }}
+          <Dragger
+            disabled={disabled}
+            {...draggerProps}
+            showUploadList={false}
+            style={{
+              height: 40,
+              borderRadius: 8,
+              padding: "0 0",
+              width: 150,
+            }}
           >
-            <InboxOutlined style={{ fontSize: 32, color: "#1890ff" }} />
-          </p>
-        </Dragger>
+            <p
+              className="ant-upload-drag-icon"
+              style={{ margin: 0, lineHeight: 1, textAlign: "center" }}
+            >
+              <InboxOutlined style={{ fontSize: 32, color: "#1890ff" }} />
+            </p>
+            <p style={{ fontSize: 12, margin: 0, color: "#999" }}>
+              Kéo thả / Dán ảnh
+            </p>
+          </Dragger>
+        </div>
       </Form.Item>
 
       {/* Hai ô input: Mô tả & Link */}
