@@ -278,7 +278,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
                 >
                   {formSnapshot?.ImageRightDesc ||
                     formSnapshot.image_form_ver2s.find((i) => i.kind == "right")
-                      ?.link}
+                      ?.desc}
                 </a>
               </p>
             </section>
