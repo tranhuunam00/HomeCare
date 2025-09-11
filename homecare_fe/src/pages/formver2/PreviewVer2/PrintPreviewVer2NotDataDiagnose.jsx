@@ -240,7 +240,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
                 alt={`img-${formSnapshot?.ImageLeftUrl}`}
                 width={300}
                 height={220}
-                style={{ objectFit: "cover", backgroundColor: "#ccc" }}
+                style={{ objectFit: "contain", backgroundColor: "#e4e4e4ff" }}
               />
               <p style={{ textAlign: "center" }}>
                 <a
@@ -264,7 +264,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
                 alt={`img-${formSnapshot?.ImageRightUrl}`}
                 width={300}
                 height={220}
-                style={{ objectFit: "cover", backgroundColor: "#ccc" }}
+                style={{ objectFit: "contain", backgroundColor: "#e4e4e4ff" }}
               />
               <p style={{ textAlign: "center" }}>
                 <a
