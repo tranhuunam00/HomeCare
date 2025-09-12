@@ -218,11 +218,14 @@ export default function DFormVer2({
         }
 
         switch (pendingAction.current) {
+          case "save":
+            navigate(`/home/form-v2`);
+            window.location.reload();
+            break;
           case "approve":
             toast.success("Đã APPROVE");
-
             navigate(`/home/form-v2`);
-            window.location.reload(); // cũng reload nếu muốn
+            window.location.reload();
 
             break;
           case "export":
