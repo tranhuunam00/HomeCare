@@ -220,6 +220,10 @@ export default function DFormVer2({
         switch (pendingAction.current) {
           case "approve":
             toast.success("Đã APPROVE");
+
+            navigate(`/home/form-v2`);
+            window.location.reload(); // cũng reload nếu muốn
+
             break;
           case "export":
             toast.success("Đã EXPORT (payload form-data đã gửi)");
