@@ -41,6 +41,10 @@ const SidebarMenu = ({ onSelect, selected }) => {
         { key: "home/form-v2-list", label: "Danh sách" },
         { key: "home/form-v2", label: "Tạo mới" },
         { key: "home/form-ver2-names", label: "Danh sách tên mẫu ver2" },
+        {
+          key: "home/doctor-use-form-v2",
+          label: "Kết quả đã dùng",
+        },
       ],
     },
 

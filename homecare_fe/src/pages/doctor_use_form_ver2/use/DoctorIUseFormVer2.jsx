@@ -17,10 +17,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 
 import styles from "./DoctorIUseFormVer2.module.scss";
-import ImageBlock from "../component/ImageBlock";
-import FormActionBar, { KEY_ACTION_BUTTON } from "../component/FormActionBar";
+import ImageBlock from "../../formver2/component/ImageBlock";
+import FormActionBar, {
+  KEY_ACTION_BUTTON,
+} from "../../formver2/component/FormActionBar";
 import CustomSunEditor from "../../../components/Suneditor/CustomSunEditor";
-import PrintPreviewVer2NotDataDiagnose from "../PreviewVer2/PrintPreviewVer2NotDataDiagnose";
+import PrintPreviewVer2NotDataDiagnose from "../../formver2/PreviewVer2/PrintPreviewVer2NotDataDiagnose";
 import useVietnamAddress from "../../../hooks/useVietnamAddress";
 import API_CALL from "../../../services/axiosClient";
 import {
@@ -29,7 +31,7 @@ import {
   buildPrompt,
   mapApiToForm,
   normalizeTablesFromApi,
-} from "../utils";
+} from "../../formver2/utils";
 import { USER_ROLE } from "../../../constant/app";
 import { useGlobalAuth } from "../../../contexts/AuthContext";
 import dayjs from "dayjs";
@@ -61,6 +63,8 @@ export default function DoctorUseDFormVer2({
   const editId = null;
   const navigate = useNavigate();
   const { id } = useParams();
+  const [idEdit, setIdEdit] = useState(id);
+  const [dataInit, setDataInit] = useState();
 
   const [filteredFormVer2Names, setFilteredFormVer2Names] = useState([]);
 
@@ -79,6 +83,91 @@ export default function DoctorUseDFormVer2({
   const selectedTemplateServiceId = Form.useWatch("id_template_service", form);
   const selectedExamPartId = Form.useWatch("id_exam_part", form);
   const selectedFormVer2NameId = Form.useWatch("id_formver2_name", form);
+  useEffect(() => {
+    if (!idEdit) return;
+
+    const fetchDetail = async () => {
+      try {
+        setLoading(true);
+        const res = await API_CALL.get(`/doctor-use-form-ver2/detail`, {
+          params: {
+            id: idEdit,
+            withDoctor: true,
+            withClinic: true,
+            withFormVer2: true,
+            withPatientDiagnose: true,
+          },
+        });
+
+        const apiData = res?.data?.data?.data;
+        if (!apiData) throw new Error("Không đọc được dữ liệu");
+        setDataInit(apiData);
+        // Map API -> form values
+        const formValues = {
+          doctor_use_form_ver2_name: apiData.ten_mau,
+          id_template_service: apiData.id_template_service,
+          id_exam_part: apiData.id_exam_part,
+          language: apiData.language,
+          id_formver2_name: apiData.id_formver2_form_ver2?.id_formver2_name,
+          id_print_template: apiData.id_print_template,
+          ket_luan: apiData.ket_luan,
+          ket_qua_chan_doan: apiData.ket_qua_chan_doan,
+          icd10: apiData.icd10,
+          phan_do_loai: apiData.phan_do_loai,
+          chan_doan_phan_biet: apiData.chan_doan_phan_biet,
+          khuyen_nghi: apiData.khuyen_nghi,
+          benh_nhan_ho_ten: apiData.benh_nhan_ho_ten,
+          benh_nhan_gioi_tinh: apiData.benh_nhan_gioi_tinh,
+          benh_nhan_tuoi: apiData.benh_nhan_tuoi,
+          benh_nhan_quoc_tich: apiData.benh_nhan_quoc_tich,
+          benh_nhan_dien_thoai: apiData.benh_nhan_dien_thoai,
+          benh_nhan_email: apiData.benh_nhan_email,
+          benh_nhan_pid: apiData.benh_nhan_pid,
+          benh_nhan_sid: apiData.benh_nhan_sid,
+          benh_nhan_lam_sang: apiData.benh_nhan_lam_sang,
+          createdAt: apiData.createdAt,
+          doctor_name: apiData.id_doctor_doctor?.full_name,
+          ngay_thuc_hien: apiData.ngay_thuc_hien,
+          quy_trinh_url: apiData.quy_trinh_url,
+          benh_nhan_dia_chi_so_nha: apiData.benh_nhan_dia_chi_so_nha,
+          benh_nhan_dia_chi_xa_phuong: apiData.benh_nhan_dia_chi_xa_phuong,
+          benh_nhan_dia_chi_tinh_thanh_pho:
+            apiData.benh_nhan_dia_chi_tinh_thanh_pho,
+        };
+        setSelectedProvince(apiData.benh_nhan_dia_chi_tinh_thanh_pho);
+
+        // fill vào form
+        form.setFieldsValue(formValues);
+
+        // fill ảnh
+        const left = apiData.image_doctor_use_form_ver2s?.find(
+          (x) => x.kind === "left"
+        )?.url;
+        const right = apiData.image_doctor_use_form_ver2s?.find(
+          (x) => x.kind === "right"
+        )?.url;
+
+        setImageLeftUrl(left || "");
+        setImageRightUrl(right || "");
+        setImageDescEditor(apiData.imageDescEditor || "");
+
+        setInitialSnap({
+          formValues,
+          apiData,
+          left,
+          right,
+          imageDesc: apiData.imageDescEditor,
+        });
+      } catch (err) {
+        toast.error("Không load được chi tiết form");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDetail();
+  }, [idEdit]);
 
   useEffect(() => {
     if (!selectedTemplateServiceId) {
@@ -218,8 +307,9 @@ export default function DoctorUseDFormVer2({
         setLoading(true);
         const fd = buildFormDataDoctorUseFormVer2(values, {
           imageDescEditor,
-          id_formver2: idFormVer2,
+          id_formver2: idFormVer2 || dataInit?.id_formver2,
           doctor,
+          ngayThucHienISO: dataInit?.ngay_thuc_hien || ngayThucHienISO,
         });
         const res = await API_CALL.postForm(`/doctor-use-form-ver2`, fd, {
           headers: { "Content-Type": "multipart/form-data" },
@@ -280,6 +370,7 @@ export default function DoctorUseDFormVer2({
             ImageRightDescLink: "https://home-care.vn/",
             ImageLeftDescLink: "https://home-care.vn/",
             benh_nhan_quoc_tich: "Việt Nam",
+            ngay_thuc_hien: ngayThucHienISO,
           }}
           onValuesChange={(_, allValues) => {
             onFormChange?.({
@@ -381,7 +472,7 @@ export default function DoctorUseDFormVer2({
               <Row gutter={16}>
                 <Col xs={24} md={12}>
                   <Form.Item
-                    name="province"
+                    name="benh_nhan_dia_chi_tinh_thanh_pho"
                     label="Tỉnh/Thành phố"
                     rules={[{ required: true }]}
                   >
@@ -389,8 +480,8 @@ export default function DoctorUseDFormVer2({
                       placeholder="Chọn Tỉnh / Thành phố"
                       onChange={(val) => {
                         form.setFieldsValue({
-                          province: val,
-                          ward: undefined,
+                          benh_nhan_dia_chi_tinh_thanh_pho: val,
+                          benh_nhan_dia_chi_xa_phuong: undefined,
                         });
                         setSelectedProvince(val);
                       }}
@@ -405,14 +496,15 @@ export default function DoctorUseDFormVer2({
                 </Col>
                 <Col xs={24} md={12}>
                   <Form.Item
-                    name="ward"
+                    name="benh_nhan_dia_chi_xa_phuong"
                     label="Phường/Xã"
                     rules={[{ required: true }]}
                   >
                     <Select
                       onChange={(val) => {
-                        console.log(val);
-                        form.setFieldsValue({ ward: val });
+                        form.setFieldsValue({
+                          benh_nhan_dia_chi_xa_phuong: val,
+                        });
                       }}
                       placeholder="Chọn Xã / Phường"
                       disabled={!wards.length}
@@ -628,7 +720,7 @@ export default function DoctorUseDFormVer2({
 
           <Row gutter={16}>
             <Col xs={24} md={24}>
-              <Form.Item label="Kết luận của mẫu" name="ketLuan">
+              <Form.Item label="Kết luận của mẫu" name="ket_luan">
                 <Input disabled={!isEdit} placeholder="VD: U máu gan" />
               </Form.Item>
             </Col>
@@ -686,7 +778,7 @@ export default function DoctorUseDFormVer2({
           <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
             QUY TRÌNH KỸ THUẬT
           </Title>
-          <Form.Item name="quyTrinh" label="" tooltip="Short text">
+          <Form.Item name="quy_trinh_url" label="" tooltip="Short text">
             <TextArea
               disabled={!isEdit}
               autoSize={{ minRows: 4, maxRows: 10 }}
@@ -706,7 +798,7 @@ export default function DoctorUseDFormVer2({
             KẾT LUẬN, CHẨN ĐOÁN
           </Title>
           <Form.Item
-            name="ketQuaChanDoan"
+            name="ket_qua_chan_doan"
             rules={[{ required: true, message: "Nhập kết luận" }]}
           >
             <TextArea
@@ -737,11 +829,11 @@ export default function DoctorUseDFormVer2({
             <Input disabled={!isEdit} placeholder="Link/Code ICD-10" />
           </Form.Item>
 
-          <Form.Item label="Phân độ, phân loại" name="phanDoLoai">
+          <Form.Item label="Phân độ, phân loại" name="phan_do_loai">
             <Input disabled={!isEdit} placeholder="Short text" />
           </Form.Item>
 
-          <Form.Item label="Chẩn đoán phân biệt" name="chanDoanPhanBiet">
+          <Form.Item label="Chẩn đoán phân biệt" name="chan_doan_phan_biet">
             <Input disabled={!isEdit} placeholder="Short text" />
           </Form.Item>
 
@@ -750,7 +842,7 @@ export default function DoctorUseDFormVer2({
           </Title>
           <Form.Item
             disabled={!isEdit}
-            name="khuyenNghi"
+            name="khuyen_nghi"
             tooltip="Có thể tích hợp ChatGPT D-RADS"
           >
             <TextArea
@@ -819,7 +911,7 @@ export default function DoctorUseDFormVer2({
                     const res = await API_CALL.get(url);
 
                     // Đổ thẳng vào "Khuyến nghị & tư vấn"
-                    form.setFieldsValue({ khuyenNghi: res.data.data });
+                    form.setFieldsValue({ khuyen_nghi: res.data.data });
                   } catch (e) {
                     console.error(e);
                     toast.error("Gọi AI thất bại.");

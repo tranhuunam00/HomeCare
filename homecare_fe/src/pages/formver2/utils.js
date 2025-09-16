@@ -237,7 +237,7 @@ export function mapApiToForm(api) {
     language: api?.language ?? "vi",
     tenMau: api?.ten_mau ?? "",
     ketLuan: api?.ket_luan ?? "",
-    quyTrinh: api?.quy_trinh_url ?? "",
+    quy_trinh_url: api?.quy_trinh_url ?? "",
     icd10: api?.icd10 ?? "",
     phanDoLoai: api?.phan_do_loai ?? "",
     chanDoanPhanBiet: api?.chan_doan_phan_biet ?? "",
@@ -439,14 +439,14 @@ export function buildFormDataDoctorUseFormVer2(values, extra) {
 
   fd.append("language", values.language ?? "vi");
   fd.append("ten_mau", values.doctor_use_form_ver2_name ?? "");
-  fd.append("ketLuan", values.ketLuan ?? "");
-  fd.append("quyTrinh", values.quyTrinh ?? "");
+  fd.append("ket_luan", values.ket_luan ?? "");
+  fd.append("quy_trinh_url", values.quy_trinh_url ?? "");
   fd.append("icd10", values.icd10 ?? "");
-  fd.append("phanDoLoai", values.phanDoLoai ?? "");
-  fd.append("chanDoanPhanBiet", values.chanDoanPhanBiet ?? "");
-  fd.append("ketQuaChanDoan", values.ketQuaChanDoan ?? "");
-  fd.append("khuyenNghi", values.khuyenNghi ?? "");
-  fd.append("ngayThucHien", extra?.ngayThucHienISO);
+  fd.append("phan_do_loai", values.phan_do_loai ?? "");
+  fd.append("chan_doan_phan_biet", values.chan_doan_phan_biet ?? "");
+  fd.append("ket_qua_chan_doan", values.ket_qua_chan_doan ?? "");
+  fd.append("khuyen_nghi", values.khuyen_nghi ?? "");
+  fd.append("ngay_thuc_hien", extra?.ngayThucHienISO || new Date());
 
   // ---- Thông tin bệnh nhân
   fd.append("benh_nhan_ho_ten", values.benh_nhan_ho_ten ?? "");

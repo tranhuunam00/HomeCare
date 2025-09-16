@@ -1,4 +1,3 @@
-// src/pages/formver2/FormVer2List.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Table,
@@ -15,16 +14,17 @@ import {
   Spin,
   Typography,
   Tooltip,
-  InputNumber,
+  Checkbox,
+  Divider,
+  Dropdown,
 } from "antd";
 import {
   FilterOutlined,
   ReloadOutlined,
-  PrinterOutlined,
-  SearchOutlined,
   FileAddFilled,
   DownloadOutlined,
   CheckOutlined,
+  SettingOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import styles from "./FormVer2List.module.scss";
@@ -80,36 +80,56 @@ const DEFAULT_FILTERS = {
   id_template_service: undefined,
   search: "",
   id_doctor: undefined,
-  range: undefined, // [dayjs, dayjs]
+  range: undefined,
   withTables: false,
   withImages: false,
   includeDeleted: false,
 };
 
+const STORAGE_KEY = "visibleColumns_formVer2";
+const defaultVisibleKeys = [
+  "stt",
+  "id",
+  "code",
+  "ten_mau",
+  "id_exam_part",
+  "id_template_service",
+  "language",
+  "ngay_thuc_hien",
+  "doctor_name",
+  "actions",
+  "ket_luan",
+  "icd10",
+];
+
 export default function FormVer2List() {
   const navigate = useNavigate();
-
-  /* ======= Global options ======= */
   const { examParts = [], templateServices = [] } = useGlobalAuth();
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
-  const getExamPartName = (id) =>
-    examParts.find((e) => String(e.id) === String(id))?.name || id;
-
-  const getTemplateServiceName = (id) =>
-    templateServices.find((t) => String(t.id) === String(id))?.name || id;
-
-  /* ======= State ======= */
   const [loading, setLoading] = useState(false);
   const [rows, setRows] = useState([]);
   const [total, setTotal] = useState(0);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewId, setPreviewId] = useState(null);
 
-  // filters đang áp dụng để fetch
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
-  // filters ở UI (gõ/đổi không fetch)
   const [uiFilters, setUiFilters] = useState(DEFAULT_FILTERS);
+
+  const [visibleKeys, setVisibleKeys] = useState([]);
+
+  /* ======= Helpers ======= */
+  const getExamPartName = (id) =>
+    examParts.find((e) => String(e.id) === String(id))?.name || id;
+
+  const getTemplateServiceName = (id) =>
+    templateServices.find((t) => String(t.id) === String(id))?.name || id;
+
+  const getLinkedName = (record) =>
+    record?.id_formver2_name_form_ver2_name?.name || record?.ten_mau || "";
+
+  const getLinkedCode = (record) =>
+    record?.id_formver2_name_form_ver2_name?.code || "";
 
   /* ======= Fetch ======= */
   const fetchList = async () => {
@@ -122,7 +142,6 @@ export default function FormVer2List() {
       setRows(payload.items || []);
       setTotal(payload.total || 0);
     } catch (e) {
-      // có thể toast ở đây nếu bạn dùng react-toastify
       console.error(e);
     } finally {
       setLoading(false);
@@ -130,9 +149,13 @@ export default function FormVer2List() {
   };
 
   useEffect(() => {
-    fetchList(); // chỉ chạy khi filters đổi (ấn Tìm kiếm / đổi trang)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    fetchList();
   }, [filters]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    setVisibleKeys(saved ? JSON.parse(saved) : defaultVisibleKeys);
+  }, []);
 
   /* ======= Actions ======= */
   const applySearch = () =>
@@ -147,13 +170,11 @@ export default function FormVer2List() {
   const selectAllOnPage = () => {
     setSelectedRowKeys((prev) => {
       const pageIds = rows.map((r) => r.id);
-      // Hợp nhất (giữ những id đã chọn ở trang khác)
       const set = new Set([...prev, ...pageIds]);
       return Array.from(set);
     });
   };
 
-  // Bỏ chọn tất cả trên TRANG HIỆN TẠI
   const unselectAllOnPage = () => {
     setSelectedRowKeys((prev) => {
       const pageIds = new Set(rows.map((r) => r.id));
@@ -162,37 +183,9 @@ export default function FormVer2List() {
   };
 
   const clearAllSelections = () => setSelectedRowKeys([]);
-  const getLinkedName = (record) =>
-    record?.id_formver2_name_form_ver2_name?.name || record?.ten_mau || "";
 
-  const getLinkedCode = (record) =>
-    record?.id_formver2_name_form_ver2_name?.code || "";
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: (keys) => setSelectedRowKeys(keys),
-    // Thêm menu nhanh: Chọn tất cả / đảo / bỏ chọn
-    selections: [
-      Table.SELECTION_ALL,
-      Table.SELECTION_INVERT,
-      Table.SELECTION_NONE,
-      {
-        key: "select-all-page",
-        text: "Chọn tất cả (trang này)",
-        onSelect: selectAllOnPage,
-      },
-      {
-        key: "unselect-all-page",
-        text: "Bỏ chọn (trang này)",
-        onSelect: unselectAllOnPage,
-      },
-    ],
-    // để checkbox nằm ở cột đầu
-    columnWidth: 48,
-    preserveSelectedRowKeys: true, // giữ selection khi đổi trang
-  };
-
-  /* ======= Columns ======= */
-  const columns = useMemo(
+  /* ======= Column visibility ======= */
+  const allColumns = useMemo(
     () => [
       {
         title: "STT",
@@ -202,13 +195,23 @@ export default function FormVer2List() {
         render: (_, __, index) =>
           (filters.page - 1) * filters.limit + index + 1,
       },
+      { title: "ID", dataIndex: "id", key: "id", align: "center", width: 70 },
       {
-        title: "ID",
-        width: 70,
-        dataIndex: "id",
-        key: "id",
+        title: "Kết Luận",
+        dataIndex: "ket_luan",
+        key: "ket_luan",
         align: "center",
+        width: 150,
       },
+
+      {
+        title: "Icd10",
+        dataIndex: "icd10",
+        key: "icd10",
+        align: "center",
+        width: 100,
+      },
+
       {
         title: "Code",
         key: "code",
@@ -223,7 +226,6 @@ export default function FormVer2List() {
         dataIndex: "ten_mau",
         key: "ten_mau",
         width: 290,
-
         ellipsis: true,
         render: (_, record) => {
           const name = getLinkedName(record);
@@ -261,7 +263,6 @@ export default function FormVer2List() {
         width: 140,
         align: "center",
       },
-
       {
         title: "Người thực hiện",
         dataIndex: "doctor_name",
@@ -270,7 +271,6 @@ export default function FormVer2List() {
         align: "center",
         render: (_, record) => record.id_doctor_doctor?.full_name,
       },
-
       {
         title: "Hành động",
         key: "actions",
@@ -295,8 +295,72 @@ export default function FormVer2List() {
         ),
       },
     ],
-    [examParts, templateServices]
+    [examParts, templateServices, filters.page, filters.limit]
   );
+
+  const columnsToRender = useMemo(
+    () => allColumns.filter((col) => visibleKeys.includes(col.key)),
+    [visibleKeys, allColumns]
+  );
+
+  const toggleColumn = (key) => {
+    const updated = visibleKeys.includes(key)
+      ? visibleKeys.filter((k) => k !== key)
+      : [...visibleKeys, key];
+    setVisibleKeys(updated);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+  };
+
+  const columnMenu = (
+    <div style={{ padding: 12, maxHeight: 300, overflowY: "auto" }}>
+      <Typography.Text strong style={{ display: "block", marginBottom: 8 }}>
+        Chọn cột hiển thị
+      </Typography.Text>
+      {allColumns.map((col) => (
+        <div key={col.key} style={{ padding: "4px 0" }}>
+          <Checkbox
+            checked={visibleKeys.includes(col.key)}
+            onChange={() => toggleColumn(col.key)}
+          >
+            {col.title}
+          </Checkbox>
+        </div>
+      ))}
+      <Divider style={{ margin: "8px 0" }} />
+      <Button
+        size="small"
+        onClick={() => {
+          setVisibleKeys(defaultVisibleKeys);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultVisibleKeys));
+        }}
+      >
+        Khôi phục mặc định
+      </Button>
+    </div>
+  );
+
+  /* ======= Row Selection ======= */
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: (keys) => setSelectedRowKeys(keys),
+    selections: [
+      Table.SELECTION_ALL,
+      Table.SELECTION_INVERT,
+      Table.SELECTION_NONE,
+      {
+        key: "select-all-page",
+        text: "Chọn tất cả (trang này)",
+        onSelect: selectAllOnPage,
+      },
+      {
+        key: "unselect-all-page",
+        text: "Bỏ chọn (trang này)",
+        onSelect: unselectAllOnPage,
+      },
+    ],
+    columnWidth: 48,
+    preserveSelectedRowKeys: true,
+  };
 
   /* ======= UI ======= */
   return (
@@ -322,15 +386,20 @@ export default function FormVer2List() {
             <Button
               icon={<FileAddFilled />}
               onClick={() => navigate(`/home/form-v2`)}
-            ></Button>
+            />
           </Tooltip>
 
           <Tooltip title="Làm mới">
             <Button
               icon={<ReloadOutlined />}
               onClick={() => setFilters({ ...filters })}
-            ></Button>
+            />
           </Tooltip>
+
+          <Dropdown overlay={columnMenu} trigger={["click"]}>
+            <Button icon={<SettingOutlined />}>Chọn cột</Button>
+          </Dropdown>
+
           <Button
             type="primary"
             icon={<DownloadOutlined />}
@@ -453,9 +522,7 @@ export default function FormVer2List() {
           <Col xs={12} md={6} lg={4}>
             <Text>Thứ tự</Text>
             <Select
-              style={{
-                width: "100%",
-              }}
+              style={{ width: "100%" }}
               value={uiFilters.orderDir}
               onChange={(v) => setUiFilters((s) => ({ ...s, orderDir: v }))}
               options={[
@@ -481,14 +548,15 @@ export default function FormVer2List() {
 
       <Spin spinning={loading}>
         <Table
+          scroll={{ x: 1200, y: 800 }}
           className={styles.table}
           dataSource={rows}
-          columns={columns}
+          columns={columnsToRender}
           rowKey="id"
           rowSelection={rowSelection}
           onRow={(record) => ({
             onClick: () => {
-              setPreviewId(record.id); // lấy id row
+              setPreviewId(record.id);
               setPreviewOpen(true);
             },
           })}
