@@ -13,23 +13,19 @@ import {
 } from "antd";
 import { QuestionCircleOutlined } from "@ant-design/icons";
 import { useNavigate, useParams } from "react-router-dom";
-import ImageBlock from "./component/ImageBlock";
-import AdminFormVer2 from "./component/AdminFormVer2";
-import FormActionBar, { KEY_ACTION_BUTTON } from "./component/FormActionBar";
-import { useGlobalAuth } from "../../contexts/AuthContext";
-import API_CALL from "../../services/axiosClient"; // axios instance của bạn
-import {
-  buildFormData,
-  buildPrompt,
-  mapApiToForm,
-  normalizeTablesFromApi,
-} from "./utils";
-import { toast } from "react-toastify";
-import CustomSunEditor from "../../components/Suneditor/CustomSunEditor";
 
-import styles from "./FormVer2.module.scss";
-import PrintPreviewVer2NotDataDiagnose from "./PreviewVer2/PrintPreviewVer2NotDataDiagnose";
-import { USER_ROLE } from "../../constant/app";
+import { toast } from "react-toastify";
+
+import styles from "./DoctorIUseFormVer2.module.scss";
+import ImageBlock from "../component/ImageBlock";
+import FormActionBar, { KEY_ACTION_BUTTON } from "../component/FormActionBar";
+import CustomSunEditor from "../../../components/Suneditor/CustomSunEditor";
+import PrintPreviewVer2NotDataDiagnose from "../PreviewVer2/PrintPreviewVer2NotDataDiagnose";
+import useVietnamAddress from "../../../hooks/useVietnamAddress";
+import API_CALL from "../../../services/axiosClient";
+import { buildPrompt, mapApiToForm, normalizeTablesFromApi } from "../utils";
+import { USER_ROLE } from "../../../constant/app";
+import { useGlobalAuth } from "../../../contexts/AuthContext";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -46,19 +42,17 @@ const toISODate = (d = new Date()) => new Date(d).toISOString().slice(0, 10); //
 /* ============== MAPPERS ============== */
 // Map API → Form initialValues
 
-export default function DFormVer2({
-  id_form_ver2,
-  isDoctor = false,
+export default function DoctorUseDFormVer2({
   onFormChange,
-  onTablesChange,
   onPrint,
+  isUse = false,
 }) {
   const [form] = Form.useForm();
   const { examParts, templateServices, user, doctor, formVer2Names } =
     useGlobalAuth();
-
+  const { provinces, wards, setSelectedProvince } = useVietnamAddress();
+  const editId = null;
   const navigate = useNavigate();
-  const { id: idFromParam } = useParams();
 
   const [filteredFormVer2Names, setFilteredFormVer2Names] = useState([]);
 
@@ -70,8 +64,7 @@ export default function DFormVer2({
     right: null,
     apiData: null,
   });
-
-  const editId = id_form_ver2 ?? idFromParam;
+  const [idFormVer2, setIdFormVer2] = useState();
 
   const selectedTemplateServiceId = Form.useWatch("id_template_service", form);
   const selectedExamPartId = Form.useWatch("id_exam_part", form);
@@ -99,7 +92,7 @@ export default function DFormVer2({
       (n) =>
         Number(n.id_template_service) === Number(selectedTemplateServiceId) &&
         Number(n.id_exam_part) === Number(selectedExamPartId) &&
-        (!n.isUsed || n.id == currentId)
+        (n.isUsed == isUse || n.id == currentId)
     );
 
     setFilteredFormVer2Names(filtered);
@@ -120,13 +113,8 @@ export default function DFormVer2({
 
   const [imageDescEditor, setImageDescEditor] = useState("");
 
-  const [tablesData, setTablesData] = useState([]);
-  const [loading, setLoading] = useState(editId);
-  const [isEdit, setIsEdit] = useState(!editId);
-
-  useEffect(() => {
-    onTablesChange?.(tablesData);
-  }, [tablesData, onTablesChange]);
+  const [loading, setLoading] = useState(idFormVer2);
+  const [isEdit, setIsEdit] = useState(!idFormVer2);
 
   useEffect(() => {
     onFormChange?.({
@@ -145,12 +133,12 @@ export default function DFormVer2({
 
   // ====== Fetch when edit ======
   useEffect(() => {
-    if (!editId) return;
+    if (!idFormVer2) return;
     (async () => {
       setLoading(true);
       try {
         const res = await API_CALL.get(
-          `/form-ver2/${editId}?withTables=true&withImages=true&includeDeleted=false`
+          `/form-ver2/${idFormVer2}?withTables=true&withImages=true&includeDeleted=false`
         );
         const apiData = res?.data?.data?.data;
         if (!apiData) throw new Error("Không đọc được dữ liệu form");
@@ -168,7 +156,6 @@ export default function DFormVer2({
         console.log("formValues", formValues);
         // set form state hiển thị
         form.setFieldsValue(formValues);
-        setTablesData(tables);
         setImageDescEditor(imageDesc);
         setImageLeftUrl(left);
         setImageRightUrl(right);
@@ -180,66 +167,12 @@ export default function DFormVer2({
         setLoading(false);
       }
     })();
-  }, [editId, form]);
+  }, [form]);
 
   const onFinish = async (values) => {
-    if (!isDoctor) {
-      try {
-        if (!editId) {
-          const leftFile = values.ImageLeftFile?.[0]?.originFileObj;
-          const rightFile = values.ImageRightFile?.[0]?.originFileObj;
-
-          if (!leftFile || !rightFile) {
-            toast.error(
-              "Vui lòng tải lên đủ 2 ảnh (trái và phải) trước khi lưu"
-            );
-            return; // dừng luôn
-          }
-        }
-
-        const fd = buildFormData(values, {
-          tablesData,
-          ngayThucHienISO,
-          imageDescEditor,
-        });
-
-        if (editId) {
-          await API_CALL.patchForm(`/form-ver2/${editId}`, fd, {
-            headers: { "Content-Type": "multipart/form-data" },
-          });
-          toast.success("Đã cập nhật mẫu thành công");
-        } else {
-          const res = await API_CALL.postForm(`/form-ver2`, fd, {
-            headers: { "Content-Type": "multipart/form-data" },
-          });
-          const newId = res?.data?.data?.data?.formId;
-          toast.success("Đã tạo mẫu thành công");
-          if (newId) {
-            navigate(`/home/form-v2/detail/${newId}`);
-            window.location.reload();
-          }
-        }
-
-        switch (pendingAction.current) {
-          case "approve":
-            toast.success("Đã APPROVE");
-            navigate(`/home/form-v2`);
-            window.location.reload();
-
-            break;
-          case "export":
-            toast.success("Đã EXPORT (payload form-data đã gửi)");
-            break;
-          case "print":
-            window.print();
-            break;
-        }
-      } catch (e) {
-        console.error(e);
-        toast.error("Lưu thất bại. Kiểm tra dữ liệu hoặc thử lại sau.");
-      } finally {
-        pendingAction.current = null;
-      }
+    if (isUse) {
+      toast.success("Lưu chế độ sử dụng thành công");
+      return;
     }
   };
 
@@ -250,12 +183,11 @@ export default function DFormVer2({
 
   const restoreFromSnapshot = () => {
     if (!initialSnap) return;
-    const { formValues, tables, imageDesc, left, right } = initialSnap;
+    const { formValues, imageDesc, left, right } = initialSnap;
 
     form.resetFields();
     form.setFieldsValue(formValues);
 
-    setTablesData(tables);
     setImageDescEditor(imageDesc);
     setImageLeftUrl(left);
     setImageRightUrl(right);
@@ -264,9 +196,7 @@ export default function DFormVer2({
   return (
     <div style={{ maxWidth: 980, margin: "0 auto", padding: 0 }}>
       <Title level={3} style={{ textAlign: "center", marginBottom: 24 }}>
-        {editId
-          ? "CẬP NHẬT BỘ MẪU KẾT QUẢ D-FORM"
-          : "TẠO MỚI BỘ MẪU KẾT QUẢ D-FORM"}
+        BỘ MẪU KẾT QUẢ D-FORM
       </Title>
 
       {loading ? (
@@ -301,6 +231,149 @@ export default function DFormVer2({
           }}
         >
           {/* Hàng 1 */}
+          <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
+            THÔNG TIN BỆNH NHÂN
+          </Title>
+
+          {isUse && (
+            <>
+              <Row gutter={16}>
+                <Col xs={24} md={12}>
+                  <Form.Item
+                    label="Họ tên"
+                    name="benh_nhan_ho_ten"
+                    rules={[
+                      { required: true, message: "Nhập họ tên bệnh nhân" },
+                    ]}
+                  >
+                    <Input placeholder="VD: Nguyễn Văn A" />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} md={12}>
+                  <Form.Item
+                    label="Giới tính"
+                    name="benh_nhan_gioi_tinh"
+                    rules={[{ required: true, message: "Chọn giới tính" }]}
+                  >
+                    <Select placeholder="Chọn giới tính">
+                      <Option value="Nam">Nam</Option>
+                      <Option value="Nữ">Nữ</Option>
+                      <Option value="Khác">Khác</Option>
+                    </Select>
+                  </Form.Item>
+                </Col>
+              </Row>
+
+              <Row gutter={16}>
+                <Col xs={24} md={12}>
+                  <Form.Item
+                    label="Tuổi"
+                    name="benh_nhan_tuoi"
+                    rules={[{ required: true, message: "Nhập tuổi bệnh nhân" }]}
+                  >
+                    <Input type="number" placeholder="VD: 45" />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} md={12}>
+                  <Form.Item label="Quốc tịch" name="benh_nhan_quoc_tich">
+                    <Input placeholder="VD: Việt Nam" />
+                  </Form.Item>
+                </Col>
+              </Row>
+
+              <Row gutter={16}>
+                <Col xs={24} md={12}>
+                  <Form.Item label="Điện thoại" name="benh_nhan_dien_thoai">
+                    <Input placeholder="SĐT liên hệ" />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} md={12}>
+                  <Form.Item label="Email" name="benh_nhan_email">
+                    <Input type="email" placeholder="Email liên hệ" />
+                  </Form.Item>
+                </Col>
+              </Row>
+
+              <Row gutter={16}>
+                <Col xs={24} md={12}>
+                  <Form.Item label="PID (Mã định danh)" name="benh_nhan_pid">
+                    <Input placeholder="VD: 123456789" />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} md={12}>
+                  <Form.Item label="SID" name="benh_nhan_sid">
+                    <Input placeholder="PID-DATE-TIME" />
+                  </Form.Item>
+                </Col>
+              </Row>
+
+              <Row gutter={16}>
+                <Col xs={24} md={12}>
+                  <Form.Item
+                    name="province"
+                    label="Tỉnh/Thành phố"
+                    rules={[{ required: true }]}
+                  >
+                    <Select
+                      placeholder="Chọn Tỉnh / Thành phố"
+                      onChange={(val) => {
+                        form.setFieldsValue({
+                          province: val,
+                          ward: undefined,
+                        });
+                        setSelectedProvince(val);
+                      }}
+                    >
+                      {provinces.map((prov) => (
+                        <Option key={prov.code} value={prov.code}>
+                          {prov.name}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Col>
+                <Col xs={24} md={12}>
+                  <Form.Item
+                    name="ward"
+                    label="Phường/Xã"
+                    rules={[{ required: true }]}
+                  >
+                    <Select
+                      onChange={(val) => {
+                        console.log(val);
+                        form.setFieldsValue({ ward: val });
+                      }}
+                      placeholder="Chọn Xã / Phường"
+                      disabled={!wards.length}
+                    >
+                      {wards.map((ward) => (
+                        <Option key={ward.code} value={ward.code}>
+                          {ward.name}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Col>
+              </Row>
+              <Form.Item
+                label="Địa chỉ (số nhà)"
+                name="benh_nhan_dia_chi_so_nha"
+              >
+                <Input placeholder="VD: 123 Lê Lợi" />
+              </Form.Item>
+
+              <Form.Item label="Lâm sàng" name="benh_nhan_lam_sang">
+                <TextArea
+                  autoSize={{ minRows: 3, maxRows: 6 }}
+                  placeholder="Nhập triệu chứng lâm sàng..."
+                />
+              </Form.Item>
+            </>
+          )}
+          <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
+            THÔNG TIN MẪU FORM VER 2
+          </Title>
+
           <Row gutter={16}>
             <Col xs={24} md={12}>
               <Form.Item
@@ -310,7 +383,7 @@ export default function DFormVer2({
               >
                 <Select
                   placeholder="Chọn kỹ thuật"
-                  disabled={isDoctor || !isEdit}
+                  disabled={!isEdit}
                   allowClear
                   onChange={() => {
                     // Clear các field phụ thuộc khi đổi phân hệ
@@ -318,7 +391,7 @@ export default function DFormVer2({
                       id_exam_part: undefined,
                       id_formver2_name: undefined,
                     });
-                    setFilteredFormVer2Names([]); // làm sạch danh sách tên mẫu lọc theo
+                    setFilteredFormVer2Names([]);
                   }}
                 >
                   {templateServices.map((s) => (
@@ -337,7 +410,7 @@ export default function DFormVer2({
               >
                 <Select
                   placeholder="Chọn bộ phận thăm khám"
-                  disabled={isDoctor || !isEdit || !selectedTemplateServiceId}
+                  disabled={!isEdit || !selectedTemplateServiceId}
                   allowClear
                   onChange={() => {
                     form.setFieldsValue({ id_formver2_name: undefined });
@@ -407,6 +480,23 @@ export default function DFormVer2({
                       ? "Không có tên mẫu phù hợp"
                       : "Chưa đủ điều kiện để chọn"
                   }
+                  onChange={async (id_formver2_name) => {
+                    if (isUse) {
+                      // nếu là đang sử dụng
+                      try {
+                        const res = await API_CALL.get(
+                          `/form-ver2/detail?id_formver2_name=${id_formver2_name}&withTables=false&withImages=false&includeDeleted=false`
+                        );
+                        setIdFormVer2(res.data.data.data.id);
+                      } catch (e) {
+                        toast.error(
+                          "Không tải được dữ liệu. Vui lòng thử lại."
+                        );
+                      } finally {
+                        setLoading(false);
+                      }
+                    }
+                  }}
                 >
                   {filteredFormVer2Names.map((item) => (
                     <Option key={item.id} value={item.id}>
@@ -427,18 +517,20 @@ export default function DFormVer2({
           </Row>
 
           {/* Thông tin hệ thống */}
-          <Row gutter={16}>
-            <Col xs={24} md={12}>
-              <Form.Item label="Ngày thực hiện" name={"createdAt"}>
-                <Input value={ngayThucHienISO} readOnly disabled />
-              </Form.Item>
-            </Col>
-            <Col xs={24} md={12}>
-              <Form.Item label="Người thực hiện" name="doctor_name">
-                <Input readOnly disabled />
-              </Form.Item>
-            </Col>
-          </Row>
+          {!isUse && (
+            <Row gutter={16}>
+              <Col xs={24} md={12}>
+                <Form.Item label="Ngày thực hiện" name={"createdAt"}>
+                  <Input value={ngayThucHienISO} readOnly disabled />
+                </Form.Item>
+              </Col>
+              <Col xs={24} md={12}>
+                <Form.Item label="Người thực hiện" name="doctor_name">
+                  <Input readOnly disabled />
+                </Form.Item>
+              </Col>
+            </Row>
+          )}
 
           {/* Ảnh minh hoạ */}
           <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
@@ -484,20 +576,6 @@ export default function DFormVer2({
             />
           </Form.Item>
 
-          {/* Bảng mô tả hình ảnh */}
-          <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
-            MÔ TẢ HÌNH ẢNH
-          </Title>
-          {/* <AdminFormVer2
-            value={tablesData} // state ở cha
-            onChange={(next) => {
-              // giữ nguyên id theo tid (nếu CreateFormVer2 tạo object mới)
-              setTablesData((prev) => {
-                const prevByTid = new Map(prev.map((t) => [t.tid, t]));
-                return next.map((t) => ({ ...prevByTid.get(t.tid), ...t }));
-              });
-            }}
-          /> */}
           <CustomSunEditor
             value={imageDescEditor}
             onChange={setImageDescEditor}

@@ -24,6 +24,7 @@ import {
   SearchOutlined,
   FileAddFilled,
   DownloadOutlined,
+  CheckOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import styles from "./FormVer2List.module.scss";
@@ -305,6 +306,18 @@ export default function FormVer2List() {
           Danh sách FormVer2
         </Title>
         <Space>
+          <Tooltip title="Sử dụng">
+            <Button
+              type="primary"
+              icon={<CheckOutlined />}
+              onClick={() => {
+                navigate(`/home/form-v2/use`);
+              }}
+            >
+              Sử dụng
+            </Button>
+          </Tooltip>
+
           <Tooltip title="Thêm mới">
             <Button
               icon={<FileAddFilled />}

@@ -225,7 +225,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
             </p>
           </div>
 
-          <h2 className={styles.center}>NỘI DUNG THỰC HIỆN</h2>
+          <h2 className={styles.center}>QUY TRÌNH KĨ THUẬT</h2>
 
           <div
             style={{
@@ -284,12 +284,10 @@ const PrintPreviewVer2NotDataDiagnose = ({
             </section>
           </div>
 
-          <h4>QUY TRÌNH KỸ THUẬT / LINK</h4>
           <p className={styles.paragraph}>
             {formSnapshot.quyTrinh || formSnapshot.quy_trinh_url}
           </p>
 
-          <h4>MÔ TẢ HÌNH ẢNH</h4>
           <TablesSnapshotPreview tablesSnapshot={tablesSnapshot} />
           <InnerHTMLFormEditor data={imageDescEditor} />
 

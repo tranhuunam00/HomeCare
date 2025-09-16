@@ -48,7 +48,12 @@ export default function FormActionBar({
       icon: <ReloadOutlined />,
       onClick: onReset ?? emptyF,
     },
-    { key: "save", label: "SAVE", icon: <SaveOutlined />, disabled: editId },
+    {
+      key: "save",
+      label: "SAVE",
+      icon: <SaveOutlined />,
+      disabled: editId && !isEdit,
+    },
     {
       key: "edit",
       label: "EDIT",
