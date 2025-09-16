@@ -621,10 +621,7 @@ export default function DFormVer2({
                       prompt
                     )}`;
                     const res = await API_CALL.get(url);
-                    const text = await res.text()?.data;
-
-                    // Đổ thẳng vào "Khuyến nghị & tư vấn"
-                    form.setFieldsValue({ khuyenNghi: text });
+                    form.setFieldsValue({ khuyenNghi: res.data.data });
                   } catch (e) {
                     console.error(e);
                     toast.error("Gọi AI thất bại.");

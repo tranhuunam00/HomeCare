@@ -23,9 +23,16 @@ import CustomSunEditor from "../../../components/Suneditor/CustomSunEditor";
 import PrintPreviewVer2NotDataDiagnose from "../PreviewVer2/PrintPreviewVer2NotDataDiagnose";
 import useVietnamAddress from "../../../hooks/useVietnamAddress";
 import API_CALL from "../../../services/axiosClient";
-import { buildPrompt, mapApiToForm, normalizeTablesFromApi } from "../utils";
+import {
+  buildFormData,
+  buildFormDataDoctorUseFormVer2,
+  buildPrompt,
+  mapApiToForm,
+  normalizeTablesFromApi,
+} from "../utils";
 import { USER_ROLE } from "../../../constant/app";
 import { useGlobalAuth } from "../../../contexts/AuthContext";
+import dayjs from "dayjs";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -53,6 +60,7 @@ export default function DoctorUseDFormVer2({
   const { provinces, wards, setSelectedProvince } = useVietnamAddress();
   const editId = null;
   const navigate = useNavigate();
+  const { id } = useParams();
 
   const [filteredFormVer2Names, setFilteredFormVer2Names] = useState([]);
 
@@ -65,10 +73,45 @@ export default function DoctorUseDFormVer2({
     apiData: null,
   });
   const [idFormVer2, setIdFormVer2] = useState();
+  const [printTemplateList, setPrintTemplateList] = useState([]);
+  const [printTemplate, setPrintTemplate] = useState(null);
 
   const selectedTemplateServiceId = Form.useWatch("id_template_service", form);
   const selectedExamPartId = Form.useWatch("id_exam_part", form);
   const selectedFormVer2NameId = Form.useWatch("id_formver2_name", form);
+
+  useEffect(() => {
+    if (!selectedTemplateServiceId) {
+      setPrintTemplate();
+      setPrintTemplateList([]);
+      form.setFieldValue("id_print_template", null);
+    }
+    const fetchTemplates = async () => {
+      try {
+        const [printRes] = await Promise.all([
+          API_CALL.get("/print-template", {
+            params: {
+              page: 1,
+              limit: 1000,
+              id_template_service: +selectedTemplateServiceId || -1,
+              id_clinic: doctor.id_clinic,
+            },
+          }),
+        ]);
+
+        const printData = printRes.data.data?.data || printRes.data.data || [];
+
+        setPrintTemplateList(printData);
+      } catch (error) {
+        console.error(error);
+        toast.error("Không thể tải danh sách template");
+      }
+    };
+
+    if (selectedTemplateServiceId) {
+      fetchTemplates();
+    }
+  }, [selectedTemplateServiceId]);
 
   const currentFormVer2Name = useMemo(() => {
     const byPick = (formVer2Names || []).find(
@@ -167,11 +210,26 @@ export default function DoctorUseDFormVer2({
         setLoading(false);
       }
     })();
-  }, [form]);
+  }, [form, idFormVer2]);
 
   const onFinish = async (values) => {
     if (isUse) {
-      toast.success("Lưu chế độ sử dụng thành công");
+      try {
+        setLoading(true);
+        const fd = buildFormDataDoctorUseFormVer2(values, {
+          imageDescEditor,
+          id_formver2: idFormVer2,
+          doctor,
+        });
+        const res = await API_CALL.postForm(`/doctor-use-form-ver2`, fd, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        toast.success("Lưu chế độ sử dụng thành công");
+      } catch (error) {
+        toast.error("Lưu thất bại ", error);
+      } finally {
+        setLoading(false);
+      }
       return;
     }
   };
@@ -221,6 +279,7 @@ export default function DoctorUseDFormVer2({
             ImageRightDesc: "Quy trình kỹ thuật",
             ImageRightDescLink: "https://home-care.vn/",
             ImageLeftDescLink: "https://home-care.vn/",
+            benh_nhan_quoc_tich: "Việt Nam",
           }}
           onValuesChange={(_, allValues) => {
             onFormChange?.({
@@ -296,13 +355,25 @@ export default function DoctorUseDFormVer2({
 
               <Row gutter={16}>
                 <Col xs={24} md={12}>
-                  <Form.Item label="PID (Mã định danh)" name="benh_nhan_pid">
-                    <Input placeholder="VD: 123456789" />
+                  <Form.Item
+                    label="PID (Mã định danh)"
+                    name="benh_nhan_pid"
+                    required
+                  >
+                    <Input
+                      onChange={(e) => {
+                        form.setFieldValue(
+                          "benh_nhan_sid",
+                          `${e.target.value}-${dayjs().format("DDMMYY-HHmmss")}`
+                        );
+                      }}
+                      placeholder="CCCD"
+                    />
                   </Form.Item>
                 </Col>
                 <Col xs={24} md={12}>
-                  <Form.Item label="SID" name="benh_nhan_sid">
-                    <Input placeholder="PID-DATE-TIME" />
+                  <Form.Item label="SID" name="benh_nhan_sid" required>
+                    <Input disabled={true} placeholder="PID-DATE-TIME" />
                   </Form.Item>
                 </Col>
               </Row>
@@ -373,6 +444,21 @@ export default function DoctorUseDFormVer2({
           <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
             THÔNG TIN MẪU FORM VER 2
           </Title>
+
+          <Row gutter={16}>
+            <Col xs={24} md={24}>
+              <Form.Item
+                label="Tên kết quả"
+                name="doctor_use_form_ver2_name"
+                required
+              >
+                <Input
+                  disabled={!isEdit}
+                  placeholder="VD: Kết quả bệnh nhân A ngày "
+                />
+              </Form.Item>
+            </Col>
+          </Row>
 
           <Row gutter={16}>
             <Col xs={24} md={12}>
@@ -460,7 +546,7 @@ export default function DoctorUseDFormVer2({
           <Row gutter={16}>
             <Col xs={24} md={24}>
               <Form.Item
-                label="Tên mẫu"
+                label="Tên FormVer 2"
                 name="id_formver2_name"
                 rules={[{ required: true, message: "Chọn tên mẫu" }]}
               >
@@ -507,6 +593,38 @@ export default function DoctorUseDFormVer2({
               </Form.Item>
             </Col>
           </Row>
+          <Form.Item
+            label="Mẫu header in"
+            name="id_print_template"
+            rules={[{ required: true, message: "Chọn mẫu in" }]}
+          >
+            <Select
+              disabled={!selectedTemplateServiceId}
+              showSearch
+              allowClear
+              style={{ width: "100%" }}
+              placeholder="Chọn mẫu in"
+              optionFilterProp="children"
+              onChange={(val) => {
+                const printT = printTemplateList.find((t) => t.id == val);
+                setPrintTemplate(printT);
+                form.setFieldsValue({ id_print_template: printT?.id });
+              }}
+              filterOption={(input, option) =>
+                option?.children?.toLowerCase()?.includes(input.toLowerCase())
+              }
+            >
+              {printTemplateList
+                .filter(
+                  (t) => t.id_template_service == selectedTemplateServiceId
+                )
+                .map((tpl) => (
+                  <Option key={tpl.id} value={tpl.id}>
+                    {tpl.name}
+                  </Option>
+                ))}
+            </Select>
+          </Form.Item>
 
           <Row gutter={16}>
             <Col xs={24} md={24}>
@@ -699,10 +817,9 @@ export default function DoctorUseDFormVer2({
                       prompt
                     )}`;
                     const res = await API_CALL.get(url);
-                    const text = await res.text()?.data;
 
                     // Đổ thẳng vào "Khuyến nghị & tư vấn"
-                    form.setFieldsValue({ khuyenNghi: text });
+                    form.setFieldsValue({ khuyenNghi: res.data.data });
                   } catch (e) {
                     console.error(e);
                     toast.error("Gọi AI thất bại.");

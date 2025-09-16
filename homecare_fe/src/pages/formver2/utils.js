@@ -424,3 +424,71 @@ Dạng Markdown, ngắn gọn, rõ ràng (theo dõi, xét nghiệm bổ sung, đ
 Chỉ trả về nội dung "Khuyến nghị & Tư vấn", không lặp lại dữ liệu đầu vào.
 `.trim();
 };
+
+const toISODate = (d = new Date()) => new Date(d).toISOString().slice(0, 10); // YYYY-MM-DD
+
+export function buildFormDataDoctorUseFormVer2(values, extra) {
+  const fd = new FormData();
+
+  // ---- Header & fields thường
+  fd.append("id_template_service", String(values.id_template_service ?? ""));
+  fd.append("id_exam_part", String(values.id_exam_part ?? ""));
+  fd.append("id_print_template", String(values.id_print_template ?? ""));
+  fd.append("id_formver2", String(extra.id_formver2 ?? ""));
+  fd.append("id_doctor", String(extra.doctor.id ?? ""));
+
+  fd.append("language", values.language ?? "vi");
+  fd.append("ten_mau", values.doctor_use_form_ver2_name ?? "");
+  fd.append("ketLuan", values.ketLuan ?? "");
+  fd.append("quyTrinh", values.quyTrinh ?? "");
+  fd.append("icd10", values.icd10 ?? "");
+  fd.append("phanDoLoai", values.phanDoLoai ?? "");
+  fd.append("chanDoanPhanBiet", values.chanDoanPhanBiet ?? "");
+  fd.append("ketQuaChanDoan", values.ketQuaChanDoan ?? "");
+  fd.append("khuyenNghi", values.khuyenNghi ?? "");
+  fd.append("ngayThucHien", extra?.ngayThucHienISO);
+
+  // ---- Thông tin bệnh nhân
+  fd.append("benh_nhan_ho_ten", values.benh_nhan_ho_ten ?? "");
+  fd.append("benh_nhan_gioi_tinh", values.benh_nhan_gioi_tinh ?? "");
+  fd.append("benh_nhan_tuoi", String(values.benh_nhan_tuoi ?? ""));
+  fd.append("benh_nhan_dia_chi_so_nha", values.benh_nhan_dia_chi_so_nha ?? "");
+  fd.append(
+    "benh_nhan_dia_chi_xa_phuong",
+    values.benh_nhan_dia_chi_xa_phuong ?? ""
+  );
+  fd.append(
+    "benh_nhan_dia_chi_tinh_thanh_pho",
+    values.benh_nhan_dia_chi_tinh_thanh_pho ?? ""
+  );
+  fd.append("benh_nhan_quoc_tich", values.benh_nhan_quoc_tich ?? "");
+  fd.append("benh_nhan_dien_thoai", values.benh_nhan_dien_thoai ?? "");
+  fd.append("benh_nhan_email", values.benh_nhan_email ?? "");
+  fd.append("benh_nhan_pid", values.benh_nhan_pid ?? "");
+  fd.append("benh_nhan_sid", values.benh_nhan_sid ?? "");
+  fd.append("benh_nhan_lam_sang", values.benh_nhan_lam_sang ?? "");
+
+  // ---- Ảnh: text fields (đúng key BE)
+  fd.append("ImageLeftDesc", values.ImageLeftDesc ?? "");
+  fd.append("ImageLeftDescLink", values.ImageLeftDescLink ?? "");
+  fd.append("ImageRightDesc", values.ImageRightDesc ?? "");
+  fd.append("ImageRightDescLink", values.ImageRightDescLink ?? "");
+  fd.append(
+    "id_formver2_name",
+    values.id_formver2_name ?? values?.id_formver2_name_form_ver2_name?.id ?? ""
+  );
+
+  // ---- Ảnh: FILE (đúng key BE: ImageFormLeft / ImageFormRight)
+  const leftFileObj = values.ImageLeftFile?.[0]?.originFileObj;
+  if (leftFileObj) fd.append("ImageFormLeft", leftFileObj);
+
+  const rightFileObj = values.ImageRightFile?.[0]?.originFileObj;
+  if (rightFileObj) fd.append("ImageFormRight", rightFileObj);
+
+  fd.append("tables", JSON.stringify(extra?.tablesData ?? []));
+  fd.append("imageDescEditor", JSON.stringify(extra?.imageDescEditor ?? []));
+
+  // ---- auto_code nếu cần
+
+  return fd;
+}
