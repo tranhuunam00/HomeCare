@@ -420,7 +420,7 @@ export default function DFormVer2({
 
           <Row gutter={16}>
             <Col xs={24} md={24}>
-              <Form.Item label="Kết luận của mẫu" name="ketLuan">
+              <Form.Item label="Kết luận của mẫu" name="ket_luan">
                 <Input disabled={!isEdit} placeholder="VD: U máu gan" />
               </Form.Item>
             </Col>
@@ -476,7 +476,7 @@ export default function DFormVer2({
           <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
             QUY TRÌNH KỸ THUẬT
           </Title>
-          <Form.Item name="quyTrinh" label="" tooltip="Short text">
+          <Form.Item name="quy_trinh_url" label="" tooltip="Short text">
             <TextArea
               disabled={!isEdit}
               autoSize={{ minRows: 4, maxRows: 10 }}
@@ -510,7 +510,7 @@ export default function DFormVer2({
             KẾT LUẬN, CHẨN ĐOÁN
           </Title>
           <Form.Item
-            name="ketQuaChanDoan"
+            name="ket_qua_chan_doan"
             rules={[{ required: true, message: "Nhập kết luận" }]}
           >
             <TextArea
@@ -541,11 +541,11 @@ export default function DFormVer2({
             <Input disabled={!isEdit} placeholder="Link/Code ICD-10" />
           </Form.Item>
 
-          <Form.Item label="Phân độ, phân loại" name="phanDoLoai">
+          <Form.Item label="Phân độ, phân loại" name="phan_do_loai">
             <Input disabled={!isEdit} placeholder="Short text" />
           </Form.Item>
 
-          <Form.Item label="Chẩn đoán phân biệt" name="chanDoanPhanBiet">
+          <Form.Item label="Chẩn đoán phân biệt" name="chan_doan_phan_biet">
             <Input disabled={!isEdit} placeholder="Short text" />
           </Form.Item>
 
@@ -554,7 +554,7 @@ export default function DFormVer2({
           </Title>
           <Form.Item
             disabled={!isEdit}
-            name="khuyenNghi"
+            name="khuyen_nghi"
             tooltip="Có thể tích hợp ChatGPT D-RADS"
           >
             <TextArea

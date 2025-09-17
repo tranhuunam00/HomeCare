@@ -190,14 +190,14 @@ export function buildFormData(values, extra) {
   fd.append("id_template_service", String(values.id_template_service ?? ""));
   fd.append("id_exam_part", String(values.id_exam_part ?? ""));
   fd.append("language", values.language ?? "vi");
-  fd.append("tenMau", values.tenMau ?? "");
-  fd.append("ketLuan", values.ketLuan ?? "");
-  fd.append("quyTrinh", values.quyTrinh ?? "");
+  fd.append("tenMau", values.ten_mau ?? "");
+  fd.append("ketLuan", values.ket_luan ?? "");
+  fd.append("quyTrinh", values.quy_trinh_url ?? "");
   fd.append("icd10", values.icd10 ?? "");
-  fd.append("phanDoLoai", values.phanDoLoai ?? "");
-  fd.append("chanDoanPhanBiet", values.chanDoanPhanBiet ?? "");
-  fd.append("ketQuaChanDoan", values.ketQuaChanDoan ?? "");
-  fd.append("khuyenNghi", values.khuyenNghi ?? "");
+  fd.append("phanDoLoai", values.phan_do_loai ?? "");
+  fd.append("chanDoanPhanBiet", values.chan_doan_phan_biet ?? "");
+  fd.append("ketQuaChanDoan", values.ket_qua_chan_doan ?? "");
+  fd.append("khuyenNghi", values.khuyen_nghi ?? "");
   fd.append("ngayThucHien", extra?.ngayThucHienISO);
 
   // ---- Ảnh: text fields (đúng key BE)
@@ -230,19 +230,18 @@ export function mapApiToForm(api) {
   const left = api?.image_form_ver2s?.find((x) => x.kind === "left");
   const right = api?.image_form_ver2s?.find((x) => x.kind === "right");
 
-  console.log("api", api);
   return {
     id_template_service: api?.id_template_service ?? undefined,
     id_exam_part: api?.id_exam_part ?? undefined,
     language: api?.language ?? "vi",
-    tenMau: api?.ten_mau ?? "",
-    ketLuan: api?.ket_luan ?? "",
+    ten_mau: api?.ten_mau ?? "",
+    ket_luan: api?.ket_luan ?? "",
     quy_trinh_url: api?.quy_trinh_url ?? "",
     icd10: api?.icd10 ?? "",
-    phanDoLoai: api?.phan_do_loai ?? "",
-    chanDoanPhanBiet: api?.chan_doan_phan_biet ?? "",
-    ketQuaChanDoan: api?.ket_qua_chan_doan ?? "",
-    khuyenNghi: api?.khuyen_nghi ?? "",
+    phan_do_loai: api?.phan_do_loai ?? "",
+    chan_doan_phan_biet: api?.chan_doan_phan_biet ?? "",
+    ket_qua_chan_doan: api?.ket_qua_chan_doan ?? "",
+    khuyen_nghi: api?.khuyen_nghi ?? "",
     ImageLeftDesc: left?.desc || "",
     ImageLeftDescLink: left?.link || "",
     ImageRightDesc: right?.desc || "",
@@ -430,6 +429,26 @@ const toISODate = (d = new Date()) => new Date(d).toISOString().slice(0, 10); //
 export function buildFormDataDoctorUseFormVer2(values, extra) {
   const fd = new FormData();
 
+  if (extra.imageList?.length) {
+    const meta = extra.imageList.map((item, idx) => {
+      const hasFile = item.file;
+      return {
+        url: !hasFile ? item.url || item.rawUrl : "",
+        caption: item.caption || "",
+        isChange: hasFile,
+        fileField: hasFile ? `ImageDescFiles` : undefined,
+      };
+    });
+
+    fd.append("imageDescMeta", JSON.stringify(meta));
+
+    extra.imageList.forEach((item, idx) => {
+      if (item.file) {
+        fd.append(`ImageDescFiles`, item.file);
+      }
+    });
+  }
+
   // ---- Header & fields thường
   fd.append("id_template_service", String(values.id_template_service ?? ""));
   fd.append("id_exam_part", String(values.id_exam_part ?? ""));
@@ -453,7 +472,10 @@ export function buildFormDataDoctorUseFormVer2(values, extra) {
   fd.append("chan_doan_phan_biet", values.chan_doan_phan_biet ?? "");
   fd.append("ket_qua_chan_doan", values.ket_qua_chan_doan ?? "");
   fd.append("khuyen_nghi", values.khuyen_nghi ?? "");
-  fd.append("ngay_thuc_hien", extra?.ngayThucHienISO || new Date());
+  fd.append(
+    "ngay_thuc_hien",
+    extra?.ngayThucHienISO || new Date().toISOString().slice(0, 10)
+  );
 
   // ---- Thông tin bệnh nhân
   fd.append("benh_nhan_ho_ten", values.benh_nhan_ho_ten ?? "");
@@ -493,7 +515,7 @@ export function buildFormDataDoctorUseFormVer2(values, extra) {
   if (rightFileObj) fd.append("ImageFormRight", rightFileObj);
 
   fd.append("tables", JSON.stringify(extra?.tablesData ?? []));
-  fd.append("imageDescEditor", JSON.stringify(extra?.imageDescEditor ?? []));
+  fd.append("imageDescEditor", extra?.imageDescEditor);
 
   // ---- auto_code nếu cần
 

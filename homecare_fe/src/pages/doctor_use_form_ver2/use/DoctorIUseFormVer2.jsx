@@ -136,7 +136,17 @@ export default function DoctorUseDFormVer2({
             apiData.benh_nhan_dia_chi_tinh_thanh_pho,
         };
         setSelectedProvince(apiData.benh_nhan_dia_chi_tinh_thanh_pho);
+        const descImages =
+          apiData.image_doctor_use_form_ver2s
+            ?.filter((x) => x.kind === "desc") // chỉ lấy ảnh mô tả
+            ?.map((x, idx) => ({
+              url: x.url,
+              caption: x.desc || "",
+              rawUrl: x.url,
+              file: undefined, // ảnh từ API thì chưa có file local
+            })) || [];
 
+        setImageList(descImages);
         // fill vào form
         form.setFieldsValue(formValues);
 
@@ -158,6 +168,7 @@ export default function DoctorUseDFormVer2({
           left,
           right,
           imageDesc: apiData.imageDescEditor,
+          descImages,
         });
       } catch (err) {
         toast.error("Không load được chi tiết form");
@@ -278,7 +289,6 @@ export default function DoctorUseDFormVer2({
         if (!apiData) throw new Error("Không đọc được dữ liệu form");
 
         const formValues = mapApiToForm(apiData);
-        const tables = normalizeTablesFromApi(apiData?.table_form_ver2s);
         const imageDesc = apiData?.imageDescEditor
           ? JSON.parse(apiData.imageDescEditor)
           : "";
@@ -293,8 +303,6 @@ export default function DoctorUseDFormVer2({
         setImageDescEditor(imageDesc);
         setImageLeftUrl(left);
         setImageRightUrl(right);
-
-        setInitialSnap({ formValues, tables, imageDesc, left, right, apiData });
       } catch (e) {
         toast.error("Không tải được dữ liệu. Vui lòng thử lại.");
       } finally {
@@ -313,8 +321,9 @@ export default function DoctorUseDFormVer2({
           doctor,
           ngayThucHienISO:
             initialSnap.apiData?.ngay_thuc_hien || ngayThucHienISO,
-          prev_id: initialSnap.apiData.id,
-          id_root: initialSnap.apiData.id_root || initialSnap.apiData.id,
+          prev_id: initialSnap?.apiData?.id,
+          id_root: initialSnap?.apiData?.id_root || initialSnap?.apiData?.id,
+          imageList,
         });
         const res = await API_CALL.postForm(`/doctor-use-form-ver2`, fd, {
           headers: { "Content-Type": "multipart/form-data" },
@@ -338,6 +347,7 @@ export default function DoctorUseDFormVer2({
           `/home/doctor-use-form-v2/detail/${res.data.data.data.data.id}`
         );
       } catch (error) {
+        console.error("error", error);
         toast.error("Lưu thất bại ", error);
       } finally {
         setLoading(false);
@@ -1006,6 +1016,9 @@ export default function DoctorUseDFormVer2({
           initialSnap={initialSnap}
           currentFormVer2Name={currentFormVer2Name}
           editId={idEdit}
+          imageList={imageList}
+          isUse={isUse}
+          printTemplate={initialSnap.apiData?.id_print_template_print_template}
         />
       </Modal>
 

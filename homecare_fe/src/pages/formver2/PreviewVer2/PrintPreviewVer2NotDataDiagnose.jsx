@@ -36,10 +36,12 @@ const PrintPreviewVer2NotDataDiagnose = ({
   initialSnap,
   currentFormVer2Name,
   editId,
+  isUse = false,
+  imageList = [],
+  printTemplate = {},
 }) => {
   const { examParts, templateServices, user, doctor, formVer2Names } =
     useGlobalAuth();
-
   const LABELS = ADMIN_INFO_LABELS;
   const printRef = useRef();
 
@@ -50,6 +52,60 @@ const PrintPreviewVer2NotDataDiagnose = ({
           <h2 className={styles.center}>
             BỘ MẪU KẾT QUẢ CHẨN ĐOÁN HÌNH ẢNH D-RAD
           </h2>
+          {isUse && (
+            <header
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                marginBottom: 20,
+                alignItems: "flex-start",
+                gap: 20,
+              }}
+            >
+              <div style={{ maxWidth: "350px", flex: 1 }}>
+                <img
+                  style={{
+                    marginTop: 10,
+                    objectFit: "cover",
+                    alignContent: "center",
+                  }}
+                  src={
+                    printTemplate?.logo_url ||
+                    "https://via.placeholder.com/150x100?text=Logo"
+                  }
+                  className="logoImg"
+                  alt="Logo"
+                  width={80}
+                  height={80}
+                />
+              </div>
+
+              <div style={{ maxWidth: "350px", flex: 2 }}>
+                <p style={{ fontWeight: 600, color: "red", fontSize: 14 }}>
+                  {printTemplate?.clinic_name || "[Tên phòng khám]"}
+                </p>
+                <p style={{ fontSize: 13 }}>
+                  <strong>Khoa:</strong> {printTemplate?.department_name || "-"}
+                </p>
+                <p style={{ fontSize: 13 }}>
+                  <strong>Địa chỉ:</strong> {printTemplate?.address || "-"}
+                </p>
+              </div>
+              <div style={{ maxWidth: "280px", flex: 2 }}>
+                <p style={{ fontSize: 13 }}>
+                  <strong>Website:</strong>
+                  <i>{printTemplate?.website || "http://..."}</i>
+                </p>
+                <p style={{ fontSize: 13 }}>
+                  <strong>Hotline:</strong> {printTemplate?.phone || "..."}
+                </p>
+                <p style={{ fontSize: 13 }}>
+                  <strong>Email:</strong>
+                  <i>{printTemplate?.email || "example@email.com"}</i>
+                </p>
+              </div>
+            </header>
+          )}
           <div
             style={{
               marginBottom: 6,
@@ -311,6 +367,46 @@ const PrintPreviewVer2NotDataDiagnose = ({
           <p className={styles.paragraph}>
             {formSnapshot.khuyenNghi || formSnapshot.khuyen_nghi}
           </p>
+          {isUse && (
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap", // Cho phép ảnh xuống dòng
+                justifyContent: "space-between",
+              }}
+            >
+              {imageList?.map((item, index) => (
+                <section
+                  key={index}
+                  style={{
+                    width: "48%", // Chiếm 48% chiều rộng để hiển thị 2 ảnh trong 1 hàng
+                    marginBottom: "16px", // Khoảng cách giữa các ảnh
+                  }}
+                >
+                  <img
+                    src={item.url || item.rawUrl}
+                    alt={`img-${index}`}
+                    width={300}
+                    height={220}
+                    style={{
+                      objectFit: "contain",
+                      backgroundColor: "#e4e4e4ff",
+                      width: "100%", // Đảm bảo ảnh đầy đủ chiều rộng của ô
+                    }}
+                  />
+                  <p style={{ textAlign: "center" }}>
+                    <a
+                      href={item.rawUrl || item.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {item.caption || "Ảnh mô tả"}
+                    </a>
+                  </p>
+                </section>
+              ))}
+            </div>
+          )}
         </Card>
       </div>
       <FormActionBar
