@@ -34,6 +34,7 @@ import { useNavigate } from "react-router-dom";
 import { exportFormVer2 } from "../utils";
 import FormVer2PreviewModal from "./FormVer2PreviewModal";
 import { USER_ROLE } from "../../../constant/app";
+import { FormVer2CloneModal } from "../component/FormVer2CloneModal";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -107,6 +108,9 @@ export default function FormVer2List() {
   const navigate = useNavigate();
   const { examParts = [], templateServices = [], user } = useGlobalAuth();
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+
+  const [cloneOpen, setCloneOpen] = useState(false);
+  const [cloneRecord, setCloneRecord] = useState(null);
 
   const [loading, setLoading] = useState(false);
   const [rows, setRows] = useState([]);
@@ -285,6 +289,7 @@ export default function FormVer2List() {
             >
               Chi tiết
             </Button>
+
             {user.id_role == USER_ROLE.ADMIN && (
               <Button
                 size="small"
@@ -294,6 +299,16 @@ export default function FormVer2List() {
                 Export
               </Button>
             )}
+            <Button
+              type="link"
+              onClick={(e) => {
+                e.stopPropagation();
+                setCloneRecord(record);
+                setCloneOpen(true);
+              }}
+            >
+              Clone
+            </Button>
           </Space>
         ),
       },
@@ -427,7 +442,7 @@ export default function FormVer2List() {
         className={styles.filters}
         title={
           <Space>
-            <FilterOutlined /> Bộ lọc
+            <FilterOutlined /> Bộ lọc --- {total}bản ghi
           </Space>
         }
         extra={
@@ -608,6 +623,14 @@ export default function FormVer2List() {
           id={previewId}
         />
       </Spin>
+      {cloneOpen && (
+        <FormVer2CloneModal
+          open={cloneOpen}
+          onCancel={() => setCloneOpen(false)}
+          cloneRecord={cloneRecord}
+          onSuccess={fetchList} // ✅ reload list sau khi clone
+        />
+      )}
     </div>
   );
 }

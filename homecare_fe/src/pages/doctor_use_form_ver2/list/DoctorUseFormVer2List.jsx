@@ -299,7 +299,7 @@ export default function DoctorUseFormVer2List() {
         className={styles.filters}
         title={
           <Space>
-            <FilterOutlined /> Bộ lọc
+            <FilterOutlined /> Bộ lọc --- {total} bản ghi
           </Space>
         }
         extra={

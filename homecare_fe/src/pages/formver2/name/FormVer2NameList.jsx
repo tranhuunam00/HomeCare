@@ -414,7 +414,7 @@ const FormVer2NameList = () => {
             size="small"
             title={
               <>
-                <FilterOutlined /> Bộ lọc
+                <FilterOutlined /> Bộ lọc --- {total} bản ghi
               </>
             }
             extra={
