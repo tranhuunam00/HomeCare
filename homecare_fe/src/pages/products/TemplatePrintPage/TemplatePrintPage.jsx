@@ -16,6 +16,7 @@ import styles from "./TemplatePrintPreview.module.scss";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useGlobalAuth } from "../../../contexts/AuthContext";
+import { USER_ROLE } from "../../../constant/app";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -128,7 +129,7 @@ const TemplatePrintPreview = () => {
 
   return (
     <Card style={{ maxWidth: 1240, margin: "auto" }}>
-      <Title level={3}>Xem trước mẫu in</Title>
+      <Title level={3}>Header Mẫu in</Title>
 
       <Spin spinning={loading}>
         <Form layout="vertical" form={form} onFinish={onFinish}>
@@ -150,19 +151,21 @@ const TemplatePrintPreview = () => {
             </Select>
           </Form.Item>
 
-          <Form.Item
-            label="Phòng khám"
-            name="id_clinic"
-            rules={[{ required: true }]}
-          >
-            <Select placeholder="Chọn phòng khám">
-              {clinics.map((s) => (
-                <Option key={s.id} value={s.id}>
-                  {s.name}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
+          {user.id_role == USER_ROLE.ADMIN && (
+            <Form.Item
+              label="Phòng khám"
+              name="id_clinic"
+              rules={[{ required: true }]}
+            >
+              <Select placeholder="Chọn phòng khám">
+                {clinics.map((s) => (
+                  <Option key={s.id} value={s.id}>
+                    {s.name}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+          )}
 
           <TemplateHeaderEditor
             value={headerInfo}

@@ -90,7 +90,7 @@ function App() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<PatientTablePage />} />
+          <Route index element={<FormVer2List />} />
 
           <Route path="products" element={<ProductList />} />
           <Route path="templates" element={<TemplateList />} />

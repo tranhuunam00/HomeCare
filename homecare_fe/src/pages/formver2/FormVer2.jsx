@@ -449,7 +449,7 @@ export default function DFormVer2({
                 form={form}
                 namePrefix="ImageLeft"
                 src={ImageLeftUrl}
-                title="Ảnh minh họa 1"
+                title=""
                 onChange={(value) => {
                   setImageLeftUrl(value);
                 }}
@@ -461,7 +461,7 @@ export default function DFormVer2({
                 form={form}
                 namePrefix="ImageRight"
                 src={ImageRightUrl}
-                title="Ảnh minh họa 2"
+                title=""
                 onChange={(value) => {
                   setImageRightUrl(value);
                 }}

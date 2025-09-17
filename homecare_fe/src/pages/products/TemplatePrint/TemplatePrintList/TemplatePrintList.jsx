@@ -88,24 +88,53 @@ const TemplatePrintList = () => {
   };
 
   const columns = [
+    {
+      title: "STT",
+      key: "stt",
+      align: "center",
+      width: 70,
+      render: (_, __, index) => (page - 1) * 10 + index + 1,
+    },
     { title: "ID", dataIndex: "id", key: "id", align: "center" },
     { title: "Tên", dataIndex: "name", key: "name" },
-    { title: "Phòng khám", dataIndex: "clinic_name", key: "clinic_name" },
-    { title: "Khoa", dataIndex: "department_name", key: "department_name" },
-    { title: "Mã header", dataIndex: "code_header", key: "code_header" },
     {
-      title: "Logo",
-      dataIndex: "logo_url",
-      key: "logo_url",
-      render: (url) =>
-        url ? <img src={url} alt="logo" style={{ width: 40 }} /> : "—",
+      title: "Phân hệ",
+      key: "id_template_service",
+      align: "center",
+      render: (_, record) =>
+        record?.id_template_service_template_service?.name || "—",
     },
     {
-      title: "Kích hoạt",
-      dataIndex: "is_active",
-      key: "is_active",
-      render: (active) => (active ? "✔️" : "❌"),
+      title: "Tên phòng khám",
+      key: "id_clinic",
+      align: "center",
+      render: (_, record) => record?.id_clinic_clinic?.name || "—",
     },
+
+    {
+      title: "Phòng khám hiển thị",
+      dataIndex: "clinic_name",
+      key: "clinic_name",
+    },
+    {
+      title: "Khoa hiển thị",
+      dataIndex: "department_name",
+      key: "department_name",
+    },
+    // { title: "Mã header", dataIndex: "code_header", key: "code_header" },
+    // {
+    //   title: "Logo",
+    //   dataIndex: "logo_url",
+    //   key: "logo_url",
+    //   render: (url) =>
+    //     url ? <img src={url} alt="logo" style={{ width: 40 }} /> : "—",
+    // },
+    // {
+    //   title: "Kích hoạt",
+    //   dataIndex: "is_active",
+    //   key: "is_active",
+    //   render: (active) => (active ? "✔️" : "❌"),
+    // },
     {
       title: "Thao tác",
       key: "action",
@@ -148,7 +177,7 @@ const TemplatePrintList = () => {
     <div className={styles.TemplateList}>
       <Row justify="space-between" align="middle" style={{ marginBottom: 16 }}>
         <Col>
-          <h2 className={styles.title}>Danh sách mẫu in kết quả</h2>
+          <h2 className={styles.title}>Danh sách header mẫu in kết quả</h2>
         </Col>
         <Col>
           <Button

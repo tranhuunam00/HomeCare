@@ -352,6 +352,7 @@ export default function DoctorUseDFormVer2({
         navigate(
           `/home/doctor-use-form-v2/detail/${res.data.data.data.data.id}`
         );
+        window.location.reload();
       } catch (error) {
         console.error("error", error);
         toast.error("Lưu thất bại ", error);
@@ -802,7 +803,7 @@ export default function DoctorUseDFormVer2({
                 form={form}
                 namePrefix="ImageLeft"
                 src={ImageLeftUrl}
-                title="Ảnh minh họa 1"
+                title=""
                 onChange={(value) => {
                   setImageLeftUrl(value);
                 }}
@@ -814,7 +815,7 @@ export default function DoctorUseDFormVer2({
                 form={form}
                 namePrefix="ImageRight"
                 src={ImageRightUrl}
-                title="Ảnh minh họa 2"
+                title=""
                 onChange={(value) => {
                   setImageRightUrl(value);
                 }}

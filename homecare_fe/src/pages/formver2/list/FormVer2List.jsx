@@ -33,6 +33,7 @@ import { useGlobalAuth } from "../../../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { exportFormVer2 } from "../utils";
 import FormVer2PreviewModal from "./FormVer2PreviewModal";
+import { USER_ROLE } from "../../../constant/app";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -104,7 +105,7 @@ const defaultVisibleKeys = [
 
 export default function FormVer2List() {
   const navigate = useNavigate();
-  const { examParts = [], templateServices = [] } = useGlobalAuth();
+  const { examParts = [], templateServices = [], user } = useGlobalAuth();
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
   const [loading, setLoading] = useState(false);
@@ -284,13 +285,15 @@ export default function FormVer2List() {
             >
               Chi tiết
             </Button>
-            <Button
-              size="small"
-              icon={<DownloadOutlined />}
-              onClick={() => exportFormVer2({ ids: [record.id] })}
-            >
-              Export
-            </Button>
+            {user.id_role == USER_ROLE.ADMIN && (
+              <Button
+                size="small"
+                icon={<DownloadOutlined />}
+                onClick={() => exportFormVer2({ ids: [record.id] })}
+              >
+                Export
+              </Button>
+            )}
           </Space>
         ),
       },
@@ -382,12 +385,14 @@ export default function FormVer2List() {
             </Button>
           </Tooltip>
 
-          <Tooltip title="Thêm mới">
-            <Button
-              icon={<FileAddFilled />}
-              onClick={() => navigate(`/home/form-v2`)}
-            />
-          </Tooltip>
+          {user.id_role == USER_ROLE.ADMIN && (
+            <Tooltip title="Thêm mới">
+              <Button
+                icon={<FileAddFilled />}
+                onClick={() => navigate(`/home/form-v2`)}
+              />
+            </Tooltip>
+          )}
 
           <Tooltip title="Làm mới">
             <Button
@@ -400,14 +405,16 @@ export default function FormVer2List() {
             <Button icon={<SettingOutlined />}>Chọn cột</Button>
           </Dropdown>
 
-          <Button
-            type="primary"
-            icon={<DownloadOutlined />}
-            disabled={!selectedRowKeys.length}
-            onClick={() => exportFormVer2({ ids: selectedRowKeys })}
-          >
-            Export ({selectedRowKeys.length})
-          </Button>
+          {user.id_role == USER_ROLE.ADMIN && (
+            <Button
+              type="primary"
+              icon={<DownloadOutlined />}
+              disabled={!selectedRowKeys.length}
+              onClick={() => exportFormVer2({ ids: selectedRowKeys })}
+            >
+              Export ({selectedRowKeys.length})
+            </Button>
+          )}
 
           <Button onClick={selectAllOnPage}>Chọn tất cả</Button>
           <Button onClick={unselectAllOnPage}>Bỏ chọn</Button>
