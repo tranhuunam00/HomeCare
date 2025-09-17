@@ -11,6 +11,7 @@ const ImageWithCaptionInput = ({
   links,
   setLinks = () => {},
   max,
+  disabled,
 }) => {
   const [images, setImages] = useState(value);
   const [imagesTrans, setImagesTrans] = useState(valueTrans);
@@ -88,7 +89,7 @@ const ImageWithCaptionInput = ({
         icon={<PlusOutlined />}
         onClick={handleAddImage}
         style={{ marginBottom: 12 }}
-        disabled={images.length >= max}
+        disabled={images.length >= max || disabled}
       >
         Thêm ảnh
       </Button>
@@ -101,7 +102,9 @@ const ImageWithCaptionInput = ({
                 beforeUpload={(file) => handleImageChange(file, index)}
                 accept=".jpg,.jpeg,.png"
               >
-                <Button icon={<UploadOutlined />}>Chọn ảnh</Button>
+                <Button disabled={disabled} icon={<UploadOutlined />}>
+                  Chọn ảnh
+                </Button>
               </Upload>
               {item.url && (
                 <img
@@ -116,6 +119,7 @@ const ImageWithCaptionInput = ({
                 />
               )}
               <Input.TextArea
+                disabled={disabled}
                 placeholder="Chú thích ảnh"
                 value={item.caption}
                 onChange={(e) => handleCaptionChange(e, index)}
@@ -137,6 +141,7 @@ const ImageWithCaptionInput = ({
                 />
               )}
               <Button
+                disabled={disabled}
                 danger
                 type="text"
                 onClick={() => handleRemove(index)}

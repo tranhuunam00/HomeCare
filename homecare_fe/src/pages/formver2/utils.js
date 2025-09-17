@@ -436,6 +436,13 @@ export function buildFormDataDoctorUseFormVer2(values, extra) {
   fd.append("id_print_template", String(values.id_print_template ?? ""));
   fd.append("id_formver2", String(extra.id_formver2 ?? ""));
   fd.append("id_doctor", String(extra.doctor.id ?? ""));
+  if (extra.prev_id) {
+    fd.append("prev_id", String(extra.prev_id));
+  }
+
+  if (extra.id_root) {
+    fd.append("id_root", String(extra.id_root));
+  }
 
   fd.append("language", values.language ?? "vi");
   fd.append("ten_mau", values.doctor_use_form_ver2_name ?? "");

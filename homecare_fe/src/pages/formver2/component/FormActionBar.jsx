@@ -38,7 +38,6 @@ export default function FormActionBar({
   isEdit = false,
   editId,
 }) {
-  console.log("keys", keys);
   const navigate = useNavigate();
   const emptyF = () => {};
   const items = [

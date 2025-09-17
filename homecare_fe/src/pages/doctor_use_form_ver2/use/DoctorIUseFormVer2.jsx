@@ -35,6 +35,8 @@ import {
 import { USER_ROLE } from "../../../constant/app";
 import { useGlobalAuth } from "../../../contexts/AuthContext";
 import dayjs from "dayjs";
+import HistoryModal from "./items/HistoryModal";
+import ImageWithCaptionInput from "../../products/ImageWithCaptionInput/ImageWithCaptionInput";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -60,12 +62,12 @@ export default function DoctorUseDFormVer2({
   const { examParts, templateServices, user, doctor, formVer2Names } =
     useGlobalAuth();
   const { provinces, wards, setSelectedProvince } = useVietnamAddress();
-  const editId = null;
   const navigate = useNavigate();
   const { id } = useParams();
   const [idEdit, setIdEdit] = useState(id);
-  const [dataInit, setDataInit] = useState();
-
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [imageList, setImageList] = useState([]);
+  console.log("imageList", imageList);
   const [filteredFormVer2Names, setFilteredFormVer2Names] = useState([]);
 
   const [initialSnap, setInitialSnap] = useState({
@@ -101,7 +103,6 @@ export default function DoctorUseDFormVer2({
 
         const apiData = res?.data?.data?.data;
         if (!apiData) throw new Error("Không đọc được dữ liệu");
-        setDataInit(apiData);
         // Map API -> form values
         const formValues = {
           doctor_use_form_ver2_name: apiData.ten_mau,
@@ -245,8 +246,9 @@ export default function DoctorUseDFormVer2({
 
   const [imageDescEditor, setImageDescEditor] = useState("");
 
-  const [loading, setLoading] = useState(idFormVer2);
-  const [isEdit, setIsEdit] = useState(!idFormVer2);
+  const [loading, setLoading] = useState();
+
+  const [isEdit, setIsEdit] = useState(!idEdit);
 
   useEffect(() => {
     onFormChange?.({
@@ -307,14 +309,34 @@ export default function DoctorUseDFormVer2({
         setLoading(true);
         const fd = buildFormDataDoctorUseFormVer2(values, {
           imageDescEditor,
-          id_formver2: idFormVer2 || dataInit?.id_formver2,
+          id_formver2: idFormVer2 || initialSnap.apiData?.id_formver2,
           doctor,
-          ngayThucHienISO: dataInit?.ngay_thuc_hien || ngayThucHienISO,
+          ngayThucHienISO:
+            initialSnap.apiData?.ngay_thuc_hien || ngayThucHienISO,
+          prev_id: initialSnap.apiData.id,
+          id_root: initialSnap.apiData.id_root || initialSnap.apiData.id,
         });
         const res = await API_CALL.postForm(`/doctor-use-form-ver2`, fd, {
           headers: { "Content-Type": "multipart/form-data" },
         });
         toast.success("Lưu chế độ sử dụng thành công");
+
+        switch (pendingAction.current) {
+          case "approve":
+            navigate(`/home/form-v2/use`);
+            window.location.reload();
+            break;
+          case "export":
+            toast.success("Đã EXPORT (payload form-data đã gửi)");
+            break;
+          case "print":
+            window.print();
+            break;
+        }
+
+        navigate(
+          `/home/doctor-use-form-v2/detail/${res.data.data.data.data.id}`
+        );
       } catch (error) {
         toast.error("Lưu thất bại ", error);
       } finally {
@@ -333,7 +355,6 @@ export default function DoctorUseDFormVer2({
     if (!initialSnap) return;
     const { formValues, imageDesc, left, right } = initialSnap;
 
-    form.resetFields();
     form.setFieldsValue(formValues);
 
     setImageDescEditor(imageDesc);
@@ -396,7 +417,7 @@ export default function DoctorUseDFormVer2({
                       { required: true, message: "Nhập họ tên bệnh nhân" },
                     ]}
                   >
-                    <Input placeholder="VD: Nguyễn Văn A" />
+                    <Input disabled={!isEdit} placeholder="VD: Nguyễn Văn A" />
                   </Form.Item>
                 </Col>
                 <Col xs={24} md={12}>
@@ -405,7 +426,7 @@ export default function DoctorUseDFormVer2({
                     name="benh_nhan_gioi_tinh"
                     rules={[{ required: true, message: "Chọn giới tính" }]}
                   >
-                    <Select placeholder="Chọn giới tính">
+                    <Select disabled={!isEdit} placeholder="Chọn giới tính">
                       <Option value="Nam">Nam</Option>
                       <Option value="Nữ">Nữ</Option>
                       <Option value="Khác">Khác</Option>
@@ -421,12 +442,16 @@ export default function DoctorUseDFormVer2({
                     name="benh_nhan_tuoi"
                     rules={[{ required: true, message: "Nhập tuổi bệnh nhân" }]}
                   >
-                    <Input type="number" placeholder="VD: 45" />
+                    <Input
+                      disabled={!isEdit}
+                      type="number"
+                      placeholder="VD: 45"
+                    />
                   </Form.Item>
                 </Col>
                 <Col xs={24} md={12}>
                   <Form.Item label="Quốc tịch" name="benh_nhan_quoc_tich">
-                    <Input placeholder="VD: Việt Nam" />
+                    <Input disabled={!isEdit} placeholder="VD: Việt Nam" />
                   </Form.Item>
                 </Col>
               </Row>
@@ -434,12 +459,16 @@ export default function DoctorUseDFormVer2({
               <Row gutter={16}>
                 <Col xs={24} md={12}>
                   <Form.Item label="Điện thoại" name="benh_nhan_dien_thoai">
-                    <Input placeholder="SĐT liên hệ" />
+                    <Input disabled={!isEdit} placeholder="SĐT liên hệ" />
                   </Form.Item>
                 </Col>
                 <Col xs={24} md={12}>
                   <Form.Item label="Email" name="benh_nhan_email">
-                    <Input type="email" placeholder="Email liên hệ" />
+                    <Input
+                      disabled={!isEdit}
+                      type="email"
+                      placeholder="Email liên hệ"
+                    />
                   </Form.Item>
                 </Col>
               </Row>
@@ -452,6 +481,7 @@ export default function DoctorUseDFormVer2({
                     required
                   >
                     <Input
+                      disabled={!isEdit}
                       onChange={(e) => {
                         form.setFieldValue(
                           "benh_nhan_sid",
@@ -475,8 +505,10 @@ export default function DoctorUseDFormVer2({
                     name="benh_nhan_dia_chi_tinh_thanh_pho"
                     label="Tỉnh/Thành phố"
                     rules={[{ required: true }]}
+                    disabled={!isEdit}
                   >
                     <Select
+                      disabled={!isEdit}
                       placeholder="Chọn Tỉnh / Thành phố"
                       onChange={(val) => {
                         form.setFieldsValue({
@@ -507,7 +539,7 @@ export default function DoctorUseDFormVer2({
                         });
                       }}
                       placeholder="Chọn Xã / Phường"
-                      disabled={!wards.length}
+                      disabled={!wards.length || !isEdit}
                     >
                       {wards.map((ward) => (
                         <Option key={ward.code} value={ward.code}>
@@ -522,11 +554,12 @@ export default function DoctorUseDFormVer2({
                 label="Địa chỉ (số nhà)"
                 name="benh_nhan_dia_chi_so_nha"
               >
-                <Input placeholder="VD: 123 Lê Lợi" />
+                <Input disabled={!isEdit} placeholder="VD: 123 Lê Lợi" />
               </Form.Item>
 
               <Form.Item label="Lâm sàng" name="benh_nhan_lam_sang">
                 <TextArea
+                  disabled={!isEdit}
                   autoSize={{ minRows: 3, maxRows: 6 }}
                   placeholder="Nhập triệu chứng lâm sàng..."
                 />
@@ -691,7 +724,7 @@ export default function DoctorUseDFormVer2({
             rules={[{ required: true, message: "Chọn mẫu in" }]}
           >
             <Select
-              disabled={!selectedTemplateServiceId}
+              disabled={!selectedTemplateServiceId || !isEdit}
               showSearch
               allowClear
               style={{ width: "100%" }}
@@ -852,10 +885,38 @@ export default function DoctorUseDFormVer2({
             />
           </Form.Item>
 
+          <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
+            HÌNH ẢNH MINH HỌA
+          </Title>
+          <Form.Item label="">
+            <ImageWithCaptionInput
+              disabled={!isEdit}
+              max={4}
+              value={imageList}
+              onChange={setImageList}
+              valueTrans={imageList}
+              onChangeTrans={setImageList}
+            />
+          </Form.Item>
+
+          <Title level={4} style={{ margin: "24px 0 16px" }}>
+            <a
+              style={{
+                fontStyle: "italic",
+                color: "#b17b16ff",
+                textDecoration: "underline",
+                cursor: "pointer",
+              }}
+              onClick={() => setHistoryOpen(true)}
+            >
+              LỊCH SỬ THAY ĐỔI
+            </a>
+          </Title>
+
           {/* Action bar */}
           {(initialSnap.apiData?.id_doctor == doctor.id ||
             user.id_role == USER_ROLE.ADMIN ||
-            !editId) && (
+            !idEdit) && (
             <FormActionBar
               keys={[
                 KEY_ACTION_BUTTON.reset,
@@ -881,11 +942,11 @@ export default function DoctorUseDFormVer2({
                   setIsEdit(
                     initialSnap.apiData?.id_doctor == doctor.id ||
                       user.id_role == USER_ROLE.ADMIN ||
-                      !editId
+                      !idEdit
                   );
                 }
               }}
-              editId={editId}
+              editId={idEdit}
               onGenAi={async () => {
                 const handleGenAi = async () => {
                   try {
@@ -944,9 +1005,16 @@ export default function DoctorUseDFormVer2({
           imageDescEditor={imageDescEditor}
           initialSnap={initialSnap}
           currentFormVer2Name={currentFormVer2Name}
-          editId={editId}
+          editId={idEdit}
         />
       </Modal>
+
+      <HistoryModal
+        open={historyOpen}
+        onClose={() => setHistoryOpen(false)}
+        idRoot={initialSnap.apiData?.id_root || idEdit}
+        idCurrent={idEdit}
+      />
     </div>
   );
 }
