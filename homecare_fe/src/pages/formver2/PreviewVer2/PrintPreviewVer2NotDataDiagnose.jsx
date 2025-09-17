@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { Button, Card } from "antd";
 
 import { ADMIN_INFO_LABELS } from "../../../constant/app";
@@ -12,6 +12,7 @@ import { handlePrint } from "../utils";
 import InnerHTMLFormEditor from "./InnerHTMLFormEditor";
 import dayjs from "dayjs";
 import { useGlobalAuth } from "../../../contexts/AuthContext";
+import useVietnamAddress from "../../../hooks/useVietnamAddress";
 
 const SectionTitle = ({ children }) => (
   <h3 className={styles.sectionTitle}>{children}</h3>
@@ -21,6 +22,30 @@ const KVRow = ({ label, value }) => (
   <div className={styles.kvRow}>
     <div className={styles.label}>{label}:</div>
     <div className={styles.value}>{value ?? "-"}</div>
+  </div>
+);
+
+const LABELS_ADDON = ADMIN_INFO_LABELS;
+
+const PrintItem = ({ label, value }) => (
+  <div
+    style={{
+      marginBottom: 6,
+      display: "flex",
+    }}
+  >
+    <p
+      style={{
+        fontSize: 14,
+        fontWeight: 600,
+        margin: 0,
+        padding: 0,
+        marginRight: 10,
+      }}
+    >
+      {label}:
+    </p>
+    <p style={{ fontSize: 14, margin: 0, padding: 0 }}>{value || "-"}</p>
   </div>
 );
 
@@ -39,19 +64,27 @@ const PrintPreviewVer2NotDataDiagnose = ({
   isUse = false,
   imageList = [],
   printTemplate = {},
+  doctor = {},
 }) => {
-  const { examParts, templateServices, user, doctor, formVer2Names } =
-    useGlobalAuth();
+  const { examParts, templateServices, user, formVer2Names } = useGlobalAuth();
   const LABELS = ADMIN_INFO_LABELS;
   const printRef = useRef();
+  const { provinces, wards, setSelectedProvince } = useVietnamAddress();
+  useEffect(() => {
+    setSelectedProvince(formSnapshot?.benh_nhan_dia_chi_tinh_thanh_pho);
+  }, [formSnapshot?.benh_nhan_dia_chi_tinh_thanh_pho]);
+  const provinceName =
+    provinces.find(
+      (p) => p.code == formSnapshot?.benh_nhan_dia_chi_tinh_thanh_pho
+    )?.name || formSnapshot?.benh_nhan_dia_chi_tinh_thanh_pho;
 
+  const wardName =
+    wards.find((w) => w.code == formSnapshot?.benh_nhan_dia_chi_xa_phuong)
+      ?.name || formSnapshot?.benh_nhan_dia_chi_xa_phuong;
   return (
     <div>
       <div ref={printRef} className={styles.wrapper}>
         <Card bordered={false} className={styles.a4Page}>
-          <h2 className={styles.center}>
-            BỘ MẪU KẾT QUẢ CHẨN ĐOÁN HÌNH ẢNH D-RAD
-          </h2>
           {isUse && (
             <header
               style={{
@@ -81,7 +114,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
               </div>
 
               <div style={{ maxWidth: "350px", flex: 2 }}>
-                <p style={{ fontWeight: 600, color: "red", fontSize: 14 }}>
+                <p style={{ fontWeight: 600, color: "#2f6db8", fontSize: 14 }}>
                   {printTemplate?.clinic_name || "[Tên phòng khám]"}
                 </p>
                 <p style={{ fontSize: 13 }}>
@@ -106,183 +139,162 @@ const PrintPreviewVer2NotDataDiagnose = ({
               </div>
             </header>
           )}
-          <div
-            style={{
-              marginBottom: 6,
-              display: "flex",
-            }}
-          >
-            <p
-              style={{
-                fontSize: 14,
-                fontWeight: 600,
-                margin: 0,
-                padding: 0,
-                marginRight: 10,
-              }}
-            >
-              {"Phân hệ"}:
-            </p>
-            <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
-              {selectedExamPart?.name ||
-                templateServices?.find(
-                  (t) => t.id == formSnapshot.id_template_service
-                )?.name}
-            </p>
-          </div>
-          <div
-            style={{
-              marginBottom: 6,
-              display: "flex",
-            }}
-          >
-            <p
-              style={{
-                fontSize: 14,
-                fontWeight: 600,
-                margin: 0,
-                padding: 0,
-                marginRight: 10,
-              }}
-            >
-              {"Bộ phận"}:
-            </p>
-            <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
-              {selectedTemplateService?.name ||
-                examParts?.find((t) => t.id == formSnapshot.id_exam_part)?.name}
-            </p>
-          </div>
 
-          <div
+          <h1
             style={{
-              marginBottom: 6,
-              display: "flex",
+              textAlign: "center",
+              color: "#2f6db8",
+              margin: 0,
+              padding: 0,
             }}
           >
-            <p
-              style={{
-                fontSize: 14,
-                fontWeight: 600,
-                margin: 0,
-                padding: 0,
-                marginRight: 10,
-              }}
-            >
-              {"Ngôn ngữ"}:
-            </p>
-            <p style={{ fontSize: 14, margin: 0, padding: 0 }}>{"Vi"}</p>
-          </div>
-          <div
+            PHIẾU KẾT QUẢ
+          </h1>
+          <h3
             style={{
-              marginBottom: 6,
-              display: "flex",
+              textAlign: "center",
+              color: "#2f6db8",
+              margin: 0,
+              padding: 0,
             }}
-          >
-            <p
-              style={{
-                fontSize: 14,
-                fontWeight: 600,
-                margin: 0,
-                padding: 0,
-                marginRight: 10,
-              }}
-            >
-              {"Mã số định danh mẫu"}:
-            </p>
-            <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
-              {currentFormVer2Name?.code}
-            </p>
-          </div>
-          <div
-            style={{
-              marginBottom: 6,
-              display: "flex",
-            }}
-          >
-            <p
-              style={{
-                fontSize: 14,
-                fontWeight: 600,
-                margin: 0,
-                padding: 0,
-                marginRight: 10,
-              }}
-            >
-              {"Tên mẫu"}:
-            </p>
-            <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
-              {currentFormVer2Name?.name}
-            </p>
-          </div>
-          <div
-            style={{
-              marginBottom: 6,
-              display: "flex",
-            }}
-          >
-            <p
-              style={{
-                fontSize: 14,
-                fontWeight: 600,
-                margin: 0,
-                padding: 0,
-                marginRight: 10,
-              }}
-            >
-              {"Kết luận của mẫu"}:
-            </p>
-            <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
-              {formSnapshot?.ketLuan}
-            </p>
-          </div>
-          <div
-            style={{
-              marginBottom: 6,
-              display: "flex",
-            }}
-          >
-            <p
-              style={{
-                fontSize: 14,
-                fontWeight: 600,
-                margin: 0,
-                padding: 0,
-                marginRight: 10,
-              }}
-            >
-              {"Ngày thực hiện"}:
-            </p>
-            <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
-              {dayjs(initialSnap?.apiData?.createdAt || new Date()).format(
-                "DD-MM-YYYY"
-              )}
-            </p>
-          </div>
-          <div
-            style={{
-              marginBottom: 6,
-              display: "flex",
-            }}
-          >
-            <p
-              style={{
-                fontSize: 14,
-                fontWeight: 600,
-                margin: 0,
-                padding: 0,
-                marginRight: 10,
-              }}
-            >
-              {"Người thực hiện"}:
-            </p>
-            <p style={{ fontSize: 14, margin: 0, padding: 0 }}>
-              {initialSnap?.apiData?.id_doctor_doctor?.full_name ||
-                doctor?.full_name}
-            </p>
-          </div>
+          >{`PHÂN HỆ: ${
+            selectedExamPart?.name?.toUpperCase() ||
+            templateServices
+              ?.find((t) => t.id == formSnapshot.id_template_service)
+              ?.name?.toUpperCase()
+          }`}</h3>
+          {isUse && (
+            <>
+              <h3
+                style={{
+                  textAlign: "left",
+                  color: "#2f6db8",
+                  margin: 0,
+                  padding: 0,
+                  marginBottom: 20,
+                  marginTop: 20,
+                }}
+              >
+                THÔNG TIN BỆNH NHÂN
+              </h3>
 
-          <h2 className={styles.center}>QUY TRÌNH KĨ THUẬT</h2>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <PrintItem
+                  label={"HỌ VÀ TÊN"}
+                  value={formSnapshot?.benh_nhan_ho_ten}
+                />
+                <PrintItem
+                  label={"GIỚI TÍNH"}
+                  value={formSnapshot?.benh_nhan_gioi_tinh}
+                />
+                <PrintItem
+                  label={"TUỔI"}
+                  value={formSnapshot?.benh_nhan_tuoi}
+                />
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <PrintItem
+                  label={"QUỐC TỊCH"}
+                  value={formSnapshot?.benh_nhan_quoc_tich}
+                />
+                <PrintItem label={"TỈNH/THÀNH PHỐ"} value={provinceName} />
+                <PrintItem label={"XÃ/PHƯỜNG"} value={wardName} />
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <PrintItem
+                  label={"SỐ NHÀ"}
+                  value={formSnapshot?.benh_nhan_dia_chi_so_nha}
+                />
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <PrintItem
+                  label={"ĐIỆN THOẠI"}
+                  value={formSnapshot?.benh_nhan_dien_thoai}
+                />
+                <PrintItem
+                  label={"EMAIL"}
+                  value={formSnapshot?.benh_nhan_email}
+                />
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <PrintItem
+                  label={"MÃ SỐ PID"}
+                  value={formSnapshot?.benh_nhan_pid}
+                />
+                <PrintItem
+                  label={"MÃ SỐ SID"}
+                  value={formSnapshot?.benh_nhan_sid}
+                />
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <PrintItem
+                  label={"LÂM SÀNG"}
+                  value={formSnapshot?.benh_nhan_lam_sang}
+                />
+              </div>
+            </>
+          )}
+          <h3
+            style={{
+              textAlign: "left",
+              color: "#2f6db8",
+              margin: 0,
+              padding: 0,
+              marginBottom: 20,
+              marginTop: 20,
+            }}
+          >
+            QUY TRÌNH KĨ THUẬT
+          </h3>
 
+          <>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <PrintItem
+                label={"PHÂN HỆ"}
+                value={
+                  selectedExamPart?.name ||
+                  templateServices?.find(
+                    (t) => t.id == formSnapshot.id_template_service
+                  )?.name
+                }
+              />
+              <PrintItem
+                label={"BỘ PHẬN"}
+                value={
+                  selectedTemplateService?.name ||
+                  examParts?.find((t) => t.id == formSnapshot.id_exam_part)
+                    ?.name
+                }
+              />
+              <PrintItem label={"NGÔN NGỮ"} value={"Vi"} />
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <PrintItem
+                label={"TÊN MẪU"}
+                value={
+                  formSnapshot?.doctor_use_form_ver2_name ||
+                  currentFormVer2Name?.name
+                }
+              />
+              <PrintItem
+                label={"MÃ SỐ ĐỊNH DANH MẪU"}
+                value={currentFormVer2Name?.code}
+              />
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <PrintItem
+                label={"KẾT LUẬN CỦA MẪU"}
+                value={formSnapshot?.ket_luan || formSnapshot?.ket_luan_url}
+              />
+              <PrintItem
+                label={"NGÀY THỰC HIỆN"}
+                value={dayjs(
+                  initialSnap?.apiData?.createdAt || new Date()
+                ).format("DD-MM-YYYY")}
+              />
+            </div>
+          </>
           <div
             style={{
               display: "flex",
@@ -302,14 +314,14 @@ const PrintPreviewVer2NotDataDiagnose = ({
                 <a
                   href={
                     formSnapshot?.ImageLeftDescLink ||
-                    formSnapshot.image_form_ver2s.find((i) => i.kind == "left")
+                    formSnapshot.image_form_ver2s?.find((i) => i.kind == "left")
                       ?.link
                   }
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   {formSnapshot?.ImageLeftDesc ||
-                    formSnapshot.image_form_ver2s.find((i) => i.kind == "left")
+                    formSnapshot.image_form_ver2s?.find((i) => i.kind == "left")
                       ?.desc}
                 </a>
               </p>
@@ -347,26 +359,57 @@ const PrintPreviewVer2NotDataDiagnose = ({
           <TablesSnapshotPreview tablesSnapshot={tablesSnapshot} />
           <InnerHTMLFormEditor data={imageDescEditor} />
 
-          <h4>KẾT LUẬN, CHẨN ĐOÁN</h4>
+          <h3
+            style={{
+              textAlign: "left",
+              color: "#2f6db8",
+              margin: 0,
+              padding: 0,
+              marginBottom: 20,
+              marginTop: 20,
+            }}
+          >
+            KẾT LUẬN, CHẨN ĐOÁN
+          </h3>
           <p className={styles.paragraph}>{formSnapshot.ketQuaChanDoan}</p>
+          <PrintItem label={"PHÂN LOẠI IDC-10"} value={formSnapshot?.icd10} />
+          <PrintItem
+            label={"PHÂN ĐỘ, PHÂN LOẠI"}
+            value={formSnapshot?.phanDoLoai}
+          />
+          <PrintItem
+            label={"CHẨN ĐOÁN ĐẶC BIỆT"}
+            value={formSnapshot?.chanDoanPhanBiet}
+          />
 
-          <div className={styles.box}>
-            <p>
-              Phân loại IDC-10: <strong>{formSnapshot.icd10}</strong>
-            </p>
-            <p>
-              Phân độ, phân loại: <strong>{formSnapshot.phanDoLoai}</strong>
-            </p>
-            <p>
-              Chẩn đoán phân biệt
-              <strong>{formSnapshot.chanDoanPhanBiet}</strong>
-            </p>
-          </div>
-
-          <h4>KHUYẾN NGHỊ & TƯ VẤN</h4>
+          <h3
+            style={{
+              textAlign: "left",
+              color: "#2f6db8",
+              margin: 0,
+              padding: 0,
+              marginBottom: 20,
+              marginTop: 20,
+            }}
+          >
+            KHUYẾN NGHỊ & TƯ VẤN
+          </h3>
           <p className={styles.paragraph}>
             {formSnapshot.khuyenNghi || formSnapshot.khuyen_nghi}
           </p>
+          <h3
+            style={{
+              textAlign: "left",
+              color: "#2f6db8",
+              margin: 0,
+              padding: 0,
+              marginBottom: 20,
+              marginTop: 20,
+            }}
+          >
+            HÌNH ẢNH MÔ TẢ
+          </h3>
+
           {isUse && (
             <div
               style={{
@@ -395,17 +438,79 @@ const PrintPreviewVer2NotDataDiagnose = ({
                     }}
                   />
                   <p style={{ textAlign: "center" }}>
-                    <a
-                      href={item.rawUrl || item.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {item.caption || "Ảnh mô tả"}
-                    </a>
+                    {item.caption || "Ảnh mô tả"}
                   </p>
                 </section>
               ))}
             </div>
+          )}
+          {isUse && (
+            <>
+              <h3
+                style={{
+                  textAlign: "left",
+                  color: "#2f6db8",
+                  margin: 0,
+                  padding: 0,
+                  marginBottom: 20,
+                  marginTop: 20,
+                }}
+              >
+                BÁC SĨ THỰC HIỆN
+              </h3>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <section>
+                  <div
+                    style={{ display: "flex", marginBottom: 6, fontSize: 14 }}
+                  >
+                    <div style={{ width: 150 }}>
+                      <strong>{LABELS_ADDON.full_name}:</strong>
+                    </div>
+                    {doctor.full_name}
+                  </div>
+                  <div
+                    style={{ display: "flex", marginBottom: 6, fontSize: 14 }}
+                  >
+                    <div style={{ width: 150 }}>
+                      <strong>{LABELS_ADDON.phoneNumber}:</strong>
+                    </div>
+                    {doctor.phone_number}
+                  </div>
+                  <div
+                    style={{ display: "flex", marginBottom: 6, fontSize: 14 }}
+                  >
+                    <div style={{ width: 150 }}>
+                      <strong>{LABELS_ADDON.time}:</strong>
+                    </div>
+                    {dayjs().format("DD-MM-YYYY HH:mm")}
+                  </div>
+                  <div
+                    style={{ display: "flex", marginBottom: 6, fontSize: 14 }}
+                  >
+                    <div style={{ width: 150 }}>
+                      <strong>{LABELS_ADDON.email}:</strong>
+                    </div>
+                    {doctor.id_user_user.email}
+                  </div>
+                </section>
+                <section>
+                  <img
+                    src={doctor?.signature_url}
+                    alt=""
+                    width={100}
+                    height={100}
+                  />
+                </section>
+                <section>
+                  <img
+                    src={doctor?.avatar_url}
+                    alt=""
+                    width={100}
+                    height={100}
+                  />
+                </section>
+              </div>
+            </>
           )}
         </Card>
       </div>

@@ -156,7 +156,6 @@ export default function DFormVer2({
         if (!apiData) throw new Error("Không đọc được dữ liệu form");
 
         const formValues = mapApiToForm(apiData);
-        const tables = normalizeTablesFromApi(apiData?.table_form_ver2s);
         const imageDesc = apiData?.imageDescEditor
           ? JSON.parse(apiData.imageDescEditor)
           : "";
@@ -168,12 +167,11 @@ export default function DFormVer2({
         console.log("formValues", formValues);
         // set form state hiển thị
         form.setFieldsValue(formValues);
-        setTablesData(tables);
         setImageDescEditor(imageDesc);
         setImageLeftUrl(left);
         setImageRightUrl(right);
 
-        setInitialSnap({ formValues, tables, imageDesc, left, right, apiData });
+        setInitialSnap({ formValues, imageDesc, left, right, apiData });
       } catch (e) {
         toast.error("Không tải được dữ liệu. Vui lòng thử lại.");
       } finally {

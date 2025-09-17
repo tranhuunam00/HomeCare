@@ -460,23 +460,6 @@ export default function FormVer2List() {
             />
           </Col>
 
-          <Col xs={12} md={8} lg={5}>
-            <Text>Bộ phận</Text>
-            <Select
-              allowClear
-              style={{ width: "100%" }}
-              placeholder="Chọn bộ phận thăm khám"
-              value={uiFilters.id_exam_part}
-              onChange={(v) => setUiFilters((s) => ({ ...s, id_exam_part: v }))}
-            >
-              {examParts.map((s) => (
-                <Option key={s.id} value={s.id}>
-                  {s.name}
-                </Option>
-              ))}
-            </Select>
-          </Col>
-
           <Col xs={12} md={8} lg={6}>
             <Text>Dịch vụ</Text>
             <Select
@@ -485,7 +468,11 @@ export default function FormVer2List() {
               placeholder="Chọn dịch vụ mẫu"
               value={uiFilters.id_template_service}
               onChange={(v) =>
-                setUiFilters((s) => ({ ...s, id_template_service: v }))
+                setUiFilters((s) => ({
+                  ...s,
+                  id_template_service: v,
+                  id_exam_part: undefined,
+                }))
               }
             >
               {templateServices.map((t) => (
@@ -493,6 +480,30 @@ export default function FormVer2List() {
                   {t.name}
                 </Option>
               ))}
+            </Select>
+          </Col>
+
+          <Col xs={12} md={8} lg={5}>
+            <Text>Bộ phận</Text>
+            <Select
+              allowClear
+              style={{ width: "100%" }}
+              placeholder="Chọn bộ phận thăm khám"
+              value={uiFilters.id_exam_part}
+              onChange={(v) => setUiFilters((s) => ({ ...s, id_exam_part: v }))}
+              disabled={!uiFilters.id_template_service} // disable khi chưa chọn phân hệ
+            >
+              {examParts
+                .filter(
+                  (s) =>
+                    String(s.id_template_service) ===
+                    String(uiFilters.id_template_service)
+                ) // lọc theo phân hệ
+                .map((s) => (
+                  <Option key={s.id} value={s.id}>
+                    {s.name}
+                  </Option>
+                ))}
             </Select>
           </Col>
 

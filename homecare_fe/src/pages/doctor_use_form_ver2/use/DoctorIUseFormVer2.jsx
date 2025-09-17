@@ -103,6 +103,15 @@ export default function DoctorUseDFormVer2({
 
         const apiData = res?.data?.data?.data;
         if (!apiData) throw new Error("Không đọc được dữ liệu");
+        // fill ảnh
+
+        const left = apiData.image_doctor_use_form_ver2s?.find(
+          (x) => x.kind === "left"
+        );
+        const right = apiData.image_doctor_use_form_ver2s?.find(
+          (x) => x.kind === "right"
+        );
+
         // Map API -> form values
         const formValues = {
           doctor_use_form_ver2_name: apiData.ten_mau,
@@ -134,6 +143,12 @@ export default function DoctorUseDFormVer2({
           benh_nhan_dia_chi_xa_phuong: apiData.benh_nhan_dia_chi_xa_phuong,
           benh_nhan_dia_chi_tinh_thanh_pho:
             apiData.benh_nhan_dia_chi_tinh_thanh_pho,
+          ImageLeftDesc: left?.desc || "",
+          ImageLeftDescLink: left?.link || "",
+          ImageRightDesc: right?.desc || "",
+          ImageRightDescLink: right?.link || "",
+          ImageRightUrl: right?.url || "",
+          ImageLeftUrl: left?.url || "",
         };
         setSelectedProvince(apiData.benh_nhan_dia_chi_tinh_thanh_pho);
         const descImages =
@@ -150,23 +165,15 @@ export default function DoctorUseDFormVer2({
         // fill vào form
         form.setFieldsValue(formValues);
 
-        // fill ảnh
-        const left = apiData.image_doctor_use_form_ver2s?.find(
-          (x) => x.kind === "left"
-        )?.url;
-        const right = apiData.image_doctor_use_form_ver2s?.find(
-          (x) => x.kind === "right"
-        )?.url;
-
-        setImageLeftUrl(left || "");
-        setImageRightUrl(right || "");
+        setImageLeftUrl(left.url || "");
+        setImageRightUrl(right.url || "");
         setImageDescEditor(apiData.imageDescEditor || "");
 
         setInitialSnap({
           formValues,
           apiData,
-          left,
-          right,
+          left: left.url,
+          right: right.url,
           imageDesc: apiData.imageDescEditor,
           descImages,
         });
@@ -276,7 +283,6 @@ export default function DoctorUseDFormVer2({
     );
   }, [examParts, selectedTemplateServiceId]);
 
-  // ====== Fetch when edit ======
   useEffect(() => {
     if (!idFormVer2) return;
     (async () => {
@@ -937,6 +943,9 @@ export default function DoctorUseDFormVer2({
                 KEY_ACTION_BUTTON.AI,
                 KEY_ACTION_BUTTON.exit,
               ]}
+              onExit={() => {
+                navigate(`/home/doctor-use-form-v2`);
+              }}
               onAction={(key) => {
                 pendingAction.current = key;
                 form.submit();
@@ -1018,6 +1027,7 @@ export default function DoctorUseDFormVer2({
           editId={idEdit}
           imageList={imageList}
           isUse={isUse}
+          doctor={initialSnap?.apiData?.id_doctor_doctor || doctor}
           printTemplate={initialSnap.apiData?.id_print_template_print_template}
         />
       </Modal>

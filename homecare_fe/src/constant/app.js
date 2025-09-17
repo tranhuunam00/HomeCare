@@ -96,7 +96,7 @@ export const ADMIN_INFO_LABELS = {
   district: "Quận/Huyện",
   ward: "Xã/Phường",
   address: "Số nhà",
-  phoneNumber: "Số điện thoại",
+  phoneNumber: "Điện thoại",
   email: "Email",
   symptoms: "Triệu chứng",
   progress: "Diễn biến",
@@ -106,7 +106,7 @@ export const ADMIN_INFO_LABELS = {
   section_title: "THÔNG TIN HÀNH CHÍNH",
   image_section: "HÌNH ẢNH MINH HỌA",
   doctor: "BÁC SĨ THỰC HIỆN",
-  time: "Thời gian",
+  time: "Thời gian hoàn thành",
   digital_signature: "Chữ ký số",
   Medical_test_result: "PHIẾU KẾT QUẢ",
 };

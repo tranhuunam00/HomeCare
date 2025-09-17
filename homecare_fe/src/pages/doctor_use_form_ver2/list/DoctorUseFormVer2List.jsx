@@ -24,6 +24,7 @@ import {
   ReloadOutlined,
   SettingOutlined,
   EyeOutlined,
+  CheckOutlined,
 } from "@ant-design/icons";
 import API_CALL from "../../../services/axiosClient";
 import { useNavigate } from "react-router-dom";
@@ -278,6 +279,17 @@ export default function DoctorUseFormVer2List() {
           </Dropdown>
           <Tooltip title="Làm mới">
             <Button icon={<ReloadOutlined />} onClick={() => fetchList()} />
+          </Tooltip>
+          <Tooltip title="Sử dụng">
+            <Button
+              type="primary"
+              icon={<CheckOutlined />}
+              onClick={() => {
+                navigate(`/home/form-v2/use`);
+              }}
+            >
+              Sử dụng
+            </Button>
           </Tooltip>
         </Space>
       </div>

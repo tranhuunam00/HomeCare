@@ -37,6 +37,7 @@ export default function FormActionBar({
   onEdit,
   isEdit = false,
   editId,
+  onExit = undefined,
 }) {
   const navigate = useNavigate();
   const emptyF = () => {};
@@ -99,7 +100,11 @@ export default function FormActionBar({
       label: "EXIT",
       icon: <LogoutOutlined />,
       onClick: () => {
-        navigate(-1);
+        if (onExit) {
+          onExit();
+        } else {
+          navigate(-1);
+        }
       },
     },
   ];
