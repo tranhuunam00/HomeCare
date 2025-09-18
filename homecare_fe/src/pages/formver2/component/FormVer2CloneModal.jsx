@@ -14,14 +14,18 @@ export const FormVer2CloneModal = ({
   const { examParts, templateServices, formVer2Names } = useGlobalAuth();
 
   // state cho selections
-  const [selectedService, setSelectedService] = useState(null);
-  const [selectedPart, setSelectedPart] = useState(null);
+  const [selectedService, setSelectedService] = useState(
+    cloneRecord?.id_template_service
+  );
+  const [selectedPart, setSelectedPart] = useState(cloneRecord?.id_exam_part);
   const [filteredFormVer2Names, setFilteredFormVer2Names] = useState([]);
 
   useEffect(() => {
     if (cloneRecord) {
       form.setFieldsValue({
         id_clone: cloneRecord?.id,
+        id_template_service: cloneRecord?.id_template_service,
+        id_exam_part: cloneRecord?.id_exam_part,
       });
     }
   }, [cloneRecord, form]);
@@ -45,7 +49,10 @@ export const FormVer2CloneModal = ({
           id_clone: cloneRecord?.id,
         };
         const res = await API_CALL.post("/form-ver2/clone", payload);
-        onSuccess();
+
+        console.log("res", res);
+
+        onSuccess(res.data.data.id);
         onCancel();
       } catch (err) {
         console.error(err);

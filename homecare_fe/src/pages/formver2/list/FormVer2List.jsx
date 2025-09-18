@@ -40,6 +40,8 @@ const { Title, Text } = Typography;
 const { Option } = Select;
 const { RangePicker } = DatePicker;
 
+const STORAGE_KEY_PAGE_SIZE = "formVer2_pageSize";
+
 /* ================= Helpers ================= */
 const buildParams = (f) => {
   const params = {
@@ -123,6 +125,14 @@ export default function FormVer2List() {
 
   const [visibleKeys, setVisibleKeys] = useState([]);
 
+  useEffect(() => {
+    const savedPageSize = localStorage.getItem(STORAGE_KEY_PAGE_SIZE);
+    if (savedPageSize) {
+      setFilters((prev) => ({ ...prev, limit: Number(savedPageSize) }));
+      setUiFilters((prev) => ({ ...prev, limit: Number(savedPageSize) }));
+    }
+  }, []);
+
   /* ======= Helpers ======= */
   const getExamPartName = (id) =>
     examParts.find((e) => String(e.id) === String(id))?.name || id;
@@ -201,27 +211,12 @@ export default function FormVer2List() {
           (filters.page - 1) * filters.limit + index + 1,
       },
       { title: "ID", dataIndex: "id", key: "id", align: "center", width: 70 },
-      {
-        title: "Kết Luận",
-        dataIndex: "ket_luan",
-        key: "ket_luan",
-        align: "center",
-        width: 150,
-      },
-
-      {
-        title: "Icd10",
-        dataIndex: "icd10",
-        key: "icd10",
-        align: "center",
-        width: 100,
-      },
 
       {
         title: "Code",
         key: "code",
         dataIndex: ["id_formver2_name_form_ver2_name", "code"],
-        width: 140,
+        width: 160,
         ellipsis: true,
         render: (_, record) =>
           getLinkedCode(record) || <Text type="secondary">—</Text>,
@@ -252,6 +247,22 @@ export default function FormVer2List() {
         align: "center",
         width: 200,
         render: (id) => getTemplateServiceName(id),
+      },
+
+      {
+        title: "Icd10",
+        dataIndex: "icd10",
+        key: "icd10",
+        align: "center",
+        width: 150,
+      },
+
+      {
+        title: "Kết Luận",
+        dataIndex: "ket_luan",
+        key: "ket_luan",
+        align: "center",
+        width: 260,
       },
       {
         title: "Ngôn ngữ",
@@ -605,9 +616,10 @@ export default function FormVer2List() {
                 <Select
                   style={{ width: 80 }}
                   value={filters.limit}
-                  onChange={(limit) =>
-                    setFilters((s) => ({ ...s, page: 1, limit }))
-                  }
+                  onChange={(limit) => {
+                    localStorage.setItem(STORAGE_KEY_PAGE_SIZE, limit);
+                    setFilters((s) => ({ ...s, page: 1, limit }));
+                  }}
                   options={[10, 20, 50, 100].map((n) => ({
                     value: n,
                     label: n,
@@ -628,7 +640,9 @@ export default function FormVer2List() {
           open={cloneOpen}
           onCancel={() => setCloneOpen(false)}
           cloneRecord={cloneRecord}
-          onSuccess={fetchList} // ✅ reload list sau khi clone
+          onSuccess={(id) => {
+            navigate("/home/form-v2/detail/" + id);
+          }} // ✅ reload list sau khi clone
         />
       )}
     </div>

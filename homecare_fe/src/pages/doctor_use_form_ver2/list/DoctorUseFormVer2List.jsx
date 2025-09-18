@@ -74,6 +74,8 @@ const STATUS = {
   4: { text: "Đã xác nhận", color: "green" },
 };
 
+const STORAGE_KEY_PAGE_SIZE = "doctorUseFormVer2_pageSize";
+
 export default function DoctorUseFormVer2List() {
   const navigate = useNavigate();
   const { examParts = [], templateServices = [] } = useGlobalAuth();
@@ -90,8 +92,16 @@ export default function DoctorUseFormVer2List() {
   const [visibleKeys, setVisibleKeys] = useState([]);
 
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    setVisibleKeys(saved ? JSON.parse(saved) : defaultVisibleKeys);
+    const savedColumns = localStorage.getItem(STORAGE_KEY);
+    setVisibleKeys(
+      savedColumns ? JSON.parse(savedColumns) : defaultVisibleKeys
+    );
+
+    const savedPageSize = localStorage.getItem(STORAGE_KEY_PAGE_SIZE);
+    if (savedPageSize) {
+      setFilters((prev) => ({ ...prev, limit: Number(savedPageSize) }));
+      setFiltersDraft((prev) => ({ ...prev, limit: Number(savedPageSize) }));
+    }
   }, []);
 
   const fetchList = async () => {
@@ -455,8 +465,10 @@ export default function DoctorUseFormVer2List() {
             pageSize: filters.limit,
             total,
             showSizeChanger: true,
-            onChange: (page, limit) =>
-              setFilters((s) => ({ ...s, page, limit })),
+            onChange: (page, limit) => {
+              localStorage.setItem(STORAGE_KEY_PAGE_SIZE, limit);
+              setFilters((s) => ({ ...s, page, limit }));
+            },
           }}
         />
       </Spin>
