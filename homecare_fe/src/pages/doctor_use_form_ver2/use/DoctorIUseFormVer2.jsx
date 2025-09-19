@@ -768,13 +768,13 @@ export default function DoctorUseDFormVer2({
             </Select>
           </Form.Item>
 
-          <Row gutter={16}>
+          {/* <Row gutter={16}>
             <Col xs={24} md={24}>
               <Form.Item label="Kết luận của mẫu" name="ket_luan">
                 <Input disabled={!isEdit} placeholder="VD: U máu gan" />
               </Form.Item>
             </Col>
-          </Row>
+          </Row> */}
 
           {/* Thông tin hệ thống */}
           {!isUse && (

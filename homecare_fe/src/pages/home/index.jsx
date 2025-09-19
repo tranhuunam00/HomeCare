@@ -39,7 +39,7 @@ const Sidebar = ({ collapsed }) => {
             ]
           : [],
     },
-    {
+     user?.id_role === USER_ROLE.ADMIN &&{
       key: "Mẫu kết quả",
       icon: (
         <Avatar
@@ -53,8 +53,6 @@ const Sidebar = ({ collapsed }) => {
           key: "templates",
           label: "Danh sách",
         },
-        { key: "/tirads_nn", label: "D-Tirads" },
-        { key: "/recist_nn", label: "D-Recist" },
       ],
     },
     {
@@ -86,6 +84,35 @@ const Sidebar = ({ collapsed }) => {
       ],
     },
 
+    {
+      key: "Ứng dụng, tiện ích",
+      icon: (
+        <Avatar
+          src={
+            "https://static.vecteezy.com/system/resources/previews/023/014/146/non_2x/questionnaire-icon-in-modern-and-trendy-style-premium-vector.jpg"
+          }
+          size={40}
+        />
+      ),
+      label: "Ứng dụng, tiện ích",
+      children: [
+        { key: "/tirads_nn", label: "Phần mềm D-TIRADS" },
+        { key: "/recist_nn", label: "Phần mềm D-RECIST" },
+        { key: "/tirad", label: "Phần mềm D-TIRADS-2" },
+        { key: "/lungrad", label: "Phần mềm D-LUNG" },
+        { key: "/birad", label: "Phần mềm D-BIRADS" },
+        { key: "/boneage", label: "Phần mềm D-BONE" },
+        { key: "/dipss", label: "Phần mềm D-IPSS" },
+        { key: "/D-COR", label: "Phần mềm D-COR" },
+        { key: "/D-CPS", label: "Phần mềm D-CPS" },
+        { key: "/D-BALTHAZA", label: "Phần mềm D-CTSI" },
+        { key: "/D-VOTHAN", label: "Phần mềm D-KIDNEY" },
+        { key: "/D-VOGAN", label: "Phần mềm D-LIVER" },
+        { key: "/D-BOSNIAK", label: "Phần mềm D-Bosniak" },
+        { key: "/D-LIRADS", label: "Phần mềm D-LIRADS" },
+        { key: "/D-ORADS", label: "Phần mềm D-ORADS" },
+      ],
+    },
     {
       key: "Mẫu in kết quả",
       icon: (

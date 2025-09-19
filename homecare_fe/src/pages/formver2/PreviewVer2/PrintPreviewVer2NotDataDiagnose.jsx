@@ -276,17 +276,17 @@ const PrintPreviewVer2NotDataDiagnose = ({
                   currentFormVer2Name?.name
                 }
               />
-              <PrintItem
-                label={"MÃ SỐ ĐỊNH DANH MẪU"}
-                value={currentFormVer2Name?.code}
-              />
             </div>
 
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <PrintItem
+                label={"MÃ SỐ ĐỊNH DANH MẪU"}
+                value={currentFormVer2Name?.code}
+              />
+              {/* <PrintItem
                 label={"KẾT LUẬN CỦA MẪU"}
                 value={formSnapshot?.ket_luan || formSnapshot?.ket_luan_url}
-              />
+              /> */}
               <PrintItem
                 label={"NGÀY THỰC HIỆN"}
                 value={dayjs(
@@ -492,7 +492,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
                     <div style={{ width: 150 }}>
                       <strong>{LABELS_ADDON.email}:</strong>
                     </div>
-                    {doctor.id_user_user.email}
+                    {doctor?.id_user_user?.email}
                   </div>
                 </section>
                 <section>
