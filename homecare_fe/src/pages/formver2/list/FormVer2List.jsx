@@ -225,7 +225,7 @@ export default function FormVer2List() {
         title: "Tên mẫu",
         dataIndex: "ten_mau",
         key: "ten_mau",
-        width: 290,
+        width: 350,
         ellipsis: true,
         render: (_, record) => {
           const name = getLinkedName(record);
@@ -236,15 +236,16 @@ export default function FormVer2List() {
         title: "Bộ phận thăm khám",
         dataIndex: "id_exam_part",
         key: "id_exam_part",
-        align: "center",
+        align: "left",
         width: 150,
+
         render: (id) => getExamPartName(id),
       },
       {
         title: "Dịch vụ",
         dataIndex: "id_template_service",
         key: "id_template_service",
-        align: "center",
+        align: "left",
         width: 200,
         render: (id) => getTemplateServiceName(id),
       },
@@ -261,7 +262,7 @@ export default function FormVer2List() {
         title: "Kết Luận",
         dataIndex: "ket_luan",
         key: "ket_luan",
-        align: "center",
+        align: "left",
         width: 260,
       },
       {
@@ -276,21 +277,21 @@ export default function FormVer2List() {
         title: "Ngày thực hiện",
         dataIndex: "ngay_thuc_hien",
         key: "ngay_thuc_hien",
-        width: 140,
-        align: "center",
+        width: 180,
+        align: "left",
       },
       {
         title: "Người thực hiện",
         dataIndex: "doctor_name",
         key: "doctor_name",
-        width: 140,
-        align: "center",
+        width: 200,
+        align: "left",
         render: (_, record) => record.id_doctor_doctor?.full_name,
       },
       {
         title: "Hành động",
         key: "actions",
-        width: 220,
+        width: 320,
         align: "center",
         render: (_, record) => (
           <Space>

@@ -218,7 +218,7 @@ export default function DoctorUseFormVer2List() {
       {
         title: "Hành động",
         key: "actions",
-        width: 120,
+        width: 220,
         align: "center",
         render: (_, record) => (
           <Space>
