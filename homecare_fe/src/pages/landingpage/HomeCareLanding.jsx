@@ -35,11 +35,8 @@ const HomeCareLanding = () => {
 
   const productsItem = [
     {
-      label: "D-RADS",
-      onClick: () =>
-        isLoggedIn
-          ? navigate("/home/templates")
-          : toast.warning("Vui lòng đăng nhập để xem chi tiết!"),
+      label: "SỬ DỤNG MẪU KẾT QUẢ",
+      onClick: () => navigate("/home/form-v2/use"),
     },
     {
       label: "Phần mềm D-Tirads".toUpperCase(),
@@ -156,14 +153,14 @@ const HomeCareLanding = () => {
                 key="home"
                 onClick={() => (window.location.href = "https://home-care.vn/")}
               >
-                HOME
+                TRANG CHỦ
               </Menu.Item>
 
-              <DropdownNav title="SẢN PHẨM" items={productsItem} />
-              <DropdownNav title="TRẢI NGHIỆM" items={trialItem} />
+              <DropdownNav title="ĐỌC KẾT QUẢ" items={productsItem} />
+              <DropdownNav title="ỨNG DỤNG, TIỆN ÍCH" items={trialItem} />
 
               <Menu.Item key="contact" onClick={() => navigate("/contact")}>
-                LIÊN HỆ
+                HỖ TRỢ KỸ THUẬT
               </Menu.Item>
             </Menu>
           </div>
@@ -223,9 +220,9 @@ const HomeCareLanding = () => {
           </Button>
         </div>
       </section>
-      <h2 style={{ textAlign: "center", marginTop: 50 }}>
+      {/* <h2 style={{ textAlign: "center", marginTop: 50 }}>
         Giá trị của các phần mềm D-RADS
-      </h2>
+      </h2> */}
 
       <section className={styles["homecare__agency"]}>
         <div className={styles["homecare__agency-container"]}>
@@ -269,7 +266,7 @@ const HomeCareLanding = () => {
           </div>
         </div>
       </section>
-
+      {/* 
       <section ref={aboutRef} className={styles["homecare__about"]}>
         <h2 className={styles["homecare__about-title"]}>Giới thiệu chung</h2>
         <p className={styles["homecare__about-text"]}>
@@ -370,9 +367,9 @@ const HomeCareLanding = () => {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
-      <h2
+      {/* <h2
         className={styles["homecare__about-title"]}
         style={{ textAlign: "center" }}
       >
@@ -482,7 +479,7 @@ const HomeCareLanding = () => {
         >
           Xem Thêm
         </Button>
-      </div>
+      </div> */}
 
       {/* Footer Subscribe Section */}
       <section className={styles["homecare__subscribe"]}>

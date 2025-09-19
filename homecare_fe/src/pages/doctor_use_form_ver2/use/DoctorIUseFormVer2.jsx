@@ -382,7 +382,7 @@ export default function DoctorUseDFormVer2({
   return (
     <div style={{ maxWidth: 980, margin: "0 auto", padding: 0 }}>
       <Title level={3} style={{ textAlign: "center", marginBottom: 24 }}>
-        BỘ MẪU KẾT QUẢ D-FORM
+        ĐỌC KẾT QUẢ CHẨN ĐOÁN HÌNH ẢNH – THĂM DÒ CHỨC NĂNG
       </Title>
 
       {loading ? (
@@ -420,7 +420,7 @@ export default function DoctorUseDFormVer2({
         >
           {/* Hàng 1 */}
           <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
-            THÔNG TIN BỆNH NHÂN
+            THÔNG TIN HÀNH CHÍNH
           </Title>
 
           {isUse && (
@@ -493,7 +493,7 @@ export default function DoctorUseDFormVer2({
               <Row gutter={16}>
                 <Col xs={24} md={12}>
                   <Form.Item
-                    label="PID (Mã định danh)"
+                    label="Mã số bệnh nhân PID"
                     name="benh_nhan_pid"
                     required
                   >
@@ -794,7 +794,7 @@ export default function DoctorUseDFormVer2({
 
           {/* Ảnh minh hoạ */}
           <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
-            NỘI DUNG THỰC HIỆN
+            QUY TRÌNH KỸ THUẬT
           </Title>
 
           <Row gutter={[16, 16]} style={{ justifyContent: "space-between" }}>
@@ -824,10 +824,6 @@ export default function DoctorUseDFormVer2({
             </Col>
           </Row>
 
-          {/* Quy trình */}
-          <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
-            QUY TRÌNH KỸ THUẬT
-          </Title>
           <Form.Item name="quy_trinh_url" label="" tooltip="Short text">
             <TextArea
               disabled={!isEdit}

@@ -175,7 +175,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
                   marginTop: 20,
                 }}
               >
-                THÔNG TIN BỆNH NHÂN
+                THÔNG TIN HÀNH CHÍNH
               </h3>
 
               <div style={{ display: "flex", justifyContent: "space-between" }}>

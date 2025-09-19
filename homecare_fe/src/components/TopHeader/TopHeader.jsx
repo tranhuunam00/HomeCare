@@ -73,14 +73,17 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
 
   return (
     <div className={styles.topHeader}>
-      <div className={styles.topHeader__left} style={{ cursor: "pointer" }}>
+      <div
+        onClick={() => {
+          window.open(currentEndpont);
+        }}
+        className={styles.topHeader__left}
+        style={{ cursor: "pointer" }}
+      >
         <img
           src="/logo_home_care.jpg"
           className={styles.topHeader__logo}
           alt="logo"
-          onClick={() => {
-            window.open(currentEndpont);
-          }}
         />
         {!collapsed && (
           <span className={styles.topHeader__title}>HOMECARE</span>

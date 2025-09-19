@@ -628,7 +628,7 @@ const PrintPreviewVer2 = ({
           </p>
         </div>
 
-        <h2 className={styles.center}>NỘI DUNG THỰC HIỆN</h2>
+        <h2 className={styles.center}>QUY TRÌNH KỸ THUẬT</h2>
 
         <div
           style={{
@@ -675,7 +675,6 @@ const PrintPreviewVer2 = ({
           </section>
         </div>
 
-        <h4>QUY TRÌNH KỸ THUẬT</h4>
         <p className={styles.paragraph}>{formSnapshot.quyTrinh}</p>
 
         <h4>MÔ TẢ HÌNH ẢNH</h4>

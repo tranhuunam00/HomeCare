@@ -440,7 +440,7 @@ export default function DFormVer2({
 
           {/* Ảnh minh hoạ */}
           <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
-            NỘI DUNG THỰC HIỆN
+            QUY TRÌNH KỸ THUẬT
           </Title>
 
           <Row gutter={[16, 16]} style={{ justifyContent: "space-between" }}>
@@ -470,10 +470,6 @@ export default function DFormVer2({
             </Col>
           </Row>
 
-          {/* Quy trình */}
-          <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
-            QUY TRÌNH KỸ THUẬT
-          </Title>
           <Form.Item name="quy_trinh_url" label="" tooltip="Short text">
             <TextArea
               disabled={!isEdit}

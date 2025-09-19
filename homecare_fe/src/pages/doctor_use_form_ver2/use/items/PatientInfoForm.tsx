@@ -69,7 +69,7 @@ export default function PatientInfoForm({
 
       <Row gutter={16}>
         <Col xs={24} md={12}>
-          <Form.Item label="PID (Mã định danh)" name="benh_nhan_pid">
+          <Form.Item label="Mã số bệnh nhân PID" name="benh_nhan_pid">
             <Input placeholder="VD: 123456789" />
           </Form.Item>
         </Col>

@@ -168,7 +168,7 @@ export default function ImageBlock({
         <Col span={24}>
           <Form.Item
             name={descName}
-            label="Mô tả"
+            label=""
             rules={[{ required: true, message: "Nhập mô tả ngắn" }]}
           >
             <Input disabled={disabled} placeholder="Nhập mô tả ảnh" />
@@ -180,7 +180,7 @@ export default function ImageBlock({
         <Col span={24}>
           <Form.Item
             name={linkName}
-            label="Link"
+            label=""
             tooltip="Nhập URL (vd: https://...)"
             required={true}
             rules={[
