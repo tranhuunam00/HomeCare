@@ -5,7 +5,7 @@ export const products = [
     subName: "Mẫu kết qủa thông minh",
     category: "CĐHA",
     price: 0,
-    image: "/banner.png",
+    image: "/banner.jpg",
     subImages: [
       "https://ktmt.vnmediacdn.com/images/2021/09/03/7-1630640575-khau-pha.jpg",
       "https://ktmt.vnmediacdn.com/images/2021/09/03/7-1630640575-khau-pha.jpg",
@@ -24,7 +24,7 @@ export const products = [
     subName: "Đánh năng lực chuyên môn",
     category: "CĐHA",
     price: 0,
-    image: "/banner.png",
+    image: "/banner.jpg",
     subImages: [
       "https://ktmt.vnmediacdn.com/images/2021/09/03/7-1630640575-khau-pha.jpg",
       "https://ktmt.vnmediacdn.com/images/2021/09/03/7-1630640575-khau-pha.jpg",
@@ -43,7 +43,7 @@ export const products = [
     subName: "Đánh giá ung thư sau điều trị",
     category: "MSCT, MRI",
     price: 0,
-    image: "/banner.png",
+    image: "/banner.jpg",
     subImages: [
       "https://ktmt.vnmediacdn.com/images/2021/09/03/7-1630640575-khau-pha.jpg",
       "https://ktmt.vnmediacdn.com/images/2021/09/03/7-1630640575-khau-pha.jpg",
@@ -62,7 +62,7 @@ export const products = [
     subName: "Sàng lọc ung thư tuyến giáp",
     category: "Siêu âm",
     price: 0,
-    image: "/banner.png",
+    image: "/banner.jpg",
     subImages: [
       "https://ktmt.vnmediacdn.com/images/2021/09/03/7-1630640575-khau-pha.jpg",
       "https://ktmt.vnmediacdn.com/images/2021/09/03/7-1630640575-khau-pha.jpg",
@@ -81,7 +81,7 @@ export const products = [
     subName: "Sàng lọc ung thư vú",
     category: "Siêu âm",
     price: 0,
-    image: "/banner.png",
+    image: "/banner.jpg",
     subImages: [
       "https://ktmt.vnmediacdn.com/images/2021/09/03/7-1630640575-khau-pha.jpg",
       "https://ktmt.vnmediacdn.com/images/2021/09/03/7-1630640575-khau-pha.jpg",

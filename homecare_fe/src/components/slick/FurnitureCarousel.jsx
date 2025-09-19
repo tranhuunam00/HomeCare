@@ -31,7 +31,7 @@ const items = [
   {
     title: "Liên kết đa chuyên khoa (multidisciplinary value)",
     desc: "Kết quả hình ảnh có giá trị trong quyết định điều trị của bác sĩ nội khoa, ngoại khoa, ung bướu, cấp cứu,...Là cơ sở quan trọng cho hội chẩn đa chuyên ngành – một xu hướng đang phổ biến trong y học hiện đại",
-    img: "/banner.png",
+    img: "/banner.jpg",
   },
   {
     title:

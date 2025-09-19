@@ -169,7 +169,7 @@
   }
 
   &__hero {
-    background: url("/banner.png") center/cover no-repeat;
+    background: url("/banner.jpg") center/cover no-repeat;
     height: 90vh;
     display: flex;
     align-items: center;
@@ -201,6 +201,7 @@
     font-size: 28px;
     font-weight: 500;
     margin: 20px 0;
+    color: #fff;
   }
 
   &__cta {

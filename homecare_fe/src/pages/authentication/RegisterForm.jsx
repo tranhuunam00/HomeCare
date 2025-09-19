@@ -53,7 +53,7 @@ const RegisterPage = () => {
       {/* Bên trái: Hình ảnh giới thiệu */}
       <div
         style={{
-          backgroundImage: "url('/banner.png')",
+          backgroundImage: "url('/banner.jpg')",
           backgroundSize: "cover",
           backgroundPosition: "center",
           width: 500,
