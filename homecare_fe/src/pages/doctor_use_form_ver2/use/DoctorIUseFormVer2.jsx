@@ -119,7 +119,7 @@ export default function DoctorUseDFormVer2({
           id_exam_part: apiData.id_exam_part,
           language: apiData.language,
           id_formver2_name: apiData.id_formver2_form_ver2?.id_formver2_name,
-          id_print_template: apiData.id_print_template,
+          id_print_template: +apiData.id_print_template,
           ket_luan: apiData.ket_luan,
           ket_qua_chan_doan: apiData.ket_qua_chan_doan,
           icd10: apiData.icd10,
