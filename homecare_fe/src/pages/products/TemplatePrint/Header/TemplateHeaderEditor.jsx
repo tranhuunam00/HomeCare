@@ -37,7 +37,7 @@ const TemplateHeaderEditor = ({ value = {}, onChange }) => {
     <Form
       form={form}
       layout="vertical"
-      initialValues={value}
+      initialValues={{ ...value, code_header: "1" }}
       onValuesChange={handleFormChange}
       className={styles.templateHeaderForm}
     >

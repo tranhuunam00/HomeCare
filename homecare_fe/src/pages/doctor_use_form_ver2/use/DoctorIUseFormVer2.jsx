@@ -1009,7 +1009,10 @@ export default function DoctorUseDFormVer2({
         width={1100}
       >
         <PrintPreviewVer2NotDataDiagnose
-          formSnapshot={form.getFieldsValue()}
+          formSnapshot={{
+            ...form.getFieldsValue(),
+            createdAt: initialSnap?.apiData?.createdAt,
+          }}
           selectedExamPart={examParts?.find(
             (ex) => ex.id == form.getFieldValue("id_exam_part")
           )}

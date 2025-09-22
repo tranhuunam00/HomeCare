@@ -39,7 +39,7 @@ const Sidebar = ({ collapsed }) => {
             ]
           : [],
     },
-     user?.id_role === USER_ROLE.ADMIN &&{
+    user?.id_role === USER_ROLE.ADMIN && {
       key: "Mẫu kết quả",
       icon: (
         <Avatar
@@ -67,7 +67,10 @@ const Sidebar = ({ collapsed }) => {
       ),
       label: "Mẫu kết quả phiên bản 2",
       children: [
-        { key: "form-v2-list", label: "Danh sách" },
+        user?.id_role === USER_ROLE.ADMIN && {
+          key: "form-v2-list",
+          label: "Danh sách",
+        },
         user?.id_role === USER_ROLE.ADMIN && {
           key: "form-v2",
           label: "Tạo mới",

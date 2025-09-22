@@ -81,6 +81,8 @@ const PrintPreviewVer2NotDataDiagnose = ({
   const wardName =
     wards.find((w) => w.code == formSnapshot?.benh_nhan_dia_chi_xa_phuong)
       ?.name || formSnapshot?.benh_nhan_dia_chi_xa_phuong;
+
+  console.log("formSnapshot", formSnapshot);
   return (
     <div>
       <div ref={printRef} className={styles.wrapper}>
@@ -157,8 +159,8 @@ const PrintPreviewVer2NotDataDiagnose = ({
               margin: 0,
               padding: 0,
             }}
-          >{`PHÂN HỆ: ${
-            selectedExamPart?.name?.toUpperCase() ||
+          >{`${
+            selectedTemplateService?.name?.toUpperCase() ||
             templateServices
               ?.find((t) => t.id == formSnapshot.id_template_service)
               ?.name?.toUpperCase()
@@ -252,7 +254,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
               <PrintItem
                 label={"PHÂN HỆ"}
                 value={
-                  selectedExamPart?.name ||
+                  selectedTemplateService?.name ||
                   templateServices?.find(
                     (t) => t.id == formSnapshot.id_template_service
                   )?.name
@@ -261,7 +263,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
               <PrintItem
                 label={"BỘ PHẬN"}
                 value={
-                  selectedTemplateService?.name ||
+                  selectedExamPart?.name ||
                   examParts?.find((t) => t.id == formSnapshot.id_exam_part)
                     ?.name
                 }
@@ -269,30 +271,30 @@ const PrintPreviewVer2NotDataDiagnose = ({
               <PrintItem label={"NGÔN NGỮ"} value={"Vi"} />
             </div>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <PrintItem
+              {/* <PrintItem
                 label={"TÊN MẪU"}
                 value={
                   formSnapshot?.doctor_use_form_ver2_name ||
                   currentFormVer2Name?.name
                 }
-              />
+              /> */}
             </div>
 
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <PrintItem
+              {/* <PrintItem
                 label={"MÃ SỐ ĐỊNH DANH MẪU"}
                 value={currentFormVer2Name?.code}
-              />
+              /> */}
               {/* <PrintItem
                 label={"KẾT LUẬN CỦA MẪU"}
                 value={formSnapshot?.ket_luan || formSnapshot?.ket_luan_url}
               /> */}
-              <PrintItem
+              {/* <PrintItem
                 label={"NGÀY THỰC HIỆN"}
                 value={dayjs(
                   initialSnap?.apiData?.createdAt || new Date()
                 ).format("DD-MM-YYYY")}
-              />
+              /> */}
             </div>
           </>
           <div
@@ -375,11 +377,11 @@ const PrintPreviewVer2NotDataDiagnose = ({
           <PrintItem label={"PHÂN LOẠI IDC-10"} value={formSnapshot?.icd10} />
           <PrintItem
             label={"PHÂN ĐỘ, PHÂN LOẠI"}
-            value={formSnapshot?.phanDoLoai}
+            value={formSnapshot?.phan_do_loai}
           />
           <PrintItem
-            label={"CHẨN ĐOÁN ĐẶC BIỆT"}
-            value={formSnapshot?.chanDoanPhanBiet}
+            label={"CHẨN ĐOÁN PHÂN BIỆT"}
+            value={formSnapshot?.chan_doan_phan_biet}
           />
 
           <h3
@@ -484,7 +486,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
                     <div style={{ width: 150 }}>
                       <strong>{LABELS_ADDON.time}:</strong>
                     </div>
-                    {dayjs().format("DD-MM-YYYY HH:mm")}
+                    {dayjs(formSnapshot.createdAt).format("DD-MM-YYYY HH:mm")}
                   </div>
                   <div
                     style={{ display: "flex", marginBottom: 6, fontSize: 14 }}
