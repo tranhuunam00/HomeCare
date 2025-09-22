@@ -10,6 +10,7 @@ import {
   Tooltip,
   Spin,
   Modal,
+  Divider,
 } from "antd";
 import { QuestionCircleOutlined } from "@ant-design/icons";
 import { useNavigate, useParams } from "react-router-dom";
@@ -583,10 +584,7 @@ export default function DoctorUseDFormVer2({
               </Form.Item>
             </>
           )}
-          <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
-            THÔNG TIN MẪU FORM VER 2
-          </Title>
-
+          <Divider />
           <Row gutter={16}>
             <Col xs={24} md={24}>
               <Form.Item
@@ -674,21 +672,12 @@ export default function DoctorUseDFormVer2({
                 />
               </Form.Item>
             </Col>
-            <Col xs={24} md={12}>
-              <Form.Item label="Mã số định danh mẫu">
-                <Input
-                  value={currentFormVer2Name?.code || ""}
-                  readOnly
-                  disabled
-                />
-              </Form.Item>
-            </Col>
           </Row>
 
           <Row gutter={16}>
             <Col xs={24} md={24}>
               <Form.Item
-                label="Tên FormVer 2"
+                label="Tên form"
                 name="id_formver2_name"
                 rules={[{ required: true, message: "Chọn tên mẫu" }]}
               >
@@ -736,7 +725,7 @@ export default function DoctorUseDFormVer2({
             </Col>
           </Row>
           <Form.Item
-            label="Mẫu header in"
+            label="Mẫu in kết quả"
             name="id_print_template"
             rules={[{ required: true, message: "Chọn mẫu in" }]}
           >

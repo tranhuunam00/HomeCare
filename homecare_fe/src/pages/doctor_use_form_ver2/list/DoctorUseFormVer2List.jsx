@@ -282,7 +282,7 @@ export default function DoctorUseFormVer2List() {
   return (
     <div className={styles.page}>
       <div className={styles.header}>
-        <Title level={3}>Danh sách Kết quả Ver2 đã sử dụng</Title>
+        <Title level={3}>Danh sách kết quả đã đọc</Title>
         <Space>
           <Dropdown overlay={columnMenu} trigger={["click"]}>
             <Button icon={<SettingOutlined />}>Chọn cột</Button>
@@ -290,7 +290,7 @@ export default function DoctorUseFormVer2List() {
           <Tooltip title="Làm mới">
             <Button icon={<ReloadOutlined />} onClick={() => fetchList()} />
           </Tooltip>
-          <Tooltip title="Sử dụng">
+          <Tooltip title="">
             <Button
               type="primary"
               icon={<CheckOutlined />}
@@ -298,7 +298,7 @@ export default function DoctorUseFormVer2List() {
                 navigate(`/home/form-v2/use`);
               }}
             >
-              Sử dụng
+              Đọc kết quả mới
             </Button>
           </Tooltip>
         </Space>

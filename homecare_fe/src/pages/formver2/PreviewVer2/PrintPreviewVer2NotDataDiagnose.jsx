@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { Button, Card } from "antd";
+import { Button, Card, Divider } from "antd";
 
 import { ADMIN_INFO_LABELS } from "../../../constant/app";
 
@@ -270,6 +270,9 @@ const PrintPreviewVer2NotDataDiagnose = ({
               />
               <PrintItem label={"NGÔN NGỮ"} value={"Vi"} />
             </div>
+
+            <Divider />
+
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               {/* <PrintItem
                 label={"TÊN MẪU"}

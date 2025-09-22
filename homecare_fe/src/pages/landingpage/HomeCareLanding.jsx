@@ -217,25 +217,7 @@ const HomeCareLanding = () => {
         </header>
       </div>
 
-      <section ref={topRef} className={styles["homecare__hero"]}>
-        <div className={styles["homecare__hero-inner"]}>
-          <h1 className={styles["homecare__title"]}>
-            <span>HOME</span>CARE
-          </h1>
-
-          <Button
-            type="primary"
-            size="large"
-            className={styles["homecare__cta"]}
-            onClick={() => navigate("/home")} // hoặc route bạn muốn
-          >
-            Sử dụng ngay
-          </Button>
-        </div>
-      </section>
-      {/* <h2 style={{ textAlign: "center", marginTop: 50 }}>
-        Giá trị của các phần mềm D-RADS
-      </h2> */}
+      <section ref={topRef} className={styles["homecare__hero"]}></section>
 
       <section className={styles["homecare__agency"]}>
         <div className={styles["homecare__agency-container"]}>

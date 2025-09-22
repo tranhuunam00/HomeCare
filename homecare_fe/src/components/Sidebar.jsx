@@ -49,7 +49,7 @@ const SidebarMenu = ({ onSelect, selected }) => {
         },
         {
           key: "home/doctor-use-form-v2",
-          label: "Kết quả đã dùng",
+          label: "Kết quả đã đọc",
         },
       ],
     },

@@ -82,7 +82,7 @@ const Sidebar = ({ collapsed }) => {
         },
         {
           key: "doctor-use-form-v2",
-          label: "Kết quả đã dùng",
+          label: "Kết quả đã đọc",
         },
       ],
     },
@@ -99,9 +99,9 @@ const Sidebar = ({ collapsed }) => {
       ),
       label: "Ứng dụng, tiện ích",
       children: [
-        { key: "/tirads_nn", label: "Phần mềm D-TIRADS" },
+        // { key: "/tirads_nn", label: "Phần mềm D-TIRADS" },
         { key: "/recist_nn", label: "Phần mềm D-RECIST" },
-        { key: "/tirad", label: "Phần mềm D-TIRADS-2" },
+        { key: "/tirad", label: "Phần mềm D-TIRADS" },
         { key: "/lungrad", label: "Phần mềm D-LUNG" },
         { key: "/birad", label: "Phần mềm D-BIRADS" },
         { key: "/boneage", label: "Phần mềm D-BONE" },

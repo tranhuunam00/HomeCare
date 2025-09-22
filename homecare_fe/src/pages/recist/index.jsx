@@ -690,7 +690,7 @@ export default function Recist() {
           {/* Thông tin bệnh nhân */}
           <div className="print-section">
             {/* Thêm Header vào đây */}
-            <Header />
+            {/* <Header /> */}
             <h2
               style={{
                 textAlign: "center",

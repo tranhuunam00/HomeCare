@@ -176,48 +176,103 @@ const Profile = () => {
             <Col span={18}>
               <Row gutter={16}>
                 <Col span={10}>
-                  {renderItem(
-                    "Họ và tên",
-                    "full_name",
-                    <Input placeholder="Nguyễn Văn A" />
-                  )}
+                  <Form.Item
+                    label="Họ và tên"
+                    name="full_name"
+                    rules={[
+                      { required: true, message: "Vui lòng nhập họ và tên" },
+                    ]}
+                  >
+                    {isEditing && editableFields.includes("full_name") ? (
+                      <Input placeholder="Nguyễn Văn A" />
+                    ) : (
+                      <Text>{form.getFieldValue("full_name") || "-"}</Text>
+                    )}
+                  </Form.Item>
                 </Col>
                 <Col span={4}>
-                  {renderItem(
-                    "Ngày sinh",
-                    "dob",
-                    <DatePicker
-                      style={{ width: "100%" }}
-                      format="DD-MM-YYYY"
-                      placeholder="Chọn ngày"
-                    />
-                  )}
+                  <Form.Item
+                    label="Ngày sinh"
+                    name="dob"
+                    rules={[
+                      { required: true, message: "Vui lòng chọn ngày sinh" },
+                    ]}
+                  >
+                    {isEditing && editableFields.includes("dob") ? (
+                      <DatePicker
+                        style={{ width: "100%" }}
+                        format="DD-MM-YYYY"
+                        placeholder="Chọn ngày"
+                      />
+                    ) : (
+                      <Text>
+                        {form.getFieldValue("dob")
+                          ? dayjs(form.getFieldValue("dob")).format(
+                              "DD-MM-YYYY"
+                            )
+                          : "-"}
+                      </Text>
+                    )}
+                  </Form.Item>
                 </Col>
                 <Col span={4}>
-                  {renderItem(
-                    "Giới tính",
-                    "gender",
-                    <Select placeholder="Chọn giới tính">
-                      <Option value="Nam">Nam</Option>
-                      <Option value="Nữ">Nữ</Option>
-                    </Select>
-                  )}
+                  <Form.Item
+                    label="Giới tính"
+                    name="gender"
+                    rules={[
+                      { required: true, message: "Vui lòng chọn giới tính" },
+                    ]}
+                  >
+                    {isEditing && editableFields.includes("gender") ? (
+                      <Select placeholder="Chọn giới tính">
+                        <Option value="Nam">Nam</Option>
+                        <Option value="Nữ">Nữ</Option>
+                      </Select>
+                    ) : (
+                      <Text>{form.getFieldValue("gender") || "-"}</Text>
+                    )}
+                  </Form.Item>
                 </Col>
               </Row>
               <Row gutter={16}>
                 <Col span={12}>
-                  <Form.Item label="Email" name="email">
-                    <Text>
-                      {form.getFieldValue("email") || "Chưa có email"}
-                    </Text>
+                  <Form.Item
+                    label="Email"
+                    name="email"
+                    rules={[
+                      {
+                        required: true,
+                        type: "email",
+                        message: "Vui lòng nhập email hợp lệ",
+                      },
+                    ]}
+                  >
+                    {isEditing ? (
+                      <Input placeholder="abc@gmail.com" />
+                    ) : (
+                      <Text>
+                        {form.getFieldValue("email") || "Chưa có email"}
+                      </Text>
+                    )}
                   </Form.Item>
                 </Col>
-                <Col>
-                  {renderItem(
-                    "Số điện thoại",
-                    "phone_number",
-                    <Input placeholder="0912345678" />
-                  )}
+                <Col span={12}>
+                  <Form.Item
+                    label="Số điện thoại"
+                    name="phone_number"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Vui lòng nhập số điện thoại",
+                      },
+                    ]}
+                  >
+                    {isEditing ? (
+                      <Input placeholder="0912345678" />
+                    ) : (
+                      <Text>{form.getFieldValue("phone_number") || "-"}</Text>
+                    )}
+                  </Form.Item>
                 </Col>
               </Row>
               <Form.Item label="Mô tả" name="description">
@@ -227,7 +282,13 @@ const Profile = () => {
                   <Text>{form.getFieldValue("description")}</Text>
                 )}
               </Form.Item>
-              <Form.Item label="Phòng khám" name="id_clinic">
+              <Form.Item
+                rules={[
+                  { required: true, message: "Vui lòng chọn phòng khám" },
+                ]}
+                label="Phòng khám"
+                name="id_clinic"
+              >
                 <Select placeholder="Chọn phòng khám" disabled={!isEditing}>
                   {clinics.map((clinic) => (
                     <Option key={clinic.id} value={clinic.id}>
