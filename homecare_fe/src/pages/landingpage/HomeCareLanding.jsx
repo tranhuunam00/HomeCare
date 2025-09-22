@@ -31,13 +31,16 @@ const textVariants = {
 
 const HomeCareLanding = () => {
   const navigate = useNavigate();
-  const { isLoggedIn } = useGlobalAuth();
+  const { isLoggedIn, user } = useGlobalAuth();
 
   const productsItem = [
     {
       label: "SỬ DỤNG MẪU KẾT QUẢ",
       onClick: () => navigate("/home/form-v2/use"),
     },
+  ];
+
+  const trialItem = [
     {
       label: "Phần mềm D-Tirads".toUpperCase(),
       onClick: () => navigate("/tirads_nn"),
@@ -46,11 +49,8 @@ const HomeCareLanding = () => {
       label: "Phần mềm D-RECIST".toUpperCase(),
       onClick: () => navigate("/recist_nn"),
     },
-  ];
-
-  const trialItem = [
     {
-      label: "Phần mềm D-TIRADS",
+      label: "Phần mềm D-TIRADS 2",
       onClick: () => navigate("tirad"),
     },
     {
@@ -113,7 +113,14 @@ const HomeCareLanding = () => {
 
   return (
     <div className={styles["homecare"]}>
-      <header className={styles["homecare__header"]}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: 200,
+        }}
+      >
         <div
           style={{
             display: "flex",
@@ -129,87 +136,93 @@ const HomeCareLanding = () => {
             width={200}
             style={{ cursor: "pointer" }}
           />
-          <h2 style={{ color: "#1b8415", fontWeight: 450 }}>
-            BỆNH VIỆN TẠI NHÀ HOMECARE
-          </h2>
         </div>
-        <div className={styles["homecare__container"]}>
+
+        <header className={styles["homecare__header"]}>
+          <div className={styles["homecare__container"]}>
+            <div
+              className={styles["homecare__nav-left"]}
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                justifyContent: "center",
+                width: "100%",
+                gap: 50,
+              }}
+            >
+              <Menu
+                mode="horizontal"
+                selectable={false}
+                className={styles["homecare__menu"]}
+              >
+                <Menu.Item
+                  key="home"
+                  onClick={() =>
+                    (window.location.href = "https://home-care.vn/")
+                  }
+                >
+                  TRANG CHỦ
+                </Menu.Item>
+
+                <DropdownNav
+                  title="ĐỌC KẾT QUẢ"
+                  onClickTitle={() => {
+                    if (user) navigate("/home/form-v2/use");
+                    else toast.warn("Vui lòng đăng nhập để sử dụng");
+                  }}
+                />
+                <DropdownNav title="ỨNG DỤNG, TIỆN ÍCH" items={trialItem} />
+
+                <Menu.Item key="contact" onClick={() => navigate("/contact")}>
+                  HỖ TRỢ KỸ THUẬT
+                </Menu.Item>
+              </Menu>
+            </div>
+          </div>
           <div
-            className={styles["homecare__nav-left"]}
             style={{
               display: "flex",
-              flexWrap: "wrap",
               justifyContent: "center",
-              width: "100%",
-              gap: 50,
+              marginBottom: "30px",
+              gap: 30,
             }}
           >
-            <Menu
-              mode="horizontal"
-              selectable={false}
-              className={styles["homecare__menu"]}
-            >
-              <Menu.Item
-                key="home"
-                onClick={() => (window.location.href = "https://home-care.vn/")}
+            {isLoggedIn ? (
+              <Button
+                type="primary"
+                className={styles["homecare__contact"]}
+                onClick={() => navigate("/home")} // hoặc route bạn muốn
               >
-                TRANG CHỦ
-              </Menu.Item>
-
-              <DropdownNav title="ĐỌC KẾT QUẢ" items={productsItem} />
-              <DropdownNav title="ỨNG DỤNG, TIỆN ÍCH" items={trialItem} />
-
-              <Menu.Item key="contact" onClick={() => navigate("/contact")}>
-                HỖ TRỢ KỸ THUẬT
-              </Menu.Item>
-            </Menu>
+                Sử dụng ngay
+              </Button>
+            ) : (
+              <>
+                <Button
+                  type="primary"
+                  className={styles["homecare__contact"]}
+                  onClick={() => navigate("login")}
+                >
+                  Đăng nhập
+                </Button>
+                <Button
+                  type="primary"
+                  className={styles["homecare__contact"]}
+                  onClick={() => navigate("register")}
+                >
+                  Đăng ký
+                </Button>
+              </>
+            )}
           </div>
-        </div>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            marginBottom: "30px",
-            gap: 30,
-          }}
-        >
-          {isLoggedIn ? (
-            <Button
-              type="primary"
-              className={styles["homecare__contact"]}
-              onClick={() => navigate("/home")} // hoặc route bạn muốn
-            >
-              Sử dụng ngay
-            </Button>
-          ) : (
-            <>
-              <Button
-                type="primary"
-                className={styles["homecare__contact"]}
-                onClick={() => navigate("login")}
-              >
-                Đăng nhập
-              </Button>
-              <Button
-                type="primary"
-                className={styles["homecare__contact"]}
-                onClick={() => navigate("register")}
-              >
-                Đăng ký
-              </Button>
-            </>
-          )}
-        </div>
-      </header>
+        </header>
+      </div>
 
       <section ref={topRef} className={styles["homecare__hero"]}>
         <div className={styles["homecare__hero-inner"]}>
           <h1 className={styles["homecare__title"]}>
             <span>HOME</span>CARE
           </h1>
-          <h2 className={styles["homecare__subtitle"]}>
-            Chuẩn hóa kết quả chẩn đoán hình ảnh theo tiêu chuẩn quốc tế
-          </h2>
+
           <Button
             type="primary"
             size="large"
