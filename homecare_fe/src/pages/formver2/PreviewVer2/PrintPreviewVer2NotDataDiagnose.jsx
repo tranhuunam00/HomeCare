@@ -368,10 +368,8 @@ const PrintPreviewVer2NotDataDiagnose = ({
             {formSnapshot.quyTrinh || formSnapshot.quy_trinh_url}
           </p>
 
-          <TablesSnapshotPreview tablesSnapshot={tablesSnapshot} />
-          <div className="editor_print_ver2" style={{ marginLeft: 15 }}>
-            <InnerHTMLFormEditor data={imageDescEditor} />
-          </div>
+          {/* <TablesSnapshotPreview tablesSnapshot={tablesSnapshot} /> */}
+          <InnerHTMLFormEditor data={imageDescEditor} />
 
           <h3
             style={{
@@ -518,7 +516,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
                     <div style={{ width: 150 }}>
                       <strong>{LABELS_ADDON.email}:</strong>
                     </div>
-                    {doctor?.id_user_user?.email}
+                    {doctor?.id_user_user?.email || user.email}
                   </div>
                 </section>
                 <section>

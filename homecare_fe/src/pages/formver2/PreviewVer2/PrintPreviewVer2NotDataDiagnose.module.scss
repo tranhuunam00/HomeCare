@@ -236,7 +236,4 @@ h4 {
   a[href]::after {
     content: none !important;
   } /* không in URL đuôi link */
-  .editor_print_ver2 {
-    margin-left: -20px !important; /* bỏ margin khi in */
-  }
 }

@@ -293,9 +293,7 @@ export const handlePrint = (printRef) => {
           // .logoImg{
           //   height: 60px !important
           // }
-         .editor_print_ver2 {
-            margin-left: -20px !important; /* bỏ margin khi in */
-          }
+         
         </style>
       </head>
      <body ">
