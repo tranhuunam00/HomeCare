@@ -70,6 +70,7 @@ export default function DoctorUseDFormVer2({
   const [imageList, setImageList] = useState([]);
   console.log("imageList", imageList);
   const [filteredFormVer2Names, setFilteredFormVer2Names] = useState([]);
+  const [resetKey, setResetKey] = useState(0);
 
   const [initialSnap, setInitialSnap] = useState({
     formValues: null,
@@ -169,6 +170,7 @@ export default function DoctorUseDFormVer2({
         setImageLeftUrl(left.url || "");
         setImageRightUrl(right.url || "");
         setImageDescEditor(apiData.imageDescEditor || "");
+        setPrintTemplate(apiData?.id_print_template_print_template);
 
         setInitialSnap({
           formValues,
@@ -176,7 +178,7 @@ export default function DoctorUseDFormVer2({
           left: left.url,
           right: right.url,
           imageDesc: apiData.imageDescEditor,
-          descImages,
+          descImages: [...descImages.map((i) => ({ ...i }))],
         });
       } catch (err) {
         toast.error("Không load được chi tiết form");
@@ -370,14 +372,30 @@ export default function DoctorUseDFormVer2({
   };
 
   const restoreFromSnapshot = () => {
-    if (!initialSnap) return;
-    const { formValues, imageDesc, left, right } = initialSnap;
+    if (!window.confirm("Bạn có chắc muốn khôi phục dữ liệu không?")) {
+      return;
+    }
+    if (!idEdit) {
+      form.resetFields();
+      setImageDescEditor("<p></p>");
+      setImageLeftUrl();
+      setImageRightUrl();
+      setImageList([]);
+    } else {
+      const { formValues, imageDesc, left, right, descImages } = initialSnap;
 
-    form.setFieldsValue(formValues);
+      form.setFieldsValue({
+        ...formValues,
+        ImageLeftFile: [],
+        ImageRightFile: [],
+      });
 
-    setImageDescEditor(imageDesc);
-    setImageLeftUrl(left);
-    setImageRightUrl(right);
+      setImageDescEditor(imageDesc);
+      setImageLeftUrl(left);
+      setImageRightUrl(right);
+      setImageList(descImages);
+    }
+    setResetKey((k) => k + 1);
   };
 
   return (
@@ -497,6 +515,9 @@ export default function DoctorUseDFormVer2({
                     label="Mã số bệnh nhân PID"
                     name="benh_nhan_pid"
                     required
+                    rules={[
+                      { required: true, message: "Nhập mã số bệnh nhân PID" },
+                    ]}
                   >
                     <Input
                       disabled={!isEdit}
@@ -522,7 +543,7 @@ export default function DoctorUseDFormVer2({
                   <Form.Item
                     name="benh_nhan_dia_chi_tinh_thanh_pho"
                     label="Tỉnh/Thành phố"
-                    rules={[{ required: true }]}
+                    rules={[{ required: true, message: "Chọn tỉnh/thành phố" }]}
                     disabled={!isEdit}
                   >
                     <Select
@@ -548,7 +569,7 @@ export default function DoctorUseDFormVer2({
                   <Form.Item
                     name="benh_nhan_dia_chi_xa_phuong"
                     label="Phường/Xã"
-                    rules={[{ required: true }]}
+                    rules={[{ required: true, message: "Chọn xã/phường" }]}
                   >
                     <Select
                       onChange={(val) => {
@@ -590,6 +611,9 @@ export default function DoctorUseDFormVer2({
               <Form.Item
                 label="Tên kết quả"
                 name="doctor_use_form_ver2_name"
+                rules={[
+                  { required: true, message: "Vui lòng nhập tên kết quả" },
+                ]}
                 required
               >
                 <Input
@@ -797,6 +821,7 @@ export default function DoctorUseDFormVer2({
                   setImageLeftUrl(value);
                 }}
                 disabled={!isEdit}
+                key={resetKey}
               />
             </Col>
             <Col xs={24} md={12}>
@@ -930,9 +955,17 @@ export default function DoctorUseDFormVer2({
                 KEY_ACTION_BUTTON.exit,
               ]}
               onExit={() => {
+                if (!window.confirm("Bạn có chắc muốn thoát không?")) {
+                  return;
+                }
                 navigate(`/home/doctor-use-form-v2`);
               }}
               onAction={(key) => {
+                if (
+                  !window.confirm("Bạn có chắc muốn lưu lại dữ liệu không?")
+                ) {
+                  return;
+                }
                 pendingAction.current = key;
                 form.submit();
               }}
@@ -954,6 +987,13 @@ export default function DoctorUseDFormVer2({
               editId={idEdit}
               onGenAi={async () => {
                 const handleGenAi = async () => {
+                  if (
+                    !window.confirm(
+                      "Bạn có chắc muốn sử dụng tính năng AI không?"
+                    )
+                  ) {
+                    return;
+                  }
                   try {
                     const v = form.getFieldsValue();
                     const selectedExamPart = examParts?.find(
@@ -1017,7 +1057,10 @@ export default function DoctorUseDFormVer2({
           imageList={imageList}
           isUse={isUse}
           doctor={initialSnap?.apiData?.id_doctor_doctor || doctor}
-          printTemplate={initialSnap.apiData?.id_print_template_print_template}
+          printTemplate={
+            printTemplate ||
+            initialSnap.apiData?.id_print_template_print_template
+          }
         />
       </Modal>
 

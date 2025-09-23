@@ -343,26 +343,35 @@ const PrintPreviewVer2NotDataDiagnose = ({
                 <a
                   href={
                     formSnapshot?.ImageRightDescLink ||
-                    formSnapshot.image_form_ver2s.find((i) => i.kind == "right")
-                      ?.link
+                    formSnapshot.image_form_ver2s?.find(
+                      (i) => i.kind == "right"
+                    )?.link
                   }
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   {formSnapshot?.ImageRightDesc ||
-                    formSnapshot.image_form_ver2s.find((i) => i.kind == "right")
-                      ?.desc}
+                    formSnapshot.image_form_ver2s?.find(
+                      (i) => i.kind == "right"
+                    )?.desc}
                 </a>
               </p>
             </section>
           </div>
 
-          <p className={styles.paragraph}>
+          <p
+            className={styles.paragraph}
+            style={{
+              whiteSpace: "pre-line",
+            }}
+          >
             {formSnapshot.quyTrinh || formSnapshot.quy_trinh_url}
           </p>
 
           <TablesSnapshotPreview tablesSnapshot={tablesSnapshot} />
-          <InnerHTMLFormEditor data={imageDescEditor} />
+          <div className="editor_print_ver2" style={{ marginLeft: 15 }}>
+            <InnerHTMLFormEditor data={imageDescEditor} />
+          </div>
 
           <h3
             style={{
@@ -376,7 +385,14 @@ const PrintPreviewVer2NotDataDiagnose = ({
           >
             KẾT LUẬN, CHẨN ĐOÁN
           </h3>
-          <p className={styles.paragraph}>{formSnapshot.ketQuaChanDoan}</p>
+          <p
+            className={styles.paragraph}
+            style={{
+              whiteSpace: "pre-line",
+            }}
+          >
+            {formSnapshot.ketQuaChanDoan}
+          </p>
           <PrintItem label={"PHÂN LOẠI IDC-10"} value={formSnapshot?.icd10} />
           <PrintItem
             label={"PHÂN ĐỘ, PHÂN LOẠI"}
@@ -399,7 +415,12 @@ const PrintPreviewVer2NotDataDiagnose = ({
           >
             KHUYẾN NGHỊ & TƯ VẤN
           </h3>
-          <p className={styles.paragraph}>
+          <p
+            className={styles.paragraph}
+            style={{
+              whiteSpace: "pre-line",
+            }}
+          >
             {formSnapshot.khuyenNghi || formSnapshot.khuyen_nghi}
           </p>
 

@@ -92,7 +92,6 @@ export default function FormActionBar({
       label: "IN",
       icon: <PrinterOutlined />,
       onClick: onPrint || emptyF,
-      disabled: !editId,
     },
 
     {
