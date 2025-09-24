@@ -34,6 +34,7 @@ export default function ImageBlock({
   title,
   onChange,
   disabled,
+  disabledLink,
 }) {
   const descName = `${namePrefix}Desc`;
   const linkName = `${namePrefix}DescLink`; // ⚠️ đồng bộ với BE: ...DescLink
@@ -171,7 +172,11 @@ export default function ImageBlock({
             label=""
             rules={[{ required: true, message: "Nhập mô tả ngắn" }]}
           >
-            <Input disabled={disabled} placeholder="Nhập mô tả ảnh" />
+            <Input
+              style={{ textAlign: "center" }}
+              disabled={disabled}
+              placeholder="Nhập mô tả ảnh"
+            />
           </Form.Item>
         </Col>
       </Row>
@@ -194,7 +199,8 @@ export default function ImageBlock({
             ]}
           >
             <Input
-              disabled={disabled}
+              style={{ textAlign: "center" }}
+              disabled={disabled || disabledLink}
               placeholder="https://... hoặc domain.com/..."
             />
           </Form.Item>

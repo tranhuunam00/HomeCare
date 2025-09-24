@@ -53,7 +53,7 @@ const CustomSunEditor = ({ value, onChange, className, disabled = false }) => {
         }}
         setOptions={{
           height: "300px",
-          defaultStyle: "line-height: 1.4; font-size: 14px;",
+          defaultStyle: "line-height: 1.4; font-size: 16px;",
           buttonList: [
             ["undo", "redo"],
             ["formatBlock", "font", "fontSize"],

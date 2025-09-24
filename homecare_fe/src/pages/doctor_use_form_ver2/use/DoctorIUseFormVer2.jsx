@@ -821,6 +821,7 @@ export default function DoctorUseDFormVer2({
                   setImageLeftUrl(value);
                 }}
                 disabled={!isEdit}
+                disabledLink={true}
                 key={resetKey}
               />
             </Col>
@@ -834,6 +835,7 @@ export default function DoctorUseDFormVer2({
                   setImageRightUrl(value);
                 }}
                 disabled={!isEdit}
+                disabledLink={true}
               />
             </Col>
           </Row>
