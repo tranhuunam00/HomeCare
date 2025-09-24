@@ -233,6 +233,9 @@ const HomeCareLanding = () => {
                 textAlign: "center",
                 fontSize: 24,
                 fontWeight: "bold",
+                backgroundColor: "#aef3b4ff",
+                padding: 10,
+                borderRadius: 8,
               }}
             >
               Nhanh hơn - Dễ hơn - Chuẩn hơn
