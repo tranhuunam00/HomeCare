@@ -228,21 +228,24 @@ const HomeCareLanding = () => {
               alt="Rocket launch"
             />
             <h2>D-RADS</h2>
-            <p style={{ textAlign: "left" }}>
-              Phần mềm D-RADS chuẩn hóa quy trình chẩn đoán, rút ngắn thời gian
-              đọc kết quả và nâng cao hiệu quả chuyên môn cho bác sĩ. Tích hợp
-              AI thông minh giúp phân loại tổn thương, dịch đa ngôn ngữ, tư vấn
-              kết quả và tạo video trực quan từ văn bản.
+            <p
+              style={{
+                textAlign: "center",
+                fontSize: 24,
+                fontWeight: "bold",
+              }}
+            >
+              Nhanh hơn - Dễ hơn - Chuẩn hơn
             </p>
           </div>
           <div className={styles["homecare__agency-right"]}>
             <ul className={styles["homecare__agency-services"]}>
               {[
-                "Thiết kế biểu mẫu chuẩn hóa, đồng bộ giúp rút ngắn thời gian đọc kết quả, tăng chất lượng chẩn đoán cho Bác sĩ",
-                "Tích hợp AI tự động phân loại tổn thương theo tiêu chuẩn quốc tế: TIRADS, BIRADS, Lung RADS, PIRADS, LIRADS, RECIST...",
-                "Tích hợp AI tự động dịch kết quả đa ngôn ngữ (Anh, Pháp, Trung...)",
-                "Tích hợp AI tự động hỗ trợ tư vấn và phiên giải kết quả",
-                "Tích hợp AI tự động chuyển kết quả Text sang Video",
+                "Sở hữu hơn 3.000 mẫu kết quả bình thường và bệnh lý trong các lĩnh vực Siêu âm, X Quang, MSCT, MRI, Điện quang can thiệp, Thăm dò chức năng…",
+                "Nội dung chuyên môn được chuẩn hóa theo các phân loại quốc tế Lung RADS, TIRADS, BIRADS, ORADS, TNM, CTSI, AAST, ARCO, FICAT….",
+                "Thiết kế chuẩn hóa theo Thông tư 32 Bô y tế, phân loại mã bệnh quốc tế ICD-10 để dễ dàng đồng bộ với yêu cầu và quy chuẩn của hệ thống BHYT",
+                "Đa ngôn ngữ : Tiếng Việt, Tiếng Anh, Tiếng Pháp,..",
+                "Dễ dàng tích hợp với các hệ thống HIS/RIS/PACS/eHOS/EMR…",
               ].map((text, index) => (
                 <motion.li
                   key={index}
@@ -479,14 +482,13 @@ const HomeCareLanding = () => {
       {/* Footer Subscribe Section */}
       <section className={styles["homecare__subscribe"]}>
         <h2 className={styles["homecare__subscribe-title"]}>
-          Đăng Ký Nhận Thông Tin Mới Nhất Từ Home Care
+          Gửi yêu cầu cho chúng tôi
         </h2>
-        <p className={styles["homecare__subscribe-desc"]}>
-          Liên hệ ngay với chúng tôi để được trải nghiệm demo miễn phí và nhận
-          tư vấn giải pháp tích hợp hệ thống phần mềm D-RADS vào quy trình vận
-          hành y tế.
-        </p>
-        <div className={styles["homecare__subscribe-input"]}>
+
+        <div
+          className={styles["homecare__subscribe-input"]}
+          style={{ alignItems: "center" }}
+        >
           <Input placeholder="Nhập email của bạn..." size="large" />
           <Button type="primary">Đăng Ký Ngay</Button>
         </div>
