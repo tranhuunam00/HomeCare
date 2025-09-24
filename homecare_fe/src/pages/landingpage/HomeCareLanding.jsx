@@ -13,6 +13,7 @@ import { products } from "./products";
 import { useGlobalAuth } from "../../contexts/AuthContext";
 import DropdownNav from "../../components/DropdownNav";
 import { toast } from "react-toastify";
+import API_CALL from "../../services/axiosClient";
 
 const textVariants = {
   hidden: { opacity: 0, x: 30 },
@@ -32,6 +33,7 @@ const textVariants = {
 const HomeCareLanding = () => {
   const navigate = useNavigate();
   const { isLoggedIn, user } = useGlobalAuth();
+  const [email, setEmail] = useState("");
 
   const productsItem = [
     {
@@ -104,8 +106,34 @@ const HomeCareLanding = () => {
   ];
 
   const [isContactOpen, setIsContactOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleContactCancel = () => setIsContactOpen(false);
+
+  const handleSubscribe = async () => {
+    if (!email) {
+      message.error("Vui lòng nhập email!");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await API_CALL.post("/contacts", {
+        email,
+        full_name: "khách",
+        type: "liên hệ tư vấn chung",
+        message: "Khách đăng ký nhận thông tin qua email", // có thể tuỳ biến
+      });
+      toast.success("Đăng ký thành công! Chúng tôi sẽ liên hệ với bạn.");
+      setEmail(""); // reset input
+    } catch (err) {
+      toast.error(
+        err?.response?.data?.message || "Đăng ký thất bại. Vui lòng thử lại!"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const topRef = useRef(null);
   const aboutRef = useRef(null);
@@ -233,7 +261,6 @@ const HomeCareLanding = () => {
                 textAlign: "center",
                 fontSize: 24,
                 fontWeight: "bold",
-                backgroundColor: "#aef3b4ff",
                 padding: 10,
                 borderRadius: 8,
               }}
@@ -246,7 +273,7 @@ const HomeCareLanding = () => {
               {[
                 "Sở hữu hơn 3.000 mẫu kết quả bình thường và bệnh lý trong các lĩnh vực Siêu âm, X Quang, MSCT, MRI, Điện quang can thiệp, Thăm dò chức năng…",
                 "Nội dung chuyên môn được chuẩn hóa theo các phân loại quốc tế Lung RADS, TIRADS, BIRADS, ORADS, TNM, CTSI, AAST, ARCO, FICAT….",
-                "Thiết kế chuẩn hóa theo Thông tư 32 Bô y tế, phân loại mã bệnh quốc tế ICD-10 để dễ dàng đồng bộ với yêu cầu và quy chuẩn của hệ thống BHYT",
+                "Thiết kế chuẩn hóa theo Thông tư 32 Bộ y tế, phân loại mã bệnh quốc tế ICD-10 để dễ dàng đồng bộ với yêu cầu và quy chuẩn của hệ thống BHYT",
                 "Đa ngôn ngữ : Tiếng Việt, Tiếng Anh, Tiếng Pháp,..",
                 "Dễ dàng tích hợp với các hệ thống HIS/RIS/PACS/eHOS/EMR…",
               ].map((text, index) => (
@@ -484,7 +511,10 @@ const HomeCareLanding = () => {
 
       {/* Footer Subscribe Section */}
       <section className={styles["homecare__subscribe"]}>
-        <h2 className={styles["homecare__subscribe-title"]}>
+        <h2
+          className={styles["homecare__subscribe-title"]}
+          style={{ color: "#fff" }}
+        >
           Gửi yêu cầu cho chúng tôi
         </h2>
 
@@ -492,11 +522,22 @@ const HomeCareLanding = () => {
           className={styles["homecare__subscribe-input"]}
           style={{ alignItems: "center" }}
         >
-          <Input placeholder="Nhập email của bạn..." size="large" />
-          <Button type="primary">Đăng Ký Ngay</Button>
+          <Input
+            placeholder="Nhập email của bạn..."
+            size="large"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <Button
+            type="primary"
+            size="large"
+            onClick={handleSubscribe}
+            loading={loading}
+          >
+            Gửi
+          </Button>
         </div>
       </section>
-
       <footer className={styles["homecare__footer"]}>
         <div className={styles["homecare__footer-content"]}>
           <div className={styles["homecare__footer-col"]}>
@@ -505,7 +546,7 @@ const HomeCareLanding = () => {
           </div>
 
           <div className={styles["homecare__footer-col"]}>
-            <h4>Thông Tin Liên Hệ</h4>
+            <h4 style={{ color: "white" }}>Thông Tin Liên Hệ</h4>
             <p>
               <FaMapMarkerAlt /> Số 22, đường 3.7/10, KĐT Gamuda Gardens, Hoàng
               Mai, Hà Nội
