@@ -153,13 +153,13 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
               ✕
             </div>
           </div>
-          <SidebarMenu
+          {/* <SidebarMenu
             onSelect={(key) => {
               setSelectedMenu(key);
               navigate(`/${key}`); // ✅ Điều hướng nội bộ, không mở tab mới
             }}
             selected={selectedMenu}
-          />
+          /> */}
 
           <div className={styles.qrContact}>
             <QRCodeCanvas value={qrValue} size={128} level="H" includeMargin />
