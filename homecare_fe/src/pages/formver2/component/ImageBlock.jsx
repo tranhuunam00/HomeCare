@@ -181,31 +181,35 @@ export default function ImageBlock({
         </Col>
       </Row>
 
-      <Row gutter={8} style={{ marginTop: 0 }}>
-        <Col span={24}>
-          <Form.Item
-            name={linkName}
-            label=""
-            tooltip="Nhập URL (vd: https://...)"
-            required={true}
-            rules={[
-              ({ getFieldValue }) => ({
-                validator: async (_, v) => {
-                  if (!v) throw new Error("Link không hợp lệ");
-                  const ok = /^(https?:\/\/)?[\w.-]+(\.[\w.-]+)+\S*$/i.test(v);
-                  if (!ok) throw new Error("Link không hợp lệ");
-                },
-              }),
-            ]}
-          >
-            <Input
-              style={{ textAlign: "center" }}
-              disabled={disabled || disabledLink}
-              placeholder="https://... hoặc domain.com/..."
-            />
-          </Form.Item>
-        </Col>
-      </Row>
+      {!disabledLink && (
+        <Row gutter={8} style={{ marginTop: 0 }}>
+          <Col span={24}>
+            <Form.Item
+              name={linkName}
+              label=""
+              tooltip="Nhập URL (vd: https://...)"
+              required={true}
+              rules={[
+                ({ getFieldValue }) => ({
+                  validator: async (_, v) => {
+                    if (!v) throw new Error("Link không hợp lệ");
+                    const ok = /^(https?:\/\/)?[\w.-]+(\.[\w.-]+)+\S*$/i.test(
+                      v
+                    );
+                    if (!ok) throw new Error("Link không hợp lệ");
+                  },
+                }),
+              ]}
+            >
+              <Input
+                style={{ textAlign: "center" }}
+                disabled={disabled}
+                placeholder="https://... hoặc domain.com/..."
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+      )}
     </div>
   );
 }

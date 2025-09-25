@@ -606,7 +606,7 @@ export default function DoctorUseDFormVer2({
             </>
           )}
           <Divider />
-          <Row gutter={16}>
+          {/* <Row gutter={16}>
             <Col xs={24} md={24}>
               <Form.Item
                 label="Tên kết quả"
@@ -622,7 +622,7 @@ export default function DoctorUseDFormVer2({
                 />
               </Form.Item>
             </Col>
-          </Row>
+          </Row> */}
 
           <Row gutter={16}>
             <Col xs={24} md={12}>
@@ -821,7 +821,7 @@ export default function DoctorUseDFormVer2({
                   setImageLeftUrl(value);
                 }}
                 disabled={!isEdit}
-                disabledLink={true}
+                disabledLink={user?.id_role != USER_ROLE.ADMIN}
                 key={resetKey}
               />
             </Col>
@@ -835,7 +835,7 @@ export default function DoctorUseDFormVer2({
                   setImageRightUrl(value);
                 }}
                 disabled={!isEdit}
-                disabledLink={true}
+                disabledLink={user?.id_role != USER_ROLE.ADMIN}
               />
             </Col>
           </Row>

@@ -43,16 +43,16 @@ const HomeCareLanding = () => {
   ];
 
   const trialItem = [
-    {
-      label: "Phần mềm D-Tirads".toUpperCase(),
-      onClick: () => navigate("/tirads_nn"),
-    },
+    // {
+    //   label: "Phần mềm D-Tirads".toUpperCase(),
+    //   onClick: () => navigate("/tirads_nn"),
+    // },
     {
       label: "Phần mềm D-RECIST".toUpperCase(),
       onClick: () => navigate("/recist_nn"),
     },
     {
-      label: "Phần mềm D-TIRADS 2",
+      label: "Phần mềm D-TIRADS",
       onClick: () => navigate("tirad"),
     },
     {
