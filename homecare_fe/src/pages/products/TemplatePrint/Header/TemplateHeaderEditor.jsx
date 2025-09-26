@@ -49,7 +49,11 @@ const TemplateHeaderEditor = ({ value = {}, onChange, form }) => {
               }
               return null;
             }}
-            rules={[{ required: true, message: "Vui lòng tải logo" }]}
+            rules={
+              logoPreview
+                ? [] // đã có logo → không required
+                : [{ required: true, message: "Vui lòng tải logo" }]
+            }
           >
             <Upload
               beforeUpload={() => false} // chặn auto-upload
