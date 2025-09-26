@@ -59,16 +59,6 @@ export default function HistoryModal({ open, onClose, idRoot, idCurrent }) {
       render: (val) => (val ? dayjs(val).format("DD/MM/YYYY HH:mm") : "-"),
     },
     {
-      title: "Ngày thực hiện",
-      dataIndex: "ngay_thuc_hien",
-      render: (val) => (val ? dayjs(val).format("DD/MM/YYYY") : "-"),
-    },
-    {
-      title: "Kết luận",
-      dataIndex: "ket_luan",
-      ellipsis: true,
-    },
-    {
       title: "Prev ID",
       dataIndex: "prev_id",
       width: 100,

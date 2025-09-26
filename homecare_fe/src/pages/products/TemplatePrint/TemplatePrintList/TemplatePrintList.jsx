@@ -17,7 +17,15 @@ const TemplatePrintList = () => {
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
-  const [searchName, setSearchName] = useState("");
+
+  const [filter, setFilter] = useState({
+    name: "",
+    // mai kia thêm clinicId, status...
+  });
+
+  const [draft, setDraft] = useState({
+    name: "",
+  });
 
   const { user } = useGlobalAuth();
   const navigate = useNavigate();
@@ -27,7 +35,7 @@ const TemplatePrintList = () => {
     try {
       const res = await API_CALL.get("/print-template", {
         params: {
-          name: searchName,
+          ...filter,
           page,
           limit: 10,
         },
@@ -46,7 +54,7 @@ const TemplatePrintList = () => {
 
   useEffect(() => {
     fetchTemplates();
-  }, [page, searchName]);
+  }, [page, filter]);
 
   const handleDelete = async (id) => {
     const confirm = window.confirm(
@@ -200,16 +208,39 @@ const TemplatePrintList = () => {
               </>
             }
           >
-            <Input
-              placeholder="Tìm theo tên..."
-              value={searchName}
-              onChange={(e) => {
-                setPage(1);
-                setSearchName(e.target.value);
-              }}
-              allowClear
-              style={{ marginBottom: 8 }}
-            />
+            <div>
+              <Input
+                placeholder="Tìm theo tên..."
+                value={draft.name}
+                onChange={(e) =>
+                  setDraft((prev) => ({ ...prev, name: e.target.value }))
+                }
+                allowClear
+                style={{ marginBottom: 8 }}
+              />
+
+              <div style={{ display: "flex", gap: 8 }}>
+                <Button
+                  type="primary"
+                  onClick={() => {
+                    setPage(1);
+                    setFilter(draft); // commit draft → filter
+                  }}
+                >
+                  Tìm kiếm
+                </Button>
+                <Button
+                  onClick={() => {
+                    const reset = { name: "" };
+                    setDraft(reset);
+                    setFilter(reset);
+                    setPage(1);
+                  }}
+                >
+                  Reset
+                </Button>
+              </div>
+            </div>
           </Card>
         </Col>
       </Row>

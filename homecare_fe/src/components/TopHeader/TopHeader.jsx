@@ -146,7 +146,7 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
         >
           <div className={styles.drawerHeader}>
             <div>
-              <div className={styles.customerName}>Daogroup D software</div>
+              <div className={styles.customerName}>doctor.home-care.vn</div>
               <div className={styles.version}>ver. 1</div>
             </div>
             <div className={styles.drawerClose} onClick={closeRightDrawer}>

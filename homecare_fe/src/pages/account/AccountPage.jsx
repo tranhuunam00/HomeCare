@@ -39,13 +39,19 @@ const AccountPage = () => {
         <TabPane tab="Dịch vụ" key="1">
           <div className={styles["account-page__content"]}>
             <div style={{ display: "flex", flexDirection: "column" }}>
-              <div className={styles["account-page__content-child"]}>
+              <div
+                className={styles["account-page__content-child"]}
+                onClick={() => setSelectedMenu("profile")}
+              >
                 <UserOutlined /> Hồ sơ cá nhân
               </div>
               <div className={styles["account-page__content-child"]}>
                 <SettingOutlined /> Thông báo
               </div>
-              <div className={styles["account-page__content-child"]}>
+              <div
+                className={styles["account-page__content-child"]}
+                onClick={() => setSelectedMenu("password")}
+              >
                 <KeyOutlined /> Đổi mật khẩu
               </div>
             </div>

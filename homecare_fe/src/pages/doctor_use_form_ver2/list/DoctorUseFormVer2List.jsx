@@ -41,6 +41,7 @@ const STORAGE_KEY = "visibleColumns_doctorUseFormVer2";
 const defaultVisibleKeys = [
   "stt",
   "id",
+  "createAt",
   "ten_mau",
   "benh_nhan_ho_ten",
   "benh_nhan_gioi_tinh",
@@ -150,12 +151,18 @@ export default function DoctorUseFormVer2List() {
           (filters.page - 1) * filters.limit + index + 1,
       },
       { title: "ID", dataIndex: "id", key: "id", width: 70, align: "center" },
-      { title: "Tên mẫu", dataIndex: "ten_mau", key: "ten_mau", width: 200 },
       {
         title: "Họ tên BN",
         dataIndex: "benh_nhan_ho_ten",
         key: "benh_nhan_ho_ten",
         width: 160,
+      },
+      {
+        title: "Ngày tạo",
+        dataIndex: "createdAt",
+        key: "createdAt",
+        width: 160,
+        render: (_, r) => dayjs(r.createdAt).format("DD-MM-YYYY HH:mm:ss"),
       },
       {
         title: "Giới tính",
@@ -200,21 +207,13 @@ export default function DoctorUseFormVer2List() {
         render: (_, r) => r.id_doctor_doctor?.full_name || "—",
       },
       {
-        title: "FormVer2",
+        title: "Id mẫu form",
         key: "formver2",
         width: 120,
         render: (_, r) =>
           r.id_formver2_form_ver2?.ten_mau || r.id_formver2 || "—",
       },
-      {
-        title: "Trạng thái",
-        dataIndex: "status",
-        key: "status",
-        width: 120,
-        render: (status) => (
-          <Tag color={STATUS[status]?.color}>{STATUS[status]?.text}</Tag>
-        ),
-      },
+
       {
         title: "Hành động",
         key: "actions",
@@ -303,6 +302,7 @@ export default function DoctorUseFormVer2List() {
           </Tooltip>
         </Space>
       </div>
+      <Divider />
 
       <Card
         size="small"
@@ -436,19 +436,6 @@ export default function DoctorUseFormVer2List() {
                 }))
               }
             />
-          </Col>
-
-          {/* Đã xóa */}
-          <Col xs={12} md={6} lg={3}>
-            <Text>Đã xóa</Text>
-            <div>
-              <Switch
-                checked={filtersDraft.includeDeleted}
-                onChange={(v) =>
-                  setFiltersDraft((s) => ({ ...s, includeDeleted: v }))
-                }
-              />
-            </div>
           </Col>
         </Row>
       </Card>

@@ -1,15 +1,39 @@
-// ChangePasswordSection.jsx
-import React from "react";
-import { Card, Input, Button, Form, Typography } from "antd";
+import React, { useState } from "react";
+import { Card, Input, Button, Form, Typography, message, Modal } from "antd";
 import styles from "./AccountPage.module.scss";
+import API_CALL from "../../services/axiosClient";
+import { useGlobalAuth } from "../../contexts/AuthContext";
+import { toast } from "react-toastify";
 
 const { Title, Text } = Typography;
 
 const ChangePasswordSection = () => {
   const [form] = Form.useForm();
+  const { user } = useGlobalAuth();
+  const [loading, setLoading] = useState(false);
 
-  const onFinish = (values) => {
-    console.log("Change Password Values:", values);
+  const onFinish = async (values) => {
+    const confirm = window.confirm("Bạn có chắc chắn muốn đổi mật khẩu không?");
+    if (!confirm) return;
+
+    try {
+      setLoading(true);
+      const payload = {
+        oldPassword: values.currentPassword,
+        newPassword: values.newPassword,
+      };
+      await API_CALL.patch("/users/password", payload);
+      toast.success("Đổi mật khẩu thành công!");
+      form.resetFields();
+    } catch (err) {
+      console.error("Change password error:", err);
+      toast.error(
+        err?.response?.data?.message ||
+          "Đổi mật khẩu thất bại, vui lòng thử lại"
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -20,10 +44,6 @@ const ChangePasswordSection = () => {
         onFinish={onFinish}
         className={styles["change-password-form"]}
       >
-        <Form.Item label="Email">
-          <Input defaultValue="email@email.com" disabled />
-        </Form.Item>
-
         <Form.Item
           label="Mật khẩu hiện tại"
           name="currentPassword"
@@ -73,7 +93,7 @@ const ChangePasswordSection = () => {
         </div>
 
         <Form.Item style={{ marginTop: 16 }}>
-          <Button type="primary" htmlType="submit" block>
+          <Button type="primary" htmlType="submit" block loading={loading}>
             Lưu
           </Button>
         </Form.Item>

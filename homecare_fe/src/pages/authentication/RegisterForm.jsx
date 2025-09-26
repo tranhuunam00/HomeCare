@@ -167,7 +167,7 @@ const RegisterPage = () => {
 
                 const { token, user, doctor } = res.data.data;
                 handleLoginContext({ token, user, doctor });
-                showSuccess(`Đăng nhập thành công! Xin chào ${user.name}`);
+                showSuccess(`Đăng nhập thành công!`);
                 navigate("/");
               } catch (err) {
                 const message =
