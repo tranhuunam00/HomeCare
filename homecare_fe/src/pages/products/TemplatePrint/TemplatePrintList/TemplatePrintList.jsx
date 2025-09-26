@@ -177,7 +177,7 @@ const TemplatePrintList = () => {
     <div className={styles.TemplateList}>
       <Row justify="space-between" align="middle" style={{ marginBottom: 16 }}>
         <Col>
-          <h2 className={styles.title}>Danh sách header mẫu in kết quả</h2>
+          <h2 className={styles.title}>Danh sách mẫu in kết quả</h2>
         </Col>
         <Col>
           <Button

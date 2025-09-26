@@ -14,9 +14,8 @@ import styles from "./TemplateHeaderEditor.module.scss";
 
 const { Option } = Select;
 
-const TemplateHeaderEditor = ({ value = {}, onChange }) => {
+const TemplateHeaderEditor = ({ value = {}, onChange, form }) => {
   const [logoPreview, setLogoPreview] = useState(value.logo_url || "");
-  const [form] = Form.useForm();
   form.setFieldsValue(value);
 
   const handleLogoChange = (file) => {
@@ -34,68 +33,103 @@ const TemplateHeaderEditor = ({ value = {}, onChange }) => {
   };
 
   return (
-    <Form
-      form={form}
-      layout="vertical"
-      initialValues={{ ...value, code_header: "1" }}
-      onValuesChange={handleFormChange}
-      className={styles.templateHeaderForm}
-    >
-      <Row gutter={24} align="middle">
-        <Col span={6}>
-          <div className={styles.logoBlock}>
-            <img
-              src={
-                logoPreview || "https://via.placeholder.com/100x100?text=Logo"
+    <Row gutter={24} align="middle">
+      <Col span={6}>
+        <div className={styles.logoBlock}>
+          <Form.Item
+            label="Logo"
+            name="logo"
+            valuePropName="file" // 👈 quản lý 1 file duy nhất
+            getValueFromEvent={(e) => {
+              if (e?.file) {
+                const file = e.file.originFileObj || e.file;
+                setLogoPreview(URL.createObjectURL(file));
+                onChange?.({ ...form.getFieldsValue(), logo: file });
+                return file; // 👈 trả về đúng 1 file
               }
-              alt="Logo"
-              className={styles.logoImage}
-              width={180}
-            />
+              return null;
+            }}
+            rules={[{ required: true, message: "Vui lòng tải logo" }]}
+          >
             <Upload
-              beforeUpload={handleLogoChange}
+              beforeUpload={() => false} // chặn auto-upload
+              maxCount={1}
               showUploadList={false}
               accept=".jpg,.png,.jpeg"
             >
               <Button icon={<UploadOutlined />}>Tải logo</Button>
             </Upload>
+          </Form.Item>
 
-            <Form.Item name="code_header" label="Kiểu header">
-              <Select>
-                <Option value="1">Header 1</Option>
-              </Select>
+          <img
+            src={logoPreview || "https://via.placeholder.com/100x100?text=Logo"}
+            alt="Logo"
+            className={styles.logoImage}
+            width={180}
+          />
+        </div>
+      </Col>
+
+      <Col span={18}>
+        <Form.Item
+          rules={[
+            { required: true, message: "Vui lòng điền tên phòng khám " },
+            {},
+          ]}
+          name="clinic_name"
+          label="Tên phòng khám"
+        >
+          <Input />
+        </Form.Item>
+        <Form.Item
+          rules={[{ required: true, message: "Vui lòng điền tên khoa " }, {}]}
+          name="department_name"
+          label="Khoa"
+        >
+          <Input />
+        </Form.Item>
+        <Form.Item
+          rules={[{ required: true, message: "Vui lòng điền địa chỉ " }, {}]}
+          name="address"
+          label="Địa chỉ"
+        >
+          <Input />
+        </Form.Item>
+        <Row gutter={16}>
+          <Col span={12}>
+            <Form.Item
+              rules={[
+                { required: true, message: "Vui lòng điền website " },
+                {},
+              ]}
+              name="website"
+              label="Website"
+            >
+              <Input />
             </Form.Item>
-          </div>
-        </Col>
-
-        <Col span={18}>
-          <Form.Item name="clinic_name" label="Tên phòng khám">
-            <Input />
-          </Form.Item>
-          <Form.Item name="department_name" label="Khoa">
-            <Input />
-          </Form.Item>
-          <Form.Item name="address" label="Địa chỉ">
-            <Input />
-          </Form.Item>
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item name="website" label="Website">
-                <Input />
-              </Form.Item>
-              <Form.Item name="phone" label="Hotline">
-                <Input />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item name="email" label="Email">
-                <Input />
-              </Form.Item>
-            </Col>
-          </Row>
-        </Col>
-      </Row>
-    </Form>
+            <Form.Item
+              rules={[
+                { required: true, message: "Vui lòng điền hotline " },
+                {},
+              ]}
+              name="phone"
+              label="Hotline"
+            >
+              <Input />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              rules={[{ required: true, message: "Vui lòng điền email " }, {}]}
+              name="email"
+              label="Email"
+            >
+              <Input />
+            </Form.Item>
+          </Col>
+        </Row>
+      </Col>
+    </Row>
   );
 };
 

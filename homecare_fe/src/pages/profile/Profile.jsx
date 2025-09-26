@@ -304,8 +304,12 @@ const Profile = () => {
                   name="signature"
                   rules={[
                     {
-                      required: true,
-                      message: "Vui lòng tải chữ ký",
+                      validator: (_, value) => {
+                        if (signatureUrl || value) {
+                          return Promise.resolve();
+                        }
+                        return Promise.reject("Vui lòng tải chữ ký");
+                      },
                     },
                   ]}
                 >
@@ -335,8 +339,12 @@ const Profile = () => {
                 name="avatar"
                 rules={[
                   {
-                    required: true,
-                    message: "Vui lòng tải ảnh đại diện",
+                    validator: (_, value) => {
+                      if (avatarUrl || value) {
+                        return Promise.resolve();
+                      }
+                      return Promise.reject("Vui lòng tải ảnh đại diện");
+                    },
                   },
                 ]}
               >

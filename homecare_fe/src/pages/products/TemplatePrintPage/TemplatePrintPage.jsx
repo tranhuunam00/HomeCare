@@ -78,7 +78,20 @@ const TemplatePrintPreview = () => {
 
     // Đẩy từng key-value vào FormData
     Object.entries(payload).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
+      if (value === undefined || value === null) return;
+
+      if (key === "logo") {
+        console.log("value", value);
+        if (value instanceof File) {
+          formData.append("logo", value, value.name);
+        } else if (value.originFileObj) {
+          formData.append(
+            "logo",
+            value.originFileObj,
+            value.originFileObj.name
+          );
+        }
+      } else {
         formData.append(key, value);
       }
     });
@@ -129,20 +142,24 @@ const TemplatePrintPreview = () => {
 
   return (
     <Card style={{ maxWidth: 1240, margin: "auto" }}>
-      <Title level={3}>Header Mẫu in</Title>
+      <Title level={3}>Mẫu in</Title>
 
       <Spin spinning={loading}>
         <Form layout="vertical" form={form} onFinish={onFinish}>
-          <Form.Item label="Tên mẫu" name="name" rules={[{ required: true }]}>
-            <Input />
+          <Form.Item
+            label="Tên mẫu in"
+            name="name"
+            rules={[{ required: true, message: "Vui lòng nhập tên mẫu in" }]}
+          >
+            <Input placeholder="Nhập tên mẫu in" />
           </Form.Item>
 
           <Form.Item
-            label="Dịch vụ"
+            label="Phân hệ"
             name="id_template_service"
-            rules={[{ required: true }]}
+            rules={[{ required: true, message: "Vui lòng chọn phân hệ" }]}
           >
-            <Select placeholder="Chọn dịch vụ">
+            <Select placeholder="Chọn phân hệ">
               {templateServices.map((s) => (
                 <Option key={s.id} value={s.id}>
                   {s.name}
@@ -155,7 +172,7 @@ const TemplatePrintPreview = () => {
             <Form.Item
               label="Phòng khám"
               name="id_clinic"
-              rules={[{ required: true }]}
+              rules={[{ required: true, message: "Vui lòng chọn phòng khám" }]}
             >
               <Select placeholder="Chọn phòng khám">
                 {clinics.map((s) => (
@@ -171,6 +188,7 @@ const TemplatePrintPreview = () => {
             value={headerInfo}
             onChange={setHeaderInfo}
             headerInfo={headerInfo}
+            form={form}
           />
 
           <Form.Item style={{ marginTop: 24 }}>
