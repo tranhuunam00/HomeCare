@@ -299,39 +299,65 @@ const Profile = () => {
               </Form.Item>
 
               <Col span={6} className={styles.signatureSection}>
-                <img
-                  src={signatureUrl || "http://suneditor.com/docs/cat.jpg"}
-                  alt="Chữ ký"
-                  className={styles.signature}
-                />
-                <Upload
-                  accept=".jpg,.jpeg,.png"
-                  showUploadList={false}
-                  beforeUpload={handleSignaturePreview}
-                  disabled={!isEditing}
+                <Form.Item
+                  label="Chữ ký"
+                  name="signature"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Vui lòng tải chữ ký",
+                    },
+                  ]}
                 >
-                  <Button icon={<UploadOutlined />} disabled={!isEditing}>
-                    Đổi chữ ký
-                  </Button>
-                </Upload>
+                  <>
+                    <img
+                      src={signatureUrl || "http://suneditor.com/docs/cat.jpg"}
+                      alt="Chữ ký"
+                      className={styles.signature}
+                    />
+                    <Upload
+                      accept=".jpg,.jpeg,.png"
+                      showUploadList={false}
+                      beforeUpload={handleSignaturePreview}
+                      disabled={!isEditing}
+                    >
+                      <Button icon={<UploadOutlined />} disabled={!isEditing}>
+                        Đổi chữ ký
+                      </Button>
+                    </Upload>
+                  </>
+                </Form.Item>
               </Col>
             </Col>
             <Col span={6} className={styles.avatarSection}>
-              <Avatar
-                size={120}
-                src={avatarUrl ?? "https://i.pravatar.cc/300"}
-                className={styles.avatar}
-              />
-              <Upload
-                accept=".jpg,.jpeg,.png"
-                showUploadList={false}
-                beforeUpload={handleAvatarPreview}
-                disabled={!isEditing}
+              <Form.Item
+                label="Ảnh đại diện"
+                name="avatar"
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng tải ảnh đại diện",
+                  },
+                ]}
               >
-                <Button icon={<UploadOutlined />} disabled={!isEditing}>
-                  Đổi Ảnh Đại Diện
-                </Button>
-              </Upload>
+                <>
+                  <Avatar
+                    size={120}
+                    src={avatarUrl ?? "https://i.pravatar.cc/300"}
+                    className={styles.avatar}
+                  />
+                  <Upload
+                    accept=".jpg,.jpeg,.png"
+                    showUploadList={false}
+                    beforeUpload={handleAvatarPreview}
+                    disabled={!isEditing}
+                  >
+                    <Button icon={<UploadOutlined />} disabled={!isEditing}>
+                      Đổi Ảnh Đại Diện
+                    </Button>
+                  </Upload>
+                </>
+              </Form.Item>
             </Col>
           </Row>
           <Col span={20}>

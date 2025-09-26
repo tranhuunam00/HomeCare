@@ -131,14 +131,14 @@ const Sidebar = ({ collapsed }) => {
       ],
     },
     user?.id_role === USER_ROLE.ADMIN && {
-      key: "Cơ sở",
+      key: "Phân hệ",
       icon: (
         <Avatar
           src="https://png.pngtree.com/png-clipart/20230922/original/pngtree-school-building-flat-color-ui-icon-facility-elearning-solid-vector-png-image_12822392.png"
           size={40}
         />
       ),
-      label: "Cơ sở",
+      label: "Phân hệ",
       children: [{ key: "clinics", label: "Danh sách" }],
     },
     user?.id_role === USER_ROLE.ADMIN && {

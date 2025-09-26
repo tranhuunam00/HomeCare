@@ -153,7 +153,7 @@ const TemplateServiceList = () => {
     <div className={styles.TemplateList}>
       <Row justify="space-between" align="middle" style={{ marginBottom: 16 }}>
         <Col>
-          <h2 className={styles.title}>Danh sách mẫu dịch vụ</h2>
+          <h2 className={styles.title}>Danh sách mẫu phân hệ</h2>
         </Col>
         <Col>
           <Button

@@ -397,7 +397,7 @@ export default function FormVer2List() {
     <div className={styles.page}>
       <div className={styles.header}>
         <Title level={3} style={{ margin: 0 }}>
-          Danh sách FormVer2
+          Danh sách mẫu form Ver2
         </Title>
         <Space>
           <Tooltip title="Sử dụng">

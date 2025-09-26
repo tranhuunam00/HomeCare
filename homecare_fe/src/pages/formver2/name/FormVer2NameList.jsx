@@ -321,6 +321,7 @@ const FormVer2NameList = () => {
       title: "Tên mẫu",
       dataIndex: "name",
       key: "name",
+      width: 330,
       render: (v) => v || "",
     },
 
@@ -377,7 +378,7 @@ const FormVer2NameList = () => {
   return (
     <div className={styles.wrapper}>
       <div className={styles.header}>
-        <h2 className={styles.title}>Danh mục Tên Mẫu (FormVer2Name)</h2>
+        <h2 className={styles.title}>Danh sách tên mẫu form ver2</h2>
         <div className={styles.headerActions}>
           <Button icon={<ReloadOutlined />} onClick={fetchList}>
             Tải lại

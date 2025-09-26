@@ -80,11 +80,12 @@ const LoginPage = () => {
             name="login_form"
             onFinish={onFinish}
             layout="vertical"
-            requiredMark={false}
+            // requiredMark={false}
           >
             <Form.Item
               label="Email"
               name="email"
+              required
               rules={[
                 {
                   required: true,
