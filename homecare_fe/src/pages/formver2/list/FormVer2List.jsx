@@ -571,8 +571,8 @@ export default function FormVer2List() {
               value={uiFilters.orderDir}
               onChange={(v) => setUiFilters((s) => ({ ...s, orderDir: v }))}
               options={[
-                { value: "DESC", label: "Cũ nhất" },
-                { value: "ASC", label: "Mới nhất" },
+                { value: "DESC", label: "Giảm dần" },
+                { value: "ASC", label: "Tăng dần" },
               ]}
             />
           </Col>

@@ -36,10 +36,7 @@ const FormVer2NameList = () => {
   const [uploading, setUploading] = useState(false);
 
   // lấy từ context
-  const { examParts, templateServices, user, doctor, formVer2Names } =
-    useGlobalAuth();
-
-  console.log("templateServices", templateServices);
+  const { examParts, templateServices } = useGlobalAuth();
 
   // file input ref (ẩn) cho nút Import
   const fileInputRef = useRef(null);
@@ -49,13 +46,14 @@ const FormVer2NameList = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(20);
   const [total, setTotal] = useState(0);
+  const [orderBy, setOrderBy] = useState("id");
+  const [orderDir, setOrderDir] = useState("ASC");
 
   // filters
   const [q, setQ] = useState("");
-  const [includeDeleted, setIncludeDeleted] = useState(false); // nếu sau này cần
   const [selectedExamPartId, setSelectedExamPartId] = useState();
   const [selectedTemplateServiceId, setSelectedTemplateServiceId] = useState();
-  const [isUsedFilter, setIsUsedFilter] = useState(); // ✅ thêm state
+  const [isUsedFilter, setIsUsedFilter] = useState();
 
   // modal
   const [open, setOpen] = useState(false);
@@ -79,20 +77,21 @@ const FormVer2NameList = () => {
       page,
       limit,
       q: q?.trim() || undefined,
-      includeDeleted: includeDeleted ? 1 : undefined,
-      // truyền ID đa chọn lên BE (mảng). Axios sẽ serialize thành ?examPartIds=1&examPartIds=2...
       id_exam_part: selectedExamPartId,
       id_template_service: selectedTemplateServiceId,
       isUsed: isUsedFilter,
+      orderBy,
+      orderDir,
     }),
     [
       page,
       limit,
       q,
-      includeDeleted,
       selectedExamPartId,
       selectedTemplateServiceId,
       isUsedFilter,
+      orderBy,
+      orderDir,
     ]
   );
 
@@ -115,7 +114,7 @@ const FormVer2NameList = () => {
   useEffect(() => {
     fetchList();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, limit /* q để trigger bằng nút search riêng */]);
+  }, [page, limit]);
 
   const onSearch = () => {
     setPage(1);
@@ -124,10 +123,10 @@ const FormVer2NameList = () => {
 
   const onResetFilters = () => {
     setQ("");
-    setSelectedExamPartId();
-    setSelectedTemplateServiceId();
+    setSelectedExamPartId(undefined);
+    setSelectedTemplateServiceId(undefined);
+    setIsUsedFilter(undefined);
     setPage(1);
-    setIsUsedFilter();
     setLimit(20);
     fetchList();
   };
@@ -138,12 +137,11 @@ const FormVer2NameList = () => {
     setOpen(true);
   };
 
-  const openEdit = async (record) => {
+  const openEdit = (record) => {
     setEditingId(record.id);
     form.setFieldsValue({
       name: record.name,
       code: record.code,
-
       id_exam_part: record.id_exam_part,
       id_template_service: record.id_template_service,
     });
@@ -152,7 +150,6 @@ const FormVer2NameList = () => {
 
   const handleSubmit = async (values) => {
     try {
-      // values sẽ có: { name, id_exam_part, id_template_service }
       if (editingId) {
         await API_CALL.patch(`/form-ver2-names/${editingId}`, values);
         toast.success("Cập nhật thành công");
@@ -181,7 +178,6 @@ const FormVer2NameList = () => {
   };
 
   // ================== IMPORT & DOWNLOAD SAMPLE ==================
-
   const handleClickImport = () => {
     if (fileInputRef.current) fileInputRef.current.click();
   };
@@ -252,21 +248,6 @@ const FormVer2NameList = () => {
         "Bụng",
         "DRAD-IRSA-02",
         "Đốt sóng cao tần (RFA) u gan dưới CLVT",
-      ],
-      ["ĐQCT", "Bụng", "DRAD-IRSA-04", "Sinh thiết (Biopsy) gan dưới CLVT"],
-      ["ĐQCT", "Bụng", "DRAD-IRSA-05", "Sinh thiết (Biopsy) gan dưới CLVT"],
-      [
-        "ĐQCT",
-        "Bụng",
-        "DRAD-IRSA-06",
-        "Sinh thiết (Biopsy) hạch trong ổ bụng dưới CLVT",
-      ],
-      ["ĐQCT", "Bụng", "DRAD-IRSA-07", "Sinh thiết (Biopsy) lách dưới CLVT"],
-      [
-        "ĐQCT",
-        "Bụng",
-        "DRAD-IRSA-10",
-        "Sinh thiết (Biopsy) tạng hay khối ổ bụng dưới CLVT",
       ],
     ];
 
@@ -383,7 +364,6 @@ const FormVer2NameList = () => {
           <Button icon={<ReloadOutlined />} onClick={fetchList}>
             Tải lại
           </Button>
-
           <Button
             icon={<UploadOutlined />}
             loading={uploading}
@@ -398,17 +378,16 @@ const FormVer2NameList = () => {
             style={{ display: "none" }}
             onChange={handleFileChange}
           />
-
           <Button icon={<DownloadOutlined />} onClick={handleDownloadSample}>
             Tải file mẫu
           </Button>
-
           <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
             Thêm mới
           </Button>
         </div>
       </div>
 
+      {/* ===== Bộ lọc ===== */}
       <Row gutter={16} className={styles.filterRow}>
         <Col span={24}>
           <Card
@@ -439,17 +418,24 @@ const FormVer2NameList = () => {
                 />
               </Col>
               <Col xs={24} sm={12} md={8} lg={6}>
-                <label>Đã sử dụng?</label>
+                <label>Phân hệ</label>
                 <Select
                   allowClear
-                  placeholder="Chọn trạng thái…"
-                  value={isUsedFilter}
-                  onChange={setIsUsedFilter}
+                  placeholder="Chọn phân hệ…"
+                  value={selectedTemplateServiceId}
+                  onChange={(v) => {
+                    setSelectedTemplateServiceId(v);
+                    setSelectedExamPartId(undefined); // reset bộ phận
+                  }}
                   style={{ width: "100%" }}
+                  showSearch
+                  optionFilterProp="children"
                 >
-                  <Option value={"true"}>Đã dùng</Option>
-                  <Option value={"false"}>Chưa dùng</Option>
-                  <Option value={"all"}>Tất cả</Option>
+                  {(templateServices || []).map((s) => (
+                    <Option key={s.id} value={s.id}>
+                      {s.name}
+                    </Option>
+                  ))}
                 </Select>
               </Col>
               <Col xs={24} sm={12} md={8} lg={6}>
@@ -460,33 +446,59 @@ const FormVer2NameList = () => {
                   value={selectedExamPartId}
                   onChange={setSelectedExamPartId}
                   style={{ width: "100%" }}
-                  optionFilterProp="children"
                   showSearch
+                  optionFilterProp="children"
+                  disabled={!selectedTemplateServiceId}
                 >
-                  {(examParts || []).map((p) => (
-                    <Option key={p.id} value={p.id}>
-                      {p.name}
-                    </Option>
-                  ))}
+                  {(examParts || [])
+                    .filter(
+                      (p) =>
+                        String(p.id_template_service) ===
+                        String(selectedTemplateServiceId)
+                    )
+                    .map((p) => (
+                      <Option key={p.id} value={p.id}>
+                        {p.name}
+                      </Option>
+                    ))}
+                </Select>
+              </Col>
+              <Col xs={24} sm={12} md={8} lg={6}>
+                <label>Đã sử dụng?</label>
+                <Select
+                  allowClear
+                  placeholder="Chọn trạng thái…"
+                  value={isUsedFilter}
+                  onChange={setIsUsedFilter}
+                  style={{ width: "100%" }}
+                >
+                  <Option value={"true"}>Đã dùng</Option>
+                  <Option value={"false"}>Chưa dùng</Option>
+                </Select>
+              </Col>
+              <Col xs={24} sm={12} md={8} lg={6}>
+                <label>Sắp xếp theo</label>
+                <Select
+                  value={orderBy}
+                  onChange={(v) => setOrderBy(v)}
+                  style={{ width: "100%" }}
+                >
+                  <Option value="id">ID</Option>
+                  <Option value="name">Tên mẫu</Option>
+                  <Option value="code">Code</Option>
+                  <Option value="createdAt">Ngày tạo</Option>
                 </Select>
               </Col>
 
               <Col xs={24} sm={12} md={8} lg={6}>
-                <label>Phân hệ</label>
+                <label>Thứ tự</label>
                 <Select
-                  allowClear
-                  placeholder="Chọn phân hệ…"
-                  value={selectedTemplateServiceId}
-                  onChange={setSelectedTemplateServiceId}
+                  value={orderDir}
+                  onChange={(v) => setOrderDir(v)}
                   style={{ width: "100%" }}
-                  optionFilterProp="children"
-                  showSearch
                 >
-                  {(templateServices || []).map((s) => (
-                    <Option key={s.id} value={s.id}>
-                      {s.name}
-                    </Option>
-                  ))}
+                  <Option value="ASC">Tăng dần</Option>
+                  <Option value="DESC">Giảm dần</Option>
                 </Select>
               </Col>
             </Row>
@@ -577,33 +589,52 @@ const FormVer2NameList = () => {
                   allowClear
                   showSearch
                   optionFilterProp="children"
+                  onChange={() =>
+                    form.setFieldsValue({ id_exam_part: undefined })
+                  }
                 >
                   {(templateServices || []).map((s) => (
-                    <Select.Option key={s.id} value={s.id}>
+                    <Option key={s.id} value={s.id}>
                       {s.name}
-                    </Select.Option>
+                    </Option>
                   ))}
                 </Select>
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item
-                name="id_exam_part"
-                label="Bộ phận"
-                rules={[{ required: true, message: "Vui lòng chọn bộ phận" }]}
-              >
-                <Select
-                  placeholder="Chọn bộ phận…"
-                  allowClear
-                  showSearch
-                  optionFilterProp="children"
-                >
-                  {(examParts || []).map((p) => (
-                    <Select.Option key={p.id} value={p.id}>
-                      {p.name}
-                    </Select.Option>
-                  ))}
-                </Select>
+              <Form.Item shouldUpdate>
+                {({ getFieldValue }) => {
+                  const serviceId = getFieldValue("id_template_service");
+                  return (
+                    <Form.Item
+                      name="id_exam_part"
+                      label="Bộ phận"
+                      rules={[
+                        { required: true, message: "Vui lòng chọn bộ phận" },
+                      ]}
+                    >
+                      <Select
+                        placeholder="Chọn bộ phận…"
+                        allowClear
+                        showSearch
+                        optionFilterProp="children"
+                        disabled={!serviceId}
+                      >
+                        {(examParts || [])
+                          .filter(
+                            (p) =>
+                              String(p.id_template_service) ===
+                              String(serviceId)
+                          )
+                          .map((p) => (
+                            <Option key={p.id} value={p.id}>
+                              {p.name}
+                            </Option>
+                          ))}
+                      </Select>
+                    </Form.Item>
+                  );
+                }}
               </Form.Item>
             </Col>
           </Row>

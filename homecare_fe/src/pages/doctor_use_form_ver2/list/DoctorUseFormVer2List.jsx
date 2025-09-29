@@ -84,6 +84,8 @@ export default function DoctorUseFormVer2List() {
   const [loading, setLoading] = useState(false);
   const [rows, setRows] = useState([]);
   const [total, setTotal] = useState(0);
+  const [orderBy, setOrderBy] = useState("id");
+  const [orderDir, setOrderDir] = useState("ASC");
 
   // filters chính thức (gửi lên API)
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
@@ -117,6 +119,8 @@ export default function DoctorUseFormVer2List() {
         id_formver2: filters.id_formver2 || undefined,
         id: filters.id || undefined,
         includeDeleted: filters.includeDeleted || undefined,
+        orderBy,
+        orderDir,
       };
       if (filters.range) {
         params.date_from = filters.range[0].format("YYYY-MM-DD");
@@ -436,6 +440,31 @@ export default function DoctorUseFormVer2List() {
                 }))
               }
             />
+          </Col>
+
+          <Col xs={24} sm={12} md={8} lg={6}>
+            <label>Sắp xếp theo</label>
+            <Select
+              value={orderBy}
+              onChange={(v) => setOrderBy(v)}
+              style={{ width: "100%" }}
+            >
+              <Option value="id">ID</Option>
+              <Option value="benh_nhan_ho_ten">Tên bệnh nhân</Option>
+              <Option value="createdAt">Ngày tạo</Option>
+            </Select>
+          </Col>
+
+          <Col xs={24} sm={12} md={8} lg={6}>
+            <label>Thứ tự</label>
+            <Select
+              value={orderDir}
+              onChange={(v) => setOrderDir(v)}
+              style={{ width: "100%" }}
+            >
+              <Option value="ASC">Tăng dần</Option>
+              <Option value="DESC">Giảm dần</Option>
+            </Select>
           </Col>
         </Row>
       </Card>

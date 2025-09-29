@@ -5,6 +5,21 @@ import { useGlobalAuth } from "../contexts/AuthContext";
 import API_CALL from "../services/axiosClient";
 import useToast from "./useToast";
 
+const fetchWithRetry = async (fn, retries = 3, delay = 1000) => {
+  let lastError;
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastError = err;
+      if (i < retries - 1) {
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+  }
+  throw lastError;
+};
+
 const useAuthInitializer = () => {
   const {
     handleLoginContext,
@@ -20,25 +35,32 @@ const useAuthInitializer = () => {
     const user = storage.get("USER");
 
     if (token && user?.id) {
-      API_CALL.get(`/users/profile/${user.id}`)
+      // Profile
+      fetchWithRetry(() => API_CALL.get(`/users/profile/${user.id}`))
         .then((res) => {
           const { user, doctor } = res.data.data;
           handleLoginContext({ token, user, doctor });
         })
         .catch(() => {
           handleLogoutGlobal();
-          showWarning("Vui lòng đăng nhập lại ");
+          showWarning("Vui lòng đăng nhập lại");
         });
 
-      API_CALL.get(`/ts`, { params: { page: 1, limit: 1000 } })
+      // Template Services
+      fetchWithRetry(() =>
+        API_CALL.get(`/ts`, { params: { page: 1, limit: 1000 } })
+      )
         .then((res) => {
           setTemplateServices(res.data.data.data);
         })
         .catch(() => {
-          showWarning("Vui lòng  API_CALL.get(`/users/ts`)");
+          showWarning("Không thể tải danh sách phân hệ");
         });
 
-      API_CALL.get("/ts/exam-parts", { params: { page: 1, limit: 1000 } })
+      // Exam Parts
+      fetchWithRetry(() =>
+        API_CALL.get(`/ts/exam-parts`, { params: { page: 1, limit: 1000 } })
+      )
         .then((res) => {
           setExamParts(res.data.data);
         })
@@ -46,12 +68,15 @@ const useAuthInitializer = () => {
           showWarning("Không thể tải danh sách bộ phận thăm khám");
         });
 
-      API_CALL.get("/form-ver2-names", { params: { page: 1, limit: 2000 } })
+      // Form Ver2 Names
+      fetchWithRetry(() =>
+        API_CALL.get(`/form-ver2-names`, { params: { page: 1, limit: 2000 } })
+      )
         .then((res) => {
           setFormVer2Names(res.data?.data.items);
         })
         .catch(() => {
-          showWarning("Không thể tải danh sách formver2");
+          showWarning("Không thể tải danh sách form ver2");
         });
     }
   }, []);
