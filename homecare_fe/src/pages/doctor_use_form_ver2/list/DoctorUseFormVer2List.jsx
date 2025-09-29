@@ -165,11 +165,11 @@ export default function DoctorUseFormVer2List() {
         key: "benh_nhan_ho_ten",
         width: 160,
       },
-      user?.id_role == USER_ROLE.ADMIN && {
-        title: "Bác sĩ đọc",
+      {
+        title: "Bác sĩ",
         key: "doctor_name",
-        width: 160,
-        render: (_, record) => record.id_doctor_doctor?.full_name || "—",
+        width: 150,
+        render: (_, r) => r.id_doctor_doctor?.full_name || "—",
       },
       {
         title: "Ngày tạo",
@@ -214,12 +214,7 @@ export default function DoctorUseFormVer2List() {
         width: 140,
         render: (_, r) => r.id_exam_part_exam_part?.name || "—",
       },
-      {
-        title: "Bác sĩ",
-        key: "doctor_name",
-        width: 150,
-        render: (_, r) => r.id_doctor_doctor?.full_name || "—",
-      },
+
       {
         title: "Id mẫu form",
         key: "formver2",

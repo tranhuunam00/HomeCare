@@ -30,6 +30,7 @@ import moment from "moment";
 import useVietnamAddress from "../../hooks/useVietnamAddress.js";
 
 import { QRCodeCanvas } from "qrcode.react";
+import BackHeader from "../../components/BackHeader.jsx";
 
 const qrValue = `http://222.255.214.218:3003/home/recist`;
 
@@ -649,6 +650,11 @@ export default function Recist() {
   return (
     <div style={{ display: "flex", justifyContent: "center", width: "100vw" }}>
       <div className="a4-page">
+        <BackHeader
+          title=""
+          sticky
+          // extra={<Button type="primary">Lưu</Button>}
+        />
         <div>
           <Space
             style={{
