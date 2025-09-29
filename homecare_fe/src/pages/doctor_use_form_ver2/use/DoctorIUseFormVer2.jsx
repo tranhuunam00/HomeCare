@@ -400,10 +400,38 @@ export default function DoctorUseDFormVer2({
 
   return (
     <div style={{ maxWidth: 980, margin: "0 auto", padding: 0 }}>
-      <Title level={3} style={{ textAlign: "center", marginBottom: 24 }}>
+      <Title
+        level={3}
+        style={{
+          textAlign: "center",
+          marginBottom: 8,
+          color: "rgb(47, 109, 184)",
+        }}
+      >
+        HỆ THỐNG PHẦN MỀM PHẦN MỀM ĐỌC KẾT QUẢ
+      </Title>
+      <Title
+        level={3}
+        style={{
+          textAlign: "center",
+          marginBottom: 8,
+          marginTop: 8,
+          color: "rgb(47, 109, 184)",
+        }}
+      >
         ĐỌC KẾT QUẢ CHẨN ĐOÁN HÌNH ẢNH – THĂM DÒ CHỨC NĂNG
       </Title>
-
+      <Title
+        level={3}
+        style={{
+          textAlign: "center",
+          marginBottom: 24,
+          marginTop: 8,
+          color: "rgb(47, 109, 184)",
+        }}
+      >
+        D-RADS
+      </Title>
       {loading ? (
         <div style={{ textAlign: "center", padding: 40 }}>
           <Spin />
@@ -865,7 +893,7 @@ export default function DoctorUseDFormVer2({
           >
             <TextArea
               disabled={!isEdit}
-              style={{ height: 200 }}
+              style={{ height: 200, fontWeight: "bold" }}
               placeholder="VD: U máu gan"
             />
           </Form.Item>
@@ -1032,7 +1060,6 @@ export default function DoctorUseDFormVer2({
           )}
         </Form>
       )}
-
       <Modal
         open={previewOpen}
         onCancel={() => setPreviewOpen(false)}
@@ -1065,7 +1092,6 @@ export default function DoctorUseDFormVer2({
           }
         />
       </Modal>
-
       <HistoryModal
         open={historyOpen}
         onClose={() => setHistoryOpen(false)}

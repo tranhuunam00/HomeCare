@@ -387,9 +387,10 @@ const PrintPreviewVer2NotDataDiagnose = ({
             className={styles.paragraph}
             style={{
               whiteSpace: "pre-line",
+              fontWeight: "bold",
             }}
           >
-            {formSnapshot.ketQuaChanDoan}
+            {formSnapshot.ketQuaChanDoan || formSnapshot.ket_qua_chan_doan}
           </p>
           <PrintItem label={"PHÂN LOẠI IDC-10"} value={formSnapshot?.icd10} />
           <PrintItem
