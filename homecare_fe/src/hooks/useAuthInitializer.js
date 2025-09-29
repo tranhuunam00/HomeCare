@@ -62,7 +62,7 @@ const useAuthInitializer = () => {
         API_CALL.get(`/ts/exam-parts`, { params: { page: 1, limit: 1000 } })
       )
         .then((res) => {
-          setExamParts(res.data.data);
+          setExamParts(res.data.data.data);
         })
         .catch(() => {
           showWarning("Không thể tải danh sách bộ phận thăm khám");

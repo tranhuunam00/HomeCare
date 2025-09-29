@@ -9,6 +9,7 @@ import {
   Button,
   Popconfirm,
   Tooltip,
+  Select,
 } from "antd";
 import {
   DeleteOutlined,
@@ -36,7 +37,12 @@ const ExamPartList = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
+
+  const [searchDraft, setSearchDraft] = useState("");
+  const [selectedServiceDraft, setSelectedServiceDraft] = useState();
+
   const [searchName, setSearchName] = useState("");
+  const [selectedServiceId, setSelectedServiceId] = useState();
 
   const [modalOpen, setModalOpen] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
@@ -76,15 +82,15 @@ const ExamPartList = () => {
     try {
       const res = await API_CALL.get("/ts/exam-parts", {
         params: {
-          name: searchName,
+          name: searchName || undefined,
+          id_template_service: selectedServiceId || undefined,
           page,
           limit,
         },
       });
-
       const responseData = res.data;
-      setParts(responseData?.data || []);
-      setTotal(responseData?.total || 0);
+      setParts(responseData?.data?.data || []);
+      setTotal(responseData?.data.total || 0);
     } catch (err) {
       console.error("Lỗi lấy danh sách exam part:", err);
       toast.error(err?.response?.data?.message || "Không thể tải dữ liệu");
@@ -92,9 +98,10 @@ const ExamPartList = () => {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     fetchParts();
-  }, [page, limit, searchName]);
+  }, [page, limit, searchName, selectedServiceId]);
 
   const handleDelete = async (id) => {
     try {
@@ -190,29 +197,66 @@ const ExamPartList = () => {
         </Col>
       </Row>
 
-      <Row gutter={16} className={styles.filterGroup}>
-        <Col span={6}>
-          <Card
-            size="small"
-            title={
-              <>
-                <FilterOutlined /> Bộ lọc
-              </>
-            }
-          >
+      <Card
+        size="small"
+        title={
+          <>
+            <FilterOutlined /> Bộ lọc - {total} bản ghi
+          </>
+        }
+        extra={
+          <div style={{ display: "flex", gap: 8 }}>
+            <Button
+              type="primary"
+              onClick={() => {
+                setPage(1);
+                setSearchName(searchDraft);
+                setSelectedServiceId(selectedServiceDraft);
+              }}
+            >
+              Tìm kiếm
+            </Button>
+            <Button
+              onClick={() => {
+                setPage(1);
+                setSearchDraft("");
+                setSelectedServiceDraft(undefined);
+                setSearchName("");
+                setSelectedServiceId(undefined);
+              }}
+            >
+              Xoá lọc
+            </Button>
+          </div>
+        }
+      >
+        <Row>
+          <Col>
             <Input
               placeholder="Tìm theo tên..."
-              value={searchName}
-              onChange={(e) => {
-                setPage(1);
-                setSearchName(e.target.value);
-              }}
+              value={searchDraft}
+              onChange={(e) => setSearchDraft(e.target.value)}
               allowClear
               style={{ marginBottom: 8 }}
             />
-          </Card>
-        </Col>
-      </Row>
+          </Col>
+          <Col>
+            <Select
+              allowClear
+              placeholder="Chọn phân hệ..."
+              value={selectedServiceDraft}
+              onChange={(v) => setSelectedServiceDraft(v)}
+              style={{ width: "100%" }}
+            >
+              {(templateServices || []).map((s) => (
+                <Select.Option key={s.id} value={s.id}>
+                  {s.name}
+                </Select.Option>
+              ))}
+            </Select>
+          </Col>
+        </Row>
+      </Card>
 
       <Spin spinning={loading}>
         <Table

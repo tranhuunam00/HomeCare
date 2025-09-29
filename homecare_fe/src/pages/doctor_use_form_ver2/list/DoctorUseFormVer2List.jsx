@@ -31,6 +31,7 @@ import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import styles from "./DoctorUseFormVer2List.module.scss";
 import { useGlobalAuth } from "../../../contexts/AuthContext";
+import { USER_ROLE } from "../../../constant/app";
 
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
@@ -66,6 +67,7 @@ const DEFAULT_FILTERS = {
   id: undefined,
   includeDeleted: false,
   range: undefined,
+  id_doctor: null,
 };
 
 const STATUS = {
@@ -79,7 +81,7 @@ const STORAGE_KEY_PAGE_SIZE = "doctorUseFormVer2_pageSize";
 
 export default function DoctorUseFormVer2List() {
   const navigate = useNavigate();
-  const { examParts = [], templateServices = [] } = useGlobalAuth();
+  const { examParts = [], templateServices = [], user } = useGlobalAuth();
 
   const [loading, setLoading] = useState(false);
   const [rows, setRows] = useState([]);
@@ -119,6 +121,7 @@ export default function DoctorUseFormVer2List() {
         id_formver2: filters.id_formver2 || undefined,
         id: filters.id || undefined,
         includeDeleted: filters.includeDeleted || undefined,
+        id_doctor: filters.id_doctor || undefined,
         orderBy,
         orderDir,
       };
@@ -155,11 +158,18 @@ export default function DoctorUseFormVer2List() {
           (filters.page - 1) * filters.limit + index + 1,
       },
       { title: "ID", dataIndex: "id", key: "id", width: 70, align: "center" },
+
       {
         title: "Họ tên BN",
         dataIndex: "benh_nhan_ho_ten",
         key: "benh_nhan_ho_ten",
         width: 160,
+      },
+      user?.id_role == USER_ROLE.ADMIN && {
+        title: "Bác sĩ đọc",
+        key: "doctor_name",
+        width: 160,
+        render: (_, record) => record.id_doctor_doctor?.full_name || "—",
       },
       {
         title: "Ngày tạo",
@@ -349,6 +359,20 @@ export default function DoctorUseFormVer2List() {
               }
             />
           </Col>
+
+          {user.id_role == USER_ROLE.ADMIN && (
+            <Col xs={24} md={8} lg={4}>
+              <Text>ID Bác sĩ</Text>
+              <Input
+                type="number"
+                placeholder="Nhập ID bác sĩ"
+                value={filtersDraft.id_doctor}
+                onChange={(e) =>
+                  setFiltersDraft((s) => ({ ...s, id_doctor: e.target.value }))
+                }
+              />
+            </Col>
+          )}
 
           {/* Phân hệ */}
           <Col xs={24} md={8} lg={4}>
