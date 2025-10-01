@@ -180,7 +180,10 @@ export default function FormVer2List() {
       page: 1,
     }));
 
-  const resetUi = () => setUiFilters(DEFAULT_FILTERS);
+  const resetUi = () => {
+    setUiFilters(DEFAULT_FILTERS);
+    setFilters(DEFAULT_FILTERS);
+  };
 
   const selectAllOnPage = () => {
     setSelectedRowKeys((prev) => {
@@ -233,7 +236,7 @@ export default function FormVer2List() {
         },
       },
       {
-        title: "Bộ phận thăm khám",
+        title: "Bộ phận",
         dataIndex: "id_exam_part",
         key: "id_exam_part",
         align: "left",
@@ -251,7 +254,7 @@ export default function FormVer2List() {
       },
 
       {
-        title: "Icd10",
+        title: "ICD-10",
         dataIndex: "icd10",
         key: "icd10",
         align: "center",
@@ -395,10 +398,24 @@ export default function FormVer2List() {
   /* ======= UI ======= */
   return (
     <div className={styles.page}>
+      <Title
+        level={3}
+        style={{ margin: 0, textAlign: "center", color: "#3366CC" }}
+      >
+        PHẦN MỀM D-RADS
+      </Title>
+      <Title
+        level={3}
+        style={{
+          margin: 0,
+          textAlign: "center",
+          marginBottom: 30,
+          color: "#3366CC",
+        }}
+      >
+        DANH SÁCH MẪU KẾT QUẢ
+      </Title>
       <div className={styles.header}>
-        <Title level={3} style={{ margin: 0 }}>
-          Danh sách mẫu form Ver2
-        </Title>
         <Space>
           <Tooltip title="Sử dụng">
             <Button
@@ -459,12 +476,8 @@ export default function FormVer2List() {
         }
         extra={
           <Space>
-            <Button size="small" onClick={resetUi}>
-              Reset
-            </Button>
-            <Button type="primary" size="small" onClick={applySearch}>
-              Tìm kiếm
-            </Button>
+            <button onClick={resetUi}>Reset</button>
+            <button onClick={applySearch}>Tìm kiếm</button>
           </Space>
         }
       >

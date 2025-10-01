@@ -68,21 +68,22 @@ const Sidebar = ({ collapsed }) => {
       label: "Mẫu kết quả phiên bản 2",
       children: [
         user?.id_role === USER_ROLE.ADMIN && {
-          key: "form-v2-list",
-          label: "Danh sách",
+          key: "form-v2",
+          label: "Tạo mẫu mới",
         },
         user?.id_role === USER_ROLE.ADMIN && {
-          key: "form-v2",
-          label: "Tạo mới",
+          key: "form-v2-list",
+          label: "Danh sách mẫu",
         },
+        {
+          key: "doctor-use-form-v2",
+          label: "Kết quả đã sử dụng",
+        },
+
         user?.id_role === USER_ROLE.ADMIN && {
           key: "form-ver2-names",
 
           label: "Danh sách tên mẫu ver2",
-        },
-        {
-          key: "doctor-use-form-v2",
-          label: "Kết quả đã đọc",
         },
       ],
     },

@@ -67,7 +67,7 @@ export default function DoctorUseDFormVer2({
   const { id } = useParams();
   const [idEdit, setIdEdit] = useState(id);
   const [historyOpen, setHistoryOpen] = useState(false);
-  const [imageList, setImageList] = useState([]);
+  const [imageList, setImageList] = useState([{}, {}, {}]);
   console.log("imageList", imageList);
   const [filteredFormVer2Names, setFilteredFormVer2Names] = useState([]);
   const [resetKey, setResetKey] = useState(0);
@@ -408,7 +408,7 @@ export default function DoctorUseDFormVer2({
           color: "rgb(47, 109, 184)",
         }}
       >
-        HỆ THỐNG PHẦN MỀM PHẦN MỀM ĐỌC KẾT QUẢ
+        PHẦN MỀM D-RADS
       </Title>
       <Title
         level={3}
@@ -445,6 +445,16 @@ export default function DoctorUseDFormVer2({
           wrapperCol={{ flex: "1 0 0" }}
           colon={false}
           onFinish={onFinish}
+          requiredMark={(label, { required }) =>
+            required ? (
+              <span>
+                {label}
+                <span style={{ color: "red", marginLeft: 4 }}>*</span>
+              </span>
+            ) : (
+              label
+            )
+          }
           onFinishFailed={onFinishFailed}
           initialValues={{
             language: "vi",
@@ -618,7 +628,7 @@ export default function DoctorUseDFormVer2({
                 </Col>
               </Row>
               <Form.Item
-                label="Địa chỉ (số nhà)"
+                label="Địa chỉ, số nhà"
                 name="benh_nhan_dia_chi_so_nha"
               >
                 <Input disabled={!isEdit} placeholder="VD: 123 Lê Lợi" />
@@ -653,7 +663,7 @@ export default function DoctorUseDFormVer2({
           </Row> */}
 
           <Row gutter={16}>
-            <Col xs={24} md={12}>
+            <Col xs={24} md={9}>
               <Form.Item
                 label="Phân hệ"
                 name="id_template_service"
@@ -664,7 +674,6 @@ export default function DoctorUseDFormVer2({
                   disabled={!isEdit}
                   allowClear
                   onChange={() => {
-                    // Clear các field phụ thuộc khi đổi phân hệ
                     form.setFieldsValue({
                       id_exam_part: undefined,
                       id_formver2_name: undefined,
@@ -680,7 +689,8 @@ export default function DoctorUseDFormVer2({
                 </Select>
               </Form.Item>
             </Col>
-            <Col xs={24} md={12}>
+
+            <Col xs={24} md={8}>
               <Form.Item
                 label="Bộ phận"
                 name="id_exam_part"
@@ -707,11 +717,8 @@ export default function DoctorUseDFormVer2({
                 </Select>
               </Form.Item>
             </Col>
-          </Row>
 
-          {/* Hàng 2 */}
-          <Row gutter={16}>
-            <Col xs={24} md={12}>
+            <Col xs={24} md={7}>
               <Form.Item
                 label="Ngôn ngữ"
                 name="language"
@@ -729,7 +736,7 @@ export default function DoctorUseDFormVer2({
           <Row gutter={16}>
             <Col xs={24} md={24}>
               <Form.Item
-                label="Tên form"
+                label="Mẫu đọc kết quả"
                 name="id_formver2_name"
                 rules={[{ required: true, message: "Chọn tên mẫu" }]}
               >
@@ -876,6 +883,11 @@ export default function DoctorUseDFormVer2({
             />
           </Form.Item>
 
+          {/* Ảnh minh hoạ */}
+          <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
+            MÔ TẢ HÌNH ẢNH
+          </Title>
+
           <CustomSunEditor
             value={imageDescEditor}
             onChange={setImageDescEditor}
@@ -955,20 +967,6 @@ export default function DoctorUseDFormVer2({
               onChangeTrans={setImageList}
             />
           </Form.Item>
-
-          <Title level={4} style={{ margin: "24px 0 16px" }}>
-            <a
-              style={{
-                fontStyle: "italic",
-                color: "#b17b16ff",
-                textDecoration: "underline",
-                cursor: "pointer",
-              }}
-              onClick={() => setHistoryOpen(true)}
-            >
-              LỊCH SỬ THAY ĐỔI
-            </a>
-          </Title>
 
           {/* Action bar */}
           {(initialSnap.apiData?.id_doctor == doctor.id ||
@@ -1058,6 +1056,20 @@ export default function DoctorUseDFormVer2({
               }}
             />
           )}
+
+          <Title level={4} style={{ margin: "24px 0 16px" }}>
+            <a
+              style={{
+                fontStyle: "italic",
+                color: "#b17b16ff",
+                textDecoration: "underline",
+                cursor: "pointer",
+              }}
+              onClick={() => setHistoryOpen(true)}
+            >
+              LỊCH SỬ THAY ĐỔI
+            </a>
+          </Title>
         </Form>
       )}
       <Modal
