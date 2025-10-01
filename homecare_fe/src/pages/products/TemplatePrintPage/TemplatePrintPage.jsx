@@ -154,20 +154,6 @@ const TemplatePrintPreview = () => {
             <Input placeholder="Nhập tên mẫu in" />
           </Form.Item>
 
-          <Form.Item
-            label="Phân hệ"
-            name="id_template_service"
-            rules={[{ required: true, message: "Vui lòng chọn phân hệ" }]}
-          >
-            <Select placeholder="Chọn phân hệ">
-              {templateServices.map((s) => (
-                <Option key={s.id} value={s.id}>
-                  {s.name}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
-
           {user.id_role == USER_ROLE.ADMIN && (
             <Form.Item
               label="Phòng khám"

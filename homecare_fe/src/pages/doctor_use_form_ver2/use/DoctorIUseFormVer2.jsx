@@ -192,11 +192,6 @@ export default function DoctorUseDFormVer2({
   }, [idEdit]);
 
   useEffect(() => {
-    if (!selectedTemplateServiceId) {
-      setPrintTemplate();
-      setPrintTemplateList([]);
-      form.setFieldValue("id_print_template", null);
-    }
     const fetchTemplates = async () => {
       try {
         const [printRes] = await Promise.all([
@@ -204,7 +199,6 @@ export default function DoctorUseDFormVer2({
             params: {
               page: 1,
               limit: 1000,
-              id_template_service: +selectedTemplateServiceId || -1,
               id_clinic: doctor.id_clinic,
             },
           }),
@@ -219,10 +213,8 @@ export default function DoctorUseDFormVer2({
       }
     };
 
-    if (selectedTemplateServiceId) {
-      fetchTemplates();
-    }
-  }, [selectedTemplateServiceId]);
+    fetchTemplates();
+  }, []);
 
   const currentFormVer2Name = useMemo(() => {
     const byPick = (formVer2Names || []).find(
@@ -789,7 +781,7 @@ export default function DoctorUseDFormVer2({
             rules={[{ required: true, message: "Chọn mẫu in" }]}
           >
             <Select
-              disabled={!selectedTemplateServiceId || !isEdit}
+              disabled={!isEdit}
               showSearch
               allowClear
               style={{ width: "100%" }}
@@ -804,15 +796,11 @@ export default function DoctorUseDFormVer2({
                 option?.children?.toLowerCase()?.includes(input.toLowerCase())
               }
             >
-              {printTemplateList
-                .filter(
-                  (t) => t.id_template_service == selectedTemplateServiceId
-                )
-                .map((tpl) => (
-                  <Option key={tpl.id} value={tpl.id}>
-                    {tpl.name}
-                  </Option>
-                ))}
+              {printTemplateList.map((tpl) => (
+                <Option key={tpl.id} value={tpl.id}>
+                  {tpl.name}
+                </Option>
+              ))}
             </Select>
           </Form.Item>
 

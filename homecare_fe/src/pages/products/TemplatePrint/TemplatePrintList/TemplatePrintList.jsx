@@ -106,13 +106,6 @@ const TemplatePrintList = () => {
     { title: "ID", dataIndex: "id", key: "id", align: "center" },
     { title: "Tên", dataIndex: "name", key: "name" },
     {
-      title: "Phân hệ",
-      key: "id_template_service",
-      align: "center",
-      render: (_, record) =>
-        record?.id_template_service_template_service?.name || "—",
-    },
-    {
       title: "Tên phòng khám",
       key: "id_clinic",
       align: "center",

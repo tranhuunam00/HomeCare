@@ -88,7 +88,7 @@ const TemplateHeaderEditor = ({ value = {}, onChange, form }) => {
         <Form.Item
           rules={[{ required: true, message: "Vui lòng điền tên khoa " }, {}]}
           name="department_name"
-          label="Khoa"
+          label="Chuyên khoa"
         >
           <Input />
         </Form.Item>
