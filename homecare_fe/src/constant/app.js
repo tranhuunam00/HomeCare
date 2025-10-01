@@ -217,3 +217,17 @@ export const STYLE_COPY = `
         }
       </style>
       `;
+export const ACADEMIC_TITLES = [
+  { label: "Giáo sư", value: "GS" },
+  { label: "Phó Giáo sư", value: "PGS" },
+  { label: "Không có", value: "" },
+];
+
+export const DEGREES = [
+  { label: "Tiến sĩ", value: "TS" },
+  { label: "Thạc sĩ", value: "ThS" },
+  { label: "BSCKI", value: "BSCKI" },
+  { label: "BSCKII", value: "BSCKII" },
+  { label: "Cử nhân", value: "CN" },
+  { label: "Không có", value: "" },
+];

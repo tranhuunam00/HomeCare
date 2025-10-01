@@ -22,6 +22,7 @@ import useToast from "../../hooks/useToast";
 import dayjs from "dayjs";
 import storage from "../../services/storage";
 import { useGlobalAuth } from "../../contexts/AuthContext";
+import { ACADEMIC_TITLES, DEGREES } from "../../constant/app";
 
 const { Option } = Select;
 const { Title, Text } = Typography;
@@ -71,6 +72,8 @@ const Profile = () => {
         ...data,
         dob: data.dob ? dayjs(data.dob, "YYYY-MM-DD") : null,
         email: data.id_user_user.email,
+        academic_title: data.academic_title,
+        degree: data.degree,
       });
     } catch (err) {
       console.error("Lỗi khi lấy thông tin bác sĩ theo ID:", err);
@@ -105,6 +108,8 @@ const Profile = () => {
     formData.append("id_clinic", values.id_clinic);
     formData.append("gender", values.gender);
     formData.append("e_signature_url", values.e_signature_url);
+    formData.append("academic_title", values.academic_title || "");
+    formData.append("degree", values.degree || "");
 
     formData.append(
       "dob",
@@ -271,6 +276,49 @@ const Profile = () => {
                       <Input placeholder="0912345678" />
                     ) : (
                       <Text>{form.getFieldValue("phone_number") || "-"}</Text>
+                    )}
+                  </Form.Item>
+                </Col>
+              </Row>
+
+              <Row gutter={16}>
+                <Col span={12}>
+                  <Form.Item label="Học hàm" name="academic_title">
+                    {isEditing ? (
+                      <Select placeholder="Chọn học hàm">
+                        {ACADEMIC_TITLES.map((item) => (
+                          <Option key={item.value} value={item.value}>
+                            {item.label}
+                          </Option>
+                        ))}
+                      </Select>
+                    ) : (
+                      <Text>
+                        {ACADEMIC_TITLES.find(
+                          (item) =>
+                            item.value === form.getFieldValue("academic_title")
+                        )?.label || "-"}
+                      </Text>
+                    )}
+                  </Form.Item>
+                </Col>
+
+                <Col span={12}>
+                  <Form.Item label="Học vị" name="degree">
+                    {isEditing ? (
+                      <Select placeholder="Chọn học vị">
+                        {DEGREES.map((item) => (
+                          <Option key={item.value} value={item.value}>
+                            {item.label}
+                          </Option>
+                        ))}
+                      </Select>
+                    ) : (
+                      <Text>
+                        {DEGREES.find(
+                          (item) => item.value === form.getFieldValue("degree")
+                        )?.label || "-"}
+                      </Text>
                     )}
                   </Form.Item>
                 </Col>
