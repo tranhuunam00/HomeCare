@@ -700,11 +700,13 @@ export default function DoctorUseDFormVer2({
                     setFilteredFormVer2Names([]);
                   }}
                 >
-                  {templateServices.map((s) => (
-                    <Option key={s.id} value={s.id}>
-                      {s.name}
-                    </Option>
-                  ))}
+                  {templateServices
+                    .sort((a, b) => (a.name > b.name ? 1 : -1))
+                    .map((s) => (
+                      <Option key={s.id} value={s.id}>
+                        {s.name}
+                      </Option>
+                    ))}
                 </Select>
               </Form.Item>
             </Col>
@@ -729,11 +731,13 @@ export default function DoctorUseDFormVer2({
                       : "Chọn Phân hệ trước"
                   }
                 >
-                  {filteredExamParts.map((s) => (
-                    <Option key={s.id} value={s.id}>
-                      {s.name}
-                    </Option>
-                  ))}
+                  {filteredExamParts
+                    .sort((a, b) => (a.name > b.name ? 1 : -1))
+                    .map((s) => (
+                      <Option key={s.id} value={s.id}>
+                        {s.name}
+                      </Option>
+                    ))}
                 </Select>
               </Form.Item>
             </Col>
