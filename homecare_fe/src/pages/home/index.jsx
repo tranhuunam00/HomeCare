@@ -152,8 +152,8 @@ const Sidebar = ({ collapsed }) => {
       ),
       label: "Dịch vụ khám",
       children: [
-        { key: "template_services", label: "Dịch vụ" },
-        { key: "exam-parts", label: "Bộ phận thăm khám" },
+        { key: "template_services", label: "Phân hệ" },
+        { key: "exam-parts", label: "Bộ phận" },
       ],
     },
 

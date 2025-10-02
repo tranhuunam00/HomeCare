@@ -421,17 +421,7 @@ export default function DoctorUseDFormVer2({
       >
         ĐỌC KẾT QUẢ CHẨN ĐOÁN HÌNH ẢNH – THĂM DÒ CHỨC NĂNG
       </Title>
-      <Title
-        level={3}
-        style={{
-          textAlign: "center",
-          marginBottom: 24,
-          marginTop: 8,
-          color: "rgb(47, 109, 184)",
-        }}
-      >
-        D-RADS
-      </Title>
+
       {loading ? (
         <div style={{ textAlign: "center", padding: 40 }}>
           <Spin />
@@ -696,6 +686,7 @@ export default function DoctorUseDFormVer2({
                 label={translateLabel(languageTranslate, "department", false)}
                 name="id_template_service"
                 rules={[{ required: true, message: "Chọn kỹ thuật" }]}
+                labelCol={{ flex: "0 0 90px" }}
               >
                 <Select
                   placeholder="Chọn kỹ thuật"
@@ -718,11 +709,12 @@ export default function DoctorUseDFormVer2({
               </Form.Item>
             </Col>
 
-            <Col xs={24} md={8}>
+            <Col xs={24} md={9}>
               <Form.Item
                 label={translateLabel(languageTranslate, "bodyPart", false)}
                 name="id_exam_part"
                 rules={[{ required: true, message: "Chọn bộ phận" }]}
+                labelCol={{ flex: "0 0 90px" }}
               >
                 <Select
                   placeholder="Chọn bộ phận thăm khám"
@@ -746,11 +738,12 @@ export default function DoctorUseDFormVer2({
               </Form.Item>
             </Col>
 
-            <Col xs={24} md={7}>
+            <Col xs={24} md={6}>
               <Form.Item
                 label={translateLabel(languageTranslate, "language", false)}
                 name="language"
                 rules={[{ required: true }]}
+                labelCol={{ flex: "0 0 90px" }}
               >
                 <Select
                   disabled={!isEdit}
@@ -877,6 +870,13 @@ export default function DoctorUseDFormVer2({
             ).toUpperCase()}
           </Title>
 
+          <Form.Item name="quy_trinh_url" label="" tooltip="Short text">
+            <TextArea
+              disabled={!isEdit}
+              autoSize={{ minRows: 4, maxRows: 10 }}
+              placeholder="Nhập mô tả quy trình kỹ thuật..."
+            />
+          </Form.Item>
           <Row gutter={[16, 16]} style={{ justifyContent: "space-between" }}>
             <Col xs={24} md={12}>
               <ImageBlock
@@ -906,14 +906,6 @@ export default function DoctorUseDFormVer2({
               />
             </Col>
           </Row>
-
-          <Form.Item name="quy_trinh_url" label="" tooltip="Short text">
-            <TextArea
-              disabled={!isEdit}
-              autoSize={{ minRows: 4, maxRows: 10 }}
-              placeholder="Nhập mô tả quy trình kỹ thuật..."
-            />
-          </Form.Item>
 
           {/* Ảnh minh hoạ */}
           <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>

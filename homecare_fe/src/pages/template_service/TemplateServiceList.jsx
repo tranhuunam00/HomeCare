@@ -70,7 +70,7 @@ const TemplateServiceList = () => {
         params: {
           name: searchName,
           page,
-          limit: 10,
+          limit: 20,
         },
       });
 
@@ -107,8 +107,19 @@ const TemplateServiceList = () => {
       width: 70,
       render: (_, __, index) => (page - 1) * 10 + index + 1,
     },
-    { title: "ID", dataIndex: "id", key: "id", align: "center" },
-    { title: "Tên", dataIndex: "name", key: "name" },
+    {
+      title: "ID",
+      dataIndex: "id",
+      key: "id",
+      align: "center",
+      sorter: (a, b) => a.id - b.id,
+    },
+    {
+      title: "Tên",
+      dataIndex: "name",
+      key: "name",
+      sorter: (a, b) => a.name.localeCompare(b.name),
+    },
     { title: "Tên rút gọn", dataIndex: "short_name", key: "short_name" },
     { title: "Mã code", dataIndex: "code", key: "code" },
     {
