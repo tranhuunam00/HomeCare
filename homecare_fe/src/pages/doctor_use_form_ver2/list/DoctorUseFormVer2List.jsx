@@ -87,7 +87,7 @@ export default function DoctorUseFormVer2List() {
   const [rows, setRows] = useState([]);
   const [total, setTotal] = useState(0);
   const [orderBy, setOrderBy] = useState("id");
-  const [orderDir, setOrderDir] = useState("ASC");
+  const [orderDir, setOrderDir] = useState("DESC");
 
   // filters chính thức (gửi lên API)
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
