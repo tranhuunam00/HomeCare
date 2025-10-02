@@ -231,3 +231,76 @@ export const DEGREES = [
   { label: "Cử nhân", value: "CN" },
   { label: "Không có", value: "" },
 ];
+
+export const TRANSLATE_LANGUAGE = {
+  VI: "vi",
+  ENG: "en",
+};
+
+// languageConstants.js
+export const FORM_LABELS = {
+  vi: {
+    administrativeInfo: "THÔNG TIN HÀNH CHÍNH",
+    fullName: "Họ tên",
+    gender: "Giới tính",
+    age: "Tuổi",
+    nationality: "Quốc tịch",
+    phone: "Điện thoại",
+    email: "Email",
+    patientId: "Mã số bệnh nhân PID",
+    sid: "SID",
+    province: "Tỉnh/Thành phố",
+    district: "Phường/Xã",
+    address: "Địa chỉ, số nhà",
+    clinical: "Lâm sàng",
+    department: "Phân hệ",
+    bodyPart: "Bộ phận",
+    resultTemplate: "Mẫu đọc kết quả",
+    resultPrint: "Mẫu in kết quả",
+    language: "Ngôn ngữ",
+
+    // --- Radiology / Report sections ---
+    technicalProtocol: "QUY TRÌNH KỸ THUẬT",
+    imagingFindings: "MÔ TẢ HÌNH ẢNH",
+    impression: "KẾT LUẬN, CHẨN ĐOÁN",
+    icd10Classification: "Phân loại ICD-10",
+    gradingClassification: "Phân độ, phân loại",
+    differentialDiagnosis: "Chẩn đoán phân biệt",
+    recommendationsCounseling: "KHUYẾN NGHỊ & TƯ VẤN",
+    illustrativeImages: "HÌNH ẢNH MINH HỌA",
+  },
+  en: {
+    administrativeInfo: "Administrative Information",
+    fullName: "Full Name",
+    gender: "Gender",
+    age: "Age",
+    nationality: "Nationality",
+    phone: "Phone",
+    email: "Email",
+    patientId: "Patient ID (PID)",
+    sid: "SID",
+    province: "Province/City",
+    district: "Ward/District",
+    address: "Address",
+    clinical: "Clinical Symptoms",
+    department: "Department",
+    bodyPart: "Body Part",
+    resultTemplate: "Result Template",
+    resultPrint: "Result Print",
+    language: "Language",
+
+    // --- Radiology / Report sections ---
+    technicalProtocol: "Technical Protocol",
+    imagingFindings: "Imaging Findings",
+    impression: "Conclusion, Impression",
+    icd10Classification: "ICD-10 Classification",
+    gradingClassification: "Grading / Classification",
+    differentialDiagnosis: "Differential Diagnosis",
+    recommendationsCounseling: "Recommendations & Counseling",
+    illustrativeImages: "Illustrative Images",
+  },
+};
+export const translateLabel = (lang = "vi", key, uppercase = true) => {
+  let text = FORM_LABELS?.[lang]?.[key] || key;
+  return uppercase ? text.toUpperCase() : text;
+};

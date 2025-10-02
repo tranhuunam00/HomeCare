@@ -33,7 +33,11 @@ import {
   mapApiToForm,
   normalizeTablesFromApi,
 } from "../../formver2/utils";
-import { USER_ROLE } from "../../../constant/app";
+import {
+  TRANSLATE_LANGUAGE,
+  translateLabel,
+  USER_ROLE,
+} from "../../../constant/app";
 import { useGlobalAuth } from "../../../contexts/AuthContext";
 import dayjs from "dayjs";
 import HistoryModal from "./items/HistoryModal";
@@ -71,6 +75,9 @@ export default function DoctorUseDFormVer2({
   console.log("imageList", imageList);
   const [filteredFormVer2Names, setFilteredFormVer2Names] = useState([]);
   const [resetKey, setResetKey] = useState(0);
+  const [languageTranslate, setLanguageTransslate] = useState(
+    TRANSLATE_LANGUAGE.VI
+  );
 
   const [initialSnap, setInitialSnap] = useState({
     formValues: null,
@@ -469,7 +476,7 @@ export default function DoctorUseDFormVer2({
         >
           {/* Hàng 1 */}
           <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
-            THÔNG TIN HÀNH CHÍNH
+            {translateLabel(languageTranslate, "administrativeInfo")}
           </Title>
 
           {isUse && (
@@ -477,7 +484,7 @@ export default function DoctorUseDFormVer2({
               <Row gutter={16}>
                 <Col xs={24} md={12}>
                   <Form.Item
-                    label="Họ tên"
+                    label={translateLabel(languageTranslate, "fullName", false)}
                     name="benh_nhan_ho_ten"
                     rules={[
                       { required: true, message: "Nhập họ tên bệnh nhân" },
@@ -488,7 +495,7 @@ export default function DoctorUseDFormVer2({
                 </Col>
                 <Col xs={24} md={12}>
                   <Form.Item
-                    label="Giới tính"
+                    label={translateLabel(languageTranslate, "gender", false)}
                     name="benh_nhan_gioi_tinh"
                     rules={[{ required: true, message: "Chọn giới tính" }]}
                   >
@@ -504,7 +511,7 @@ export default function DoctorUseDFormVer2({
               <Row gutter={16}>
                 <Col xs={24} md={12}>
                   <Form.Item
-                    label="Tuổi"
+                    label={translateLabel(languageTranslate, "age", false)}
                     name="benh_nhan_tuoi"
                     rules={[{ required: true, message: "Nhập tuổi bệnh nhân" }]}
                   >
@@ -516,7 +523,14 @@ export default function DoctorUseDFormVer2({
                   </Form.Item>
                 </Col>
                 <Col xs={24} md={12}>
-                  <Form.Item label="Quốc tịch" name="benh_nhan_quoc_tich">
+                  <Form.Item
+                    label={translateLabel(
+                      languageTranslate,
+                      "nationality",
+                      false
+                    )}
+                    name="benh_nhan_quoc_tich"
+                  >
                     <Input disabled={!isEdit} placeholder="VD: Việt Nam" />
                   </Form.Item>
                 </Col>
@@ -524,12 +538,18 @@ export default function DoctorUseDFormVer2({
 
               <Row gutter={16}>
                 <Col xs={24} md={12}>
-                  <Form.Item label="Điện thoại" name="benh_nhan_dien_thoai">
+                  <Form.Item
+                    label={translateLabel(languageTranslate, "phone", false)}
+                    name="benh_nhan_dien_thoai"
+                  >
                     <Input disabled={!isEdit} placeholder="SĐT liên hệ" />
                   </Form.Item>
                 </Col>
                 <Col xs={24} md={12}>
-                  <Form.Item label="Email" name="benh_nhan_email">
+                  <Form.Item
+                    label={translateLabel(languageTranslate, "email", false)}
+                    name="benh_nhan_email"
+                  >
                     <Input
                       disabled={!isEdit}
                       type="email"
@@ -542,7 +562,11 @@ export default function DoctorUseDFormVer2({
               <Row gutter={16}>
                 <Col xs={24} md={12}>
                   <Form.Item
-                    label="Mã số bệnh nhân PID"
+                    label={translateLabel(
+                      languageTranslate,
+                      "patientId",
+                      false
+                    )}
                     name="benh_nhan_pid"
                     required
                     rules={[
@@ -562,7 +586,11 @@ export default function DoctorUseDFormVer2({
                   </Form.Item>
                 </Col>
                 <Col xs={24} md={12}>
-                  <Form.Item label="SID" name="benh_nhan_sid" required>
+                  <Form.Item
+                    label={translateLabel(languageTranslate, "sid", false)}
+                    name="benh_nhan_sid"
+                    required
+                  >
                     <Input disabled={true} placeholder="PID-DATE-TIME" />
                   </Form.Item>
                 </Col>
@@ -572,13 +600,17 @@ export default function DoctorUseDFormVer2({
                 <Col xs={24} md={12}>
                   <Form.Item
                     name="benh_nhan_dia_chi_tinh_thanh_pho"
-                    label="Tỉnh/Thành phố"
+                    label={translateLabel(languageTranslate, "province", false)}
                     rules={[{ required: true, message: "Chọn tỉnh/thành phố" }]}
                     disabled={!isEdit}
                   >
                     <Select
                       disabled={!isEdit}
-                      placeholder="Chọn Tỉnh / Thành phố"
+                      placeholder={translateLabel(
+                        languageTranslate,
+                        "province",
+                        false
+                      )}
                       onChange={(val) => {
                         form.setFieldsValue({
                           benh_nhan_dia_chi_tinh_thanh_pho: val,
@@ -598,7 +630,7 @@ export default function DoctorUseDFormVer2({
                 <Col xs={24} md={12}>
                   <Form.Item
                     name="benh_nhan_dia_chi_xa_phuong"
-                    label="Phường/Xã"
+                    label={translateLabel(languageTranslate, "district", false)}
                     rules={[{ required: true, message: "Chọn xã/phường" }]}
                   >
                     <Select
@@ -620,13 +652,16 @@ export default function DoctorUseDFormVer2({
                 </Col>
               </Row>
               <Form.Item
-                label="Địa chỉ, số nhà"
+                label={translateLabel(languageTranslate, "address", false)}
                 name="benh_nhan_dia_chi_so_nha"
               >
                 <Input disabled={!isEdit} placeholder="VD: 123 Lê Lợi" />
               </Form.Item>
 
-              <Form.Item label="Lâm sàng" name="benh_nhan_lam_sang">
+              <Form.Item
+                label={translateLabel(languageTranslate, "clinical", false)}
+                name="benh_nhan_lam_sang"
+              >
                 <TextArea
                   disabled={!isEdit}
                   autoSize={{ minRows: 3, maxRows: 6 }}
@@ -657,7 +692,7 @@ export default function DoctorUseDFormVer2({
           <Row gutter={16}>
             <Col xs={24} md={9}>
               <Form.Item
-                label="Phân hệ"
+                label={translateLabel(languageTranslate, "department", false)}
                 name="id_template_service"
                 rules={[{ required: true, message: "Chọn kỹ thuật" }]}
               >
@@ -684,7 +719,7 @@ export default function DoctorUseDFormVer2({
 
             <Col xs={24} md={8}>
               <Form.Item
-                label="Bộ phận"
+                label={translateLabel(languageTranslate, "bodyPart", false)}
                 name="id_exam_part"
                 rules={[{ required: true, message: "Chọn bộ phận" }]}
               >
@@ -712,7 +747,7 @@ export default function DoctorUseDFormVer2({
 
             <Col xs={24} md={7}>
               <Form.Item
-                label="Ngôn ngữ"
+                label={translateLabel(languageTranslate, "language", false)}
                 name="language"
                 rules={[{ required: true }]}
               >
@@ -728,7 +763,11 @@ export default function DoctorUseDFormVer2({
           <Row gutter={16}>
             <Col xs={24} md={24}>
               <Form.Item
-                label="Mẫu đọc kết quả"
+                label={translateLabel(
+                  languageTranslate,
+                  "resultTemplate",
+                  false
+                )}
                 name="id_formver2_name"
                 rules={[{ required: true, message: "Chọn tên mẫu" }]}
               >
@@ -776,7 +815,7 @@ export default function DoctorUseDFormVer2({
             </Col>
           </Row>
           <Form.Item
-            label="Mẫu in kết quả"
+            label={translateLabel(languageTranslate, "resultPrint", false)}
             name="id_print_template"
             rules={[{ required: true, message: "Chọn mẫu in" }]}
           >
@@ -830,7 +869,11 @@ export default function DoctorUseDFormVer2({
 
           {/* Ảnh minh hoạ */}
           <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
-            QUY TRÌNH KỸ THUẬT
+            {translateLabel(
+              languageTranslate,
+              "technicalProtocol",
+              false
+            ).toUpperCase()}
           </Title>
 
           <Row gutter={[16, 16]} style={{ justifyContent: "space-between" }}>
@@ -873,7 +916,11 @@ export default function DoctorUseDFormVer2({
 
           {/* Ảnh minh hoạ */}
           <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
-            MÔ TẢ HÌNH ẢNH
+            {translateLabel(
+              languageTranslate,
+              "imagingFindings",
+              false
+            ).toUpperCase()}
           </Title>
 
           <CustomSunEditor
@@ -885,7 +932,11 @@ export default function DoctorUseDFormVer2({
 
           {/* Kết luận */}
           <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
-            KẾT LUẬN, CHẨN ĐOÁN
+            {translateLabel(
+              languageTranslate,
+              "impression",
+              false
+            ).toUpperCase()}
           </Title>
           <Form.Item
             name="ket_qua_chan_doan"
@@ -901,7 +952,11 @@ export default function DoctorUseDFormVer2({
           <Form.Item
             label={
               <span>
-                Phân loại ICD-10
+                {translateLabel(
+                  languageTranslate,
+                  "icd10Classification",
+                  false
+                )}
                 <Tooltip title="Tra cứu ICD-10">
                   <a
                     href="https://icd.kcb.vn/icd-10/icd10"
@@ -919,16 +974,34 @@ export default function DoctorUseDFormVer2({
             <Input disabled={!isEdit} placeholder="Link/Code ICD-10" />
           </Form.Item>
 
-          <Form.Item label="Phân độ, phân loại" name="phan_do_loai">
+          <Form.Item
+            label={translateLabel(
+              languageTranslate,
+              "gradingClassification",
+              false
+            )}
+            name="phan_do_loai"
+          >
             <Input disabled={!isEdit} placeholder="Short text" />
           </Form.Item>
 
-          <Form.Item label="Chẩn đoán phân biệt" name="chan_doan_phan_biet">
+          <Form.Item
+            label={translateLabel(
+              languageTranslate,
+              "differentialDiagnosis",
+              false
+            )}
+            name="chan_doan_phan_biet"
+          >
             <Input disabled={!isEdit} placeholder="Short text" />
           </Form.Item>
 
           <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
-            KHUYẾN NGHỊ & TƯ VẤN
+            {translateLabel(
+              languageTranslate,
+              "recommendationsCounseling",
+              false
+            ).toUpperCase()}
           </Title>
           <Form.Item
             disabled={!isEdit}
@@ -943,7 +1016,11 @@ export default function DoctorUseDFormVer2({
           </Form.Item>
 
           <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
-            HÌNH ẢNH MINH HỌA
+            {translateLabel(
+              languageTranslate,
+              "illustrativeImages",
+              false
+            ).toUpperCase()}
           </Title>
           <Form.Item label="">
             <ImageWithCaptionInput
@@ -969,6 +1046,7 @@ export default function DoctorUseDFormVer2({
                 KEY_ACTION_BUTTON.preview,
                 KEY_ACTION_BUTTON.AI,
                 KEY_ACTION_BUTTON.exit,
+                KEY_ACTION_BUTTON.translate,
               ]}
               onExit={() => {
                 if (!window.confirm("Bạn có chắc muốn thoát không?")) {
@@ -1041,6 +1119,22 @@ export default function DoctorUseDFormVer2({
                 };
 
                 await handleGenAi();
+              }}
+              onTranslate={() => {
+                try {
+                  setLoading(true);
+
+                  if (languageTranslate == TRANSLATE_LANGUAGE.VI) {
+                    setLanguageTransslate(TRANSLATE_LANGUAGE.ENG);
+                    form.setFieldValue("language", TRANSLATE_LANGUAGE.ENG);
+                  } else {
+                    setLanguageTransslate(TRANSLATE_LANGUAGE.VI);
+                    form.setFieldValue("language", TRANSLATE_LANGUAGE.VI);
+                  }
+                } catch (error) {
+                } finally {
+                  setLoading(false);
+                }
               }}
             />
           )}

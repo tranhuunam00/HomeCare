@@ -11,6 +11,7 @@ import {
   PrinterOutlined,
   LogoutOutlined,
   GatewayOutlined,
+  TranslationOutlined,
 } from "@ant-design/icons";
 import styles from "./FormActionBar.module.scss";
 import { useNavigate } from "react-router-dom";
@@ -25,6 +26,7 @@ export const KEY_ACTION_BUTTON = {
   AI: "AI",
   print: "print",
   exit: "exit",
+  translate: "translate",
 };
 
 export default function FormActionBar({
@@ -37,6 +39,7 @@ export default function FormActionBar({
   onEdit,
   isEdit = false,
   editId,
+  onTranslate = undefined,
   onExit = undefined,
 }) {
   const navigate = useNavigate();
@@ -94,6 +97,12 @@ export default function FormActionBar({
       onClick: onPrint || emptyF,
     },
 
+    {
+      key: "translate",
+      label: "DỊCH",
+      icon: <TranslationOutlined />,
+      onClick: onTranslate || emptyF,
+    },
     {
       key: "exit",
       label: "EXIT",
