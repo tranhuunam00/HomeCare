@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { Button, Card, Divider } from "antd";
 
-import { ADMIN_INFO_LABELS } from "../../../constant/app";
+import { ADMIN_INFO_LABELS, translateLabel } from "../../../constant/app";
 
 import styles from "./PrintPreviewVer2NotDataDiagnose.module.scss";
 import { PrinterOutlined } from "@ant-design/icons";
@@ -65,6 +65,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
   imageList = [],
   printTemplate = {},
   doctor = {},
+  languageTranslate,
 }) => {
   const { examParts, templateServices, user, formVer2Names } = useGlobalAuth();
   const LABELS = ADMIN_INFO_LABELS;
@@ -120,10 +121,16 @@ const PrintPreviewVer2NotDataDiagnose = ({
                   {printTemplate?.clinic_name || "[Tên phòng khám]"}
                 </p>
                 <p style={{ fontSize: 13 }}>
-                  <strong>Khoa:</strong> {printTemplate?.department_name || "-"}
+                  <strong>
+                    {translateLabel(languageTranslate, "division", false)}:
+                  </strong>{" "}
+                  {printTemplate?.department_name || "-"}
                 </p>
                 <p style={{ fontSize: 13 }}>
-                  <strong>Địa chỉ:</strong> {printTemplate?.address || "-"}
+                  <strong>
+                    {translateLabel(languageTranslate, "address", false)}:
+                  </strong>{" "}
+                  {printTemplate?.address || "-"}
                 </p>
               </div>
               <div style={{ maxWidth: "280px", flex: 2 }}>
@@ -150,7 +157,11 @@ const PrintPreviewVer2NotDataDiagnose = ({
               padding: 0,
             }}
           >
-            PHIẾU KẾT QUẢ
+            {translateLabel(
+              languageTranslate,
+              "Result_Report",
+              false
+            ).toUpperCase()}
           </h1>
           <h3
             style={{
@@ -177,60 +188,118 @@ const PrintPreviewVer2NotDataDiagnose = ({
                   marginTop: 20,
                 }}
               >
-                THÔNG TIN HÀNH CHÍNH
+                {translateLabel(
+                  languageTranslate,
+                  "administrativeInfo",
+                  false
+                ).toUpperCase()}
               </h3>
 
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <PrintItem
-                  label={"HỌ VÀ TÊN"}
+                  label={translateLabel(
+                    languageTranslate,
+                    "fullName",
+                    false
+                  ).toUpperCase()}
                   value={formSnapshot?.benh_nhan_ho_ten}
                 />
                 <PrintItem
-                  label={"GIỚI TÍNH"}
+                  label={translateLabel(
+                    languageTranslate,
+                    "gender",
+                    false
+                  ).toUpperCase()}
                   value={formSnapshot?.benh_nhan_gioi_tinh}
                 />
                 <PrintItem
-                  label={"TUỔI"}
+                  label={translateLabel(
+                    languageTranslate,
+                    "age",
+                    false
+                  ).toUpperCase()}
                   value={formSnapshot?.benh_nhan_tuoi}
                 />
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <PrintItem
-                  label={"QUỐC TỊCH"}
+                  label={translateLabel(
+                    languageTranslate,
+                    "nationality",
+                    false
+                  ).toUpperCase()}
                   value={formSnapshot?.benh_nhan_quoc_tich}
                 />
-                <PrintItem label={"TỈNH/THÀNH PHỐ"} value={provinceName} />
-                <PrintItem label={"XÃ/PHƯỜNG"} value={wardName} />
+                <PrintItem
+                  label={translateLabel(
+                    languageTranslate,
+                    "province",
+                    false
+                  ).toUpperCase()}
+                  value={provinceName}
+                />
+                <PrintItem
+                  label={translateLabel(
+                    languageTranslate,
+                    "district",
+                    false
+                  ).toUpperCase()}
+                  value={wardName}
+                />
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <PrintItem
-                  label={"SỐ NHÀ"}
+                  label={translateLabel(
+                    languageTranslate,
+                    "address",
+                    false
+                  ).toUpperCase()}
                   value={formSnapshot?.benh_nhan_dia_chi_so_nha}
                 />
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <PrintItem
-                  label={"ĐIỆN THOẠI"}
+                  label={translateLabel(
+                    languageTranslate,
+                    "phone",
+                    false
+                  ).toUpperCase()}
                   value={formSnapshot?.benh_nhan_dien_thoai}
                 />
                 <PrintItem
-                  label={"EMAIL"}
+                  label={translateLabel(
+                    languageTranslate,
+                    "email",
+                    false
+                  ).toUpperCase()}
                   value={formSnapshot?.benh_nhan_email}
                 />
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <PrintItem
-                  label={"MÃ SỐ PID"}
+                  label={translateLabel(
+                    languageTranslate,
+                    "age",
+                    false
+                  ).toUpperCase()}
                   value={formSnapshot?.benh_nhan_pid}
                 />
                 <PrintItem
-                  label={"MÃ SỐ SID"}
+                  label={translateLabel(
+                    languageTranslate,
+                    "sid",
+                    false
+                  ).toUpperCase()}
                   value={formSnapshot?.benh_nhan_sid}
                 />
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <PrintItem
-                  label={"LÂM SÀNG"}
+                  label={translateLabel(
+                    languageTranslate,
+                    "clinical",
+                    false
+                  ).toUpperCase()}
                   value={formSnapshot?.benh_nhan_lam_sang}
                 />
               </div>
@@ -246,13 +315,21 @@ const PrintPreviewVer2NotDataDiagnose = ({
               marginTop: 20,
             }}
           >
-            QUY TRÌNH KĨ THUẬT
+            {translateLabel(
+              languageTranslate,
+              "technicalProtocol",
+              false
+            ).toUpperCase()}
           </h3>
 
           <>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <PrintItem
-                label={"PHÂN HỆ"}
+                label={translateLabel(
+                  languageTranslate,
+                  "department",
+                  false
+                ).toUpperCase()}
                 value={
                   selectedTemplateService?.name ||
                   templateServices?.find(
@@ -261,14 +338,25 @@ const PrintPreviewVer2NotDataDiagnose = ({
                 }
               />
               <PrintItem
-                label={"BỘ PHẬN"}
+                label={translateLabel(
+                  languageTranslate,
+                  "bodyPart",
+                  false
+                ).toUpperCase()}
                 value={
                   selectedExamPart?.name ||
                   examParts?.find((t) => t.id == formSnapshot.id_exam_part)
                     ?.name
                 }
               />
-              <PrintItem label={"NGÔN NGỮ"} value={"Vi"} />
+              <PrintItem
+                label={translateLabel(
+                  languageTranslate,
+                  "language",
+                  false
+                ).toUpperCase()}
+                value={"Vi"}
+              />
             </div>
 
             <Divider />
@@ -381,7 +469,11 @@ const PrintPreviewVer2NotDataDiagnose = ({
               marginTop: 20,
             }}
           >
-            KẾT LUẬN, CHẨN ĐOÁN
+            {translateLabel(
+              languageTranslate,
+              "impression",
+              false
+            ).toUpperCase()}
           </h3>
           <p
             className={styles.paragraph}
@@ -392,13 +484,28 @@ const PrintPreviewVer2NotDataDiagnose = ({
           >
             {formSnapshot.ketQuaChanDoan || formSnapshot.ket_qua_chan_doan}
           </p>
-          <PrintItem label={"PHÂN LOẠI IDC-10"} value={formSnapshot?.icd10} />
           <PrintItem
-            label={"PHÂN ĐỘ, PHÂN LOẠI"}
+            label={translateLabel(
+              languageTranslate,
+              "icd10Classification",
+              false
+            ).toUpperCase()}
+            value={formSnapshot?.icd10}
+          />
+          <PrintItem
+            label={translateLabel(
+              languageTranslate,
+              "gradingClassification",
+              false
+            ).toUpperCase()}
             value={formSnapshot?.phan_do_loai}
           />
           <PrintItem
-            label={"CHẨN ĐOÁN PHÂN BIỆT"}
+            label={translateLabel(
+              languageTranslate,
+              "differentialDiagnosis",
+              false
+            ).toUpperCase()}
             value={formSnapshot?.chan_doan_phan_biet}
           />
 
@@ -412,7 +519,11 @@ const PrintPreviewVer2NotDataDiagnose = ({
               marginTop: 20,
             }}
           >
-            KHUYẾN NGHỊ & TƯ VẤN
+            {translateLabel(
+              languageTranslate,
+              "recommendationsCounseling",
+              false
+            ).toUpperCase()}
           </h3>
           <p
             className={styles.paragraph}
@@ -435,7 +546,11 @@ const PrintPreviewVer2NotDataDiagnose = ({
                   marginTop: 20,
                 }}
               >
-                HÌNH ẢNH MÔ TẢ
+                {translateLabel(
+                  languageTranslate,
+                  "illustrativeImages",
+                  false
+                ).toUpperCase()}
               </h3>
               <div
                 style={{
@@ -483,7 +598,11 @@ const PrintPreviewVer2NotDataDiagnose = ({
                   marginTop: 20,
                 }}
               >
-                BÁC SĨ THỰC HIỆN
+                {translateLabel(
+                  languageTranslate,
+                  "doctor",
+                  false
+                ).toUpperCase()}
               </h3>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <section>
@@ -491,7 +610,9 @@ const PrintPreviewVer2NotDataDiagnose = ({
                     style={{ display: "flex", marginBottom: 6, fontSize: 14 }}
                   >
                     <div style={{ width: 150 }}>
-                      <strong>{LABELS_ADDON.full_name}:</strong>
+                      <strong>
+                        {translateLabel(languageTranslate, "fullName", false)}:
+                      </strong>
                     </div>
                     {doctor.full_name}
                   </div>
@@ -499,7 +620,9 @@ const PrintPreviewVer2NotDataDiagnose = ({
                     style={{ display: "flex", marginBottom: 6, fontSize: 14 }}
                   >
                     <div style={{ width: 150 }}>
-                      <strong>{LABELS_ADDON.phoneNumber}:</strong>
+                      <strong>
+                        {translateLabel(languageTranslate, "phone", false)}:
+                      </strong>
                     </div>
                     {doctor.phone_number}
                   </div>
@@ -507,7 +630,9 @@ const PrintPreviewVer2NotDataDiagnose = ({
                     style={{ display: "flex", marginBottom: 6, fontSize: 14 }}
                   >
                     <div style={{ width: 150 }}>
-                      <strong>{LABELS_ADDON.time}:</strong>
+                      <strong>
+                        {translateLabel(languageTranslate, "time", false)}:
+                      </strong>
                     </div>
                     {dayjs(formSnapshot.createdAt).format("DD-MM-YYYY HH:mm")}
                   </div>
@@ -515,7 +640,10 @@ const PrintPreviewVer2NotDataDiagnose = ({
                     style={{ display: "flex", marginBottom: 6, fontSize: 14 }}
                   >
                     <div style={{ width: 150 }}>
-                      <strong>{LABELS_ADDON.email}:</strong>
+                      <strong>
+                        {" "}
+                        {translateLabel(languageTranslate, "email", false)}:
+                      </strong>
                     </div>
                     {doctor?.id_user_user?.email || user.email}
                   </div>

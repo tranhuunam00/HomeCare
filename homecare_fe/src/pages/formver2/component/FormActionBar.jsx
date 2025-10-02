@@ -41,6 +41,8 @@ export default function FormActionBar({
   editId,
   onTranslate = undefined,
   onExit = undefined,
+  onViewTranslate,
+  languageTranslate,
 }) {
   const navigate = useNavigate();
   const emptyF = () => {};
@@ -99,9 +101,17 @@ export default function FormActionBar({
 
     {
       key: "translate",
+      label: "CHUYỂN BẢN DỊCH",
+      icon: <TranslationOutlined />,
+      onClick: onViewTranslate || emptyF,
+    },
+
+    {
+      key: "translate",
       label: "DỊCH",
       icon: <TranslationOutlined />,
       onClick: onTranslate || emptyF,
+      disabled: !isEdit || languageTranslate == "vi",
     },
     {
       key: "exit",

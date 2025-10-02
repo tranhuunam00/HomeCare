@@ -85,14 +85,6 @@ const ImageWithCaptionInput = ({
 
   return (
     <div>
-      <Button
-        icon={<PlusOutlined />}
-        onClick={handleAddImage}
-        style={{ marginBottom: 12 }}
-        disabled={images.length >= max || disabled}
-      >
-        Thêm ảnh
-      </Button>
       <Row gutter={[16, 16]}>
         {images.map((item, index) => (
           <Col key={index} span={16} md={8}>
@@ -153,6 +145,14 @@ const ImageWithCaptionInput = ({
           </Col>
         ))}
       </Row>
+      <Button
+        icon={<PlusOutlined />}
+        onClick={handleAddImage}
+        style={{ marginBottom: 12 }}
+        disabled={images.length >= max || disabled}
+      >
+        Thêm ảnh
+      </Button>
     </div>
   );
 };

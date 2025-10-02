@@ -254,6 +254,8 @@ export const FORM_LABELS = {
     address: "Địa chỉ, số nhà",
     clinical: "Lâm sàng",
     department: "Phân hệ",
+    division: "Khoa",
+
     bodyPart: "Bộ phận",
     resultTemplate: "Mẫu đọc kết quả",
     resultPrint: "Mẫu in kết quả",
@@ -268,9 +270,14 @@ export const FORM_LABELS = {
     differentialDiagnosis: "Chẩn đoán phân biệt",
     recommendationsCounseling: "KHUYẾN NGHỊ & TƯ VẤN",
     illustrativeImages: "HÌNH ẢNH MINH HỌA",
+    doctor: "BÁC SỸ THỰC HIỆN",
+    time: "Thời gian hoàn thành",
+    Result_Report: "Phiếu kết quả",
   },
   en: {
+    Result_Report: "Result Report",
     administrativeInfo: "Administrative Information",
+    time: "Completed time",
     fullName: "Full Name",
     gender: "Gender",
     age: "Age",
@@ -284,6 +291,8 @@ export const FORM_LABELS = {
     address: "Address",
     clinical: "Clinical Symptoms",
     department: "Department",
+    division: "Department",
+
     bodyPart: "Body Part",
     resultTemplate: "Result Template",
     resultPrint: "Result Print",

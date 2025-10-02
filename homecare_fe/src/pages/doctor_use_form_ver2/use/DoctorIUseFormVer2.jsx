@@ -160,6 +160,7 @@ export default function DoctorUseDFormVer2({
           ImageLeftUrl: left?.url || "",
         };
         setSelectedProvince(apiData.benh_nhan_dia_chi_tinh_thanh_pho);
+        setLanguageTransslate(apiData.language);
         const descImages =
           apiData.image_doctor_use_form_ver2s
             ?.filter((x) => x.kind === "desc") // chỉ lấy ảnh mô tả
@@ -1038,6 +1039,7 @@ export default function DoctorUseDFormVer2({
             user.id_role == USER_ROLE.ADMIN ||
             !idEdit) && (
             <FormActionBar
+              languageTranslate={languageTranslate}
               keys={[
                 KEY_ACTION_BUTTON.reset,
                 KEY_ACTION_BUTTON.save,
@@ -1120,14 +1122,54 @@ export default function DoctorUseDFormVer2({
 
                 await handleGenAi();
               }}
-              onTranslate={() => {
+              onViewTranslate={async () => {
                 try {
                   setLoading(true);
 
+                  const existPreviousTranslate = await API_CALL.get(
+                    "doctor-use-form-ver2",
+                    {
+                      params: {
+                        id_root:
+                          initialSnap?.apiData?.id_root ||
+                          initialSnap?.apiData?.id ||
+                          -1,
+                        includeDeleted: false,
+                      },
+                    }
+                  );
+                  const existItems = existPreviousTranslate.data.data.items;
                   if (languageTranslate == TRANSLATE_LANGUAGE.VI) {
+                    const existTranslateRecord = existItems.find(
+                      (et) =>
+                        et.id != idEdit &&
+                        et.language != TRANSLATE_LANGUAGE.VI &&
+                        !et.deletedAt
+                    );
+                    if (existTranslateRecord) {
+                      navigate(
+                        `/home/doctor-use-form-v2/detail/${existTranslateRecord.id}`
+                      );
+                      setIdEdit(existTranslateRecord.id);
+                      return;
+                    }
                     setLanguageTransslate(TRANSLATE_LANGUAGE.ENG);
                     form.setFieldValue("language", TRANSLATE_LANGUAGE.ENG);
                   } else {
+                    const existTranslateRecord = existItems.find(
+                      (et) =>
+                        et.id != idEdit &&
+                        et.language != TRANSLATE_LANGUAGE.ENG &&
+                        !et.deletedAt
+                    );
+                    if (existTranslateRecord) {
+                      navigate(
+                        `/home/doctor-use-form-v2/detail/${existTranslateRecord.id}`
+                      );
+                      setIdEdit(existTranslateRecord.id);
+
+                      return;
+                    }
                     setLanguageTransslate(TRANSLATE_LANGUAGE.VI);
                     form.setFieldValue("language", TRANSLATE_LANGUAGE.VI);
                   }
@@ -1136,6 +1178,96 @@ export default function DoctorUseDFormVer2({
                   setLoading(false);
                 }
               }}
+              onTranslate={
+                form.getFieldValue("language") == "vi"
+                  ? () => {
+                      toast.warning("Đang ở chế độ tiếng Việt");
+                    }
+                  : async () => {
+                      try {
+                        setLoading(true);
+
+                        if (
+                          !window.confirm(
+                            "Bạn có chắc muốn dịch bản ghi này sang tiếng Anh không?"
+                          )
+                        ) {
+                          return;
+                        }
+
+                        const [translatedAddon, translatedImageDescEditor] =
+                          await Promise.all([
+                            API_CALL.post(
+                              "translate/object",
+                              {
+                                quy_trinh_url:
+                                  form.getFieldValue("quy_trinh_url"),
+                                ket_qua_chan_doan:
+                                  form.getFieldValue("ket_qua_chan_doan"),
+                                phan_do_loai:
+                                  form.getFieldValue("phan_do_loai"),
+                                icd10: form.getFieldValue("icd10"),
+                                chan_doan_phan_biet: form.getFieldValue(
+                                  "chan_doan_phan_biet"
+                                ),
+                                khuyen_nghi: form.getFieldValue("khuyen_nghi"),
+                                ImageLeftDesc:
+                                  form.getFieldValue("ImageLeftDesc"),
+                                ImageRightDesc:
+                                  form.getFieldValue("ImageRightDesc"),
+                              },
+                              {
+                                timeout: 120000,
+                              }
+                            ),
+                            API_CALL.post(
+                              "translate/html-text",
+                              { text: imageDescEditor },
+                              {
+                                timeout: 120000,
+                              }
+                            ),
+                          ]);
+                        setImageDescEditor(translatedImageDescEditor.data.data);
+
+                        form.setFieldValue(
+                          "quy_trinh_url",
+                          translatedAddon.data.data.quy_trinh_url
+                        );
+                        form.setFieldValue(
+                          "ket_qua_chan_doan",
+                          translatedAddon.data.data.ket_qua_chan_doan
+                        );
+                        form.setFieldValue(
+                          "phan_do_loai",
+                          translatedAddon.data.data.phan_do_loai
+                        );
+                        form.setFieldValue(
+                          "icd10",
+                          translatedAddon.data.data.icd10
+                        );
+                        form.setFieldValue(
+                          "chan_doan_phan_biet",
+                          translatedAddon.data.data.chan_doan_phan_biet
+                        );
+                        form.setFieldValue(
+                          "khuyen_nghi",
+                          translatedAddon.data.data.khuyen_nghi
+                        );
+                        form.setFieldValue(
+                          "ImageLeftDesc",
+                          translatedAddon.data.data.ImageLeftDesc
+                        );
+                        form.setFieldValue(
+                          "ImageRightDesc",
+                          translatedAddon.data.data.ImageRightDesc
+                        );
+                      } catch (error) {
+                      } finally {
+                        setLoading(false);
+                      }
+                    }
+              }
             />
           )}
 
@@ -1184,6 +1316,7 @@ export default function DoctorUseDFormVer2({
             printTemplate ||
             initialSnap.apiData?.id_print_template_print_template
           }
+          languageTranslate={languageTranslate}
         />
       </Modal>
       <HistoryModal
