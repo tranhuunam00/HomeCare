@@ -111,51 +111,7 @@ export default function ImageBlock({
       }}
     >
       {/* Hai ô input: Mô tả & Link */}
-      <Row gutter={8} style={{ marginTop: 0 }}>
-        <Col span={24}>
-          <Form.Item
-            name={descName}
-            label=""
-            rules={[{ required: true, message: "Nhập mô tả ngắn" }]}
-          >
-            <Input
-              style={{ textAlign: "center" }}
-              disabled={disabled}
-              placeholder="Nhập mô tả ảnh"
-            />
-          </Form.Item>
-        </Col>
-      </Row>
-      {!disabledLink && (
-        <Row gutter={8} style={{ marginTop: 0 }}>
-          <Col span={24}>
-            <Form.Item
-              name={linkName}
-              label=""
-              tooltip="Nhập URL (vd: https://...)"
-              required={true}
-              rules={[
-                ({ getFieldValue }) => ({
-                  validator: async (_, v) => {
-                    if (!v) throw new Error("Link không hợp lệ");
-                    const ok = /^(https?:\/\/)?[\w.-]+(\.[\w.-]+)+\S*$/i.test(
-                      v
-                    );
-                    if (!ok) throw new Error("Link không hợp lệ");
-                  },
-                }),
-              ]}
-            >
-              <Input
-                style={{ textAlign: "center" }}
-                disabled={disabled}
-                placeholder="https://... hoặc domain.com/..."
-              />
-            </Form.Item>
-          </Col>
-        </Row>
-      )}
-      {/* Ảnh hiển thị – bấm để mở link */}
+
       <div
         style={{
           cursor: linkVal ? "pointer" : "default",
@@ -208,6 +164,51 @@ export default function ImageBlock({
           </p>
         </Dragger>
       </Form.Item>
+      <Row gutter={8} style={{ marginTop: 0 }}>
+        <Col span={24}>
+          <Form.Item
+            name={descName}
+            label=""
+            rules={[{ required: true, message: "Nhập mô tả ngắn" }]}
+          >
+            <Input
+              style={{ textAlign: "center" }}
+              disabled={disabled}
+              placeholder="Nhập mô tả ảnh"
+            />
+          </Form.Item>
+        </Col>
+      </Row>
+      {!disabledLink && (
+        <Row gutter={8} style={{ marginTop: 0 }}>
+          <Col span={24}>
+            <Form.Item
+              name={linkName}
+              label=""
+              tooltip="Nhập URL (vd: https://...)"
+              required={true}
+              rules={[
+                ({ getFieldValue }) => ({
+                  validator: async (_, v) => {
+                    if (!v) throw new Error("Link không hợp lệ");
+                    const ok = /^(https?:\/\/)?[\w.-]+(\.[\w.-]+)+\S*$/i.test(
+                      v
+                    );
+                    if (!ok) throw new Error("Link không hợp lệ");
+                  },
+                }),
+              ]}
+            >
+              <Input
+                style={{ textAlign: "center" }}
+                disabled={disabled}
+                placeholder="https://... hoặc domain.com/..."
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+      )}
+      {/* Ảnh hiển thị – bấm để mở link */}
     </div>
   );
 }
