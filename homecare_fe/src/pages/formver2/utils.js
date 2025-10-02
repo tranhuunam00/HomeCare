@@ -266,17 +266,24 @@ export const calculateAge = (dob) => {
 
 export const handlePrint = (printRef) => {
   const printContents = printRef.current.innerHTML;
-  const newWindow = window.open("", "_blank", "width=800,height=600");
+  const newWindow = window.open(
+    "/print-preview",
+    "_blank",
+    "width=800,height=600"
+  );
+
   newWindow.document.write(`
     <html>
       <head>
-        <title>HOMECARE</title>
+        <title>www.home-care.vn</title>
         <style>
-          /* Font toàn trang */
           * {
             font-family: 'Arial', sans-serif !important;
           }
-          body { padding: 20px; }
+          body { 
+            padding: 20px; 
+            margin: 0;
+          }
          
           table { 
             width: 100%; 
@@ -290,13 +297,11 @@ export const handlePrint = (printRef) => {
             font-size: 13px 
           }
           h3 { margin-top: 24px; font-size: 16px !important }
-          // .logoImg{
-          //   height: 60px !important
-          // }
-         
+
+          
         </style>
       </head>
-     <body ">
+      <body>
         ${printContents}
       </body>
     </html>

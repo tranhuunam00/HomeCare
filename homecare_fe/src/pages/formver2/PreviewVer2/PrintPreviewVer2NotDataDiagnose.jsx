@@ -45,7 +45,7 @@ const PrintItem = ({ label, value }) => (
     >
       {label}:
     </p>
-    <p style={{ fontSize: 14, margin: 0, padding: 0 }}>{value || "-"}</p>
+    <p style={{ fontSize: 14, margin: 0, padding: 0 }}>{value || ""}</p>
   </div>
 );
 
@@ -98,7 +98,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
                 gap: 20,
               }}
             >
-              <div style={{ maxWidth: "350px", flex: 1 }}>
+              <div style={{ maxWidth: "350px", flex: 1, marginLeft: 60 }}>
                 <img
                   style={{
                     marginTop: 10,
@@ -116,34 +116,34 @@ const PrintPreviewVer2NotDataDiagnose = ({
                 />
               </div>
 
-              <div style={{ maxWidth: "350px", flex: 2 }}>
+              <div style={{ maxWidth: "350px", flex: 6 }}>
                 <p style={{ fontWeight: 600, color: "#2f6db8", fontSize: 14 }}>
-                  {printTemplate?.clinic_name || "[Tên phòng khám]"}
+                  {printTemplate?.clinic_name || ""}
                 </p>
                 <p style={{ fontSize: 13 }}>
                   <strong>
                     {translateLabel(languageTranslate, "division", false)}:
-                  </strong>{" "}
+                  </strong>
                   {printTemplate?.department_name || "-"}
                 </p>
                 <p style={{ fontSize: 13 }}>
                   <strong>
                     {translateLabel(languageTranslate, "address", false)}:
-                  </strong>{" "}
+                  </strong>
                   {printTemplate?.address || "-"}
                 </p>
               </div>
-              <div style={{ maxWidth: "280px", flex: 2 }}>
+              <div style={{ maxWidth: "280px", flex: 5 }}>
                 <p style={{ fontSize: 13 }}>
-                  <strong>Website:</strong>
-                  <i>{printTemplate?.website || "http://..."}</i>
+                  <strong>Website: </strong>
+                  {printTemplate?.website || "http://..."}
                 </p>
                 <p style={{ fontSize: 13 }}>
-                  <strong>Hotline:</strong> {printTemplate?.phone || "..."}
+                  <strong>Hotline: </strong> {printTemplate?.phone || "..."}
                 </p>
                 <p style={{ fontSize: 13 }}>
-                  <strong>Email:</strong>
-                  <i>{printTemplate?.email || "example@email.com"}</i>
+                  <strong>Email: </strong>
+                  {printTemplate?.email || "example@email.com"}
                 </p>
               </div>
             </header>
@@ -163,19 +163,20 @@ const PrintPreviewVer2NotDataDiagnose = ({
               false
             ).toUpperCase()}
           </h1>
-          <h3
+          <h2
             style={{
               textAlign: "center",
               color: "#2f6db8",
               margin: 0,
               padding: 0,
+              fontSize: 25,
             }}
           >{`${
             selectedTemplateService?.name?.toUpperCase() ||
             templateServices
               ?.find((t) => t.id == formSnapshot.id_template_service)
               ?.name?.toUpperCase()
-          }`}</h3>
+          }`}</h2>
           {isUse && (
             <>
               <h3
@@ -225,11 +226,22 @@ const PrintPreviewVer2NotDataDiagnose = ({
                 <PrintItem
                   label={translateLabel(
                     languageTranslate,
-                    "nationality",
+                    "address",
                     false
                   ).toUpperCase()}
-                  value={formSnapshot?.benh_nhan_quoc_tich}
+                  value={formSnapshot?.benh_nhan_dia_chi_so_nha}
                 />
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <PrintItem
+                  label={translateLabel(
+                    languageTranslate,
+                    "district",
+                    false
+                  ).toUpperCase()}
+                  value={wardName}
+                />
+
                 <PrintItem
                   label={translateLabel(
                     languageTranslate,
@@ -241,22 +253,13 @@ const PrintPreviewVer2NotDataDiagnose = ({
                 <PrintItem
                   label={translateLabel(
                     languageTranslate,
-                    "district",
+                    "nationality",
                     false
                   ).toUpperCase()}
-                  value={wardName}
+                  value={formSnapshot?.benh_nhan_quoc_tich}
                 />
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <PrintItem
-                  label={translateLabel(
-                    languageTranslate,
-                    "address",
-                    false
-                  ).toUpperCase()}
-                  value={formSnapshot?.benh_nhan_dia_chi_so_nha}
-                />
-              </div>
+
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <PrintItem
                   label={translateLabel(
@@ -323,7 +326,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
           </h3>
 
           <>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
+            {/* <div style={{ display: "flex", justifyContent: "space-between" }}>
               <PrintItem
                 label={translateLabel(
                   languageTranslate,
@@ -357,9 +360,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
                 ).toUpperCase()}
                 value={"Vi"}
               />
-            </div>
-
-            <Divider />
+            </div> */}
 
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               {/* <PrintItem
@@ -388,6 +389,16 @@ const PrintPreviewVer2NotDataDiagnose = ({
               /> */}
             </div>
           </>
+          <p
+            className={styles.paragraph}
+            style={{
+              whiteSpace: "pre-line",
+            }}
+          >
+            {formSnapshot.quyTrinh || formSnapshot.quy_trinh_url}
+          </p>
+          <Divider />
+
           <div
             style={{
               display: "flex",
@@ -447,15 +458,6 @@ const PrintPreviewVer2NotDataDiagnose = ({
             </section>
           </div>
 
-          <p
-            className={styles.paragraph}
-            style={{
-              whiteSpace: "pre-line",
-            }}
-          >
-            {formSnapshot.quyTrinh || formSnapshot.quy_trinh_url}
-          </p>
-
           {/* <TablesSnapshotPreview tablesSnapshot={tablesSnapshot} /> */}
           <InnerHTMLFormEditor data={imageDescEditor} />
 
@@ -480,6 +482,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
             style={{
               whiteSpace: "pre-line",
               fontWeight: "bold",
+              fontSize: 18,
             }}
           >
             {formSnapshot.ketQuaChanDoan || formSnapshot.ket_qua_chan_doan}
@@ -489,7 +492,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
               languageTranslate,
               "icd10Classification",
               false
-            ).toUpperCase()}
+            )}
             value={formSnapshot?.icd10}
           />
           <PrintItem
@@ -497,7 +500,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
               languageTranslate,
               "gradingClassification",
               false
-            ).toUpperCase()}
+            )}
             value={formSnapshot?.phan_do_loai}
           />
           <PrintItem
@@ -505,7 +508,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
               languageTranslate,
               "differentialDiagnosis",
               false
-            ).toUpperCase()}
+            )}
             value={formSnapshot?.chan_doan_phan_biet}
           />
 
@@ -563,7 +566,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
                   <section
                     key={index}
                     style={{
-                      width: "48%", // Chiếm 48% chiều rộng để hiển thị 2 ảnh trong 1 hàng
+                      width: "33%", // Chiếm 48% chiều rộng để hiển thị 2 ảnh trong 1 hàng
                       marginBottom: "16px", // Khoảng cách giữa các ảnh
                     }}
                   >
@@ -578,9 +581,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
                         width: "100%", // Đảm bảo ảnh đầy đủ chiều rộng của ô
                       }}
                     />
-                    <p style={{ textAlign: "center" }}>
-                      {item.caption || "Ảnh mô tả"}
-                    </p>
+                    <p style={{ textAlign: "center" }}>{item.caption || ""}</p>
                   </section>
                 ))}
               </div>
@@ -604,8 +605,17 @@ const PrintPreviewVer2NotDataDiagnose = ({
                   false
                 ).toUpperCase()}
               </h3>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <section>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                }}
+              >
+                <section
+                  style={{
+                    marginTop: 10,
+                  }}
+                >
                   <div
                     style={{ display: "flex", marginBottom: 6, fontSize: 14 }}
                   >
@@ -631,24 +641,27 @@ const PrintPreviewVer2NotDataDiagnose = ({
                   >
                     <div style={{ width: 150 }}>
                       <strong>
-                        {translateLabel(languageTranslate, "time", false)}:
-                      </strong>
-                    </div>
-                    {dayjs(formSnapshot.createdAt).format("DD-MM-YYYY HH:mm")}
-                  </div>
-                  <div
-                    style={{ display: "flex", marginBottom: 6, fontSize: 14 }}
-                  >
-                    <div style={{ width: 150 }}>
-                      <strong>
                         {" "}
                         {translateLabel(languageTranslate, "email", false)}:
                       </strong>
                     </div>
                     {doctor?.id_user_user?.email || user.email}
                   </div>
+                  <div
+                    style={{ display: "flex", marginBottom: 6, fontSize: 14 }}
+                  >
+                    <div style={{ width: 150 }}>
+                      <strong>
+                        {translateLabel(languageTranslate, "time", false)}:
+                      </strong>
+                    </div>
+                    {dayjs(formSnapshot.createdAt).format("DD-MM-YYYY HH:mm")}
+                  </div>
                 </section>
                 <section>
+                  <h4 style={{ padding: 0, margin: 0, marginBottom: 10 }}>
+                    Chữ ký
+                  </h4>
                   <img
                     src={doctor?.signature_url}
                     alt=""
@@ -657,6 +670,10 @@ const PrintPreviewVer2NotDataDiagnose = ({
                   />
                 </section>
                 <section>
+                  <h4 style={{ padding: 0, margin: 0, marginBottom: 10 }}>
+                    Ảnh đại diện
+                  </h4>
+
                   <img
                     src={doctor?.avatar_url}
                     alt=""

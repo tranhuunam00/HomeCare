@@ -254,7 +254,7 @@ export const FORM_LABELS = {
     address: "Địa chỉ, số nhà",
     clinical: "Lâm sàng",
     department: "Phân hệ",
-    division: "Khoa",
+    division: "Chuyên khoa",
 
     bodyPart: "Bộ phận",
     resultTemplate: "Mẫu đọc kết quả",

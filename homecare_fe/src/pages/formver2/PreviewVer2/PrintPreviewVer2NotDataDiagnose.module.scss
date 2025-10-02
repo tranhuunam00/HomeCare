@@ -181,60 +181,60 @@ h4 {
   margin: 10mm 12mm; /* khớp padding màn hình để kết quả giống nhau */
 }
 
-@media print {
-  html,
-  body {
-    background: #fff !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-  .a4Page {
-    width: auto; /* để khớp đúng vùng in A4 */
-    min-height: auto;
-    margin: 0;
-    padding: 0; /* vì @page đã có margin */
-    box-shadow: none !important;
-    border-radius: 0;
-  }
+// @media print {
+//   html,
+//   body {
+//     background: #fff !important;
+//     -webkit-print-color-adjust: exact;
+//     print-color-adjust: exact;
+//   }
+//   .a4Page {
+//     width: auto; /* để khớp đúng vùng in A4 */
+//     min-height: auto;
+//     margin: 0;
+//     padding: 0; /* vì @page đã có margin */
+//     box-shadow: none !important;
+//     border-radius: 0;
+//   }
 
-  /* AntD card/box */
-  :global(.ant-card) {
-    box-shadow: none !important;
-    border: none !important;
-  }
+//   /* AntD card/box */
+//   :global(.ant-card) {
+//     box-shadow: none !important;
+//     border: none !important;
+//   }
 
-  /* Tránh vỡ trang các khối quan trọng */
-  .box,
-  .contentImages .imgCard,
-  .pairsGrid {
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
-  h2,
-  h3,
-  h4 {
-    break-after: avoid;
-    page-break-after: avoid;
-  }
+//   /* Tránh vỡ trang các khối quan trọng */
+//   .box,
+//   .contentImages .imgCard,
+//   .pairsGrid {
+//     break-inside: avoid;
+//     page-break-inside: avoid;
+//   }
+//   h2,
+//   h3,
+//   h4 {
+//     break-after: avoid;
+//     page-break-after: avoid;
+//   }
 
-  /* Bảng mô tả hình ảnh in rõ ràng */
-  :global(.tableSnapshot),
-  :global(.tableSnapshot table) {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  :global(.tableSnapshot th),
-  :global(.tableSnapshot td) {
-    border: 1px solid #d9d9d9;
-    padding: 6px 8px;
-    vertical-align: top;
-  }
+//   /* Bảng mô tả hình ảnh in rõ ràng */
+//   :global(.tableSnapshot),
+//   :global(.tableSnapshot table) {
+//     width: 100%;
+//     border-collapse: collapse;
+//   }
+//   :global(.tableSnapshot th),
+//   :global(.tableSnapshot td) {
+//     border: 1px solid #d9d9d9;
+//     padding: 6px 8px;
+//     vertical-align: top;
+//   }
 
-  /* Ảnh giữ màu & không méo */
-  .contentImages img {
-    object-fit: cover;
-  }
-  a[href]::after {
-    content: none !important;
-  } /* không in URL đuôi link */
-}
+//   /* Ảnh giữ màu & không méo */
+//   .contentImages img {
+//     object-fit: cover;
+//   }
+//   a[href]::after {
+//     content: none !important;
+//   } /* không in URL đuôi link */
+// }

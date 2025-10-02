@@ -31,23 +31,23 @@
   }
 }
 
-@media print {
-  .printHeader {
-    gap: 16px;
+// @media print {
+//   .printHeader {
+//     gap: 16px;
 
-    img {
-      width: 100px;
-      height: 100px;
-    }
+//     img {
+//       width: 100px;
+//       height: 100px;
+//     }
 
-    div {
-      font-size: 12px;
+//     div {
+//       font-size: 12px;
 
-      p {
-        font-size: 11px;
-        margin: 0;
-        padding: 0;
-      }
-    }
-  }
-}
+//       p {
+//         font-size: 11px;
+//         margin: 0;
+//         padding: 0;
+//       }
+//     }
+//   }
+// }

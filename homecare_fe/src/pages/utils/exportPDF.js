@@ -101,85 +101,85 @@ export async function generatePDF() {
     @page {
       size: A4;
     }
-    @media print {
+    // @media print {
 
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
+    //   * {
+    //     margin: 0;
+    //     padding: 0;
+    //     box-sizing: border-box;
+    //   }
 
-      body {
-        margin: 0 !important;
-        padding: 0 !important;
-      }
-      /* Ẩn tất cả extension và thanh công cụ */
-      #browser-extension-hide,
-      #browser-action-hide,
-      #page-action-hide,
-      #nav-bar-hide,
-      #toolbar-hide,
-      #chrome-extension-hide,
-      .chrome-extension,
-      .browser-action,
-      .page-action {
-        display: none !important;
-        visibility: hidden !important;
-      }
-      /* Ẩn tất cả nội dung khác */
-      body * {
-        visibility: hidden;
-      }
-      /* Chỉ hiển thị nội dung cần in */
-      #report-container,
-      #report-container *,
-      .print-section,
-      .print-section *,
-      .tirads-container,
-      .tirads-container * {
-        visibility: visible !important;
-      }
-      #report-container,
-      .tirads-container {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        background-color: white !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-        margin: 0;
-        box-sizing: border-box;
-      }
-      .no-print {
-        display: none !important;
-      }
-      .print-section {
-        page-break-inside: avoid;
-      }
-      table {
-        page-break-inside: avoid;
-      }
-      .ant-table {
-        page-break-inside: avoid;
-      }
-      .ant-table-tbody {
-        page-break-inside: avoid;
-      }
-      .ant-table-row {
-        page-break-inside: avoid;
-      }
-      /* Ẩn các form control không cần thiết khi in */
-      .ant-form-item-control-input-content .ant-picker-suffix,
-      .ant-form-item-control-input-content .ant-select-arrow,
-      .ant-form-item-control-input-content .ant-input-number-handler-wrap {
-        display: none !important;
-      }
+    //   body {
+    //     margin: 0 !important;
+    //     padding: 0 !important;
+    //   }
+    //   /* Ẩn tất cả extension và thanh công cụ */
+    //   #browser-extension-hide,
+    //   #browser-action-hide,
+    //   #page-action-hide,
+    //   #nav-bar-hide,
+    //   #toolbar-hide,
+    //   #chrome-extension-hide,
+    //   .chrome-extension,
+    //   .browser-action,
+    //   .page-action {
+    //     display: none !important;
+    //     visibility: hidden !important;
+    //   }
+    //   /* Ẩn tất cả nội dung khác */
+    //   body * {
+    //     visibility: hidden;
+    //   }
+    //   /* Chỉ hiển thị nội dung cần in */
+    //   #report-container,
+    //   #report-container *,
+    //   .print-section,
+    //   .print-section *,
+    //   .tirads-container,
+    //   .tirads-container * {
+    //     visibility: visible !important;
+    //   }
+    //   #report-container,
+    //   .tirads-container {
+    //     position: absolute;
+    //     left: 0;
+    //     top: 0;
+    //     width: 100%;
+    //     background-color: white !important;
+    //     -webkit-print-color-adjust: exact !important;
+    //     print-color-adjust: exact !important;
+    //     margin: 0;
+    //     box-sizing: border-box;
+    //   }
+    //   .no-print {
+    //     display: none !important;
+    //   }
+    //   .print-section {
+    //     page-break-inside: avoid;
+    //   }
+    //   table {
+    //     page-break-inside: avoid;
+    //   }
+    //   .ant-table {
+    //     page-break-inside: avoid;
+    //   }
+    //   .ant-table-tbody {
+    //     page-break-inside: avoid;
+    //   }
+    //   .ant-table-row {
+    //     page-break-inside: avoid;
+    //   }
+    //   /* Ẩn các form control không cần thiết khi in */
+    //   .ant-form-item-control-input-content .ant-picker-suffix,
+    //   .ant-form-item-control-input-content .ant-select-arrow,
+    //   .ant-form-item-control-input-content .ant-input-number-handler-wrap {
+    //     display: none !important;
+    //   }
 
     
      
     
-    }
+    // }
   `;
 
   const styleTag = document.createElement("style");
