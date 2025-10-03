@@ -249,6 +249,7 @@ const HomeCareLanding = () => {
             justifyContent: "center",
             marginBottom: "30px",
             gap: 30,
+            minWidth: 200,
           }}
         >
           {isLoggedIn ? (
@@ -268,12 +269,23 @@ const HomeCareLanding = () => {
                 ],
               }}
             >
-              <Avatar
-                size={70}
-                src={doctor?.avatar_url}
-                icon={!user?.avatar_url && <UserOutlined />}
-                style={{ cursor: "pointer", border: "1px solid #000" }}
-              />
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                }}
+              >
+                <Avatar
+                  size={70}
+                  src={doctor?.avatar_url}
+                  icon={!user?.avatar_url && <UserOutlined />}
+                  style={{ cursor: "pointer", border: "1px solid #000" }}
+                />
+                <div style={{ marginTop: 8, fontWeight: "bold", fontSize: 12 }}>
+                  {doctor?.full_name || "Người dùng"}
+                </div>
+              </div>
             </Dropdown>
           ) : (
             <></>
