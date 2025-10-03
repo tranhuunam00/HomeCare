@@ -151,9 +151,9 @@ const OnboardingWizard = ({ open, onClose, doctorId }) => {
             <Input.TextArea />
           </Form.Item>
           <Form.Item
-            label="Phòng khám"
+            label="Phòng khám (nếu chưa có liên hệ admin để hỗ trợ thêm mới)"
             name="id_clinic"
-            rules={[{ required: true, message: "Vui lòng chọn phòng khám" }]}
+            rules={[{ required: true, message: "Vui lòng chọn phòng khám." }]}
           >
             <Select placeholder="Chọn phòng khám">
               {clinics?.map((c) => (
