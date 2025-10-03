@@ -34,6 +34,7 @@ export const GlobalAuthProvider = ({ children }) => {
         user,
         token,
         doctor,
+        setDoctor,
         handleLoginContext,
         handleLogoutGlobal,
         isLoggedIn,

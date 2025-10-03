@@ -55,9 +55,35 @@ import DoctorChooseForm from "./pages/doctor_use_form_ver2/DoctorChooseForm";
 import FormVer2NameList from "./pages/formver2/name/FormVer2NameList";
 import DoctorUseDFormVer2 from "./pages/doctor_use_form_ver2/use/DoctorIUseFormVer2";
 import DoctorUseFormVer2List from "./pages/doctor_use_form_ver2/list/DoctorUseFormVer2List";
+import API_CALL from "./services/axiosClient";
+import { useGlobalAuth } from "./contexts/AuthContext";
+import { useEffect, useState } from "react";
+import OnboardingWizard from "./components/OnboardingWizard/OnboardingWizard";
 
 function App() {
   useAuthInitializer();
+  const { doctor } = useGlobalAuth();
+  const [wizardOpen, setWizardOpen] = useState(false);
+
+  const isProfileIncomplete = (doc) => {
+    if (!doc) return true;
+    return (
+      !doc.full_name ||
+      !doc.dob ||
+      !doc.gender ||
+      !doc.phone_number ||
+      !doc.id_clinic ||
+      !doc.avatar_url ||
+      !doc.signature_url
+    );
+  };
+
+  useEffect(() => {
+    if (doctor && isProfileIncomplete(doctor)) {
+      setWizardOpen(true);
+    }
+  }, [doctor]);
+
   return (
     <BrowserRouter>
       <Routes>
@@ -180,6 +206,12 @@ function App() {
           />
         </Route>
       </Routes>
+      <OnboardingWizard
+        open={wizardOpen}
+        onClose={() => setWizardOpen(false)}
+        doctorId={doctor?.id}
+        API={API_CALL}
+      />
       <ToastContainer />
     </BrowserRouter>
   );
