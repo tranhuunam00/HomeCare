@@ -16,6 +16,7 @@ import dayjs from "dayjs";
 import API_CALL from "../../services/axiosClient";
 import { ACADEMIC_TITLES, DEGREES } from "../../constant/app";
 import { useGlobalAuth } from "../../contexts/AuthContext";
+import STORAGE from "../../services/storage";
 
 const { Option } = Select;
 
@@ -44,6 +45,32 @@ const OnboardingWizard = ({ open, onClose, doctorId }) => {
       fetchClinics();
     }
   }, [open]);
+
+  useEffect(() => {
+    const fetchDoctor = async () => {
+      try {
+        const res = await API_CALL.get(`/doctor/${doctorId}`);
+        const data = res.data.data;
+
+        // map vào form
+        form.setFieldsValue({
+          ...data,
+          dob: data.dob ? dayjs(data.dob, "YYYY-MM-DD") : null,
+          email: data.id_user_user?.email || "", // nếu API trả email trong user
+        });
+
+        // set avatar & signature preview
+        setAvatarUrl(data.avatar_url || null);
+        setSignatureUrl(data.signature_url || null);
+      } catch (err) {
+        console.error("Lỗi khi lấy thông tin doctor:", err);
+      }
+    };
+
+    if (open && doctorId) {
+      fetchDoctor();
+    }
+  }, [open, doctorId]);
 
   const handleAvatarPreview = (file) => {
     setAvatarFile(file);
@@ -250,6 +277,7 @@ const OnboardingWizard = ({ open, onClose, doctorId }) => {
 
       const res = await API_CALL.get(`/doctor/${doctorId}`);
       setDoctor(res.data.data);
+      STORAGE.set("DOCTOR", res.data.data);
       setCurrent(current + 1);
     } catch (err) {
       console.error("Validation fail:", err);
