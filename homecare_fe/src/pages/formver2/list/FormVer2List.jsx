@@ -41,6 +41,7 @@ const { Option } = Select;
 const { RangePicker } = DatePicker;
 
 const STORAGE_KEY_PAGE_SIZE = "formVer2_pageSize";
+const FILTER_STORAGE_KEY = "formVer2_filters";
 
 /* ================= Helpers ================= */
 const buildParams = (f) => {
@@ -126,12 +127,33 @@ export default function FormVer2List() {
   const [visibleKeys, setVisibleKeys] = useState([]);
 
   useEffect(() => {
+    // Lấy pageSize đã lưu
     const savedPageSize = localStorage.getItem(STORAGE_KEY_PAGE_SIZE);
+    let nextFilters = { ...DEFAULT_FILTERS };
+
     if (savedPageSize) {
-      setFilters((prev) => ({ ...prev, limit: Number(savedPageSize) }));
-      setUiFilters((prev) => ({ ...prev, limit: Number(savedPageSize) }));
+      nextFilters.limit = Number(savedPageSize);
     }
+
+    // Lấy toàn bộ filters đã lưu
+    const savedFilters = localStorage.getItem(FILTER_STORAGE_KEY);
+    if (savedFilters) {
+      try {
+        const parsed = JSON.parse(savedFilters);
+        nextFilters = { ...nextFilters, ...parsed };
+      } catch (e) {
+        console.error("Parse filters error", e);
+      }
+    }
+
+    // Cập nhật lại state
+    setFilters(nextFilters);
+    setUiFilters(nextFilters);
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem(FILTER_STORAGE_KEY, JSON.stringify(filters));
+  }, [filters]);
 
   /* ======= Helpers ======= */
   const getExamPartName = (id) =>
@@ -245,7 +267,7 @@ export default function FormVer2List() {
         render: (id) => getExamPartName(id),
       },
       {
-        title: "Dịch vụ",
+        title: "Phân hệ",
         dataIndex: "id_template_service",
         key: "id_template_service",
         align: "left",
@@ -508,11 +530,11 @@ export default function FormVer2List() {
           </Col>
 
           <Col xs={12} md={8} lg={6}>
-            <Text>Dịch vụ</Text>
+            <Text>Phân hệ</Text>
             <Select
               allowClear
               style={{ width: "100%" }}
-              placeholder="Chọn dịch vụ mẫu"
+              placeholder="Chọn phân hệ"
               value={uiFilters.id_template_service}
               onChange={(v) =>
                 setUiFilters((s) => ({
@@ -522,11 +544,13 @@ export default function FormVer2List() {
                 }))
               }
             >
-              {templateServices.map((t) => (
-                <Option key={t.id} value={t.id}>
-                  {t.name}
-                </Option>
-              ))}
+              {templateServices
+                .sort((a, b) => (a.name > b.name ? 1 : -1))
+                .map((t) => (
+                  <Option key={t.id} value={t.id}>
+                    {t.name}
+                  </Option>
+                ))}
             </Select>
           </Col>
 
@@ -545,7 +569,8 @@ export default function FormVer2List() {
                   (s) =>
                     String(s.id_template_service) ===
                     String(uiFilters.id_template_service)
-                ) // lọc theo phân hệ
+                )
+                .sort((a, b) => (a.name > b.name ? 1 : -1))
                 .map((s) => (
                   <Option key={s.id} value={s.id}>
                     {s.name}

@@ -65,7 +65,7 @@ const Sidebar = ({ collapsed }) => {
           size={40}
         />
       ),
-      label: "Mẫu form",
+      label: "Mẫu kết quả",
       children: [
         user?.id_role === USER_ROLE.ADMIN && {
           key: "form-v2",
@@ -91,7 +91,7 @@ const Sidebar = ({ collapsed }) => {
           size={40}
         />
       ),
-      label: "Dùng ngay",
+      label: "Đọc kết quả ngay",
     },
     {
       key: "doctor-use-form-v2",
@@ -103,7 +103,7 @@ const Sidebar = ({ collapsed }) => {
           size={40}
         />
       ),
-      label: "Kết quả đã sử dụng",
+      label: "Kết quả đã đọc",
     },
 
     {
