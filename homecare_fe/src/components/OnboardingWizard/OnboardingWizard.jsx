@@ -29,6 +29,7 @@ const OnboardingWizard = ({ open, onClose, doctorId }) => {
   const [signatureUrl, setSignatureUrl] = useState(null);
   const [clinics, setClinics] = useState([]);
   const { setDoctor } = useGlobalAuth(); // cần thêm hàm setDoctor trong AuthContext
+  const [createClinicMode, setCreateClinicMode] = useState(false);
 
   useEffect(() => {
     const fetchClinics = async () => {
@@ -150,19 +151,47 @@ const OnboardingWizard = ({ open, onClose, doctorId }) => {
           <Form.Item label="Mô tả" name="description">
             <Input.TextArea />
           </Form.Item>
-          <Form.Item
-            label="Phòng khám (nếu chưa có liên hệ admin để hỗ trợ thêm mới)"
-            name="id_clinic"
-            rules={[{ required: true, message: "Vui lòng chọn phòng khám." }]}
-          >
-            <Select placeholder="Chọn phòng khám">
-              {clinics?.map((c) => (
-                <Option key={c.id} value={c.id}>
-                  {c.name}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
+          {!createClinicMode ? (
+            <>
+              <Form.Item
+                label="Phòng khám (nếu bạn chưa có thì vui lòng ấn vào Tạo mới phòng khám bên dưới)"
+                name="id_clinic"
+                rules={[
+                  { required: true, message: "Vui lòng chọn phòng khám." },
+                ]}
+              >
+                <Select placeholder="Chọn phòng khám">
+                  {clinics?.map((c) => (
+                    <Option key={c.id} value={c.id}>
+                      {c.name}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+              <Button type="dashed" onClick={() => setCreateClinicMode(true)}>
+                + Tạo mới phòng khám
+              </Button>
+            </>
+          ) : (
+            <>
+              <Form.Item
+                name="new_clinic_name"
+                label="Tên cơ sở"
+                rules={[{ required: true, message: "Vui lòng nhập tên cơ sở" }]}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item name="new_clinic_phone_number" label="Số điện thoại">
+                <Input />
+              </Form.Item>
+              <Form.Item name="new_clinic_address" label="Địa chỉ">
+                <Input />
+              </Form.Item>
+              <Button type="link" onClick={() => setCreateClinicMode(false)}>
+                ← Chọn phòng khám có sẵn
+              </Button>
+            </>
+          )}
         </>
       ),
     },
@@ -247,6 +276,25 @@ const OnboardingWizard = ({ open, onClose, doctorId }) => {
     try {
       await form.validateFields();
       const values = form.getFieldsValue();
+
+      if (current === 1 && createClinicMode) {
+        const payload = {
+          name: values.new_clinic_name,
+          phone_number: values.new_clinic_phone_number || "",
+          address: values.new_clinic_address || "",
+        };
+
+        // Call API tạo mới clinic
+        const resClinic = await API_CALL.post("/clinics", payload);
+        const newClinic = resClinic.data.data;
+
+        // gắn vào doctor
+        values.id_clinic = newClinic.id;
+        form.setFieldValue("id_clinic", newClinic.id);
+
+        // cập nhật danh sách clinic
+        setClinics([...clinics, newClinic]);
+      }
 
       // Tạo FormData
       const formData = new FormData();

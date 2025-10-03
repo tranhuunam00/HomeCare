@@ -145,7 +145,7 @@ const Sidebar = ({ collapsed }) => {
       ),
       label: "Mẫu in kết quả",
     },
-    user?.id_role === USER_ROLE.ADMIN && {
+    {
       key: "clinics",
       icon: (
         <Avatar

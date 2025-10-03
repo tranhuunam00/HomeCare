@@ -17,6 +17,8 @@ import { FilterOutlined, PlusOutlined, EditOutlined } from "@ant-design/icons";
 import API_CALL from "../../services/axiosClient";
 import styles from "./ClinicList.module.scss";
 import { toast } from "react-toastify";
+import { useGlobalAuth } from "../../contexts/AuthContext";
+import { USER_ROLE } from "../../constant/app";
 
 const { Option } = Select;
 
@@ -35,6 +37,8 @@ const ClinicList = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form] = Form.useForm();
+
+  const { user } = useGlobalAuth();
 
   const fetchClinics = async () => {
     setLoading(true);
@@ -97,18 +101,23 @@ const ClinicList = () => {
     {
       title: "Hành động",
       key: "actions",
-      render: (_, record) => (
-        <Button
-          icon={<EditOutlined />}
-          onClick={() => {
-            setEditingId(record.id);
-            fetchClinicById(record.id);
-            setModalVisible(true);
-          }}
-        >
-          Sửa
-        </Button>
-      ),
+      render: (_, record) => {
+        const canEdit =
+          user?.id_role == USER_ROLE.ADMIN || user?.id == record.id_user;
+
+        return canEdit ? (
+          <Button
+            icon={<EditOutlined />}
+            onClick={() => {
+              setEditingId(record.id);
+              fetchClinicById(record.id);
+              setModalVisible(true);
+            }}
+          >
+            Chỉnh sửa
+          </Button>
+        ) : null;
+      },
     },
   ];
 

@@ -1,7 +1,7 @@
 // HomeCareLanding.jsx
 import React, { useRef, useState } from "react";
-import { Button, Form, Input, Menu, Modal } from "antd";
-import { DownOutlined, SearchOutlined } from "@ant-design/icons";
+import { Avatar, Button, Dropdown, Form, Input, Menu, Modal } from "antd";
+import { DownOutlined, SearchOutlined, UserOutlined } from "@ant-design/icons";
 import { FaPhoneAlt, FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
 import { SiZalo } from "react-icons/si";
 import styles from "./HomeCareLanding.module.scss";
@@ -32,7 +32,7 @@ const textVariants = {
 
 const HomeCareLanding = () => {
   const navigate = useNavigate();
-  const { isLoggedIn, user } = useGlobalAuth();
+  const { isLoggedIn, user, doctor, handleLogoutGlobal } = useGlobalAuth();
   const [email, setEmail] = useState("");
 
   const productsItem = [
@@ -112,7 +112,7 @@ const HomeCareLanding = () => {
 
   const handleSubscribe = async () => {
     if (!email) {
-      message.error("Vui lòng nhập email!");
+      toast.error("Vui lòng nhập email!");
       return;
     }
 
@@ -243,6 +243,42 @@ const HomeCareLanding = () => {
             )}
           </div>
         </header>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            marginBottom: "30px",
+            gap: 30,
+          }}
+        >
+          {isLoggedIn ? (
+            <Dropdown
+              menu={{
+                items: [
+                  {
+                    key: "profile",
+                    label: "Trang cá nhân",
+                    onClick: () => navigate("/home/profile"),
+                  },
+                  {
+                    key: "logout",
+                    label: "Đăng xuất",
+                    onClick: () => handleLogoutGlobal(),
+                  },
+                ],
+              }}
+            >
+              <Avatar
+                size={70}
+                src={doctor?.avatar_url}
+                icon={!user?.avatar_url && <UserOutlined />}
+                style={{ cursor: "pointer", border: "1px solid #000" }}
+              />
+            </Dropdown>
+          ) : (
+            <></>
+          )}
+        </div>
       </div>
 
       <section ref={topRef} className={styles["homecare__hero"]}></section>
