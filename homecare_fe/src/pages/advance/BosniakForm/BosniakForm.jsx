@@ -616,8 +616,9 @@ const BosniakForm = () => {
         <Form form={form} layout="vertical">
           <ThamKhaoLinkHomeCare
             link={"https://home-care.vn/product/phan-mem-d-bosniak/"}
+            name={"D-Bosniak"}
+            desc={"Đánh giá và phân loại các tổn thương dạng nang của thận"}
           />
-          <h2>Phần mềm D-Bosniak</h2>
 
           {/* Modality */}
           <Form.Item label="Bạn muốn báo cáo theo phương thức nào? *">

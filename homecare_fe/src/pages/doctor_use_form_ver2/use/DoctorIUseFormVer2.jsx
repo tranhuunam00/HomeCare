@@ -405,7 +405,7 @@ export default function DoctorUseDFormVer2({
         style={{
           textAlign: "center",
           marginBottom: 8,
-          color: "rgb(47, 109, 184)",
+          color: "rgba(18, 119, 49, 1)",
         }}
       >
         PHẦN MỀM D-RADS
@@ -416,10 +416,10 @@ export default function DoctorUseDFormVer2({
           textAlign: "center",
           marginBottom: 8,
           marginTop: 8,
-          color: "rgb(47, 109, 184)",
+          color: "rgba(18, 119, 49, 1)",
         }}
       >
-        ĐỌC KẾT QUẢ CHẨN ĐOÁN HÌNH ẢNH – THĂM DÒ CHỨC NĂNG
+        ĐỌC KẾT QUẢ
       </Title>
 
       {loading ? (

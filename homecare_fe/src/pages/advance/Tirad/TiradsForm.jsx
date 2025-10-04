@@ -239,9 +239,11 @@ const TiradsForm = () => {
     <div className={styles.pageWrapper}>
       <div className={styles.formContainer}>
         <Form form={form} layout="vertical" initialValues={defaultValues}>
-          <ThamKhaoLinkHomeCare />
+          <ThamKhaoLinkHomeCare
+            name={"D-TIRADS"}
+            desc={"Đánh giá tổn thương tuyến giáp theo hệ thống TIRADS của ACR"}
+          />
 
-          <h2 style={{ marginBottom: 24 }}>Phần mềm D-TIRADS</h2>
           <div style={{ marginBottom: 50 }}></div>
           <Row gutter={24}>
             <Col span={12}>

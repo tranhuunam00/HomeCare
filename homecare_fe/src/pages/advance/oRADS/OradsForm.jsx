@@ -441,8 +441,11 @@ export default function OradsForm() {
         >
           <ThamKhaoLinkHomeCare
             link={"https://home-care.vn/product/phan-mem-d-orads/"}
+            name={"D-ORADS"}
+            desc={
+              "Đánh giá hình ảnh và phụ khoa trong việc đánh giá các tổn thương dạng khối ở buồng trứng và phân loại nguy cơ ung thư buồng trứng."
+            }
           />
-          <h2 style={{ marginBottom: 24 }}>Phần mềm D-ORADS</h2>
 
           {/* Modality */}
           <Form.Item

@@ -224,9 +224,9 @@ const BoneAgeForm = () => {
       <div className={styles.formContainer}>
         <ThamKhaoLinkHomeCare
           link={"https://home-care.vn/product/phan-mem-d-bone/"}
+          name={"D-BONE"}
+          desc={"Đánh giá tuổi xương theo phương pháp Greulich & Pyle"}
         />
-
-        <h2 style={{ marginBottom: 24 }}>Phần mềm D-BONE</h2>
 
         <div style={{ marginBottom: 50 }}></div>
         <Form layout="vertical" form={form}>

@@ -266,8 +266,9 @@ const AASTKidneyForm = () => {
         <Form form={form} layout="vertical">
           <ThamKhaoLinkHomeCare
             link={"https://home-care.vn/product/phan-mem-d-kidney/"}
+            name={"D-KIDNEY"}
+            desc={"Đánh giá và phân loại mức độ tổn thương thận do chấn thương"}
           />
-          <h2>Phần mềm D-KIDNEY</h2>
           <Form.Item
             name="injuries"
             label="Chọn các loại tổn thương đã xác định (có thể chọn nhiều)"

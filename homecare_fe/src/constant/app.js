@@ -251,7 +251,7 @@ export const FORM_LABELS = {
     sid: "SID",
     province: "Tỉnh/Thành phố",
     district: "Phường/Xã",
-    address: "Địa chỉ, số nhà",
+    address: "Địa chỉ",
     clinical: "Lâm sàng",
     department: "Phân hệ",
     division: "Chuyên khoa",
@@ -271,7 +271,7 @@ export const FORM_LABELS = {
     recommendationsCounseling: "KHUYẾN NGHỊ & TƯ VẤN",
     illustrativeImages: "HÌNH ẢNH MINH HỌA",
     doctor: "BÁC SỸ THỰC HIỆN",
-    time: "Thời gian hoàn thành",
+    time: "Thời gian",
     Result_Report: "Phiếu kết quả",
   },
   en: {

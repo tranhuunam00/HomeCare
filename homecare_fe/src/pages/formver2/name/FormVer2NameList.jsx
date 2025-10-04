@@ -359,7 +359,7 @@ const FormVer2NameList = () => {
   return (
     <div className={styles.wrapper}>
       <div className={styles.header}>
-        <h2 className={styles.title}>Danh sách tên mẫu form ver2</h2>
+        <h2 className={styles.title}>Danh sách tên mẫu form</h2>
         <div className={styles.headerActions}>
           <Button icon={<ReloadOutlined />} onClick={fetchList}>
             Tải lại

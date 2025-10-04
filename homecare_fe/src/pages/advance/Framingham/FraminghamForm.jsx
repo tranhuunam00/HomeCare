@@ -261,8 +261,9 @@ const FraminghamForm = () => {
       <div className={styles.formContainer}>
         <ThamKhaoLinkHomeCare
           link={"https://home-care.vn/product/phan-mem-d-cor/"}
+          name={"D-COR"}
+          desc={"Đánh giá nguy cơ nhồi máu cơ tim theo thang điểm Framingham"}
         />
-        <h2>Phần mềm D-COR</h2>
 
         <Form
           form={form}

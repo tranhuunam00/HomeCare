@@ -642,8 +642,11 @@ const BiradsForm = () => {
       <div className={styles.formContainer}>
         <ThamKhaoLinkHomeCare
           link={"https://home-care.vn/product/phan-mem-d-birads/"}
+          name={"D-BIRADS"}
+          desc={
+            "Đánh giá và đọc kết quả Mammography theo hệ thống BI-RADS của ACR"
+          }
         />
-        <h2>Phần mềm D-BIRADS</h2>
 
         <Form
           form={form}

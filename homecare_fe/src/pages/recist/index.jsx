@@ -31,6 +31,7 @@ import useVietnamAddress from "../../hooks/useVietnamAddress.js";
 
 import { QRCodeCanvas } from "qrcode.react";
 import BackHeader from "../../components/BackHeader.jsx";
+import { ThamKhaoLinkHomeCare } from "../advance/component_common/Thamkhao.jsx";
 
 const qrValue = `http://222.255.214.218:3003/home/recist`;
 
@@ -648,40 +649,18 @@ export default function Recist() {
   };
 
   return (
-    <div style={{ display: "flex", justifyContent: "center", width: "100vw" }}>
+    <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
       <div className="a4-page">
-        <BackHeader
-          title=""
-          sticky
-          // extra={<Button type="primary">Lưu</Button>}
-        />
         <div>
-          <Space
-            style={{
-              marginBottom: 16,
-              justifyContent: "space-between",
-              width: "100%",
-            }}
-          >
-            <Link to=""></Link>
-            <div style={{ display: "flex", gap: 8 }}>
-              {/* <Button
-              type="primary"
-              onClick={handleExportPDF}
-              loading={loading}
-              disabled={loading}
-            >
-              {loading ? "Đang xuất file PDF..." : "Xuất PDF"}
-            </Button> */}
-              <Button
-                onClick={handlePrint}
-                loading={loading}
-                disabled={loading}
-              >
-                Xuất PDF
-              </Button>
-            </div>
-          </Space>
+          <div style={{ padding: 30, paddingBottom: 0 }}>
+            <ThamKhaoLinkHomeCare
+              link={"https://home-care.vn/product/phan-mem-d-recist/"}
+              name={"D-RECIST"}
+              desc={
+                "Đánh giá đáp ứng điều trị của các khối u đặc trên hình ảnh chụp cắt lớp vi tính (CT) và cộng hưởng từ (MRI)"
+              }
+            />
+          </div>
         </div>
 
         <div
@@ -693,23 +672,6 @@ export default function Recist() {
             padding: "20px",
           }}
         >
-          {/* Thông tin bệnh nhân */}
-          <div className="print-section">
-            {/* Thêm Header vào đây */}
-            {/* <Header /> */}
-            <h2
-              style={{
-                textAlign: "center",
-                marginBottom: "20px",
-                color: "#0000FF",
-              }}
-            >
-              KẾT QUẢ ĐÁNH GIÁ THEO DÕI ĐÁP ỨNG ĐIỀU TRỊ KHỐI U ĐẶC THEO TIÊU
-              CHUẨN RECIST 1.1
-            </h2>
-            {/* <PatientForm /> */}
-          </div>
-
           {/* Hướng dẫn RECIST */}
           <div className="print-section">
             <GuildLine

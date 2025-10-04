@@ -87,7 +87,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
   return (
     <div>
       <div ref={printRef} className={styles.wrapper}>
-        <Card bordered={false} className={styles.a4Page}>
+        <Card bordered={false} className={styles.a4Page} style={{ padding: 0 }}>
           {isUse && (
             <header
               style={{
@@ -314,7 +314,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
               color: "#2f6db8",
               margin: 0,
               padding: 0,
-              marginBottom: 20,
+              marginBottom: 0,
               marginTop: 20,
             }}
           >
@@ -326,42 +326,6 @@ const PrintPreviewVer2NotDataDiagnose = ({
           </h3>
 
           <>
-            {/* <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <PrintItem
-                label={translateLabel(
-                  languageTranslate,
-                  "department",
-                  false
-                ).toUpperCase()}
-                value={
-                  selectedTemplateService?.name ||
-                  templateServices?.find(
-                    (t) => t.id == formSnapshot.id_template_service
-                  )?.name
-                }
-              />
-              <PrintItem
-                label={translateLabel(
-                  languageTranslate,
-                  "bodyPart",
-                  false
-                ).toUpperCase()}
-                value={
-                  selectedExamPart?.name ||
-                  examParts?.find((t) => t.id == formSnapshot.id_exam_part)
-                    ?.name
-                }
-              />
-              <PrintItem
-                label={translateLabel(
-                  languageTranslate,
-                  "language",
-                  false
-                ).toUpperCase()}
-                value={"Vi"}
-              />
-            </div> */}
-
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               {/* <PrintItem
                 label={"TÊN MẪU"}
@@ -412,7 +376,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
                 alt={`img-${formSnapshot?.ImageLeftUrl}`}
                 width={300}
                 height={220}
-                style={{ objectFit: "contain", backgroundColor: "#e4e4e4ff" }}
+                style={{ objectFit: "contain", backgroundColor: "#c0b6b6ff" }}
               />
               <p style={{ textAlign: "center" }}>
                 <a
@@ -436,7 +400,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
                 alt={`img-${formSnapshot?.ImageRightUrl}`}
                 width={300}
                 height={220}
-                style={{ objectFit: "contain", backgroundColor: "#e4e4e4ff" }}
+                style={{ objectFit: "contain", backgroundColor: "#c0b6b6ff" }}
               />
               <p style={{ textAlign: "center" }}>
                 <a
@@ -467,7 +431,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
               color: "#2f6db8",
               margin: 0,
               padding: 0,
-              marginBottom: 20,
+              marginBottom: 0,
               marginTop: 20,
             }}
           >
@@ -518,7 +482,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
               color: "#2f6db8",
               margin: 0,
               padding: 0,
-              marginBottom: 20,
+              marginBottom: 0,
               marginTop: 20,
             }}
           >
@@ -595,7 +559,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
                   color: "#2f6db8",
                   margin: 0,
                   padding: 0,
-                  marginBottom: 20,
+                  marginBottom: 0,
                   marginTop: 20,
                 }}
               >
@@ -624,7 +588,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
                         {translateLabel(languageTranslate, "fullName", false)}:
                       </strong>
                     </div>
-                    {doctor.full_name}
+                    {`${doctor.academic_title}.${doctor.degree}. ${doctor.full_name}`}
                   </div>
                   <div
                     style={{ display: "flex", marginBottom: 6, fontSize: 14 }}

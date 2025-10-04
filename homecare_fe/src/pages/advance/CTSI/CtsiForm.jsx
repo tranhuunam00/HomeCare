@@ -170,8 +170,11 @@ const BalthazarForm = () => {
       <div className={styles.formContainer}>
         <ThamKhaoLinkHomeCare
           link={"https://home-care.vn/product/phan-mem-d-ctsi/"}
+          name={"D-CTSI"}
+          desc={
+            "Đánh giá và phân loại mức độ viêm tụy cấp. Phần mềm được xây dựng dựa trên hệ thống chỉ số CTSI (Computed Tomography Severity Index) và thang điểm Balthazar."
+          }
         />
-        <Title level={2}>Phần mềm D-CTSI</Title>
 
         <Form form={form} layout="vertical" onFinish={calcAndSet}>
           <Form.Item

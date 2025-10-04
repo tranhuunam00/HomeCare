@@ -150,8 +150,11 @@ const DipssForm = () => {
       <div className={styles.formContainer}>
         <ThamKhaoLinkHomeCare
           link={"https://home-care.vn/product/phan-mem-d-ipss/"}
+          name={"D-IPSS"}
+          desc={
+            "Đánh giá rối loạn tiểu tiện và chất lượng cuộc sống ở bệnh nhân phì đại tuyến tiền liệt theo thang điểm IPSS"
+          }
         />
-        <h2>Phần mềm D-IPSS</h2>
 
         <Form form={form} layout="vertical" onFinish={onFinish}>
           {IPSS_QUESTIONS.map((q) => (

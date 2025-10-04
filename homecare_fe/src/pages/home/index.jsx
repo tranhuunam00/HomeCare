@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Avatar, Layout, Menu } from "antd";
 import {
   AppstoreOutlined,
@@ -18,6 +18,9 @@ const { Header } = Layout;
 
 const Sidebar = ({ collapsed }) => {
   const { user, doctor, handleLogoutGlobal } = useGlobalAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+
   const menuItems = [
     // user?.id_role === USER_ROLE.ADMIN && {
     //   key: "Ca chẩn đoán",
@@ -119,20 +122,20 @@ const Sidebar = ({ collapsed }) => {
       label: "Ứng dụng, tiện ích",
       children: [
         // { key: "/tirads_nn", label: "Phần mềm D-TIRADS" },
-        { key: "/recist_nn", label: "Phần mềm D-RECIST" },
-        { key: "/tirad", label: "Phần mềm D-TIRADS" },
-        { key: "/lungrad", label: "Phần mềm D-LUNG" },
-        { key: "/birad", label: "Phần mềm D-BIRADS" },
-        { key: "/boneage", label: "Phần mềm D-BONE" },
-        { key: "/dipss", label: "Phần mềm D-IPSS" },
-        { key: "/D-COR", label: "Phần mềm D-COR" },
-        { key: "/D-CPS", label: "Phần mềm D-CPS" },
-        { key: "/D-BALTHAZA", label: "Phần mềm D-CTSI" },
-        { key: "/D-VOTHAN", label: "Phần mềm D-KIDNEY" },
-        { key: "/D-VOGAN", label: "Phần mềm D-LIVER" },
-        { key: "/D-BOSNIAK", label: "Phần mềm D-Bosniak" },
-        { key: "/D-LIRADS", label: "Phần mềm D-LIRADS" },
-        { key: "/D-ORADS", label: "Phần mềm D-ORADS" },
+        { key: "/home/recist_nn", label: "Phần mềm D-RECIST" },
+        { key: "/home/tirad", label: "Phần mềm D-TIRADS" },
+        { key: "/home/lungrad", label: "Phần mềm D-LUNG" },
+        { key: "/home/birad", label: "Phần mềm D-BIRADS" },
+        { key: "/home/boneage", label: "Phần mềm D-BONE" },
+        { key: "/home/dipss", label: "Phần mềm D-IPSS" },
+        { key: "/home/D-COR", label: "Phần mềm D-COR" },
+        { key: "/home/D-CPS", label: "Phần mềm D-CPS" },
+        { key: "/home/D-BALTHAZA", label: "Phần mềm D-CTSI" },
+        { key: "/home/D-VOTHAN", label: "Phần mềm D-KIDNEY" },
+        { key: "/home/D-VOGAN", label: "Phần mềm D-LIVER" },
+        { key: "/home/D-BOSNIAK", label: "Phần mềm D-Bosniak" },
+        { key: "/home/D-LIRADS", label: "Phần mềm D-LIRADS" },
+        { key: "/home/D-ORADS", label: "Phần mềm D-ORADS" },
       ],
     },
     {
@@ -217,8 +220,6 @@ const Sidebar = ({ collapsed }) => {
     },
   ].filter(Boolean); // loại bỏ các mục false nếu user không phải admin
 
-  const navigate = useNavigate();
-
   const handleClick = (e) => {
     navigate(e.key);
   };
@@ -231,6 +232,7 @@ const Sidebar = ({ collapsed }) => {
       items={menuItems}
       style={{ height: "100%" }}
       inlineCollapsed={collapsed}
+      selectedKeys={[location.pathname.replace("/", "")]}
     />
   );
 };

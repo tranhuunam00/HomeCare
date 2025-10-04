@@ -182,6 +182,7 @@ const HomeCareLanding = () => {
                 mode="horizontal"
                 selectable={false}
                 className={styles["homecare__menu"]}
+                style={{ width: "100%", justifyContent: "center", gap: 40 }}
               >
                 <Menu.Item
                   key="home"
@@ -192,15 +193,13 @@ const HomeCareLanding = () => {
                   TRANG CHỦ
                 </Menu.Item>
 
-                <DropdownNav
-                  title="ĐỌC KẾT QUẢ"
-                  onClickTitle={() => {
-                    if (user) navigate("/home/form-v2/use");
-                    else toast.warn("Vui lòng đăng nhập để sử dụng");
-                  }}
-                />
-                <DropdownNav title="ỨNG DỤNG, TIỆN ÍCH" items={trialItem} />
-
+                <Menu.Item
+                  key="contact"
+                  onClick={() => navigate("/home")}
+                  style={{ fontSize: 24 }}
+                >
+                  PHẦN MỀM D-RADS
+                </Menu.Item>
                 <Menu.Item key="contact" onClick={() => navigate("/contact")}>
                   HỖ TRỢ KỸ THUẬT
                 </Menu.Item>
@@ -216,13 +215,27 @@ const HomeCareLanding = () => {
             }}
           >
             {isLoggedIn ? (
-              <Button
-                type="primary"
-                className={styles["homecare__contact"]}
-                onClick={() => navigate("/home")} // hoặc route bạn muốn
+              <div
+                style={{
+                  display: "flex",
+                  gap: 30,
+                }}
               >
-                Sử dụng ngay
-              </Button>
+                <Button
+                  type="primary"
+                  className={styles["homecare__contact"]}
+                  onClick={() => navigate("/home/form-v2/use")} // hoặc route bạn muốn
+                >
+                  ĐỌC KẾT QUẢ
+                </Button>
+                <Button
+                  type="primary"
+                  className={styles["homecare__contact"]}
+                  onClick={() => navigate("/home/tirad")} // hoặc route bạn muốn
+                >
+                  ỨNG DỤNG
+                </Button>
+              </div>
             ) : (
               <>
                 <Button

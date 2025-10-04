@@ -278,8 +278,9 @@ const AASTLiverForm = () => {
         <Form form={form} layout="vertical">
           <ThamKhaoLinkHomeCare
             link={"https://home-care.vn/product/phan-mem-d-liver/"}
+            name={"D-LIVER"}
+            desc={"Đánh giá và phân loại mức độ tổn thương gan do chấn thương"}
           />
-          <h2>Phần mềm D-LIVER</h2>
 
           {/* Nhóm chính */}
           <Form.Item

@@ -559,9 +559,9 @@ const LungRADSForm = () => {
       <div className={styles.formContainer}>
         <ThamKhaoLinkHomeCare
           link={"https://home-care.vn/product/phan-mem-d-lung/"}
+          name={"D-LUNG"}
+          desc={"Đánh giá nốt phổi theo Lung-RADS – Sàng lọc sớm ung thư phổi"}
         />
-
-        <Title level={3}>Phần mềm D-LUNG</Title>
 
         <Form form={form} layout="vertical" onFinish={onFinish}>
           <Form.Item

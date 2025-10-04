@@ -277,6 +277,12 @@ export const handlePrint = (printRef) => {
       <head>
         <title>www.home-care.vn</title>
         <style>
+          @page {
+            margin-top: 70px;   /* cách header 20px cho mọi trang */
+          }
+          @page :first {
+            margin-top: 20px; /* chỉ trang đầu tiên giữ 20px */
+          }
           * {
             font-family: 'Arial', sans-serif !important;
           }

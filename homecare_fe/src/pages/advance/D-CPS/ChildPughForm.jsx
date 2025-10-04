@@ -158,8 +158,11 @@ const ChildPughForm = () => {
       <div className={styles.formContainer}>
         <ThamKhaoLinkHomeCare
           link={"https://home-care.vn/product/phan-mem-d-cps/"}
+          name={"D-CPS"}
+          desc={
+            "Đánh giá rối loạn chức năng gan ở bệnh nhân xơ gan theo thang điểm Child-Pugh Score"
+          }
         />
-        <h2>Phần mềm D-CPS</h2>
         <Form form={form} layout="vertical" onFinish={onFinish}>
           {CHILD_PUGH_QUESTIONS.map((q) => (
             <Form.Item

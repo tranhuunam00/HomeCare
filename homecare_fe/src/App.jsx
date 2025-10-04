@@ -91,22 +91,7 @@ function App() {
         <Route path="/" element={<HomeCareLanding />} />
         <Route path="/login" element={<LoginForm />} />
         <Route path="/register" element={<RegisterForm />} />
-        <Route path="/tirad" element={<TiradsForm />} />
-        <Route path="/lungrad" element={<LungRADSForm />} />
-        <Route path="/birad" element={<BiradsForm />} />
-        <Route path="/boneage" element={<BoneAgeForm />} />
-        <Route path="/dipss" element={<DipssForm />} />
-        <Route path="/D-COR" element={<FraminghamForm />} />
-        <Route path="/D-CPS" element={<ChildPughForm />} />
         <Route path="/contact" element={<ContactForm />} />
-        <Route path="/D-BALTHAZA" element={<ModifiedCTSIForm />} />
-        <Route path="/D-VOTHAN" element={<AASTKidneyForm />} />
-        <Route path="/D-VOGAN" element={<AASTLiverForm />} />
-        <Route path="/D-BOSNIAK" element={<BosniakForm />} />
-        <Route path="/D-LIRADS" element={<LIRADSForm />} />
-        <Route path="/D-ORADS" element={<ORADSModalityOnly />} />
-        <Route path="tirads_nn" element={<TiradPage />} />
-        <Route path="recist_nn" element={<Recist />} />
 
         <Route
           path="/home"
@@ -117,7 +102,21 @@ function App() {
           }
         >
           <Route index element={<DoctorUseFormVer2List />} />
-
+          <Route path="tirad" element={<TiradsForm />} />
+          <Route path="lungrad" element={<LungRADSForm />} />
+          <Route path="birad" element={<BiradsForm />} />
+          <Route path="boneage" element={<BoneAgeForm />} />
+          <Route path="dipss" element={<DipssForm />} />
+          <Route path="D-COR" element={<FraminghamForm />} />
+          <Route path="D-CPS" element={<ChildPughForm />} />
+          <Route path="D-BALTHAZA" element={<ModifiedCTSIForm />} />
+          <Route path="D-VOTHAN" element={<AASTKidneyForm />} />
+          <Route path="D-VOGAN" element={<AASTLiverForm />} />
+          <Route path="D-BOSNIAK" element={<BosniakForm />} />
+          <Route path="D-LIRADS" element={<LIRADSForm />} />
+          <Route path="D-ORADS" element={<ORADSModalityOnly />} />
+          <Route path="tirads_nn" element={<TiradPage />} />
+          <Route path="recist_nn" element={<Recist />} />
           <Route path="products" element={<ProductList />} />
           <Route path="templates" element={<TemplateList />} />
 

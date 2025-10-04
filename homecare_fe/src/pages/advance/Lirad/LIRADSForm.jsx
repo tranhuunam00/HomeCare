@@ -31,8 +31,11 @@ const LIRADSForm = () => {
         <Form form={form} layout="vertical" onFinish={() => {}}>
           <ThamKhaoLinkHomeCare
             link={"https://home-care.vn/product/phan-mem-d-lirads/"}
+            name={"D-LIRADS"}
+            desc={
+              "Đánh giá các khối u gan trên phim chụp cắt lớp vi tính (CT) và cộng hưởng từ (MRI)"
+            }
           />
-          <h2>Phần mềm D-LIRADS</h2>
 
           {/* Modality */}
           <Form.Item label="Chọn phương thức chẩn đoán hình ảnh:" required>
