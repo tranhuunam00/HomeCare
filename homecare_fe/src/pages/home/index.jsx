@@ -71,23 +71,23 @@ const Sidebar = ({ collapsed }) => {
       label: "Mẫu kết quả",
       children: [
         user?.id_role === USER_ROLE.ADMIN && {
-          key: "form-v2",
+          key: "/home/form-v2",
           label: "Tạo mẫu mới",
         },
         user?.id_role === USER_ROLE.ADMIN && {
-          key: "form-v2-list",
+          key: "/home/form-v2-list",
           label: "Danh sách mẫu",
         },
 
         user?.id_role === USER_ROLE.ADMIN && {
-          key: "form-ver2-names",
+          key: "/home/form-ver2-names",
 
           label: "Danh sách tên mẫu",
         },
       ],
     },
     {
-      key: "form-v2/use",
+      key: "/home/form-v2/use",
       icon: (
         <Avatar
           src={"https://cdn-icons-png.flaticon.com/512/3798/3798294.png"}
@@ -97,7 +97,7 @@ const Sidebar = ({ collapsed }) => {
       label: "Đọc kết quả ngay",
     },
     {
-      key: "doctor-use-form-v2",
+      key: "/home/doctor-use-form-v2",
       icon: (
         <Avatar
           src={
@@ -139,7 +139,7 @@ const Sidebar = ({ collapsed }) => {
       ],
     },
     {
-      key: "templates-print",
+      key: "/home/templates-print",
       icon: (
         <Avatar
           src="https://png.pngtree.com/png-clipart/20200224/original/pngtree-printer-icon-for-your-project-png-image_5214091.jpg"
@@ -149,7 +149,7 @@ const Sidebar = ({ collapsed }) => {
       label: "Mẫu in kết quả",
     },
     {
-      key: "clinics",
+      key: "/home/clinics",
       icon: (
         <Avatar
           src="https://png.pngtree.com/png-clipart/20230922/original/pngtree-school-building-flat-color-ui-icon-facility-elearning-solid-vector-png-image_12822392.png"
@@ -168,8 +168,8 @@ const Sidebar = ({ collapsed }) => {
       ),
       label: "Dịch vụ khám",
       children: [
-        { key: "template_services", label: "Phân hệ" },
-        { key: "exam-parts", label: "Bộ phận" },
+        { key: "/home/template_services", label: "Phân hệ" },
+        { key: "/home/exam-parts", label: "Bộ phận" },
       ],
     },
 
@@ -182,7 +182,7 @@ const Sidebar = ({ collapsed }) => {
         />
       ),
       label: "Liên hệ",
-      children: [{ key: "contacts-admin", label: "Tất cả" }],
+      children: [{ key: "/home/contacts-admin", label: "Tất cả" }],
     },
     user?.id_role === USER_ROLE.ADMIN && {
       key: "Bác sĩ",
@@ -193,7 +193,7 @@ const Sidebar = ({ collapsed }) => {
         />
       ),
       label: "Bác sĩ",
-      children: [{ key: "customers", label: "Danh sách" }],
+      children: [{ key: "/home/customers", label: "Danh sách" }],
     },
 
     user?.id_role === USER_ROLE.ADMIN && {
@@ -208,7 +208,7 @@ const Sidebar = ({ collapsed }) => {
       children: [{ key: "report-product", label: "Sản phẩm" }],
     },
     {
-      key: "intergate",
+      key: "/home/intergate",
       icon: (
         <Avatar
           src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRBsdqP84ptWxCDbHZMpLQeN5AgDF1LUzzH8g"
@@ -224,6 +224,12 @@ const Sidebar = ({ collapsed }) => {
     navigate(e.key);
   };
 
+  const currentPath = location.pathname;
+
+  const parentKey = menuItems.find((item) =>
+    item?.children?.some((child) => child.key === currentPath)
+  )?.key;
+
   return (
     <Menu
       onClick={handleClick}
@@ -232,7 +238,8 @@ const Sidebar = ({ collapsed }) => {
       items={menuItems}
       style={{ height: "100%" }}
       inlineCollapsed={collapsed}
-      selectedKeys={[location.pathname.replace("/", "")]}
+      selectedKeys={[location.pathname]}
+      defaultOpenKeys={parentKey ? [parentKey] : []}
     />
   );
 };

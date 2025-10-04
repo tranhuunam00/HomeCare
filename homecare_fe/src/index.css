@@ -105,3 +105,14 @@ div[style*="text-align: left"], div[style*="textAlign: left"], td:first-child, t
     page-break-after: always;
   }
 }:contentReference[oaicite:27]{index=27}
+
+
+.ant-menu-item-selected {
+  background-color: #1890ff !important; /* nền xanh */
+  color: #fff !important;               /* chữ trắng */
+}
+
+.ant-menu-item-selected a,
+.ant-menu-item-selected span {
+  color: #fff !important; /* chữ icon và label đều trắng */
+}
