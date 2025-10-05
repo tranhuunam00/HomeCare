@@ -19,11 +19,10 @@ import styles from "./contactAdminList.module.scss";
 const { Option } = Select;
 
 const CONTACT_TYPES = [
-  "liên hệ tư vấn chung",
-  "đặt lịch khám/chăm sóc",
-  "phản hồi/dịch vụ đã dùng",
+  "hỗ trợ kỹ thuật",
+  "phát triển phần mềm",
+  "chỉnh sửa nội dung",
   "hợp tác kinh doanh",
-  "khiếu nại",
   "khác",
 ];
 

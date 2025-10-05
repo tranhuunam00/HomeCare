@@ -106,38 +106,10 @@ const HomeCareLanding = () => {
   ];
 
   const [isContactOpen, setIsContactOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
 
   const handleContactCancel = () => setIsContactOpen(false);
 
-  const handleSubscribe = async () => {
-    if (!email) {
-      toast.error("Vui lòng nhập email!");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      await API_CALL.post("/contacts", {
-        email,
-        full_name: "khách",
-        type: "liên hệ tư vấn chung",
-        message: "Khách đăng ký nhận thông tin qua email", // có thể tuỳ biến
-      });
-      toast.success("Đăng ký thành công! Chúng tôi sẽ liên hệ với bạn.");
-      setEmail(""); // reset input
-    } catch (err) {
-      toast.error(
-        err?.response?.data?.message || "Đăng ký thất bại. Vui lòng thử lại!"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const topRef = useRef(null);
-  const aboutRef = useRef(null);
-  const serviceRef = useRef(null);
 
   return (
     <div className={styles["homecare"]}>
@@ -572,30 +544,18 @@ const HomeCareLanding = () => {
 
       {/* Footer Subscribe Section */}
       <section className={styles["homecare__subscribe"]}>
-        <h2
-          className={styles["homecare__subscribe-title"]}
-          style={{ color: "#fff" }}
-        >
-          Gửi yêu cầu cho chúng tôi
-        </h2>
-
         <div
           className={styles["homecare__subscribe-input"]}
           style={{ alignItems: "center" }}
         >
-          <Input
-            placeholder="Nhập email của bạn..."
-            size="large"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
           <Button
             type="primary"
             size="large"
-            onClick={handleSubscribe}
-            loading={loading}
+            onClick={() => {
+              navigate("/contact");
+            }}
           >
-            Gửi
+            {"Gửi yêu cầu cho chúng tôi".toUpperCase()}
           </Button>
         </div>
       </section>

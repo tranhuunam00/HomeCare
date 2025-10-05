@@ -50,9 +50,24 @@ const ContactForm = () => {
           boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
         }}
       >
-        <h2 style={{ textAlign: "center" }}>HOME-CARE</h2>
-        <Title level={3} style={{ textAlign: "center", marginBottom: 32 }}>
-          Liên hệ với chúng tôi
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            marginBottom: 20,
+          }}
+        >
+          <img src="/logo_home_care.jpg" alt="" width={80} />
+        </div>
+        <Title
+          level={3}
+          style={{
+            textAlign: "center",
+            marginBottom: 32,
+            color: "#04580fff",
+          }}
+        >
+          {"Gửi yêu cầu, góp ý cho chúng tôi".toUpperCase()}
         </Title>
 
         <Form
@@ -63,16 +78,17 @@ const ContactForm = () => {
           onFinish={handleSubmit}
         >
           <Row gutter={16}>
-            <Col span={12}>
+            <Col span={8}>
               <Form.Item
                 label="Họ và tên"
                 name="full_name"
                 rules={[{ required: true, message: "Vui lòng nhập họ tên!" }]}
+                ti
               >
                 <Input placeholder="Nguyễn Văn A" />
               </Form.Item>
             </Col>
-            <Col span={12}>
+            <Col span={10}>
               <Form.Item
                 label="Email"
                 name="email"
@@ -84,10 +100,7 @@ const ContactForm = () => {
                 <Input placeholder="abc@gmail.com" />
               </Form.Item>
             </Col>
-          </Row>
-
-          <Row gutter={16}>
-            <Col span={12}>
+            <Col span={6}>
               <Form.Item
                 label="Số điện thoại"
                 name="phone"
@@ -98,23 +111,25 @@ const ContactForm = () => {
                 <Input placeholder="0909123456" />
               </Form.Item>
             </Col>
+          </Row>
+
+          <Row gutter={16}>
             <Col span={12}>
               <Form.Item
                 label="Loại liên hệ"
                 name="type"
-                initialValue="liên hệ tư vấn chung"
+                initialValue="hỗ trợ kỹ thuật"
                 rules={[
                   { required: true, message: "Vui lòng chọn loại liên hệ!" },
                 ]}
               >
                 <Select placeholder="Chọn loại liên hệ">
-                  <Option value="liên hệ tư vấn chung">Tư vấn chung</Option>
-                  <Option value="đặt lịch khám/chăm sóc">
-                    Đặt lịch khám/chăm sóc
+                  <Option value="hỗ trợ kỹ thuật">Hỗ trợ kỹ thuật</Option>
+                  <Option value="phát triển phần mềm">
+                    Phát triển phần mềm
                   </Option>
-                  <Option value="phản hồi/dịch vụ đã dùng">Phản hồi</Option>
-                  <Option value="hợp tác kinh doanh">Hợp tác</Option>
-                  <Option value="khiếu nại">Khiếu nại</Option>
+                  <Option value="chỉnh sửa nội dung">Chỉnh sửa nội dung</Option>
+                  <Option value="hợp tác kinh doanh">Hợp tác kinh doanh</Option>
                   <Option value="khác">Khác</Option>
                 </Select>
               </Form.Item>
