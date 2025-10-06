@@ -35,6 +35,7 @@ import { exportFormVer2 } from "../utils";
 import FormVer2PreviewModal from "./FormVer2PreviewModal";
 import { USER_ROLE } from "../../../constant/app";
 import { FormVer2CloneModal } from "../component/FormVer2CloneModal";
+import { toast } from "react-toastify";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -57,6 +58,7 @@ const buildParams = (f) => {
   if (f.id_exam_part) params.id_exam_part = f.id_exam_part;
   if (f.id_template_service) params.id_template_service = f.id_template_service;
   if (f.id_doctor) params.id_doctor = f.id_doctor;
+  if (f.language) params.language = f.language;
 
   if (f.search?.trim()) params.search = f.search.trim();
   if (Array.isArray(f.range) && f.range[0] && f.range[1]) {
@@ -89,6 +91,7 @@ const DEFAULT_FILTERS = {
   withTables: false,
   withImages: false,
   includeDeleted: false,
+  language: "vi",
 };
 
 const STORAGE_KEY = "visibleColumns_formVer2";
@@ -346,6 +349,18 @@ export default function FormVer2List() {
             >
               Clone
             </Button>
+            {user.id_role == USER_ROLE.ADMIN && (
+              <Button
+                type="link"
+                style={{ color: "#1890ff" }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  cloneToEnglish({ ids: [record.id] });
+                }}
+              >
+                Clone EN
+              </Button>
+            )}
           </Space>
         ),
       },
@@ -394,6 +409,69 @@ export default function FormVer2List() {
     </div>
   );
 
+  const cloneToEnglish = async ({ ids }) => {
+    if (!ids?.length) return;
+
+    const alreadyEN = rows
+      .filter((r) => ids.includes(r.id) && r.language === "us")
+      .map((r) => r.id);
+
+    if (alreadyEN.length > 0) {
+      toast.warning(
+        `⚠️ Bản ghi ID: ${alreadyEN.join(
+          ", "
+        )} đã là bản tiếng Anh. Vui lòng bỏ chọn trước khi nhân bản.`,
+        { autoClose: 6000 }
+      );
+
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // ✅ Chỉ giữ lại ID chưa có EN
+      const filteredIds = ids.filter((id) => !alreadyEN.includes(id));
+
+      const res = await API_CALL.post(
+        "/form-ver2/nhan-ban-us",
+        { ids: filteredIds },
+        { timeout: 120000 }
+      );
+
+      const { successed = [], failed = [] } = res?.data?.data || {};
+
+      if (successed.length > 0) {
+        toast.success(`✅ Thành công: ${successed.join(", ")}`, {
+          autoClose: 5000,
+        });
+      }
+
+      if (failed.length > 0) {
+        const failMessages = failed
+          .map((obj) => {
+            const [id, msg] = Object.entries(obj)[0];
+            return `${id}: ${msg}`;
+          })
+          .join(", ");
+        toast.error(`❌ Thất bại: ${failMessages}`, { autoClose: 7000 });
+      }
+
+      if (successed.length === 0 && failed.length === 0) {
+        toast.info("Không có bản ghi nào được xử lý.");
+      }
+
+      if (successed.length > 0) {
+        await fetchList();
+      }
+    } catch (e) {
+      console.error(e);
+      toast.error("Lỗi khi nhân bản sang tiếng Anh!");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   /* ======= Row Selection ======= */
   const rowSelection = {
     selectedRowKeys,
@@ -419,217 +497,244 @@ export default function FormVer2List() {
 
   /* ======= UI ======= */
   return (
-    <div className={styles.page}>
-      <Title
-        level={3}
-        style={{ margin: 0, textAlign: "center", color: "#3366CC" }}
-      >
-        PHẦN MỀM D-RADS
-      </Title>
-      <Title
-        level={3}
-        style={{
-          margin: 0,
-          textAlign: "center",
-          marginBottom: 30,
-          color: "#3366CC",
-        }}
-      >
-        DANH SÁCH MẪU KẾT QUẢ
-      </Title>
-      <div className={styles.header}>
-        <Space>
-          <Tooltip title="Sử dụng">
-            <Button
-              type="primary"
-              icon={<CheckOutlined />}
-              onClick={() => {
-                navigate(`/home/form-v2/use`);
-              }}
-            >
-              Sử dụng
-            </Button>
-          </Tooltip>
-
-          {user.id_role == USER_ROLE.ADMIN && (
-            <Tooltip title="Thêm mới">
+    <Spin spinning={loading}>
+      <div className={styles.page}>
+        <Title
+          level={3}
+          style={{ margin: 0, textAlign: "center", color: "#3366CC" }}
+        >
+          PHẦN MỀM D-RADS
+        </Title>
+        <Title
+          level={3}
+          style={{
+            margin: 0,
+            textAlign: "center",
+            marginBottom: 30,
+            color: "#3366CC",
+          }}
+        >
+          DANH SÁCH MẪU KẾT QUẢ
+        </Title>
+        <div className={styles.header}>
+          <Space>
+            <Tooltip title="Sử dụng">
               <Button
-                icon={<FileAddFilled />}
-                onClick={() => navigate(`/home/form-v2`)}
+                type="primary"
+                icon={<CheckOutlined />}
+                onClick={() => {
+                  navigate(`/home/form-v2/use`);
+                }}
+              >
+                Sử dụng
+              </Button>
+            </Tooltip>
+
+            {user.id_role == USER_ROLE.ADMIN && (
+              <Tooltip title="Thêm mới">
+                <Button
+                  icon={<FileAddFilled />}
+                  onClick={() => navigate(`/home/form-v2`)}
+                />
+              </Tooltip>
+            )}
+
+            <Tooltip title="Làm mới">
+              <Button
+                icon={<ReloadOutlined />}
+                onClick={() => setFilters({ ...filters })}
               />
             </Tooltip>
-          )}
 
-          <Tooltip title="Làm mới">
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={() => setFilters({ ...filters })}
-            />
-          </Tooltip>
+            <Dropdown overlay={columnMenu} trigger={["click"]}>
+              <Button icon={<SettingOutlined />}>Chọn cột</Button>
+            </Dropdown>
 
-          <Dropdown overlay={columnMenu} trigger={["click"]}>
-            <Button icon={<SettingOutlined />}>Chọn cột</Button>
-          </Dropdown>
+            {user.id_role == USER_ROLE.ADMIN && (
+              <>
+                {" "}
+                <Button
+                  type="primary"
+                  icon={<DownloadOutlined />}
+                  disabled={!selectedRowKeys.length}
+                  onClick={() => exportFormVer2({ ids: selectedRowKeys })}
+                >
+                  Export ({selectedRowKeys.length})
+                </Button>
+                <Button
+                  icon={<CheckOutlined />}
+                  disabled={!selectedRowKeys.length}
+                  onClick={() => cloneToEnglish({ ids: selectedRowKeys })}
+                >
+                  Clone EN ({selectedRowKeys.length})
+                </Button>
+              </>
+            )}
 
-          {user.id_role == USER_ROLE.ADMIN && (
-            <Button
-              type="primary"
-              icon={<DownloadOutlined />}
-              disabled={!selectedRowKeys.length}
-              onClick={() => exportFormVer2({ ids: selectedRowKeys })}
-            >
-              Export ({selectedRowKeys.length})
-            </Button>
-          )}
-
-          <Button onClick={selectAllOnPage}>Chọn tất cả</Button>
-          <Button onClick={unselectAllOnPage}>Bỏ chọn</Button>
-          <Button onClick={clearAllSelections}>Xóa toàn bộ chọn</Button>
-        </Space>
-      </div>
-
-      <Card
-        size="small"
-        className={styles.filters}
-        title={
-          <Space>
-            <FilterOutlined /> Bộ lọc --- {total}bản ghi
+            <Button onClick={selectAllOnPage}>Chọn tất cả</Button>
+            <Button onClick={unselectAllOnPage}>Bỏ chọn</Button>
+            <Button onClick={clearAllSelections}>Xóa toàn bộ chọn</Button>
           </Space>
-        }
-        extra={
-          <Space>
-            <button onClick={resetUi}>Reset</button>
-            <button onClick={applySearch}>Tìm kiếm</button>
-          </Space>
-        }
-      >
-        <Row gutter={[12, 12]}>
-          <Col xs={24} md={8} lg={6}>
-            <Text>Từ khóa</Text>
-            <Input
-              placeholder="search"
-              value={uiFilters.search}
-              onChange={(e) =>
-                setUiFilters((s) => ({ ...s, search: e.target.value }))
-              }
-              onPressEnter={(e) => e.preventDefault()}
-              type="text"
-            />
-          </Col>
-          <Col xs={24} md={8} lg={4}>
-            <Text>Nhập Id bác sĩ</Text>
-            <Input
-              placeholder="search"
-              value={uiFilters.id_doctor}
-              onChange={(e) =>
-                setUiFilters((s) => ({ ...s, id_doctor: e.target.value }))
-              }
-              type="number"
-              onPressEnter={(e) => e.preventDefault()}
-            />
-          </Col>
+        </div>
 
-          <Col xs={12} md={8} lg={6}>
-            <Text>Phân hệ</Text>
-            <Select
-              allowClear
-              style={{ width: "100%" }}
-              placeholder="Chọn phân hệ"
-              value={uiFilters.id_template_service}
-              onChange={(v) =>
-                setUiFilters((s) => ({
-                  ...s,
-                  id_template_service: v,
-                  id_exam_part: undefined,
-                }))
-              }
-            >
-              {templateServices
-                .sort((a, b) => (a.name > b.name ? 1 : -1))
-                .map((t) => (
-                  <Option key={t.id} value={t.id}>
-                    {t.name}
-                  </Option>
-                ))}
-            </Select>
-          </Col>
-
-          <Col xs={12} md={8} lg={5}>
-            <Text>Bộ phận</Text>
-            <Select
-              allowClear
-              style={{ width: "100%" }}
-              placeholder="Chọn bộ phận thăm khám"
-              value={uiFilters.id_exam_part}
-              onChange={(v) => setUiFilters((s) => ({ ...s, id_exam_part: v }))}
-              disabled={!uiFilters.id_template_service} // disable khi chưa chọn phân hệ
-            >
-              {examParts
-                .filter(
-                  (s) =>
-                    String(s.id_template_service) ===
-                    String(uiFilters.id_template_service)
-                )
-                .sort((a, b) => (a.name > b.name ? 1 : -1))
-                .map((s) => (
-                  <Option key={s.id} value={s.id}>
-                    {s.name}
-                  </Option>
-                ))}
-            </Select>
-          </Col>
-
-          <Col xs={24} md={12} lg={7}>
-            <Text>Khoảng ngày</Text>
-            <RangePicker
-              style={{ width: "100%" }}
-              value={uiFilters.range}
-              onChange={(range) => setUiFilters((s) => ({ ...s, range }))}
-            />
-          </Col>
-
-          <Col xs={12} md={6} lg={4}>
-            <Text>Sắp xếp theo</Text>
-            <Select
-              style={{ width: "100%" }}
-              value={uiFilters.orderBy}
-              onChange={(v) => setUiFilters((s) => ({ ...s, orderBy: v }))}
-              options={[
-                { value: "createdAt", label: "Ngày tạo" },
-                { value: "updatedAt", label: "Ngày cập nhật" },
-                { value: "ngay_thuc_hien", label: "Ngày thực hiện" },
-              ]}
-            />
-          </Col>
-
-          <Col xs={12} md={6} lg={4}>
-            <Text>Thứ tự</Text>
-            <Select
-              style={{ width: "100%" }}
-              value={uiFilters.orderDir}
-              onChange={(v) => setUiFilters((s) => ({ ...s, orderDir: v }))}
-              options={[
-                { value: "DESC", label: "Giảm dần" },
-                { value: "ASC", label: "Tăng dần" },
-              ]}
-            />
-          </Col>
-
-          <Col xs={8} md={6} lg={2}>
-            <Text>Đã xoá</Text>
-            <div>
-              <Switch
-                checked={uiFilters.includeDeleted}
-                onChange={(v) =>
-                  setUiFilters((s) => ({ ...s, includeDeleted: v }))
+        <Card
+          size="small"
+          className={styles.filters}
+          title={
+            <Space>
+              <FilterOutlined /> Bộ lọc --- {total}bản ghi
+            </Space>
+          }
+          extra={
+            <Space>
+              <button onClick={resetUi}>Reset</button>
+              <button onClick={applySearch}>Tìm kiếm</button>
+            </Space>
+          }
+        >
+          <Row gutter={[12, 12]}>
+            <Col xs={24} md={8} lg={6}>
+              <Text>Từ khóa</Text>
+              <Input
+                placeholder="search"
+                value={uiFilters.search}
+                onChange={(e) =>
+                  setUiFilters((s) => ({ ...s, search: e.target.value }))
                 }
+                onPressEnter={(e) => e.preventDefault()}
+                type="text"
               />
-            </div>
-          </Col>
-        </Row>
-      </Card>
+            </Col>
+            <Col xs={24} md={8} lg={4}>
+              <Text>Nhập Id bác sĩ</Text>
+              <Input
+                placeholder="search"
+                value={uiFilters.id_doctor}
+                onChange={(e) =>
+                  setUiFilters((s) => ({ ...s, id_doctor: e.target.value }))
+                }
+                type="number"
+                onPressEnter={(e) => e.preventDefault()}
+              />
+            </Col>
 
-      <Spin spinning={loading}>
+            <Col xs={12} md={8} lg={6}>
+              <Text>Phân hệ</Text>
+              <Select
+                allowClear
+                style={{ width: "100%" }}
+                placeholder="Chọn phân hệ"
+                value={uiFilters.id_template_service}
+                onChange={(v) =>
+                  setUiFilters((s) => ({
+                    ...s,
+                    id_template_service: v,
+                    id_exam_part: undefined,
+                  }))
+                }
+              >
+                {templateServices
+                  .sort((a, b) => (a.name > b.name ? 1 : -1))
+                  .map((t) => (
+                    <Option key={t.id} value={t.id}>
+                      {t.name}
+                    </Option>
+                  ))}
+              </Select>
+            </Col>
+
+            <Col xs={12} md={8} lg={5}>
+              <Text>Bộ phận</Text>
+              <Select
+                allowClear
+                style={{ width: "100%" }}
+                placeholder="Chọn bộ phận thăm khám"
+                value={uiFilters.id_exam_part}
+                onChange={(v) =>
+                  setUiFilters((s) => ({ ...s, id_exam_part: v }))
+                }
+                disabled={!uiFilters.id_template_service} // disable khi chưa chọn phân hệ
+              >
+                {examParts
+                  .filter(
+                    (s) =>
+                      String(s.id_template_service) ===
+                      String(uiFilters.id_template_service)
+                  )
+                  .sort((a, b) => (a.name > b.name ? 1 : -1))
+                  .map((s) => (
+                    <Option key={s.id} value={s.id}>
+                      {s.name}
+                    </Option>
+                  ))}
+              </Select>
+            </Col>
+
+            <Col xs={24} md={12} lg={7}>
+              <Text>Khoảng ngày</Text>
+              <RangePicker
+                style={{ width: "100%" }}
+                value={uiFilters.range}
+                onChange={(range) => setUiFilters((s) => ({ ...s, range }))}
+              />
+            </Col>
+
+            <Col xs={12} md={6} lg={4}>
+              <Text>Ngôn ngữ</Text>
+              <Select
+                allowClear
+                style={{ width: "100%" }}
+                placeholder="Chọn ngôn ngữ"
+                value={uiFilters.language}
+                onChange={(v) => setUiFilters((s) => ({ ...s, language: v }))}
+                options={[
+                  { value: "vi", label: "Tiếng Việt" },
+                  { value: "us", label: "Tiếng Anh (US)" },
+                ]}
+              />
+            </Col>
+
+            <Col xs={12} md={6} lg={4}>
+              <Text>Sắp xếp theo</Text>
+              <Select
+                style={{ width: "100%" }}
+                value={uiFilters.orderBy}
+                onChange={(v) => setUiFilters((s) => ({ ...s, orderBy: v }))}
+                options={[
+                  { value: "createdAt", label: "Ngày tạo" },
+                  { value: "updatedAt", label: "Ngày cập nhật" },
+                  { value: "ngay_thuc_hien", label: "Ngày thực hiện" },
+                ]}
+              />
+            </Col>
+
+            <Col xs={12} md={6} lg={4}>
+              <Text>Thứ tự</Text>
+              <Select
+                style={{ width: "100%" }}
+                value={uiFilters.orderDir}
+                onChange={(v) => setUiFilters((s) => ({ ...s, orderDir: v }))}
+                options={[
+                  { value: "DESC", label: "Giảm dần" },
+                  { value: "ASC", label: "Tăng dần" },
+                ]}
+              />
+            </Col>
+
+            <Col xs={8} md={6} lg={2}>
+              <Text>Đã xoá</Text>
+              <div>
+                <Switch
+                  checked={uiFilters.includeDeleted}
+                  onChange={(v) =>
+                    setUiFilters((s) => ({ ...s, includeDeleted: v }))
+                  }
+                />
+              </div>
+            </Col>
+          </Row>
+        </Card>
+
         <Table
           scroll={{ x: 1200, y: 800 }}
           className={styles.table}
@@ -673,17 +778,17 @@ export default function FormVer2List() {
           onClose={() => setPreviewOpen(false)}
           id={previewId}
         />
-      </Spin>
-      {cloneOpen && (
-        <FormVer2CloneModal
-          open={cloneOpen}
-          onCancel={() => setCloneOpen(false)}
-          cloneRecord={cloneRecord}
-          onSuccess={(id) => {
-            navigate("/home/form-v2/detail/" + id);
-          }} // ✅ reload list sau khi clone
-        />
-      )}
-    </div>
+        {cloneOpen && (
+          <FormVer2CloneModal
+            open={cloneOpen}
+            onCancel={() => setCloneOpen(false)}
+            cloneRecord={cloneRecord}
+            onSuccess={(id) => {
+              navigate("/home/form-v2/detail/" + id);
+            }} // ✅ reload list sau khi clone
+          />
+        )}
+      </div>
+    </Spin>
   );
 }

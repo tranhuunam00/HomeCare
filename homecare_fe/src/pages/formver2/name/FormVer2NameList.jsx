@@ -54,6 +54,7 @@ const FormVer2NameList = () => {
   const [selectedExamPartId, setSelectedExamPartId] = useState();
   const [selectedTemplateServiceId, setSelectedTemplateServiceId] = useState();
   const [isUsedFilter, setIsUsedFilter] = useState();
+  const [languageFilter, setLanguageFilter] = useState();
 
   // modal
   const [open, setOpen] = useState(false);
@@ -80,6 +81,7 @@ const FormVer2NameList = () => {
       id_exam_part: selectedExamPartId,
       id_template_service: selectedTemplateServiceId,
       isUsed: isUsedFilter,
+      language: languageFilter,
       orderBy,
       orderDir,
     }),
@@ -91,6 +93,7 @@ const FormVer2NameList = () => {
       selectedTemplateServiceId,
       isUsedFilter,
       orderBy,
+      languageFilter,
       orderDir,
     ]
   );
@@ -129,6 +132,7 @@ const FormVer2NameList = () => {
     setPage(1);
     setLimit(20);
     fetchList();
+    setLanguageFilter(undefined);
   };
 
   const openCreate = () => {
@@ -329,6 +333,13 @@ const FormVer2NameList = () => {
         val ? <Tag color="green">Đã dùng</Tag> : <Tag>Chưa dùng</Tag>,
     },
     {
+      title: "id_root",
+      dataIndex: "id_root",
+      key: "id_root",
+      width: 70,
+      render: (v) => v || "",
+    },
+    {
       title: "Hành động",
       key: "actions",
       width: 220,
@@ -461,6 +472,19 @@ const FormVer2NameList = () => {
                         {p.name}
                       </Option>
                     ))}
+                </Select>
+              </Col>
+              <Col xs={24} sm={12} md={8} lg={6}>
+                <label>Ngôn ngữ</label>
+                <Select
+                  allowClear
+                  placeholder="Tất cả ngôn ngữ"
+                  value={languageFilter}
+                  onChange={(v) => setLanguageFilter(v || undefined)}
+                  style={{ width: "100%" }}
+                >
+                  <Option value="vi">Tiếng Việt</Option>
+                  <Option value="us">Tiếng Anh (US)</Option>
                 </Select>
               </Col>
               <Col xs={24} sm={12} md={8} lg={6}>
