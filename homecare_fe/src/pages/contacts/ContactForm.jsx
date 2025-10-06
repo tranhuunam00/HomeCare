@@ -144,18 +144,18 @@ const ContactForm = () => {
             <TextArea rows={4} placeholder="Tôi cần tư vấn về dịch vụ ABC..." />
           </Form.Item>
 
-          <Form.Item label="Lưu ý" name="note">
+          {/* <Form.Item label="Lưu ý" name="note">
             <TextArea rows={3} placeholder="Thông tin cần lưu ý (nếu có)..." />
-          </Form.Item>
+          </Form.Item> */}
 
           <Form.Item>
             <Button
               type="primary"
               htmlType="submit"
               loading={loading}
-              style={{ marginTop: 24 }}
+              style={{ marginTop: 24, backgroundColor: "#04580fff" }}
             >
-              {loading ? "Đang gửi..." : "Gửi liên hệ"}
+              {loading ? "Đang gửi..." : "Gửi"}
             </Button>
           </Form.Item>
         </Form>

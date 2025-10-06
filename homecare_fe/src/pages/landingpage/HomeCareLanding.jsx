@@ -116,9 +116,9 @@ const HomeCareLanding = () => {
       <div
         style={{
           display: "flex",
-          justifyContent: "center",
+          justifyContent: "space-around",
           alignItems: "center",
-          gap: 200,
+          // gap: 200,
         }}
       >
         <div
@@ -543,22 +543,28 @@ const HomeCareLanding = () => {
       </div> */}
 
       {/* Footer Subscribe Section */}
-      <section className={styles["homecare__subscribe"]}>
-        <div
-          className={styles["homecare__subscribe-input"]}
-          style={{ alignItems: "center" }}
+      <div
+        style={{
+          alignItems: "center",
+          display: "flex",
+          justifyContent: "center",
+          marginTop: 60,
+          marginBottom: 60,
+        }}
+      >
+        <Button
+          type="primary"
+          size="large"
+          style={{
+            backgroundColor: "#04580fff",
+          }}
+          onClick={() => {
+            navigate("/contact");
+          }}
         >
-          <Button
-            type="primary"
-            size="large"
-            onClick={() => {
-              navigate("/contact");
-            }}
-          >
-            {"Gửi yêu cầu cho chúng tôi".toUpperCase()}
-          </Button>
-        </div>
-      </section>
+          {"Gửi yêu cầu, góp ý cho chúng tôi".toUpperCase()}
+        </Button>
+      </div>
       <footer className={styles["homecare__footer"]}>
         <div className={styles["homecare__footer-content"]}>
           <div className={styles["homecare__footer-col"]}>
