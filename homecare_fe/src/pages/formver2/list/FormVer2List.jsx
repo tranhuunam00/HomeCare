@@ -413,7 +413,7 @@ export default function FormVer2List() {
     if (!ids?.length) return;
 
     const alreadyEN = rows
-      .filter((r) => ids.includes(r.id) && r.language === "us")
+      .filter((r) => ids.includes(r.id) && r.language === "en")
       .map((r) => r.id);
 
     if (alreadyEN.length > 0) {
@@ -688,8 +688,10 @@ export default function FormVer2List() {
                 value={uiFilters.language}
                 onChange={(v) => setUiFilters((s) => ({ ...s, language: v }))}
                 options={[
+                  { value: "", label: "Tất cả" },
+
                   { value: "vi", label: "Tiếng Việt" },
-                  { value: "us", label: "Tiếng Anh (US)" },
+                  { value: "en", label: "Tiếng Anh" },
                 ]}
               />
             </Col>

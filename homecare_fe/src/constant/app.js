@@ -255,11 +255,15 @@ export const FORM_LABELS = {
     clinical: "Lâm sàng",
     department: "Phân hệ",
     division: "Chuyên khoa",
-
+    codeForm: "Mã số định danh mẫu",
     bodyPart: "Bộ phận",
     resultTemplate: "Mẫu đọc kết quả",
     resultPrint: "Mẫu in kết quả",
     language: "Ngôn ngữ",
+    formName: "Tên mẫu",
+    formResult: "Kết luận của mẫu",
+    createdAt: "Ngày thực hiện",
+    createdUser: "Người thực hiện",
 
     // --- Radiology / Report sections ---
     technicalProtocol: "QUY TRÌNH KỸ THUẬT",
@@ -292,11 +296,16 @@ export const FORM_LABELS = {
     clinical: "Clinical Symptoms",
     department: "Department",
     division: "Department",
+    codeForm: "Code",
+    formResult: "Form Result",
 
     bodyPart: "Body Part",
     resultTemplate: "Result Template",
     resultPrint: "Result Print",
     language: "Language",
+    formName: "Form name",
+    createdAt: "Created date",
+    createdUser: "Created user",
 
     // --- Radiology / Report sections ---
     technicalProtocol: "Technical Protocol",

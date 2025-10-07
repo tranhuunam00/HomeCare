@@ -29,7 +29,11 @@ import CustomSunEditor from "../../components/Suneditor/CustomSunEditor";
 
 import styles from "./FormVer2.module.scss";
 import PrintPreviewVer2NotDataDiagnose from "./PreviewVer2/PrintPreviewVer2NotDataDiagnose";
-import { USER_ROLE } from "../../constant/app";
+import {
+  TRANSLATE_LANGUAGE,
+  translateLabel,
+  USER_ROLE,
+} from "../../constant/app";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -124,6 +128,10 @@ export default function DFormVer2({
   const [loading, setLoading] = useState(editId);
   const [isEdit, setIsEdit] = useState(!editId);
 
+  const [languageTranslate, setLanguageTransslate] = useState(
+    TRANSLATE_LANGUAGE.VI
+  );
+
   useEffect(() => {
     onTablesChange?.(tablesData);
   }, [tablesData, onTablesChange]);
@@ -156,6 +164,7 @@ export default function DFormVer2({
         if (!apiData) throw new Error("Không đọc được dữ liệu form");
 
         const formValues = mapApiToForm(apiData);
+        setLanguageTransslate(apiData?.language || "vi");
         const imageDesc = apiData?.imageDescEditor
           ? JSON.parse(apiData.imageDescEditor)
           : "";
@@ -164,7 +173,6 @@ export default function DFormVer2({
           apiData?.image_form_ver2s?.find((x) => x.kind === "left")?.url || "";
         const right =
           apiData?.image_form_ver2s?.find((x) => x.kind === "right")?.url || "";
-        console.log("formValues", formValues);
         // set form state hiển thị
         form.setFieldsValue(formValues);
         setImageDescEditor(imageDesc);
@@ -302,7 +310,7 @@ export default function DFormVer2({
           <Row gutter={16}>
             <Col xs={24} md={12}>
               <Form.Item
-                label="Phân hệ"
+                label={translateLabel(languageTranslate, "department", false)}
                 name="id_template_service"
                 rules={[{ required: true, message: "Chọn kỹ thuật" }]}
               >
@@ -329,7 +337,7 @@ export default function DFormVer2({
             </Col>
             <Col xs={24} md={12}>
               <Form.Item
-                label="Bộ phận"
+                label={translateLabel(languageTranslate, "bodyPart", false)}
                 name="id_exam_part"
                 rules={[{ required: true, message: "Chọn bộ phận" }]}
               >
@@ -360,19 +368,24 @@ export default function DFormVer2({
           <Row gutter={16}>
             <Col xs={24} md={12}>
               <Form.Item
-                label="Ngôn ngữ"
+                label={translateLabel(languageTranslate, "language", false)}
                 name="language"
                 rules={[{ required: true }]}
               >
                 <Select
+                  onChange={(lang) => {
+                    setLanguageTransslate(lang);
+                  }}
                   disabled={!isEdit}
                   options={LANGUAGE_OPTIONS}
-                  placeholder="VI / EN"
+                  placeholder="VI / US"
                 />
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
-              <Form.Item label="Mã số định danh mẫu">
+              <Form.Item
+                label={translateLabel(languageTranslate, "codeForm", false)}
+              >
                 <Input
                   value={currentFormVer2Name?.code || ""}
                   readOnly
@@ -385,7 +398,7 @@ export default function DFormVer2({
           <Row gutter={16}>
             <Col xs={24} md={24}>
               <Form.Item
-                label="Tên mẫu"
+                label={translateLabel(languageTranslate, "formName", false)}
                 name="id_formver2_name"
                 rules={[{ required: true, message: "Chọn tên mẫu" }]}
               >
@@ -418,7 +431,10 @@ export default function DFormVer2({
 
           <Row gutter={16}>
             <Col xs={24} md={24}>
-              <Form.Item label="Kết luận của mẫu" name="ket_luan">
+              <Form.Item
+                label={translateLabel(languageTranslate, "formResult", false)}
+                name="ket_luan"
+              >
                 <Input disabled={!isEdit} placeholder="VD: U máu gan" />
               </Form.Item>
             </Col>
@@ -427,12 +443,18 @@ export default function DFormVer2({
           {/* Thông tin hệ thống */}
           <Row gutter={16}>
             <Col xs={24} md={12}>
-              <Form.Item label="Ngày thực hiện" name={"createdAt"}>
+              <Form.Item
+                label={translateLabel(languageTranslate, "createdAt", false)}
+                name={"createdAt"}
+              >
                 <Input value={ngayThucHienISO} readOnly disabled />
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
-              <Form.Item label="Người thực hiện" name="doctor_name">
+              <Form.Item
+                label={translateLabel(languageTranslate, "createdUser", false)}
+                name="doctor_name"
+              >
                 <Input readOnly disabled />
               </Form.Item>
             </Col>
@@ -440,7 +462,11 @@ export default function DFormVer2({
 
           {/* Ảnh minh hoạ */}
           <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
-            QUY TRÌNH KỸ THUẬT
+            {translateLabel(
+              languageTranslate,
+              "technicalProtocol",
+              false
+            ).toUpperCase()}
           </Title>
 
           <Row gutter={[16, 16]} style={{ justifyContent: "space-between" }}>
@@ -480,7 +506,11 @@ export default function DFormVer2({
 
           {/* Bảng mô tả hình ảnh */}
           <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
-            MÔ TẢ HÌNH ẢNH
+            {translateLabel(
+              languageTranslate,
+              "imagingFindings",
+              false
+            ).toUpperCase()}
           </Title>
           {/* <AdminFormVer2
             value={tablesData} // state ở cha
@@ -501,7 +531,11 @@ export default function DFormVer2({
 
           {/* Kết luận */}
           <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
-            KẾT LUẬN, CHẨN ĐOÁN
+            {translateLabel(
+              languageTranslate,
+              "impression",
+              false
+            ).toUpperCase()}
           </Title>
           <Form.Item
             name="ket_qua_chan_doan"
@@ -517,7 +551,11 @@ export default function DFormVer2({
           <Form.Item
             label={
               <span>
-                Phân loại ICD-10
+                {translateLabel(
+                  languageTranslate,
+                  "icd10Classification",
+                  false
+                )}
                 <Tooltip title="Tra cứu ICD-10">
                   <a
                     href="https://icd.kcb.vn/icd-10/icd10"
@@ -535,16 +573,34 @@ export default function DFormVer2({
             <Input disabled={!isEdit} placeholder="Link/Code ICD-10" />
           </Form.Item>
 
-          <Form.Item label="Phân độ, phân loại" name="phan_do_loai">
+          <Form.Item
+            label={translateLabel(
+              languageTranslate,
+              "gradingClassification",
+              false
+            )}
+            name="phan_do_loai"
+          >
             <Input disabled={!isEdit} placeholder="Short text" />
           </Form.Item>
 
-          <Form.Item label="Chẩn đoán phân biệt" name="chan_doan_phan_biet">
+          <Form.Item
+            label={translateLabel(
+              languageTranslate,
+              "differentialDiagnosis",
+              false
+            )}
+            name="chan_doan_phan_biet"
+          >
             <Input disabled={!isEdit} placeholder="Short text" />
           </Form.Item>
 
           <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
-            KHUYẾN NGHỊ & TƯ VẤN
+            {translateLabel(
+              languageTranslate,
+              "recommendationsCounseling",
+              false
+            ).toUpperCase()}
           </Title>
           <Form.Item
             disabled={!isEdit}

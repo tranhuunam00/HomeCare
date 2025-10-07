@@ -484,7 +484,7 @@ const FormVer2NameList = () => {
                   style={{ width: "100%" }}
                 >
                   <Option value="vi">Tiếng Việt</Option>
-                  <Option value="us">Tiếng Anh (US)</Option>
+                  <Option value="en">Tiếng Anh</Option>
                 </Select>
               </Col>
               <Col xs={24} sm={12} md={8} lg={6}>

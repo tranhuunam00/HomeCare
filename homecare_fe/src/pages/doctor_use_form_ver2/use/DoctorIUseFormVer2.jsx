@@ -753,6 +753,7 @@ export default function DoctorUseDFormVer2({
                   disabled={!isEdit}
                   options={LANGUAGE_OPTIONS}
                   placeholder="VI / EN"
+                  onChange={(lang) => setLanguageTransslate(lang)}
                 />
               </Form.Item>
             </Col>
