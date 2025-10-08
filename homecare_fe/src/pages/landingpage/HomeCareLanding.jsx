@@ -268,7 +268,13 @@ const HomeCareLanding = () => {
                   style={{ cursor: "pointer", border: "1px solid #000" }}
                 />
                 <div style={{ marginTop: 8, fontWeight: "bold", fontSize: 12 }}>
-                  {doctor?.full_name || "Người dùng"}
+                  {[
+                    doctor.academic_title ? `${doctor.academic_title}.` : null,
+                    doctor.degree ? `${doctor.degree}.` : null,
+                    doctor.full_name,
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
                 </div>
               </div>
             </Dropdown>

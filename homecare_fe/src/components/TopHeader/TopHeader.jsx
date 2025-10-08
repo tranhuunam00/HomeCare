@@ -105,17 +105,34 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
           placement="bottomRight"
           trigger={["click"]}
         >
-          <Avatar
-            size={36}
+          <div
             style={{
-              backgroundColor: "#d9d9d9",
-              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
             }}
-            src={
-              doctor?.avatar_url ||
-              "https://cdn-icons-png.flaticon.com/512/149/149071.png"
-            }
-          />
+          >
+            <Avatar
+              size={36}
+              style={{
+                backgroundColor: "#d9d9d9",
+                cursor: "pointer",
+              }}
+              src={
+                doctor?.avatar_url ||
+                "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+              }
+            />
+            <div style={{ marginLeft: 8, fontWeight: "bold", fontSize: 12 }}>
+              {[
+                doctor.academic_title ? `${doctor.academic_title}.` : null,
+                doctor.degree ? `${doctor.degree}.` : null,
+                doctor.full_name,
+              ]
+                .filter(Boolean)
+                .join(" ")}
+            </div>
+          </div>
         </Dropdown>
         <Tooltip title="Thông báo">
           <Badge

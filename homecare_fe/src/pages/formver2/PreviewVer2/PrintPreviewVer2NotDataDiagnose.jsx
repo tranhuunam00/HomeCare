@@ -588,7 +588,15 @@ const PrintPreviewVer2NotDataDiagnose = ({
                         {translateLabel(languageTranslate, "fullName", false)}:
                       </strong>
                     </div>
-                    {`${doctor.academic_title}.${doctor.degree}. ${doctor.full_name}`}
+                    {[
+                      doctor.academic_title
+                        ? `${doctor.academic_title}.`
+                        : null,
+                      doctor.degree ? `${doctor.degree}.` : null,
+                      doctor.full_name,
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
                   </div>
                   <div
                     style={{ display: "flex", marginBottom: 6, fontSize: 14 }}
