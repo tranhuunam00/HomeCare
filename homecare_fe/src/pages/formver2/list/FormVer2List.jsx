@@ -325,7 +325,7 @@ export default function FormVer2List() {
           <Space>
             <Button
               type="link"
-              onClick={() => navigate(`/home/form-v2/detail/${record.id}`)}
+              onClick={() => navigate(`/home/form-drad/detail/${record.id}`)}
             >
               Chi tiết
             </Button>
@@ -523,7 +523,7 @@ export default function FormVer2List() {
                 type="primary"
                 icon={<CheckOutlined />}
                 onClick={() => {
-                  navigate(`/home/form-v2/use`);
+                  navigate(`/home/form-drad/use`);
                 }}
               >
                 Sử dụng
@@ -534,7 +534,7 @@ export default function FormVer2List() {
               <Tooltip title="Thêm mới">
                 <Button
                   icon={<FileAddFilled />}
-                  onClick={() => navigate(`/home/form-v2`)}
+                  onClick={() => navigate(`/home/form-drad`)}
                 />
               </Tooltip>
             )}
@@ -786,7 +786,7 @@ export default function FormVer2List() {
             onCancel={() => setCloneOpen(false)}
             cloneRecord={cloneRecord}
             onSuccess={(id) => {
-              navigate("/home/form-v2/detail/" + id);
+              navigate("/home/form-drad/detail/" + id);
             }} // ✅ reload list sau khi clone
           />
         )}

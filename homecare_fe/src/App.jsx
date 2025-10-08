@@ -121,26 +121,26 @@ function App() {
           <Route path="templates" element={<TemplateList />} />
 
           <Route
-            path="form-v2/use/detail/:id"
+            path="form-drad/use/detail/:id"
             element={<DoctorUseDFormVer2 isUse={true} />}
           />
           <Route
-            path="form-v2/use"
+            path="form-drad/use"
             element={<DoctorUseDFormVer2 isUse={true} />}
           />
           <Route
-            path="doctor-use-form-v2/detail/:id"
+            path="doctor-use-form-drad/detail/:id"
             element={<DoctorUseDFormVer2 isUse={true} />}
           />
 
           <Route
-            path="doctor-use-form-v2"
+            path="doctor-use-form-drad"
             element={<DoctorUseFormVer2List />}
           />
 
-          <Route path="form-v2/detail/:id" element={<DFormVer2 />} />
-          <Route path="form-v2" element={<DFormVer2 />} />
-          <Route path="form-v2-list" element={<FormVer2List />} />
+          <Route path="form-drad/detail/:id" element={<DFormVer2 />} />
+          <Route path="form-drad" element={<DFormVer2 />} />
+          <Route path="form-drad-list" element={<FormVer2List />} />
           <Route path="form-ver2-names" element={<FormVer2NameList />} />
 
           <Route path="form-choose-form/:id" element={<DoctorChooseForm />} />

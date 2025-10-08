@@ -221,7 +221,7 @@ export default function DFormVer2({
           const newId = res?.data?.data?.data?.formId;
           toast.success("Đã tạo mẫu thành công");
           if (newId) {
-            navigate(`/home/form-v2/detail/${newId}`);
+            navigate(`/home/form-drad/detail/${newId}`);
             window.location.reload();
           }
         }
@@ -229,7 +229,7 @@ export default function DFormVer2({
         switch (pendingAction.current) {
           case "approve":
             toast.success("Đã APPROVE");
-            navigate(`/home/form-v2`);
+            navigate(`/home/form-drad`);
             window.location.reload();
 
             break;

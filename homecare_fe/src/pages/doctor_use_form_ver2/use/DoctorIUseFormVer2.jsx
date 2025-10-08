@@ -64,8 +64,21 @@ export default function DoctorUseDFormVer2({
   isUse = false,
 }) {
   const [form] = Form.useForm();
-  const { examParts, templateServices, user, doctor, formVer2Names } =
-    useGlobalAuth();
+  const {
+    examParts,
+    templateServices,
+    user,
+    doctor,
+    formVer2Names,
+    setIsReadingForm,
+  } = useGlobalAuth();
+
+  useEffect(() => {
+    setIsReadingForm(true);
+    return () => {
+      setIsReadingForm(false);
+    };
+  }, []);
   const { provinces, wards, setSelectedProvince } = useVietnamAddress();
   const navigate = useNavigate();
   const { id } = useParams();
@@ -246,7 +259,8 @@ export default function DoctorUseDFormVer2({
       (n) =>
         Number(n.id_template_service) === Number(selectedTemplateServiceId) &&
         Number(n.id_exam_part) === Number(selectedExamPartId) &&
-        (n.isUsed == isUse || n.id == currentId)
+        (n.isUsed == isUse || n.id == currentId) &&
+        n.language?.includes(languageTranslate)
     );
 
     setFilteredFormVer2Names(filtered);
@@ -255,6 +269,7 @@ export default function DoctorUseDFormVer2({
     selectedTemplateServiceId,
     selectedExamPartId,
     initialSnap,
+    languageTranslate,
   ]);
 
   const pendingAction = useRef(null);
@@ -341,7 +356,7 @@ export default function DoctorUseDFormVer2({
 
         switch (pendingAction.current) {
           case "approve":
-            navigate(`/home/form-v2/use`);
+            navigate(`/home/form-drad/use`);
             window.location.reload();
             break;
           case "export":
@@ -353,7 +368,7 @@ export default function DoctorUseDFormVer2({
         }
 
         navigate(
-          `/home/doctor-use-form-v2/detail/${res.data.data.data.data.id}`
+          `/home/doctor-use-form-drad/detail/${res.data.data.data.data.id}`
         );
         window.location.reload();
       } catch (error) {
@@ -1051,7 +1066,7 @@ export default function DoctorUseDFormVer2({
                 if (!window.confirm("Bạn có chắc muốn thoát không?")) {
                   return;
                 }
-                navigate(`/home/doctor-use-form-v2`);
+                navigate(`/home/doctor-use-form-drad`);
               }}
               onAction={(key) => {
                 if (
@@ -1145,7 +1160,7 @@ export default function DoctorUseDFormVer2({
                     );
                     if (existTranslateRecord) {
                       navigate(
-                        `/home/doctor-use-form-v2/detail/${existTranslateRecord.id}`
+                        `/home/doctor-use-form-drad/detail/${existTranslateRecord.id}`
                       );
                       setIdEdit(existTranslateRecord.id);
                       return;
@@ -1161,7 +1176,7 @@ export default function DoctorUseDFormVer2({
                     );
                     if (existTranslateRecord) {
                       navigate(
-                        `/home/doctor-use-form-v2/detail/${existTranslateRecord.id}`
+                        `/home/doctor-use-form-drad/detail/${existTranslateRecord.id}`
                       );
                       setIdEdit(existTranslateRecord.id);
 

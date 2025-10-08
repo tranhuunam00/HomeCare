@@ -38,17 +38,17 @@ const SidebarMenu = ({ onSelect, selected }) => {
       ),
       label: "Mẫu kết quả phiên bản 2",
       children: [
-        { key: "home/form-v2-list", label: "Danh sách" },
-        { key: "home/form-v2", label: "Tạo mới" },
+        { key: "home/form-drad-list", label: "Danh sách" },
+        { key: "home/form-drad", label: "Tạo mới" },
         {
           key:
             user.id_role == USER_ROLE.ADMIN
               ? "home/form-ver2-names"
-              : "home/form-v2-list",
+              : "home/form-drad-list",
           label: "Danh sách tên mẫu ver2",
         },
         {
-          key: "home/doctor-use-form-v2",
+          key: "home/doctor-use-form-drad",
           label: "Kết quả đã đọc",
         },
       ],

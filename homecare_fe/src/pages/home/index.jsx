@@ -17,7 +17,7 @@ import { USER_ROLE } from "../../constant/app";
 const { Header } = Layout;
 
 const Sidebar = ({ collapsed }) => {
-  const { user, doctor, handleLogoutGlobal } = useGlobalAuth();
+  const { user, isReadingForm } = useGlobalAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -59,7 +59,7 @@ const Sidebar = ({ collapsed }) => {
     //   ],
     // },
     user?.id_role === USER_ROLE.ADMIN && {
-      key: "form-v2-list",
+      key: "form-drad-list",
       icon: (
         <Avatar
           src={
@@ -71,11 +71,11 @@ const Sidebar = ({ collapsed }) => {
       label: "Mẫu kết quả",
       children: [
         user?.id_role === USER_ROLE.ADMIN && {
-          key: "/home/form-v2",
+          key: "/home/form-drad",
           label: "Tạo mẫu mới",
         },
         user?.id_role === USER_ROLE.ADMIN && {
-          key: "/home/form-v2-list",
+          key: "/home/form-drad-list",
           label: "Danh sách mẫu",
         },
 
@@ -87,7 +87,7 @@ const Sidebar = ({ collapsed }) => {
       ],
     },
     {
-      key: "/home/form-v2/use",
+      key: "/home/form-drad/use",
       icon: (
         <Avatar
           src={"https://cdn-icons-png.flaticon.com/512/3798/3798294.png"}
@@ -97,7 +97,7 @@ const Sidebar = ({ collapsed }) => {
       label: "Đọc kết quả ngay",
     },
     {
-      key: "/home/doctor-use-form-v2",
+      key: "/home/doctor-use-form-drad",
       icon: (
         <Avatar
           src={
@@ -220,8 +220,19 @@ const Sidebar = ({ collapsed }) => {
     },
   ].filter(Boolean); // loại bỏ các mục false nếu user không phải admin
 
-  const handleClick = (e) => {
-    navigate(e.key);
+  const handleClick = (e, isReadingForm) => {
+    const key = e.key;
+
+    if (isReadingForm) {
+      const newWindow = window.open(key, "_blank");
+      if (newWindow) {
+        newWindow.focus();
+      } else {
+        console.warn("window.open returned null — tab may be blocked");
+      }
+    } else {
+      navigate(key);
+    }
   };
 
   const currentPath = location.pathname;
@@ -232,7 +243,7 @@ const Sidebar = ({ collapsed }) => {
 
   return (
     <Menu
-      onClick={handleClick}
+      onClick={(e) => handleClick(e, isReadingForm)}
       defaultSelectedKeys={["products"]}
       mode="inline"
       items={menuItems}

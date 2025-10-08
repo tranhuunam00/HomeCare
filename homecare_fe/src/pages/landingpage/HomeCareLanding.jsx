@@ -38,7 +38,7 @@ const HomeCareLanding = () => {
   const productsItem = [
     {
       label: "SỬ DỤNG MẪU KẾT QUẢ",
-      onClick: () => navigate("/home/form-v2/use"),
+      onClick: () => navigate("/home/form-drad/use"),
     },
   ];
 
@@ -196,7 +196,7 @@ const HomeCareLanding = () => {
                 <Button
                   type="primary"
                   className={styles["homecare__contact"]}
-                  onClick={() => navigate("/home/form-v2/use")} // hoặc route bạn muốn
+                  onClick={() => navigate("/home/form-drad/use")} // hoặc route bạn muốn
                 >
                   ĐỌC KẾT QUẢ
                 </Button>

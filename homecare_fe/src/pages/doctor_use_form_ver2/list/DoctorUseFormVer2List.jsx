@@ -234,7 +234,7 @@ export default function DoctorUseFormVer2List() {
               size="small"
               icon={<EyeOutlined />}
               onClick={() =>
-                navigate(`/home/doctor-use-form-v2/detail/${record.id}`)
+                navigate(`/home/doctor-use-form-drad/detail/${record.id}`)
               }
             >
               Xem
@@ -303,7 +303,7 @@ export default function DoctorUseFormVer2List() {
               type="primary"
               icon={<CheckOutlined />}
               onClick={() => {
-                navigate(`/home/form-v2/use`);
+                navigate(`/home/form-drad/use`);
               }}
             >
               Đọc kết quả mới
