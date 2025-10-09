@@ -196,17 +196,6 @@ const Sidebar = ({ collapsed }) => {
       children: [{ key: "/home/customers", label: "Danh sách" }],
     },
 
-    user?.id_role === USER_ROLE.ADMIN && {
-      key: "Báo cáo",
-      icon: (
-        <Avatar
-          src="https://static.vecteezy.com/system/resources/previews/033/664/065/non_2x/seo-report-icon-in-illustration-vector.jpg"
-          size={40}
-        />
-      ),
-      label: "Báo cáo",
-      children: [{ key: "report-product", label: "Sản phẩm" }],
-    },
     {
       key: "/home/intergate",
       icon: (
@@ -216,10 +205,7 @@ const Sidebar = ({ collapsed }) => {
         />
       ),
       label: "Tính năng",
-      children: [
-        { key: "", label: "Hướng dẫn" },
-        { key: "/home/subscription", label: "Gói đăng ký" },
-      ],
+      children: [{ key: "/home/subscription", label: "Gói đăng ký" }],
     },
   ].filter(Boolean); // loại bỏ các mục false nếu user không phải admin
 
