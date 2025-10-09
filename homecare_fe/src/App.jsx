@@ -59,6 +59,7 @@ import API_CALL from "./services/axiosClient";
 import { useGlobalAuth } from "./contexts/AuthContext";
 import { useEffect, useState } from "react";
 import OnboardingWizard from "./components/OnboardingWizard/OnboardingWizard";
+import SubscriptionPage from "./pages/packages/SubscriptionPage";
 
 function App() {
   useAuthInitializer();
@@ -203,6 +204,8 @@ function App() {
             path="patients-diagnose/:id"
             element={<PatientDiagnoseDetailPage />}
           />
+
+          <Route path="subscription" element={<SubscriptionPage />} />
         </Route>
       </Routes>
       <OnboardingWizard
