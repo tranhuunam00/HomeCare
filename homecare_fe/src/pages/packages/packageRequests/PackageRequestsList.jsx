@@ -14,25 +14,36 @@ import {
 } from "antd";
 import {
   FilterOutlined,
-  EditOutlined,
   ReloadOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  ClockCircleOutlined,
 } from "@ant-design/icons";
 import API_CALL from "../../../services/axiosClient";
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
 import styles from "./packageRequestsList.module.scss";
+import { useGlobalAuth } from "../../../contexts/AuthContext";
+import { USER_ROLE } from "../../../constant/app";
 
 const { Option } = Select;
 const { RangePicker } = DatePicker;
 
 const PACKAGE_STATUSES = ["pending", "approved", "rejected"];
 const STATUS_COLORS = {
-  pending: "blue",
-  approved: "green",
-  rejected: "red",
+  pending: "processing", // xanh lam nhạt
+  approved: "success", // xanh lá
+  rejected: "error", // đỏ
+};
+
+const STATUS_ICONS = {
+  pending: <ClockCircleOutlined />,
+  approved: <CheckCircleOutlined />,
+  rejected: <CloseCircleOutlined />,
 };
 
 const PackageRequestsList = () => {
+  const { user } = useGlobalAuth();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({
@@ -53,7 +64,7 @@ const PackageRequestsList = () => {
     try {
       const cleanParams = Object.fromEntries(
         Object.entries(filters).filter(
-          ([_, value]) => value !== "" && value !== undefined && value !== null
+          ([, value]) => value !== "" && value !== undefined && value !== null
         )
       );
       const res = await API_CALL.get("/package/request-package", {
@@ -74,7 +85,13 @@ const PackageRequestsList = () => {
     fetchRequests();
   }, [filters]);
 
-  const handleStatusUpdate = async (id, newStatus) => {
+  const handleStatusUpdate = async (id, newStatus, currentStatus) => {
+    if (newStatus === currentStatus) return;
+    const confirmChange = window.confirm(
+      `Bạn có chắc chắn muốn chuyển trạng thái từ "${currentStatus}" sang "${newStatus}" không?`
+    );
+    if (!confirmChange) return;
+
     try {
       await API_CALL.patch(`/package/requests/${id}/status`, {
         status: newStatus,
@@ -90,15 +107,18 @@ const PackageRequestsList = () => {
     { title: "ID", dataIndex: "id", key: "id", width: 60 },
     {
       title: "Người dùng",
-      dataIndex: ["user", "full_name"],
-      key: "user_name",
-      render: (text, record) => (
-        <>
-          <strong>{text}</strong>
-          <br />
-          <small>{record.user?.email}</small>
-        </>
-      ),
+      key: "user_info",
+      render: (_, record) => {
+        const u = record.id_user_user;
+        const doctor = u?.doctors?.[0];
+        return (
+          <>
+            <strong>{doctor?.full_name || "—"}</strong>
+            <br />
+            <small>{u?.email}</small>
+          </>
+        );
+      },
     },
     { title: "Mã gói", dataIndex: "package_code", key: "package_code" },
     {
@@ -112,13 +132,15 @@ const PackageRequestsList = () => {
       dataIndex: "status",
       key: "status",
       render: (status) => (
-        <Tag color={STATUS_COLORS[status] || "default"}>{status}</Tag>
+        <Tag color={STATUS_COLORS[status]} icon={STATUS_ICONS[status]}>
+          {status}
+        </Tag>
       ),
     },
     {
       title: "Ngày tạo",
-      dataIndex: "created_at",
-      key: "created_at",
+      dataIndex: "createdAt",
+      key: "createdAt",
       render: (val) => dayjs(val).format("DD/MM/YYYY HH:mm"),
     },
     {
@@ -135,18 +157,22 @@ const PackageRequestsList = () => {
           >
             Chi tiết
           </Button>
-          <Select
-            size="small"
-            defaultValue={record.status}
-            style={{ width: 120 }}
-            onChange={(value) => handleStatusUpdate(record.id, value)}
-          >
-            {PACKAGE_STATUSES.map((status) => (
-              <Option key={status} value={status}>
-                {status}
-              </Option>
-            ))}
-          </Select>
+          {user.id_role === USER_ROLE.ADMIN && (
+            <Select
+              size="small"
+              value={record.status}
+              style={{ width: 120 }}
+              onChange={(value) =>
+                handleStatusUpdate(record.id, value, record.status)
+              }
+            >
+              {PACKAGE_STATUSES.map((status) => (
+                <Option key={status} value={status}>
+                  {status}
+                </Option>
+              ))}
+            </Select>
+          )}
         </div>
       ),
     },
@@ -283,10 +309,12 @@ const PackageRequestsList = () => {
                 <strong>ID yêu cầu:</strong> {selectedRequest.id}
               </p>
               <p>
-                <strong>Người dùng:</strong> {selectedRequest.user?.full_name}
+                <strong>Người dùng:</strong>{" "}
+                {selectedRequest.id_user_user?.doctors?.[0]?.full_name || "—"}
               </p>
               <p>
-                <strong>Email:</strong> {selectedRequest.user?.email}
+                <strong>Email:</strong>{" "}
+                {selectedRequest.id_user_user?.email || "—"}
               </p>
               <p>
                 <strong>Mã gói:</strong> {selectedRequest.package_code}
@@ -297,13 +325,16 @@ const PackageRequestsList = () => {
               </p>
               <p>
                 <strong>Trạng thái:</strong>{" "}
-                <Tag color={STATUS_COLORS[selectedRequest.status]}>
+                <Tag
+                  color={STATUS_COLORS[selectedRequest.status]}
+                  icon={STATUS_ICONS[selectedRequest.status]}
+                >
                   {selectedRequest.status}
                 </Tag>
               </p>
               <p>
                 <strong>Ngày tạo:</strong>{" "}
-                {dayjs(selectedRequest.created_at).format("DD/MM/YYYY HH:mm")}
+                {dayjs(selectedRequest.createdAt).format("DD/MM/YYYY HH:mm")}
               </p>
             </div>
           )}

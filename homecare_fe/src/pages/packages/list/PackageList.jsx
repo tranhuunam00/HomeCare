@@ -14,7 +14,7 @@ const { Option } = Select;
 const PackageList = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState(null);
-  const [duration, setDuration] = useState(3);
+  const [duration, setDuration] = useState(1);
   const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
 
