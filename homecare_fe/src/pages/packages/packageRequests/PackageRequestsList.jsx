@@ -18,6 +18,7 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined,
   ClockCircleOutlined,
+  SearchOutlined,
 } from "@ant-design/icons";
 import API_CALL from "../../../services/axiosClient";
 import { toast } from "react-toastify";
@@ -29,13 +30,13 @@ import { USER_ROLE } from "../../../constant/app";
 const { Option } = Select;
 const { RangePicker } = DatePicker;
 
+const PACKAGE_CODES = ["BASIC", "STANDARD", "PREMIUM"];
 const PACKAGE_STATUSES = ["pending", "approved", "rejected"];
 const STATUS_COLORS = {
-  pending: "processing", // xanh lam nhạt
-  approved: "success", // xanh lá
-  rejected: "error", // đỏ
+  pending: "processing",
+  approved: "success",
+  rejected: "error",
 };
-
 const STATUS_ICONS = {
   pending: <ClockCircleOutlined />,
   approved: <CheckCircleOutlined />,
@@ -55,6 +56,7 @@ const PackageRequestsList = () => {
     page: 1,
     limit: 10,
   });
+  const [uiFilters, setUiFilters] = useState(filters);
   const [total, setTotal] = useState(0);
   const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
@@ -64,7 +66,7 @@ const PackageRequestsList = () => {
     try {
       const cleanParams = Object.fromEntries(
         Object.entries(filters).filter(
-          ([, value]) => value !== "" && value !== undefined && value !== null
+          ([, v]) => v !== "" && v !== undefined && v !== null
         )
       );
       const res = await API_CALL.get("/package/request-package", {
@@ -81,9 +83,30 @@ const PackageRequestsList = () => {
     }
   };
 
+  // Chỉ gọi API khi filters thay đổi (ko tự động khi UI gõ)
   useEffect(() => {
     fetchRequests();
-  }, [filters]);
+  }, [
+    filters.page,
+    filters.limit,
+    filters.id_user,
+    filters.package_code,
+    filters.status,
+    filters.from,
+    filters.to,
+  ]);
+
+  const handleSearch = () => {
+    setFilters((prev) => ({
+      ...prev,
+      id_user: uiFilters.id_user,
+      package_code: uiFilters.package_code,
+      status: uiFilters.status,
+      from: uiFilters.from,
+      to: uiFilters.to,
+      page: 1,
+    }));
+  };
 
   const handleStatusUpdate = async (id, newStatus, currentStatus) => {
     if (newStatus === currentStatus) return;
@@ -120,6 +143,47 @@ const PackageRequestsList = () => {
         );
       },
     },
+    {
+      title: "Các gói đang dùng",
+      key: "current_packages",
+      render: (_, record) => {
+        const packages = record.id_user_user?.user_packages || [];
+        if (!packages.length) return "—";
+
+        return (
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            {packages.map((pkg) => (
+              <div
+                key={pkg.id}
+                style={{
+                  borderBottom: "1px dashed #ddd",
+                  paddingBottom: 4,
+                  marginBottom: 4,
+                }}
+              >
+                <strong>{pkg.package_code}</strong>{" "}
+                <Tag
+                  color={
+                    pkg.status === "active"
+                      ? "green"
+                      : pkg.status === "expired"
+                      ? "red"
+                      : "blue"
+                  }
+                >
+                  {pkg.status}
+                </Tag>
+                <br />
+                <small>
+                  Hết hạn: {dayjs(pkg.end_date).format("DD/MM/YYYY HH:mm")}
+                </small>
+              </div>
+            ))}
+          </div>
+        );
+      },
+    },
+
     { title: "Mã gói", dataIndex: "package_code", key: "package_code" },
     {
       title: "Thời hạn (tháng)",
@@ -193,56 +257,77 @@ const PackageRequestsList = () => {
         }
         className={styles.filterCard}
         extra={
-          <Button
-            icon={<ReloadOutlined />}
-            onClick={() =>
-              setFilters({
-                id_user: "",
-                package_code: "",
-                status: "",
-                from: "",
-                to: "",
-                page: 1,
-                limit: 10,
-              })
-            }
-          >
-            Làm mới
-          </Button>
+          <>
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={() => {
+                setUiFilters({
+                  id_user: "",
+                  package_code: "",
+                  status: "",
+                  from: "",
+                  to: "",
+                });
+                setFilters({
+                  id_user: "",
+                  package_code: "",
+                  status: "",
+                  from: "",
+                  to: "",
+                  page: 1,
+                  limit: filters.limit,
+                });
+              }}
+              style={{ marginRight: 8 }}
+            >
+              Làm mới
+            </Button>
+            <Button
+              type="primary"
+              icon={<SearchOutlined />}
+              onClick={handleSearch}
+            >
+              Tìm kiếm
+            </Button>
+          </>
         }
       >
         <Row gutter={16}>
           <Col span={4}>
             <label>ID người dùng</label>
             <Input
-              value={filters.id_user}
+              value={uiFilters.id_user}
               onChange={(e) =>
-                setFilters({ ...filters, id_user: e.target.value, page: 1 })
+                setUiFilters({ ...uiFilters, id_user: e.target.value })
               }
               placeholder="Nhập ID user..."
             />
           </Col>
           <Col span={5}>
             <label>Mã gói</label>
-            <Input
-              value={filters.package_code}
-              onChange={(e) =>
-                setFilters({
-                  ...filters,
-                  package_code: e.target.value,
-                  page: 1,
-                })
+            <Select
+              allowClear
+              value={uiFilters.package_code || undefined}
+              onChange={(value) =>
+                setUiFilters({ ...uiFilters, package_code: value })
               }
-              placeholder="Tìm theo mã gói..."
-            />
+              placeholder="Chọn mã gói"
+              style={{ width: "100%" }}
+            >
+              {PACKAGE_CODES.map((pkg) => (
+                <Option key={pkg} value={pkg}>
+                  {pkg}
+                </Option>
+              ))}
+            </Select>
           </Col>
           <Col span={5}>
             <label>Trạng thái</label>
             <Select
               allowClear
-              value={filters.status || undefined}
+              value={uiFilters.status || undefined}
               onChange={(value) =>
-                setFilters({ ...filters, status: value, page: 1 })
+                setUiFilters({ ...uiFilters, status: value })
               }
               placeholder="Chọn trạng thái"
               style={{ width: "100%" }}
@@ -258,20 +343,19 @@ const PackageRequestsList = () => {
             <label>Khoảng ngày tạo</label>
             <RangePicker
               value={
-                filters.from && filters.to
-                  ? [dayjs(filters.from), dayjs(filters.to)]
+                uiFilters.from && uiFilters.to
+                  ? [dayjs(uiFilters.from), dayjs(uiFilters.to)]
                   : []
               }
               onChange={(dates) => {
                 if (dates) {
-                  setFilters({
-                    ...filters,
+                  setUiFilters({
+                    ...uiFilters,
                     from: dates[0].format("YYYY-MM-DD"),
                     to: dates[1].format("YYYY-MM-DD"),
-                    page: 1,
                   });
                 } else {
-                  setFilters({ ...filters, from: "", to: "", page: 1 });
+                  setUiFilters({ ...uiFilters, from: "", to: "" });
                 }
               }}
               style={{ width: "100%" }}
@@ -336,6 +420,51 @@ const PackageRequestsList = () => {
                 <strong>Ngày tạo:</strong>{" "}
                 {dayjs(selectedRequest.createdAt).format("DD/MM/YYYY HH:mm")}
               </p>
+              {selectedRequest.id_user_user?.user_packages?.length > 0 && (
+                <>
+                  <h4 style={{ marginTop: 16 }}>
+                    Danh sách gói của người dùng
+                  </h4>
+                  {selectedRequest.id_user_user.user_packages.map((pkg) => (
+                    <Card
+                      key={pkg.id}
+                      size="small"
+                      style={{ marginBottom: 10, background: "#fafafa" }}
+                    >
+                      <p>
+                        <strong>Tên gói:</strong> {pkg.package_code}
+                      </p>
+                      <p>
+                        <strong>Trạng thái:</strong>{" "}
+                        <Tag
+                          color={
+                            pkg.status === "active"
+                              ? "green"
+                              : pkg.status === "expired"
+                              ? "red"
+                              : "blue"
+                          }
+                        >
+                          {pkg.status}
+                        </Tag>
+                      </p>
+                      <p>
+                        <strong>Ngày bắt đầu:</strong>{" "}
+                        {dayjs(pkg.start_date).format("DD/MM/YYYY HH:mm")}
+                      </p>
+                      <p>
+                        <strong>Ngày hết hạn:</strong>{" "}
+                        {dayjs(pkg.end_date).format("DD/MM/YYYY HH:mm")}
+                      </p>
+                      {pkg.note && (
+                        <p>
+                          <strong>Ghi chú:</strong> {pkg.note}
+                        </p>
+                      )}
+                    </Card>
+                  ))}
+                </>
+              )}
             </div>
           )}
         </Modal>
