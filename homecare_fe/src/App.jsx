@@ -60,6 +60,8 @@ import { useGlobalAuth } from "./contexts/AuthContext";
 import { useEffect, useState } from "react";
 import OnboardingWizard from "./components/OnboardingWizard/OnboardingWizard";
 import SubscriptionPage from "./pages/packages/SubscriptionPage";
+import PackageRequestsList from "./pages/packages/packageRequests/PackageRequestsList";
+import UserPackagesList from "./pages/packages/userPackages/UserPackagesList";
 
 function App() {
   useAuthInitializer();
@@ -206,6 +208,8 @@ function App() {
           />
 
           <Route path="subscription" element={<SubscriptionPage />} />
+          <Route path="package-request" element={<PackageRequestsList />} />
+          <Route path="package-user" element={<UserPackagesList />} />
         </Route>
       </Routes>
       <OnboardingWizard

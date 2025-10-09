@@ -1,0 +1,63 @@
+.userPackages {
+  padding: 16px;
+
+  &__title {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: #1f1f1f;
+  }
+}
+
+.filterCard {
+  margin-bottom: 16px;
+  background: #fafafa;
+  border: 1px solid #f0f0f0;
+
+  label {
+    display: block;
+    font-weight: 500;
+    color: #555;
+    margin-bottom: 6px;
+  }
+
+  .ant-input,
+  .ant-select {
+    width: 100%;
+  }
+}
+
+.userPackages {
+  .ant-table {
+    background: #fff;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .ant-tag {
+    text-transform: none;
+    font-weight: 500;
+  }
+
+  .ant-table-thead > tr > th {
+    font-weight: 600;
+    background: #fafafa;
+  }
+
+  .ant-pagination {
+    margin-top: 12px;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .filterCard {
+    .ant-row {
+      row-gap: 12px;
+    }
+  }
+
+  .userPackages__title {
+    font-size: 18px;
+  }
+}

@@ -54,6 +54,7 @@ export const FEATURE_KEYS = {
 
 export const PACKAGE_FEATURES = {
   BASIC: {
+    code: "BASIC",
     name: "DRADS-Basic",
     description: "Gói cơ bản cho cá nhân dùng thử và sử dụng hằng tháng",
     permissions: [
@@ -66,6 +67,8 @@ export const PACKAGE_FEATURES = {
   },
 
   STANDARD: {
+    code: "STANDARD",
+
     name: "DRADS-Standard",
     description:
       "Gói tiêu chuẩn hỗ trợ PACS, nhiều mẫu hơn, có hỗ trợ kỹ thuật",
@@ -84,6 +87,7 @@ export const PACKAGE_FEATURES = {
   },
 
   PREMIUM: {
+    code: "PREMIUM",
     name: "DRADS-Premium",
     description:
       "Gói cao cấp cho tổ chức, có AI hỗ trợ chuyên môn và đa ngôn ngữ",
@@ -103,3 +107,10 @@ export const PACKAGE_FEATURES = {
     ],
   },
 };
+
+export const DURATION_OPTIONS = [
+  { value: 1, label: "1 tháng" },
+  { value: 3, label: "3 tháng" },
+  { value: 6, label: "6 tháng" },
+  { value: 12, label: "12 tháng" },
+];

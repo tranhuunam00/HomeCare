@@ -205,7 +205,11 @@ const Sidebar = ({ collapsed }) => {
         />
       ),
       label: "Tính năng",
-      children: [{ key: "/home/subscription", label: "Gói đăng ký" }],
+      children: [
+        { key: "/home/subscription", label: "Gói đăng ký" },
+        { key: "/home/package-request", label: "Yêu cầu của bạn" },
+        { key: "/home/package-user", label: "Gói của bạn" },
+      ],
     },
   ].filter(Boolean); // loại bỏ các mục false nếu user không phải admin
 
