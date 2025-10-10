@@ -95,8 +95,7 @@ const OnboardingWizard = ({ open, onClose, doctorId }) => {
       setModalVisible(false);
       setNote("");
       setSelectedPackage(null);
-      await API_CALL.post("/package/request", { id_user: user.id });
-      fetchRequests();
+      await fetchRequests();
     } catch (err) {
       toast.error(
         err?.response?.data?.message ||
