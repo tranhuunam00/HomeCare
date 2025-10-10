@@ -1,4 +1,3 @@
-// src/components/OnboardingWizard.jsx
 import React, { useState, useEffect } from "react";
 import {
   Modal,
@@ -17,6 +16,8 @@ import API_CALL from "../../services/axiosClient";
 import { ACADEMIC_TITLES, DEGREES } from "../../constant/app";
 import { useGlobalAuth } from "../../contexts/AuthContext";
 import STORAGE from "../../services/storage";
+import { toast } from "react-toastify";
+import TemplateHeaderEditor from "../../pages/products/TemplatePrint/Header/TemplateHeaderEditor";
 
 const { Option } = Select;
 
@@ -28,9 +29,14 @@ const OnboardingWizard = ({ open, onClose, doctorId }) => {
   const [avatarUrl, setAvatarUrl] = useState(null);
   const [signatureUrl, setSignatureUrl] = useState(null);
   const [clinics, setClinics] = useState([]);
-  const { setDoctor } = useGlobalAuth(); // cần thêm hàm setDoctor trong AuthContext
+  const { setDoctor } = useGlobalAuth();
   const [createClinicMode, setCreateClinicMode] = useState(false);
 
+  // thêm state cho mẫu in
+  const [headerInfo, setHeaderInfo] = useState({});
+  const [printTemplates, setPrintTemplates] = useState([]);
+
+  // ===== Load clinics khi mở modal =====
   useEffect(() => {
     const fetchClinics = async () => {
       try {
@@ -42,37 +48,32 @@ const OnboardingWizard = ({ open, onClose, doctorId }) => {
         console.error("Lỗi khi load clinics:", err);
       }
     };
-    if (open) {
-      fetchClinics();
-    }
+    if (open) fetchClinics();
   }, [open]);
 
+  // ===== Load thông tin doctor =====
   useEffect(() => {
     const fetchDoctor = async () => {
       try {
         const res = await API_CALL.get(`/doctor/${doctorId}`);
         const data = res.data.data;
 
-        // map vào form
         form.setFieldsValue({
           ...data,
           dob: data.dob ? dayjs(data.dob, "YYYY-MM-DD") : null,
-          email: data.id_user_user?.email || "", // nếu API trả email trong user
+          email: data.id_user_user?.email || "",
         });
 
-        // set avatar & signature preview
         setAvatarUrl(data.avatar_url || null);
         setSignatureUrl(data.signature_url || null);
       } catch (err) {
         console.error("Lỗi khi lấy thông tin doctor:", err);
       }
     };
-
-    if (open && doctorId) {
-      fetchDoctor();
-    }
+    if (open && doctorId) fetchDoctor();
   }, [open, doctorId]);
 
+  // ===== Preview ảnh =====
   const handleAvatarPreview = (file) => {
     setAvatarFile(file);
     setAvatarUrl(URL.createObjectURL(file));
@@ -87,6 +88,7 @@ const OnboardingWizard = ({ open, onClose, doctorId }) => {
     return false;
   };
 
+  // ===== Các bước =====
   const steps = [
     {
       title: "Hồ sơ bác sĩ",
@@ -151,13 +153,14 @@ const OnboardingWizard = ({ open, onClose, doctorId }) => {
           <Form.Item label="Mô tả" name="description">
             <Input.TextArea />
           </Form.Item>
+
           {!createClinicMode ? (
             <>
               <Form.Item
-                label="Phòng khám (nếu bạn chưa có thì vui lòng ấn vào Tạo mới phòng khám bên dưới)"
+                label="Phòng khám (chưa có? tạo mới bên dưới)"
                 name="id_clinic"
                 rules={[
-                  { required: true, message: "Vui lòng chọn phòng khám." },
+                  { required: true, message: "Vui lòng chọn phòng khám" },
                 ]}
               >
                 <Select placeholder="Chọn phòng khám">
@@ -196,6 +199,28 @@ const OnboardingWizard = ({ open, onClose, doctorId }) => {
       ),
     },
     {
+      title: "Mẫu in phòng khám",
+      content: (
+        <>
+          <p>
+            Phòng khám của bạn chưa có mẫu in. Vui lòng nhập thông tin dưới đây.
+          </p>
+          <Form.Item
+            label="Tên mẫu in"
+            name="print_template_name"
+            rules={[{ required: true, message: "Vui lòng nhập tên mẫu in" }]}
+          >
+            <Input placeholder="VD: Mẫu in chuẩn HomeCare" />
+          </Form.Item>
+          <TemplateHeaderEditor
+            value={headerInfo}
+            onChange={setHeaderInfo}
+            form={form}
+          />
+        </>
+      ),
+    },
+    {
       title: "Ảnh & Chữ ký",
       content: (
         <>
@@ -226,6 +251,7 @@ const OnboardingWizard = ({ open, onClose, doctorId }) => {
               </Upload>
             </>
           </Form.Item>
+
           <Form.Item
             label="Chữ ký"
             name="signature"
@@ -255,6 +281,7 @@ const OnboardingWizard = ({ open, onClose, doctorId }) => {
               </Upload>
             </>
           </Form.Item>
+
           <Form.Item label="Chữ ký điện tử" name="e_signature_url">
             <Input placeholder="Nhập chữ ký điện tử" />
           </Form.Item>
@@ -272,74 +299,108 @@ const OnboardingWizard = ({ open, onClose, doctorId }) => {
     },
   ];
 
+  // ====== HANDLE NEXT ======
   const next = async () => {
     try {
       await form.validateFields();
       const values = form.getFieldsValue();
 
+      // Bước 1: tạo clinic mới (nếu có)
       if (current === 1 && createClinicMode) {
         const payload = {
           name: values.new_clinic_name,
           phone_number: values.new_clinic_phone_number || "",
           address: values.new_clinic_address || "",
         };
-
-        // Call API tạo mới clinic
         const resClinic = await API_CALL.post("/clinics", payload);
         const newClinic = resClinic.data.data;
 
-        // gắn vào doctor
         values.id_clinic = newClinic.id;
         form.setFieldValue("id_clinic", newClinic.id);
-
-        // cập nhật danh sách clinic
-        setClinics([...clinics, newClinic]);
+        setClinics((prev) => [...prev, newClinic]);
       }
 
-      // Tạo FormData
-      const formData = new FormData();
-      values.full_name && formData.append("full_name", values.full_name);
-      values.phone_number &&
-        formData.append("phone_number", values.phone_number);
-      values.description &&
-        formData.append("description", values.description || "");
-      values.id_clinic && formData.append("id_clinic", values.id_clinic || "");
-      values.gender && formData.append("gender", values.gender);
-      values.e_signature_url &&
-        formData.append("e_signature_url", values.e_signature_url || "");
-      values.academic_title &&
-        formData.append("academic_title", values.academic_title || "");
-      values.degree && formData.append("degree", values.degree || "");
-      values.dob &&
-        formData.append(
+      // Kiểm tra xem phòng khám có mẫu in chưa
+      if (current === 1) {
+        const clinicId = form.getFieldValue("id_clinic");
+        if (clinicId) {
+          const resTemplate = await API_CALL.get("/print-template", {
+            params: { id_clinic: clinicId, is_use_onboard: true },
+          });
+          const templates = resTemplate.data.data?.data || [];
+          if (!templates.length) {
+            toast.info("Phòng khám chưa có mẫu in — vui lòng tạo mẫu in.");
+            setCurrent(2);
+            return;
+          }
+          setPrintTemplates(templates);
+        }
+      }
+
+      // Bước 2: tạo mẫu in
+      if (current === 2) {
+        const clinicId = form.getFieldValue("id_clinic");
+        const payload = {
+          name: values.print_template_name,
+          id_clinic: clinicId,
+          ...headerInfo,
+        };
+        const fd = new FormData();
+        Object.entries(payload).forEach(([k, v]) => {
+          if (v !== undefined && v !== null) fd.append(k, v);
+        });
+
+        await API_CALL.post("/print-template", fd, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        toast.success("Đã tạo mẫu in cho phòng khám!");
+      }
+
+      // Bước 3: cập nhật thông tin bác sĩ
+      if (current === 3) {
+        const formData = new FormData();
+        const append = (k, v) => v && formData.append(k, v);
+
+        append("full_name", values.full_name);
+        append("phone_number", values.phone_number);
+        append("description", values.description);
+        append("id_clinic", values.id_clinic);
+        append("gender", values.gender);
+        append("e_signature_url", values.e_signature_url);
+        append("academic_title", values.academic_title);
+        append("degree", values.degree);
+        append(
           "dob",
           values.dob ? dayjs(values.dob).format("YYYY-MM-DD") : null
         );
-      if (avatarFile) formData.append("avatar", avatarFile);
-      if (signatureFile) formData.append("signature", signatureFile);
 
-      // Gọi API update
-      await API_CALL.put(`/doctor/${doctorId}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+        if (avatarFile) formData.append("avatar", avatarFile);
+        if (signatureFile) formData.append("signature", signatureFile);
 
-      const res = await API_CALL.get(`/doctor/${doctorId}`);
-      setDoctor(res.data.data);
-      STORAGE.set("DOCTOR", res.data.data);
-      setCurrent(current + 1);
+        await API_CALL.put(`/doctor/${doctorId}`, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+
+        const res = await API_CALL.get(`/doctor/${doctorId}`);
+        setDoctor(res.data.data);
+        STORAGE.set("DOCTOR", res.data.data);
+      }
+
+      setCurrent((prev) => prev + 1);
     } catch (err) {
       console.error("Validation fail:", err);
     }
   };
 
-  const prev = () => setCurrent(current - 1);
+  const prev = () => setCurrent((prev) => prev - 1);
 
   return (
-    <Modal open={open} closable={false} footer={null} width={700}>
+    <Modal open={open} closable={false} footer={null} width={800}>
       <Steps current={current} items={steps.map((s) => ({ title: s.title }))} />
       <Form form={form} layout="vertical" style={{ marginTop: 24 }}>
         {steps[current].content}
       </Form>
+
       <div style={{ marginTop: 24, textAlign: "right" }}>
         {current > 0 && current < steps.length - 1 && (
           <Button style={{ marginRight: 8 }} onClick={prev}>
