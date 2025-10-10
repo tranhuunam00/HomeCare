@@ -237,6 +237,17 @@ export default function DoctorUseDFormVer2({
     fetchTemplates();
   }, []);
 
+  useEffect(() => {
+    if (
+      printTemplateList.length > 0 &&
+      !form.getFieldValue("id_print_template")
+    ) {
+      const firstTpl = printTemplateList[0];
+      form.setFieldsValue({ id_print_template: firstTpl.id });
+      setPrintTemplate(firstTpl);
+    }
+  }, [printTemplateList]);
+
   const currentFormVer2Name = useMemo(() => {
     const byPick = (formVer2Names || []).find(
       (n) => n.id === selectedFormVer2NameId

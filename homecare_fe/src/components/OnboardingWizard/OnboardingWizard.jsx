@@ -9,8 +9,11 @@ import {
   DatePicker,
   Upload,
   Avatar,
+  Divider,
+  Card,
+  Descriptions,
 } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
+import { UploadOutlined, PlusOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import API_CALL from "../../services/axiosClient";
 import { ACADEMIC_TITLES, DEGREES } from "../../constant/app";
@@ -32,11 +35,12 @@ const OnboardingWizard = ({ open, onClose, doctorId }) => {
   const { setDoctor } = useGlobalAuth();
   const [createClinicMode, setCreateClinicMode] = useState(false);
 
-  // thêm state cho mẫu in
+  // Mẫu in
   const [headerInfo, setHeaderInfo] = useState({});
   const [printTemplates, setPrintTemplates] = useState([]);
+  const [createTemplateMode, setCreateTemplateMode] = useState(false);
 
-  // ===== Load clinics khi mở modal =====
+  // ===== Load clinics =====
   useEffect(() => {
     const fetchClinics = async () => {
       try {
@@ -51,7 +55,7 @@ const OnboardingWizard = ({ open, onClose, doctorId }) => {
     if (open) fetchClinics();
   }, [open]);
 
-  // ===== Load thông tin doctor =====
+  // ===== Load doctor =====
   useEffect(() => {
     const fetchDoctor = async () => {
       try {
@@ -73,7 +77,7 @@ const OnboardingWizard = ({ open, onClose, doctorId }) => {
     if (open && doctorId) fetchDoctor();
   }, [open, doctorId]);
 
-  // ===== Preview ảnh =====
+  // ===== Avatar/Signature preview =====
   const handleAvatarPreview = (file) => {
     setAvatarFile(file);
     setAvatarUrl(URL.createObjectURL(file));
@@ -88,7 +92,7 @@ const OnboardingWizard = ({ open, onClose, doctorId }) => {
     return false;
   };
 
-  // ===== Các bước =====
+  // ===== Steps =====
   const steps = [
     {
       title: "Hồ sơ bác sĩ",
@@ -202,21 +206,94 @@ const OnboardingWizard = ({ open, onClose, doctorId }) => {
       title: "Mẫu in phòng khám",
       content: (
         <>
-          <p>
-            Phòng khám của bạn chưa có mẫu in. Vui lòng nhập thông tin dưới đây.
-          </p>
-          <Form.Item
-            label="Tên mẫu in"
-            name="print_template_name"
-            rules={[{ required: true, message: "Vui lòng nhập tên mẫu in" }]}
-          >
-            <Input placeholder="VD: Mẫu in chuẩn HomeCare" />
-          </Form.Item>
-          <TemplateHeaderEditor
-            value={headerInfo}
-            onChange={setHeaderInfo}
-            form={form}
-          />
+          {printTemplates.length > 0 && !createTemplateMode ? (
+            <>
+              <Card
+                title="Mẫu in hiện tại"
+                style={{ marginBottom: 16, borderRadius: 8 }}
+              >
+                {printTemplates.map((tpl) => (
+                  <Descriptions
+                    key={tpl.id}
+                    column={1}
+                    size="small"
+                    bordered
+                    style={{ marginBottom: 12 }}
+                  >
+                    <Descriptions.Item label="Tên mẫu">
+                      {tpl.name}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Phòng khám">
+                      {tpl.clinic_name}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Khoa">
+                      {tpl.department_name}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Địa chỉ">
+                      {tpl.address}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Hotline">
+                      {tpl.phone}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Email">
+                      {tpl.email}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Website">
+                      {tpl.website}
+                    </Descriptions.Item>
+                    {tpl.logo_url && (
+                      <Descriptions.Item label="Logo">
+                        <img
+                          src={tpl.logo_url}
+                          alt="logo"
+                          style={{ height: 60 }}
+                        />
+                      </Descriptions.Item>
+                    )}
+                  </Descriptions>
+                ))}
+              </Card>
+
+              <Divider />
+              <Button
+                icon={<PlusOutlined />}
+                type="dashed"
+                onClick={() => setCreateTemplateMode(true)}
+              >
+                + Tạo mẫu in mới
+              </Button>
+            </>
+          ) : (
+            <>
+              <p>
+                Phòng khám chưa có mẫu in hoặc bạn đang tạo mẫu mới. Vui lòng
+                nhập thông tin bên dưới:
+              </p>
+              <Form.Item
+                label="Tên mẫu in"
+                name="print_template_name"
+                rules={[
+                  { required: true, message: "Vui lòng nhập tên mẫu in" },
+                ]}
+              >
+                <Input placeholder="VD: Mẫu in chuẩn HomeCare" />
+              </Form.Item>
+              <TemplateHeaderEditor
+                value={headerInfo}
+                onChange={setHeaderInfo}
+                form={form}
+              />
+
+              {printTemplates.length > 0 && (
+                <Button
+                  type="link"
+                  onClick={() => setCreateTemplateMode(false)}
+                >
+                  ← Quay lại mẫu in hiện có
+                </Button>
+              )}
+            </>
+          )}
         </>
       ),
     },
@@ -299,13 +376,13 @@ const OnboardingWizard = ({ open, onClose, doctorId }) => {
     },
   ];
 
-  // ====== HANDLE NEXT ======
+  // ===== NEXT =====
   const next = async () => {
     try {
       await form.validateFields();
       const values = form.getFieldsValue();
 
-      // Bước 1: tạo clinic mới (nếu có)
+      // Bước 1: tạo clinic
       if (current === 1 && createClinicMode) {
         const payload = {
           name: values.new_clinic_name,
@@ -320,7 +397,7 @@ const OnboardingWizard = ({ open, onClose, doctorId }) => {
         setClinics((prev) => [...prev, newClinic]);
       }
 
-      // Kiểm tra xem phòng khám có mẫu in chưa
+      // Check mẫu in
       if (current === 1) {
         const clinicId = form.getFieldValue("id_clinic");
         if (clinicId) {
@@ -328,17 +405,17 @@ const OnboardingWizard = ({ open, onClose, doctorId }) => {
             params: { id_clinic: clinicId, is_use_onboard: true },
           });
           const templates = resTemplate.data.data?.data || [];
+          setPrintTemplates(templates);
+
           if (!templates.length) {
             toast.info("Phòng khám chưa có mẫu in — vui lòng tạo mẫu in.");
-            setCurrent(2);
-            return;
+            setCreateTemplateMode(true);
           }
-          setPrintTemplates(templates);
         }
       }
 
       // Bước 2: tạo mẫu in
-      if (current === 2) {
+      if (current === 2 && createTemplateMode) {
         const clinicId = form.getFieldValue("id_clinic");
         const payload = {
           name: values.print_template_name,
@@ -356,8 +433,7 @@ const OnboardingWizard = ({ open, onClose, doctorId }) => {
         toast.success("Đã tạo mẫu in cho phòng khám!");
       }
 
-      // Bước 3: cập nhật thông tin bác sĩ
-      if (current === 3) {
+      if (current !== 2) {
         const formData = new FormData();
         const append = (k, v) => v && formData.append(k, v);
 

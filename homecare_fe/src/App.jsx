@@ -65,8 +65,20 @@ import UserPackagesList from "./pages/packages/userPackages/UserPackagesList";
 
 function App() {
   useAuthInitializer();
-  const { doctor } = useGlobalAuth();
+  const { doctor, printTemplateGlobal, setPrintTemplateGlobal } =
+    useGlobalAuth();
   const [wizardOpen, setWizardOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchPrints = async () => {
+      const resTemplate = await API_CALL.get("/print-template", {
+        params: { id_clinic: doctor.id_clinic },
+      });
+      const templates = resTemplate.data.data?.data || [];
+      setPrintTemplateGlobal(templates);
+    };
+    fetchPrints();
+  }, [doctor.id_clinic]);
 
   const isProfileIncomplete = (doc) => {
     if (!doc) return true;
@@ -82,10 +94,15 @@ function App() {
   };
 
   useEffect(() => {
-    if (doctor && isProfileIncomplete(doctor)) {
+    if (
+      doctor &&
+      (isProfileIncomplete(doctor) || !printTemplateGlobal?.length)
+    ) {
       setWizardOpen(true);
+    } else {
+      setWizardOpen(false);
     }
-  }, [doctor]);
+  }, [doctor, printTemplateGlobal]);
 
   return (
     <BrowserRouter>
