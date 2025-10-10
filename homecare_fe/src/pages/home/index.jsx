@@ -196,7 +196,7 @@ const Sidebar = ({ collapsed }) => {
       children: [{ key: "/home/customers", label: "Danh sách" }],
     },
 
-    {
+    user?.id_role === USER_ROLE.ADMIN && {
       key: "/home/intergate",
       icon: (
         <Avatar
