@@ -78,7 +78,7 @@ function App() {
       setPrintTemplateGlobal(templates);
     };
     fetchPrints();
-  }, [doctor.id_clinic]);
+  }, [doctor?.id_clinic]);
 
   const isProfileIncomplete = (doc) => {
     if (!doc) return true;
