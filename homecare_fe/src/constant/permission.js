@@ -1,3 +1,5 @@
+import dayjs from "dayjs";
+
 export const FEATURE_KEYS = {
   TRIAL_1_MONTH: {
     label: "Thời gian dùng thử - 1 tháng",
@@ -114,3 +116,14 @@ export const DURATION_OPTIONS = [
   { value: 6, label: "6 tháng" },
   { value: 12, label: "12 tháng" },
 ];
+
+export const getUsablePackageCodes = (packages = []) => {
+  return packages
+    .filter(
+      (pkg) =>
+        pkg?.status === "active" &&
+        pkg?.end_date &&
+        dayjs(pkg.end_date).isAfter(dayjs())
+    )
+    .map((p) => p.package_code);
+};

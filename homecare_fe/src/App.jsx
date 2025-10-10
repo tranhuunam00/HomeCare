@@ -62,23 +62,13 @@ import OnboardingWizard from "./components/OnboardingWizard/OnboardingWizard";
 import SubscriptionPage from "./pages/packages/SubscriptionPage";
 import PackageRequestsList from "./pages/packages/packageRequests/PackageRequestsList";
 import UserPackagesList from "./pages/packages/userPackages/UserPackagesList";
+import { getUsablePackageCodes } from "./constant/permission";
+import { USER_ROLE } from "./constant/app";
 
 function App() {
   useAuthInitializer();
-  const { doctor, printTemplateGlobal, setPrintTemplateGlobal } =
-    useGlobalAuth();
+  const { user, doctor, printTemplateGlobal, userPackages } = useGlobalAuth();
   const [wizardOpen, setWizardOpen] = useState(false);
-
-  useEffect(() => {
-    const fetchPrints = async () => {
-      const resTemplate = await API_CALL.get("/print-template", {
-        params: { id_clinic: doctor.id_clinic },
-      });
-      const templates = resTemplate.data.data?.data || [];
-      setPrintTemplateGlobal(templates);
-    };
-    fetchPrints();
-  }, [doctor?.id_clinic]);
 
   const isProfileIncomplete = (doc) => {
     if (!doc) return true;
@@ -96,7 +86,10 @@ function App() {
   useEffect(() => {
     if (
       doctor &&
-      (isProfileIncomplete(doctor) || !printTemplateGlobal?.length)
+      user?.id_role != USER_ROLE.ADMIN &&
+      (isProfileIncomplete(doctor) ||
+        !printTemplateGlobal?.length ||
+        !getUsablePackageCodes(userPackages).length)
     ) {
       setWizardOpen(true);
     } else {

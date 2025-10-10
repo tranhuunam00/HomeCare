@@ -13,6 +13,7 @@ export const GlobalAuthProvider = ({ children }) => {
   const [formVer2Names, setFormVer2Names] = useState([]);
   const [isReadingForm, setIsReadingForm] = useState(false);
   const [printTemplateGlobal, setPrintTemplateGlobal] = useState([{}]);
+  const [userPackages, setUserPackages] = useState([{}]);
 
   const handleLoginContext = ({ token, user, doctor }) => {
     storage.saveAuth({ token, user, doctor });
@@ -50,6 +51,8 @@ export const GlobalAuthProvider = ({ children }) => {
         setIsReadingForm,
         printTemplateGlobal,
         setPrintTemplateGlobal,
+        userPackages,
+        setUserPackages,
       }}
     >
       {children}

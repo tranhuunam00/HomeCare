@@ -22,11 +22,15 @@ const fetchWithRetry = async (fn, retries = 3, delay = 1000) => {
 
 const useAuthInitializer = () => {
   const {
+    user,
+    doctor,
     handleLoginContext,
     handleLogoutGlobal,
     setExamParts,
     setTemplateServices,
     setFormVer2Names,
+    setUserPackages,
+    setPrintTemplateGlobal,
   } = useGlobalAuth();
   const { showWarning } = useToast();
 
@@ -80,6 +84,35 @@ const useAuthInitializer = () => {
         });
     }
   }, []);
+  useEffect(() => {
+    if (user?.id)
+      fetchWithRetry(() =>
+        API_CALL.get(`/package/user-package`, {
+          params: { page: 1, limit: 2000, id_user: user?.id },
+        })
+      )
+        .then((res) => {
+          setUserPackages(res.data?.data.data);
+        })
+        .catch(() => {
+          showWarning("Không thể tải setUserPackages");
+        });
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (user?.id)
+      fetchWithRetry(() =>
+        API_CALL.get(`/print-template`, {
+          params: { id_clinic: doctor?.id_clinic },
+        })
+      )
+        .then((res) => {
+          setPrintTemplateGlobal(res.data?.data.data);
+        })
+        .catch(() => {
+          showWarning("Không thể tải setUserPackages");
+        });
+  }, [doctor?.id_clinic]);
 };
 
 export default useAuthInitializer;

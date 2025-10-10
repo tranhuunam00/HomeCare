@@ -12,15 +12,41 @@ import {
   Divider,
   Card,
   Descriptions,
+  Row,
+  Col,
 } from "antd";
 import { UploadOutlined, PlusOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import API_CALL from "../../services/axiosClient";
 import { ACADEMIC_TITLES, DEGREES } from "../../constant/app";
+import {
+  PACKAGE_FEATURES,
+  DURATION_OPTIONS,
+  getUsablePackageCodes,
+} from "../../constant/permission";
 import { useGlobalAuth } from "../../contexts/AuthContext";
 import STORAGE from "../../services/storage";
 import { toast } from "react-toastify";
 import TemplateHeaderEditor from "../../pages/products/TemplatePrint/Header/TemplateHeaderEditor";
+import PackageCard from "../../pages/packages/components/card/PackageCard";
+
+import { Tag, Table, Spin } from "antd";
+import {
+  ClockCircleOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+} from "@ant-design/icons";
+
+const STATUS_COLORS = {
+  pending: "processing",
+  approved: "success",
+  rejected: "error",
+};
+const STATUS_ICONS = {
+  pending: <ClockCircleOutlined />,
+  approved: <CheckCircleOutlined />,
+  rejected: <CloseCircleOutlined />,
+};
 
 const { Option } = Select;
 
@@ -32,13 +58,72 @@ const OnboardingWizard = ({ open, onClose, doctorId }) => {
   const [avatarUrl, setAvatarUrl] = useState(null);
   const [signatureUrl, setSignatureUrl] = useState(null);
   const [clinics, setClinics] = useState([]);
-  const { setDoctor } = useGlobalAuth();
+  const { setDoctor, userPackages, user } = useGlobalAuth();
   const [createClinicMode, setCreateClinicMode] = useState(false);
 
   // Mẫu in
   const [headerInfo, setHeaderInfo] = useState({});
   const [printTemplates, setPrintTemplates] = useState([]);
   const [createTemplateMode, setCreateTemplateMode] = useState(false);
+
+  // ==== Package registration ====
+  const [selectedPackage, setSelectedPackage] = useState(null);
+  const [duration, setDuration] = useState(1);
+  const [note, setNote] = useState("");
+  const [loadingPackage, setLoadingPackage] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [requests, setRequests] = useState([]);
+  const [loadingRequests, setLoadingRequests] = useState(false);
+
+  const handleSelectPackage = (planKey) => {
+    setSelectedPackage(planKey);
+    setModalVisible(true);
+  };
+
+  const handleSubmitPackage = async () => {
+    if (!selectedPackage) return toast.error("Vui lòng chọn gói!");
+    setLoadingPackage(true);
+    try {
+      await API_CALL.post("/package/request", {
+        package_code: selectedPackage,
+        duration_months: duration,
+        type: "new",
+        note,
+      });
+      toast.success("Gửi yêu cầu đăng ký gói thành công!");
+      setModalVisible(false);
+      setNote("");
+      setSelectedPackage(null);
+      await API_CALL.post("/package/request", { id_user: user.id });
+      fetchRequests();
+    } catch (err) {
+      toast.error(
+        err?.response?.data?.message ||
+          "Đăng ký gói thất bại, vui lòng thử lại."
+      );
+    } finally {
+      setLoadingPackage(false);
+    }
+  };
+
+  const fetchRequests = async () => {
+    if (!user?.id) return;
+    setLoadingRequests(true);
+    try {
+      const res = await API_CALL.get("/package/request-package", {
+        params: { id_user: user.id, limit: 10 },
+      });
+      setRequests(res.data.data.data || []);
+    } catch (err) {
+      toast.error("Không thể tải yêu cầu gói");
+    } finally {
+      setLoadingRequests(false);
+    }
+  };
+
+  useEffect(() => {
+    if (open) fetchRequests();
+  }, [open]);
 
   // ===== Load clinics =====
   useEffect(() => {
@@ -366,6 +451,109 @@ const OnboardingWizard = ({ open, onClose, doctorId }) => {
       ),
     },
     {
+      title: "Đăng ký gói sử dụng",
+      content: (
+        <>
+          <div style={{ textAlign: "center", marginBottom: 16 }}>
+            <h3>Chọn gói dịch vụ DRADS phù hợp với bạn</h3>
+          </div>
+          <h3 style={{ color: "rgba(19, 143, 180, 1)" }}>
+            Vui lòng đợi ADMIN phê duyệt để sử dụng sản phẩm!
+          </h3>
+          <Divider />
+          <h4>Các yêu cầu đăng ký gần đây</h4>
+          <Spin spinning={loadingRequests}>
+            <Table
+              dataSource={requests}
+              size="small"
+              rowKey="id"
+              pagination={false}
+              columns={[
+                { title: "Mã gói", dataIndex: "package_code" },
+                {
+                  title: "Trạng thái",
+                  dataIndex: "status",
+                  render: (st) => (
+                    <Tag color={STATUS_COLORS[st]} icon={STATUS_ICONS[st]}>
+                      {st}
+                    </Tag>
+                  ),
+                },
+                {
+                  title: "Ngày tạo",
+                  dataIndex: "createdAt",
+                  render: (v) => dayjs(v).format("DD/MM/YYYY HH:mm"),
+                },
+              ]}
+            />
+          </Spin>
+          <Divider />
+
+          <Row gutter={[24, 24]} justify="center">
+            {Object.entries(PACKAGE_FEATURES).map(([key, plan]) => (
+              <Col xs={24} sm={12} md={8} key={key}>
+                <PackageCard
+                  planKey={key}
+                  plan={plan}
+                  onSelect={handleSelectPackage}
+                />
+              </Col>
+            ))}
+          </Row>
+
+          <Modal
+            title="Xác nhận đăng ký gói"
+            open={modalVisible}
+            onCancel={() => setModalVisible(false)}
+            footer={null}
+          >
+            <p>
+              Bạn đang chọn gói:{" "}
+              <strong style={{ color: "#1677ff" }}>{selectedPackage}</strong>
+            </p>
+            <div style={{ marginTop: 12 }}>
+              <label>Thời hạn sử dụng</label>
+              <Select
+                style={{ width: "100%", marginTop: 4 }}
+                value={duration}
+                onChange={(val) => setDuration(val)}
+              >
+                {DURATION_OPTIONS.map((d) => (
+                  <Option
+                    key={d.value}
+                    value={d.value}
+                    disabled={d.value !== 1}
+                  >
+                    {d.label}
+                  </Option>
+                ))}
+              </Select>
+            </div>
+
+            <div style={{ marginTop: 12 }}>
+              <label>Ghi chú (tùy chọn)</label>
+              <Input.TextArea
+                rows={3}
+                placeholder="Nhập ghi chú ... "
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+              />
+            </div>
+
+            <Button
+              type="primary"
+              block
+              style={{ marginTop: 16 }}
+              loading={loadingPackage}
+              onClick={handleSubmitPackage}
+            >
+              Gửi yêu cầu đăng ký
+            </Button>
+          </Modal>
+        </>
+      ),
+    },
+    {
       title: "Hoàn tất",
       content: (
         <div style={{ textAlign: "center" }}>
@@ -375,7 +563,7 @@ const OnboardingWizard = ({ open, onClose, doctorId }) => {
       ),
     },
   ];
-
+  const usableCount = getUsablePackageCodes(userPackages).length;
   // ===== NEXT =====
   const next = async () => {
     try {
@@ -433,7 +621,14 @@ const OnboardingWizard = ({ open, onClose, doctorId }) => {
         toast.success("Đã tạo mẫu in cho phòng khám!");
       }
 
-      if (current !== 2) {
+      if (current === 4 && usableCount === 0) {
+        toast.warning(
+          "Vui lòng đăng ký và được duyệt ít nhất 1 gói hoạt động."
+        );
+        return;
+      }
+
+      if (current !== 2 || current !== 3) {
         const formData = new FormData();
         const append = (k, v) => v && formData.append(k, v);
 
@@ -471,7 +666,7 @@ const OnboardingWizard = ({ open, onClose, doctorId }) => {
   const prev = () => setCurrent((prev) => prev - 1);
 
   return (
-    <Modal open={open} closable={false} footer={null} width={800}>
+    <Modal open={open} closable={false} footer={null} width={900}>
       <Steps current={current} items={steps.map((s) => ({ title: s.title }))} />
       <Form form={form} layout="vertical" style={{ marginTop: 24 }}>
         {steps[current].content}
@@ -484,7 +679,11 @@ const OnboardingWizard = ({ open, onClose, doctorId }) => {
           </Button>
         )}
         {current < steps.length - 1 && (
-          <Button type="primary" onClick={next}>
+          <Button
+            type="primary"
+            onClick={next}
+            disabled={current === 4 && usableCount === 0}
+          >
             Tiếp tục
           </Button>
         )}
