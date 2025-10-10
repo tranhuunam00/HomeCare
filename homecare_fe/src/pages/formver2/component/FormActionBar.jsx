@@ -15,6 +15,9 @@ import {
 } from "@ant-design/icons";
 import styles from "./FormActionBar.module.scss";
 import { useNavigate } from "react-router-dom";
+import { useGlobalAuth } from "../../../contexts/AuthContext";
+import { getUsablePackageCodes } from "../../../constant/permission";
+import { USER_ROLE } from "../../../constant/app";
 
 export const KEY_ACTION_BUTTON = {
   reset: "reset",
@@ -45,6 +48,10 @@ export default function FormActionBar({
   languageTranslate,
 }) {
   const navigate = useNavigate();
+  const { userPackages, user } = useGlobalAuth();
+
+  const availblePackage = getUsablePackageCodes(userPackages);
+
   const emptyF = () => {};
   const items = [
     {
@@ -104,6 +111,8 @@ export default function FormActionBar({
       label: "CHUYỂN BẢN DỊCH",
       icon: <TranslationOutlined />,
       onClick: onViewTranslate || emptyF,
+      disabled:
+        !availblePackage.includes("PREMIUM") && user.id_role != USER_ROLE.ADMIN,
     },
 
     {
@@ -111,7 +120,11 @@ export default function FormActionBar({
       label: "DỊCH",
       icon: <TranslationOutlined />,
       onClick: onTranslate || emptyF,
-      disabled: !isEdit || languageTranslate == "vi",
+      disabled:
+        !isEdit ||
+        languageTranslate == "vi" ||
+        (!availblePackage.includes("PREMIUM") &&
+          user.id_role != USER_ROLE.ADMIN),
     },
     {
       key: "exit",

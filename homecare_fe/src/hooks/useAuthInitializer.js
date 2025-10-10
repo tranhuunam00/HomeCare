@@ -74,7 +74,7 @@ const useAuthInitializer = () => {
 
       // Form Ver2 Names
       fetchWithRetry(() =>
-        API_CALL.get(`/form-ver2-names`, { params: { page: 1, limit: 2000 } })
+        API_CALL.get(`/form-ver2-names`, { params: { page: 1, limit: 5000 } })
       )
         .then((res) => {
           setFormVer2Names(res.data?.data.items);
