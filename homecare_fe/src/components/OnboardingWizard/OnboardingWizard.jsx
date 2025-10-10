@@ -74,6 +74,7 @@ const OnboardingWizard = ({ open, onClose, doctorId }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [requests, setRequests] = useState([]);
   const [loadingRequests, setLoadingRequests] = useState(false);
+  const [loadingTemplate, setLoadingTemplate] = useState(false);
 
   const handleSelectPackage = (planKey) => {
     setSelectedPackage(planKey);
@@ -577,14 +578,28 @@ const OnboardingWizard = ({ open, onClose, doctorId }) => {
           phone_number: values.new_clinic_phone_number || "",
           address: values.new_clinic_address || "",
         };
-        const resClinic = await API_CALL.post("/clinics", payload);
-        const newClinic = resClinic.data.data;
 
-        values.id_clinic = newClinic.id;
-        form.setFieldValue("id_clinic", newClinic.id);
-        setClinics((prev) => [...prev, newClinic]);
+        setLoadingTemplate(true); // dùng chung state loading hoặc tạo state riêng như loadingClinic
+        try {
+          // 1️⃣ Tạo mới clinic
+          const resClinic = await API_CALL.post("/clinics", payload);
+          const newClinic = resClinic.data.data;
+          toast.success("Tạo mới phòng khám thành công!");
+
+          const res = await API_CALL.get("/clinics", {
+            params: { page: 1, limit: 100 },
+          });
+          setClinics(res.data.data.data || []);
+
+          form.setFieldValue("id_clinic", newClinic.id);
+          setCreateClinicMode(false);
+        } catch (err) {
+          console.error("Tạo phòng khám lỗi:", err);
+          toast.error("Tạo mới phòng khám thất bại!");
+        } finally {
+          setLoadingTemplate(false);
+        }
       }
-
       // Check mẫu in
       if (current === 1) {
         const clinicId = form.getFieldValue("id_clinic");
@@ -615,10 +630,27 @@ const OnboardingWizard = ({ open, onClose, doctorId }) => {
           if (v !== undefined && v !== null) fd.append(k, v);
         });
 
-        await API_CALL.post("/print-template", fd, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-        toast.success("Đã tạo mẫu in cho phòng khám!");
+        setLoadingTemplate(true);
+        try {
+          // 1️⃣ Tạo mới template
+          await API_CALL.post("/print-template", fd, {
+            headers: { "Content-Type": "multipart/form-data" },
+          });
+          toast.success("Đã tạo mẫu in cho phòng khám!");
+
+          const res = await API_CALL.get("/print-template", {
+            params: { id_clinic: clinicId, is_use_onboard: true },
+          });
+          const updatedTemplates = res.data.data?.data || [];
+          setPrintTemplates(updatedTemplates);
+
+          setCreateTemplateMode(false);
+        } catch (err) {
+          console.error("Tạo mẫu in lỗi:", err);
+          toast.error(err?.response?.data?.message || "Tạo mẫu in thất bại!");
+        } finally {
+          setLoadingTemplate(false);
+        }
       }
 
       if (current === 4 && usableCount === 0) {
@@ -683,6 +715,7 @@ const OnboardingWizard = ({ open, onClose, doctorId }) => {
             type="primary"
             onClick={next}
             disabled={current === 4 && usableCount === 0}
+            loading={loadingTemplate}
           >
             Tiếp tục
           </Button>
