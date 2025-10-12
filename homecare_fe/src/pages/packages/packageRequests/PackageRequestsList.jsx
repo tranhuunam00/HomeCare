@@ -186,6 +186,15 @@ const PackageRequestsList = () => {
 
     { title: "Mã gói", dataIndex: "package_code", key: "package_code" },
     {
+      title: "Dùng thử",
+      dataIndex: "is_trial",
+      key: "is_trial",
+      align: "center",
+      render: (val) =>
+        val ? <Tag color="blue">Có</Tag> : <Tag color="default">Không</Tag>,
+    },
+
+    {
       title: "Thời hạn (tháng)",
       dataIndex: "duration_months",
       key: "duration_months",

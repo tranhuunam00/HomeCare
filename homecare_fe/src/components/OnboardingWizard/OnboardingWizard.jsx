@@ -50,7 +50,7 @@ const STATUS_ICONS = {
 
 const { Option } = Select;
 
-const OnboardingWizard = ({ open, onClose, doctorId }) => {
+const OnboardingWizard = ({ open, onClose, doctorId, is_use_onboard }) => {
   const [current, setCurrent] = useState(0);
   const [form] = Form.useForm();
   const [avatarFile, setAvatarFile] = useState(null);
@@ -76,6 +76,8 @@ const OnboardingWizard = ({ open, onClose, doctorId }) => {
   const [loadingRequests, setLoadingRequests] = useState(false);
   const [loadingTemplate, setLoadingTemplate] = useState(false);
 
+  const usableCount = getUsablePackageCodes(userPackages).length;
+
   const handleSelectPackage = (planKey) => {
     setSelectedPackage(planKey);
     setModalVisible(true);
@@ -85,17 +87,34 @@ const OnboardingWizard = ({ open, onClose, doctorId }) => {
     if (!selectedPackage) return toast.error("Vui lòng chọn gói!");
     setLoadingPackage(true);
     try {
-      await API_CALL.post("/package/request", {
+      const hasPackage = userPackages.some(
+        (pkg) => pkg.package_code === selectedPackage
+      );
+
+      const payload = {
         package_code: selectedPackage,
         duration_months: duration,
         type: "new",
         note,
-      });
+      };
+
+      // Nếu chưa có gói này => thêm is_trial = true
+      if (!hasPackage) {
+        payload.is_trial = true;
+      }
+
+      const res = await API_CALL.post("/package/request", payload);
+      const data = res.data?.data || {};
       toast.success("Gửi yêu cầu đăng ký gói thành công!");
       setModalVisible(false);
       setNote("");
       setSelectedPackage(null);
-      await fetchRequests();
+      if (data.trial === true) {
+        toast.success("Gói trial đã được kích hoạt tự động!");
+        setCurrent((prev) => prev + 1);
+      } else {
+        await fetchRequests();
+      }
     } catch (err) {
       toast.error(
         err?.response?.data?.message ||
@@ -457,6 +476,36 @@ const OnboardingWizard = ({ open, onClose, doctorId }) => {
           <div style={{ textAlign: "center", marginBottom: 16 }}>
             <h3>Chọn gói dịch vụ DRADS phù hợp với bạn</h3>
           </div>
+          <Divider />
+
+          <h3>Gói hiện tại của bạn</h3>
+          {userPackages?.length > 0 ? (
+            <Table
+              dataSource={userPackages}
+              size="small"
+              rowKey="id"
+              pagination={false}
+              columns={[
+                { title: "Mã gói", dataIndex: "package_code" },
+                {
+                  title: "Trạng thái",
+                  dataIndex: "status",
+                  render: (st) => (
+                    <Tag color={STATUS_COLORS[st]} icon={STATUS_ICONS[st]}>
+                      {st}
+                    </Tag>
+                  ),
+                },
+                {
+                  title: "Hết hạn",
+                  dataIndex: "expired_at",
+                  render: (v) => (v ? dayjs(v).format("DD/MM/YYYY") : "—"),
+                },
+              ]}
+            />
+          ) : (
+            <p style={{ color: "#999" }}>Chưa có gói hoạt động nào.</p>
+          )}
           <h3 style={{ color: "rgba(19, 143, 180, 1)" }}>
             Vui lòng đợi ADMIN phê duyệt để sử dụng sản phẩm!
           </h3>
@@ -563,7 +612,7 @@ const OnboardingWizard = ({ open, onClose, doctorId }) => {
       ),
     },
   ];
-  const usableCount = getUsablePackageCodes(userPackages).length;
+
   // ===== NEXT =====
   const next = async () => {
     try {
