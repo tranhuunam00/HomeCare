@@ -6,11 +6,11 @@ export const FEATURE_KEYS = {
     description: "Người dùng được sử dụng thử miễn phí trong 1 tháng đầu tiên.",
   },
   CLOUD_12_MONTH: {
-    label: "Thời gian lưu kết quả Cloud - 12 tháng",
+    label: "Thời gian lưu kết quả Cloud",
     description: "Dữ liệu lưu trữ trên Cloud trong 12 tháng.",
   },
   TOOLKIT_15_APP: {
-    label: "Tích hợp phần mềm ứng dụng tiện ích - 15 công cụ",
+    label: "Tích hợp ứng dụng tiện ích",
     description:
       "Bao gồm 15 ứng dụng tiện ích giúp đọc và quản lý kết quả chẩn đoán.",
   },
@@ -23,33 +23,33 @@ export const FEATURE_KEYS = {
     description: "Nhận hỗ trợ kỹ thuật liên tục qua email, chat hoặc cuộc gọi.",
   },
   PACS_SUPPORT: {
-    label: "Hỗ trợ đọc kết quả từ xa qua PACS (phí tính riêng)",
+    label: "Hỗ trợ đọc kết quả từ xa qua PACS ",
     description:
-      "Cho phép đọc kết quả chẩn đoán từ xa thông qua hệ thống PACS.",
+      "Cho phép đọc kết quả chẩn đoán từ xa thông qua hệ thống PACS (phí tính riêng).",
   },
   REPORT_NORMAL_500: {
-    label: "Mẫu kết quả bình thường - hơn 500 mẫu",
+    label: "Mẫu kết quả bình thường",
     description: "Truy cập thư viện hơn 500 mẫu kết quả bình thường.",
   },
   REPORT_ABNORMAL_1000: {
-    label: "Mẫu kết quả bất thường - hơn 1000 mẫu",
+    label: "Mẫu kết quả bất thường",
     description: "Truy cập thư viện hơn 1000 mẫu kết quả bất thường.",
   },
   REPORT_EN_NORMAL_500: {
-    label: "Mẫu kết quả tiếng Anh bình thường - hơn 500 mẫu",
+    label: "Mẫu kết quả tiếng Anh bình thường",
     description: "Truy cập mẫu kết quả tiếng Anh bình thường (trên 500 mẫu).",
   },
   REPORT_EN_ABNORMAL_1000: {
-    label: "Mẫu kết quả tiếng Anh bất thường - hơn 1000 mẫu",
+    label: "Mẫu kết quả tiếng Anh bất thường",
     description: "Truy cập mẫu kết quả tiếng Anh bất thường (trên 1000 mẫu).",
   },
   MULTI_LANG_30: {
-    label: "Tích hợp kết quả đa ngôn ngữ - hơn 30 ngôn ngữ",
+    label: "Tích hợp kết quả đa ngôn ngữ",
     description:
       "Kết quả có thể được hiển thị và xuất báo cáo bằng hơn 30 ngôn ngữ.",
   },
   AI_SUPPORT_EXPERT: {
-    label: "AI hỗ trợ tư vấn chuyên môn dựa theo kết luận",
+    label: "AI hỗ trợ tư vấn",
     description: "AI phân tích kết quả và gợi ý tư vấn chuyên môn cho bác sĩ.",
   },
 };
@@ -57,7 +57,7 @@ export const FEATURE_KEYS = {
 export const PACKAGE_FEATURES = {
   BASIC: {
     code: "BASIC",
-    name: "DRADS-Basic",
+    name: "Basic",
     description: "Gói cơ bản cho cá nhân dùng thử và sử dụng hằng tháng",
     permissions: [
       FEATURE_KEYS.TRIAL_1_MONTH,
@@ -71,7 +71,7 @@ export const PACKAGE_FEATURES = {
   STANDARD: {
     code: "STANDARD",
 
-    name: "DRADS-Standard",
+    name: "Standard",
     description:
       "Gói tiêu chuẩn hỗ trợ PACS, nhiều mẫu hơn, có hỗ trợ kỹ thuật",
     permissions: [
@@ -90,7 +90,7 @@ export const PACKAGE_FEATURES = {
 
   PREMIUM: {
     code: "PREMIUM",
-    name: "DRADS-Premium",
+    name: "Premium",
     description:
       "Gói cao cấp cho tổ chức, có AI hỗ trợ chuyên môn và đa ngôn ngữ",
     permissions: [

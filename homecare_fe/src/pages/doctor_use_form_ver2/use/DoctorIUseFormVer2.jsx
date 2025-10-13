@@ -27,11 +27,14 @@ import PrintPreviewVer2NotDataDiagnose from "../../formver2/PreviewVer2/PrintPre
 import useVietnamAddress from "../../../hooks/useVietnamAddress";
 import API_CALL from "../../../services/axiosClient";
 import {
+  buildFormData,
   buildFormDataDoctorUseFormVer2,
   buildPrompt,
   mapApiToForm,
+  normalizeTablesFromApi,
 } from "../../formver2/utils";
 import {
+  sortTemplateServices,
   TRANSLATE_LANGUAGE,
   translateLabel,
   USER_ROLE,
@@ -40,13 +43,16 @@ import { useGlobalAuth } from "../../../contexts/AuthContext";
 import dayjs from "dayjs";
 import HistoryModal from "./items/HistoryModal";
 import ImageWithCaptionInput from "../../products/ImageWithCaptionInput/ImageWithCaptionInput";
-import { getUsablePackageCodes } from "../../../constant/permission";
 
 const { Title } = Typography;
 const { TextArea } = Input;
 const { Option } = Select;
 
 /* ============== CONSTS ============== */
+const LANGUAGE_OPTIONS = [
+  { label: "VI", value: "vi" },
+  { label: "EN", value: "en" },
+];
 
 const toISODate = (d = new Date()) => new Date(d).toISOString().slice(0, 10); // YYYY-MM-DD
 
@@ -66,21 +72,7 @@ export default function DoctorUseDFormVer2({
     doctor,
     formVer2Names,
     setIsReadingForm,
-    userPackages,
   } = useGlobalAuth();
-
-  const availblePackage = getUsablePackageCodes(userPackages);
-  console.log("availblePackage", availblePackage);
-
-  const LANGUAGE_OPTIONS = [
-    { label: "VI", value: "vi" },
-    {
-      label: "EN",
-      value: "en",
-      disabled:
-        !availblePackage.includes("PREMIUM") && user.id_role != USER_ROLE.ADMIN,
-    },
-  ];
 
   useEffect(() => {
     setIsReadingForm(true);
@@ -735,13 +727,11 @@ export default function DoctorUseDFormVer2({
                     setFilteredFormVer2Names([]);
                   }}
                 >
-                  {templateServices
-                    .sort((a, b) => (a.name > b.name ? 1 : -1))
-                    .map((s) => (
-                      <Option key={s.id} value={s.id}>
-                        {s.name}
-                      </Option>
-                    ))}
+                  {sortTemplateServices(templateServices).map((s) => (
+                    <Option key={s.id} value={s.id}>
+                      {s.name}
+                    </Option>
+                  ))}
                 </Select>
               </Form.Item>
             </Col>
@@ -840,17 +830,7 @@ export default function DoctorUseDFormVer2({
                   }}
                 >
                   {filteredFormVer2Names.map((item) => (
-                    <Option
-                      key={item.id}
-                      value={item.id}
-                      disabled={
-                        !availblePackage.includes("STANDARD") &&
-                        !availblePackage.includes("PREMIUM") &&
-                        item.form_ver2s?.[0]?.ket_luan &&
-                        item.form_ver2s?.[0]?.ket_luan?.toUpperCase() !=
-                          "BÌNH THƯỜNG"
-                      }
-                    >
+                    <Option key={item.id} value={item.id}>
                       {item.name}
                     </Option>
                   ))}

@@ -322,3 +322,26 @@ export const translateLabel = (lang = "vi", key, uppercase = true) => {
   let text = FORM_LABELS?.[lang]?.[key] || key;
   return uppercase ? text.toUpperCase() : text;
 };
+
+export const sortTemplateServices = (templateServices = []) => {
+  const priorityOrder = [
+    "Siêu âm",
+    "Chụp XQ",
+    "Chụp MSCT",
+    "Chụp MRI",
+    "Nội soi và TDCN",
+    "Can thiệp SA",
+    "Can thiệp CT",
+    "Can thiệp DSA",
+  ];
+
+  return [...templateServices].sort((a, b) => {
+    const indexA = priorityOrder.indexOf(a.name);
+    const indexB = priorityOrder.indexOf(b.name);
+
+    if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+    if (indexA !== -1) return -1;
+    if (indexB !== -1) return 1;
+    return a.name.localeCompare(b.name);
+  });
+};
