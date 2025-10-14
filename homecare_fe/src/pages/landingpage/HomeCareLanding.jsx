@@ -574,8 +574,9 @@ const HomeCareLanding = () => {
       <footer className={styles["homecare__footer"]}>
         <div className={styles["homecare__footer-content"]}>
           <div className={styles["homecare__footer-col"]}>
-            <img src="/logo_home_care.jpg" alt="logo" />
-            <p>Giải Pháp Chăm Sóc Sức Khỏe Toàn Diện</p>
+            <img src="/daogroup.png" alt="logo" />
+            <p> Kiến tạo cuộc sống số - Digital for life</p>
+            <p>www.daogroup.vn</p>
           </div>
 
           <div className={styles["homecare__footer-col"]}>
