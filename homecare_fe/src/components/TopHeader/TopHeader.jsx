@@ -18,6 +18,7 @@ import { USER_ROLE, USER_ROLE_ID } from "../../constant/app";
 import useToast from "../../hooks/useToast";
 import { toast } from "react-toastify";
 import SidebarMenu from "../Sidebar";
+import NotificationBell from "../../pages/notifications/NotificationBell";
 
 const qrValue = `https://www.daogroup.vn/`;
 
@@ -135,13 +136,7 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
           </div>
         </Dropdown>
         <Tooltip title="Thông báo">
-          <Badge
-            onClick={() => toast.warning("Sắp ra mắt")}
-            count={""}
-            size="small"
-          >
-            <BellOutlined className={styles.topHeader__icon} />
-          </Badge>
+          <NotificationBell />
         </Tooltip>
 
         {/* Avatar Dropdown giữ nguyên ở đây nếu có */}

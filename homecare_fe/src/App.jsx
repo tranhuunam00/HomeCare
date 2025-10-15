@@ -1,5 +1,7 @@
 import "./App.css";
 import Home from "./pages/home";
+import { io } from "socket.io-client";
+import { toast } from "react-toastify";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import TiradPage from "./pages/tirads";
 import LoginForm from "./pages/authentication/LoginForm";
@@ -64,10 +66,18 @@ import PackageRequestsList from "./pages/packages/packageRequests/PackageRequest
 import UserPackagesList from "./pages/packages/userPackages/UserPackagesList";
 import { getUsablePackageCodes } from "./constant/permission";
 import { USER_ROLE } from "./constant/app";
+import STORAGE from "./services/storage";
 
 function App() {
   useAuthInitializer();
-  const { user, doctor, printTemplateGlobal, userPackages } = useGlobalAuth();
+  const {
+    user,
+    doctor,
+    printTemplateGlobal,
+    userPackages,
+    setNotifications,
+    setUnreadCount,
+  } = useGlobalAuth();
   const [wizardOpen, setWizardOpen] = useState(false);
 
   const isProfileIncomplete = (doc) => {
@@ -82,6 +92,41 @@ function App() {
       !doc.signature_url
     );
   };
+
+  useEffect(() => {
+    if (!user) return;
+
+    const token = STORAGE.get("TOKEN");
+    if (!token) return;
+
+    const socket = io(
+      import.meta.env.VITE_API_SOCKET_URL || "http://localhost:3001/socket",
+      {
+        auth: { token },
+        transports: ["websocket"],
+      }
+    );
+
+    socket.on("connect", () => {
+      console.log("✅ Connected to Socket:", socket.id);
+    });
+
+    socket.on("notification:new", (data) => {
+      toast.info(`${data.title}\n${data.message}`, {
+        position: "bottom-right",
+      });
+      setNotifications((prev) => [data, ...prev]);
+      setUnreadCount((prev) => (prev || 0) + 1);
+    });
+
+    socket.on("disconnect", () => {
+      console.log("❌ Socket disconnected");
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [user?.id]);
 
   useEffect(() => {
     if (

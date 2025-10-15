@@ -16,6 +16,8 @@ export const GlobalAuthProvider = ({ children }) => {
   const [userPackages, setUserPackages] = useState([
     { package_code: "BASIC", status: "active", end_date: "2030-01-01" },
   ]);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const handleLoginContext = ({ token, user, doctor }) => {
     storage.saveAuth({ token, user, doctor });
@@ -55,6 +57,10 @@ export const GlobalAuthProvider = ({ children }) => {
         setPrintTemplateGlobal,
         userPackages,
         setUserPackages,
+        notifications,
+        setNotifications,
+        unreadCount,
+        setUnreadCount,
       }}
     >
       {children}

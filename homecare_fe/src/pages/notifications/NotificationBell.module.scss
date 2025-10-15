@@ -1,0 +1,51 @@
+.dropdownContainer {
+  width: 360px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  font-weight: 600;
+}
+
+.item {
+  cursor: pointer;
+  transition: background 0.2s;
+  &:hover {
+    background: #f5f5f5;
+  }
+}
+.unread {
+  background: #e6f7ff;
+}
+
+.message {
+  font-size: 13px;
+  color: #555;
+}
+
+.meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #999;
+}
+
+.bellIcon {
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.footer {
+  text-align: center;
+  padding: 8px 0;
+  color: #999;
+  font-size: 13px;
+}
