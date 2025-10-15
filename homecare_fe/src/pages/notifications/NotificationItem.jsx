@@ -7,6 +7,7 @@ import {
   UserOutlined,
   FileTextOutlined,
   BellOutlined,
+  ContainerOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -36,19 +37,59 @@ const NotificationItem = ({ item, onClick }) => {
 
   // Chọn icon theo type hoặc custom icon
   const renderIcon = () => {
-    if (icon) return <Avatar src={icon} />;
-    switch (type) {
-      case "chat":
-        return <Avatar icon={<MessageOutlined />} />;
-      case "alert":
-        return <Avatar icon={<AlertOutlined />} />;
-      case "diagnosis":
-        return <Avatar icon={<FileTextOutlined />} />;
+    // Nếu icon là URL hợp lệ
+    if (icon && icon.startsWith("http")) {
+      return <Avatar src={icon} />;
+    }
+
+    // Nếu icon là tên biểu tượng từ backend
+    switch (icon || type) {
+      case "gift":
+        return (
+          <Avatar
+            style={{ backgroundColor: "#fadb14" }}
+            icon={<BellOutlined />}
+          />
+        );
       case "package":
-        return <Avatar icon={<ExclamationCircleOutlined />} />;
-      case "system":
+        return (
+          <Avatar
+            style={{ backgroundColor: "#fa8c16" }}
+            icon={<ContainerOutlined />}
+          />
+        );
+      case "check-circle":
+        return (
+          <Avatar
+            style={{ backgroundColor: "#52c41a" }}
+            icon={<FileTextOutlined />}
+          />
+        );
+      case "x-circle":
+        return (
+          <Avatar
+            style={{ backgroundColor: "#f5222d" }}
+            icon={<AlertOutlined />}
+          />
+        );
+      case "diagnosis":
+        return (
+          <Avatar
+            style={{ backgroundColor: "#13c2c2" }}
+            icon={<FileTextOutlined />}
+          />
+        );
+      case "chat":
+        return (
+          <Avatar
+            style={{ backgroundColor: "#1677ff" }}
+            icon={<MessageOutlined />}
+          />
+        );
       default:
-        return <Avatar icon={<BellOutlined />} />;
+        return (
+          <Avatar style={{ backgroundColor: "#ccc" }} icon={<BellOutlined />} />
+        );
     }
   };
 
