@@ -103,7 +103,6 @@ function App() {
       import.meta.env.VITE_API_SOCKET_URL || "http://localhost:3001/socket",
       {
         auth: { token },
-        transports: ["websocket"],
       }
     );
 
