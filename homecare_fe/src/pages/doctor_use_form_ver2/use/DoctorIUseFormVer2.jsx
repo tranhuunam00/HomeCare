@@ -1220,31 +1220,40 @@ export default function DoctorUseDFormVer2({
                         const [translatedAddon, translatedImageDescEditor] =
                           await Promise.all([
                             API_CALL.post(
-                              "translate/object",
+                              "translate/object-google",
                               {
-                                quy_trinh_url:
-                                  form.getFieldValue("quy_trinh_url"),
-                                ket_qua_chan_doan:
-                                  form.getFieldValue("ket_qua_chan_doan"),
-                                phan_do_loai:
-                                  form.getFieldValue("phan_do_loai"),
-                                icd10: form.getFieldValue("icd10"),
-                                chan_doan_phan_biet: form.getFieldValue(
-                                  "chan_doan_phan_biet"
-                                ),
-                                khuyen_nghi: form.getFieldValue("khuyen_nghi"),
-                                ImageLeftDesc:
-                                  form.getFieldValue("ImageLeftDesc"),
-                                ImageRightDesc:
-                                  form.getFieldValue("ImageRightDesc"),
+                                ["noidung"]: {
+                                  quy_trinh_url:
+                                    form.getFieldValue("quy_trinh_url"),
+                                  ket_qua_chan_doan:
+                                    form.getFieldValue("ket_qua_chan_doan"),
+                                  phan_do_loai:
+                                    form.getFieldValue("phan_do_loai"),
+                                  icd10: form.getFieldValue("icd10"),
+                                  chan_doan_phan_biet: form.getFieldValue(
+                                    "chan_doan_phan_biet"
+                                  ),
+                                  khuyen_nghi:
+                                    form.getFieldValue("khuyen_nghi"),
+                                  ImageLeftDesc:
+                                    form.getFieldValue("ImageLeftDesc"),
+                                  ImageRightDesc:
+                                    form.getFieldValue("ImageRightDesc"),
+                                },
+                                targetLang: "en",
+                                sourceLang: "vi",
                               },
                               {
                                 timeout: 120000,
                               }
                             ),
                             API_CALL.post(
-                              "translate/html-text",
-                              { text: imageDescEditor },
+                              "translate/html-text-google",
+                              {
+                                text: imageDescEditor,
+                                targetLang: "en",
+                                sourceLang: "vi",
+                              },
                               {
                                 timeout: 120000,
                               }
