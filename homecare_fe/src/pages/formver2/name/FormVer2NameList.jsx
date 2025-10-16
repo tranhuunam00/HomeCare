@@ -580,9 +580,9 @@ const FormVer2NameList = () => {
               { required: true, message: "Vui lòng nhập code" },
               { max: 30, message: "Tối đa 30 ký tự theo cú pháp DRAD-" },
               {
-                pattern: /^DRAD-[A-Za-z0-9-]+$/,
+                pattern: /^DRAD-[A-Za-z0-9-]+(\s\[[A-Za-z]{2}\])?$/,
                 message:
-                  "Code phải bắt đầu bằng DRAD- và chỉ gồm A–Z, 0–9, dấu gạch nối (-)",
+                  "Code phải bắt đầu bằng DRAD-, chỉ gồm A–Z, 0–9, dấu gạch nối (-), và có thể có quốc gia dạng [US] hoặc [VN]",
               },
             ]}
           >
