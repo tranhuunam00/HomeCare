@@ -282,7 +282,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
                 <PrintItem
                   label={translateLabel(
                     languageTranslate,
-                    "age",
+                    "patientId",
                     false
                   ).toUpperCase()}
                   value={formSnapshot?.benh_nhan_pid}

@@ -196,6 +196,15 @@ const HomeCareLanding = () => {
                 <Button
                   type="primary"
                   className={styles["homecare__contact"]}
+                  onClick={() => {
+                    toast.info("✨ Tính năng sắp ra mắt!");
+                  }} // hoặc route bạn muốn
+                >
+                  PACS
+                </Button>
+                <Button
+                  type="primary"
+                  className={styles["homecare__contact"]}
                   onClick={() => navigate("/home/form-drad/use")} // hoặc route bạn muốn
                 >
                   ĐỌC KẾT QUẢ

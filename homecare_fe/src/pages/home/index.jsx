@@ -13,6 +13,7 @@ import { Content } from "antd/es/layout/layout";
 import TopHeader from "../../components/TopHeader/TopHeader";
 import { useGlobalAuth } from "../../contexts/AuthContext";
 import { USER_ROLE } from "../../constant/app";
+import { toast } from "react-toastify";
 
 const { Header } = Layout;
 
@@ -60,14 +61,7 @@ const Sidebar = ({ collapsed }) => {
     // },
     user?.id_role === USER_ROLE.ADMIN && {
       key: "form-drad-list",
-      icon: (
-        <Avatar
-          src={
-            "https://png.pngtree.com/png-vector/20221118/ourmid/pngtree-flat-style-audit-icon-with-result-report-on-white-background-vector-png-image_41384148.jpg"
-          }
-          size={40}
-        />
-      ),
+      icon: <Avatar src={"/icons/formver2.png"} size={40} />,
       label: "Mẫu kết quả",
       children: [
         user?.id_role === USER_ROLE.ADMIN && {
@@ -88,37 +82,26 @@ const Sidebar = ({ collapsed }) => {
     },
     {
       key: "/home/form-drad/use",
-      icon: (
-        <Avatar
-          src={"https://cdn-icons-png.flaticon.com/512/3798/3798294.png"}
-          size={40}
-        />
-      ),
+      icon: <Avatar src={"/icons/useNow.png"} size={40} />,
       label: "Đọc kết quả ngay",
     },
     {
+      key: "Pacs",
+      icon: <Avatar src="/icons/pacs.png" size={40} />,
+      label: "PACS",
+      onClick: () => {
+        toast.info("✨ Tính năng sắp ra mắt!");
+      },
+    },
+    {
       key: "/home/doctor-use-form-drad",
-      icon: (
-        <Avatar
-          src={
-            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrtsSi4Yl5RInF7PPT6pDxs0S70ZQe0KeyEg&s"
-          }
-          size={40}
-        />
-      ),
+      icon: <Avatar src={"/icons/ketquadadoc.png"} size={40} />,
       label: "Kết quả đã đọc",
     },
 
     {
       key: "Ứng dụng, tiện ích",
-      icon: (
-        <Avatar
-          src={
-            "https://static.vecteezy.com/system/resources/previews/023/014/146/non_2x/questionnaire-icon-in-modern-and-trendy-style-premium-vector.jpg"
-          }
-          size={40}
-        />
-      ),
+      icon: <Avatar src={"/icons/tienich.png"} size={40} />,
       label: "Ứng dụng, tiện ích",
       children: [
         // { key: "/tirads_nn", label: "Phần mềm D-TIRADS" },
@@ -140,32 +123,17 @@ const Sidebar = ({ collapsed }) => {
     },
     {
       key: "/home/templates-print",
-      icon: (
-        <Avatar
-          src="https://png.pngtree.com/png-clipart/20200224/original/pngtree-printer-icon-for-your-project-png-image_5214091.jpg"
-          size={40}
-        />
-      ),
+      icon: <Avatar src="/icons/printTemplate.png" size={40} />,
       label: "Mẫu in kết quả",
     },
     {
       key: "/home/clinics",
-      icon: (
-        <Avatar
-          src="https://png.pngtree.com/png-clipart/20230922/original/pngtree-school-building-flat-color-ui-icon-facility-elearning-solid-vector-png-image_12822392.png"
-          size={40}
-        />
-      ),
+      icon: <Avatar src="/icons/clinic.png" size={40} />,
       label: "Phòng khám",
     },
     user?.id_role === USER_ROLE.ADMIN && {
       key: "Dịch vụ khám",
-      icon: (
-        <Avatar
-          src="https://benhvientantao.com/wp-content/uploads/2021/12/Icon-tab-dich-vu_KHAM-SUC-KHOE-CHO-DOANH-NGHIEP-1024x1024.png"
-          size={40}
-        />
-      ),
+      icon: <Avatar src="/icons/templateservice.png" size={40} />,
       label: "Dịch vụ khám",
       children: [
         { key: "/home/template_services", label: "Phân hệ" },
@@ -175,35 +143,20 @@ const Sidebar = ({ collapsed }) => {
 
     user?.id_role === USER_ROLE.ADMIN && {
       key: "Liên hệ",
-      icon: (
-        <Avatar
-          src="https://daihocnguyentrai.edu.vn/wp-content/uploads/2021/12/anhlienhe.png"
-          size={40}
-        />
-      ),
+      icon: <Avatar src="/icons/contact.png" size={40} />,
       label: "Liên hệ",
       children: [{ key: "/home/contacts-admin", label: "Tất cả" }],
     },
     user?.id_role === USER_ROLE.ADMIN && {
       key: "Bác sĩ",
-      icon: (
-        <Avatar
-          src="https://img.freepik.com/premium-vector/user-icon-icon_1076610-59410.jpg"
-          size={40}
-        />
-      ),
+      icon: <Avatar src="/icons/doctor.png" size={40} />,
       label: "Bác sĩ",
       children: [{ key: "/home/customers", label: "Danh sách" }],
     },
 
     {
       key: "/home/intergate",
-      icon: (
-        <Avatar
-          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRBsdqP84ptWxCDbHZMpLQeN5AgDF1LUzzH8g"
-          size={40}
-        />
-      ),
+      icon: <Avatar src="/icons/package.png" size={40} />,
       label: "Tính năng",
       children: [
         { key: "/home/subscription", label: "Gói đăng ký" },
@@ -215,7 +168,7 @@ const Sidebar = ({ collapsed }) => {
 
   const handleClick = (e, isReadingForm) => {
     const key = e.key;
-
+    if (e.key === "Pacs") return;
     if (isReadingForm) {
       const newWindow = window.open(key, "_blank");
       if (newWindow) {
