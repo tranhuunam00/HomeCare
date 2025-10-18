@@ -68,7 +68,7 @@ const buildParams = (f) => {
   return params;
 };
 
-const languageTag = (lang) => {
+export const languageTag = (lang) => {
   if (!lang) return "—";
   const map = {
     vi: { color: "green", text: "VI" },

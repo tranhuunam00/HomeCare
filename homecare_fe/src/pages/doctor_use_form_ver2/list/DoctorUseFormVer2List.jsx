@@ -32,6 +32,7 @@ import dayjs from "dayjs";
 import styles from "./DoctorUseFormVer2List.module.scss";
 import { useGlobalAuth } from "../../../contexts/AuthContext";
 import { USER_ROLE } from "../../../constant/app";
+import { languageTag } from "../../formver2/list/FormVer2List";
 
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
@@ -43,6 +44,7 @@ const defaultVisibleKeys = [
   "stt",
   "id",
   "createAt",
+  "language",
   "ten_mau",
   "benh_nhan_ho_ten",
   "benh_nhan_gioi_tinh",
@@ -55,6 +57,7 @@ const defaultVisibleKeys = [
   "formver2",
   "status",
   "actions",
+  "id_root",
 ];
 
 const DEFAULT_FILTERS = {
@@ -172,6 +175,14 @@ export default function DoctorUseFormVer2List() {
         render: (_, r) => r.id_doctor_doctor?.full_name || "—",
       },
       {
+        title: "Ngôn ngữ",
+        dataIndex: "language",
+        key: "language",
+        width: 150,
+        align: "center",
+        render: (lang) => languageTag(lang),
+      },
+      {
         title: "Ngày tạo",
         dataIndex: "createdAt",
         key: "createdAt",
@@ -221,6 +232,13 @@ export default function DoctorUseFormVer2List() {
         width: 120,
         render: (_, r) =>
           r.id_formver2_form_ver2?.ten_mau || r.id_formver2 || "—",
+      },
+
+      {
+        title: "Id Nguồn",
+        dataIndex: "id_root",
+        key: "id_root",
+        width: 120,
       },
 
       {
