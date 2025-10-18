@@ -1022,105 +1022,119 @@ export default function DoctorUseDFormVer2({
                   setLoading(false);
                 }
               }}
-              onTranslate={
-                form.getFieldValue("language") == "vi"
-                  ? () => {
-                      toast.warning("Đang ở chế độ tiếng Việt");
-                    }
-                  : async () => {
-                      try {
-                        setLoading(true);
+              onTranslate={async () => {
+                try {
+                  if (
+                    !window.confirm(
+                      "Bạn có chắc muốn dịch bản ghi này từ tiếng Việt sang tiếng Anh không?"
+                    )
+                  ) {
+                    return;
+                  }
 
-                        if (
-                          !window.confirm(
-                            "Bạn có chắc muốn dịch bản ghi này sang tiếng Anh không?"
-                          )
-                        ) {
-                          return;
+                  const differentLanguageRecords = idEdit
+                    ? await API_CALL.get("/doctor-use-form-ver2", {
+                        params: {
+                          id_root: initialSnap?.apiData?.id_root || idEdit,
+                          includeDeleted: false,
+                          page: 1,
+                          limit: 100,
+                          language: "en",
+                        },
+                      })
+                    : null;
+
+                  const records =
+                    differentLanguageRecords?.data?.data?.items?.filter(
+                      (a) => !a.deletedAt
+                    );
+                  console.log("records", records);
+                  if (records?.length) {
+                    toast.info(
+                      "Bạn đã có bản dịch của SID này bằng tiếng Anh rồi! với id là: " +
+                        records[0]?.id
+                    );
+                    return;
+                  }
+
+                  setLanguageTransslate("en");
+                  form.setFieldValue("language", "en");
+                  setLoading(true);
+
+                  const [translatedAddon, translatedImageDescEditor] =
+                    await Promise.all([
+                      API_CALL.post(
+                        "translate/object-google",
+                        {
+                          ["noidung"]: {
+                            quy_trinh_url: form.getFieldValue("quy_trinh_url"),
+                            ket_qua_chan_doan:
+                              form.getFieldValue("ket_qua_chan_doan"),
+                            phan_do_loai: form.getFieldValue("phan_do_loai"),
+                            icd10: form.getFieldValue("icd10"),
+                            chan_doan_phan_biet: form.getFieldValue(
+                              "chan_doan_phan_biet"
+                            ),
+                            khuyen_nghi: form.getFieldValue("khuyen_nghi"),
+                            ImageLeftDesc: form.getFieldValue("ImageLeftDesc"),
+                            ImageRightDesc:
+                              form.getFieldValue("ImageRightDesc"),
+                          },
+                          targetLang: "en",
+                          sourceLang: "vi",
+                        },
+                        {
+                          timeout: 120000,
                         }
+                      ),
+                      API_CALL.post(
+                        "translate/html-text-google",
+                        {
+                          text: imageDescEditor,
+                          targetLang: "en",
+                          sourceLang: "vi",
+                        },
+                        {
+                          timeout: 120000,
+                        }
+                      ),
+                    ]);
+                  setImageDescEditor(translatedImageDescEditor.data.data);
 
-                        const [translatedAddon, translatedImageDescEditor] =
-                          await Promise.all([
-                            API_CALL.post(
-                              "translate/object-google",
-                              {
-                                ["noidung"]: {
-                                  quy_trinh_url:
-                                    form.getFieldValue("quy_trinh_url"),
-                                  ket_qua_chan_doan:
-                                    form.getFieldValue("ket_qua_chan_doan"),
-                                  phan_do_loai:
-                                    form.getFieldValue("phan_do_loai"),
-                                  icd10: form.getFieldValue("icd10"),
-                                  chan_doan_phan_biet: form.getFieldValue(
-                                    "chan_doan_phan_biet"
-                                  ),
-                                  khuyen_nghi:
-                                    form.getFieldValue("khuyen_nghi"),
-                                  ImageLeftDesc:
-                                    form.getFieldValue("ImageLeftDesc"),
-                                  ImageRightDesc:
-                                    form.getFieldValue("ImageRightDesc"),
-                                },
-                                targetLang: "en",
-                                sourceLang: "vi",
-                              },
-                              {
-                                timeout: 120000,
-                              }
-                            ),
-                            API_CALL.post(
-                              "translate/html-text-google",
-                              {
-                                text: imageDescEditor,
-                                targetLang: "en",
-                                sourceLang: "vi",
-                              },
-                              {
-                                timeout: 120000,
-                              }
-                            ),
-                          ]);
-                        setImageDescEditor(translatedImageDescEditor.data.data);
-
-                        form.setFieldValue(
-                          "quy_trinh_url",
-                          translatedAddon.data.data.quy_trinh_url
-                        );
-                        form.setFieldValue(
-                          "ket_qua_chan_doan",
-                          translatedAddon.data.data.ket_qua_chan_doan
-                        );
-                        form.setFieldValue(
-                          "phan_do_loai",
-                          translatedAddon.data.data.phan_do_loai
-                        );
-                        form.setFieldValue(
-                          "icd10",
-                          translatedAddon.data.data.icd10
-                        );
-                        form.setFieldValue(
-                          "chan_doan_phan_biet",
-                          translatedAddon.data.data.chan_doan_phan_biet
-                        );
-                        form.setFieldValue(
-                          "khuyen_nghi",
-                          translatedAddon.data.data.khuyen_nghi
-                        );
-                        form.setFieldValue(
-                          "ImageLeftDesc",
-                          translatedAddon.data.data.ImageLeftDesc
-                        );
-                        form.setFieldValue(
-                          "ImageRightDesc",
-                          translatedAddon.data.data.ImageRightDesc
-                        );
-                      } catch (error) {
-                      } finally {
-                        setLoading(false);
-                      }
-                    }
-              }
+                  form.setFieldValue(
+                    "quy_trinh_url",
+                    translatedAddon.data.data.quy_trinh_url
+                  );
+                  form.setFieldValue(
+                    "ket_qua_chan_doan",
+                    translatedAddon.data.data.ket_qua_chan_doan
+                  );
+                  form.setFieldValue(
+                    "phan_do_loai",
+                    translatedAddon.data.data.phan_do_loai
+                  );
+                  form.setFieldValue("icd10", translatedAddon.data.data.icd10);
+                  form.setFieldValue(
+                    "chan_doan_phan_biet",
+                    translatedAddon.data.data.chan_doan_phan_biet
+                  );
+                  form.setFieldValue(
+                    "khuyen_nghi",
+                    translatedAddon.data.data.khuyen_nghi
+                  );
+                  form.setFieldValue(
+                    "ImageLeftDesc",
+                    translatedAddon.data.data.ImageLeftDesc
+                  );
+                  form.setFieldValue(
+                    "ImageRightDesc",
+                    translatedAddon.data.data.ImageRightDesc
+                  );
+                } catch (error) {
+                } finally {
+                  setLoading(false);
+                }
+              }}
             />
           )}
 

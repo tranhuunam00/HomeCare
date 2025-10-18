@@ -27,7 +27,7 @@ export default function TranslateListRecords({
             limit: 100,
           },
         });
-        setData(res.data.data?.items || []);
+        setData(res.data.data?.items?.filter((a) => !a.deletedAt) || []);
       } catch (err) {
         toast.error("Không tải được lịch sử thay đổi");
         console.error(err);

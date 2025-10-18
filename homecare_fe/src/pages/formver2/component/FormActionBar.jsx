@@ -18,6 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { useGlobalAuth } from "../../../contexts/AuthContext";
 import { getUsablePackageCodes } from "../../../constant/permission";
 import { USER_ROLE } from "../../../constant/app";
+import { toast } from "react-toastify";
 
 export const KEY_ACTION_BUTTON = {
   reset: "reset",
@@ -108,21 +109,24 @@ export default function FormActionBar({
 
     {
       key: "translate",
-      label: "CHUYỂN BẢN DỊCH",
+      label: "DỊCH NGÔN NGỮ",
       icon: <TranslationOutlined />,
-      onClick: onViewTranslate || emptyF,
+      onClick: () => {
+        toast.info("Sắp ra mắt tính năng dịch đa ngôn ngữ!");
+      },
+      // onClick: onViewTranslate || emptyF,
       disabled:
         !availblePackage.includes("PREMIUM") && user.id_role != USER_ROLE.ADMIN,
     },
 
     {
       key: "translate",
-      label: "DỊCH",
+      label: "DỊCH VI -> EN",
       icon: <TranslationOutlined />,
       onClick: onTranslate || emptyF,
       disabled:
         !isEdit ||
-        languageTranslate == "vi" ||
+        languageTranslate != "vi" ||
         (!availblePackage.includes("PREMIUM") &&
           user.id_role != USER_ROLE.ADMIN),
     },
