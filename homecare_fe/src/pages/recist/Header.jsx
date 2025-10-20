@@ -11,7 +11,7 @@ import {
 export const Header = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState("PHÒNG KHÁM BÁC SĨ GIA ĐÌNH HOMECARE");
-  const [logo, setLogo] = useState("/logo_home_care.jpg");
+  const [logo, setLogo] = useState("/logo_home_care.png");
   const [contact, setContact] = useState({
     phone: "0969268000",
     website: "www.home-care.vn",

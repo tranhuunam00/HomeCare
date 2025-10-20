@@ -29,7 +29,7 @@ const LoginPage = () => {
     }
   };
 
-  const [logo, setLogo] = useState("/logo_home_care.jpg");
+  const [logo, setLogo] = useState("/logo_home_care.png");
 
   return (
     <div

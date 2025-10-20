@@ -57,7 +57,7 @@ const ContactForm = () => {
             marginBottom: 20,
           }}
         >
-          <img src="/logo_home_care.jpg" alt="" width={80} />
+          <img src="/logo_home_care.png" alt="" width={80} />
         </div>
         <Title
           level={3}

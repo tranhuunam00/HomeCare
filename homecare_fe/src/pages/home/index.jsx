@@ -203,7 +203,7 @@ const Sidebar = ({ collapsed }) => {
 
 const Home = () => {
   const [collapsed, setCollapsed] = useState(false);
-  const [logo, setLogo] = useState("/logo_home_care.jpg");
+  const [logo, setLogo] = useState("/logo_home_care.png");
   const navigate = useNavigate();
 
   return (

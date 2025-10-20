@@ -131,7 +131,7 @@ const HomeCareLanding = () => {
         >
           <img
             onClick={() => (window.location.href = "https://home-care.vn/")}
-            src="cropped-logo-png-01-scaled-1.png"
+            src="/logo_home_care.png"
             alt=""
             width={200}
             style={{ cursor: "pointer" }}
@@ -300,7 +300,7 @@ const HomeCareLanding = () => {
           <div className={styles["homecare__agency-left"]}>
             <img
               style={{ width: 100 }}
-              src="/logo_home_care.jpg"
+              src="/logo_home_care.png"
               alt="Rocket launch"
             />
             <h2>D-RADS</h2>
@@ -618,7 +618,7 @@ const HomeCareLanding = () => {
       >
         <Form layout="vertical">
           <div className={styles["homecare__logo"]}>
-            <img src="/logo_home_care.jpg" alt="logo_home_care.jpg" />
+            <img src="/logo_home_care.png" alt="logo_home_care.png" />
           </div>
           <p style={{ marginBottom: 16, fontSize: 14, color: "#555" }}>
             Vui lòng điền thông tin bên dưới để HomeCare có thể liên hệ với bạn

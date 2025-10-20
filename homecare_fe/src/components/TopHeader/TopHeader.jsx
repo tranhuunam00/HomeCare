@@ -82,7 +82,7 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
         style={{ cursor: "pointer" }}
       >
         <img
-          src="/logo_home_care.jpg"
+          src="/logo_home_care.png"
           className={styles.topHeader__logo}
           alt="logo"
         />

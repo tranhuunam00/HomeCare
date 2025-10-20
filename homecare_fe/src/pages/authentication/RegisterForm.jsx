@@ -13,7 +13,7 @@ const RegisterPage = () => {
   const navigate = useNavigate();
   const { showError, showSuccess } = useToast();
   const [showPassword, setShowPassword] = useState(false);
-  const [logo] = useState("/logo_home_care.jpg");
+  const [logo] = useState("/logo_home_care.png");
   const { handleLoginContext } = useGlobalAuth();
 
   const onFinish = async ({ email, password, confirmPassword, fullName }) => {
