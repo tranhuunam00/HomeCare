@@ -59,6 +59,14 @@ const Sidebar = ({ collapsed }) => {
     //     },
     //   ],
     // },
+    {
+      key: "Pacs",
+      icon: <Avatar src="/icons/pacs.png" size={40} />,
+      label: "PACS",
+      onClick: () => {
+        toast.info("✨ Tính năng sắp ra mắt!");
+      },
+    },
     user?.id_role === USER_ROLE.ADMIN && {
       key: "form-drad-list",
       icon: <Avatar src={"/icons/formver2.png"} size={40} />,
@@ -83,16 +91,9 @@ const Sidebar = ({ collapsed }) => {
     {
       key: "/home/form-drad/use",
       icon: <Avatar src={"/icons/useNow.png"} size={40} />,
-      label: "Đọc kết quả ngay",
+      label: "Đọc kết quả",
     },
-    {
-      key: "Pacs",
-      icon: <Avatar src="/icons/pacs.png" size={40} />,
-      label: "PACS",
-      onClick: () => {
-        toast.info("✨ Tính năng sắp ra mắt!");
-      },
-    },
+
     {
       key: "/home/doctor-use-form-drad",
       icon: <Avatar src={"/icons/ketquadadoc.png"} size={40} />,
@@ -249,7 +250,7 @@ const Home = () => {
                     color: "#000",
                   }}
                 >
-                  Radiology
+                  RADIOLOGY
                 </div>
               </div>
             )}
