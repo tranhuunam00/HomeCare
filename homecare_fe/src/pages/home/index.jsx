@@ -249,7 +249,7 @@ const Home = () => {
                     color: "#000",
                   }}
                 >
-                  DAOGROUP
+                  Radiology
                 </div>
               </div>
             )}

@@ -86,9 +86,7 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
           className={styles.topHeader__logo}
           alt="logo"
         />
-        {!collapsed && (
-          <span className={styles.topHeader__title}>HOMECARE</span>
-        )}
+        {!collapsed && <span className={styles.topHeader__title}>D-RADS</span>}
         <MenuOutlined
           style={{ marginLeft: 50 }}
           onClick={toggleSidebar}
