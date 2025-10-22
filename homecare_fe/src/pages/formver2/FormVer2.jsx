@@ -667,7 +667,7 @@ export default function DFormVer2({
                       imageDescHTML: imageDescEditor || "", // lấy từ state của bạn
                     });
 
-                    const url = `https://api.home-care.vn/chatgpt/ask-gemini-recommendation?prompt=${encodeURIComponent(
+                    const url = `https://api.home-care.vn/api/chatgpt/ask-gemini-recommendation?prompt=${encodeURIComponent(
                       prompt
                     )}`;
                     const res = await API_CALL.get(url);

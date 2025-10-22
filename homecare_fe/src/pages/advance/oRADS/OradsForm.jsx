@@ -23,6 +23,7 @@ import {
 
 import { computeORADS } from "./oradsUtils";
 import { ThamKhaoLinkHomeCare } from "../component_common/Thamkhao";
+import API_CALL from "../../../services/axiosClient";
 
 const { Text } = Typography;
 
@@ -398,12 +399,12 @@ export default function OradsForm() {
     }
     try {
       const tableHtml = await genHtml({ isCopy: false });
-      const r = await fetch(
-        `https://api.home-care.vn/chatgpt/ask-gemini-recommendation?prompt=${encodeURIComponent(
-          tableHtml
-        )}`
-      );
-      const data = await r.json();
+      const res = await API_CALL.get(`/chatgpt/ask-gemini-recommendation`, {
+        params: {
+          prompt: encodeURIComponent(tableHtml),
+        },
+      });
+      const data = res.data;
       setAiText(
         data?.data
           ?.replace(/\*\*(.*?)\*\*/g, "$1")

@@ -7,6 +7,7 @@ import styles from "./DipssForm.module.scss";
 import { genAITextToHtml } from "../../../constant/app";
 import AIRecommendationEditor from "../../../components/AIRecommendationEditor";
 import { ThamKhaoLinkHomeCare } from "../component_common/Thamkhao";
+import API_CALL from "../../../services/axiosClient";
 
 const { Title, Text } = Typography;
 
@@ -120,13 +121,12 @@ const DipssForm = () => {
   const onFinish = async (values) => {
     calculateScore(values);
     const tableHtml = await genHtml({ isCopy: false });
-    const res = await fetch(
-      `https://api.home-care.vn/chatgpt/ask-gemini-recommendation?prompt=${encodeURIComponent(
-        tableHtml
-      )}`
-    );
-
-    const data = await res.json();
+    const res = await API_CALL.get(`/chatgpt/ask-gemini-recommendation`, {
+      params: {
+        prompt: encodeURIComponent(tableHtml),
+      },
+    });
+    const data = res.data;
     setGeminiResponse(
       data.data
         ?.replace(/\*\*(.*?)\*\*/g, "$1") // bỏ **bôi đậm**

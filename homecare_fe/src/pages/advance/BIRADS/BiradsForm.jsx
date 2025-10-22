@@ -332,6 +332,7 @@ import { toast } from "react-toastify";
 import { genAITextToHtml, STYLE_COPY } from "../../../constant/app";
 import AIRecommendationEditor from "../../../components/AIRecommendationEditor";
 import { ThamKhaoLinkHomeCare } from "../component_common/Thamkhao";
+import API_CALL from "../../../services/axiosClient";
 
 // ⬇️ Giả định các constants đã được export từ cùng file constants hoặc ở trên scope hiện tại
 // import {
@@ -620,12 +621,12 @@ const BiradsForm = () => {
     try {
       // Chỉ gọi AI; tính điểm/khuyến nghị đã tự động rồi
       const tableHtml = await genHtml({ isCopy: false });
-      const res = await fetch(
-        `https://api.home-care.vn/chatgpt/ask-gemini-recommendation?prompt=${encodeURIComponent(
-          tableHtml
-        )}`
-      );
-      const data = await res.json();
+      const res = await API_CALL.get(`/chatgpt/ask-gemini-recommendation`, {
+        params: {
+          prompt: encodeURIComponent(tableHtml),
+        },
+      });
+      const data = res.data;
       setGeminiResponse(
         data?.data
           ?.replace(/\*\*(.*?)\*\*/g, "$1")
