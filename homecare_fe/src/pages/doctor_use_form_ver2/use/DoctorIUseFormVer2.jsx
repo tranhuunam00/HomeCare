@@ -27,11 +27,9 @@ import PrintPreviewVer2NotDataDiagnose from "../../formver2/PreviewVer2/PrintPre
 import useVietnamAddress from "../../../hooks/useVietnamAddress";
 import API_CALL from "../../../services/axiosClient";
 import {
-  buildFormData,
   buildFormDataDoctorUseFormVer2,
   buildPrompt,
   mapApiToForm,
-  normalizeTablesFromApi,
 } from "../../formver2/utils";
 import {
   sortTemplateServices,
@@ -40,11 +38,11 @@ import {
   USER_ROLE,
 } from "../../../constant/app";
 import { useGlobalAuth } from "../../../contexts/AuthContext";
-import dayjs from "dayjs";
 import HistoryModal from "./items/HistoryModal";
 import ImageWithCaptionInput from "../../products/ImageWithCaptionInput/ImageWithCaptionInput";
 import PatientInfoSection from "./items/PatientInfoForm";
 import TranslateListRecords from "./items/TranslateListRecords";
+import { APPROVAL_STATUS } from "../../../components/ApprovalStatusTag";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -87,13 +85,15 @@ export default function DoctorUseDFormVer2({
   const { id } = useParams();
   const [idEdit, setIdEdit] = useState(id);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [translateOpen, setTranslateOpen] = useState(false);
+
   const [imageList, setImageList] = useState([{}, {}, {}]);
-  console.log("imageList", imageList);
   const [filteredFormVer2Names, setFilteredFormVer2Names] = useState([]);
   const [resetKey, setResetKey] = useState(0);
   const [languageTranslate, setLanguageTransslate] = useState(
     TRANSLATE_LANGUAGE.VI
   );
+  const [status, setStatus] = useState(APPROVAL_STATUS.DRAFT);
 
   const [initialSnap, setInitialSnap] = useState({
     formValues: null,
@@ -190,7 +190,7 @@ export default function DoctorUseDFormVer2({
         setImageList(descImages);
         // fill vào form
         form.setFieldsValue(formValues);
-
+        setStatus(apiData.approval_status);
         setImageLeftUrl(left.url || "");
         setImageRightUrl(right.url || "");
         setImageDescEditor(apiData.imageDescEditor || "");
@@ -350,48 +350,47 @@ export default function DoctorUseDFormVer2({
   }, [form, idFormVer2]);
 
   const onFinish = async (values) => {
-    if (isUse) {
-      try {
-        setLoading(true);
-        const fd = buildFormDataDoctorUseFormVer2(values, {
-          imageDescEditor,
-          id_formver2: idFormVer2 || initialSnap.apiData?.id_formver2,
-          doctor,
-          ngayThucHienISO:
-            initialSnap.apiData?.ngay_thuc_hien || ngayThucHienISO,
-          prev_id: initialSnap?.apiData?.id,
-          id_root: initialSnap?.apiData?.id_root || initialSnap?.apiData?.id,
-          imageList,
-        });
-        const res = await API_CALL.postForm(`/doctor-use-form-ver2`, fd, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-        toast.success("Lưu chế độ sử dụng thành công");
+    if (!isUse) return;
 
-        switch (pendingAction.current) {
-          case "approve":
-            navigate(`/home/form-drad/use`);
-            window.location.reload();
-            break;
-          case "export":
-            toast.success("Đã EXPORT (payload form-data đã gửi)");
-            break;
-          case "print":
-            window.print();
-            break;
-        }
+    try {
+      setLoading(true);
 
-        navigate(
-          `/home/doctor-use-form-drad/detail/${res.data.data.data.data.id}`
-        );
-        window.location.reload();
-      } catch (error) {
-        console.error("error", error);
-        toast.error("Lưu thất bại ", error);
-      } finally {
-        setLoading(false);
+      // 🟢 Nếu không phải "Phê duyệt" → thực hiện lưu form
+      const fd = buildFormDataDoctorUseFormVer2(values, {
+        imageDescEditor,
+        id_formver2: idFormVer2 || initialSnap.apiData?.id_formver2,
+        doctor,
+        ngayThucHienISO: initialSnap.apiData?.ngay_thuc_hien || ngayThucHienISO,
+        prev_id: initialSnap?.apiData?.id,
+        id_root: initialSnap?.apiData?.id_root || initialSnap?.apiData?.id,
+        imageList,
+      });
+
+      const res = await API_CALL.postForm(`/doctor-use-form-ver2`, fd, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      toast.success("Lưu chế độ sử dụng thành công");
+
+      const newId = res?.data?.data?.data?.data?.id;
+
+      switch (pendingAction.current) {
+        case "export":
+          toast.success("Đã EXPORT (payload form-data đã gửi)");
+          break;
+        case "print":
+          window.print();
+          break;
+        default:
+          navigate(`/home/doctor-use-form-drad/detail/${newId}`);
+          setIdEdit(newId);
+          break;
       }
-      return;
+    } catch (error) {
+      console.error("error", error);
+      toast.error("Lưu thất bại");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -884,6 +883,7 @@ export default function DoctorUseDFormVer2({
             !idEdit) && (
             <FormActionBar
               languageTranslate={languageTranslate}
+              approvalStatus={status}
               keys={[
                 KEY_ACTION_BUTTON.reset,
                 KEY_ACTION_BUTTON.save,
@@ -899,6 +899,32 @@ export default function DoctorUseDFormVer2({
                   return;
                 }
                 navigate(`/home/doctor-use-form-drad`);
+              }}
+              onApprove={async () => {
+                try {
+                  if (
+                    !window.confirm(
+                      "Bạn có chắc muốn xác nhận bản ghi này không? Lưu ý khi xác nhận sẽ không thể sửa đổi!"
+                    )
+                  ) {
+                    return;
+                  }
+                  setLoading(true);
+                  await API_CALL.patch(
+                    `/doctor-use-form-ver2/${idEdit}/approve`,
+                    {
+                      approval_status: APPROVAL_STATUS.APPROVED,
+                    }
+                  );
+
+                  toast.success(`Phê duyệt Form #${idEdit} thành công!`);
+                  setStatus(APPROVAL_STATUS.APPROVED);
+                } catch (err) {
+                  console.error("Approve error:", err);
+                  toast.error("Phê duyệt thất bại!");
+                } finally {
+                  setLoading(false);
+                }
               }}
               onAction={(key) => {
                 if (
@@ -1160,7 +1186,7 @@ export default function DoctorUseDFormVer2({
                 textDecoration: "underline",
                 cursor: "pointer",
               }}
-              onClick={() => setHistoryOpen(true)}
+              onClick={() => setTranslateOpen(true)}
             >
               CÁC BẢN DỊCH
             </a>
@@ -1174,6 +1200,7 @@ export default function DoctorUseDFormVer2({
         width={1100}
       >
         <PrintPreviewVer2NotDataDiagnose
+          approvalStatus={status}
           formSnapshot={{
             ...form.getFieldsValue(),
             createdAt: initialSnap?.apiData?.createdAt,
@@ -1209,8 +1236,8 @@ export default function DoctorUseDFormVer2({
       />
 
       <TranslateListRecords
-        open={historyOpen}
-        onClose={() => setHistoryOpen(false)}
+        open={translateOpen}
+        onClose={() => setTranslateOpen(false)}
         idRoot={initialSnap.apiData?.id_root || idEdit}
         idCurrent={idEdit}
         language={languageTranslate}

@@ -63,6 +63,11 @@ export default function HistoryModal({ open, onClose, idRoot, idCurrent }) {
       dataIndex: "prev_id",
       width: 100,
     },
+    {
+      title: "ID gốc",
+      dataIndex: "id_root",
+      width: 100,
+    },
   ];
 
   return (

@@ -120,7 +120,7 @@ export default function PatientInfoSection({
           <Form.Item
             name="benh_nhan_dia_chi_tinh_thanh_pho"
             label={translateLabel(languageTranslate, "province", false)}
-            rules={[{ required: true, message: "Chọn tỉnh/thành phố" }]}
+            // rules={[{ required: true, message: "Chọn tỉnh/thành phố" }]}
             disabled={!isEdit}
           >
             <Select
@@ -146,7 +146,7 @@ export default function PatientInfoSection({
           <Form.Item
             name="benh_nhan_dia_chi_xa_phuong"
             label={translateLabel(languageTranslate, "district", false)}
-            rules={[{ required: true, message: "Chọn xã/phường" }]}
+            // rules={[{ required: true, message: "Chọn xã/phường" }]}
           >
             <Select
               onChange={(val) => {

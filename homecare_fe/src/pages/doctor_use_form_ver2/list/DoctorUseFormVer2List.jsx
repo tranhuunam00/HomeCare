@@ -33,6 +33,7 @@ import styles from "./DoctorUseFormVer2List.module.scss";
 import { useGlobalAuth } from "../../../contexts/AuthContext";
 import { USER_ROLE } from "../../../constant/app";
 import { languageTag } from "../../formver2/list/FormVer2List";
+import { approvalStatusTag } from "../../../components/ApprovalStatusTag";
 
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
@@ -181,6 +182,14 @@ export default function DoctorUseFormVer2List() {
         width: 150,
         align: "center",
         render: (lang) => languageTag(lang),
+      },
+      {
+        title: "Trạng thái phê duyệt",
+        dataIndex: "approval_status",
+        key: "approval_status",
+        width: 120,
+        align: "center",
+        render: (status) => approvalStatusTag(status),
       },
       {
         title: "Ngày tạo",

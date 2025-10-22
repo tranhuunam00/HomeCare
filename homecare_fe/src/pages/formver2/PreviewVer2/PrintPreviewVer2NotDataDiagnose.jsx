@@ -66,6 +66,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
   printTemplate = {},
   doctor = {},
   languageTranslate,
+  approvalStatus,
 }) => {
   const { examParts, templateServices, user, formVer2Names } = useGlobalAuth();
   const LABELS = ADMIN_INFO_LABELS;
@@ -662,6 +663,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
         onPrint={() => handlePrint(printRef)}
         keys={["print"]}
         editId={editId}
+        approvalStatus={approvalStatus}
       />
     </div>
   );

@@ -1,6 +1,6 @@
 // FormActionBar.jsx
 import React from "react";
-import { Button } from "antd";
+import { Button, Tooltip } from "antd";
 import {
   ReloadOutlined,
   SaveOutlined,
@@ -19,6 +19,7 @@ import { useGlobalAuth } from "../../../contexts/AuthContext";
 import { getUsablePackageCodes } from "../../../constant/permission";
 import { USER_ROLE } from "../../../constant/app";
 import { toast } from "react-toastify";
+import { APPROVAL_STATUS } from "../../../components/ApprovalStatusTag";
 
 export const KEY_ACTION_BUTTON = {
   reset: "reset",
@@ -38,6 +39,7 @@ export default function FormActionBar({
   onPrint,
   onReset,
   onPreview,
+  onApprove,
   onGenAi,
   keys,
   onEdit,
@@ -45,7 +47,7 @@ export default function FormActionBar({
   editId,
   onTranslate = undefined,
   onExit = undefined,
-  onViewTranslate,
+  approvalStatus = APPROVAL_STATUS.DRAFT,
   languageTranslate,
 }) {
   const navigate = useNavigate();
@@ -60,31 +62,35 @@ export default function FormActionBar({
       label: "RESET",
       icon: <ReloadOutlined />,
       onClick: onReset ?? emptyF,
+      disabled: approvalStatus == APPROVAL_STATUS.APPROVED,
     },
     {
       key: "save",
       label: "SAVE",
       icon: <SaveOutlined />,
-      disabled: editId && !isEdit,
+      disabled:
+        (editId && !isEdit) || approvalStatus == APPROVAL_STATUS.APPROVED,
     },
     {
       key: "edit",
       label: "EDIT",
       icon: <EditOutlined />,
       onClick: onEdit,
-      disabled: !editId,
+      disabled: !editId || approvalStatus == APPROVAL_STATUS.APPROVED,
     },
     {
       key: "approve",
       label: "APPROVE",
       icon: <CheckCircleOutlined />,
-      disabled: !isEdit || !editId,
+      onClick: onApprove ?? emptyF,
+      disabled: !editId || approvalStatus == APPROVAL_STATUS.APPROVED,
     },
     {
       key: "preview",
       label: "PREVIEW",
       icon: <EyeOutlined />,
       onClick: onPreview ?? emptyF,
+      disabled: approvalStatus != APPROVAL_STATUS.APPROVED,
     },
     {
       key: "export",
@@ -98,6 +104,7 @@ export default function FormActionBar({
       label: "AI GEN",
       icon: <GatewayOutlined />,
       onClick: onGenAi || emptyF,
+      disabled: approvalStatus == APPROVAL_STATUS.APPROVED,
     },
 
     {
@@ -105,6 +112,7 @@ export default function FormActionBar({
       label: "IN",
       icon: <PrinterOutlined />,
       onClick: onPrint || emptyF,
+      disabled: approvalStatus != APPROVAL_STATUS.APPROVED,
     },
 
     {
@@ -128,7 +136,8 @@ export default function FormActionBar({
         !isEdit ||
         languageTranslate != "vi" ||
         (!availblePackage.includes("PREMIUM") &&
-          user.id_role != USER_ROLE.ADMIN),
+          user.id_role != USER_ROLE.ADMIN) ||
+        approvalStatus == APPROVAL_STATUS.APPROVED,
     },
     {
       key: "exit",
@@ -144,18 +153,42 @@ export default function FormActionBar({
     },
   ];
 
-  const genButtonC = (it) => (
-    <Button
-      key={it.key}
-      className={`${styles.btn} ${styles[it.key]}`}
-      icon={it.icon}
-      block
-      onClick={() => (it.onClick ? it.onClick() : onAction?.(it.key))}
-      disabled={it.disabled}
-    >
-      {it.label}
-    </Button>
-  );
+  const genButtonC = (it) => {
+    const disabledReason = (() => {
+      if (it.key === "save" && approvalStatus == APPROVAL_STATUS.APPROVED)
+        return "Không thể lưu vì mẫu đã được phê duyệt";
+      if (it.key === "edit" && approvalStatus == APPROVAL_STATUS.APPROVED)
+        return "Không thể chỉnh sửa mẫu đã được phê duyệt";
+      if (it.key === "preview" && approvalStatus !== APPROVAL_STATUS.APPROVED)
+        return "Chỉ xem được khi mẫu đã được phê duyệt";
+      if (it.key === "translate" && !availblePackage.includes("PREMIUM"))
+        return "Chức năng dịch chỉ khả dụng cho gói PREMIUM";
+      if (it.disabled) return "Chức năng hiện không khả dụng";
+      return null;
+    })();
+
+    const btn = (
+      <Button
+        key={it.key}
+        className={`${styles.btn} ${styles[it.key]}`}
+        icon={it.icon}
+        block
+        onClick={() => (it.onClick ? it.onClick() : onAction?.(it.key))}
+        disabled={it.disabled}
+      >
+        {it.label}
+      </Button>
+    );
+
+    // 🧩 Tooltip chỉ bọc nếu có disabledReason
+    return disabledReason ? (
+      <Tooltip title={disabledReason} placement="top">
+        <span style={{ display: "block" }}>{btn}</span>
+      </Tooltip>
+    ) : (
+      btn
+    );
+  };
   return (
     <div className={styles.actionBar}>
       <div className={styles.actionGrid}>
