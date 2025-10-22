@@ -239,18 +239,21 @@ const FraminghamForm = () => {
     const score = calculateFraminghamScore(values);
     const risk = getFraminghamRisk(score, values.gender === "male");
     const tableHtml = await genHtml({ isCopy: false });
-    const res = await API_CALL.get(`/chatgpt/ask-gemini-recommendation`, {
-      params: {
-        prompt: encodeURIComponent(tableHtml),
-      },
-    });
-    const data = res.data;
-    setGeminiResponse(
-      data.data
-        ?.replace(/\*\*(.*?)\*\*/g, "$1") // bỏ **bôi đậm**
-        .replace(/^\* /gm, "• ") // dòng bắt đầu bằng "* " → "• "
-        .replace(/\n{2,}/g, "\n\n")
-    );
+    try {
+      const res = await API_CALL.get(`/chatgpt/ask-gemini-recommendation`, {
+        params: {
+          prompt: encodeURIComponent(tableHtml),
+        },
+      });
+      const data = res.data;
+      setGeminiResponse(
+        data.data
+          ?.replace(/\*\*(.*?)\*\*/g, "$1") // bỏ **bôi đậm**
+          .replace(/^\* /gm, "• ") // dòng bắt đầu bằng "* " → "• "
+          .replace(/\n{2,}/g, "\n\n")
+      );
+    } catch (error) {}
+
     setResult(
       `Tổng điểm: ${score} → Nguy cơ mắc bệnh tim mạch trong 10 năm: ${risk}`
     );

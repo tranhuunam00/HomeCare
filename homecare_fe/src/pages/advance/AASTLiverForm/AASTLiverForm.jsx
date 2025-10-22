@@ -157,19 +157,20 @@ const AASTLiverForm = () => {
     try {
       const max = computeMaxGrade();
       const tableHtml = await genHtml({ isCopy: false });
-
-      const res = await API_CALL.get(`/chatgpt/ask-gemini-recommendation`, {
-        params: {
-          prompt: encodeURIComponent(tableHtml),
-        },
-      });
-      const data = res.data;
-      setGeminiResponse(
-        data.data
-          ?.replace(/\*\*(.*?)\*\*/g, "$1")
-          .replace(/^\* /gm, "• ")
-          .replace(/\n{2,}/g, "\n\n")
-      );
+      try {
+        const res = await API_CALL.get(`/chatgpt/ask-gemini-recommendation`, {
+          params: {
+            prompt: encodeURIComponent(tableHtml),
+          },
+        });
+        const data = res.data;
+        setGeminiResponse(
+          data.data
+            ?.replace(/\*\*(.*?)\*\*/g, "$1")
+            .replace(/^\* /gm, "• ")
+            .replace(/\n{2,}/g, "\n\n")
+        );
+      } catch (error) {}
 
       setMaxGrade(max);
     } catch (err) {

@@ -621,18 +621,20 @@ const BiradsForm = () => {
     try {
       // Chỉ gọi AI; tính điểm/khuyến nghị đã tự động rồi
       const tableHtml = await genHtml({ isCopy: false });
-      const res = await API_CALL.get(`/chatgpt/ask-gemini-recommendation`, {
-        params: {
-          prompt: encodeURIComponent(tableHtml),
-        },
-      });
-      const data = res.data;
-      setGeminiResponse(
-        data?.data
-          ?.replace(/\*\*(.*?)\*\*/g, "$1")
-          .replace(/^\* /gm, "• ")
-          .replace(/\n{2,}/g, "\n\n") || ""
-      );
+      try {
+        const res = await API_CALL.get(`/chatgpt/ask-gemini-recommendation`, {
+          params: {
+            prompt: encodeURIComponent(tableHtml),
+          },
+        });
+        const data = res.data;
+        setGeminiResponse(
+          data?.data
+            ?.replace(/\*\*(.*?)\*\*/g, "$1")
+            .replace(/^\* /gm, "• ")
+            .replace(/\n{2,}/g, "\n\n") || ""
+        );
+      } catch (error) {}
     } catch (e) {
       toast.error("Không gọi được AI. Vui lòng thử lại!");
     }
