@@ -13,6 +13,7 @@ const RegisterPage = () => {
   const navigate = useNavigate();
   const { showError, showSuccess } = useToast();
   const [showPassword, setShowPassword] = useState(false);
+  const [agreePolicy, setAgreePolicy] = useState(false);
   const [logo] = useState("/logo_home_care.png");
   const { handleLoginContext } = useGlobalAuth();
 
@@ -23,7 +24,7 @@ const RegisterPage = () => {
     }
 
     try {
-      const res = await API_CALL.post("/auth/register", {
+      await API_CALL.post("/auth/register", {
         email,
         password,
         id_role: USER_ROLE.DOCTOR,
@@ -35,10 +36,6 @@ const RegisterPage = () => {
       const message = err?.response?.data?.message || "Đăng ký thất bại!";
       showError(message);
     }
-  };
-
-  const handleGoogleLogin = () => {
-    showSuccess("Chức năng đăng nhập bằng Google đang phát triển...");
   };
 
   return (
@@ -60,6 +57,7 @@ const RegisterPage = () => {
         }}
       ></div>
 
+      {/* Bên phải: Form đăng ký */}
       <div
         style={{
           display: "flex",
@@ -144,11 +142,35 @@ const RegisterPage = () => {
               </Checkbox>
             </Form.Item>
 
-            <Form.Item>
+            {/* ✅ Checkbox chính sách */}
+            <Form.Item style={{ marginBottom: 0 }}>
+              <Checkbox
+                checked={agreePolicy}
+                onChange={(e) => setAgreePolicy(e.target.checked)}
+              >
+                Tôi đồng ý với{" "}
+                <a
+                  href="/privacy-policy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Chính sách bảo mật và điều khoản sử dụng
+                </a>{" "}
+                của D-RADS.
+              </Checkbox>
+            </Form.Item>
+
+            <Form.Item style={{ marginTop: 12 }}>
               <Button
                 type="primary"
                 htmlType="submit"
-                style={{ width: "100%", borderRadius: 5 }}
+                disabled={!agreePolicy}
+                style={{
+                  width: "100%",
+                  borderRadius: 5,
+                  opacity: agreePolicy ? 1 : 0.6,
+                  cursor: agreePolicy ? "pointer" : "not-allowed",
+                }}
               >
                 Đăng ký
               </Button>

@@ -1,0 +1,37 @@
+.privacyWrapper {
+  padding: 32px;
+  background: #f5f7fa;
+  min-height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.privacyCard {
+  max-width: 1000px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.title {
+  color: #1677ff;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+ul {
+  margin-left: 20px;
+  padding-left: 8px;
+
+  li {
+    margin-bottom: 8px;
+    line-height: 1.7;
+  }
+}
+
+a {
+  color: #1677ff;
+}

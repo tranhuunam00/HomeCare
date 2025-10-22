@@ -67,6 +67,7 @@ import UserPackagesList from "./pages/packages/userPackages/UserPackagesList";
 import { getUsablePackageCodes } from "./constant/permission";
 import { USER_ROLE } from "./constant/app";
 import STORAGE from "./services/storage";
+import PrivacyPolicy from "./components/policy/PrivacyPolicy";
 
 function App() {
   useAuthInitializer();
@@ -149,6 +150,7 @@ function App() {
         <Route path="/login" element={<LoginForm />} />
         <Route path="/register" element={<RegisterForm />} />
         <Route path="/contact" element={<ContactForm />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
 
         <Route
           path="/home"

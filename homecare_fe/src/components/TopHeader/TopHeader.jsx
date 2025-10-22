@@ -1,27 +1,15 @@
 import React, { useState } from "react";
-import { Input, Avatar, Tooltip, Badge, Dropdown, Menu, Drawer } from "antd";
-import {
-  MenuOutlined,
-  BellOutlined,
-  UserOutlined,
-  CloudDownloadOutlined,
-  AppstoreOutlined,
-} from "@ant-design/icons";
-
+import { Input, Avatar, Tooltip, Dropdown, Menu, Drawer, Divider } from "antd";
+import { MenuOutlined, AppstoreOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-
 import styles from "./TopHeader.module.scss";
-
 import { QRCodeCanvas } from "qrcode.react";
 import { useGlobalAuth } from "../../contexts/AuthContext";
-import { USER_ROLE, USER_ROLE_ID } from "../../constant/app";
+import { USER_ROLE_ID } from "../../constant/app";
 import useToast from "../../hooks/useToast";
-import { toast } from "react-toastify";
-import SidebarMenu from "../Sidebar";
 import NotificationBell from "../../pages/notifications/NotificationBell";
 
 const qrValue = `https://www.daogroup.vn/`;
-
 const currentEndpont = `${
   import.meta.env.VITE_MAIN_ENDPOINT || "http://localhost:5173"
 }`;
@@ -29,13 +17,13 @@ const currentEndpont = `${
 const TopHeader = ({ collapsed, toggleSidebar }) => {
   const [rightDrawerVisible, setRightDrawerVisible] = useState(false);
   const { user, doctor, handleLogoutGlobal } = useGlobalAuth();
-  const { showSuccess, showError, showWarning } = useToast();
+  const { showWarning } = useToast();
   const [selectedMenu, setSelectedMenu] = useState("profile");
+  const navigate = useNavigate();
 
   const showRightDrawer = () => setRightDrawerVisible(true);
   const closeRightDrawer = () => setRightDrawerVisible(false);
 
-  const navigate = useNavigate();
   const handleMenuClick = ({ key }) => {
     switch (key) {
       case "account":
@@ -45,7 +33,6 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
         showWarning("Sắp ra mắt");
         break;
       case "logout":
-        console.log("Đăng xuất");
         handleLogoutGlobal();
         break;
       case "connect":
@@ -68,16 +55,14 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
       <Menu.Divider />
       <Menu.Item key="account">Quản Lý Tài Khoản</Menu.Item>
       <Menu.Item key="logout">Đăng Xuất</Menu.Item>
-      <Menu.Divider />
     </Menu>
   );
 
   return (
     <div className={styles.topHeader}>
+      {/* --- Logo & Toggle --- */}
       <div
-        onClick={() => {
-          window.open(currentEndpont);
-        }}
+        onClick={() => window.open(currentEndpont)}
         className={styles.topHeader__left}
         style={{ cursor: "pointer" }}
       >
@@ -94,23 +79,20 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
         />
       </div>
 
+      {/* --- Right side --- */}
       <div className={styles.topHeader__right}>
         <Input
           placeholder="Chi tiết eg. nhập tối thiểu 3 ký tự"
           className={styles.topHeader__search}
         />
+
+        {/* Avatar Dropdown */}
         <Dropdown
           overlay={userMenu}
           placement="bottomRight"
           trigger={["click"]}
         >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
+          <div style={{ display: "flex", alignItems: "center" }}>
             <Avatar
               size={36}
               style={{
@@ -124,27 +106,28 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
             />
             <div style={{ marginLeft: 8, fontWeight: "bold", fontSize: 12 }}>
               {[
-                doctor.academic_title ? `${doctor.academic_title}.` : null,
-                doctor.degree ? `${doctor.degree}.` : null,
-                doctor.full_name,
+                doctor?.academic_title ? `${doctor.academic_title}.` : null,
+                doctor?.degree ? `${doctor.degree}.` : null,
+                doctor?.full_name,
               ]
                 .filter(Boolean)
                 .join(" ")}
             </div>
           </div>
         </Dropdown>
+
+        {/* Bell notification */}
         <Tooltip title="Thông báo">
           <NotificationBell />
         </Tooltip>
 
-        {/* Avatar Dropdown giữ nguyên ở đây nếu có */}
-
-        {/* Nút menu bên phải */}
+        {/* App icon mở Drawer */}
         <AppstoreOutlined
           onClick={showRightDrawer}
           className={styles.topHeader__rightToggle}
         />
 
+        {/* --- Drawer --- */}
         <Drawer
           title={null}
           placement="right"
@@ -156,30 +139,55 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
         >
           <div className={styles.drawerHeader}>
             <div>
-              <div className={styles.customerName}>doctor.home-care.vn</div>
-              <div className={styles.version}>ver. 1</div>
+              <div className={styles.customerName}>D-RADS</div>
+              <div className={styles.version}>ver. 1.0</div>
             </div>
             <div className={styles.drawerClose} onClick={closeRightDrawer}>
               ✕
             </div>
           </div>
-          {/* <SidebarMenu
-            onSelect={(key) => {
-              setSelectedMenu(key);
-              navigate(`/${key}`); // ✅ Điều hướng nội bộ, không mở tab mới
-            }}
-            selected={selectedMenu}
-          /> */}
 
+          {/* QR liên hệ */}
           <div className={styles.qrContact}>
             <QRCodeCanvas value={qrValue} size={128} level="H" includeMargin />
             <p>
               Liên hệ <strong>0961 766 816</strong>
             </p>
             <div className={styles.socials}>
-              <a href="#">Zalo</a> · <a href="#">Facebook</a> ·
-              <a href="https://www.daogroup.vn/">Website</a>
+              <a href="#">Zalo</a> · <a href="#">Facebook</a> ·{" "}
+              <a href="https://www.daogroup.vn/" target="_blank">
+                Website
+              </a>
             </div>
+          </div>
+
+          <Divider />
+
+          {/* ✅ Thêm phần Chính sách & Điều khoản */}
+          <div className={styles.policyLinks}>
+            <h4 style={{ fontWeight: 600, marginBottom: 8 }}>
+              Tài liệu & pháp lý
+            </h4>
+            <ul style={{ listStyle: "none", padding: 0, lineHeight: 1.8 }}>
+              <li>
+                <a
+                  href="/privacy-policy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  🔒 Chính sách bảo mật dữ liệu
+                </a>
+              </li>
+
+              <li>
+                <a
+                  href="mailto:daogroupltd@gmail.com"
+                  rel="noopener noreferrer"
+                >
+                  📧 Liên hệ hỗ trợ: daogroupltd@gmail.com
+                </a>
+              </li>
+            </ul>
           </div>
         </Drawer>
       </div>
@@ -187,15 +195,4 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
   );
 };
 
-const DrawerItem = ({ icon, title, desc, isLink }) => (
-  <div style={{ display: "flex", gap: 12, marginBottom: 12 }}>
-    <span style={{ fontSize: 20 }}>{icon}</span>
-    <div>
-      <div style={{ fontWeight: 500 }}>{title}</div>
-      <div style={{ fontSize: 13, color: isLink ? "#1677ff" : "#666" }}>
-        {desc}
-      </div>
-    </div>
-  </div>
-);
 export default TopHeader;
