@@ -320,6 +320,16 @@ const HomeCareLanding = () => {
             <img src="/daogroup.png" alt="logo" />
             <p> Kiến tạo cuộc sống số - Digital for life</p>
             <p>www.daogroup.vn</p>
+            <p>
+              <a
+                href="/privacy-policy"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: "white" }}
+              >
+                Chính sách phát triển
+              </a>
+            </p>
           </div>
 
           <div className={styles["homecare__footer-col"]}>
