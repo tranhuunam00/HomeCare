@@ -11,7 +11,7 @@ import {
   Spin,
   Modal,
 } from "antd";
-import { FilterOutlined } from "@ant-design/icons";
+import { FilterOutlined, SearchOutlined } from "@ant-design/icons";
 import API_CALL from "../../services/axiosClient";
 import styles from "./CustomerList.module.scss";
 import { useNavigate } from "react-router-dom";
@@ -20,37 +20,58 @@ import { toast } from "react-toastify";
 const { Option } = Select;
 
 const CustomerList = () => {
+  const navigate = useNavigate();
+
+  // Dữ liệu chính
   const [doctors, setDoctors] = useState([]);
+  const [clinics, setClinics] = useState([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
-  const [searchName, setSearchName] = useState("");
-  const [clinicFilter, setClinicFilter] = useState();
-  const [statusFilter, setStatusFilter] = useState();
-  const [clinics, setClinics] = useState([]);
+
+  // Bộ lọc “thật” (dùng khi ấn tìm kiếm)
+  const [filters, setFilters] = useState({
+    searchName: "",
+    clinicFilter: null,
+    statusFilter: null,
+    advisorFilter: null,
+  });
+
+  // Bộ lọc “giả” (người dùng nhập, chưa tìm kiếm)
+  const [pendingFilters, setPendingFilters] = useState({
+    searchName: "",
+    clinicFilter: null,
+    statusFilter: null,
+    advisorFilter: null,
+  });
+
+  // Phân quyền
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [selectedClinics, setSelectedClinics] = useState([]);
   const [permissionModalOpen, setPermissionModalOpen] = useState(false);
-  const navigate = useNavigate();
 
-  console.log(clinics);
+  // Lấy tên phòng khám
   const getClinicName = (clinicId) => {
     const found = clinics.find((clinic) => clinic.id == clinicId);
     return found ? found.name : "Không rõ";
   };
 
+  // ======= FETCH DATA =======
   const fetchDoctors = async () => {
     setLoading(true);
     try {
-      const res = await API_CALL.get("/doctor", {
-        params: {
-          full_name: searchName,
-          id_clinic: clinicFilter,
-          status: statusFilter,
-          page,
-          limit: 10,
-        },
-      });
+      // Chỉ thêm các filter có giá trị thật sự
+      const params = {
+        page,
+        limit: 10,
+      };
+      if (filters.searchName) params.full_name = filters.searchName;
+      if (filters.clinicFilter != null) params.id_clinic = filters.clinicFilter;
+      if (filters.statusFilter != null) params.status = filters.statusFilter;
+      if (filters.advisorFilter != null)
+        params.is_advisor = filters.advisorFilter;
+
+      const res = await API_CALL.get("/doctor", { params });
       setDoctors(res.data.data.data);
       setTotal(res.data.data.count);
     } catch (error) {
@@ -72,6 +93,7 @@ const CustomerList = () => {
     }
   };
 
+  // ======= ACTIONS =======
   const openPermissionModal = async (doctor) => {
     setSelectedDoctor(doctor);
     try {
@@ -83,7 +105,7 @@ const CustomerList = () => {
           value: item.id_clinic,
         };
       });
-      setSelectedClinics(clinicItems); // dùng dạng label-value object
+      setSelectedClinics(clinicItems);
       setPermissionModalOpen(true);
     } catch (err) {
       toast.error("Không thể lấy danh sách phân quyền hiện tại");
@@ -91,12 +113,6 @@ const CustomerList = () => {
   };
 
   const closePermissionModal = () => {
-    if (selectedClinics.length > 0) {
-      const confirmClose = window.confirm(
-        "Bạn đang chỉnh sửa phân quyền. Bạn có chắc chắn muốn thoát không?"
-      );
-      if (!confirmClose) return;
-    }
     setPermissionModalOpen(false);
     setSelectedDoctor(null);
     setSelectedClinics([]);
@@ -123,20 +139,53 @@ const CustomerList = () => {
     }
   };
 
-  useEffect(() => {
-    fetchDoctors();
-  }, [searchName, clinicFilter, statusFilter, page]);
+  const toggleAdvisor = async (doctor) => {
+    const newStatus = !doctor.is_advisor;
+    const confirmMsg = newStatus
+      ? `Bạn có chắc muốn đặt bác sĩ "${doctor.full_name}" làm cố vấn?`
+      : `Bạn có chắc muốn hủy trạng thái cố vấn của bác sĩ "${doctor.full_name}"?`;
+    if (!window.confirm(confirmMsg)) return;
 
+    try {
+      await API_CALL.put(`/doctor/${doctor.id}/advisor`, {
+        is_advisor: newStatus,
+      });
+      toast.success(
+        newStatus ? "Đã đặt làm cố vấn" : "Đã hủy trạng thái cố vấn"
+      );
+      fetchDoctors();
+    } catch (err) {
+      toast.error("Cập nhật trạng thái cố vấn thất bại");
+    }
+  };
+
+  // ======= EFFECTS =======
   useEffect(() => {
     fetchClinics();
   }, []);
 
+  useEffect(() => {
+    fetchDoctors();
+  }, [page, filters]);
+
+  // ======= TABLE COLUMNS =======
   const columns = [
     { title: "ID", dataIndex: "id", key: "id", width: 60, align: "center" },
     { title: "Họ tên", dataIndex: "full_name", key: "full_name" },
     { title: "Số điện thoại", dataIndex: "phone_number", key: "phone_number" },
     { title: "Giới tính", dataIndex: "gender", key: "gender" },
     { title: "Ngày sinh", dataIndex: "dob", key: "dob" },
+    {
+      title: "Cố vấn",
+      dataIndex: "is_advisor",
+      key: "is_advisor",
+      align: "center",
+      render: (val) => (
+        <span style={{ color: val ? "blue" : "gray" }}>
+          {val ? "Cố vấn" : "—"}
+        </span>
+      ),
+    },
     {
       title: "Phòng khám",
       key: "id_clinic",
@@ -156,9 +205,18 @@ const CustomerList = () => {
       title: "Hành động",
       key: "actions",
       render: (_, record) => (
-        <Button onClick={() => navigate(`/home/profile/${record.id}`)}>
-          Chỉnh sửa
-        </Button>
+        <div style={{ display: "flex", gap: 8 }}>
+          <Button onClick={() => navigate(`/home/profile/${record.id}`)}>
+            Chỉnh sửa
+          </Button>
+          <Button
+            type={record.is_advisor ? "default" : "primary"}
+            danger={record.is_advisor}
+            onClick={() => toggleAdvisor(record)}
+          >
+            {record.is_advisor ? "Hủy cố vấn" : "Làm cố vấn"}
+          </Button>
+        </div>
       ),
     },
     {
@@ -170,9 +228,11 @@ const CustomerList = () => {
     },
   ];
 
+  // ======= UI =======
   return (
     <div className={styles.CustomerList}>
       <h2 className={styles.title}>Danh sách bác sĩ</h2>
+
       <Row gutter={16} className={styles.filterGroup}>
         <Col span={24}>
           <Card
@@ -184,45 +244,123 @@ const CustomerList = () => {
             size="small"
           >
             <Row gutter={16}>
-              <Col span={6}>
+              <Col span={5}>
                 <label>Tên bác sĩ</label>
                 <Input
-                  value={searchName}
-                  onChange={(e) => setSearchName(e.target.value)}
+                  value={pendingFilters.searchName}
+                  onChange={(e) =>
+                    setPendingFilters({
+                      ...pendingFilters,
+                      searchName: e.target.value,
+                    })
+                  }
                 />
               </Col>
-              <Col span={6}>
+
+              <Col span={5}>
                 <label>Phòng khám</label>
-                <Input
-                  value={clinicFilter}
-                  onChange={(e) => setClinicFilter(e.target.value)}
-                />
-              </Col>
-              <Col span={6}>
-                <label>Trạng thái</label>
                 <Select
                   style={{ width: "100%" }}
                   placeholder="Tất cả"
                   allowClear
-                  value={statusFilter}
-                  onChange={(value) => setStatusFilter(value)}
+                  value={pendingFilters.clinicFilter}
+                  onChange={(value) =>
+                    setPendingFilters({
+                      ...pendingFilters,
+                      clinicFilter: value ?? null,
+                    })
+                  }
+                  optionFilterProp="children"
+                  showSearch
                 >
+                  <Option value={null}>Tất cả</Option>
+                  {clinics.map((c) => (
+                    <Option key={c.id} value={c.id}>
+                      {c.name}
+                    </Option>
+                  ))}
+                </Select>
+              </Col>
+
+              <Col span={5}>
+                <label>Trạng thái cố vấn</label>
+                <Select
+                  style={{ width: "100%" }}
+                  placeholder="Tất cả"
+                  allowClear
+                  value={pendingFilters.advisorFilter}
+                  onChange={(value) =>
+                    setPendingFilters({
+                      ...pendingFilters,
+                      advisorFilter: value === undefined ? null : value,
+                    })
+                  }
+                >
+                  <Option value={null}>Tất cả</Option>
+                  <Option value={true}>Là cố vấn</Option>
+                  <Option value={false}>Không phải cố vấn</Option>
+                </Select>
+              </Col>
+
+              <Col span={5}>
+                <label>Trạng thái hoạt động</label>
+                <Select
+                  style={{ width: "100%" }}
+                  placeholder="Tất cả"
+                  allowClear
+                  value={pendingFilters.statusFilter}
+                  onChange={(value) =>
+                    setPendingFilters({
+                      ...pendingFilters,
+                      statusFilter: value === undefined ? null : value,
+                    })
+                  }
+                >
+                  <Option value={null}>Tất cả</Option>
                   <Option value={1}>Hoạt động</Option>
                   <Option value={0}>Ngừng hoạt động</Option>
                 </Select>
+              </Col>
+
+              <Col
+                span={4}
+                style={{
+                  display: "flex",
+                  alignItems: "end",
+                  justifyContent: "flex-end",
+                }}
+              >
+                <Button
+                  type="primary"
+                  icon={<SearchOutlined />}
+                  onClick={() => {
+                    setPage(1);
+                    setFilters({ ...pendingFilters });
+                  }}
+                >
+                  Tìm kiếm
+                </Button>
               </Col>
             </Row>
           </Card>
         </Col>
       </Row>
+
       <Spin spinning={loading}>
         <Table
           columns={columns}
           dataSource={doctors}
           rowKey="id"
-          pagination={{ current: page, pageSize: 10, total, onChange: setPage }}
+          pagination={{
+            current: page,
+            pageSize: 10,
+            total,
+            onChange: setPage,
+          }}
         />
       </Spin>
+
+      {/* Modal phân quyền */}
       <Modal
         title={`Phân quyền bác sĩ: ${selectedDoctor?.full_name}`}
         open={permissionModalOpen}
@@ -238,9 +376,7 @@ const CustomerList = () => {
           style={{ width: "100%" }}
           placeholder="Chọn các phòng khám"
           value={selectedClinics}
-          onChange={(values) => {
-            setSelectedClinics(values);
-          }}
+          onChange={(values) => setSelectedClinics(values)}
           optionFilterProp="children"
         >
           {clinics.map((clinic) => (

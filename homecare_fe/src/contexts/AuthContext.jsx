@@ -18,6 +18,7 @@ export const GlobalAuthProvider = ({ children }) => {
   ]);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [doctors, setDoctors] = useState([]);
 
   const handleLoginContext = ({ token, user, doctor }) => {
     storage.saveAuth({ token, user, doctor });
@@ -61,6 +62,8 @@ export const GlobalAuthProvider = ({ children }) => {
         setNotifications,
         unreadCount,
         setUnreadCount,
+        doctors,
+        setDoctors,
       }}
     >
       {children}

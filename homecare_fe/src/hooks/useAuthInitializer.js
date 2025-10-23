@@ -31,6 +31,8 @@ const useAuthInitializer = () => {
     setFormVer2Names,
     setUserPackages,
     setPrintTemplateGlobal,
+    doctors,
+    setDoctors,
   } = useGlobalAuth();
   const { showWarning } = useToast();
 
@@ -78,6 +80,18 @@ const useAuthInitializer = () => {
       )
         .then((res) => {
           setFormVer2Names(res.data?.data.items);
+        })
+        .catch(() => {
+          showWarning("Không thể tải danh sách form ver2");
+        });
+
+      fetchWithRetry(() =>
+        API_CALL.get(`/doctor`, {
+          params: { page: 1, limit: 5000, is_advisor: true },
+        })
+      )
+        .then((res) => {
+          setDoctors(res.data.data.data);
         })
         .catch(() => {
           showWarning("Không thể tải danh sách form ver2");
