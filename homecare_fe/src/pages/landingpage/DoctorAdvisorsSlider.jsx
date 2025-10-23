@@ -1,11 +1,10 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import Slider from "react-slick";
 import { Avatar } from "antd";
 import styles from "./DoctorAdvisorsSlider.module.scss";
 
 const DoctorAdvisorsSlider = ({ doctors = [] }) => {
-  const [hoveredDoctor, setHoveredDoctor] = useState(null);
-  const hideTimer = useRef(null);
+  const [selectedDoctor, setSelectedDoctor] = useState(null);
 
   const hasMany = doctors.length > 4;
 
@@ -34,13 +33,12 @@ const DoctorAdvisorsSlider = ({ doctors = [] }) => {
     ],
   };
 
-  const handleEnter = (doc) => {
-    clearTimeout(hideTimer.current);
-    setHoveredDoctor(doc);
+  const handleClickDoctor = (doc) => {
+    setSelectedDoctor(doc);
   };
 
-  const handleLeave = () => {
-    hideTimer.current = setTimeout(() => setHoveredDoctor(null), 200);
+  const handleClosePopup = () => {
+    setSelectedDoctor(null);
   };
 
   return (
@@ -50,8 +48,7 @@ const DoctorAdvisorsSlider = ({ doctors = [] }) => {
           <div
             key={index}
             className={styles["doctor-card"]}
-            onMouseEnter={() => handleEnter(doc)}
-            onMouseLeave={handleLeave}
+            onClick={() => handleClickDoctor(doc)}
           >
             <div className={styles["avatar-wrapper"]}>
               <Avatar
@@ -77,34 +74,45 @@ const DoctorAdvisorsSlider = ({ doctors = [] }) => {
         ))}
       </Slider>
 
-      {/* ✅ Custom popup trung tâm, không dùng antd Modal */}
-      {hoveredDoctor && (
+      {/* ✅ Popup hiển thị khi click */}
+      {selectedDoctor && (
         <div
           className={styles["hover-popup"]}
-          onMouseEnter={() => clearTimeout(hideTimer.current)}
-          onMouseLeave={() => setHoveredDoctor(null)}
+          onClick={handleClosePopup} // 👉 click ra ngoài để tắt
         >
-          <div className={styles["popup-content"]}>
+          <div
+            className={styles["popup-content"]}
+            onClick={(e) => e.stopPropagation()} // 👉 chặn click bên trong popup làm tắt
+          >
             <Avatar
               size={160}
-              src={hoveredDoctor.avatar_url || "/default_doctor.png"}
-              style={{ border: "3px solid #04580f", marginBottom: 20 }}
+              src={selectedDoctor.avatar_url || "/default_doctor.png"}
+              style={{
+                border: "3px solid #04580f",
+                marginBottom: 20,
+              }}
             />
             <h3>
               {[
-                hoveredDoctor.academic_title
-                  ? `${hoveredDoctor.academic_title}.`
+                selectedDoctor.academic_title
+                  ? `${selectedDoctor.academic_title}.`
                   : null,
-                hoveredDoctor.degree ? `${hoveredDoctor.degree}.` : null,
-                hoveredDoctor.full_name,
+                selectedDoctor.degree ? `${selectedDoctor.degree}.` : null,
+                selectedDoctor.full_name,
               ]
                 .filter(Boolean)
                 .join(" ")}
             </h3>
             <p className={styles["popup-desc"]}>
-              {hoveredDoctor.description ||
+              {selectedDoctor.description ||
                 "Chưa có mô tả chi tiết về bác sĩ này."}
             </p>
+            <button
+              className={styles["popup-close"]}
+              onClick={handleClosePopup}
+            >
+              Đóng
+            </button>
           </div>
         </div>
       )}

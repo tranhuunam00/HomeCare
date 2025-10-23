@@ -271,7 +271,7 @@ const HomeCareLanding = () => {
                 "Sở hữu hơn 3.000 mẫu kết quả bình thường và bệnh lý trong các lĩnh vực Siêu âm, X Quang, MSCT, MRI, Điện quang can thiệp, Thăm dò chức năng…",
                 "Nội dung chuyên môn được chuẩn hóa theo các phân loại quốc tế Lung RADS, TIRADS, BIRADS, ORADS, TNM, CTSI, AAST, ARCO, FICAT….",
                 "Thiết kế chuẩn hóa theo Thông tư 32 Bộ y tế, phân loại mã bệnh quốc tế ICD-10 để dễ dàng đồng bộ với yêu cầu và quy chuẩn của hệ thống BHYT",
-                "Đa ngôn ngữ : Tiếng Việt, Tiếng Anh, Tiếng Pháp,..",
+                "Tích hợp AI dịch kết quả từ tiếng Việt sang hơn 30 ngôn ngữ khác",
                 "Dễ dàng tích hợp với các hệ thống HIS/RIS/PACS/eHOS/EMR…",
               ].map((text, index) => (
                 <motion.li
@@ -327,7 +327,7 @@ const HomeCareLanding = () => {
                 rel="noopener noreferrer"
                 style={{ color: "white" }}
               >
-                Chính sách phát triển
+                Chính sách bảo mật | Private policy
               </a>
             </p>
           </div>

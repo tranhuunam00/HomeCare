@@ -323,7 +323,7 @@ const Profile = () => {
                   </Form.Item>
                 </Col>
               </Row>
-              <Form.Item label="Sơ yếu lý lịch" name="description">
+              <Form.Item label="Lý lịch khoa học" name="description">
                 {isEditing ? (
                   <Input.TextArea />
                 ) : (

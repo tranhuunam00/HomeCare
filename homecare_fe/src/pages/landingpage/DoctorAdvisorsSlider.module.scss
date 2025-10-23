@@ -1,77 +1,58 @@
-.doctor-slider {
-  width: 85%;
-  margin: 0 auto;
-  overflow: visible !important;
-}
-
-.doctor-card {
-  text-align: center;
-  padding: 10px;
-  box-sizing: border-box;
-
-  .avatar-wrapper {
-    position: relative;
-    display: inline-block;
-    transition: transform 0.3s ease;
-
-    &:hover {
-      transform: scale(1.05);
-    }
-  }
-
-  .doctor-name {
-    margin-top: 10px;
-    font-weight: bold;
-    font-size: 14px;
-  }
-}
-
-/* ✅ Popup trung tâm custom */
 .hover-popup {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 2000;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(15px);
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
-  padding: 32px 24px;
-  animation: fadeInZoom 0.25s ease forwards;
-  width: 380px;
-  max-width: 90vw;
-  text-align: center;
-  cursor: default;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  animation: fadeIn 0.3s ease;
 }
 
 .popup-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  h3 {
-    font-size: 20px;
-    font-weight: 600;
-    color: #04580f;
-    margin-bottom: 10px;
-  }
-
-  .popup-desc {
-    font-size: 14px;
-    line-height: 1.6;
-    color: #333;
-    white-space: pre-line;
-  }
+  background: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  text-align: center;
+  width: 500px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  animation: scaleIn 0.25s ease;
 }
 
-@keyframes fadeInZoom {
+.popup-desc {
+  margin-top: 10px;
+  color: #444;
+  font-size: 15px;
+  line-height: 1.5;
+  text-align: start;
+}
+
+.popup-close {
+  margin-top: 20px;
+  background: #04580f;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+@keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translate(-50%, -50%) scale(0.9);
   }
   to {
     opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
   }
 }
