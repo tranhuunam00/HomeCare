@@ -90,7 +90,7 @@ export default function FormActionBar({
       label: "PREVIEW",
       icon: <EyeOutlined />,
       onClick: onPreview ?? emptyF,
-      disabled: approvalStatus != APPROVAL_STATUS.APPROVED,
+      disabled: approvalStatus,
     },
     {
       key: "export",
@@ -133,11 +133,10 @@ export default function FormActionBar({
       icon: <TranslationOutlined />,
       onClick: onTranslate || emptyF,
       disabled:
-        !isEdit ||
+        !editId ||
         languageTranslate != "vi" ||
         (!availblePackage.includes("PREMIUM") &&
-          user.id_role != USER_ROLE.ADMIN) ||
-        approvalStatus == APPROVAL_STATUS.APPROVED,
+          user.id_role != USER_ROLE.ADMIN),
     },
     {
       key: "exit",

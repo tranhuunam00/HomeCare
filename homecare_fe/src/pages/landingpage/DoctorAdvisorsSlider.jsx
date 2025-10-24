@@ -6,12 +6,12 @@ import styles from "./DoctorAdvisorsSlider.module.scss";
 const DoctorAdvisorsSlider = ({ doctors = [] }) => {
   const [selectedDoctor, setSelectedDoctor] = useState(null);
 
-  const hasMany = doctors.length > 4;
+  const hasMany = doctors.length > 5;
 
   const settings = {
     dots: false,
     infinite: hasMany,
-    slidesToShow: hasMany ? 4 : doctors.length || 1,
+    slidesToShow: hasMany ? 5 : doctors.length || 1,
     slidesToScroll: 1,
     autoplay: hasMany,
     autoplaySpeed: 3000,
@@ -20,15 +20,15 @@ const DoctorAdvisorsSlider = ({ doctors = [] }) => {
     responsive: [
       {
         breakpoint: 1024,
-        settings: { slidesToShow: Math.min(doctors.length, 4) },
+        settings: { slidesToShow: Math.min(doctors.length, 5) },
       },
       {
         breakpoint: 768,
-        settings: { slidesToShow: Math.min(doctors.length, 3) },
+        settings: { slidesToShow: Math.min(doctors.length, 4) },
       },
       {
         breakpoint: 480,
-        settings: { slidesToShow: Math.min(doctors.length, 2) },
+        settings: { slidesToShow: Math.min(doctors.length, 3) },
       },
     ],
   };

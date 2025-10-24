@@ -373,6 +373,8 @@ export default function DoctorUseDFormVer2({
       toast.success("Lưu chế độ sử dụng thành công");
 
       const newId = res?.data?.data?.data?.data?.id;
+      setIdEdit(newId);
+      setStatus(false);
 
       switch (pendingAction.current) {
         case "export":
@@ -383,7 +385,6 @@ export default function DoctorUseDFormVer2({
           break;
         default:
           navigate(`/home/doctor-use-form-drad/detail/${newId}`);
-          setIdEdit(newId);
           break;
       }
     } catch (error) {
@@ -1052,7 +1053,7 @@ export default function DoctorUseDFormVer2({
                 try {
                   if (
                     !window.confirm(
-                      "Bạn có chắc muốn dịch bản ghi này từ tiếng Việt sang tiếng Anh không?"
+                      "Bạn có chắc muốn dịch bản ghi này từ tiếng Việt sang tiếng Anh không? Hệ thống sẽ tự động tạo bản dịch mới."
                     )
                   ) {
                     return;
@@ -1073,12 +1074,12 @@ export default function DoctorUseDFormVer2({
                   const records =
                     differentLanguageRecords?.data?.data?.items?.filter(
                       (a) => !a.deletedAt
-                    );
+                    ) || [];
                   console.log("records", records);
+
                   if (records?.length) {
                     toast.info(
-                      "Bạn đã có bản dịch của SID này bằng tiếng Anh rồi! với id là: " +
-                        records[0]?.id
+                      `Bạn đã có bản dịch của SID này bằng tiếng Anh rồi! với ID: ${records[0].id}`
                     );
                     return;
                   }
@@ -1109,9 +1110,7 @@ export default function DoctorUseDFormVer2({
                           targetLang: "en",
                           sourceLang: "vi",
                         },
-                        {
-                          timeout: 120000,
-                        }
+                        { timeout: 120000 }
                       ),
                       API_CALL.post(
                         "translate/html-text-google",
@@ -1120,9 +1119,7 @@ export default function DoctorUseDFormVer2({
                           targetLang: "en",
                           sourceLang: "vi",
                         },
-                        {
-                          timeout: 120000,
-                        }
+                        { timeout: 120000 }
                       ),
                     ]);
                   setImageDescEditor(translatedImageDescEditor.data.data);
@@ -1156,7 +1153,67 @@ export default function DoctorUseDFormVer2({
                     "ImageRightDesc",
                     translatedAddon.data.data.ImageRightDesc
                   );
+
+                  // 🟢 3. Build lại giá trị đã dịch
+                  const values = {
+                    ...form.getFieldsValue(true),
+                    language: "en",
+                    quy_trinh_url: translatedAddon.data.data.quy_trinh_url,
+                    ket_qua_chan_doan:
+                      translatedAddon.data.data.ket_qua_chan_doan,
+                    phan_do_loai: translatedAddon.data.data.phan_do_loai,
+                    icd10: translatedAddon.data.data.icd10,
+                    chan_doan_phan_biet:
+                      translatedAddon.data.data.chan_doan_phan_biet,
+                    khuyen_nghi: translatedAddon.data.data.khuyen_nghi,
+                    ImageLeftDesc: translatedAddon.data.data.ImageLeftDesc,
+                    ImageRightDesc: translatedAddon.data.data.ImageRightDesc,
+                  };
+
+                  // 🟢 4. Dùng buildFormData nhưng bỏ ID gốc để tạo bản mới
+                  const fd = buildFormDataDoctorUseFormVer2(values, {
+                    id_formver2: idFormVer2 || initialSnap.apiData?.id_formver2,
+                    doctor,
+                    imageDescEditor: translatedImageDescEditor.data.data,
+                    ngayThucHienISO: toISODate(),
+                    imageList,
+                  });
+
+                  fd.delete("prev_id");
+                  fd.delete("id_root");
+
+                  fd.append(
+                    "id_root",
+                    initialSnap?.apiData?.id_root ||
+                      initialSnap?.apiData?.id ||
+                      idEdit
+                  );
+
+                  toast.info("Đang lưu bản dịch tiếng Anh...");
+                  const res = await API_CALL.postForm(
+                    `/doctor-use-form-ver2`,
+                    fd,
+                    {
+                      headers: { "Content-Type": "multipart/form-data" },
+                    }
+                  );
+
+                  const newId = res?.data?.data?.data?.data?.id;
+                  if (newId) {
+                    toast.success(
+                      `Đã dịch và tạo bản mới thành công (ID: ${newId})!`
+                    );
+                    setStatus(false);
+                    setIdEdit(newId);
+                    navigate(`/home/doctor-use-form-drad/detail/${newId}`);
+                  } else {
+                    toast.warning(
+                      "Dịch thành công nhưng không nhận được ID mới!"
+                    );
+                  }
                 } catch (error) {
+                  console.error("Translate & Save Error:", error);
+                  toast.error("Lỗi khi dịch hoặc lưu bản dịch!");
                 } finally {
                   setLoading(false);
                 }
