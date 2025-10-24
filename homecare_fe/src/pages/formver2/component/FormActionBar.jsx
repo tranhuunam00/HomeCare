@@ -90,7 +90,7 @@ export default function FormActionBar({
       label: "PREVIEW",
       icon: <EyeOutlined />,
       onClick: onPreview ?? emptyF,
-      disabled: approvalStatus,
+      disabled: !editId,
     },
     {
       key: "export",
@@ -158,8 +158,8 @@ export default function FormActionBar({
         return "Không thể lưu vì mẫu đã được phê duyệt";
       if (it.key === "edit" && approvalStatus == APPROVAL_STATUS.APPROVED)
         return "Không thể chỉnh sửa mẫu đã được phê duyệt";
-      if (it.key === "preview" && approvalStatus !== APPROVAL_STATUS.APPROVED)
-        return "Chỉ xem được khi mẫu đã được phê duyệt";
+      if (it.key === "print" && approvalStatus !== APPROVAL_STATUS.APPROVED)
+        return "Chỉ in được khi mẫu đã được phê duyệt";
       if (it.key === "translate" && !availblePackage.includes("PREMIUM"))
         return "Chức năng dịch chỉ khả dụng cho gói PREMIUM";
       if (it.disabled) return "Chức năng hiện không khả dụng";
