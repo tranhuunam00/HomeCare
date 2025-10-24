@@ -84,18 +84,6 @@ const useAuthInitializer = () => {
         .catch(() => {
           showWarning("Không thể tải danh sách form ver2");
         });
-
-      fetchWithRetry(() =>
-        API_CALL.get(`/doctor`, {
-          params: { page: 1, limit: 5000, is_advisor: true },
-        })
-      )
-        .then((res) => {
-          setDoctors(res.data.data.data);
-        })
-        .catch(() => {
-          showWarning("Không thể tải danh sách form ver2");
-        });
     }
   }, []);
   useEffect(() => {
@@ -127,6 +115,20 @@ const useAuthInitializer = () => {
           showWarning("Không thể tải setUserPackages");
         });
   }, [doctor?.id_clinic]);
+
+  useEffect(() => {
+    fetchWithRetry(() =>
+      API_CALL.get(`/doctor`, {
+        params: { page: 1, limit: 5000, is_advisor: true },
+      })
+    )
+      .then((res) => {
+        setDoctors(res.data.data.data);
+      })
+      .catch(() => {
+        showWarning("Không thể tải danh sách form ver2");
+      });
+  }, []);
 };
 
 export default useAuthInitializer;

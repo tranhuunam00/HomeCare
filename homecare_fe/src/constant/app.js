@@ -229,6 +229,7 @@ export const DEGREES = [
   { label: "BSCKI", value: "BSCKI" },
   { label: "BSCKII", value: "BSCKII" },
   { label: "Cử nhân", value: "CN" },
+  { label: "Bác sĩ", value: "BS" },
   { label: "Không có", value: "" },
 ];
 
