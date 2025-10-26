@@ -117,7 +117,7 @@ export default function FormActionBar({
 
     {
       key: "translate",
-      label: "DỊCH NGÔN NGỮ",
+      label: "DỊCH KHÁC",
       icon: <TranslationOutlined />,
       onClick: () => {
         toast.info("Sắp ra mắt tính năng dịch đa ngôn ngữ!");
@@ -129,7 +129,7 @@ export default function FormActionBar({
 
     {
       key: "translate",
-      label: "DỊCH VI -> EN",
+      label: "DỊCH ENGLISH",
       icon: <TranslationOutlined />,
       onClick: onTranslate || emptyF,
       disabled:
