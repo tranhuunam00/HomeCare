@@ -110,7 +110,7 @@ export default function PatientInfoSection({
             name="benh_nhan_sid"
             required
           >
-            <Input disabled={true} placeholder="PID-DATE-TIME" />
+            <Input disabled={true} placeholder="Mã số phiếu SID" />
           </Form.Item>
         </Col>
       </Row>
