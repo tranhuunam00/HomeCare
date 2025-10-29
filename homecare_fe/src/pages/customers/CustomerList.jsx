@@ -73,7 +73,7 @@ const CustomerList = () => {
 
       const res = await API_CALL.get("/doctor", { params });
       setDoctors(res.data.data.data);
-      setTotal(res.data.data.count);
+      setTotal(res.data.data.total);
     } catch (error) {
       toast.error("Lỗi khi lấy danh sách bác sĩ");
       console.error(error);
