@@ -6,81 +6,57 @@ import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
 const ImageWithCaptionInput = ({
   value = [],
   onChange,
-  valueTrans = [],
-  onChangeTrans,
   links,
   setLinks = () => {},
   max,
   disabled,
 }) => {
   const [images, setImages] = useState(value);
-  const [imagesTrans, setImagesTrans] = useState(valueTrans);
 
   useEffect(() => {
     if (value) setImages(value);
-    if (valueTrans) setImagesTrans(valueTrans);
-  }, [value, valueTrans]);
+  }, [value]);
 
   const handleAddImage = () => {
     const newList = [...images, { url: "", caption: "" }];
-    const newListTrans = [...imagesTrans, { url: "", caption: "" }];
 
     setImages(newList);
-    setImagesTrans(newListTrans);
 
     onChange?.(newList);
-    onChangeTrans?.(newListTrans);
   };
 
   const handleImageChange = (file, index) => {
     const preview = URL.createObjectURL(file);
     const newList = [...images];
-    const newListTrans = [...imagesTrans];
 
     newList[index].file = file;
 
-    newListTrans[index] = { ...newListTrans[index] };
-    newListTrans[index].file = file;
-
     newList[index].url = preview;
-    newListTrans[index].url = preview;
 
     newList[index].rawUrl = "";
-    newListTrans[index].rawUrl = "";
 
     setImages(newList);
-    setImagesTrans(newListTrans);
 
     onChange?.(newList);
-    onChangeTrans?.(newListTrans);
     return false;
   };
 
   const handleCaptionChange = (e, index) => {
     const newList = [...images];
-    const newListTrans = [...imagesTrans];
 
-    newListTrans[index] = { ...newListTrans[index] };
     newList[index].caption = e.target.value;
-    newListTrans[index].caption = e.target.value;
 
     setImages(newList);
-    setImagesTrans(newListTrans);
 
     onChange?.(newList);
-    onChangeTrans?.(newListTrans);
   };
 
   const handleRemove = (index) => {
     const newList = images.filter((_, i) => i !== index);
-    const newListTrans = imagesTrans.filter((_, i) => i !== index);
 
-    newListTrans[index] = { ...newListTrans[index] };
     setImages(newList);
-    setImagesTrans(newListTrans);
 
     onChange?.(newList);
-    onChangeTrans?.(newListTrans);
   };
 
   return (

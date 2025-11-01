@@ -1,11 +1,8 @@
 import React from "react";
 import { Card } from "antd";
 import dayjs from "dayjs";
-import {
-  ADMIN_INFO_LABELS,
-  ADMIN_INFO_LABELS_EN,
-  LANGUAGES,
-} from "../../../constant/app";
+import { LANGUAGES } from "../../../constant/app";
+import { LABEL_MULTI_LANGUAGE_JSON } from "../../../constant/translate.title";
 
 const PrintPreview = ({
   printRef,
@@ -21,8 +18,7 @@ const PrintPreview = ({
   lang = LANGUAGES.vi,
   serviceName,
 }) => {
-  const LABELS_ADDON =
-    lang == LANGUAGES.vi ? ADMIN_INFO_LABELS : ADMIN_INFO_LABELS_EN;
+  const LABELS_ADDON = LABEL_MULTI_LANGUAGE_JSON[lang];
   return (
     <div ref={printRef}>
       <Card bordered={false} className={`a4-page`}>

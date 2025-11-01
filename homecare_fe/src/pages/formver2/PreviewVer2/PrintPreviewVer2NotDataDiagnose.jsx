@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { Button, Card, Divider } from "antd";
 
-import { ADMIN_INFO_LABELS, translateLabel } from "../../../constant/app";
+import { translateLabel } from "../../../constant/app";
 
 import styles from "./PrintPreviewVer2NotDataDiagnose.module.scss";
 import { PrinterOutlined } from "@ant-design/icons";
@@ -24,8 +24,6 @@ const KVRow = ({ label, value }) => (
     <div className={styles.value}>{value ?? "-"}</div>
   </div>
 );
-
-const LABELS_ADDON = ADMIN_INFO_LABELS;
 
 const PrintItem = ({ label, value }) => (
   <div
@@ -52,14 +50,10 @@ const PrintItem = ({ label, value }) => (
 /* ---------- Main ---------- */
 const PrintPreviewVer2NotDataDiagnose = ({
   formSnapshot,
-  tablesSnapshot,
-  selectedExamPart,
   selectedTemplateService,
   ImageLeftUrl,
   ImageRightUrl,
   imageDescEditor,
-  initialSnap,
-  currentFormVer2Name,
   editId,
   isUse = false,
   imageList = [],
@@ -68,8 +62,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
   languageTranslate,
   approvalStatus,
 }) => {
-  const { examParts, templateServices, user, formVer2Names } = useGlobalAuth();
-  const LABELS = ADMIN_INFO_LABELS;
+  const { templateServices, user } = useGlobalAuth();
   const printRef = useRef();
   const { provinces, wards, setSelectedProvince } = useVietnamAddress();
   useEffect(() => {

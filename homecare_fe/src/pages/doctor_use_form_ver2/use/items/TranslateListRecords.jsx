@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Modal, Table } from "antd";
+import { Modal, Table, Button } from "antd";
 import dayjs from "dayjs";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 import API_CALL from "../../../../services/axiosClient";
 import { languageTag } from "../../../formver2/list/FormVer2List";
 
@@ -13,6 +14,7 @@ export default function TranslateListRecords({
 }) {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!open || !idRoot) return;
@@ -75,6 +77,23 @@ export default function TranslateListRecords({
       title: "Prev ID",
       dataIndex: "prev_id",
       width: 100,
+    },
+    {
+      title: "Hành động",
+      key: "action",
+      align: "center",
+      width: 150,
+      render: (_, record) => (
+        <Button
+          type="link"
+          onClick={() => {
+            onClose();
+            navigate(`/home/doctor-use-form-drad/detail/${record.id}`);
+          }}
+        >
+          Xem chi tiết
+        </Button>
+      ),
     },
   ];
 

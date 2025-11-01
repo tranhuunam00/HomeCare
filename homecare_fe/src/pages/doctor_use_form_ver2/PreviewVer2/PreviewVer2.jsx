@@ -2,13 +2,13 @@ import React, { useEffect, useMemo } from "react";
 import { Button, Card } from "antd";
 import dayjs from "dayjs";
 
-import { ADMIN_INFO_LABELS } from "../../../constant/app";
-import { calculateAge, handlePrint } from "../../formver2/utils";
+import { calculateAge } from "../../formver2/utils";
 import useVietnamAddress from "../../../hooks/useVietnamAddress";
 
 import styles from "./PrintPreviewVer2.module.scss";
 import { PrinterOutlined } from "@ant-design/icons";
 import TablesSnapshotPreview from "./TablesSnapshotPreview";
+import { LABEL_MULTI_LANGUAGE_JSON } from "../../../constant/translate.title";
 
 const SectionTitle = ({ children }) => (
   <h3 className={styles.sectionTitle}>{children}</h3>
@@ -31,7 +31,7 @@ const PrintPreviewVer2 = ({
   selectedExamPart,
   selectedTemplateService,
 }) => {
-  const LABELS = ADMIN_INFO_LABELS;
+  const LABELS = LABEL_MULTI_LANGUAGE_JSON["vi"];
   console.log("tablesSnapshot", tablesSnapshot);
 
   const { provinces, wards, setSelectedProvince } = useVietnamAddress();

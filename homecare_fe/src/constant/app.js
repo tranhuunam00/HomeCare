@@ -1,3 +1,5 @@
+import { TRANSLATE_MULTI_REPORT } from "./translate.report";
+
 export const ROLE = {
   admin: "ADMIN",
   user: "USER",
@@ -85,56 +87,6 @@ export function extractDynamicFieldsFromHtml(htmlString) {
 
   return result;
 }
-
-export const ADMIN_INFO_LABELS = {
-  full_name: "Họ và tên",
-  gender: "Giới tính",
-  dob: "Năm sinh",
-  age: "Tuổi",
-  country: "Quốc gia",
-  province: "Tỉnh/Thành phố",
-  district: "Quận/Huyện",
-  ward: "Xã/Phường",
-  address: "Số nhà",
-  phoneNumber: "Điện thoại",
-  email: "Email",
-  symptoms: "Triệu chứng",
-  progress: "Diễn biến",
-  medical_history: "Tiền sử bệnh",
-  compare_link: "So sánh",
-  old_date: "Có kết quả cũ",
-  section_title: "THÔNG TIN HÀNH CHÍNH",
-  image_section: "HÌNH ẢNH MINH HỌA",
-  doctor: "BÁC SĨ THỰC HIỆN",
-  time: "Thời gian hoàn thành",
-  digital_signature: "Chữ ký số",
-  Medical_test_result: "PHIẾU KẾT QUẢ",
-};
-
-export const ADMIN_INFO_LABELS_EN = {
-  full_name: "Full Name",
-  gender: "Gender",
-  dob: "Year of Birth",
-  age: "Age",
-  country: "Country",
-  province: "Province/City",
-  district: "District",
-  ward: "Ward/Commune",
-  address: "Address",
-  phoneNumber: "Phone Number",
-  email: "Email",
-  symptoms: "Symptoms",
-  progress: "Progress",
-  medical_history: "Medical History",
-  compare_link: "Comparison",
-  old_date: "Previous Result",
-  section_title: "ADMINISTRATIVE INFORMATION",
-  image_section: "ILLUSTRATIVE IMAGES",
-  doctor: "DOCTOR",
-  time: "Time",
-  digital_signature: "Digital signature",
-  Medical_test_result: "MEDICAL REPORT",
-};
 
 export const LANGUAGES = {
   vi: "vi",
@@ -238,89 +190,8 @@ export const TRANSLATE_LANGUAGE = {
   ENG: "en",
 };
 
-// languageConstants.js
-export const FORM_LABELS = {
-  vi: {
-    administrativeInfo: "THÔNG TIN HÀNH CHÍNH",
-    fullName: "Họ tên",
-    gender: "Giới tính",
-    age: "Tuổi",
-    nationality: "Quốc tịch",
-    phone: "Điện thoại",
-    email: "Email",
-    patientId: "Mã số bệnh nhân PID",
-    sid: "Mã số SID",
-    province: "Tỉnh/Thành phố",
-    district: "Phường/Xã",
-    address: "Địa chỉ",
-    clinical: "Lâm sàng",
-    department: "Phân hệ",
-    division: "Chuyên khoa",
-    codeForm: "Mã số định danh mẫu",
-    bodyPart: "Bộ phận",
-    resultTemplate: "Mẫu đọc kết quả",
-    resultPrint: "Mẫu in kết quả",
-    language: "Ngôn ngữ",
-    formName: "Tên mẫu",
-    formResult: "Kết luận của mẫu",
-    createdAt: "Ngày thực hiện",
-    createdUser: "Người thực hiện",
-
-    // --- Radiology / Report sections ---
-    technicalProtocol: "QUY TRÌNH KỸ THUẬT",
-    imagingFindings: "MÔ TẢ HÌNH ẢNH",
-    impression: "KẾT LUẬN, CHẨN ĐOÁN",
-    icd10Classification: "Phân loại ICD-10",
-    gradingClassification: "Phân độ, phân loại",
-    differentialDiagnosis: "Chẩn đoán phân biệt",
-    recommendationsCounseling: "KHUYẾN NGHỊ & TƯ VẤN",
-    illustrativeImages: "HÌNH ẢNH MINH HỌA",
-    doctor: "BÁC SỸ THỰC HIỆN",
-    time: "Thời gian",
-    Result_Report: "Phiếu kết quả",
-  },
-  en: {
-    Result_Report: "Result Report",
-    administrativeInfo: "Administrative Information",
-    time: "Completed time",
-    fullName: "Full Name",
-    gender: "Gender",
-    age: "Age",
-    nationality: "Nationality",
-    phone: "Phone",
-    email: "Email",
-    patientId: "Patient ID (PID)",
-    sid: "Code SID",
-    province: "Province/City",
-    district: "Ward/District",
-    address: "Address",
-    clinical: "Clinical Symptoms",
-    department: "Department",
-    division: "Department",
-    codeForm: "Code",
-    formResult: "Form Result",
-
-    bodyPart: "Body Part",
-    resultTemplate: "Result Template",
-    resultPrint: "Result Print",
-    language: "Language",
-    formName: "Form name",
-    createdAt: "Created date",
-    createdUser: "Created user",
-
-    // --- Radiology / Report sections ---
-    technicalProtocol: "Technical Protocol",
-    imagingFindings: "Imaging Findings",
-    impression: "Conclusion, Impression",
-    icd10Classification: "ICD-10 Classification",
-    gradingClassification: "Grading / Classification",
-    differentialDiagnosis: "Differential Diagnosis",
-    recommendationsCounseling: "Recommendations & Counseling",
-    illustrativeImages: "Illustrative Images",
-  },
-};
 export const translateLabel = (lang = "vi", key, uppercase = true) => {
-  let text = FORM_LABELS?.[lang]?.[key] || key;
+  let text = TRANSLATE_MULTI_REPORT?.[lang]?.[key] || key;
   return uppercase ? text.toUpperCase() : text;
 };
 

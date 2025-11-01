@@ -43,18 +43,77 @@ import ImageWithCaptionInput from "../../products/ImageWithCaptionInput/ImageWit
 import PatientInfoSection from "./items/PatientInfoForm";
 import TranslateListRecords from "./items/TranslateListRecords";
 import { APPROVAL_STATUS } from "../../../components/ApprovalStatusTag";
+import { handleTranslateToLanguage, toISODate } from "./util";
 
 const { Title } = Typography;
 const { TextArea } = Input;
 const { Option } = Select;
 
 /* ============== CONSTS ============== */
-const LANGUAGE_OPTIONS = [
-  { label: "VI", value: "vi" },
-  { label: "EN", value: "en" },
+export const LANGUAGE_OPTIONS = [
+  { label: "Vietnamese (Việt Nam)", value: "vi" },
+  { label: "English", value: "en" },
+  { label: "Chinese (Simplified)", value: "zh" },
+  { label: "Chinese (Traditional)", value: "zh-TW" },
+  { label: "Japanese", value: "ja" },
+  { label: "Korean", value: "ko" },
+  { label: "French", value: "fr" },
+  { label: "German", value: "de" },
+  { label: "Spanish", value: "es" },
+  { label: "Italian", value: "it" },
+  { label: "Portuguese", value: "pt" },
+  { label: "Russian", value: "ru" },
+  { label: "Dutch", value: "nl" },
+  { label: "Polish", value: "pl" },
+  { label: "Swedish", value: "sv" },
+  { label: "Norwegian", value: "no" },
+  { label: "Danish", value: "da" },
+  { label: "Finnish", value: "fi" },
+  { label: "Greek", value: "el" },
+  { label: "Czech", value: "cs" },
+  { label: "Hungarian", value: "hu" },
+  { label: "Romanian", value: "ro" },
+  { label: "Bulgarian", value: "bg" },
+  { label: "Slovak", value: "sk" },
+  { label: "Slovenian", value: "sl" },
+  { label: "Croatian", value: "hr" },
+  { label: "Ukrainian", value: "uk" },
+  { label: "Serbian", value: "sr" },
+  { label: "Lithuanian", value: "lt" },
+  { label: "Latvian", value: "lv" },
+  { label: "Estonian", value: "et" },
+  { label: "Spanish (Latin America)", value: "es-419" },
+  { label: "Portuguese (Brazil)", value: "pt-BR" },
+  { label: "Haitian Creole", value: "ht" },
+  { label: "Arabic", value: "ar" },
+  { label: "Persian (Farsi)", value: "fa" },
+  { label: "Turkish", value: "tr" },
+  { label: "Hebrew", value: "he" },
+  { label: "Urdu", value: "ur" },
+  { label: "Hindi", value: "hi" },
+  { label: "Bengali", value: "bn" },
+  { label: "Tamil", value: "ta" },
+  { label: "Telugu", value: "te" },
+  { label: "Malayalam", value: "ml" },
+  { label: "Punjabi", value: "pa" },
+  { label: "Thai", value: "th" },
+  { label: "Indonesian", value: "id" },
+  { label: "Malay", value: "ms" },
+  { label: "Khmer (Cambodia)", value: "km" },
+  { label: "Lao", value: "lo" },
+  { label: "Burmese (Myanmar)", value: "my" },
+  { label: "Filipino (Tagalog)", value: "fil" },
+  { label: "Swahili", value: "sw" },
+  { label: "Amharic", value: "am" },
+  { label: "Afrikaans", value: "af" },
+  { label: "Yoruba", value: "yo" },
+  { label: "Igbo", value: "ig" },
+  { label: "Hausa", value: "ha" },
+  { label: "Icelandic", value: "is" },
+  { label: "Irish (Gaelic)", value: "ga" },
+  { label: "Maltese", value: "mt" },
+  { label: "Welsh (Cymraeg)", value: "cy" },
 ];
-
-const toISODate = (d = new Date()) => new Date(d).toISOString().slice(0, 10); // YYYY-MM-DD
 
 /* ============== MAPPERS ============== */
 // Map API → Form initialValues
@@ -83,11 +142,18 @@ export default function DoctorUseDFormVer2({
   const { provinces, wards, setSelectedProvince } = useVietnamAddress();
   const navigate = useNavigate();
   const { id } = useParams();
+  useEffect(() => {
+    if (id && id !== idEdit) {
+      setIdEdit(id);
+    }
+  }, [id]);
   const [idEdit, setIdEdit] = useState(id);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [translateOpen, setTranslateOpen] = useState(false);
 
   const [imageList, setImageList] = useState([{}, {}, {}]);
+
+  console.log("imageList", imageList);
   const [filteredFormVer2Names, setFilteredFormVer2Names] = useState([]);
   const [resetKey, setResetKey] = useState(0);
   const [languageTranslate, setLanguageTransslate] = useState(
@@ -598,10 +664,21 @@ export default function DoctorUseDFormVer2({
               >
                 <Select
                   disabled={!isEdit}
-                  options={LANGUAGE_OPTIONS}
                   placeholder="VI / EN"
                   onChange={(lang) => setLanguageTransslate(lang)}
-                />
+                >
+                  {LANGUAGE_OPTIONS.map((opt) => (
+                    <Option
+                      key={opt.value}
+                      value={opt.value}
+                      disabled={
+                        idEdit || (!idEdit && !["vi", "en"].includes(opt.value))
+                      }
+                    >
+                      {opt.label}
+                    </Option>
+                  ))}
+                </Select>
               </Form.Item>
             </Col>
           </Row>
@@ -609,6 +686,7 @@ export default function DoctorUseDFormVer2({
           <Row gutter={16}>
             <Col xs={24} md={24}>
               <Form.Item
+                labelCol={{ flex: "0 0 270px" }}
                 label={translateLabel(
                   languageTranslate,
                   "resultTemplate",
@@ -664,6 +742,7 @@ export default function DoctorUseDFormVer2({
             label={translateLabel(languageTranslate, "resultPrint", false)}
             name="id_print_template"
             rules={[{ required: true, message: "Chọn mẫu in" }]}
+            labelCol={{ flex: "0 0 270px" }}
           >
             <Select
               disabled={!isEdit}
@@ -893,7 +972,8 @@ export default function DoctorUseDFormVer2({
                 KEY_ACTION_BUTTON.preview,
                 KEY_ACTION_BUTTON.AI,
                 KEY_ACTION_BUTTON.exit,
-                KEY_ACTION_BUTTON.translate,
+                KEY_ACTION_BUTTON.translate_multi,
+                KEY_ACTION_BUTTON.translate_en,
               ]}
               onExit={() => {
                 if (!window.confirm("Bạn có chắc muốn thoát không?")) {
@@ -993,231 +1073,50 @@ export default function DoctorUseDFormVer2({
 
                 await handleGenAi();
               }}
-              onViewTranslate={async () => {
-                try {
-                  setLoading(true);
+              onTranslate={() =>
+                handleTranslateToLanguage({
+                  setLanguageTransslate,
+                  form,
+                  setLoading,
 
-                  const existPreviousTranslate = await API_CALL.get(
-                    "doctor-use-form-ver2",
-                    {
-                      params: {
-                        id_root:
-                          initialSnap?.apiData?.id_root ||
-                          initialSnap?.apiData?.id ||
-                          -1,
-                        includeDeleted: false,
-                      },
-                    }
-                  );
-                  const existItems = existPreviousTranslate.data.data.items;
-                  if (languageTranslate == TRANSLATE_LANGUAGE.VI) {
-                    const existTranslateRecord = existItems.find(
-                      (et) =>
-                        et.id != idEdit &&
-                        et.language != TRANSLATE_LANGUAGE.VI &&
-                        !et.deletedAt
-                    );
-                    if (existTranslateRecord) {
-                      navigate(
-                        `/home/doctor-use-form-drad/detail/${existTranslateRecord.id}`
-                      );
-                      setIdEdit(existTranslateRecord.id);
-                      return;
-                    }
-                    setLanguageTransslate(TRANSLATE_LANGUAGE.ENG);
-                    form.setFieldValue("language", TRANSLATE_LANGUAGE.ENG);
-                  } else {
-                    const existTranslateRecord = existItems.find(
-                      (et) =>
-                        et.id != idEdit &&
-                        et.language != TRANSLATE_LANGUAGE.ENG &&
-                        !et.deletedAt
-                    );
-                    if (existTranslateRecord) {
-                      navigate(
-                        `/home/doctor-use-form-drad/detail/${existTranslateRecord.id}`
-                      );
-                      setIdEdit(existTranslateRecord.id);
+                  imageDescEditor,
+                  idFormVer2,
+                  setImageDescEditor,
+                  initialSnap,
+                  doctor,
+                  imageList,
+                  setImageList,
+                  toast,
+                  idEdit,
+                  setStatus,
+                  setIdEdit,
+                  navigate,
+                  targetLang: "en",
+                  sourceLang: "vi",
+                })
+              }
+              onTranslateMulti={({ targetLang, sourceLang }) =>
+                handleTranslateToLanguage({
+                  setLanguageTransslate,
+                  form,
+                  setLoading,
+                  imageDescEditor,
+                  idFormVer2,
+                  setImageDescEditor,
+                  initialSnap,
+                  doctor,
+                  imageList,
+                  setImageList,
 
-                      return;
-                    }
-                    setLanguageTransslate(TRANSLATE_LANGUAGE.VI);
-                    form.setFieldValue("language", TRANSLATE_LANGUAGE.VI);
-                  }
-                } catch (error) {
-                } finally {
-                  setLoading(false);
-                }
-              }}
-              onTranslate={async () => {
-                try {
-                  if (
-                    !window.confirm(
-                      "Bạn có chắc muốn dịch bản ghi này từ tiếng Việt sang tiếng Anh không? Hệ thống sẽ tự động tạo bản dịch mới."
-                    )
-                  ) {
-                    return;
-                  }
-
-                  const differentLanguageRecords = idEdit
-                    ? await API_CALL.get("/doctor-use-form-ver2", {
-                        params: {
-                          id_root: initialSnap?.apiData?.id_root || idEdit,
-                          includeDeleted: false,
-                          page: 1,
-                          limit: 100,
-                          language: "en",
-                        },
-                      })
-                    : null;
-
-                  const records =
-                    differentLanguageRecords?.data?.data?.items?.filter(
-                      (a) => !a.deletedAt
-                    ) || [];
-                  console.log("records", records);
-
-                  if (records?.length) {
-                    toast.info(
-                      `Bạn đã có bản dịch của SID này bằng tiếng Anh rồi! với ID: ${records[0].id}`
-                    );
-                    return;
-                  }
-
-                  setLanguageTransslate("en");
-                  form.setFieldValue("language", "en");
-                  setLoading(true);
-
-                  const [translatedAddon, translatedImageDescEditor] =
-                    await Promise.all([
-                      API_CALL.post(
-                        "translate/object-google",
-                        {
-                          ["noidung"]: {
-                            quy_trinh_url: form.getFieldValue("quy_trinh_url"),
-                            ket_qua_chan_doan:
-                              form.getFieldValue("ket_qua_chan_doan"),
-                            phan_do_loai: form.getFieldValue("phan_do_loai"),
-                            icd10: form.getFieldValue("icd10"),
-                            chan_doan_phan_biet: form.getFieldValue(
-                              "chan_doan_phan_biet"
-                            ),
-                            khuyen_nghi: form.getFieldValue("khuyen_nghi"),
-                            ImageLeftDesc: form.getFieldValue("ImageLeftDesc"),
-                            ImageRightDesc:
-                              form.getFieldValue("ImageRightDesc"),
-                          },
-                          targetLang: "en",
-                          sourceLang: "vi",
-                        },
-                        { timeout: 120000 }
-                      ),
-                      API_CALL.post(
-                        "translate/html-text-google",
-                        {
-                          text: imageDescEditor,
-                          targetLang: "en",
-                          sourceLang: "vi",
-                        },
-                        { timeout: 120000 }
-                      ),
-                    ]);
-                  setImageDescEditor(translatedImageDescEditor.data.data);
-
-                  form.setFieldValue(
-                    "quy_trinh_url",
-                    translatedAddon.data.data.quy_trinh_url
-                  );
-                  form.setFieldValue(
-                    "ket_qua_chan_doan",
-                    translatedAddon.data.data.ket_qua_chan_doan
-                  );
-                  form.setFieldValue(
-                    "phan_do_loai",
-                    translatedAddon.data.data.phan_do_loai
-                  );
-                  form.setFieldValue("icd10", translatedAddon.data.data.icd10);
-                  form.setFieldValue(
-                    "chan_doan_phan_biet",
-                    translatedAddon.data.data.chan_doan_phan_biet
-                  );
-                  form.setFieldValue(
-                    "khuyen_nghi",
-                    translatedAddon.data.data.khuyen_nghi
-                  );
-                  form.setFieldValue(
-                    "ImageLeftDesc",
-                    translatedAddon.data.data.ImageLeftDesc
-                  );
-                  form.setFieldValue(
-                    "ImageRightDesc",
-                    translatedAddon.data.data.ImageRightDesc
-                  );
-
-                  // 🟢 3. Build lại giá trị đã dịch
-                  const values = {
-                    ...form.getFieldsValue(true),
-                    language: "en",
-                    quy_trinh_url: translatedAddon.data.data.quy_trinh_url,
-                    ket_qua_chan_doan:
-                      translatedAddon.data.data.ket_qua_chan_doan,
-                    phan_do_loai: translatedAddon.data.data.phan_do_loai,
-                    icd10: translatedAddon.data.data.icd10,
-                    chan_doan_phan_biet:
-                      translatedAddon.data.data.chan_doan_phan_biet,
-                    khuyen_nghi: translatedAddon.data.data.khuyen_nghi,
-                    ImageLeftDesc: translatedAddon.data.data.ImageLeftDesc,
-                    ImageRightDesc: translatedAddon.data.data.ImageRightDesc,
-                  };
-
-                  // 🟢 4. Dùng buildFormData nhưng bỏ ID gốc để tạo bản mới
-                  const fd = buildFormDataDoctorUseFormVer2(values, {
-                    id_formver2: idFormVer2 || initialSnap.apiData?.id_formver2,
-                    doctor,
-                    imageDescEditor: translatedImageDescEditor.data.data,
-                    ngayThucHienISO: toISODate(),
-                    imageList,
-                  });
-
-                  fd.delete("prev_id");
-                  fd.delete("id_root");
-
-                  fd.append(
-                    "id_root",
-                    initialSnap?.apiData?.id_root ||
-                      initialSnap?.apiData?.id ||
-                      idEdit
-                  );
-
-                  toast.info("Đang lưu bản dịch tiếng Anh...");
-                  const res = await API_CALL.postForm(
-                    `/doctor-use-form-ver2`,
-                    fd,
-                    {
-                      headers: { "Content-Type": "multipart/form-data" },
-                    }
-                  );
-
-                  const newId = res?.data?.data?.data?.data?.id;
-                  if (newId) {
-                    toast.success(
-                      `Đã dịch và tạo bản mới thành công (ID: ${newId})!`
-                    );
-                    setStatus(false);
-                    setIdEdit(newId);
-                    navigate(`/home/doctor-use-form-drad/detail/${newId}`);
-                  } else {
-                    toast.warning(
-                      "Dịch thành công nhưng không nhận được ID mới!"
-                    );
-                  }
-                } catch (error) {
-                  console.error("Translate & Save Error:", error);
-                  toast.error("Lỗi khi dịch hoặc lưu bản dịch!");
-                } finally {
-                  setLoading(false);
-                }
-              }}
+                  toast,
+                  idEdit,
+                  setStatus,
+                  setIdEdit,
+                  navigate,
+                  targetLang: targetLang,
+                  sourceLang: sourceLang,
+                })
+              }
             />
           )}
 
