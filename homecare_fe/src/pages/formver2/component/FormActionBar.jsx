@@ -206,7 +206,6 @@ export default function FormActionBar({
             toast.warn("Vui lòng chọn ngôn ngữ cần dịch!");
             return;
           }
-          toast.warn("Hệ thống đang dịch!");
           setLangModalOpen(false);
 
           onTranslateMulti?.({
