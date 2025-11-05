@@ -68,6 +68,7 @@ import { getUsablePackageCodes } from "./constant/permission";
 import { USER_ROLE } from "./constant/app";
 import STORAGE from "./services/storage";
 import PrivacyPolicy from "./components/policy/PrivacyPolicy";
+import PartnerList from "./pages/intergrate/partners/partnersList";
 
 function App() {
   useAuthInitializer();
@@ -178,6 +179,7 @@ function App() {
           <Route path="recist_nn" element={<Recist />} />
           <Route path="products" element={<ProductList />} />
           <Route path="templates" element={<TemplateList />} />
+          <Route path="partners" element={<PartnerList />} />
 
           <Route
             path="form-drad/use/detail/:id"

@@ -156,14 +156,21 @@ const Sidebar = ({ collapsed }) => {
     },
 
     {
-      key: "/home/intergate",
+      key: "/home/package",
       icon: <Avatar src="/icons/package.png" size={40} />,
-      label: "Tính năng",
+      label: "Gói",
       children: [
         { key: "/home/subscription", label: "Gói đăng ký" },
         { key: "/home/package-request", label: "Yêu cầu của bạn" },
         { key: "/home/package-user", label: "Gói của bạn" },
       ],
+    },
+
+    {
+      key: "/home/intergrate",
+      icon: <Avatar src="/icons/intergrated.png" size={40} />,
+      label: "Tích hợp",
+      children: [{ key: "/home/partners", label: "Đối tác" }],
     },
   ].filter(Boolean); // loại bỏ các mục false nếu user không phải admin
 
