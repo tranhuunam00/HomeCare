@@ -19,6 +19,8 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined,
   PlusOutlined,
+  ApiOutlined,
+  CopyOutlined,
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
@@ -43,6 +45,8 @@ const PartnerList = () => {
   const { user } = useGlobalAuth();
 
   const [partners, setPartners] = useState([]);
+  const [intergration, setIntergration] = useState([]);
+
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({
     name: "",
@@ -56,10 +60,20 @@ const PartnerList = () => {
   const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [selectedPartner, setSelectedPartner] = useState(null);
 
-  // 🔹 Modal tạo mới
+  const [testModalVisible, setTestModalVisible] = useState(false);
+  const [testing, setTesting] = useState(false);
+  const [testForm] = Form.useForm();
+
+  // 🔹 Modal tạo mới Partner
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const [creating, setCreating] = useState(false);
   const [form] = Form.useForm();
+
+  // 🔹 Modal tạo token tích hợp
+  const [tokenModalVisible, setTokenModalVisible] = useState(false);
+  const [generatedToken, setGeneratedToken] = useState(null);
+  const [tokenLoading, setTokenLoading] = useState(false);
+  const [selectedPartnerForToken, setSelectedPartnerForToken] = useState(null);
 
   // 🧠 Fetch list
   const fetchPartners = async () => {
@@ -71,7 +85,11 @@ const PartnerList = () => {
         )
       );
       const res = await API_CALL.get("/partners", { params: cleanParams });
+      const intergrationRes = await API_CALL.get("/partners/intergrate", {});
+
       setPartners(res.data.data || res.data);
+      setIntergration(intergrationRes.data.data || intergrationRes.data);
+
       setTotal(res.data.total || res.data.data?.length || 0);
     } catch (err) {
       toast.error(err?.response?.data?.message || "Lỗi tải danh sách đối tác");
@@ -121,7 +139,7 @@ const PartnerList = () => {
     try {
       const values = await form.validateFields();
       setCreating(true);
-      const res = await API_CALL.post("/partners", values);
+      await API_CALL.post("/partners", values);
       toast.success("Tạo mới đối tác thành công");
       setCreateModalVisible(false);
       form.resetFields();
@@ -132,6 +150,30 @@ const PartnerList = () => {
     } finally {
       setCreating(false);
     }
+  };
+
+  // 🧩 Tạo token tích hợp
+  const handleGenerateIntegrationToken = async (partner) => {
+    setSelectedPartnerForToken(partner);
+    setGeneratedToken(null);
+    setTokenModalVisible(true);
+    setTokenLoading(true);
+
+    try {
+      const res = await API_CALL.post("/partners/generate-token-3rd", {
+        partner_id: partner.id,
+      });
+      setGeneratedToken(res.data.data || res.data);
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Không thể tạo token");
+    } finally {
+      setTokenLoading(false);
+    }
+  };
+
+  const handleCopyToken = (token) => {
+    navigator.clipboard.writeText(token);
+    toast.success("Đã sao chép token vào clipboard");
   };
 
   // 📋 Table columns
@@ -163,6 +205,22 @@ const PartnerList = () => {
         ),
     },
     {
+      title: "Tích hợp",
+      key: "integration_status",
+      render: (_, record) => {
+        const integrated = intergration.some(
+          (item) => item.partner_id === record.id && item.is_active === true
+        );
+
+        return integrated ? (
+          <Tag color="green">Đã tích hợp</Tag>
+        ) : (
+          <Tag color="default">Chưa tích hợp</Tag>
+        );
+      },
+    },
+
+    {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
@@ -178,36 +236,43 @@ const PartnerList = () => {
       key: "createdAt",
       render: (val) => dayjs(val).format("DD/MM/YYYY HH:mm"),
     },
-    user.id_role === USER_ROLE.ADMIN && {
+    {
       title: "Hành động",
       key: "actions",
-      render: (_, record) => (
-        <div style={{ display: "flex", gap: 8 }}>
-          <Button
-            size="small"
-            onClick={() => {
-              setSelectedPartner(record);
-              setDetailModalVisible(true);
-            }}
-          >
-            Chi tiết
-          </Button>
+      render: (_, record) => {
+        const integrated = intergration.some(
+          (item) => item.partner_id === record.id && item.is_active === true
+        );
 
-          {user.id_role === USER_ROLE.ADMIN && (
-            <Select
+        return (
+          <div style={{ display: "flex", gap: 8 }}>
+            {/* Nút chi tiết */}
+
+            {/* Nút tạo token: ai cũng thấy, nhưng disable nếu đã tích hợp */}
+            <Button
               size="small"
-              value={record.status}
-              style={{ width: 120 }}
-              onChange={(value) =>
-                handleStatusUpdate(record.id, value, record.status)
-              }
+              icon={<ApiOutlined />}
+              disabled={integrated}
+              onClick={() => handleGenerateIntegrationToken(record)}
             >
-              <Option value="active">active</Option>
-              <Option value="inactive">inactive</Option>
-            </Select>
-          )}
-        </div>
-      ),
+              {integrated ? "Đã tích hợp" : "Tạo token"}
+            </Button>
+
+            {/* Admin mới được chỉnh trạng thái */}
+            {user.id_role === USER_ROLE.ADMIN && (
+              <Button
+                size="small"
+                onClick={() => {
+                  setSelectedPartner(record);
+                  setDetailModalVisible(true);
+                }}
+              >
+                Chi tiết
+              </Button>
+            )}
+          </div>
+        );
+      },
     },
   ];
 
@@ -242,15 +307,24 @@ const PartnerList = () => {
               Tìm kiếm
             </Button>
 
-            {/* 🆕 Nút Tạo mới (chỉ admin) */}
             {user.id_role === USER_ROLE.ADMIN && (
-              <Button
-                type="primary"
-                icon={<PlusOutlined />}
-                onClick={() => setCreateModalVisible(true)}
-              >
-                Tạo mới
-              </Button>
+              <>
+                <Button
+                  type="primary"
+                  icon={<PlusOutlined />}
+                  onClick={() => setCreateModalVisible(true)}
+                  style={{ marginRight: 8 }}
+                >
+                  Tạo mới
+                </Button>
+
+                <Button
+                  icon={<ApiOutlined />}
+                  onClick={() => setTestModalVisible(true)}
+                >
+                  Test Connected
+                </Button>
+              </>
             )}
           </>
         }
@@ -299,64 +373,57 @@ const PartnerList = () => {
           }}
         />
 
-        {/* Modal chi tiết */}
+        {/* 🧩 Modal hiển thị token tích hợp */}
         <Modal
-          open={detailModalVisible}
-          title="Chi tiết đối tác"
-          onCancel={() => {
-            setDetailModalVisible(false);
-            setSelectedPartner(null);
-          }}
-          footer={null}
+          open={tokenModalVisible}
+          title={`Token tích hợp cho đối tác ${
+            selectedPartnerForToken?.name || ""
+          }`}
+          onCancel={() => setTokenModalVisible(false)}
+          footer={[
+            <Button key="close" onClick={() => setTokenModalVisible(false)}>
+              Đóng
+            </Button>,
+          ]}
         >
-          {selectedPartner && (
-            <div style={{ lineHeight: 1.8 }}>
+          {tokenLoading ? (
+            <Spin />
+          ) : generatedToken ? (
+            <div style={{ wordBreak: "break-all" }}>
               <p>
-                <strong>ID:</strong> {selectedPartner.id}
+                <strong>Token:</strong>{" "}
               </p>
-              <p>
-                <strong>Tên đối tác:</strong> {selectedPartner.name}
-              </p>
-              <p>
-                <strong>Mô tả:</strong>{" "}
-                {selectedPartner.description || "Không có"}
-              </p>
-              <p>
-                <strong>API URL:</strong>{" "}
-                {selectedPartner.api_base_url ? (
-                  <a
-                    href={selectedPartner.api_base_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {selectedPartner.api_base_url}
-                  </a>
-                ) : (
-                  "—"
-                )}
-              </p>
-              <p>
-                <strong>Trạng thái:</strong>{" "}
-                <Tag
-                  color={STATUS_COLORS[selectedPartner.status]}
-                  icon={STATUS_ICONS[selectedPartner.status]}
+              <Card
+                size="small"
+                style={{ background: "#f5f5f5", marginBottom: 8 }}
+              >
+                <div
+                  style={{ display: "flex", justifyContent: "space-between" }}
                 >
-                  {selectedPartner.status}
-                </Tag>
-              </p>
+                  <code style={{ wordBreak: "break-all" }}>
+                    {generatedToken.token}
+                  </code>
+                  <Button
+                    size="small"
+                    type="text"
+                    icon={<CopyOutlined />}
+                    onClick={() => handleCopyToken(generatedToken.token)}
+                  >
+                    Copy
+                  </Button>
+                </div>
+              </Card>
               <p>
-                <strong>Ngày tạo:</strong>{" "}
-                {dayjs(selectedPartner.createdAt).format("DD/MM/YYYY HH:mm")}
-              </p>
-              <p>
-                <strong>Cập nhật gần nhất:</strong>{" "}
-                {dayjs(selectedPartner.updatedAt).format("DD/MM/YYYY HH:mm")}
+                <strong>Hết hạn:</strong>{" "}
+                {dayjs(generatedToken.expired_at).format("DD/MM/YYYY HH:mm")}
               </p>
             </div>
+          ) : (
+            <p>Không thể tạo token</p>
           )}
         </Modal>
 
-        {/* 🆕 Modal tạo mới Partner */}
+        {/* Modal tạo mới Partner (giữ nguyên như bạn có) */}
         <Modal
           open={createModalVisible}
           title="Tạo mới đối tác"
@@ -388,6 +455,50 @@ const PartnerList = () => {
                 <Option value="active">active</Option>
                 <Option value="inactive">inactive</Option>
               </Select>
+            </Form.Item>
+          </Form>
+        </Modal>
+        <Modal
+          open={testModalVisible}
+          title="Kiểm tra kết nối đối tác"
+          onCancel={() => setTestModalVisible(false)}
+          onOk={async () => {
+            try {
+              const values = await testForm.validateFields();
+              setTesting(true);
+              const res = await API_CALL.post(
+                "/partners/verify-token-3rd",
+                values
+              );
+              toast.success(res?.data?.message || "Kết nối thành công!");
+              setTestModalVisible(false);
+              testForm.resetFields();
+            } catch (err) {
+              if (err?.errorFields) return;
+              toast.error(err?.response?.data?.message || "Kết nối thất bại!");
+            } finally {
+              setTesting(false);
+            }
+          }}
+          confirmLoading={testing}
+          okText="Kiểm tra"
+          cancelText="Đóng"
+        >
+          <Form layout="vertical" form={testForm}>
+            <Form.Item
+              label="Token tích hợp"
+              name="token"
+              rules={[{ required: true, message: "Vui lòng nhập token" }]}
+            >
+              <Input placeholder="Nhập token..." />
+            </Form.Item>
+
+            <Form.Item
+              label="Mã code đối tác (code_3rd)"
+              name="code_3rd"
+              rules={[{ required: true, message: "Vui lòng nhập mã code" }]}
+            >
+              <Input placeholder="Nhập mã code..." />
             </Form.Item>
           </Form>
         </Modal>
