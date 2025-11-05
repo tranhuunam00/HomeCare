@@ -8,7 +8,7 @@ export const TRANSLATE_MULTI_REPORT = {
     phone: "Điện thoại",
     email: "Email",
     patientId: "Mã số bệnh nhân PID",
-    sid: "Mã số SID",
+    sid: "Mã số phiếu SID",
     province: "Tỉnh/Thành phố",
     district: "Phường/Xã",
     address: "Địa chỉ",
