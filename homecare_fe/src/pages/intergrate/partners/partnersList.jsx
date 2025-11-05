@@ -231,12 +231,6 @@ const PartnerList = () => {
       ),
     },
     {
-      title: "Ngày tạo",
-      dataIndex: "createdAt",
-      key: "createdAt",
-      render: (val) => dayjs(val).format("DD/MM/YYYY HH:mm"),
-    },
-    {
       title: "Hành động",
       key: "actions",
       render: (_, record) => {
@@ -283,30 +277,10 @@ const PartnerList = () => {
       {/* Bộ lọc */}
       <Card
         size="small"
-        title={
-          <>
-            <FilterOutlined /> Bộ lọc tìm kiếm
-          </>
-        }
+        title={<></>}
         className={styles.filterCard}
         extra={
           <>
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={handleReset}
-              style={{ marginRight: 8 }}
-            >
-              Làm mới
-            </Button>
-            <Button
-              type="primary"
-              icon={<SearchOutlined />}
-              onClick={handleSearch}
-              style={{ marginRight: 8 }}
-            >
-              Tìm kiếm
-            </Button>
-
             {user.id_role === USER_ROLE.ADMIN && (
               <>
                 <Button
@@ -329,33 +303,7 @@ const PartnerList = () => {
           </>
         }
       >
-        <Row gutter={16}>
-          <Col span={8}>
-            <label>Tên đối tác</label>
-            <Input
-              value={uiFilters.name}
-              onChange={(e) =>
-                setUiFilters({ ...uiFilters, name: e.target.value })
-              }
-              placeholder="Nhập tên đối tác..."
-            />
-          </Col>
-          <Col span={8}>
-            <label>Trạng thái</label>
-            <Select
-              allowClear
-              value={uiFilters.status || undefined}
-              onChange={(value) =>
-                setUiFilters({ ...uiFilters, status: value })
-              }
-              placeholder="Chọn trạng thái"
-              style={{ width: "100%" }}
-            >
-              <Option value="active">active</Option>
-              <Option value="inactive">inactive</Option>
-            </Select>
-          </Col>
-        </Row>
+        <Row gutter={16}></Row>
       </Card>
 
       {/* Bảng danh sách */}
