@@ -30,7 +30,7 @@ import { USER_ROLE } from "../../../constant/app";
 const { Option } = Select;
 const { RangePicker } = DatePicker;
 
-const PACKAGE_CODES = ["BASIC", "STANDARD", "PREMIUM"];
+const PACKAGE_CODES = ["ECO", "PRO", "BUSINESS"];
 const PACKAGE_STATUSES = ["pending", "approved", "rejected"];
 const STATUS_COLORS = {
   pending: "processing",

@@ -44,6 +44,7 @@ import PatientInfoSection from "./items/PatientInfoForm";
 import TranslateListRecords from "./items/TranslateListRecords";
 import { APPROVAL_STATUS } from "../../../components/ApprovalStatusTag";
 import { handleTranslateToLanguage, toISODate } from "./util";
+import { hasProOrBusiness } from "../../../constant/permission";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -131,6 +132,7 @@ export default function DoctorUseDFormVer2({
     doctor,
     formVer2Names,
     setIsReadingForm,
+    userPackages,
   } = useGlobalAuth();
 
   useEffect(() => {
@@ -153,12 +155,14 @@ export default function DoctorUseDFormVer2({
 
   const [imageList, setImageList] = useState([{}, {}, {}]);
 
-  console.log("imageList", imageList);
   const [filteredFormVer2Names, setFilteredFormVer2Names] = useState([]);
   const [resetKey, setResetKey] = useState(0);
   const [languageTranslate, setLanguageTransslate] = useState(
     TRANSLATE_LANGUAGE.VI
   );
+
+  console.log("filteredFormVer2Names", filteredFormVer2Names);
+
   const [status, setStatus] = useState(APPROVAL_STATUS.DRAFT);
 
   const [initialSnap, setInitialSnap] = useState({
@@ -335,13 +339,18 @@ export default function DoctorUseDFormVer2({
     }
 
     const currentId = initialSnap?.apiData?.id_formver2_name_form_ver2_name?.id;
-    const filtered = (formVer2Names || []).filter(
+    let filtered = (formVer2Names || []).filter(
       (n) =>
         Number(n.id_template_service) === Number(selectedTemplateServiceId) &&
         Number(n.id_exam_part) === Number(selectedExamPartId) &&
         (n.isUsed == isUse || n.id == currentId) &&
         n.language?.includes(languageTranslate)
     );
+    if (!hasProOrBusiness(userPackages) && user.id_role != USER_ROLE.ADMIN) {
+      filtered = filtered.filter((f) =>
+        f.name?.toLowerCase().includes("bình thường")
+      );
+    }
 
     setFilteredFormVer2Names(filtered);
   }, [

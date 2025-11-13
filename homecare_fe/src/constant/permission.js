@@ -1,47 +1,59 @@
 import dayjs from "dayjs";
 
-export const FEATURE_KEYS = {
-  TRIAL_1_MONTH: {
-    label: "Thời gian dùng thử - 1 tháng",
-    description: "Người dùng được sử dụng thử miễn phí trong 1 tháng đầu tiên.",
+export const FEATURE_KEYS_PACKAGE = {
+  SIEU_AM: {
+    label: "Siêu âm",
+    description: "Mẫu form kết quả phân hệ siêu âm",
   },
-  CLOUD_12_MONTH: {
-    label: "Thời gian lưu kết quả Cloud",
-    description: "Dữ liệu lưu trữ trên Cloud trong 12 tháng.",
+  X_QUANG: {
+    label: "X-QUANG",
+    description: "Mẫu form kết quả phân hệ X-QUANG",
   },
-  TOOLKIT_15_APP: {
-    label: "Tích hợp ứng dụng tiện ích",
-    description:
-      "Bao gồm 15 ứng dụng tiện ích giúp đọc và quản lý kết quả chẩn đoán.",
+  MAMMO: {
+    label: "Mammo",
+    description: "Mẫu form kết quả phân hệ Mammo",
   },
-  UNLIMITED_REPORTS: {
-    label: "Số lượt sử dụng mẫu không giới hạn",
-    description: "Không giới hạn số lượng mẫu kết quả có thể đọc hoặc tạo.",
+  CAT_LOP_VI_TINH: {
+    label: "Cắt lớp vi tính ",
+    description: "Mẫu form kết quả phân hệ Cắt lớp vi tính",
   },
-  SUPPORT_24_7: {
-    label: "Hỗ trợ kỹ thuật 24/7 (email, chat, call)",
-    description: "Nhận hỗ trợ kỹ thuật liên tục qua email, chat hoặc cuộc gọi.",
+  CONG_HUONG_TU: {
+    label: "Cộng hưởng từ",
+    description: "Mẫu form kết quả phân hệ Cộng hưởng từ",
   },
-  PACS_SUPPORT: {
-    label: "Hỗ trợ đọc kết quả từ xa qua PACS ",
-    description:
-      "Cho phép đọc kết quả chẩn đoán từ xa thông qua hệ thống PACS (phí tính riêng).",
+  THAM_DO_CHUC_NANG: {
+    label: "Thăm dò chức năng",
+    description: "Mẫu form kết quả phân hệ Thăm dò chức năng",
+  },
+  NOI_SOI_TIEU_HOA: {
+    label: "Nội soi tiêu hóa",
+    description: "Mẫu form kết quả phân hệ Nội soi tiêu hóa",
+  },
+  GIAI_PHAU_BENH: {
+    label: "Giải phẫu bệnh",
+    description: "Mẫu form kết quả phân hệ Giải phẫu bệnh",
   },
   REPORT_NORMAL_500: {
     label: "Mẫu kết quả bình thường",
     description: "Truy cập thư viện hơn 500 mẫu kết quả bình thường.",
   },
+
   REPORT_ABNORMAL_1000: {
-    label: "Mẫu kết quả bất thường",
-    description: "Truy cập thư viện hơn 1000 mẫu kết quả bất thường.",
+    label: "Mẫu kết quả bệnh lý",
+    description: "Truy cập thư viện hơn 1000 mẫu kết quả bệnh lý bất thường.",
   },
-  REPORT_EN_NORMAL_500: {
-    label: "Mẫu kết quả tiếng Anh bình thường",
-    description: "Truy cập mẫu kết quả tiếng Anh bình thường (trên 500 mẫu).",
+  INTERGATE_FORM_ENGLISH: {
+    label: "Tích hợp mẫu kết quả tiếng Anh",
+    description:
+      "Tích hợp mẫu kết quả tiếng Anh được chuyên gia D-RADS biên soạn sẵn",
   },
-  REPORT_EN_ABNORMAL_1000: {
-    label: "Mẫu kết quả tiếng Anh bất thường",
-    description: "Truy cập mẫu kết quả tiếng Anh bất thường (trên 1000 mẫu).",
+  INTERGATE_SERVICE: {
+    label: "Tích hợp ứng dụng",
+    description: "Tích hợp ứng dụng TIRADS, BIRADS, LungRADS, BoneAge,...",
+  },
+  ENGLISH_LANG: {
+    label: "Tích hợp AI dịch sang tiếng Anh",
+    description: "Kết quả có thể được hiển thị và xuất báo cáo bằng tiếng Anh.",
   },
   MULTI_LANG_30: {
     label: "Tích hợp kết quả đa ngôn ngữ",
@@ -52,60 +64,73 @@ export const FEATURE_KEYS = {
     label: "AI hỗ trợ tư vấn",
     description: "AI phân tích kết quả và gợi ý tư vấn chuyên môn cho bác sĩ.",
   },
+  PACS_IMAGE: {
+    label: "Tích hợp PACS",
+    description: "Tích hợp đồng bộ các tiện ích của PACS",
+  },
 };
 
 export const PACKAGE_FEATURES = {
-  BASIC: {
-    code: "BASIC",
-    name: "Basic",
-    description: "Gói cơ bản cho cá nhân dùng thử và sử dụng hằng tháng",
+  ECO: {
+    code: "ECO",
+    name: "ECO",
+    description: "Gói cơ bản cho cá nhân và sử dụng hằng tháng",
     permissions: [
-      FEATURE_KEYS.TRIAL_1_MONTH,
-      FEATURE_KEYS.CLOUD_12_MONTH,
-      FEATURE_KEYS.TOOLKIT_15_APP,
-      FEATURE_KEYS.UNLIMITED_REPORTS,
-      FEATURE_KEYS.REPORT_NORMAL_500,
+      FEATURE_KEYS_PACKAGE.SIEU_AM,
+      FEATURE_KEYS_PACKAGE.X_QUANG,
+      FEATURE_KEYS_PACKAGE.MAMMO,
+      FEATURE_KEYS_PACKAGE.CAT_LOP_VI_TINH,
+      FEATURE_KEYS_PACKAGE.CONG_HUONG_TU,
+      FEATURE_KEYS_PACKAGE.THAM_DO_CHUC_NANG,
+      FEATURE_KEYS_PACKAGE.NOI_SOI_TIEU_HOA,
+      FEATURE_KEYS_PACKAGE.GIAI_PHAU_BENH,
+      FEATURE_KEYS_PACKAGE.REPORT_NORMAL_500,
     ],
   },
 
-  STANDARD: {
-    code: "STANDARD",
-
-    name: "Standard",
-    description:
-      "Gói tiêu chuẩn hỗ trợ PACS, nhiều mẫu hơn, có hỗ trợ kỹ thuật",
+  PRO: {
+    code: "PRO",
+    name: "PRO",
+    description: "Gói cao cấp thích hợp cho cá nhân dùng song ngữ Anh-Việt",
     permissions: [
-      FEATURE_KEYS.TRIAL_1_MONTH,
-      FEATURE_KEYS.CLOUD_12_MONTH,
-      FEATURE_KEYS.TOOLKIT_15_APP,
-      FEATURE_KEYS.UNLIMITED_REPORTS,
-      FEATURE_KEYS.SUPPORT_24_7,
-      FEATURE_KEYS.PACS_SUPPORT,
-      FEATURE_KEYS.REPORT_NORMAL_500,
-      FEATURE_KEYS.REPORT_ABNORMAL_1000,
-      FEATURE_KEYS.REPORT_EN_NORMAL_500,
-      FEATURE_KEYS.REPORT_EN_ABNORMAL_1000,
+      FEATURE_KEYS_PACKAGE.SIEU_AM,
+      FEATURE_KEYS_PACKAGE.X_QUANG,
+      FEATURE_KEYS_PACKAGE.MAMMO,
+      FEATURE_KEYS_PACKAGE.CAT_LOP_VI_TINH,
+      FEATURE_KEYS_PACKAGE.CONG_HUONG_TU,
+      FEATURE_KEYS_PACKAGE.THAM_DO_CHUC_NANG,
+      FEATURE_KEYS_PACKAGE.NOI_SOI_TIEU_HOA,
+      FEATURE_KEYS_PACKAGE.GIAI_PHAU_BENH,
+      FEATURE_KEYS_PACKAGE.REPORT_NORMAL_500,
+      FEATURE_KEYS_PACKAGE.REPORT_ABNORMAL_1000,
+      FEATURE_KEYS_PACKAGE.INTERGATE_FORM_ENGLISH,
+      FEATURE_KEYS_PACKAGE.INTERGATE_SERVICE,
+      FEATURE_KEYS_PACKAGE.ENGLISH_LANG,
     ],
   },
 
-  PREMIUM: {
-    code: "PREMIUM",
-    name: "Premium",
+  BUSINESS: {
+    code: "BUSINESS",
+    name: "BUSINESS",
     description:
       "Gói cao cấp cho tổ chức, có AI hỗ trợ chuyên môn và đa ngôn ngữ",
     permissions: [
-      FEATURE_KEYS.TRIAL_1_MONTH,
-      FEATURE_KEYS.CLOUD_12_MONTH,
-      FEATURE_KEYS.TOOLKIT_15_APP,
-      FEATURE_KEYS.UNLIMITED_REPORTS,
-      FEATURE_KEYS.SUPPORT_24_7,
-      FEATURE_KEYS.PACS_SUPPORT,
-      FEATURE_KEYS.REPORT_NORMAL_500,
-      FEATURE_KEYS.REPORT_ABNORMAL_1000,
-      FEATURE_KEYS.REPORT_EN_NORMAL_500,
-      FEATURE_KEYS.REPORT_EN_ABNORMAL_1000,
-      FEATURE_KEYS.MULTI_LANG_30,
-      FEATURE_KEYS.AI_SUPPORT_EXPERT,
+      FEATURE_KEYS_PACKAGE.SIEU_AM,
+      FEATURE_KEYS_PACKAGE.X_QUANG,
+      FEATURE_KEYS_PACKAGE.MAMMO,
+      FEATURE_KEYS_PACKAGE.CAT_LOP_VI_TINH,
+      FEATURE_KEYS_PACKAGE.CONG_HUONG_TU,
+      FEATURE_KEYS_PACKAGE.THAM_DO_CHUC_NANG,
+      FEATURE_KEYS_PACKAGE.NOI_SOI_TIEU_HOA,
+      FEATURE_KEYS_PACKAGE.GIAI_PHAU_BENH,
+      FEATURE_KEYS_PACKAGE.REPORT_NORMAL_500,
+      FEATURE_KEYS_PACKAGE.REPORT_ABNORMAL_1000,
+      FEATURE_KEYS_PACKAGE.INTERGATE_FORM_ENGLISH,
+      FEATURE_KEYS_PACKAGE.INTERGATE_SERVICE,
+      FEATURE_KEYS_PACKAGE.ENGLISH_LANG,
+      FEATURE_KEYS_PACKAGE.MULTI_LANG_30,
+      FEATURE_KEYS_PACKAGE.AI_SUPPORT_EXPERT,
+      FEATURE_KEYS_PACKAGE.PACS_IMAGE,
     ],
   },
 };
@@ -113,9 +138,26 @@ export const PACKAGE_FEATURES = {
 export const DURATION_OPTIONS = [
   { value: 1, label: "1 tháng" },
   { value: 3, label: "3 tháng" },
-  { value: 6, label: "6 tháng" },
   { value: 12, label: "12 tháng" },
 ];
+
+export const PACKAGE_FEES = {
+  ECO: [
+    { value: 1, label: "250.000" },
+    { value: 3, label: "625.000" },
+    { value: 12, label: "2.250.000" },
+  ],
+  PRO: [
+    { value: 1, label: "450.000" },
+    { value: 3, label: "1.125.000" },
+    { value: 12, label: "4.050.000" },
+  ],
+  BUSINESS: [
+    { value: 1, label: "650.000" },
+    { value: 3, label: "1.625.000" },
+    { value: 12, label: "5.850.000" },
+  ],
+};
 
 export const getUsablePackageCodes = (packages = []) => {
   return packages
@@ -127,3 +169,10 @@ export const getUsablePackageCodes = (packages = []) => {
     )
     .map((p) => p.package_code);
 };
+
+export const hasProOrBusiness = (userPackages) =>
+  userPackages?.some(
+    (pkg) =>
+      pkg.status === "active" &&
+      (pkg.package_code === "PRO" || pkg.package_code === "BUSINESS")
+  );

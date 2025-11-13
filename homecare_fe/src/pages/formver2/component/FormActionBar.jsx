@@ -15,7 +15,10 @@ import {
 import styles from "./FormActionBar.module.scss";
 import { useNavigate } from "react-router-dom";
 import { useGlobalAuth } from "../../../contexts/AuthContext";
-import { getUsablePackageCodes } from "../../../constant/permission";
+import {
+  getUsablePackageCodes,
+  hasProOrBusiness,
+} from "../../../constant/permission";
 import { USER_ROLE } from "../../../constant/app";
 import { toast } from "react-toastify";
 import { APPROVAL_STATUS } from "../../../components/ApprovalStatusTag";
@@ -112,7 +115,10 @@ export default function FormActionBar({
       label: "AI GEN",
       icon: <GatewayOutlined />,
       onClick: onGenAi || emptyF,
-      disabled: approvalStatus == APPROVAL_STATUS.APPROVED,
+      disabled:
+        approvalStatus == APPROVAL_STATUS.APPROVED ||
+        (!availblePackage.includes("BUSINESS") &&
+          user.id_role != USER_ROLE.ADMIN),
     },
     {
       key: "print",
@@ -128,7 +134,7 @@ export default function FormActionBar({
       onClick: () => setLangModalOpen(true), // ✅ mở popup chọn ngôn ngữ
       disabled:
         !editId ||
-        (!availblePackage.includes("PREMIUM") &&
+        (!availblePackage.includes("BUSINESS") &&
           user.id_role != USER_ROLE.ADMIN),
     },
     {
@@ -139,8 +145,7 @@ export default function FormActionBar({
       disabled:
         !editId ||
         languageTranslate != "vi" ||
-        (!availblePackage.includes("PREMIUM") &&
-          user.id_role != USER_ROLE.ADMIN),
+        (!hasProOrBusiness(userPackages) && user.id_role != USER_ROLE.ADMIN),
     },
     {
       key: "exit",
@@ -164,10 +169,15 @@ export default function FormActionBar({
         return "Không thể chỉnh sửa mẫu đã được phê duyệt";
       if (it.key === "print" && approvalStatus !== APPROVAL_STATUS.APPROVED)
         return "Chỉ in được khi mẫu đã được phê duyệt";
-      if (it.key === "translate_multi" && !availblePackage.includes("PREMIUM"))
-        return "Chức năng dịch chỉ khả dụng cho gói PREMIUM";
-      if (it.key === "translate_en" && !availblePackage.includes("PREMIUM"))
-        return "Chức năng dịch chỉ khả dụng cho gói PREMIUM";
+      if (it.key === "translate_multi" && !availblePackage.includes("BUSINESS"))
+        return "Chức năng dịch đa ngôn ngữ chỉ khả dụng cho gói BUSINESS";
+      if (
+        it.key === KEY_ACTION_BUTTON.AI &&
+        !availblePackage.includes("BUSINESS")
+      )
+        return "Chức năng AI đề xuất chỉ khả dụng cho gói BUSINESS";
+      if (it.key === "translate_en" && !hasProOrBusiness(userPackages))
+        return "Chức năng dịch chỉ khả dụng cho gói PRO và BUSINESS";
       if (it.disabled) return "Chức năng hiện không khả dụng";
       return null;
     })();

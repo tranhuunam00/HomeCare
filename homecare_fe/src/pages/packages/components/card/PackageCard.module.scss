@@ -58,3 +58,17 @@
     margin-top: auto;
   }
 }
+.priceWrapper {
+  margin-top: auto; // đẩy xuống đáy card
+  padding-top: 12px;
+  text-align: right; // căn phải
+
+  .priceItem {
+    font-size: 14px;
+    margin-bottom: 6px;
+
+    strong {
+      font-weight: 600;
+    }
+  }
+}

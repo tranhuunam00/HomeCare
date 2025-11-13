@@ -14,11 +14,12 @@ import TopHeader from "../../components/TopHeader/TopHeader";
 import { useGlobalAuth } from "../../contexts/AuthContext";
 import { USER_ROLE } from "../../constant/app";
 import { toast } from "react-toastify";
+import { hasProOrBusiness } from "../../constant/permission";
 
 const { Header } = Layout;
 
 const Sidebar = ({ collapsed }) => {
-  const { user, isReadingForm } = useGlobalAuth();
+  const { user, isReadingForm, userPackages } = useGlobalAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -177,6 +178,31 @@ const Sidebar = ({ collapsed }) => {
   const handleClick = (e, isReadingForm) => {
     const key = e.key;
     if (e.key === "Pacs") return;
+    const isAppFeature =
+      key.startsWith("/home/recist_nn") ||
+      key.startsWith("/home/tirad") ||
+      key.startsWith("/home/lungrad") ||
+      key.startsWith("/home/birad") ||
+      key.startsWith("/home/boneage") ||
+      key.startsWith("/home/dipss") ||
+      key.startsWith("/home/D-COR") ||
+      key.startsWith("/home/D-CPS") ||
+      key.startsWith("/home/D-BALTHAZA") ||
+      key.startsWith("/home/D-VOTHAN") ||
+      key.startsWith("/home/D-VOGAN") ||
+      key.startsWith("/home/D-BOSNIAK") ||
+      key.startsWith("/home/D-LIRADS") ||
+      key.startsWith("/home/D-ORADS");
+
+    if (
+      isAppFeature &&
+      !hasProOrBusiness(userPackages) &&
+      user.id_role != USER_ROLE.ADMIN
+    ) {
+      toast.error("Bạn cần gói PRO hoặc BUSINESS để sử dụng tính năng này!");
+      return;
+    }
+
     if (isReadingForm) {
       const newWindow = window.open(key, "_blank");
       if (newWindow) {

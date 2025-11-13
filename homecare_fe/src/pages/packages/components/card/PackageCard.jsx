@@ -1,9 +1,11 @@
 import React from "react";
-import { Card, Button, Tooltip } from "antd";
+import { Card, Button, Tooltip, Divider } from "antd";
 import { CheckOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import styles from "./PackageCard.module.scss";
+import { PACKAGE_FEES } from "../../../../constant/permission";
 
 const PackageCard = ({ planKey, plan, onSelect }) => {
+  const fees = PACKAGE_FEES[planKey];
   return (
     <Card className={styles.packageCard} hoverable>
       <div className={styles.contentWrapper}>
@@ -24,7 +26,6 @@ const PackageCard = ({ planKey, plan, onSelect }) => {
           ))}
         </ul>
       </div>
-
       <Button
         type="primary"
         block
@@ -33,6 +34,15 @@ const PackageCard = ({ planKey, plan, onSelect }) => {
       >
         Đăng ký ngay
       </Button>
+      <Divider />
+      <div className={styles.priceWrapper}>
+        {fees.map((f) => (
+          <div key={f.value} className={styles.priceItem}>
+            <span>{f.value} tháng: </span>
+            <strong>{f.label} đ</strong>
+          </div>
+        ))}
+      </div>
     </Card>
   );
 };
