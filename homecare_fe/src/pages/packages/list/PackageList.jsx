@@ -7,6 +7,7 @@ import API_CALL from "../../../services/axiosClient";
 import {
   DURATION_OPTIONS,
   PACKAGE_FEATURES,
+  PACKAGE_FEES,
 } from "../../../constant/permission";
 
 const { Option } = Select;
@@ -17,6 +18,7 @@ const PackageList = () => {
   const [duration, setDuration] = useState(1);
   const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
+  const fees = PACKAGE_FEES[selectedPackage];
 
   const handleSelect = (planKey) => {
     setSelectedPackage(planKey);
@@ -95,6 +97,14 @@ const PackageList = () => {
           />
         </div>
 
+        <div>
+          {fees?.map((f) => (
+            <div key={f.value}>
+              <span>{f.value} tháng: </span>
+              <strong>{f.label} đ</strong>
+            </div>
+          ))}
+        </div>
         <Button
           type="primary"
           block

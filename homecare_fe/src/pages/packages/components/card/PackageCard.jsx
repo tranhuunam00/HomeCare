@@ -35,14 +35,6 @@ const PackageCard = ({ planKey, plan, onSelect }) => {
         Đăng ký ngay
       </Button>
       <Divider />
-      <div className={styles.priceWrapper}>
-        {fees.map((f) => (
-          <div key={f.value} className={styles.priceItem}>
-            <span>{f.value} tháng: </span>
-            <strong>{f.label} đ</strong>
-          </div>
-        ))}
-      </div>
     </Card>
   );
 };

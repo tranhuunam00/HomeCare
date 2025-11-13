@@ -23,6 +23,7 @@ import {
   PACKAGE_FEATURES,
   DURATION_OPTIONS,
   getUsablePackageCodes,
+  PACKAGE_FEES,
 } from "../../constant/permission";
 import { useGlobalAuth } from "../../contexts/AuthContext";
 import STORAGE from "../../services/storage";
@@ -75,6 +76,8 @@ const OnboardingWizard = ({ open, onClose, doctorId, is_use_onboard }) => {
   const [requests, setRequests] = useState([]);
   const [loadingRequests, setLoadingRequests] = useState(false);
   const [loadingTemplate, setLoadingTemplate] = useState(false);
+
+  const fees = PACKAGE_FEES[selectedPackage];
 
   const usableCount = getUsablePackageCodes(userPackages).length;
 
@@ -587,6 +590,15 @@ const OnboardingWizard = ({ open, onClose, doctorId, is_use_onboard }) => {
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
               />
+            </div>
+
+            <div>
+              {fees?.map((f) => (
+                <div key={f.value}>
+                  <span>{f.value} tháng: </span>
+                  <strong>{f.label} đ</strong>
+                </div>
+              ))}
             </div>
 
             <Button

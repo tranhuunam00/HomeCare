@@ -344,12 +344,16 @@ export default function DoctorUseDFormVer2({
         Number(n.id_template_service) === Number(selectedTemplateServiceId) &&
         Number(n.id_exam_part) === Number(selectedExamPartId) &&
         (n.isUsed == isUse || n.id == currentId) &&
-        n.language?.includes(languageTranslate)
+        n.language?.includes(languageTranslate) &&
+        n.form_ver2s
     );
     if (!hasProOrBusiness(userPackages) && user.id_role != USER_ROLE.ADMIN) {
       filtered = filtered.filter(
         (f) =>
-          f.name?.toLowerCase().includes("bình thường") && f.language == "vi"
+          f.form_ver2s &&
+          (f.form_ver2s[0]?.ket_luan.toLowerCase().includes("bình thường") ||
+            f.form_ver2s[0]?.ket_luan.toLowerCase() == "bình thường") &&
+          f.language?.includes(languageTranslate)
       );
     }
 
