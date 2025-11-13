@@ -79,11 +79,14 @@ const PackageList = () => {
             value={duration}
             onChange={(val) => setDuration(val)}
           >
-            {DURATION_OPTIONS.map((d) => (
-              <Option key={d.value} value={d.value} disabled={d.value !== 1}>
-                {d.label}
-              </Option>
-            ))}
+            {DURATION_OPTIONS.map((d) => {
+              const fee = fees?.find((f) => f.value === d.value)?.label;
+              return (
+                <Option key={d.value} value={d.value} disabled={d.value !== 1}>
+                  {`${d.label} – ${fee || "..."} đ`}
+                </Option>
+              );
+            })}
           </Select>
         </div>
 
@@ -97,14 +100,6 @@ const PackageList = () => {
           />
         </div>
 
-        <div>
-          {fees?.map((f) => (
-            <div key={f.value}>
-              <span>{f.value} tháng: </span>
-              <strong>{f.label} đ</strong>
-            </div>
-          ))}
-        </div>
         <Button
           type="primary"
           block
