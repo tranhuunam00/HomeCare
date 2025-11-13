@@ -347,8 +347,9 @@ export default function DoctorUseDFormVer2({
         n.language?.includes(languageTranslate)
     );
     if (!hasProOrBusiness(userPackages) && user.id_role != USER_ROLE.ADMIN) {
-      filtered = filtered.filter((f) =>
-        f.name?.toLowerCase().includes("bình thường")
+      filtered = filtered.filter(
+        (f) =>
+          f.name?.toLowerCase().includes("bình thường") && f.language == "vi"
       );
     }
 
