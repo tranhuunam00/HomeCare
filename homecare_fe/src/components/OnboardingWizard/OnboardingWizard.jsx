@@ -564,21 +564,34 @@ const OnboardingWizard = ({ open, onClose, doctorId, is_use_onboard }) => {
               <strong style={{ color: "#1677ff" }}>{selectedPackage}</strong>
             </p>
             <div style={{ marginTop: 12 }}>
-              <label>Thời hạn sử dụng</label>
+              <label>Chu kỳ thanh toán</label>
               <Select
                 style={{ width: "100%", marginTop: 4 }}
                 value={duration}
                 onChange={(val) => setDuration(val)}
               >
                 {DURATION_OPTIONS.map((d) => {
-                  const fee = fees?.find((f) => f.value === d.value)?.label;
+                  const feeItem = fees?.find((f) => f.value === d.value);
+                  const fee = Number(feeItem?.label?.replace(/\./g, "")) || 0;
+
+                  const oneMonthFee =
+                    Number(
+                      fees
+                        ?.find((f) => f.value === 1)
+                        ?.label?.replace(/\./g, "")
+                    ) || 0;
+
+                  const originalPrice = oneMonthFee * d.value;
+                  const saving = originalPrice - fee;
+
                   return (
-                    <Option
-                      key={d.value}
-                      value={d.value}
-                      disabled={d.value !== 1}
-                    >
-                      {`${d.label} – ${fee || "..."} đ`}
+                    <Option key={d.value} value={d.value}>
+                      {`${d.label} – ${feeItem?.label} đ`}
+                      {saving > 0 && (
+                        <span style={{ color: "#52c41a", marginLeft: 6 }}>
+                          (Tiết kiệm {saving.toLocaleString("vi-VN")} đ)
+                        </span>
+                      )}
                     </Option>
                   );
                 })}

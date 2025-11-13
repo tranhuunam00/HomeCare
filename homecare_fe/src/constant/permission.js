@@ -140,22 +140,21 @@ export const DURATION_OPTIONS = [
   { value: 3, label: "3 tháng" },
   { value: 12, label: "12 tháng" },
 ];
-
 export const PACKAGE_FEES = {
   ECO: [
-    { value: 1, label: "250.000" },
-    { value: 3, label: "625.000" },
-    { value: 12, label: "2.250.000" },
+    { value: 1, label: "250.000", saving: 0 },
+    { value: 3, label: "625.000", saving: 125000 },
+    { value: 12, label: "2.250.000", saving: 750000 },
   ],
   PRO: [
-    { value: 1, label: "450.000" },
-    { value: 3, label: "1.125.000" },
-    { value: 12, label: "4.050.000" },
+    { value: 1, label: "450.000", saving: 0 },
+    { value: 3, label: "1.125.000", saving: 225000 },
+    { value: 12, label: "4.050.000", saving: 1350000 },
   ],
   BUSINESS: [
-    { value: 1, label: "650.000" },
-    { value: 3, label: "1.625.000" },
-    { value: 12, label: "5.850.000" },
+    { value: 1, label: "650.000", saving: 0 },
+    { value: 3, label: "1.625.000", saving: 325000 },
+    { value: 12, label: "5.850.000", saving: 2220000 },
   ],
 };
 
