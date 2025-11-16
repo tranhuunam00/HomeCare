@@ -69,6 +69,7 @@ import { USER_ROLE } from "./constant/app";
 import STORAGE from "./services/storage";
 import PrivacyPolicy from "./components/policy/PrivacyPolicy";
 import PartnerList from "./pages/intergrate/partners/partnersList";
+import UltrasoundBungForm from "./pages/sono/details/bung/sono.bung";
 
 function App() {
   useAuthInitializer();
@@ -180,7 +181,7 @@ function App() {
           <Route path="products" element={<ProductList />} />
           <Route path="templates" element={<TemplateList />} />
           <Route path="partners" element={<PartnerList />} />
-
+          <Route path="sono/bung" element={<UltrasoundBungForm />} />
           <Route
             path="form-drad/use/detail/:id"
             element={<DoctorUseDFormVer2 isUse={true} />}

@@ -171,7 +171,10 @@ const Sidebar = ({ collapsed }) => {
       key: "/home/intergrate",
       icon: <Avatar src="/icons/intergrated.png" size={40} />,
       label: "Tích hợp",
-      children: [{ key: "/home/partners", label: "Đối tác" }],
+      children: [
+        { key: "/home/partners", label: "Đối tác" },
+        { key: "/home/sono/bung", label: "D-SONO Bụng" },
+      ],
     },
   ].filter(Boolean); // loại bỏ các mục false nếu user không phải admin
 
