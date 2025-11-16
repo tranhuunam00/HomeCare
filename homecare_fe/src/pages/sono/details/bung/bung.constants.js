@@ -96,4 +96,43 @@ export const STRUCTURE_OPTIONS = {
     position: ["Bàng quang"],
     needSize: ["Có sỏi", "Có polyp", "Có khối u"],
   },
+
+  "Hố chậu phải": {
+    status: [
+      "Không thấy bất thường",
+      "Có tụ dịch",
+      "Có khối u nang",
+      "Có khối u đặc",
+    ],
+    position: ["Hố chậu phải"],
+    needSize: ["Có tụ dịch", "Có khối u nang", "Có khối u đặc"],
+  },
+
+  "Hố chậu trái": {
+    status: [
+      "Không thấy bất thường",
+      "Có tụ dịch",
+      "Có khối u nang",
+      "Có khối u đặc",
+    ],
+    position: ["Hố chậu trái"],
+    needSize: ["Có tụ dịch", "Có khối u nang", "Có khối u đặc"],
+  },
+
+  "Tiểu khung": {
+    status: [
+      "Không thấy bất thường",
+      "U xơ tử cung",
+      "U nang buồng trứng",
+      "Nang cổ tử cung",
+      "Phì đại tuyến tiền liệt",
+    ],
+    position: ["Tiểu khung"],
+    needSize: [
+      "U xơ tử cung",
+      "U nang buồng trứng",
+      "Nang cổ tử cung",
+      "Phì đại tuyến tiền liệt",
+    ],
+  },
 };
