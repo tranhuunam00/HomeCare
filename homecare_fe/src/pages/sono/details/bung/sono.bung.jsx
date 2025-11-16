@@ -1,6 +1,8 @@
 import React, { useState, useRef } from "react";
-import { Select, InputNumber, Button, Card, Row, Col } from "antd";
+import { Select, InputNumber, Button, Card, Row, Col, message } from "antd";
+import axios from "axios";
 import { STRUCTURE_OPTIONS } from "./bung.constants";
+import API_CALL from "../../../../services/axiosClient";
 
 const UltrasoundBungForm = () => {
   const [structure, setStructure] = useState(null);
@@ -8,17 +10,18 @@ const UltrasoundBungForm = () => {
   const [position, setPosition] = useState(null);
   const [size, setSize] = useState(null);
 
-  const [list, setList] = useState([]);
+  const [loadingAI, setLoadingAI] = useState(false);
 
+  const [list, setList] = useState([]); // chứa item text hoặc item phân tích AI
+  const [voiceList, setVoiceList] = useState([]); // chứa voice tạm thời để gửi AI
   const [isRecording, setIsRecording] = useState(false);
 
-  // 🔥 Quan trọng: chỉ tạo recognition 1 lần
   const recognitionRef = useRef(null);
 
   if (!recognitionRef.current && "webkitSpeechRecognition" in window) {
     const recog = new window.webkitSpeechRecognition();
-    recog.continuous = true; // nghe liên tục
-    recog.interimResults = false; // chỉ lấy kết quả cuối
+    recog.continuous = true;
+    recog.interimResults = false;
     recog.lang = "vi-VN";
     recognitionRef.current = recog;
   }
@@ -26,25 +29,70 @@ const UltrasoundBungForm = () => {
   const startVoice = () => {
     const recognition = recognitionRef.current;
     if (!recognition) {
-      alert("Trình duyệt không hỗ trợ Speech Recognition!");
+      message.error("Trình duyệt không hỗ trợ giọng nói");
       return;
     }
 
     setIsRecording(true);
+    setVoiceList([]); // reset
+
     recognition.start();
 
     recognition.onresult = (event) => {
       const text = event.results[event.results.length - 1][0].transcript;
-      setList((prev) => [...prev, { text }]);
+      setVoiceList((prev) => [...prev, text]);
     };
   };
 
   const stopVoice = () => {
     const recognition = recognitionRef.current;
     if (!recognition) return;
-
     recognition.stop();
     setIsRecording(false);
+  };
+
+  // 🔥 CALL API PHÂN TÍCH VOICE SAU KHI BẤM HOÀN THÀNH
+  const analyzeVoice = async () => {
+    if (voiceList.length === 0) {
+      return message.warning("Chưa có nội dung giọng nói!");
+    }
+
+    const finalText = voiceList.join(". ");
+
+    try {
+      setLoadingAI(true);
+      message.loading("Đang phân tích giọng nói...", 1);
+
+      const res = await API_CALL.post(
+        "/sono/analyze",
+        {
+          text: finalText,
+        },
+        { timeout: 120000 }
+      );
+
+      const aiData = res.data?.data?.data || res.data?.data;
+
+      // push từng item AI vào list hiển thị
+      const mapped = aiData.map((item) => ({
+        structure: item.structure,
+        status: item.status,
+        position: item.position,
+        size: item.size ? `${item.size} mm` : null,
+        text: `${item.structure} – ${item.status} – ${item.position}${
+          item.size ? ` – (${item.size} mm)` : ""
+        }`,
+      }));
+
+      setList((prev) => [...prev, ...mapped]);
+
+      message.success("Phân tích AI thành công!");
+    } catch (err) {
+      console.error(err);
+      message.error("AI không phân tích được, hãy thử lại!");
+    } finally {
+      setLoadingAI(false); // ⭐ tắt loading
+    }
   };
 
   const handleAdd = () => {
@@ -70,7 +118,6 @@ const UltrasoundBungForm = () => {
   const positionOptions = structure
     ? STRUCTURE_OPTIONS[structure].position
     : [];
-
   const needSize =
     structure && STRUCTURE_OPTIONS[structure].needSize.includes(status || "");
 
@@ -141,7 +188,6 @@ const UltrasoundBungForm = () => {
               value={size}
               min={1}
               onChange={(v) => setSize(v)}
-              placeholder="mm"
             />
           ) : (
             <InputNumber
@@ -153,7 +199,6 @@ const UltrasoundBungForm = () => {
         </Col>
       </Row>
 
-      {/* Nút thêm */}
       <Button
         type="primary"
         block
@@ -166,14 +211,44 @@ const UltrasoundBungForm = () => {
 
       {/* 🎤 Nút Start / Stop Voice */}
       {!isRecording ? (
-        <Button block style={{ marginTop: 16 }} onClick={startVoice}>
+        <Button
+          block
+          style={{ marginTop: 16 }}
+          onClick={startVoice}
+          loading={loadingAI}
+        >
           🎤 Bắt đầu ghi âm
         </Button>
       ) : (
-        <Button danger block style={{ marginTop: 16 }} onClick={stopVoice}>
+        <Button
+          danger
+          block
+          style={{ marginTop: 16 }}
+          onClick={stopVoice}
+          loading={loadingAI}
+        >
           ⛔ Dừng ghi âm
         </Button>
       )}
+
+      <Card title="Bạn đã nói" style={{ marginTop: 16 }}>
+        {voiceList.map((txt, idx) => (
+          <p key={idx}>• {txt}</p>
+        ))}
+        {voiceList.length === 0 && <i>Chưa có âm thanh nào.</i>}
+      </Card>
+
+      {/* 🔥 Nút gọi API sau khi hoàn thành voice */}
+      <Button
+        type="primary"
+        block
+        style={{ marginTop: 16 }}
+        disabled={voiceList.length === 0}
+        onClick={analyzeVoice}
+        loading={loadingAI}
+      >
+        🤖 Hoàn thành & Phân tích AI
+      </Button>
 
       <Card title="Hình ảnh siêu âm" style={{ marginTop: 24 }}>
         {list.map((item, idx) => (
