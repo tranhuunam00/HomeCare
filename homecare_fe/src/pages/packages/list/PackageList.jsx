@@ -19,6 +19,7 @@ const PackageList = () => {
   const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
   const fees = PACKAGE_FEES[selectedPackage];
+  const [showQR, setShowQR] = useState(false);
 
   const handleSelect = (planKey) => {
     setSelectedPackage(planKey);
@@ -48,6 +49,14 @@ const PackageList = () => {
     }
   };
 
+  const selectedFeeItem = PACKAGE_FEES[selectedPackage]?.find(
+    (f) => f.value === duration
+  );
+
+  const qrImage = selectedFeeItem?.qr
+    ? `/payment/${selectedFeeItem.qr}` // ví dụ: public/qr/650k.jpg
+    : null;
+
   return (
     <div className={styles.wrapper}>
       <div className={styles.header}>
@@ -65,38 +74,38 @@ const PackageList = () => {
       <Modal
         title="Xác nhận đăng ký gói"
         open={modalVisible}
-        onCancel={() => setModalVisible(false)}
+        onCancel={() => {
+          setModalVisible(false);
+          setShowQR(false);
+        }}
         footer={null}
       >
         <p>
           Bạn đang chọn gói:{" "}
           <strong style={{ color: "#1677ff" }}>{selectedPackage}</strong>
         </p>
+
         <div style={{ marginTop: 12 }}>
           <label>Chu kỳ thanh toán</label>
           <Select
             style={{ width: "100%", marginTop: 4 }}
             value={duration}
-            onChange={(val) => setDuration(val)}
+            onChange={(val) => {
+              setDuration(val);
+              setShowQR(false); // đổi duration thì ẩn QR, disable lại nút
+            }}
           >
             {DURATION_OPTIONS.map((d) => {
-              const feeItem = fees?.find((f) => f.value === d.value);
-              const fee = Number(feeItem?.label?.replace(/\./g, "")) || 0;
-
-              const oneMonthFee =
-                Number(
-                  fees?.find((f) => f.value === 1)?.label?.replace(/\./g, "")
-                ) || 0;
-
-              const originalPrice = oneMonthFee * d.value;
-              const saving = originalPrice - fee;
+              const feeItem = PACKAGE_FEES[selectedPackage]?.find(
+                (f) => f.value === d.value
+              );
 
               return (
                 <Option key={d.value} value={d.value}>
                   {`${d.label} – ${feeItem?.label} đ`}
-                  {saving > 0 && (
+                  {feeItem?.saving > 0 && (
                     <span style={{ color: "#52c41a", marginLeft: 6 }}>
-                      (Tiết kiệm {saving.toLocaleString("vi-VN")} đ)
+                      (Tiết kiệm {feeItem.saving.toLocaleString("vi-VN")} đ)
                     </span>
                   )}
                 </Option>
@@ -115,14 +124,40 @@ const PackageList = () => {
           />
         </div>
 
+        {/* Tiến hành thanh toán */}
+        <Button
+          type="default"
+          block
+          style={{ marginTop: 16 }}
+          onClick={() => setShowQR(true)}
+        >
+          Tiến hành thanh toán
+        </Button>
+
+        {/* QR tự động từ PACKAGE_FEES */}
+        {showQR && qrImage && (
+          <div style={{ marginTop: 16, textAlign: "center" }}>
+            <img
+              src={qrImage}
+              alt="QR Payment"
+              style={{ width: 200, borderRadius: 8 }}
+            />
+            <p style={{ marginTop: 8, color: "#888" }}>
+              Vui lòng quét mã và thanh toán trước khi gửi yêu cầu
+            </p>
+          </div>
+        )}
+
+        {/* Nút gửi yêu cầu */}
         <Button
           type="primary"
           block
           style={{ marginTop: 16 }}
           loading={loading}
+          disabled={!showQR} // chỉ bật sau khi bấm “Tiến hành thanh toán”
           onClick={handleSubmit}
         >
-          Gửi yêu cầu đăng ký
+          Xác nhận thanh toán
         </Button>
       </Modal>
     </div>
