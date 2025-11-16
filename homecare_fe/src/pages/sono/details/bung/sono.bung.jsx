@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Select, InputNumber, Button, Table, Card, Row, Col } from "antd";
+import React, { useState, useRef } from "react";
+import { Select, InputNumber, Button, Card, Row, Col } from "antd";
 import { STRUCTURE_OPTIONS } from "./bung.constants";
 
 const UltrasoundBungForm = () => {
@@ -10,19 +10,21 @@ const UltrasoundBungForm = () => {
 
   const [list, setList] = useState([]);
 
-  const [voiceText, setVoiceText] = useState("");
   const [isRecording, setIsRecording] = useState(false);
 
-  let recognition;
+  // 🔥 Quan trọng: chỉ tạo recognition 1 lần
+  const recognitionRef = useRef(null);
 
-  if ("webkitSpeechRecognition" in window) {
-    recognition = new window.webkitSpeechRecognition();
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.lang = "vi-VN";
+  if (!recognitionRef.current && "webkitSpeechRecognition" in window) {
+    const recog = new window.webkitSpeechRecognition();
+    recog.continuous = true; // nghe liên tục
+    recog.interimResults = false; // chỉ lấy kết quả cuối
+    recog.lang = "vi-VN";
+    recognitionRef.current = recog;
   }
 
   const startVoice = () => {
+    const recognition = recognitionRef.current;
     if (!recognition) {
       alert("Trình duyệt không hỗ trợ Speech Recognition!");
       return;
@@ -32,18 +34,17 @@ const UltrasoundBungForm = () => {
     recognition.start();
 
     recognition.onresult = (event) => {
-      const text = event.results[0][0].transcript;
-      setVoiceText(text);
-      setList((prev) => [...prev, { text }]); // thêm vào cuối danh sách
+      const text = event.results[event.results.length - 1][0].transcript;
+      setList((prev) => [...prev, { text }]);
     };
+  };
 
-    recognition.onerror = () => {
-      setIsRecording(false);
-    };
+  const stopVoice = () => {
+    const recognition = recognitionRef.current;
+    if (!recognition) return;
 
-    recognition.onend = () => {
-      setIsRecording(false);
-    };
+    recognition.stop();
+    setIsRecording(false);
   };
 
   const handleAdd = () => {
@@ -60,8 +61,6 @@ const UltrasoundBungForm = () => {
     };
 
     setList([...list, item]);
-
-    // Reset
     setStatus(null);
     setPosition(null);
     setSize(null);
@@ -77,9 +76,8 @@ const UltrasoundBungForm = () => {
 
   return (
     <Card title="Mô tả hình ảnh siêu âm">
-      {/* ======= 1 HÀNG – 4 CỘT ======= */}
+      {/* ========= 1 HÀNG – 4 CỘT ========= */}
       <Row gutter={12}>
-        {/* Field 2 */}
         <Col xs={24} md={6}>
           <label>
             <b>Field 2 – Cấu trúc</b>
@@ -101,7 +99,6 @@ const UltrasoundBungForm = () => {
           />
         </Col>
 
-        {/* Field 3 */}
         <Col xs={24} md={6}>
           <label>
             <b>Field 3 – Trạng thái</b>
@@ -120,7 +117,6 @@ const UltrasoundBungForm = () => {
           />
         </Col>
 
-        {/* Field 4 */}
         <Col xs={24} md={6}>
           <label>
             <b>Field 4 – Vị trí</b>
@@ -135,7 +131,6 @@ const UltrasoundBungForm = () => {
           />
         </Col>
 
-        {/* Field 5 */}
         <Col xs={24} md={6}>
           <label>
             <b>Field 5 – Kích thước (mm)</b>
@@ -169,24 +164,22 @@ const UltrasoundBungForm = () => {
         Thêm vào danh sách
       </Button>
 
-      <Button
-        type={isRecording ? "primary" : "default"}
-        danger={isRecording}
-        block
-        onClick={startVoice}
-        style={{ marginTop: 16 }}
-      >
-        {isRecording ? "Đang nghe..." : "🎤 Ghi âm giọng nói"}
-      </Button>
+      {/* 🎤 Nút Start / Stop Voice */}
+      {!isRecording ? (
+        <Button block style={{ marginTop: 16 }} onClick={startVoice}>
+          🎤 Bắt đầu ghi âm
+        </Button>
+      ) : (
+        <Button danger block style={{ marginTop: 16 }} onClick={stopVoice}>
+          ⛔ Dừng ghi âm
+        </Button>
+      )}
 
-      {/* Danh sách kết quả */}
       <Card title="Hình ảnh siêu âm" style={{ marginTop: 24 }}>
         {list.map((item, idx) => (
           <p key={idx}>• {item.text}</p>
         ))}
-
         {list.length === 0 && <i>Chưa có mô tả nào.</i>}
-        {list.length === 0 && <i>Chưa có voice nào.</i>}
       </Card>
     </Card>
   );
