@@ -1,70 +1,117 @@
 export const STRUCTURE_OPTIONS = {
-  "Tuyến giáp": {
+  Gan: {
     status: [
       "Không thấy bất thường",
-      "Có nhu mô không đều",
-      "Có nhân đặc giảm âm",
-      "Có nhân đẳng tăng âm",
-      "Có nhân đặc đồng âm",
-      "Có nhân hỗn hợp",
-      "Có nang keo",
-      "Có nốt vôi hoá",
+      "Có thoái hóa mỡ lan tỏa ",
+      "Có nhu mô thô, không đều",
+      "Có u máu",
+      "Có nang",
+      "Có khối u",
+      "Có nốt vôi hóa",
+      "Có tổn thương",
     ],
-    position: ["Thuỳ phải", "Thuỳ trái", "Eo"],
+    position: ["Gan phải", "Gan trái", "Gan phải và gan trái"],
     needSize: [
-      "Có nhân đặc giảm âm",
-      "Có nhân đẳng tăng âm",
-      "Có nhân đặc đồng âm",
-      "Có nhân hỗn hợp",
-      "Có nang keo",
-      "Có nốt vôi hoá",
-    ],
-  },
-
-  "Tuyến dưới hàm": {
-    status: [
       "Không thấy bất thường",
-      "Có phì đại lan tỏa",
-      "Có giãn ống tuyến",
-      "Có sỏi",
-      "Có hạch",
+      "Có thoái hóa mỡ lan tỏa ",
+      "Có nhu mô thô, không đều",
+      "Có u máu",
+      "Có nang",
       "Có khối u",
+      "Có nốt vôi hóa",
+      "Có tổn thương",
     ],
-    position: [
-      "Tuyến dưới hàm phải",
-      "Tuyến dưới hàm trái",
-      "Tuyến dưới hàm hai bên",
-    ],
-    needSize: ["Có sỏi", "Có hạch", "Có khối u"],
   },
 
-  "Tuyến mang tai": {
+  "Đương mật": {
     status: [
       "Không thấy bất thường",
-      "Có phì đại lan tỏa",
-      "Có giãn ống tuyến",
+      "Có sỏi đường mật",
+      "Có giãn đường mật",
+      "Có giãn đường mật",
+    ],
+    position: ["Gan phải", "Gan trái", "Gan phải và gan trái"],
+    needSize: [
+      "Không thấy bất thường",
+      "Có sỏi đường mật",
+      "Có giãn đường mật",
+      "Có giãn đường mật",
+    ],
+  },
+  "Túi mật": {
+    status: ["Không thấy bất thường", "Có sỏi", "Có polyp", "Có khối u"],
+    position: ["Cổ túi mật", "Thân túi mật", "Đáy túi mật"],
+    needSize: ["Không thấy bất thường", "Có sỏi", "Có polyp", "Có khối u"],
+  },
+  Tụy: {
+    status: [
+      "Không thấy bất thường",
+      "Giãn ống tụy",
+      "Vôi hóa tụy",
+      "Khôi u tụy",
+      "Năng tụy",
+    ],
+    position: ["Đầu tụy", "Thân tụy", "Đuôi tụy"],
+    needSize: [
+      "Không thấy bất thường",
+      "Giãn ống tụy",
+      "Vôi hóa tụy",
+      "Khôi u tụy",
+      "Năng tụy",
+    ],
+  },
+
+  Lách: {
+    status: ["Không thấy bất thường", "Có nang", "Có vôi hóa", "Có khối u"],
+    position: ["1/3 trên lách", "1/3 giữa lách", "1/3 dưới lách"],
+    needSize: ["Không thấy bất thường", "Có nang", "Có vôi hóa", "Có khối u"],
+  },
+
+  "Thận phải": {
+    status: [
+      "Không thấy bất thường",
       "Có sỏi",
-      "Có hạch",
+      "Có nang",
       "Có khối u",
+      "Có nốt vôi hóa",
+      "Giãn đài bể thận",
+      "Giãn niệu quản",
     ],
-    position: [
-      "Tuyến mang tai phải",
-      "Tuyến mang tai trái",
-      "Tuyến mang tai hai bên",
+    position: ["1/3 trên lách", "1/3 giữa lách", "1/3 dưới lách"],
+    needSize: [
+      "Không thấy bất thường",
+      "Có sỏi",
+      "Có nang",
+      "Có khối u",
+      "Có nốt vôi hóa",
+      "Giãn đài bể thận",
+      "Giãn niệu quản",
     ],
-    needSize: ["Có sỏi", "Có hạch", "Có khối u"],
   },
-
-  "Cơ và phần mềm": {
+  "Thận trái": {
     status: [
       "Không thấy bất thường",
-      "Có hạch to",
-      "Có khối tổ chức",
-      "Có khối dịch",
-      "Có dị dạng mạch",
-      "Có vôi hoá",
+      "Có sỏi",
+      "Có nang",
+      "Có khối u",
+      "Có nốt vôi hóa",
+      "Giãn đài bể thận",
+      "Giãn niệu quản",
     ],
-    position: ["Vùng cổ phải", "Vùng cổ trái", "Vùng cổ hai bên"],
-    needSize: ["Có hạch to", "Có khối tổ chức", "Có khối dịch"],
+    position: ["1/3 trên lách", "1/3 giữa lách", "1/3 dưới lách"],
+    needSize: [
+      "Không thấy bất thường",
+      "Có sỏi",
+      "Có nang",
+      "Có khối u",
+      "Có nốt vôi hóa",
+      "Giãn đài bể thận",
+      "Giãn niệu quản",
+    ],
+  },
+  "Bàng quang": {
+    status: ["Không thấy bất thường", "Có sỏi", "Có polyp", "Có khối u"],
+    position: ["bàng quang"],
+    needSize: ["Không thấy bất thường", "Có sỏi", "Có polyp", "Có khối u"],
   },
 };
