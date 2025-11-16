@@ -10,6 +10,42 @@ const UltrasoundBungForm = () => {
 
   const [list, setList] = useState([]);
 
+  const [voiceText, setVoiceText] = useState("");
+  const [isRecording, setIsRecording] = useState(false);
+
+  let recognition;
+
+  if ("webkitSpeechRecognition" in window) {
+    recognition = new window.webkitSpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = "vi-VN";
+  }
+
+  const startVoice = () => {
+    if (!recognition) {
+      alert("Trình duyệt không hỗ trợ Speech Recognition!");
+      return;
+    }
+
+    setIsRecording(true);
+    recognition.start();
+
+    recognition.onresult = (event) => {
+      const text = event.results[0][0].transcript;
+      setVoiceText(text);
+      setList((prev) => [...prev, { text }]); // thêm vào cuối danh sách
+    };
+
+    recognition.onerror = () => {
+      setIsRecording(false);
+    };
+
+    recognition.onend = () => {
+      setIsRecording(false);
+    };
+  };
+
   const handleAdd = () => {
     if (!structure || !status || !position) return;
 
@@ -133,6 +169,16 @@ const UltrasoundBungForm = () => {
         Thêm vào danh sách
       </Button>
 
+      <Button
+        type={isRecording ? "primary" : "default"}
+        danger={isRecording}
+        block
+        onClick={startVoice}
+        style={{ marginTop: 16 }}
+      >
+        {isRecording ? "Đang nghe..." : "🎤 Ghi âm giọng nói"}
+      </Button>
+
       {/* Danh sách kết quả */}
       <Card title="Hình ảnh siêu âm" style={{ marginTop: 24 }}>
         {list.map((item, idx) => (
@@ -140,6 +186,7 @@ const UltrasoundBungForm = () => {
         ))}
 
         {list.length === 0 && <i>Chưa có mô tả nào.</i>}
+        {list.length === 0 && <i>Chưa có voice nào.</i>}
       </Card>
     </Card>
   );
