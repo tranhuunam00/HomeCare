@@ -1,5 +1,14 @@
 import React, { useState, useRef } from "react";
-import { Select, InputNumber, Button, Card, Row, Col, message } from "antd";
+import {
+  Select,
+  InputNumber,
+  Button,
+  Card,
+  Row,
+  Col,
+  message,
+  Radio,
+} from "antd";
 import axios from "axios";
 import { STRUCTURE_OPTIONS } from "./bung.constants";
 import API_CALL from "../../../../services/axiosClient";
@@ -129,21 +138,21 @@ const UltrasoundBungForm = () => {
           <label>
             <b>Field 2 – Cấu trúc</b>
           </label>
-          <Select
-            style={{ width: "100%" }}
-            placeholder="Chọn"
+          <Radio.Group
             value={structure}
-            onChange={(v) => {
-              setStructure(v);
+            onChange={(e) => {
+              setStructure(e.target.value);
               setStatus(null);
               setPosition(null);
               setSize(null);
             }}
-            options={Object.keys(STRUCTURE_OPTIONS).map((k) => ({
-              label: k,
-              value: k,
-            }))}
-          />
+          >
+            {Object.keys(STRUCTURE_OPTIONS).map((k) => (
+              <Radio.Button key={k} value={k}>
+                {k}
+              </Radio.Button>
+            ))}
+          </Radio.Group>
         </Col>
 
         <Col xs={24} md={6}>
@@ -153,7 +162,7 @@ const UltrasoundBungForm = () => {
           <Select
             style={{ width: "100%" }}
             placeholder="Chọn"
-            value={status}
+            value={status || "Không thấy bất thường"}
             onChange={(v) => {
               setStatus(v);
               setPosition(null);
@@ -164,39 +173,42 @@ const UltrasoundBungForm = () => {
           />
         </Col>
 
-        <Col xs={24} md={6}>
-          <label>
-            <b>Field 4 – Vị trí</b>
-          </label>
-          <Select
-            style={{ width: "100%" }}
-            placeholder="Chọn"
-            value={position}
-            onChange={(v) => setPosition(v)}
-            options={positionOptions.map((p) => ({ label: p, value: p }))}
-            disabled={!status}
-          />
-        </Col>
-
-        <Col xs={24} md={6}>
-          <label>
-            <b>Field 5 – Kích thước (mm)</b>
-          </label>
-          {needSize ? (
-            <InputNumber
+        {status && status !== "Không thấy bất thường" && (
+          <Col xs={24} md={6}>
+            <label>
+              <b>Field 4 – Vị trí</b>
+            </label>
+            <Select
               style={{ width: "100%" }}
-              value={size}
-              min={1}
-              onChange={(v) => setSize(v)}
+              placeholder="Chọn"
+              value={position}
+              onChange={(v) => setPosition(v)}
+              options={positionOptions.map((p) => ({ label: p, value: p }))}
+              disabled={!status}
             />
-          ) : (
-            <InputNumber
-              style={{ width: "100%" }}
-              disabled
-              placeholder="Không yêu cầu"
-            />
-          )}
-        </Col>
+          </Col>
+        )}
+        {status && status !== "Không thấy bất thường" && (
+          <Col xs={24} md={6}>
+            <label>
+              <b>Field 5 – Kích thước (mm)</b>
+            </label>
+            {needSize ? (
+              <InputNumber
+                style={{ width: "100%" }}
+                value={size}
+                min={1}
+                onChange={(v) => setSize(v)}
+              />
+            ) : (
+              <InputNumber
+                style={{ width: "100%" }}
+                disabled
+                placeholder="Không yêu cầu"
+              />
+            )}
+          </Col>
+        )}
       </Row>
 
       <Button
@@ -247,10 +259,10 @@ const UltrasoundBungForm = () => {
         onClick={analyzeVoice}
         loading={loadingAI}
       >
-        🤖 Hoàn thành & Phân tích AI
+        Phân tích AI
       </Button>
 
-      <Card title="Hình ảnh siêu âm" style={{ marginTop: 24 }}>
+      <Card title="KẾT LUẬN, CHẨN ĐOÁN" style={{ marginTop: 24 }}>
         {list.map((item, idx) => (
           <p key={idx}>• {item.text}</p>
         ))}
