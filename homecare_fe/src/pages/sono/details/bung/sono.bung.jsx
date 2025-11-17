@@ -1,19 +1,19 @@
 import React, { useState, useRef } from "react";
-import {
-  Select,
-  InputNumber,
-  Button,
-  Card,
-  Row,
-  Col,
-  message,
-  Radio,
-} from "antd";
+import { Select, InputNumber, Button, Card, Row, Col, Radio } from "antd";
 import axios from "axios";
 import { STRUCTURE_OPTIONS } from "./bung.constants";
 import API_CALL from "../../../../services/axiosClient";
+import { toast } from "react-toastify";
+
+const FIELD1_OPTIONS = [
+  "Bụng tổng quát",
+  "Tuyến giáp và vùng cổ",
+  "Tuyến vú và hố nách",
+];
 
 const UltrasoundBungForm = () => {
+  const [field1, setField1] = useState(null);
+
   const [structure, setStructure] = useState(null);
   const [status, setStatus] = useState(null);
   const [position, setPosition] = useState(null);
@@ -21,8 +21,8 @@ const UltrasoundBungForm = () => {
 
   const [loadingAI, setLoadingAI] = useState(false);
 
-  const [list, setList] = useState([]); // chứa item text hoặc item phân tích AI
-  const [voiceList, setVoiceList] = useState([]); // chứa voice tạm thời để gửi AI
+  const [list, setList] = useState([]);
+  const [voiceList, setVoiceList] = useState([]);
   const [isRecording, setIsRecording] = useState(false);
 
   const recognitionRef = useRef(null);
@@ -35,16 +35,15 @@ const UltrasoundBungForm = () => {
     recognitionRef.current = recog;
   }
 
+  // ---------- VOICE ----------
   const startVoice = () => {
     const recognition = recognitionRef.current;
     if (!recognition) {
-      message.error("Trình duyệt không hỗ trợ giọng nói");
+      toast.error("Trình duyệt không hỗ trợ giọng nói");
       return;
     }
-
     setIsRecording(true);
-    setVoiceList([]); // reset
-
+    setVoiceList([]);
     recognition.start();
 
     recognition.onresult = (event) => {
@@ -60,17 +59,14 @@ const UltrasoundBungForm = () => {
     setIsRecording(false);
   };
 
-  // 🔥 CALL API PHÂN TÍCH VOICE SAU KHI BẤM HOÀN THÀNH
   const analyzeVoice = async () => {
-    if (voiceList.length === 0) {
-      return message.warning("Chưa có nội dung giọng nói!");
-    }
+    if (voiceList.length === 0) return toast.warning("Chưa có nội dung!");
 
     const finalText = voiceList.join(". ");
 
     try {
       setLoadingAI(true);
-      message.loading("Đang phân tích giọng nói...", 1);
+      toast.loading("Đang phân tích giọng nói...", 1);
 
       const res = await API_CALL.post(
         "/sono/analyze",
@@ -82,7 +78,6 @@ const UltrasoundBungForm = () => {
 
       const aiData = res.data?.data?.data || res.data?.data;
 
-      // push từng item AI vào list hiển thị
       const mapped = aiData.map((item) => ({
         structure: item.structure,
         status: item.status,
@@ -95,12 +90,11 @@ const UltrasoundBungForm = () => {
 
       setList((prev) => [...prev, ...mapped]);
 
-      message.success("Phân tích AI thành công!");
+      toast.success("Phân tích AI thành công!");
     } catch (err) {
-      console.error(err);
-      message.error("AI không phân tích được, hãy thử lại!");
+      toast.error("AI không phân tích được!");
     } finally {
-      setLoadingAI(false); // ⭐ tắt loading
+      setLoadingAI(false);
     }
   };
 
@@ -132,142 +126,176 @@ const UltrasoundBungForm = () => {
 
   return (
     <Card title="Mô tả hình ảnh siêu âm">
-      {/* ========= 1 HÀNG – 4 CỘT ========= */}
-      <Row gutter={12}>
-        <Col xs={24} md={6}>
-          <label>
-            <b>Field 2 – Cấu trúc</b>
-          </label>
-          <Radio.Group
-            value={structure}
-            onChange={(e) => {
-              setStructure(e.target.value);
-              setStatus(null);
-              setPosition(null);
-              setSize(null);
-            }}
-          >
-            {Object.keys(STRUCTURE_OPTIONS).map((k) => (
-              <Radio.Button key={k} value={k}>
-                {k}
-              </Radio.Button>
-            ))}
-          </Radio.Group>
-        </Col>
-
-        <Col xs={24} md={6}>
-          <label>
-            <b>Field 3 – Trạng thái</b>
-          </label>
-          <Select
-            style={{ width: "100%" }}
-            placeholder="Chọn"
-            value={status || "Không thấy bất thường"}
-            onChange={(v) => {
-              setStatus(v);
-              setPosition(null);
-              setSize(null);
-            }}
-            options={statusOptions.map((s) => ({ label: s, value: s }))}
-            disabled={!structure}
-          />
-        </Col>
-
-        {status && status !== "Không thấy bất thường" && (
-          <Col xs={24} md={6}>
-            <label>
-              <b>Field 4 – Vị trí</b>
-            </label>
-            <Select
-              style={{ width: "100%" }}
-              placeholder="Chọn"
-              value={position}
-              onChange={(v) => setPosition(v)}
-              options={positionOptions.map((p) => ({ label: p, value: p }))}
-              disabled={!status}
-            />
-          </Col>
-        )}
-        {status && status !== "Không thấy bất thường" && (
-          <Col xs={24} md={6}>
-            <label>
-              <b>Field 5 – Kích thước (mm)</b>
-            </label>
-            {needSize ? (
-              <InputNumber
-                style={{ width: "100%" }}
-                value={size}
-                min={1}
-                onChange={(v) => setSize(v)}
-              />
-            ) : (
-              <InputNumber
-                style={{ width: "100%" }}
-                disabled
-                placeholder="Không yêu cầu"
-              />
-            )}
-          </Col>
-        )}
-      </Row>
-
-      <Button
-        type="primary"
-        block
-        style={{ marginTop: 16 }}
-        disabled={!structure || !status || !position}
-        onClick={handleAdd}
+      <label style={{ marginRight: 50 }}>
+        <b>Field 1 – Vùng khảo sát</b>
+      </label>
+      <Radio.Group
+        value={field1}
+        onChange={(e) => setField1(e.target.value)}
+        style={{ marginBottom: 24 }}
       >
-        Thêm vào danh sách
-      </Button>
+        {FIELD1_OPTIONS.map((o) => (
+          <Radio.Button key={o} value={o}>
+            {o}
+          </Radio.Button>
+        ))}
+      </Radio.Group>
 
-      {/* 🎤 Nút Start / Stop Voice */}
-      {!isRecording ? (
-        <Button
-          block
-          style={{ marginTop: 16 }}
-          onClick={startVoice}
-          loading={loadingAI}
-        >
-          🎤 Bắt đầu ghi âm
-        </Button>
-      ) : (
-        <Button
-          danger
-          block
-          style={{ marginTop: 16 }}
-          onClick={stopVoice}
-          loading={loadingAI}
-        >
-          ⛔ Dừng ghi âm
-        </Button>
+      {!field1 && (
+        <div style={{ marginTop: 32, textAlign: "center" }}>
+          <img
+            src="/images/sono_start.png"
+            style={{ maxWidth: 260, opacity: 0.7 }}
+          />
+          <p>
+            <i>Vui lòng chọn vùng khảo sát để bắt đầu.</i>
+          </p>
+        </div>
       )}
 
-      <Card title="Bạn đã nói" style={{ marginTop: 16 }}>
-        {voiceList.map((txt, idx) => (
-          <p key={idx}>• {txt}</p>
-        ))}
-        {voiceList.length === 0 && <i>Chưa có âm thanh nào.</i>}
-      </Card>
+      {/* ⭐ Nếu chọn rồi → hiển thị toàn bộ form bên dưới */}
+      {field1 && (
+        <>
+          <Row gutter={12}>
+            {/* FIELD 2 */}
+            <Col xs={24} md={6}>
+              <label>
+                <b>Field 2 – Cấu trúc</b>
+              </label>
+              <Radio.Group
+                value={structure}
+                onChange={(e) => {
+                  setStructure(e.target.value);
+                  setStatus(null);
+                  setPosition(null);
+                  setSize(null);
+                }}
+              >
+                {Object.keys(STRUCTURE_OPTIONS).map((k) => (
+                  <Radio.Button key={k} value={k}>
+                    {k}
+                  </Radio.Button>
+                ))}
+              </Radio.Group>
+            </Col>
 
-      {/* 🔥 Nút gọi API sau khi hoàn thành voice */}
-      <Button
-        type="primary"
-        block
-        style={{ marginTop: 16 }}
-        disabled={voiceList.length === 0}
-        onClick={analyzeVoice}
-        loading={loadingAI}
-      >
-        Phân tích AI
-      </Button>
+            {/* FIELD 3 */}
+            <Col xs={24} md={6}>
+              <label>
+                <b>Field 3 – Trạng thái</b>
+              </label>
+              <Select
+                style={{ width: "100%" }}
+                placeholder="Chọn"
+                value={status || "Không thấy bất thường"}
+                onChange={(v) => {
+                  setStatus(v);
+                  setPosition(null);
+                  setSize(null);
+                }}
+                options={statusOptions.map((s) => ({
+                  label: s,
+                  value: s,
+                }))}
+                disabled={!structure}
+              />
+            </Col>
 
-      <Card title="KẾT LUẬN, CHẨN ĐOÁN" style={{ marginTop: 24 }}>
-        {list.map((item, idx) => (
-          <p key={idx}>• {item.text}</p>
-        ))}
-        {list.length === 0 && <i>Chưa có mô tả nào.</i>}
-      </Card>
+            {/* FIELD 4 */}
+            {status && status !== "Không thấy bất thường" && (
+              <Col xs={24} md={6}>
+                <label>
+                  <b>Field 4 – Vị trí</b>
+                </label>
+                <Select
+                  style={{ width: "100%" }}
+                  placeholder="Chọn"
+                  value={position}
+                  onChange={setPosition}
+                  options={positionOptions.map((p) => ({
+                    label: p,
+                    value: p,
+                  }))}
+                />
+              </Col>
+            )}
+
+            {/* FIELD 5 */}
+            {status && status !== "Không thấy bất thường" && (
+              <Col xs={24} md={6}>
+                <label>
+                  <b>Field 5 – Kích thước (mm)</b>
+                </label>
+                {needSize ? (
+                  <InputNumber
+                    style={{ width: "100%" }}
+                    value={size}
+                    min={1}
+                    onChange={setSize}
+                  />
+                ) : (
+                  <InputNumber
+                    style={{ width: "100%" }}
+                    disabled
+                    placeholder="Không yêu cầu"
+                  />
+                )}
+              </Col>
+            )}
+          </Row>
+
+          <Button
+            type="primary"
+            block
+            style={{ marginTop: 16 }}
+            disabled={!structure || !status || !position}
+            onClick={handleAdd}
+          >
+            Thêm vào danh sách
+          </Button>
+
+          {/* Voice */}
+          {!isRecording ? (
+            <Button block style={{ marginTop: 16 }} onClick={startVoice}>
+              🎤 Bắt đầu ghi âm
+            </Button>
+          ) : (
+            <Button block danger style={{ marginTop: 16 }} onClick={stopVoice}>
+              ⛔ Dừng ghi âm
+            </Button>
+          )}
+
+          {/* Voice list */}
+          <Card title="Bạn đã nói" style={{ marginTop: 16 }}>
+            {voiceList.length === 0 ? (
+              <i>Chưa có âm thanh nào.</i>
+            ) : (
+              voiceList.map((txt, idx) => <p key={idx}>• {txt}</p>)
+            )}
+          </Card>
+
+          {/* AI */}
+          <Button
+            type="primary"
+            block
+            style={{ marginTop: 16 }}
+            disabled={voiceList.length === 0}
+            onClick={analyzeVoice}
+            loading={loadingAI}
+          >
+            Phân tích AI
+          </Button>
+
+          {/* Final list */}
+          <Card title="KẾT LUẬN, CHẨN ĐOÁN" style={{ marginTop: 24 }}>
+            {list.length === 0 ? (
+              <i>Chưa có mô tả nào.</i>
+            ) : (
+              list.map((item, idx) => <p key={idx}>• {item.text}</p>)
+            )}
+          </Card>
+        </>
+      )}
     </Card>
   );
 };
