@@ -1,9 +1,19 @@
 import React, { useState, useRef } from "react";
-import { Select, InputNumber, Button, Card, Row, Col, Radio } from "antd";
-import axios from "axios";
-import { STRUCTURE_OPTIONS } from "./bung.constants";
+import {
+  Select,
+  InputNumber,
+  Button,
+  Card,
+  Row,
+  Col,
+  Radio,
+  Divider,
+} from "antd";
+import { BUNG_STRUCTURE_OPTIONS } from "./bung.constants";
 import API_CALL from "../../../../services/axiosClient";
 import { toast } from "react-toastify";
+import { TUYEN_GIAP_STRUCTURE_OPTIONS } from "../tuyengiap/tuyengiap.constants";
+import { TUYEN_VU_STRUCTURE_OPTIONS } from "../tuyenvu/tuyenvu.constants";
 
 const FIELD1_OPTIONS = [
   "Bụng tổng quát",
@@ -117,6 +127,13 @@ const UltrasoundBungForm = () => {
     setSize(null);
   };
 
+  const STRUCTURE_OPTIONS =
+    field1 == FIELD1_OPTIONS[0]
+      ? BUNG_STRUCTURE_OPTIONS
+      : field1 == FIELD1_OPTIONS[1]
+      ? TUYEN_GIAP_STRUCTURE_OPTIONS
+      : TUYEN_VU_STRUCTURE_OPTIONS;
+
   const statusOptions = structure ? STRUCTURE_OPTIONS[structure].status : [];
   const positionOptions = structure
     ? STRUCTURE_OPTIONS[structure].position
@@ -126,6 +143,8 @@ const UltrasoundBungForm = () => {
 
   return (
     <Card title="Mô tả hình ảnh siêu âm">
+      {/* <img src="/product/sono/flowSono.png" alt="" width={1000} /> */}
+      <Divider />
       <label style={{ marginRight: 50 }}>
         <b>Field 1 – Vùng khảo sát</b>
       </label>

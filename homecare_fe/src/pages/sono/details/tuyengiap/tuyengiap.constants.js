@@ -35,7 +35,13 @@ export const TUYEN_GIAP_STRUCTURE_OPTIONS = {
       "Tuyến dưới hàm trái",
       "Tuyến dưới hàm hai bên",
     ],
-    needSize: ["Có sỏi", "Có hạch", "Có khối u"],
+    needSize: [
+      "Có phì đại lan tỏa",
+      "Có giãn ống tuyến",
+      "Có sỏi",
+      "Có hạch",
+      "Có khối u",
+    ],
   },
 
   "Tuyến mang tai": {

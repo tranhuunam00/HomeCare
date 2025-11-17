@@ -1,4 +1,4 @@
-export const STRUCTURE_OPTIONS = {
+export const BUNG_STRUCTURE_OPTIONS = {
   Gan: {
     status: [
       "Không thấy bất thường",
@@ -22,7 +22,7 @@ export const STRUCTURE_OPTIONS = {
       "Có viêm đường mật",
     ],
     position: ["Gan phải", "Gan trái", "Gan phải và gan trái"],
-    needSize: ["Có sỏi đường mật", "Có giãn đường mật"],
+    needSize: ["Có sỏi đường mật", "Có giãn đường mật", "Có viêm đường mật"],
   },
 
   "Túi mật": {
