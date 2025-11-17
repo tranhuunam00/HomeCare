@@ -23,18 +23,12 @@ const FIELD1_OPTIONS = [
 
 const UltrasoundBungForm = () => {
   const [field1, setField1] = useState(null);
-
-  const [structure, setStructure] = useState(null);
-  const [status, setStatus] = useState(null);
-  const [position, setPosition] = useState(null);
-  const [size, setSize] = useState(null);
+  const [rows, setRows] = useState([]);
 
   const [loadingAI, setLoadingAI] = useState(false);
-
   const [list, setList] = useState([]);
   const [voiceList, setVoiceList] = useState([]);
   const [isRecording, setIsRecording] = useState(false);
-
   const recognitionRef = useRef(null);
 
   if (!recognitionRef.current && "webkitSpeechRecognition" in window) {
@@ -80,9 +74,7 @@ const UltrasoundBungForm = () => {
 
       const res = await API_CALL.post(
         "/sono/analyze",
-        {
-          text: finalText,
-        },
+        { text: finalText },
         { timeout: 120000 }
       );
 
@@ -99,59 +91,88 @@ const UltrasoundBungForm = () => {
       }));
 
       setList((prev) => [...prev, ...mapped]);
-
       toast.success("Phân tích AI thành công!");
-    } catch (err) {
+    } catch {
       toast.error("AI không phân tích được!");
     } finally {
       setLoadingAI(false);
     }
   };
 
-  const handleAdd = () => {
-    if (!structure || !status || !position) return;
+  // ⭐ Khi chọn Field1 → auto tạo một hàng cho mỗi cấu trúc
+  const handleField1Change = (val) => {
+    setField1(val);
 
-    const item = {
-      structure,
-      status,
-      position,
-      size: size ? `${size} mm` : null,
-      text: `${structure} – ${status} – ${position}${
-        size ? ` – (${size} mm)` : ""
-      }`,
-    };
+    const STRUCT =
+      val === FIELD1_OPTIONS[0]
+        ? BUNG_STRUCTURE_OPTIONS
+        : val === FIELD1_OPTIONS[1]
+        ? TUYEN_GIAP_STRUCTURE_OPTIONS
+        : TUYEN_VU_STRUCTURE_OPTIONS;
 
-    setList([...list, item]);
-    setStatus(null);
-    setPosition(null);
-    setSize(null);
+    // auto create: mỗi cấu trúc 1 hàng
+    const baseRows = Object.keys(STRUCT).map((k) => ({
+      structure: k,
+      status: "Không thấy bất thường",
+      position: null,
+      size: null,
+    }));
+
+    setRows(baseRows);
   };
 
-  const STRUCTURE_OPTIONS =
-    field1 == FIELD1_OPTIONS[0]
+  // ⭐ Thêm hàng mới (field2 = chọn thủ công)
+  const addRow = () => {
+    setRows([
+      ...rows,
+      {
+        structure: null,
+        status: "Không thấy bất thường",
+        position: null,
+        size: null,
+      },
+    ]);
+  };
+
+  // ⭐ Thêm từng hàng vào danh sách
+  const handleAddItem = (row) => {
+    if (!row.structure) return toast.warning("Chọn cấu trúc!");
+
+    if (row.status !== "Không thấy bất thường" && !row.position)
+      return toast.warning("Thiếu vị trí!");
+
+    const item = {
+      structure: row.structure,
+      status: row.status,
+      position: row.position,
+      size: row.size ? `${row.size} mm` : null,
+      text: `${row.structure} – ${row.status}${
+        row.position ? " – " + row.position : ""
+      }${row.size ? ` – (${row.size} mm)` : ""}`,
+    };
+
+    setList((prev) => [...prev, item]);
+    toast.success("Đã thêm!");
+  };
+
+  const STRUCT =
+    field1 === FIELD1_OPTIONS[0]
       ? BUNG_STRUCTURE_OPTIONS
-      : field1 == FIELD1_OPTIONS[1]
+      : field1 === FIELD1_OPTIONS[1]
       ? TUYEN_GIAP_STRUCTURE_OPTIONS
       : TUYEN_VU_STRUCTURE_OPTIONS;
 
-  const statusOptions = structure ? STRUCTURE_OPTIONS[structure].status : [];
-  const positionOptions = structure
-    ? STRUCTURE_OPTIONS[structure].position
-    : [];
-  const needSize =
-    structure && STRUCTURE_OPTIONS[structure].needSize.includes(status || "");
-
   return (
     <Card title="Mô tả hình ảnh siêu âm">
-      {/* <img src="/product/sono/flowSono.png" alt="" width={1000} /> */}
       <Divider />
-      <label style={{ marginRight: 50 }}>
+      <label>
         <b>Field 1 – Vùng khảo sát</b>
       </label>
+
       <Radio.Group
         value={field1}
-        onChange={(e) => setField1(e.target.value)}
-        style={{ marginBottom: 24 }}
+        onChange={(e) => handleField1Change(e.target.value)}
+        style={{ marginBottom: 24, marginLeft: 20 }}
       >
         {FIELD1_OPTIONS.map((o) => (
           <Radio.Button key={o} value={o}>
@@ -172,114 +193,151 @@ const UltrasoundBungForm = () => {
         </div>
       )}
 
-      {/* ⭐ Nếu chọn rồi → hiển thị toàn bộ form bên dưới */}
       {field1 && (
         <>
-          <Row gutter={12}>
-            {/* FIELD 2 */}
-            <Col xs={24} md={6}>
-              <label>
-                <b>Field 2 – Cấu trúc</b>
-              </label>
-              <Radio.Group
-                value={structure}
-                onChange={(e) => {
-                  setStructure(e.target.value);
-                  setStatus(null);
-                  setPosition(null);
-                  setSize(null);
-                }}
+          {/* ⭐ LIST ROWS */}
+          {rows.map((row, index) => {
+            const statusOptions = row.structure
+              ? STRUCT[row.structure].status
+              : [];
+
+            const positionOptions = row.structure
+              ? STRUCT[row.structure].position
+              : [];
+
+            const needSize =
+              row.structure &&
+              STRUCT[row.structure].needSize.includes(row.status);
+
+            return (
+              <Card
+                key={index}
+                size="small"
+                style={{ marginBottom: 16, background: "#fafafa" }}
               >
-                {Object.keys(STRUCTURE_OPTIONS).map((k) => (
-                  <Radio.Button key={k} value={k}>
-                    {k}
-                  </Radio.Button>
-                ))}
-              </Radio.Group>
-            </Col>
+                <Row gutter={12}>
+                  {/* FIELD 2 */}
+                  <Col xs={24} md={5}>
+                    {index === 0 && <b>Cấu trúc</b>}
+                    <Select
+                      style={{ width: "100%", marginTop: 4 }}
+                      placeholder="Chọn"
+                      value={row.structure}
+                      options={Object.keys(STRUCT).map((s) => ({
+                        label: s,
+                        value: s,
+                      }))}
+                      onChange={(v) => {
+                        const updated = [...rows];
+                        updated[index].structure = v;
+                        updated[index].status = "Không thấy bất thường";
+                        updated[index].position = null;
+                        updated[index].size = null;
+                        setRows(updated);
+                      }}
+                    />
+                  </Col>
 
-            {/* FIELD 3 */}
-            <Col xs={24} md={6}>
-              <label>
-                <b>Field 3 – Trạng thái</b>
-              </label>
-              <Select
-                style={{ width: "100%" }}
-                placeholder="Chọn"
-                value={status || "Không thấy bất thường"}
-                onChange={(v) => {
-                  setStatus(v);
-                  setPosition(null);
-                  setSize(null);
-                }}
-                options={statusOptions.map((s) => ({
-                  label: s,
-                  value: s,
-                }))}
-                disabled={!structure}
-              />
-            </Col>
+                  {/* FIELD 3 */}
+                  <Col xs={24} md={5}>
+                    {index === 0 && <b>Trạng thái</b>}
+                    <Select
+                      style={{ width: "100%", marginTop: 4 }}
+                      value={row.status}
+                      disabled={!row.structure}
+                      options={statusOptions.map((s) => ({
+                        label: s,
+                        value: s,
+                      }))}
+                      onChange={(v) => {
+                        const updated = [...rows];
+                        updated[index].status = v;
+                        updated[index].position = null;
+                        updated[index].size = null;
+                        setRows(updated);
+                      }}
+                    />
+                  </Col>
 
-            {/* FIELD 4 */}
-            {status && status !== "Không thấy bất thường" && (
-              <Col xs={24} md={6}>
-                <label>
-                  <b>Field 4 – Vị trí</b>
-                </label>
-                <Select
-                  style={{ width: "100%" }}
-                  placeholder="Chọn"
-                  value={position}
-                  onChange={setPosition}
-                  options={positionOptions.map((p) => ({
-                    label: p,
-                    value: p,
-                  }))}
-                />
-              </Col>
-            )}
+                  {/* FIELD 4 */}
+                  <Col xs={24} md={5}>
+                    {index === 0 && <b>Vị trí</b>}
+                    <Select
+                      style={{ width: "100%", marginTop: 4 }}
+                      placeholder="Chọn"
+                      disabled={row.status === "Không thấy bất thường"}
+                      value={row.position}
+                      options={positionOptions.map((p) => ({
+                        label: p,
+                        value: p,
+                      }))}
+                      onChange={(v) => {
+                        const updated = [...rows];
+                        updated[index].position = v;
+                        setRows(updated);
+                      }}
+                    />
+                  </Col>
 
-            {/* FIELD 5 */}
-            {status && status !== "Không thấy bất thường" && (
-              <Col xs={24} md={6}>
-                <label>
-                  <b>Field 5 – Kích thước (mm)</b>
-                </label>
-                {needSize ? (
-                  <InputNumber
-                    style={{ width: "100%" }}
-                    value={size}
-                    min={1}
-                    onChange={setSize}
-                  />
-                ) : (
-                  <InputNumber
-                    style={{ width: "100%" }}
-                    disabled
-                    placeholder="Không yêu cầu"
-                  />
-                )}
-              </Col>
-            )}
-          </Row>
+                  {/* FIELD 5 */}
+                  <Col xs={24} md={5}>
+                    {index === 0 && <b>Kích thước - đường kính (mm)</b>}
+                    {needSize ? (
+                      <InputNumber
+                        style={{ width: "100%", marginTop: 4 }}
+                        min={1}
+                        value={row.size}
+                        onChange={(v) => {
+                          const updated = [...rows];
+                          updated[index].size = v;
+                          setRows(updated);
+                        }}
+                      />
+                    ) : (
+                      <InputNumber
+                        style={{ width: "100%", marginTop: 4 }}
+                        disabled
+                        placeholder="Không yêu cầu"
+                      />
+                    )}
+                  </Col>
 
-          <Button
-            type="primary"
+                  {/* BUTTON */}
+                  <Col
+                    xs={24}
+                    md={4}
+                    style={{ display: "flex", alignItems: "end" }}
+                  >
+                    <Button
+                      type="primary"
+                      block
+                      onClick={() => handleAddItem(row)}
+                    >
+                      Thêm
+                    </Button>
+                  </Col>
+                </Row>
+              </Card>
+            );
+          })}
+
+          {/* ⭐ ADD NEW ROW */}
+          {/* <Button
+            type="dashed"
             block
-            style={{ marginTop: 16 }}
-            disabled={!structure || !status || !position}
-            onClick={handleAdd}
+            onClick={addRow}
+            style={{ marginBottom: 16 }}
           >
-            Thêm vào danh sách
-          </Button>
+            + Thêm cấu trúc mới
+          </Button> */}
 
           {/* Voice */}
           {!isRecording ? (
-            <Button block style={{ marginTop: 16 }} onClick={startVoice}>
+            <Button block onClick={startVoice}>
               🎤 Bắt đầu ghi âm
             </Button>
           ) : (
-            <Button block danger style={{ marginTop: 16 }} onClick={stopVoice}>
+            <Button block danger onClick={stopVoice}>
               ⛔ Dừng ghi âm
             </Button>
           )}
@@ -310,7 +368,31 @@ const UltrasoundBungForm = () => {
             {list.length === 0 ? (
               <i>Chưa có mô tả nào.</i>
             ) : (
-              list.map((item, idx) => <p key={idx}>• {item.text}</p>)
+              list.map((item, idx) => (
+                <div
+                  key={idx}
+                  style={{
+                    display: "flex",
+                    justifyContent: "flex-start",
+                    alignItems: "center",
+                    padding: "6px 0",
+                    borderBottom: "1px dashed #ddd",
+                  }}
+                >
+                  <span style={{ minWidth: 500 }}>• {item.text}</span>
+
+                  <Button
+                    danger
+                    size="small"
+                    onClick={() => {
+                      const newList = list.filter((_, i) => i !== idx);
+                      setList(newList);
+                    }}
+                  >
+                    X
+                  </Button>
+                </div>
+              ))
             )}
           </Card>
         </>
