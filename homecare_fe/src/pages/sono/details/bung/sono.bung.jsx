@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Select,
   InputNumber,
@@ -21,6 +21,7 @@ import PatientInfoSection from "../../../doctor_use_form_ver2/use/items/PatientI
 import FormActionBar, {
   KEY_ACTION_BUTTON,
 } from "../../../formver2/component/FormActionBar";
+import { useGlobalAuth } from "../../../../contexts/AuthContext";
 
 const FIELD1_OPTIONS = [
   "Bụng tổng quát",
@@ -30,6 +31,8 @@ const FIELD1_OPTIONS = [
 
 const UltrasoundBungForm = () => {
   const [form] = Form.useForm();
+  const { doctor } = useGlobalAuth();
+  const [printTemplateList, setPrintTemplateList] = useState([]);
 
   const [field1, setField1] = useState(null);
   const [rows, setRows] = useState([]);
@@ -46,6 +49,8 @@ const UltrasoundBungForm = () => {
     TRANSLATE_LANGUAGE.VI
   );
 
+  const [printTemplate, setPrintTemplate] = useState(null);
+
   const { provinces, wards, setSelectedProvince } = useVietnamAddress();
 
   if (!recognitionRef.current && "webkitSpeechRecognition" in window) {
@@ -55,6 +60,31 @@ const UltrasoundBungForm = () => {
     recog.lang = "vi-VN";
     recognitionRef.current = recog;
   }
+
+  useEffect(() => {
+    const fetchTemplates = async () => {
+      try {
+        const [printRes] = await Promise.all([
+          API_CALL.get("/print-template", {
+            params: {
+              page: 1,
+              limit: 1000,
+              id_clinic: doctor.id_clinic,
+            },
+          }),
+        ]);
+
+        const printData = printRes.data.data?.data || printRes.data.data || [];
+
+        setPrintTemplateList(printData);
+      } catch (error) {
+        console.error(error);
+        toast.error("Không thể tải danh sách template");
+      }
+    };
+
+    fetchTemplates();
+  }, []);
 
   // ---------- VOICE ----------
   const startVoice = () => {
@@ -172,6 +202,31 @@ const UltrasoundBungForm = () => {
     toast.success("Đã thêm!");
   };
 
+  const handleSave = async () => {
+    try {
+      const values = await form.validateFields();
+
+      // ⭐ Lấy toàn bộ thông tin bệnh nhân
+      const payload = {
+        ...values,
+        ket_qua_chan_doan: JSON.stringify({
+          list,
+          field1,
+          rows,
+        }),
+      };
+
+      // console.log("PAYLOAD GỬI LÊN:", payload);
+
+      const res = await API_CALL.post("/sono", payload);
+
+      toast.success("Lưu thành công!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Lưu thất bại!");
+    }
+  };
+
   const STRUCT =
     field1 === FIELD1_OPTIONS[0]
       ? BUNG_STRUCTURE_OPTIONS
@@ -182,6 +237,7 @@ const UltrasoundBungForm = () => {
   return (
     <Form
       form={form}
+      onFinish={handleSave}
       layout="horizontal"
       labelAlign="left"
       labelCol={{ flex: "0 0 180px" }}
@@ -208,6 +264,37 @@ const UltrasoundBungForm = () => {
           setSelectedProvince={setSelectedProvince}
           translateLabel={translateLabel}
         />
+
+        <Form.Item
+          label={translateLabel(languageTranslate, "resultPrint", false)}
+          name="id_print_template"
+          rules={[{ required: true, message: "Chọn mẫu in" }]}
+          labelCol={{ flex: "0 0 270px" }}
+        >
+          <Select
+            disabled={!isEdit}
+            showSearch
+            allowClear
+            style={{ width: "100%" }}
+            placeholder="Chọn mẫu in"
+            optionFilterProp="children"
+            onChange={(val) => {
+              const printT = printTemplateList.find((t) => t.id == val);
+              setPrintTemplate(printT);
+              form.setFieldsValue({ id_print_template: printT?.id });
+            }}
+            filterOption={(input, option) =>
+              option?.children?.toLowerCase()?.includes(input.toLowerCase())
+            }
+          >
+            {printTemplateList.map((tpl) => (
+              <Option key={tpl.id} value={tpl.id}>
+                {tpl.name}
+              </Option>
+            ))}
+          </Select>
+        </Form.Item>
+
         <label>
           <b>Field 1 – Vùng khảo sát</b>
         </label>
