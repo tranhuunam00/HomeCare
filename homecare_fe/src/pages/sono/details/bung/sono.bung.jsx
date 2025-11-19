@@ -31,7 +31,7 @@ import { useGlobalAuth } from "../../../../contexts/AuthContext";
 import { useNavigate, useParams } from "react-router-dom";
 import PreviewSono from "../../preview/PreviewSono";
 
-const SONO_STATUS = {
+export const SONO_STATUS = {
   PENDING: "draft",
   APPROVED: "approved",
 };
@@ -341,51 +341,61 @@ const UltrasoundBungForm = () => {
           translateLabel={translateLabel}
         />
 
-        <Form.Item
-          label={translateLabel(languageTranslate, "resultPrint", false)}
-          name="id_print_template"
-          rules={[{ required: true, message: "Chọn mẫu in" }]}
-          labelCol={{ flex: "0 0 270px" }}
-        >
-          <Select
-            disabled={!isEdit}
-            showSearch
-            allowClear
-            style={{ width: "100%" }}
-            placeholder="Chọn mẫu in"
-            optionFilterProp="children"
-            onChange={(val) => {
-              const printT = printTemplateGlobal.find((t) => t.id == val);
-              setPrintTemplate(printT);
-              form.setFieldsValue({ id_print_template: printT?.id });
-            }}
-            filterOption={(input, option) =>
-              option?.children?.toLowerCase()?.includes(input.toLowerCase())
-            }
-          >
-            {printTemplateGlobal.map((tpl) => (
-              <Option key={tpl.id} value={tpl.id}>
-                {tpl.name}
-              </Option>
-            ))}
-          </Select>
-        </Form.Item>
+        <Row gutter={16} style={{ marginBottom: 24 }}>
+          {/* Cột 1: Mẫu in */}
 
-        <label>
-          <b>Field 1 – Vùng khảo sát</b>
-        </label>
+          {/* Cột 2: Field 1 */}
+          <Col span={12}>
+            <label
+              style={{ fontWeight: 600, display: "block", marginBottom: 6 }}
+            >
+              Field 1 – Vùng khảo sát
+            </label>
 
-        <Radio.Group
-          value={field1}
-          onChange={(e) => handleField1Change(e.target.value)}
-          style={{ marginBottom: 24, marginLeft: 20 }}
-        >
-          {FIELD1_OPTIONS.map((o) => (
-            <Radio.Button key={o} value={o}>
-              {o}
-            </Radio.Button>
-          ))}
-        </Radio.Group>
+            <Radio.Group
+              value={field1}
+              onChange={(e) => handleField1Change(e.target.value)}
+              style={{ marginLeft: 0 }}
+            >
+              {FIELD1_OPTIONS.map((o) => (
+                <Radio.Button key={o} value={o}>
+                  {o}
+                </Radio.Button>
+              ))}
+            </Radio.Group>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              label={translateLabel(languageTranslate, "resultPrint", false)}
+              name="id_print_template"
+              rules={[{ required: true, message: "Chọn mẫu in" }]}
+              labelCol={{ flex: "0 0 150px" }} // thu nhỏ label để vừa hàng
+            >
+              <Select
+                disabled={!isEdit}
+                showSearch
+                allowClear
+                style={{ width: "100%" }}
+                placeholder="Chọn mẫu in"
+                optionFilterProp="children"
+                onChange={(val) => {
+                  const printT = printTemplateGlobal.find((t) => t.id == val);
+                  setPrintTemplate(printT);
+                  form.setFieldsValue({ id_print_template: printT?.id });
+                }}
+                filterOption={(input, option) =>
+                  option?.children?.toLowerCase()?.includes(input.toLowerCase())
+                }
+              >
+                {printTemplateGlobal.map((tpl) => (
+                  <Option key={tpl.id} value={tpl.id}>
+                    {tpl.name}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </Col>
+        </Row>
 
         {!field1 && (
           <div style={{ marginTop: 32, textAlign: "center" }}>

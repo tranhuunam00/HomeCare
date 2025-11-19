@@ -6,6 +6,7 @@ import styles from "./SonoList.module.scss"; // dùng lại css list
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import API_CALL from "../../../services/axiosClient";
+import { SONO_STATUS } from "../details/bung/sono.bung";
 
 const { Option } = Select;
 
@@ -14,7 +15,6 @@ const SonoList = () => {
 
   // Dữ liệu
   const [data, setData] = useState([]);
-  const [clinics, setClinics] = useState([]);
 
   // Loading + phân trang
   const [loading, setLoading] = useState(false);
@@ -23,18 +23,18 @@ const SonoList = () => {
 
   // Bộ lọc thật
   const [filters, setFilters] = useState({
-    name: "",
-    clinic: null,
+    benh_nhan_ho_ten: "",
+    benh_nhan_pid: "",
+    benh_nhan_sid: "",
     status: null,
   });
 
-  // Bộ lọc giả
   const [pendingFilters, setPendingFilters] = useState({
-    name: "",
-    clinic: null,
+    benh_nhan_ho_ten: "",
+    benh_nhan_pid: "",
+    benh_nhan_sid: "",
     status: null,
   });
-
   // ================================
   // FETCH SONO LIST
   // ================================
@@ -43,8 +43,12 @@ const SonoList = () => {
     try {
       const params = { page, limit: 10 };
 
-      if (filters.name) params.searchText = filters.name;
-      if (filters.clinic !== null) params.id_clinic = filters.clinic;
+      if (filters.benh_nhan_ho_ten)
+        params.benh_nhan_ho_ten = filters.benh_nhan_ho_ten;
+
+      if (filters.benh_nhan_pid) params.benh_nhan_pid = filters.benh_nhan_pid;
+
+      if (filters.benh_nhan_sid) params.benh_nhan_sid = filters.benh_nhan_sid;
       if (filters.status !== null) params.status = filters.status;
 
       const res = await API_CALL.get("/sono", { params });
@@ -144,60 +148,65 @@ const SonoList = () => {
               <Col span={6}>
                 <label>Tên bệnh nhân</label>
                 <Input
-                  value={pendingFilters.name}
+                  value={pendingFilters.benh_nhan_ho_ten}
                   onChange={(e) =>
                     setPendingFilters({
                       ...pendingFilters,
-                      name: e.target.value,
+                      benh_nhan_ho_ten: e.target.value,
                     })
                   }
                 />
               </Col>
 
-              {/* Clinic */}
-              <Col span={6}>
-                <label>Phòng khám</label>
+              <Col span={3}>
+                <label>Trạng thái</label>
                 <Select
-                  allowClear
-                  showSearch
-                  placeholder="Tất cả"
-                  value={pendingFilters.clinic}
                   style={{ width: "100%" }}
-                  onChange={(v) =>
+                  allowClear
+                  placeholder="Chọn trạng thái"
+                  value={pendingFilters.status}
+                  onChange={(value) =>
                     setPendingFilters({
                       ...pendingFilters,
-                      clinic: v ?? null,
+                      status: value,
                     })
                   }
                 >
-                  <Option value={null}>Tất cả</Option>
-                  {clinics.map((c) => (
-                    <Option key={c.id} value={c.id}>
-                      {c.name}
-                    </Option>
-                  ))}
+                  <Select.Option value={SONO_STATUS.PENDING}>
+                    Chờ duyệt
+                  </Select.Option>
+                  <Select.Option value={SONO_STATUS.APPROVED}>
+                    Đã duyệt
+                  </Select.Option>
+                  <Select.Option value={null}>Tất cả</Select.Option>
                 </Select>
               </Col>
 
-              {/* Status */}
-              <Col span={6}>
-                <label>Trạng thái</label>
-                <Select
-                  allowClear
-                  placeholder="Tất cả"
-                  style={{ width: "100%" }}
-                  value={pendingFilters.status}
-                  onChange={(v) =>
+              {/* Clinic */}
+              <Col span={3}>
+                <label>PID</label>
+                <Input
+                  value={pendingFilters.benh_nhan_pid}
+                  onChange={(e) =>
                     setPendingFilters({
                       ...pendingFilters,
-                      status: v ?? null,
+                      benh_nhan_pid: e.target.value,
                     })
                   }
-                >
-                  <Option value={null}>Tất cả</Option>
-                  <Option value={"approved"}>Đã duyệt</Option>
-                  <Option value={"pending"}>Chờ duyệt</Option>
-                </Select>
+                />
+              </Col>
+
+              <Col span={4}>
+                <label>SID</label>
+                <Input
+                  value={pendingFilters.benh_nhan_sid}
+                  onChange={(e) =>
+                    setPendingFilters({
+                      ...pendingFilters,
+                      benh_nhan_sid: e.target.value,
+                    })
+                  }
+                />
               </Col>
 
               {/* Search button */}

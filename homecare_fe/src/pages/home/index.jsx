@@ -102,6 +102,16 @@ const Sidebar = ({ collapsed }) => {
     },
 
     {
+      key: "/home/intergrate",
+      icon: <Avatar src="/icons/sono.png" size={40} />,
+      label: "D-SONO",
+      children: [
+        { key: "/home/sono/bung", label: "Đọc ngay" },
+        { key: "/home/sono/list", label: "Danh sách đã đọc" },
+      ],
+    },
+
+    {
       key: "Ứng dụng",
       icon: <Avatar src={"/icons/tienich.png"} size={40} />,
       label: "Ứng dụng",
@@ -171,11 +181,7 @@ const Sidebar = ({ collapsed }) => {
       key: "/home/intergrate",
       icon: <Avatar src="/icons/intergrated.png" size={40} />,
       label: "Tích hợp",
-      children: [
-        { key: "/home/partners", label: "Đối tác" },
-        { key: "/home/sono/bung", label: "D-SONO" },
-        { key: "/home/sono/list", label: "D-SONO Danh sách" },
-      ],
+      children: [{ key: "/home/partners", label: "Đối tác" }],
     },
   ].filter(Boolean); // loại bỏ các mục false nếu user không phải admin
 
