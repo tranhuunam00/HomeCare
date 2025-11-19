@@ -173,7 +173,8 @@ const Sidebar = ({ collapsed }) => {
       label: "Tích hợp",
       children: [
         { key: "/home/partners", label: "Đối tác" },
-        { key: "/home/sono/bung", label: "D-SONO Bụng" },
+        { key: "/home/sono/bung", label: "D-SONO" },
+        { key: "/home/sono/list", label: "D-SONO Danh sách" },
       ],
     },
   ].filter(Boolean); // loại bỏ các mục false nếu user không phải admin

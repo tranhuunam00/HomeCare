@@ -1,0 +1,244 @@
+/* ========== A4 layout & base ========== */
+.wrapper {
+  display: block;
+}
+
+.a4Page {
+  width: 794px; /* ~A4 @96dpi */
+  min-height: 1123px; /* ~A4 @96dpi */
+  margin: 0 auto;
+  padding: 18px 22px;
+  box-sizing: border-box;
+  background: #fff;
+  color: #222;
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+/* ========== Header ========== */
+.header {
+  display: grid;
+  grid-template-columns: 120px 1fr 1fr;
+  gap: 18px;
+  align-items: start;
+  margin-bottom: 14px;
+  border-bottom: 1px solid #eef1f5;
+  padding-bottom: 10px;
+}
+
+.headerColLeft {
+  display: flex;
+  align-items: center;
+}
+.logoImg {
+  object-fit: cover;
+  display: block;
+  border-radius: 8px;
+}
+
+.clinicName {
+  margin: 0 0 6px 0;
+  font-weight: 800;
+  color: #d43b3b;
+  font-size: 15px;
+  letter-spacing: 0.2px;
+}
+.headerLine {
+  margin: 0 0 4px 0;
+}
+
+/* ========== Titles ========== */
+.sectionTitle {
+  color: #2b86c5;
+  font-size: 16px;
+  font-weight: 800;
+  margin: 10px 0 10px;
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
+}
+
+.center {
+  text-align: center;
+}
+
+h2 {
+  font-size: 16px;
+  font-weight: 800;
+  color: #1d2433;
+  margin: 14px 0 10px;
+}
+
+h4 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1d2433;
+  margin: 12px 0 8px;
+}
+
+/* ========== Admin info: 4-col pairs grid ========== */
+.pairsGrid {
+  display: grid;
+  grid-template-columns: 150px 1fr 140px 1fr; /* chỉnh label trái/phải tại đây */
+  column-gap: 12px;
+  row-gap: 6px;
+  margin-bottom: 12px;
+}
+
+.label {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.value {
+  min-height: 20px;
+  word-break: break-word;
+}
+
+/* ========== Generic KV rows (2-col) ========== */
+.kvRow {
+  display: grid;
+  grid-template-columns: 230px 1fr;
+  column-gap: 12px;
+  align-items: start;
+  margin: 4px 0;
+}
+.kvRow .label {
+  font-weight: 700;
+}
+.kvRow .value {
+  word-break: break-word;
+}
+
+/* ========== Image grid (2 imgs + caption) ========== */
+.contentImages {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin: 8px 0 12px;
+}
+.contentImages .imgCard {
+  border: 1px solid #eef1f5;
+  border-radius: 10px;
+  padding: 10px;
+  background: #fafbfc;
+}
+.contentImages img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 6px;
+  display: block;
+}
+.caption {
+  margin-top: 6px;
+  text-align: center;
+  font-size: 12.5px;
+}
+.caption a {
+  color: #2b86c5;
+  text-decoration: none;
+}
+.caption a:hover {
+  text-decoration: underline;
+}
+
+/* ========== Text & helpers ========== */
+.paragraph {
+  margin: 6px 0 10px;
+  text-align: justify;
+  white-space: pre-line;
+  font-size: 16px;
+}
+
+.box {
+  border: 1px solid #eef1f5;
+  border-radius: 10px;
+  padding: 12px;
+  background: #fff;
+  margin: 8px 0;
+}
+
+/* ========== Responsive preview (web) ========== */
+/* ===== Kích thước A4 và preview trên web ===== */
+.a4Page {
+  width: 210mm; /* khớp A4 thay vì px để khỏi scale khi in */
+  min-height: 297mm;
+  margin: 0 auto;
+  padding: 10mm 12mm; /* tương đồng bản in */
+  background: #fff;
+
+  // :global(.ant-card-body) {
+  //   padding: 0 !important;
+  // }
+}
+
+@media screen {
+  .a4Page {
+    box-shadow: 0 0 0 1px #eef1f5, 0 6px 24px rgba(0, 0, 0, 0.06);
+    border-radius: 10px;
+  }
+}
+
+/* ===== Chế độ in ===== */
+@page {
+  size: A4;
+  margin: 10mm 12mm; /* khớp padding màn hình để kết quả giống nhau */
+}
+
+// @media print {
+//   html,
+//   body {
+//     background: #fff !important;
+//     -webkit-print-color-adjust: exact;
+//     print-color-adjust: exact;
+//   }
+//   .a4Page {
+//     width: auto; /* để khớp đúng vùng in A4 */
+//     min-height: auto;
+//     margin: 0;
+//     padding: 0; /* vì @page đã có margin */
+//     box-shadow: none !important;
+//     border-radius: 0;
+//   }
+
+//   /* AntD card/box */
+//   :global(.ant-card) {
+//     box-shadow: none !important;
+//     border: none !important;
+//   }
+
+//   /* Tránh vỡ trang các khối quan trọng */
+//   .box,
+//   .contentImages .imgCard,
+//   .pairsGrid {
+//     break-inside: avoid;
+//     page-break-inside: avoid;
+//   }
+//   h2,
+//   h3,
+//   h4 {
+//     break-after: avoid;
+//     page-break-after: avoid;
+//   }
+
+//   /* Bảng mô tả hình ảnh in rõ ràng */
+//   :global(.tableSnapshot),
+//   :global(.tableSnapshot table) {
+//     width: 100%;
+//     border-collapse: collapse;
+//   }
+//   :global(.tableSnapshot th),
+//   :global(.tableSnapshot td) {
+//     border: 1px solid #d9d9d9;
+//     padding: 6px 8px;
+//     vertical-align: top;
+//   }
+
+//   /* Ảnh giữ màu & không méo */
+//   .contentImages img {
+//     object-fit: cover;
+//   }
+//   a[href]::after {
+//     content: none !important;
+//   } /* không in URL đuôi link */
+// }
