@@ -498,7 +498,7 @@ const UltrasoundBungForm = () => {
 
                       {/* FIELD 5 */}
                       <Col xs={24} md={5}>
-                        {index === 0 && <b>Kích thước - đường kính (mm)</b>}
+                        {index === 0 && <b>Kích thước (mm)</b>}
                         {needSize ? (
                           <InputNumber
                             style={{ width: "100%", marginTop: 4 }}
