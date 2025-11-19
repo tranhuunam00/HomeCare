@@ -585,27 +585,26 @@ const OnboardingWizard = ({ open, onClose, doctorId, is_use_onboard }) => {
                   const saving = originalPrice - fee;
 
                   return (
-                    <Option key={d.value} value={d.value}>
+                    <Option
+                      key={d.value}
+                      value={d.value}
+                      disabled={d.value != 1}
+                    >
                       {`${d.label} – ${feeItem?.label} đ`}
                       {saving > 0 && (
                         <span style={{ color: "#52c41a", marginLeft: 6 }}>
                           (Tiết kiệm {saving.toLocaleString("vi-VN")} đ)
                         </span>
                       )}
+                      {d.value == 1 && (
+                        <span style={{ color: "#52c41a", marginLeft: 6 }}>
+                          (Trải nghiệm 30 ngày miễn phí)
+                        </span>
+                      )}
                     </Option>
                   );
                 })}
               </Select>
-            </div>
-
-            <div style={{ marginTop: 12 }}>
-              <label>Ghi chú (tùy chọn)</label>
-              <Input.TextArea
-                rows={3}
-                placeholder="Nhập ghi chú ... "
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-              />
             </div>
 
             <Button

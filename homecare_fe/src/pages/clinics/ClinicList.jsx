@@ -44,7 +44,10 @@ const ClinicList = () => {
     setLoading(true);
     try {
       const res = await API_CALL.get("/clinics", {
-        params: { page: 1, limit: 100 },
+        params:
+          user.id_role != USER_ROLE.ADMIN
+            ? { page: 1, limit: 100, id_user: user.id }
+            : { page: 1, limit: 100 },
       });
       setClinicList(res.data.data.data);
     } catch (err) {
@@ -133,7 +136,7 @@ const ClinicList = () => {
   return (
     <div className={styles.clinicList}>
       <div className={styles.clinicList__header}>
-        <h2 className={styles.clinicList__title}>Danh sách cơ sở</h2>
+        <h2 className={styles.clinicList__title}>Danh sách phòng khám</h2>
         <Button
           icon={<PlusOutlined />}
           onClick={() => {

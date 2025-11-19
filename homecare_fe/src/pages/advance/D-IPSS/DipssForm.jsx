@@ -12,13 +12,13 @@ import API_CALL from "../../../services/axiosClient";
 const { Title, Text } = Typography;
 
 export const IPSS_QUESTIONS = [
-  { key: "q1", symptom: "Cảm giác chưa đi hết sau khi đi tiểu" },
-  { key: "q2", symptom: "Đi tiểu lại trong vòng 2 giờ sau khi đã đi tiểu" },
-  { key: "q3", symptom: "Dòng nước tiểu yếu hoặc chậm" },
-  { key: "q4", symptom: "Nước tiểu bị gián đoạn và ngắt quãng" },
-  { key: "q5", symptom: "Khó, không nhịn được tiểu" },
-  { key: "q6", symptom: "Rặn mới tiểu được" },
-  { key: "q7", symptom: "Tiểu ban đêm" },
+  { key: "Q1", symptom: "Cảm giác chưa đi hết sau khi đi tiểu" },
+  { key: "Q2", symptom: "Đi tiểu lại trong vòng 2 giờ sau khi đã đi tiểu" },
+  { key: "Q3", symptom: "Dòng nước tiểu yếu hoặc chậm" },
+  { key: "Q4", symptom: "Nước tiểu bị gián đoạn và ngắt quãng" },
+  { key: "Q5", symptom: "Khó, không nhịn được tiểu" },
+  { key: "Q6", symptom: "Rặn mới tiểu được" },
+  { key: "Q7", symptom: "Tiểu ban đêm" },
 ];
 
 export const IPSS_OPTIONS = [
