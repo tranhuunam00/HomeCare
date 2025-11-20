@@ -42,6 +42,7 @@ const PreviewSono = ({
   approvalStatus,
   ket_qua_chan_doan = [],
   rows = [],
+  rowsByField = {},
 }) => {
   console.log("printTemplate", printTemplate);
   const { user } = useGlobalAuth();
@@ -60,6 +61,9 @@ const PreviewSono = ({
       ?.name || formSnapshot?.benh_nhan_dia_chi_xa_phuong;
 
   console.log("formSnapshot", formSnapshot);
+
+  const fieldList = Object.keys(rowsByField);
+
   return (
     <div>
       <div ref={printRef} className={styles.wrapper}>
@@ -280,143 +284,99 @@ const PreviewSono = ({
             {"HÌNH ẢNH MINH HỌA"}
           </h3>
 
-          <div style={{ marginTop: 10 }}>
-            {rows
-              .filter((parent) => parent.statuses?.length > 0) // CHỈ LẤY MỤC CÓ CHỌN
-              .map((parent, pIdx) => (
-                <div
-                  key={pIdx}
+          {fieldList.map((fieldName, fieldIdx) => {
+            const parents = rowsByField[fieldName] || [];
+            const hasSelected = parents.some((p) => p.statuses?.length > 0);
+            if (!hasSelected) return null;
+
+            return (
+              <div key={fieldIdx} style={{ marginTop: 20 }}>
+                {/* ==== FIELD TITLE ==== */}
+                <h2
                   style={{
-                    background: "#f7f8fa",
-                    padding: "14px 18px",
-                    borderRadius: 10,
-                    marginBottom: 16,
+                    color: "#2f6db8",
+                    margin: "10px 0 12px",
+                    fontSize: 14,
+                    fontWeight: 700,
                   }}
                 >
-                  {/* HÀNG CHA */}
-                  <div style={{ display: "flex", marginBottom: 8, gap: 20 }}>
-                    <div style={{ flex: 1 }}>
+                  {fieldName}
+                </h2>
+
+                <Card
+                  style={{
+                    background: "#f7f8fa",
+                    borderRadius: 10,
+                    padding: "0px 20px",
+                  }}
+                >
+                  {parents
+                    .filter((p) => p.statuses?.length > 0)
+                    .map((parent, pIdx) => (
                       <div
+                        key={pIdx}
                         style={{
+                          borderBottom: "1px solid #eee",
                           fontSize: 13,
-                          fontWeight: 600,
-                          marginBottom: 4,
                         }}
                       >
-                        Cấu trúc
-                      </div>
-                      <div
-                        style={{
-                          background: "#fff",
-                          padding: "8px 12px",
-                          borderRadius: 6,
-                          border: "1px solid #ddd",
-                        }}
-                      >
-                        {parent.structure}
-                      </div>
-                    </div>
-
-                    <div style={{ flex: 2 }}>
-                      <div
-                        style={{
-                          fontSize: 13,
-                          fontWeight: 600,
-                          marginBottom: 4,
-                        }}
-                      >
-                        Trạng thái (chọn nhiều)
-                      </div>
-                      <div
-                        style={{
-                          background: "#fff",
-                          padding: "8px 12px",
-                          borderRadius: 6,
-                          border: "1px solid #ddd",
-                          display: "flex",
-                          gap: 8,
-                          flexWrap: "wrap",
-                          minHeight: 38,
-                          alignItems: "center",
-                        }}
-                      >
-                        {parent.statuses.map((st) => (
-                          <span
-                            key={st}
-                            style={{
-                              background: "#e5f0ff",
-                              padding: "4px 8px",
-                              borderRadius: 6,
-                              fontSize: 13,
-                              color: "#2f6db8",
-                            }}
-                          >
-                            {st}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* HÀNG CON */}
-                  {parent.children
-                    ?.filter((c) => c.status) // chỉ hiện hàng con có status
-                    .map((child, cIdx) => (
-                      <div
-                        key={cIdx}
-                        style={{
-                          paddingTop: 12,
-                          borderTop: "1px solid #eee",
-                          marginTop: 12,
-                        }}
-                      >
-                        <div
-                          style={{
-                            fontWeight: 700,
-                            fontSize: 14,
-                            marginBottom: 8,
-                          }}
-                        >
-                          {child.status}
-                        </div>
-
                         <div
                           style={{
                             display: "flex",
-                            gap: 20,
                             alignItems: "center",
-                            flexWrap: "wrap",
+                            justifyContent: "space-between",
                           }}
                         >
-                          <div>
-                            <span
-                              style={{
-                                fontWeight: 600,
-                                marginRight: 6,
-                              }}
-                            >
-                              Ở vị trí:
-                            </span>
-                            <span>{child.position || "—"}</span>
+                          <div style={{ fontSize: 13 }}>
+                            <b>Cấu trúc:</b> {parent.structure}
                           </div>
 
-                          <div>
-                            <span
-                              style={{
-                                fontWeight: 600,
-                                marginRight: 6,
-                              }}
-                            >
-                              Kích thước:
-                            </span>
-                            <span>{child.size ? `${child.size} mm` : "—"}</span>
+                          <div style={{ fontSize: 13 }}>
+                            <b>Trạng thái:</b>{" "}
+                            {parent.statuses.map((st) => (
+                              <span
+                                key={st}
+                                style={{
+                                  background: "#e5f0ff",
+                                  color: "#2f6db8",
+                                  padding: "4px 10px",
+                                  borderRadius: 6,
+                                  marginRight: 6,
+                                  display: "inline-block",
+                                }}
+                              >
+                                {st}
+                              </span>
+                            ))}
                           </div>
                         </div>
+
+                        {parent.children?.map((child, cIdx) => (
+                          <div
+                            key={cIdx}
+                            style={{
+                              marginLeft: 16,
+                              display: "flex",
+                              justifyContent: "space-between",
+                            }}
+                          >
+                            <div>
+                              <b>Ở vị trí:</b> {child.position || "—"}
+                            </div>
+
+                            <div>
+                              <b>Kích thước:</b>{" "}
+                              {child.size ? `${child.size} mm` : "—"}
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     ))}
-                </div>
-              ))}
-          </div>
+                </Card>
+              </div>
+            );
+          })}
+
           <Divider />
 
           <h3

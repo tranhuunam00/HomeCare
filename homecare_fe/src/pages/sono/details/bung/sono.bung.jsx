@@ -52,12 +52,22 @@ const UltrasoundBungForm = () => {
   const [form] = Form.useForm();
   const { doctor, user, printTemplateGlobal } = useGlobalAuth();
 
-  // main states
+  // current selected field1
   const [field1, setField1] = useState(null);
-  // rows: parents with structure, statuses (selected array), children [{status, position, size}]
+
+  // rowsByField: mỗi field1 có một bộ rows riêng
+  const [rowsByField, setRowsByField] = useState({
+    [FIELD1_OPTIONS[0]]: [],
+    [FIELD1_OPTIONS[1]]: [],
+    [FIELD1_OPTIONS[2]]: [],
+  });
+
+  // rows: shortcut cho workspace hiện tại (rowsByField[field1])
   const [rows, setRows] = useState([]);
-  // final conclusions list (synchronized automatically)
+
+  // final conclusions
   const [list, setList] = useState([]);
+
   const [loadingAI, setLoadingAI] = useState(false);
   const [isEdit, setIsEdit] = useState(true);
   const [printTemplate, setPrintTemplate] = useState(null);
@@ -70,73 +80,54 @@ const UltrasoundBungForm = () => {
   const [voiceList, setVoiceList] = useState([]);
   const [isRecording, setIsRecording] = useState(false);
 
-  // address hook
+  // address
   const { provinces, wards, setSelectedProvince } = useVietnamAddress();
 
-  // Map server data into form and rows/list
+  // ========= Helper: determine STRUCT by field1 =========
+  const getSTRUCT = (f) =>
+    f === FIELD1_OPTIONS[0]
+      ? BUNG_STRUCTURE_OPTIONS
+      : f === FIELD1_OPTIONS[1]
+      ? TUYEN_GIAP_STRUCTURE_OPTIONS
+      : TUYEN_VU_STRUCTURE_OPTIONS;
+
+  // ========= map server data into form and rowsByField =========
   const mapSonoDataToForm = (data) => {
     let parsed = {};
+
     try {
       parsed = JSON.parse(data.ket_qua_chan_doan || "{}");
-    } catch (e) {
-      console.error("Không parse được JSON ket_qua_chan_doan:", e);
+    } catch {
+      parsed = {};
     }
 
-    if (!data || Object.keys(data).length === 0) {
-      form.resetFields();
-    } else {
-      form.setFieldsValue({
-        ...data,
-        id_print_template: data.id_print_template,
-      });
-    }
+    // Field hiện tại
+    const f1 = parsed.field1 || FIELD1_OPTIONS[0];
+    setField1(f1);
 
-    // Normalize parsed to parents format
-    if (parsed.parents && Array.isArray(parsed.parents)) {
-      setRows(parsed.parents);
-    } else if (parsed.rows && Array.isArray(parsed.rows)) {
-      // legacy flat rows -> group by structure
-      const parentsMap = {};
-      parsed.rows.forEach((r) => {
-        const key = r.structure || "__manual__";
-        if (!parentsMap[key]) {
-          parentsMap[key] = {
-            structure: r.structure,
-            statuses: r.status ? [r.status] : [],
-            children: r.status
-              ? [
-                  {
-                    status: r.status,
-                    position: r.position || null,
-                    size: r.size || null,
-                  },
-                ]
-              : [],
-          };
-        } else {
-          parentsMap[key].statuses.push(r.status);
-          parentsMap[key].children.push({
-            status: r.status,
-            position: r.position || null,
-            size: r.size || null,
-          });
-        }
-      });
-      setRows(Object.values(parentsMap));
-    } else {
-      setRows(parsed.parents || []);
-    }
+    setList(parsed.list);
+    form.setFieldsValue({ field_1: f1 });
 
-    setList(parsed.list || parsed.finalList || []);
-    setField1(parsed.field1 || null);
+    // Parse full rowsByField
+    const fullRows = parsed.rowsByField || {
+      "Bụng tổng quát": [],
+      "Tuyến giáp và vùng cổ": [],
+      "Tuyến vú và hố nách": [],
+    };
 
-    const printT = printTemplateGlobal.find(
-      (t) => t.id == data.id_print_template
-    );
-    setPrintTemplate(printT);
+    setRowsByField(fullRows);
+
+    // Set rows theo field hiện tại
+    setRows(fullRows[f1] || []);
+
+    // Set form fields khác
+    form.setFieldsValue({
+      ...data,
+      id_print_template: data.id_print_template,
+    });
   };
 
-  // load detail if id present
+  // fetch detail if id present
   useEffect(() => {
     if (!id) return;
     const fetchDetail = async () => {
@@ -166,7 +157,11 @@ const UltrasoundBungForm = () => {
   }, [printTemplateGlobal, initialSnap]);
 
   // init speech recognition if supported
-  if (!recognitionRef.current && "webkitSpeechRecognition" in window) {
+  if (
+    !recognitionRef.current &&
+    typeof window !== "undefined" &&
+    "webkitSpeechRecognition" in window
+  ) {
     const recog = new window.webkitSpeechRecognition();
     recog.continuous = true;
     recog.interimResults = false;
@@ -174,7 +169,7 @@ const UltrasoundBungForm = () => {
     recognitionRef.current = recog;
   }
 
-  // voice handlers
+  // ---------- VOICE ----------
   const startVoice = () => {
     const recognition = recognitionRef.current;
     if (!recognition) {
@@ -234,68 +229,77 @@ const UltrasoundBungForm = () => {
     }
   };
 
-  // when choose field1 -> create parents based on STRUCT
-  const handleField1Change = (val) => {
-    setField1(val);
-    const STRUCT =
-      val === FIELD1_OPTIONS[0]
-        ? BUNG_STRUCTURE_OPTIONS
-        : val === FIELD1_OPTIONS[1]
-        ? TUYEN_GIAP_STRUCTURE_OPTIONS
-        : TUYEN_VU_STRUCTURE_OPTIONS;
-
+  // ---------- Workspace logic: init workspace when selecting field1 ----------
+  const initWorkspaceForField = (f) => {
+    const STRUCT = getSTRUCT(f) || {};
     const parents = Object.keys(STRUCT).map((structureKey) => ({
       structure: structureKey,
       statuses: [],
       children: [],
     }));
+    setRowsByField((prev) => ({ ...prev, [f]: parents }));
     setRows(parents);
   };
 
-  // add manual parent if needed
-  const addParentRow = () => {
-    setRows((prev) => [
-      ...prev,
-      { structure: null, statuses: [], children: [] },
-    ]);
+  const handleField1Change = (val) => {
+    setField1(val);
+    form.setFieldsValue({ field_1: val });
+
+    // Nếu field đã có dữ liệu → load lại
+    const existing = rowsByField[val];
+    if (existing && existing.length > 0) {
+      setRows(existing);
+    } else {
+      // tạo mới theo cấu trúc
+      const STRUCT = getSTRUCT(val);
+      const newRows = Object.keys(STRUCT).map((key) => ({
+        structure: key,
+        statuses: [],
+        children: [],
+      }));
+
+      setRows(newRows);
+
+      setRowsByField((prev) => ({
+        ...prev,
+        [val]: newRows,
+      }));
+    }
   };
 
-  // utility: find list index by structure+status
-  const findListIndex = (structure, status) =>
-    list.findIndex((it) => it.structure === structure && it.status === status);
-
-  // add or update item in list (auto sync)
+  // ---------- list utilities (conclusions) ----------
   const addOrUpdateListItem = (structure, status, position, size) => {
     setList((prev) => {
       const idx = prev.findIndex(
         (it) => it.structure === structure && it.status === status
       );
-      const text = `Hình ảnh siêu âm: ${field1 || ""} –  ${status}${
-        position ? " – " + position : ""
-      }${size ? ` – (${size} mm)` : ""}`;
-
+      const text = `Hình ảnh siêu âm ${field1 || ""}   ${status}${
+        position ? ` tại ${position}` : ""
+      }`;
       if (idx === -1) {
         return [...prev, { field1, structure, status, position, size, text }];
       } else {
         const updated = [...prev];
-        updated[idx] = {
-          ...updated[idx],
-          position,
-          size,
-          text,
-        };
+        updated[idx] = { ...updated[idx], position, size, text };
         return updated;
       }
     });
   };
 
-  // remove item from list by structure+status
   const removeListItemByKey = (structure, status) => {
     setList((prev) =>
       prev.filter((it) => !(it.structure === structure && it.status === status))
     );
   };
 
+  // ---------- rows mutation helpers: every mutation must update rows and rowsByField ----------
+  const commitRowsUpdate = (updatedRows) => {
+    setRows(updatedRows);
+    setRowsByField((prev) => ({
+      ...prev,
+      [field1]: updatedRows,
+    }));
+  };
   // parent status change: selectedStatuses is array
   const onStatusChange = (selectedStatuses, parentIndex) => {
     const updated = [...rows];
@@ -304,7 +308,7 @@ const UltrasoundBungForm = () => {
 
     parent.statuses = selectedStatuses;
 
-    // regenerate children: preserve existing child position/size if status existed previously
+    // preserve child data if status existed previously
     parent.children = selectedStatuses.map((st) => {
       const oldChild = (parent.children || []).find((c) => c.status === st);
       return oldChild
@@ -313,17 +317,14 @@ const UltrasoundBungForm = () => {
     });
 
     updated[parentIndex] = parent;
-    setRows(updated);
+    commitRowsUpdate(updated);
 
-    // sync list: add new statuses
+    // sync list
     selectedStatuses.forEach((st) => {
       const exists = list.some(
         (item) => item.structure === parent.structure && item.status === st
       );
-      if (!exists) {
-        // add item with null position/size; will be updated when user edits child
-        addOrUpdateListItem(parent.structure, st, null, null);
-      }
+      if (!exists) addOrUpdateListItem(parent.structure, st, null, null);
     });
 
     // remove list items for statuses unselected
@@ -341,7 +342,7 @@ const UltrasoundBungForm = () => {
     const child = { ...parent.children[cIdx], [field]: value };
     parent.children[cIdx] = child;
     updated[pIdx] = parent;
-    setRows(updated);
+    commitRowsUpdate(updated);
 
     // update list item for this child
     addOrUpdateListItem(
@@ -352,16 +353,23 @@ const UltrasoundBungForm = () => {
     );
   };
 
-  // remove parent (and its related list items)
+  // change structure value for a parent slot (keeps statuses/children cleared)
+  const changeParentStructure = (pIdx, newStructure) => {
+    const updated = [...rows];
+    updated[pIdx] = { structure: newStructure, statuses: [], children: [] };
+    commitRowsUpdate(updated);
+  };
+
+  // remove parent and associated list items
   const removeParent = (pIdx) => {
     const toRemove = rows[pIdx];
-    // remove all list items belonging to this structure
     if (toRemove && toRemove.statuses) {
-      toRemove.statuses.forEach((st) => {
-        removeListItemByKey(toRemove.structure, st);
-      });
+      toRemove.statuses.forEach((st) =>
+        removeListItemByKey(toRemove.structure, st)
+      );
     }
-    setRows((prev) => prev.filter((_, i) => i !== pIdx));
+    const updated = rows.filter((_, i) => i !== pIdx);
+    commitRowsUpdate(updated);
   };
 
   // remove single list item from conclusion panel (also unselect status in parent)
@@ -380,7 +388,7 @@ const UltrasoundBungForm = () => {
       updated[pIdx].children = (updated[pIdx].children || []).filter(
         (c) => c.status !== item.status
       );
-      setRows(updated);
+      commitRowsUpdate(updated);
     }
   };
 
@@ -398,9 +406,9 @@ const UltrasoundBungForm = () => {
         ...values,
         status: status,
         ket_qua_chan_doan: JSON.stringify({
-          list,
           field1,
-          parents: rows,
+          rowsByField,
+          list,
         }),
         id: idEdit,
       };
@@ -427,14 +435,28 @@ const UltrasoundBungForm = () => {
     }
   };
 
-  // determine STRUCT by current field1
-  const STRUCT =
-    field1 === FIELD1_OPTIONS[0]
-      ? BUNG_STRUCTURE_OPTIONS
-      : field1 === FIELD1_OPTIONS[1]
-      ? TUYEN_GIAP_STRUCTURE_OPTIONS
-      : TUYEN_VU_STRUCTURE_OPTIONS;
+  // determine STRUCT by current field1 (cached)
+  const STRUCT = getSTRUCT(field1);
 
+  // init on first mount: if no field1, set default field1 to first option and init
+  useEffect(() => {
+    if (!field1) {
+      const defaultField = FIELD1_OPTIONS[0];
+      setField1(defaultField);
+      const existing = rowsByField[defaultField];
+      if (!existing || existing.length === 0)
+        initWorkspaceForField(defaultField);
+      else setRows(existing);
+      form.setFieldsValue({
+        field_1: defaultField,
+        id_template_service: "D-SONO",
+        language: "vi",
+      });
+    }
+    // eslint-disable-next-line
+  }, []);
+
+  // ---------- Render ----------
   return (
     <Form
       form={form}
@@ -481,18 +503,34 @@ const UltrasoundBungForm = () => {
               name="id_template_service"
               rules={[{ required: true, message: "Chọn kỹ thuật" }]}
               labelCol={{ flex: "0 0 90px" }}
-              value={"D-SONO"}
             >
-              <Select
-                placeholder="Chọn kỹ thuật"
-                disabled={!isEdit}
-                allowClear
-                onChange={() => {}}
-                defaultValue={"D-SONO"}
-              >
+              <Select placeholder="Chọn kỹ thuật" disabled={!isEdit} allowClear>
                 <Option key={"D-SONO"} value={"D-SONO"}>
                   {"D-SONO"}
                 </Option>
+              </Select>
+            </Form.Item>
+          </Col>
+
+          <Col xs={24} md={9}>
+            <Form.Item
+              label={"Bộ phận"}
+              name="field_1"
+              rules={[{ required: true, message: "Chọn bộ phận" }]}
+              labelCol={{ flex: "0 0 90px" }}
+            >
+              <Select
+                placeholder="Chọn bộ phận"
+                disabled={!isEdit}
+                allowClear
+                value={field1}
+                onChange={(v) => handleField1Change(v)}
+              >
+                {FIELD1_OPTIONS.map((o) => (
+                  <Option key={o} value={o}>
+                    {o}
+                  </Option>
+                ))}
               </Select>
             </Form.Item>
           </Col>
@@ -504,7 +542,7 @@ const UltrasoundBungForm = () => {
               rules={[{ required: true }]}
               labelCol={{ flex: "0 0 90px" }}
             >
-              <Select disabled={!isEdit} placeholder="VI / EN" value={"vi"}>
+              <Select disabled={!isEdit} placeholder="VI / EN">
                 {LANGUAGE_OPTIONS.map((opt) => (
                   <Option
                     key={opt.value}
@@ -526,12 +564,14 @@ const UltrasoundBungForm = () => {
             <label
               style={{ fontWeight: 600, display: "block", marginBottom: 6 }}
             >
-              Field 1 – Bộ phận thăm khám
+              Field 1 – Bộ phận
             </label>
 
             <Radio.Group
               value={field1}
-              onChange={(e) => handleField1Change(e.target.value)}
+              onChange={(e) => {
+                handleField1Change(e.target.value);
+              }}
               style={{ marginLeft: 0 }}
             >
               {FIELD1_OPTIONS.map((o) => (
@@ -593,7 +633,7 @@ const UltrasoundBungForm = () => {
 
         {field1 && (
           <>
-            <Card title="KẾT LUẬN, CHẨN ĐOÁN" style={{ marginTop: 24 }}>
+            <Card title="MÔ TẢ HÌNH ẢNH" style={{ marginTop: 24 }}>
               {rows.map((parent, pIdx) => {
                 const structureOptions = STRUCT ? Object.keys(STRUCT) : [];
                 const statusOptions =
@@ -618,16 +658,7 @@ const UltrasoundBungForm = () => {
                           style={{ width: "100%", marginTop: 4 }}
                           placeholder="Chọn cấu trúc"
                           value={parent.structure}
-                          onChange={(v) => {
-                            const updated = [...rows];
-                            updated[pIdx] = {
-                              ...updated[pIdx],
-                              structure: v,
-                              statuses: [],
-                              children: [],
-                            };
-                            setRows(updated);
-                          }}
+                          onChange={(v) => changeParentStructure(pIdx, v)}
                           options={structureOptions.map((s) => ({
                             label: s,
                             value: s,
@@ -651,12 +682,6 @@ const UltrasoundBungForm = () => {
                           }))}
                         />
                       </Col>
-                      {/* 
-                    <Col xs={24} md={4} style={{ textAlign: "right" }}>
-                      <Button danger onClick={() => removeParent(pIdx)}>
-                        Xóa
-                      </Button>
-                    </Col> */}
                     </Row>
 
                     {parent.children && parent.children.length > 0 && (
@@ -686,7 +711,7 @@ const UltrasoundBungForm = () => {
                                 }}
                               >
                                 <div style={{ fontWeight: 600 }}>
-                                  <p>{child.status}</p>
+                                  <p style={{ margin: 0 }}>{child.status}</p>
                                 </div>
                               </Col>
 
@@ -745,8 +770,6 @@ const UltrasoundBungForm = () => {
                                   )}
                                 </div>
                               </Col>
-
-                              {/* no Add button: operations auto-synced */}
                             </Row>
                           );
                         })}
@@ -756,15 +779,6 @@ const UltrasoundBungForm = () => {
                 );
               })}
             </Card>
-
-            {/* <Button
-              type="dashed"
-              block
-              onClick={addParentRow}
-              style={{ marginBottom: 12 }}
-            >
-              + Thêm cấu trúc mới
-            </Button> */}
 
             {/* Voice */}
             {!isRecording ? (
@@ -876,10 +890,8 @@ const UltrasoundBungForm = () => {
           style={{ top: 20 }}
         >
           <PreviewSono
-            formSnapshot={{
-              ...initialSnap,
-              ...form.getFieldsValue(),
-            }}
+            // pass the current live state (no need to parse JSON in preview)
+            formSnapshot={{ ...initialSnap, ...form.getFieldsValue() }}
             rows={rows}
             field1={field1}
             ket_qua_chan_doan={list}
@@ -888,6 +900,7 @@ const UltrasoundBungForm = () => {
             approvalStatus={initialSnap.status}
             editId={idEdit}
             printTemplate={printTemplate}
+            rowsByField={rowsByField}
           />
         </Modal>
       )}
