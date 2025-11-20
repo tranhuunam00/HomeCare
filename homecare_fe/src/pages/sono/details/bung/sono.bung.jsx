@@ -30,6 +30,10 @@ import FormActionBar, {
 import { useGlobalAuth } from "../../../../contexts/AuthContext";
 import { useNavigate, useParams } from "react-router-dom";
 import PreviewSono from "../../preview/PreviewSono";
+import { LANGUAGE_OPTIONS } from "../../../doctor_use_form_ver2/use/DoctorIUseFormVer2";
+import { ThamKhaoLinkHomeCare } from "../../../advance/component_common/Thamkhao";
+
+const { Option } = Select;
 
 export const SONO_STATUS = {
   PENDING: "draft",
@@ -44,36 +48,32 @@ const FIELD1_OPTIONS = [
 
 const UltrasoundBungForm = () => {
   const navigate = useNavigate();
-
+  const { id } = useParams();
   const [form] = Form.useForm();
   const { doctor, user, printTemplateGlobal } = useGlobalAuth();
 
-  const { id } = useParams();
-
-  const [idEdit, setIdEdit] = useState(id);
-
+  // main states
   const [field1, setField1] = useState(null);
+  // rows: parents with structure, statuses (selected array), children [{status, position, size}]
   const [rows, setRows] = useState([]);
-
-  const [loadingAI, setLoadingAI] = useState(false);
+  // final conclusions list (synchronized automatically)
   const [list, setList] = useState([]);
-  const [voiceList, setVoiceList] = useState([]);
-  const [isRecording, setIsRecording] = useState(false);
-  const recognitionRef = useRef(null);
+  const [loadingAI, setLoadingAI] = useState(false);
+  const [isEdit, setIsEdit] = useState(true);
+  const [printTemplate, setPrintTemplate] = useState(null);
+  const [initialSnap, setInitialSnap] = useState({});
+  const [idEdit, setIdEdit] = useState(id);
   const [openPreview, setOpenPreview] = useState(false);
 
-  const [isEdit, setIsEdit] = useState(true);
+  // voice
+  const recognitionRef = useRef(null);
+  const [voiceList, setVoiceList] = useState([]);
+  const [isRecording, setIsRecording] = useState(false);
 
-  const [languageTranslate, setLanguageTransslate] = useState(
-    TRANSLATE_LANGUAGE.VI
-  );
-
-  const [printTemplate, setPrintTemplate] = useState(null);
-
+  // address hook
   const { provinces, wards, setSelectedProvince } = useVietnamAddress();
 
-  const [initialSnap, setInitialSnap] = useState({});
-
+  // Map server data into form and rows/list
   const mapSonoDataToForm = (data) => {
     let parsed = {};
     try {
@@ -82,58 +82,90 @@ const UltrasoundBungForm = () => {
       console.error("Không parse được JSON ket_qua_chan_doan:", e);
     }
 
-    if (!data || Object.keys(data).length == 0) {
+    if (!data || Object.keys(data).length === 0) {
       form.resetFields();
+    } else {
+      form.setFieldsValue({
+        ...data,
+        id_print_template: data.id_print_template,
+      });
     }
-    // Gán dữ liệu vào form
-    form.setFieldsValue({
-      ...data,
-      id_print_template: data.id_print_template,
-    });
+
+    // Normalize parsed to parents format
+    if (parsed.parents && Array.isArray(parsed.parents)) {
+      setRows(parsed.parents);
+    } else if (parsed.rows && Array.isArray(parsed.rows)) {
+      // legacy flat rows -> group by structure
+      const parentsMap = {};
+      parsed.rows.forEach((r) => {
+        const key = r.structure || "__manual__";
+        if (!parentsMap[key]) {
+          parentsMap[key] = {
+            structure: r.structure,
+            statuses: r.status ? [r.status] : [],
+            children: r.status
+              ? [
+                  {
+                    status: r.status,
+                    position: r.position || null,
+                    size: r.size || null,
+                  },
+                ]
+              : [],
+          };
+        } else {
+          parentsMap[key].statuses.push(r.status);
+          parentsMap[key].children.push({
+            status: r.status,
+            position: r.position || null,
+            size: r.size || null,
+          });
+        }
+      });
+      setRows(Object.values(parentsMap));
+    } else {
+      setRows(parsed.parents || []);
+    }
+
+    setList(parsed.list || parsed.finalList || []);
+    setField1(parsed.field1 || null);
 
     const printT = printTemplateGlobal.find(
       (t) => t.id == data.id_print_template
     );
-    console.log("printTemplateGlobal", printTemplateGlobal);
-    console.log("data.id_print_template", data.id_print_template);
-    console.log("first", printT);
-    // Update state
-    setList(parsed.list || []);
-    setField1(parsed.field1 || null);
-    setRows(parsed.rows || []);
     setPrintTemplate(printT);
   };
-  useEffect(() => {
-    const printT = printTemplateGlobal.find(
-      (t) => t.id == initialSnap.id_print_template
-    );
-    setPrintTemplate(printT);
-  }, [printTemplateGlobal]);
 
+  // load detail if id present
   useEffect(() => {
-    if (!id) return; // không có id thì bỏ qua
-
+    if (!id) return;
     const fetchDetail = async () => {
       try {
         setLoadingAI(true);
-
         const res = await API_CALL.get(`/sono/${id}`);
         const data = res.data.data.data;
-
         setInitialSnap(data);
-
+        setIdEdit(id);
         mapSonoDataToForm(data);
-      } catch (error) {
-        console.error(error);
+      } catch (err) {
+        console.error(err);
         toast.error("Không tải được chi tiết phiếu siêu âm!");
       } finally {
         setLoadingAI(false);
       }
     };
-
     fetchDetail();
-  }, [idEdit]);
+    // eslint-disable-next-line
+  }, [id]);
 
+  useEffect(() => {
+    const printT = printTemplateGlobal.find(
+      (t) => t.id == initialSnap.id_print_template
+    );
+    setPrintTemplate(printT);
+  }, [printTemplateGlobal, initialSnap]);
+
+  // init speech recognition if supported
   if (!recognitionRef.current && "webkitSpeechRecognition" in window) {
     const recog = new window.webkitSpeechRecognition();
     recog.continuous = true;
@@ -142,7 +174,7 @@ const UltrasoundBungForm = () => {
     recognitionRef.current = recog;
   }
 
-  // ---------- VOICE ----------
+  // voice handlers
   const startVoice = () => {
     const recognition = recognitionRef.current;
     if (!recognition) {
@@ -152,7 +184,6 @@ const UltrasoundBungForm = () => {
     setIsRecording(true);
     setVoiceList([]);
     recognition.start();
-
     recognition.onresult = (event) => {
       const text = event.results[event.results.length - 1][0].transcript;
       setVoiceList((prev) => [...prev, text]);
@@ -168,44 +199,44 @@ const UltrasoundBungForm = () => {
 
   const analyzeVoice = async () => {
     if (voiceList.length === 0) return toast.warning("Chưa có nội dung!");
-
     const finalText = voiceList.join(". ");
-
     try {
       setLoadingAI(true);
-      toast.loading("Đang phân tích giọng nói...", 1);
-
+      toast.loading("Đang phân tích giọng nói...", { autoClose: 1200 });
       const res = await API_CALL.post(
         "/sono/analyze",
         { text: finalText },
         { timeout: 120000 }
       );
-
-      const aiData = res.data?.data?.data || res.data?.data;
-
+      const aiData = res.data?.data?.data || res.data?.data || [];
       const mapped = aiData.map((item) => ({
+        field1: item.field1 || field1,
         structure: item.structure,
         status: item.status,
         position: item.position,
         size: item.size ? `${item.size} mm` : null,
-        text: `${item.structure} – ${item.status} – ${item.position}${
-          item.size ? ` – (${item.size} mm)` : ""
-        }`,
+        text: `${item.structure} – ${item.status}${
+          item.position ? " – " + item.position : ""
+        }${item.size ? ` – (${item.size} mm)` : ""}`,
       }));
 
-      setList((prev) => [...prev, ...mapped]);
+      // Merge AI results into list (auto add/update)
+      mapped.forEach((m) => {
+        addOrUpdateListItem(m.structure, m.status, m.position, m.size);
+      });
+
       toast.success("Phân tích AI thành công!");
-    } catch {
+    } catch (err) {
+      console.error(err);
       toast.error("AI không phân tích được!");
     } finally {
       setLoadingAI(false);
     }
   };
 
-  // ⭐ Khi chọn Field1 → auto tạo một hàng cho mỗi cấu trúc
+  // when choose field1 -> create parents based on STRUCT
   const handleField1Change = (val) => {
     setField1(val);
-
     const STRUCT =
       val === FIELD1_OPTIONS[0]
         ? BUNG_STRUCTURE_OPTIONS
@@ -213,55 +244,149 @@ const UltrasoundBungForm = () => {
         ? TUYEN_GIAP_STRUCTURE_OPTIONS
         : TUYEN_VU_STRUCTURE_OPTIONS;
 
-    // auto create: mỗi cấu trúc 1 hàng
-    const baseRows = Object.keys(STRUCT).map((k) => ({
-      structure: k,
-      status: "Không thấy bất thường",
-      position: null,
-      size: null,
+    const parents = Object.keys(STRUCT).map((structureKey) => ({
+      structure: structureKey,
+      statuses: [],
+      children: [],
     }));
-
-    setRows(baseRows);
+    setRows(parents);
   };
 
-  // ⭐ Thêm hàng mới (field2 = chọn thủ công)
-  const addRow = () => {
-    setRows([
-      ...rows,
-      {
-        structure: null,
-        status: "Không thấy bất thường",
-        position: null,
-        size: null,
-      },
+  // add manual parent if needed
+  const addParentRow = () => {
+    setRows((prev) => [
+      ...prev,
+      { structure: null, statuses: [], children: [] },
     ]);
   };
 
-  // ⭐ Thêm từng hàng vào danh sách
-  const handleAddItem = (row) => {
-    if (!row.structure) return toast.warning("Chọn cấu trúc!");
+  // utility: find list index by structure+status
+  const findListIndex = (structure, status) =>
+    list.findIndex((it) => it.structure === structure && it.status === status);
 
-    if (row.status !== "Không thấy bất thường" && !row.position)
-      return toast.warning("Thiếu vị trí!");
+  // add or update item in list (auto sync)
+  const addOrUpdateListItem = (structure, status, position, size) => {
+    setList((prev) => {
+      const idx = prev.findIndex(
+        (it) => it.structure === structure && it.status === status
+      );
+      const text = `Hình ảnh siêu âm: ${field1 || ""} –  ${status}${
+        position ? " – " + position : ""
+      }${size ? ` – (${size} mm)` : ""}`;
 
-    const item = {
-      field1,
-      structure: row.structure,
-      status: row.status,
-      position: row.position,
-      size: row.size ? `${row.size} mm` : null,
-      text: `${field1} – ${row.structure} – ${row.status}${
-        row.position ? " – " + row.position : ""
-      }${row.size ? ` – (${row.size} mm)` : ""}`,
-    };
-
-    setList((prev) => [...prev, item]);
-    toast.success("Đã thêm!");
+      if (idx === -1) {
+        return [...prev, { field1, structure, status, position, size, text }];
+      } else {
+        const updated = [...prev];
+        updated[idx] = {
+          ...updated[idx],
+          position,
+          size,
+          text,
+        };
+        return updated;
+      }
+    });
   };
 
+  // remove item from list by structure+status
+  const removeListItemByKey = (structure, status) => {
+    setList((prev) =>
+      prev.filter((it) => !(it.structure === structure && it.status === status))
+    );
+  };
+
+  // parent status change: selectedStatuses is array
+  const onStatusChange = (selectedStatuses, parentIndex) => {
+    const updated = [...rows];
+    const parent = { ...updated[parentIndex] };
+    const oldStatuses = parent.statuses || [];
+
+    parent.statuses = selectedStatuses;
+
+    // regenerate children: preserve existing child position/size if status existed previously
+    parent.children = selectedStatuses.map((st) => {
+      const oldChild = (parent.children || []).find((c) => c.status === st);
+      return oldChild
+        ? { ...oldChild }
+        : { status: st, position: null, size: null };
+    });
+
+    updated[parentIndex] = parent;
+    setRows(updated);
+
+    // sync list: add new statuses
+    selectedStatuses.forEach((st) => {
+      const exists = list.some(
+        (item) => item.structure === parent.structure && item.status === st
+      );
+      if (!exists) {
+        // add item with null position/size; will be updated when user edits child
+        addOrUpdateListItem(parent.structure, st, null, null);
+      }
+    });
+
+    // remove list items for statuses unselected
+    oldStatuses
+      .filter((st) => !selectedStatuses.includes(st))
+      .forEach((removedStatus) => {
+        removeListItemByKey(parent.structure, removedStatus);
+      });
+  };
+
+  // update child value (position/size) -> auto update list
+  const updateChild = (pIdx, cIdx, field, value) => {
+    const updated = [...rows];
+    const parent = { ...updated[pIdx] };
+    const child = { ...parent.children[cIdx], [field]: value };
+    parent.children[cIdx] = child;
+    updated[pIdx] = parent;
+    setRows(updated);
+
+    // update list item for this child
+    addOrUpdateListItem(
+      parent.structure,
+      child.status,
+      child.position,
+      child.size
+    );
+  };
+
+  // remove parent (and its related list items)
+  const removeParent = (pIdx) => {
+    const toRemove = rows[pIdx];
+    // remove all list items belonging to this structure
+    if (toRemove && toRemove.statuses) {
+      toRemove.statuses.forEach((st) => {
+        removeListItemByKey(toRemove.structure, st);
+      });
+    }
+    setRows((prev) => prev.filter((_, i) => i !== pIdx));
+  };
+
+  // remove single list item from conclusion panel (also unselect status in parent)
+  const removeListItem = (index) => {
+    const item = list[index];
+    if (!item) return;
+    // remove from list
+    setList((prev) => prev.filter((_, i) => i !== index));
+    // also update rows: unselect status in parent
+    const updated = [...rows];
+    const pIdx = updated.findIndex((p) => p.structure === item.structure);
+    if (pIdx !== -1) {
+      updated[pIdx].statuses = (updated[pIdx].statuses || []).filter(
+        (s) => s !== item.status
+      );
+      updated[pIdx].children = (updated[pIdx].children || []).filter(
+        (c) => c.status !== item.status
+      );
+      setRows(updated);
+    }
+  };
+
+  // Save logic
   const handleSave = async (status = SONO_STATUS.PENDING) => {
     try {
-      console.log("status", status);
       if (list.length === 0) {
         toast.warning("Bạn chưa thêm mô tả siêu âm nào!");
         return;
@@ -269,28 +394,26 @@ const UltrasoundBungForm = () => {
       setLoadingAI(true);
       const values = await form.validateFields();
 
-      // ⭐ Lấy toàn bộ thông tin bệnh nhân
       const payload = {
         ...values,
         status: status,
         ket_qua_chan_doan: JSON.stringify({
           list,
           field1,
-          rows,
+          parents: rows,
         }),
         id: idEdit,
       };
-      console.log("payload", payload);
 
       const res = await API_CALL.post("/sono", payload);
 
-      if (status == SONO_STATUS.APPROVED) {
+      if (status === SONO_STATUS.APPROVED) {
         setInitialSnap({});
         setIdEdit(null);
         navigate(`/home/sono/bung`);
-
         return;
       }
+
       setInitialSnap(res.data.data.data);
       const newId = +res.data.data.data.id;
       setIdEdit(newId);
@@ -304,6 +427,7 @@ const UltrasoundBungForm = () => {
     }
   };
 
+  // determine STRUCT by current field1
   const STRUCT =
     field1 === FIELD1_OPTIONS[0]
       ? BUNG_STRUCTURE_OPTIONS
@@ -329,27 +453,80 @@ const UltrasoundBungForm = () => {
           label
         )
       }
+      initialValues={{
+        id_template_service: "D-SONO",
+        language: "vi",
+      }}
     >
-      <Card title="Mô tả hình ảnh siêu âm">
+      <Card>
+        <ThamKhaoLinkHomeCare
+          name={"D-SONO"}
+          title={"BÁO CÁO KẾT QUẢ SIÊU ÂM THÔNG MINH"}
+        />
+
         <PatientInfoSection
           form={form}
           isEdit={isEdit}
-          languageTranslate={languageTranslate}
+          languageTranslate={TRANSLATE_LANGUAGE.VI}
           provinces={provinces}
           wards={wards}
           setSelectedProvince={setSelectedProvince}
           translateLabel={translateLabel}
         />
 
-        <Row gutter={16} style={{ marginBottom: 24 }}>
-          {/* Cột 1: Mẫu in */}
+        <Row gutter={16} justify={"space-between"}>
+          <Col xs={24} md={9}>
+            <Form.Item
+              label={"Phân hệ"}
+              name="id_template_service"
+              rules={[{ required: true, message: "Chọn kỹ thuật" }]}
+              labelCol={{ flex: "0 0 90px" }}
+              value={"D-SONO"}
+            >
+              <Select
+                placeholder="Chọn kỹ thuật"
+                disabled={!isEdit}
+                allowClear
+                onChange={() => {}}
+                defaultValue={"D-SONO"}
+              >
+                <Option key={"D-SONO"} value={"D-SONO"}>
+                  {"D-SONO"}
+                </Option>
+              </Select>
+            </Form.Item>
+          </Col>
 
-          {/* Cột 2: Field 1 */}
+          <Col xs={24} md={6}>
+            <Form.Item
+              label={"Ngôn ngữ"}
+              name="language"
+              rules={[{ required: true }]}
+              labelCol={{ flex: "0 0 90px" }}
+            >
+              <Select disabled={!isEdit} placeholder="VI / EN" value={"vi"}>
+                {LANGUAGE_OPTIONS.map((opt) => (
+                  <Option
+                    key={opt.value}
+                    value={opt.value}
+                    disabled={
+                      idEdit || (!idEdit && !["vi"].includes(opt.value))
+                    }
+                  >
+                    {opt.label}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16} style={{ marginBottom: 24 }}>
           <Col span={12}>
             <label
               style={{ fontWeight: 600, display: "block", marginBottom: 6 }}
             >
-              Field 1 – Vùng khảo sát
+              Field 1 – Bộ phận thăm khám
             </label>
 
             <Radio.Group
@@ -364,12 +541,17 @@ const UltrasoundBungForm = () => {
               ))}
             </Radio.Group>
           </Col>
+
           <Col span={12}>
             <Form.Item
-              label={translateLabel(languageTranslate, "resultPrint", false)}
+              label={translateLabel(
+                TRANSLATE_LANGUAGE.VI,
+                "resultPrint",
+                false
+              )}
               name="id_print_template"
               rules={[{ required: true, message: "Chọn mẫu in" }]}
-              labelCol={{ flex: "0 0 150px" }} // thu nhỏ label để vừa hàng
+              labelCol={{ flex: "0 0 150px" }}
             >
               <Select
                 disabled={!isEdit}
@@ -411,143 +593,178 @@ const UltrasoundBungForm = () => {
 
         {field1 && (
           <>
-            {/* ⭐ LIST ROWS */}
-            {rows.map((row, index) => {
-              const statusOptions = row.structure
-                ? STRUCT[row.structure].status
-                : [];
+            <Card title="KẾT LUẬN, CHẨN ĐOÁN" style={{ marginTop: 24 }}>
+              {rows.map((parent, pIdx) => {
+                const structureOptions = STRUCT ? Object.keys(STRUCT) : [];
+                const statusOptions =
+                  parent.structure && STRUCT && STRUCT[parent.structure]
+                    ? STRUCT[parent.structure].status
+                    : [];
+                const positionOptions =
+                  parent.structure && STRUCT && STRUCT[parent.structure]
+                    ? STRUCT[parent.structure].position
+                    : [];
 
-              const positionOptions = row.structure
-                ? STRUCT[row.structure].position
-                : [];
-
-              const needSize =
-                row.structure &&
-                STRUCT[row.structure].needSize.includes(row.status);
-
-              return (
-                <Spin spinning={loadingAI}>
+                return (
                   <Card
-                    key={index}
+                    key={pIdx}
                     size="small"
-                    style={{ marginBottom: 16, background: "#fafafa" }}
+                    style={{ marginBottom: 12, background: "#fafafa" }}
                   >
-                    <Row gutter={12}>
-                      {/* FIELD 2 */}
-                      <Col xs={24} md={5}>
-                        {index === 0 && <b>Cấu trúc</b>}
+                    <Row gutter={12} align="middle">
+                      <Col xs={24} md={8}>
+                        {pIdx === 0 && <b>Cấu trúc</b>}
                         <Select
                           style={{ width: "100%", marginTop: 4 }}
-                          placeholder="Chọn"
-                          value={row.structure}
-                          options={Object.keys(STRUCT).map((s) => ({
+                          placeholder="Chọn cấu trúc"
+                          value={parent.structure}
+                          onChange={(v) => {
+                            const updated = [...rows];
+                            updated[pIdx] = {
+                              ...updated[pIdx],
+                              structure: v,
+                              statuses: [],
+                              children: [],
+                            };
+                            setRows(updated);
+                          }}
+                          options={structureOptions.map((s) => ({
                             label: s,
                             value: s,
                           }))}
-                          onChange={(v) => {
-                            const updated = [...rows];
-                            updated[index].structure = v;
-                            updated[index].status = "Không thấy bất thường";
-                            updated[index].position = null;
-                            updated[index].size = null;
-                            setRows(updated);
-                          }}
                         />
                       </Col>
 
-                      {/* FIELD 3 */}
-                      <Col xs={24} md={5}>
-                        {index === 0 && <b>Trạng thái</b>}
+                      <Col xs={24} md={12}>
+                        {pIdx === 0 && <b>Trạng thái (chọn nhiều)</b>}
                         <Select
+                          mode="multiple"
+                          allowClear
+                          placeholder="Chọn trạng thái (multi)"
                           style={{ width: "100%", marginTop: 4 }}
-                          value={row.status}
-                          disabled={!row.structure}
+                          value={parent.statuses}
+                          disabled={!parent.structure}
+                          onChange={(vals) => onStatusChange(vals, pIdx)}
                           options={statusOptions.map((s) => ({
                             label: s,
                             value: s,
                           }))}
-                          onChange={(v) => {
-                            const updated = [...rows];
-                            updated[index].status = v;
-                            updated[index].position = null;
-                            updated[index].size = null;
-                            setRows(updated);
-                          }}
                         />
                       </Col>
-
-                      {/* FIELD 4 */}
-                      <Col xs={24} md={5}>
-                        {index === 0 && <b>Vị trí</b>}
-                        <Select
-                          style={{ width: "100%", marginTop: 4 }}
-                          placeholder="Chọn"
-                          disabled={row.status === "Không thấy bất thường"}
-                          value={row.position}
-                          options={positionOptions.map((p) => ({
-                            label: p,
-                            value: p,
-                          }))}
-                          onChange={(v) => {
-                            const updated = [...rows];
-                            updated[index].position = v;
-                            setRows(updated);
-                          }}
-                        />
-                      </Col>
-
-                      {/* FIELD 5 */}
-                      <Col xs={24} md={5}>
-                        {index === 0 && <b>Kích thước (mm)</b>}
-                        {needSize ? (
-                          <InputNumber
-                            style={{ width: "100%", marginTop: 4 }}
-                            min={1}
-                            value={row.size}
-                            onChange={(v) => {
-                              const updated = [...rows];
-                              updated[index].size = v;
-                              setRows(updated);
-                            }}
-                          />
-                        ) : (
-                          <InputNumber
-                            style={{ width: "100%", marginTop: 4 }}
-                            disabled
-                            placeholder="Không yêu cầu"
-                          />
-                        )}
-                      </Col>
-
-                      {/* BUTTON */}
-                      <Col
-                        xs={24}
-                        md={4}
-                        style={{ display: "flex", alignItems: "end" }}
-                      >
-                        <Button
-                          type="primary"
-                          block
-                          onClick={() => handleAddItem(row)}
-                        >
-                          Thêm
-                        </Button>
-                      </Col>
+                      {/* 
+                    <Col xs={24} md={4} style={{ textAlign: "right" }}>
+                      <Button danger onClick={() => removeParent(pIdx)}>
+                        Xóa
+                      </Button>
+                    </Col> */}
                     </Row>
-                  </Card>
-                </Spin>
-              );
-            })}
 
-            {/* ⭐ ADD NEW ROW */}
+                    {parent.children && parent.children.length > 0 && (
+                      <>
+                        <Divider style={{ margin: "8px 0" }} />
+                        {parent.children.map((child, cIdx) => {
+                          const needSize =
+                            parent.structure &&
+                            STRUCT &&
+                            STRUCT[parent.structure] &&
+                            STRUCT[parent.structure].needSize.includes(
+                              child.status
+                            );
+
+                          return (
+                            <Row
+                              gutter={12}
+                              key={cIdx}
+                              style={{ marginBottom: 8 }}
+                            >
+                              <Col
+                                xs={24}
+                                md={8}
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                }}
+                              >
+                                <div style={{ fontWeight: 600 }}>
+                                  <p>{child.status}</p>
+                                </div>
+                              </Col>
+
+                              <Col xs={24} md={8}>
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                  }}
+                                >
+                                  <div style={{ width: 80 }}>{"Ở vị trí:"}</div>
+                                  <Select
+                                    style={{ width: "100%" }}
+                                    placeholder="Chọn vị trí"
+                                    value={child.position}
+                                    disabled={
+                                      child.status === "Không thấy bất thường"
+                                    }
+                                    options={positionOptions.map((p) => ({
+                                      label: p,
+                                      value: p,
+                                    }))}
+                                    onChange={(v) =>
+                                      updateChild(pIdx, cIdx, "position", v)
+                                    }
+                                  />
+                                </div>
+                              </Col>
+
+                              <Col xs={24} md={4}>
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                  }}
+                                >
+                                  <div style={{ width: 220 }}>
+                                    {"Có kích thước:"}
+                                  </div>
+                                  {needSize ? (
+                                    <InputNumber
+                                      style={{ width: "100%" }}
+                                      min={1}
+                                      placeholder="mm"
+                                      value={child.size}
+                                      onChange={(v) =>
+                                        updateChild(pIdx, cIdx, "size", v)
+                                      }
+                                    />
+                                  ) : (
+                                    <InputNumber
+                                      style={{ width: "100%" }}
+                                      disabled
+                                      placeholder="Không yêu cầu"
+                                    />
+                                  )}
+                                </div>
+                              </Col>
+
+                              {/* no Add button: operations auto-synced */}
+                            </Row>
+                          );
+                        })}
+                      </>
+                    )}
+                  </Card>
+                );
+              })}
+            </Card>
+
             {/* <Button
-            type="dashed"
-            block
-            onClick={addRow}
-            style={{ marginBottom: 16 }}
-          >
-            + Thêm cấu trúc mới
-          </Button> */}
+              type="dashed"
+              block
+              onClick={addParentRow}
+              style={{ marginBottom: 12 }}
+            >
+              + Thêm cấu trúc mới
+            </Button> */}
 
             {/* Voice */}
             {!isRecording ? (
@@ -560,7 +777,6 @@ const UltrasoundBungForm = () => {
               </Button>
             )}
 
-            {/* Voice list */}
             <Card title="Bạn đã nói" style={{ marginTop: 16 }}>
               {voiceList.length === 0 ? (
                 <i>Chưa có âm thanh nào.</i>
@@ -569,7 +785,6 @@ const UltrasoundBungForm = () => {
               )}
             </Card>
 
-            {/* AI */}
             <Button
               type="primary"
               block
@@ -581,7 +796,6 @@ const UltrasoundBungForm = () => {
               Phân tích AI
             </Button>
 
-            {/* Final list */}
             <Card title="KẾT LUẬN, CHẨN ĐOÁN" style={{ marginTop: 24 }}>
               {list.length === 0 ? (
                 <i>Chưa có mô tả nào.</i>
@@ -591,24 +805,24 @@ const UltrasoundBungForm = () => {
                     key={idx}
                     style={{
                       display: "flex",
-                      justifyContent: "flex-start",
+                      justifyContent: "space-between",
                       alignItems: "center",
                       padding: "6px 0",
                       borderBottom: "1px dashed #ddd",
                     }}
                   >
-                    <span style={{ minWidth: 500 }}>• {item.text}</span>
-
-                    <Button
-                      danger
-                      size="small"
-                      onClick={() => {
-                        const newList = list.filter((_, i) => i !== idx);
-                        setList(newList);
-                      }}
-                    >
-                      X
-                    </Button>
+                    <span style={{ flex: 1 }}>
+                      • {item.text || `${item.structure} – ${item.status}`}
+                    </span>
+                    <div style={{ marginLeft: 12 }}>
+                      <Button
+                        danger
+                        size="small"
+                        onClick={() => removeListItem(idx)}
+                      >
+                        X
+                      </Button>
+                    </div>
                   </div>
                 ))
               )}
@@ -616,19 +830,20 @@ const UltrasoundBungForm = () => {
           </>
         )}
       </Card>
+
       <FormActionBar
-        languageTranslate={languageTranslate}
+        languageTranslate={TRANSLATE_LANGUAGE.VI}
         approvalStatus={initialSnap.status}
         onAction={() => handleSave(SONO_STATUS.PENDING)}
         editId={idEdit}
         onPreview={() => {
-          const values = form.validateFields();
-          setOpenPreview(true);
+          form
+            .validateFields()
+            .then(() => setOpenPreview(true))
+            .catch(() => setOpenPreview(true));
         }}
         onExit={() => {
-          if (!window.confirm("Bạn có chắc muốn thoát không?")) {
-            return;
-          }
+          if (!window.confirm("Bạn có chắc muốn thoát không?")) return;
           navigate(`/home/sono/bung`);
         }}
         isEdit={isEdit}
@@ -636,11 +851,8 @@ const UltrasoundBungForm = () => {
           mapSonoDataToForm(initialSnap);
         }}
         onEdit={() => {
-          if (isEdit == true) {
-            setIsEdit(false);
-          } else {
-            setIsEdit(user.id_role == USER_ROLE.ADMIN || !idEdit);
-          }
+          if (isEdit === true) setIsEdit(false);
+          else setIsEdit(user.id_role == USER_ROLE.ADMIN || !idEdit);
         }}
         onApprove={async () => {
           handleSave(SONO_STATUS.APPROVED);
@@ -668,9 +880,11 @@ const UltrasoundBungForm = () => {
               ...initialSnap,
               ...form.getFieldsValue(),
             }}
+            rows={rows}
+            field1={field1}
             ket_qua_chan_doan={list}
             doctor={doctor}
-            languageTranslate={languageTranslate}
+            languageTranslate={TRANSLATE_LANGUAGE.VI}
             approvalStatus={initialSnap.status}
             editId={idEdit}
             printTemplate={printTemplate}

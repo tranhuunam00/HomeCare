@@ -41,6 +41,7 @@ const PreviewSono = ({
   languageTranslate = "vi",
   approvalStatus,
   ket_qua_chan_doan = [],
+  rows = [],
 }) => {
   console.log("printTemplate", printTemplate);
   const { user } = useGlobalAuth();
@@ -276,21 +277,146 @@ const PreviewSono = ({
               marginTop: 20,
             }}
           >
-            {translateLabel(
-              languageTranslate,
-              "technicalProtocol",
-              false
-            ).toUpperCase()}
+            {"HÌNH ẢNH MINH HỌA"}
           </h3>
 
-          <p
-            className={styles.paragraph}
-            style={{
-              whiteSpace: "pre-line",
-            }}
-          >
-            {formSnapshot.quyTrinh || formSnapshot.quy_trinh_url}
-          </p>
+          <div style={{ marginTop: 10 }}>
+            {rows
+              .filter((parent) => parent.statuses?.length > 0) // CHỈ LẤY MỤC CÓ CHỌN
+              .map((parent, pIdx) => (
+                <div
+                  key={pIdx}
+                  style={{
+                    background: "#f7f8fa",
+                    padding: "14px 18px",
+                    borderRadius: 10,
+                    marginBottom: 16,
+                  }}
+                >
+                  {/* HÀNG CHA */}
+                  <div style={{ display: "flex", marginBottom: 8, gap: 20 }}>
+                    <div style={{ flex: 1 }}>
+                      <div
+                        style={{
+                          fontSize: 13,
+                          fontWeight: 600,
+                          marginBottom: 4,
+                        }}
+                      >
+                        Cấu trúc
+                      </div>
+                      <div
+                        style={{
+                          background: "#fff",
+                          padding: "8px 12px",
+                          borderRadius: 6,
+                          border: "1px solid #ddd",
+                        }}
+                      >
+                        {parent.structure}
+                      </div>
+                    </div>
+
+                    <div style={{ flex: 2 }}>
+                      <div
+                        style={{
+                          fontSize: 13,
+                          fontWeight: 600,
+                          marginBottom: 4,
+                        }}
+                      >
+                        Trạng thái (chọn nhiều)
+                      </div>
+                      <div
+                        style={{
+                          background: "#fff",
+                          padding: "8px 12px",
+                          borderRadius: 6,
+                          border: "1px solid #ddd",
+                          display: "flex",
+                          gap: 8,
+                          flexWrap: "wrap",
+                          minHeight: 38,
+                          alignItems: "center",
+                        }}
+                      >
+                        {parent.statuses.map((st) => (
+                          <span
+                            key={st}
+                            style={{
+                              background: "#e5f0ff",
+                              padding: "4px 8px",
+                              borderRadius: 6,
+                              fontSize: 13,
+                              color: "#2f6db8",
+                            }}
+                          >
+                            {st}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* HÀNG CON */}
+                  {parent.children
+                    ?.filter((c) => c.status) // chỉ hiện hàng con có status
+                    .map((child, cIdx) => (
+                      <div
+                        key={cIdx}
+                        style={{
+                          paddingTop: 12,
+                          borderTop: "1px solid #eee",
+                          marginTop: 12,
+                        }}
+                      >
+                        <div
+                          style={{
+                            fontWeight: 700,
+                            fontSize: 14,
+                            marginBottom: 8,
+                          }}
+                        >
+                          {child.status}
+                        </div>
+
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: 20,
+                            alignItems: "center",
+                            flexWrap: "wrap",
+                          }}
+                        >
+                          <div>
+                            <span
+                              style={{
+                                fontWeight: 600,
+                                marginRight: 6,
+                              }}
+                            >
+                              Ở vị trí:
+                            </span>
+                            <span>{child.position || "—"}</span>
+                          </div>
+
+                          <div>
+                            <span
+                              style={{
+                                fontWeight: 600,
+                                marginRight: 6,
+                              }}
+                            >
+                              Kích thước:
+                            </span>
+                            <span>{child.size ? `${child.size} mm` : "—"}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              ))}
+          </div>
           <Divider />
 
           <h3
@@ -303,11 +429,7 @@ const PreviewSono = ({
               marginTop: 20,
             }}
           >
-            {translateLabel(
-              languageTranslate,
-              "impression",
-              false
-            ).toUpperCase()}
+            {"KẾT LUẬN CHẨN ĐOÁN"}
           </h3>
 
           {/* Parse JSON kết quả */}
