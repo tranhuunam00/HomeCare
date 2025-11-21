@@ -46,6 +46,17 @@ const FIELD1_OPTIONS = [
   "Tuyến vú và hố nách",
 ];
 
+const groupConclusionsByField = (list) => {
+  const grouped = {};
+
+  list.forEach((item) => {
+    if (!grouped[item.field1]) grouped[item.field1] = [];
+    grouped[item.field1].push(item);
+  });
+
+  return grouped;
+};
+
 const UltrasoundBungForm = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -234,8 +245,10 @@ const UltrasoundBungForm = () => {
     const STRUCT = getSTRUCT(f) || {};
     const parents = Object.keys(STRUCT).map((structureKey) => ({
       structure: structureKey,
-      statuses: [],
-      children: [],
+      statuses: ["Không thấy bất thường"],
+      children: [
+        { status: "Không thấy bất thường", position: null, size: null },
+      ],
     }));
     setRowsByField((prev) => ({ ...prev, [f]: parents }));
     setRows(parents);
@@ -254,8 +267,10 @@ const UltrasoundBungForm = () => {
       const STRUCT = getSTRUCT(val);
       const newRows = Object.keys(STRUCT).map((key) => ({
         structure: key,
-        statuses: [],
-        children: [],
+        statuses: ["Không thấy bất thường"],
+        children: [
+          { status: "Không thấy bất thường", position: null, size: null },
+        ],
       }));
 
       setRows(newRows);
@@ -277,7 +292,18 @@ const UltrasoundBungForm = () => {
         position ? ` tại ${position}` : ""
       }`;
       if (idx === -1) {
-        return [...prev, { field1, structure, status, position, size, text }];
+        return [
+          ...prev,
+          {
+            id: Date.now().toString() + Math.random(),
+            field1,
+            structure,
+            status,
+            position,
+            size,
+            text,
+          },
+        ];
       } else {
         const updated = [...prev];
         updated[idx] = { ...updated[idx], position, size, text };
@@ -302,6 +328,15 @@ const UltrasoundBungForm = () => {
   };
   // parent status change: selectedStatuses is array
   const onStatusChange = (selectedStatuses, parentIndex) => {
+    const NORMAL = "Không thấy bất thường";
+    if (selectedStatuses.includes(NORMAL) && selectedStatuses.length > 1) {
+      selectedStatuses = selectedStatuses.filter((s) => s !== NORMAL);
+    }
+
+    if (selectedStatuses.length === 0) {
+      selectedStatuses = [NORMAL];
+    }
+
     const updated = [...rows];
     const parent = { ...updated[parentIndex] };
     const oldStatuses = parent.statuses || [];
@@ -356,7 +391,13 @@ const UltrasoundBungForm = () => {
   // change structure value for a parent slot (keeps statuses/children cleared)
   const changeParentStructure = (pIdx, newStructure) => {
     const updated = [...rows];
-    updated[pIdx] = { structure: newStructure, statuses: [], children: [] };
+    updated[pIdx] = {
+      structure: newStructure,
+      statuses: ["Không thấy bất thường"],
+      children: [
+        { status: "Không thấy bất thường", position: null, size: null },
+      ],
+    };
     commitRowsUpdate(updated);
   };
 
@@ -372,23 +413,44 @@ const UltrasoundBungForm = () => {
     commitRowsUpdate(updated);
   };
 
+  const grouped = groupConclusionsByField(list);
+
   // remove single list item from conclusion panel (also unselect status in parent)
   const removeListItem = (index) => {
     const item = list[index];
     if (!item) return;
-    // remove from list
+
+    // 1) Remove from LIST
     setList((prev) => prev.filter((_, i) => i !== index));
-    // also update rows: unselect status in parent
-    const updated = [...rows];
-    const pIdx = updated.findIndex((p) => p.structure === item.structure);
-    if (pIdx !== -1) {
-      updated[pIdx].statuses = (updated[pIdx].statuses || []).filter(
-        (s) => s !== item.status
+
+    // 2) Remove from đúng rowsByField của field1 item
+    setRowsByField((prev) => {
+      const copy = { ...prev };
+      const rowsOfField = [...copy[item.field1]];
+
+      const pIdx = rowsOfField.findIndex((p) => p.structure === item.structure);
+
+      if (pIdx !== -1) {
+        rowsOfField[pIdx].statuses = rowsOfField[pIdx].statuses.filter(
+          (s) => s !== item.status
+        );
+
+        rowsOfField[pIdx].children = rowsOfField[pIdx].children.filter(
+          (c) => c.status !== item.status
+        );
+      }
+
+      copy[item.field1] = rowsOfField;
+      return copy;
+    });
+
+    // 3) Nếu item nằm ở field1 hiện tại → cập nhật rows hiển thị
+    if (item.field1 === field1) {
+      const newRows = rows.filter(
+        (p) =>
+          !(p.structure === item.structure && p.statuses.includes(item.status))
       );
-      updated[pIdx].children = (updated[pIdx].children || []).filter(
-        (c) => c.status !== item.status
-      );
-      commitRowsUpdate(updated);
+      setRows(newRows);
     }
   };
 
@@ -561,28 +623,6 @@ const UltrasoundBungForm = () => {
 
         <Row gutter={16} style={{ marginBottom: 24 }}>
           <Col span={12}>
-            <label
-              style={{ fontWeight: 600, display: "block", marginBottom: 6 }}
-            >
-              Field 1 – Bộ phận
-            </label>
-
-            <Radio.Group
-              value={field1}
-              onChange={(e) => {
-                handleField1Change(e.target.value);
-              }}
-              style={{ marginLeft: 0 }}
-            >
-              {FIELD1_OPTIONS.map((o) => (
-                <Radio.Button key={o} value={o}>
-                  {o}
-                </Radio.Button>
-              ))}
-            </Radio.Group>
-          </Col>
-
-          <Col span={12}>
             <Form.Item
               label={translateLabel(
                 TRANSLATE_LANGUAGE.VI,
@@ -656,7 +696,7 @@ const UltrasoundBungForm = () => {
                         {pIdx === 0 && <b>Cấu trúc</b>}
                         <Select
                           style={{ width: "100%", marginTop: 4 }}
-                          placeholder="Chọn cấu trúc"
+                          disabled
                           value={parent.structure}
                           onChange={(v) => changeParentStructure(pIdx, v)}
                           options={structureOptions.map((s) => ({
@@ -814,29 +854,52 @@ const UltrasoundBungForm = () => {
               {list.length === 0 ? (
                 <i>Chưa có mô tả nào.</i>
               ) : (
-                list.map((item, idx) => (
-                  <div
-                    key={idx}
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      padding: "6px 0",
-                      borderBottom: "1px dashed #ddd",
-                    }}
-                  >
-                    <span style={{ flex: 1 }}>
-                      • {item.text || `${item.structure} – ${item.status}`}
-                    </span>
-                    <div style={{ marginLeft: 12 }}>
-                      <Button
-                        danger
-                        size="small"
-                        onClick={() => removeListItem(idx)}
-                      >
-                        X
-                      </Button>
-                    </div>
+                Object.entries(
+                  list.reduce((acc, item) => {
+                    if (!acc[item.field1]) acc[item.field1] = [];
+                    acc[item.field1].push(item);
+                    return acc;
+                  }, {})
+                ).map(([field, items], groupIdx) => (
+                  <div key={groupIdx} style={{ marginBottom: 16 }}>
+                    {/* dòng dẫn */}
+                    <p style={{ fontWeight: 600 }}>
+                      • Hình ảnh siêu âm {field}
+                    </p>
+
+                    {/* từng mô tả */}
+                    {items.map((item) => {
+                      const globalIndex = list.findIndex(
+                        (x) => x.id === item.id
+                      );
+
+                      return (
+                        <div
+                          key={item.id}
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            padding: "6px 0",
+                            borderBottom: "1px dashed #ddd",
+                          }}
+                        >
+                          <span style={{ flex: 1, marginLeft: 16 }}>
+                            {item.text
+                              .replace(`Hình ảnh siêu âm ${field}`, "")
+                              .trim()}
+                          </span>
+
+                          <Button
+                            danger
+                            size="small"
+                            onClick={() => removeListItem(globalIndex)}
+                          >
+                            X
+                          </Button>
+                        </div>
+                      );
+                    })}
                   </div>
                 ))
               )}

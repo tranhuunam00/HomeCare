@@ -285,7 +285,10 @@ const PreviewSono = ({
           </h3>
 
           {fieldList.map((fieldName, fieldIdx) => {
-            const parents = rowsByField[fieldName] || [];
+            let parents = rowsByField[fieldName] || [];
+            parents = parents.filter(
+              (p) => p.statuses[0] != "Không thấy bất thường"
+            );
             const hasSelected = parents.some((p) => p.statuses?.length > 0);
             if (!hasSelected) return null;
 
@@ -394,27 +397,41 @@ const PreviewSono = ({
 
           {/* Parse JSON kết quả */}
           {(() => {
-            return (
-              <div style={{ marginTop: 12 }}>
-                {ket_qua_chan_doan?.length > 0 ? (
-                  ket_qua_chan_doan.map((item, idx) => (
-                    <p
-                      key={idx}
-                      style={{
-                        margin: 0,
-                        fontSize: 16,
-                        fontWeight: 600,
-                        lineHeight: "22px",
-                      }}
-                    >
-                      • {item.text}
-                    </p>
-                  ))
-                ) : (
-                  <i>Không có kết quả.</i>
-                )}
+            if (!ket_qua_chan_doan || ket_qua_chan_doan.length === 0)
+              return <i>Không có kết quả.</i>;
+
+            const grouped = ket_qua_chan_doan.reduce((acc, item) => {
+              if (!acc[item.field1]) acc[item.field1] = [];
+              acc[item.field1].push(item);
+              return acc;
+            }, {});
+
+            return Object.entries(grouped).map(([field, items], idx) => (
+              <div key={idx} style={{ marginBottom: 14 }}>
+                {/* Dẫn đầu */}
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: 16,
+                    fontWeight: 500,
+                  }}
+                >
+                  • Hình ảnh siêu âm {field}
+                </p>
+
+                {/* Các dòng kết luận con */}
+                {items.map((item, childIdx) => (
+                  <p
+                    key={childIdx}
+                    style={{
+                      margin: "2px 0 0 16px",
+                    }}
+                  >
+                    {item.text.replace(`Hình ảnh siêu âm ${field}`, "").trim()}
+                  </p>
+                ))}
               </div>
-            );
+            ));
           })()}
 
           <>
