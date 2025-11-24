@@ -199,3 +199,9 @@ Bên trái
 - Không thấy dịch tự do ở ổ bụng.
   `,
 };
+
+export const SONO_CONTENT_IMAGE = {
+  "Tuyến giáp và vùng cổ": ["tuyengiap_trai.png", "tuyengiap_phai.png"],
+  "Tuyến vú và hố nách": ["vu_trai.png", "vu_phai.png"],
+  "Bụng tổng quát": ["bung_trai.png", "bung_phai.png"],
+};

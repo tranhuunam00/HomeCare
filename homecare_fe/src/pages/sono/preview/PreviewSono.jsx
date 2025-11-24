@@ -10,7 +10,10 @@ import useVietnamAddress from "../../../hooks/useVietnamAddress";
 import { handlePrint } from "../../formver2/utils";
 import FormActionBar from "../../formver2/component/FormActionBar";
 import { THYROID_ULTRASOUND_TEXT } from "../details/tuyengiap/tuyengiap.constants";
-import { SONO_CONTENT } from "../details/bung/bung.constants";
+import {
+  SONO_CONTENT,
+  SONO_CONTENT_IMAGE,
+} from "../details/bung/bung.constants";
 
 const PrintItem = ({ label, value }) => (
   <div
@@ -304,7 +307,7 @@ const PreviewSono = ({
           >
             <section>
               <img
-                src={"/product/sono/tuyengiap_trai.png"}
+                src={"/product/sono/" + SONO_CONTENT_IMAGE[field1][0]}
                 alt={`img-${formSnapshot?.ImageLeftUrl}`}
                 width={300}
                 height={220}
@@ -322,7 +325,7 @@ const PreviewSono = ({
             </section>
             <section>
               <img
-                src={"/product/sono/tuyengiap_phai.png"}
+                src={"/product/sono/" + SONO_CONTENT_IMAGE[field1][1]}
                 alt={`img-${formSnapshot?.ImageRightUrl}`}
                 width={300}
                 height={220}
