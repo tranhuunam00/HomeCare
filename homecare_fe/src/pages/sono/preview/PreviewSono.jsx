@@ -9,6 +9,8 @@ import { useGlobalAuth } from "../../../contexts/AuthContext";
 import useVietnamAddress from "../../../hooks/useVietnamAddress";
 import { handlePrint } from "../../formver2/utils";
 import FormActionBar from "../../formver2/component/FormActionBar";
+import { THYROID_ULTRASOUND_TEXT } from "../details/tuyengiap/tuyengiap.constants";
+import { SONO_CONTENT } from "../details/bung/bung.constants";
 
 const PrintItem = ({ label, value }) => (
   <div
@@ -43,6 +45,7 @@ const PreviewSono = ({
   ket_qua_chan_doan = [],
   rows = [],
   rowsByField = {},
+  field1,
 }) => {
   console.log("printTemplate", printTemplate);
   const { user } = useGlobalAuth();
@@ -135,12 +138,19 @@ const PreviewSono = ({
               padding: 0,
             }}
           >
-            {translateLabel(
-              languageTranslate,
-              "Result_Report",
-              false
-            ).toUpperCase()}
+            {"PHIẾU KẾT QUẢ"}
           </h1>
+          <h2
+            style={{
+              textAlign: "center",
+              color: "#2f6db8",
+              margin: 0,
+              padding: 0,
+              fontSize: 23,
+            }}
+          >
+            {"SIÊU ÂM - SONOGRAPHY"}
+          </h2>
 
           <>
             <h3
@@ -281,7 +291,80 @@ const PreviewSono = ({
               marginTop: 20,
             }}
           >
-            {"HÌNH ẢNH MINH HỌA"}
+            {"QUY TRÌNH KỸ THUẬT"}
+          </h3>
+
+          <p>{`Thực hiện siêu âm ${field1}`}</p>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+            }}
+          >
+            <section>
+              <img
+                src={"/product/sono/tuyengiap_trai.png"}
+                alt={`img-${formSnapshot?.ImageLeftUrl}`}
+                width={300}
+                height={220}
+                style={{ objectFit: "contain", backgroundColor: "#c0b6b6ff" }}
+              />
+              <p style={{ textAlign: "center" }}>
+                <a
+                  href={"www.home-care.vn"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {"Quy trình kỹ thuật"}
+                </a>
+              </p>
+            </section>
+            <section>
+              <img
+                src={"/product/sono/tuyengiap_phai.png"}
+                alt={`img-${formSnapshot?.ImageRightUrl}`}
+                width={300}
+                height={220}
+                style={{ objectFit: "contain", backgroundColor: "#c0b6b6ff" }}
+              />
+              <p style={{ textAlign: "center" }}>
+                <a
+                  href={"www.home-care.vn"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {"Cấu trúc giải phẫu"}
+                </a>
+              </p>
+            </section>
+          </div>
+
+          <div style={{ marginTop: 20 }}>
+            <pre
+              style={{
+                whiteSpace: "pre-wrap",
+                fontSize: 13,
+                margin: 0,
+                padding: 0,
+                color: "#333",
+              }}
+            >
+              {SONO_CONTENT[field1]}
+            </pre>
+          </div>
+
+          <h3
+            style={{
+              textAlign: "left",
+              color: "#2f6db8",
+              margin: 0,
+              padding: 0,
+              marginBottom: 0,
+              marginTop: 20,
+            }}
+          >
+            {"KẾT LUẬN CHẨN ĐOÁN"}
           </h3>
 
           {fieldList.map((fieldName, fieldIdx) => {
@@ -382,19 +465,6 @@ const PreviewSono = ({
 
           <Divider />
 
-          <h3
-            style={{
-              textAlign: "left",
-              color: "#2f6db8",
-              margin: 0,
-              padding: 0,
-              marginBottom: 0,
-              marginTop: 20,
-            }}
-          >
-            {"KẾT LUẬN CHẨN ĐOÁN"}
-          </h3>
-
           {/* Parse JSON kết quả */}
           {(() => {
             if (!ket_qua_chan_doan || ket_qua_chan_doan.length === 0)
@@ -433,6 +503,75 @@ const PreviewSono = ({
               </div>
             ));
           })()}
+
+          <PrintItem
+            label={translateLabel(
+              languageTranslate,
+              "icd10Classification",
+              false
+            )}
+            value={formSnapshot?.icd10}
+          />
+          <PrintItem
+            label={translateLabel(
+              languageTranslate,
+              "gradingClassification",
+              false
+            )}
+            value={formSnapshot?.phan_do_loai}
+          />
+          <PrintItem
+            label={translateLabel(
+              languageTranslate,
+              "differentialDiagnosis",
+              false
+            )}
+            value={formSnapshot?.chan_doan_phan_biet}
+          />
+
+          <h3
+            style={{
+              textAlign: "left",
+              color: "#2f6db8",
+              margin: 0,
+              padding: 0,
+              marginBottom: 0,
+              marginTop: 20,
+            }}
+          >
+            {"KHUYẾN NGHỊ VÀ TƯ VẤN"}
+          </h3>
+
+          <div>
+            <pre
+              style={{
+                whiteSpace: "pre-wrap",
+                fontSize: 13,
+                margin: 0,
+                padding: 0,
+                color: "#333",
+              }}
+            >
+              {`
+• Khám Bác sĩ chuyên khoa
+• Tái khám định kỳ theo hướng dẫn của Bác sĩ
+• Phối hợp thêm: xét nghiệm, siêu âm / chụp X quang /chụp CLVT/ chụp MRI
+              `}
+            </pre>
+          </div>
+
+          <h3
+            style={{
+              textAlign: "left",
+              color: "#2f6db8",
+              margin: 0,
+              padding: 0,
+              marginBottom: 0,
+              marginTop: 20,
+            }}
+          >
+            {"HÌNH ẢNH MINH HỌA"}
+          </h3>
 
           <>
             <h3

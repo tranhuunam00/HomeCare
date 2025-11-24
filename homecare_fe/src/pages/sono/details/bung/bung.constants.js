@@ -136,3 +136,66 @@ export const BUNG_STRUCTURE_OPTIONS = {
     ],
   },
 };
+
+export const SONO_CONTENT = {
+  "Tuyến giáp và vùng cổ": `
+Tuyến giáp
+- Thùy phải: kích thước bình thường; cấu trúc đồng nhất; không thấy tổn thương dạng nốt hay khối.
+- Thùy trái: kích thước bình thường; cấu trúc đồng nhất; không thấy tổn thương dạng nốt hay khối.
+- Eo tuyến: kích thước bình thường; cấu trúc đồng nhất; không thấy tổn thương dạng nốt hay khối.
+
+Tuyến nước bọt dưới hàm hai bên
+- Kích thước bình thường.
+- Nhu mô đồng nhất, không thấy khối khu trú.
+- Ống tuyến không giãn, không có sỏi.
+
+Tuyến nước bọt mang tai hai bên
+- Kích thước bình thường.
+- Nhu mô đồng nhất, không thấy khối khu trú.
+- Ống tuyến không giãn, không có sỏi.
+
+Hạch vùng cổ hai bên
+- Có một số hạch nhỏ vùng dưới hàm và dưới cằm hai bên.
+- Đường kính trước–sau 4–5 mm.
+- Hình dạng và cấu trúc hạch bình thường.
+
+Nhận xét khác
+- Cơ vùng cổ hai bên: cấu trúc đồng nhất. Không thấy tụ dịch hay khối bất thường.
+- Phần mềm dưới da vùng cổ: cấu trúc đồng nhất. Không thấy tụ dịch hay khối bất thường.
+  `,
+
+  "Tuyến vú và hố nách": `
+Bên phải
+- Nhu mô tuyến: cấu trúc đồng nhất. Không thấy khối bất thường.
+- Hệ thống ống tuyến vú: không giãn.
+- Mô mỡ trước tuyến: cấu trúc đồng nhất.
+- Hệ thống dây chằng Cooper: phân bố đồng nhất, không co kéo.
+- Cơ thành ngực: cấu trúc đồng nhất, không thấy hình ảnh bất thường.
+- Mô mỡ dưới da: cấu trúc đồng nhất.
+- Phần mềm hố nách: không có hạch to; không thấy tuyến vú phụ.
+
+Bên trái
+- Nhu mô tuyến: cấu trúc đồng nhất. Không thấy khối bất thường.
+- Hệ thống ống tuyến vú: không giãn.
+- Mô mỡ trước tuyến: cấu trúc đồng nhất.
+- Hệ thống dây chằng Cooper: phân bố đồng nhất, không co kéo.
+- Cơ thành ngực: cấu trúc đồng nhất, không thấy hình ảnh bất thường.
+- Mô mỡ dưới da: cấu trúc đồng nhất.
+- Phần mềm hố nách: không có hạch to; không thấy tuyến vú phụ.
+  `,
+
+  "Bụng tổng quát": `
+- Gan: kích thước bình thường. Nhu mô đồng nhất, không có khối khu trú.
+- Đường mật trong gan: không giãn, thành đều. Không thấy sỏi hay cấu trúc bất thường.
+- Đường mật ngoài gan: không giãn, thành đều. Không thấy sỏi hay cấu trúc bất thường.
+- Túi mật: không giãn, không có sỏi. Thành đều. Xung quanh không có dịch.
+- Tụy: kích thước bình thường. Nhu mô đồng nhất, không có khối khu trú. Ống tụy không giãn, không thấy sỏi. Xung quanh tụy không thấy tụ dịch.
+- Lách: kích thước bình thường. Nhu mô đồng nhất.
+- Thận phải: kích thước bình thường. Nhu mô đồng nhất. Xung quanh thận không tụ dịch. Đài thận và bể thận không giãn, không có sỏi. Niệu quản không giãn.
+- Thận trái: kích thước bình thường. Nhu mô đồng nhất. Xung quanh thận không tụ dịch. Đài thận và bể thận không giãn, không có sỏi. Niệu quản không giãn.
+- Bàng quang: nước tiểu trong, thành đều, không có sỏi.
+- Tuyến tiền liệt: kích thước trong giới hạn bình thường. Nhu mô đồng nhất, không có khối khu trú.
+- Hố chậu hai bên: không thấy hình ảnh bất thường.
+- Không thấy dịch tự do ở ổ bụng.
+  `,
+};
