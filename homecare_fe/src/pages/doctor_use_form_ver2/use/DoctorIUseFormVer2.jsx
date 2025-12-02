@@ -181,10 +181,30 @@ export default function DoctorUseDFormVer2({
   const [idFormVer2, setIdFormVer2] = useState();
   const [printTemplateList, setPrintTemplateList] = useState([]);
   const [printTemplate, setPrintTemplate] = useState(null);
+  const [idTemplateService, setIdTemplateService] = useState(null);
+  const [idExamPart, setIdExamPart] = useState(null);
 
   const selectedTemplateServiceId = Form.useWatch("id_template_service", form);
+
   const selectedExamPartId = Form.useWatch("id_exam_part", form);
   const selectedFormVer2NameId = Form.useWatch("id_formver2_name", form);
+
+  useEffect(() => {
+    if (selectedTemplateServiceId) {
+      setIdTemplateService(selectedTemplateServiceId);
+    } else {
+      setIdTemplateService(null); // hoặc giữ nguyên tùy logic của bạn
+    }
+  }, [selectedTemplateServiceId]);
+
+  useEffect(() => {
+    if (selectedExamPartId) {
+      setIdExamPart(selectedExamPartId);
+    } else {
+      setIdExamPart(null); // hoặc giữ nguyên tùy logic của bạn
+    }
+  }, [selectedExamPartId]);
+
   useEffect(() => {
     if (!idEdit) return;
 
@@ -343,10 +363,13 @@ export default function DoctorUseDFormVer2({
           benh_nhan_dia_chi_so_nha: patientDiagnose.address,
           benh_nhan_dia_chi_xa_phuong: patientDiagnose.ward_code,
           benh_nhan_dia_chi_tinh_thanh_pho: patientDiagnose.province_code,
+          id_template_service: patientDiagnose.id_template_service,
+          id_exam_part: patientDiagnose.id_exam_part,
         };
 
         setSelectedProvince(patientDiagnose.province_code);
-
+        setIdExamPart(patientDiagnose.id_exam_part);
+        setIdTemplateService(patientDiagnose.id_template_service);
         form.setFieldsValue(formValues);
         setPatientDiagnose(patientDiagnose);
 
@@ -384,8 +407,10 @@ export default function DoctorUseDFormVer2({
     return snap ? { id: snap.id, name: snap.name, code: snap.code } : null;
   }, [selectedFormVer2NameId, formVer2Names, initialSnap]);
   // Lọc local từ formVer2Names đã có sẵn trong context
+  console.log("idTemplateService", idTemplateService, idExamPart);
+
   useEffect(() => {
-    if (!selectedTemplateServiceId || !selectedExamPartId) {
+    if (!idTemplateService || !idExamPart) {
       setFilteredFormVer2Names([]);
       return;
     }
@@ -393,8 +418,8 @@ export default function DoctorUseDFormVer2({
     const currentId = initialSnap?.apiData?.id_formver2_name_form_ver2_name?.id;
     let filtered = (formVer2Names || []).filter(
       (n) =>
-        Number(n.id_template_service) === Number(selectedTemplateServiceId) &&
-        Number(n.id_exam_part) === Number(selectedExamPartId) &&
+        Number(n.id_template_service) === Number(idTemplateService) &&
+        Number(n.id_exam_part) === Number(idExamPart) &&
         (n.isUsed == isUse || n.id == currentId) &&
         n.language?.includes(languageTranslate) &&
         n.form_ver2s
@@ -412,8 +437,8 @@ export default function DoctorUseDFormVer2({
     setFilteredFormVer2Names(filtered);
   }, [
     formVer2Names,
-    selectedTemplateServiceId,
-    selectedExamPartId,
+    idTemplateService,
+    idExamPart,
     initialSnap,
     languageTranslate,
   ]);
@@ -441,11 +466,11 @@ export default function DoctorUseDFormVer2({
   }, [ImageLeftUrl, ImageRightUrl]);
 
   const filteredExamParts = useMemo(() => {
-    if (!selectedTemplateServiceId) return [];
+    if (!idTemplateService) return [];
     return (examParts || []).filter(
-      (p) => Number(p.id_template_service) === Number(selectedTemplateServiceId)
+      (p) => Number(p.id_template_service) === Number(idTemplateService)
     );
-  }, [examParts, selectedTemplateServiceId]);
+  }, [examParts, idTemplateService]);
 
   useEffect(() => {
     if (!idFormVer2) return;
@@ -700,13 +725,13 @@ export default function DoctorUseDFormVer2({
               >
                 <Select
                   placeholder="Chọn bộ phận thăm khám"
-                  disabled={!isEdit || !selectedTemplateServiceId}
+                  disabled={!isEdit || !idTemplateService}
                   allowClear
                   onChange={() => {
                     form.setFieldsValue({ id_formver2_name: undefined });
                   }}
                   notFoundContent={
-                    selectedTemplateServiceId
+                    idTemplateService
                       ? "Không có bộ phận cho phân hệ này"
                       : "Chọn Phân hệ trước"
                   }
@@ -763,18 +788,16 @@ export default function DoctorUseDFormVer2({
                 rules={[{ required: true, message: "Chọn tên mẫu" }]}
               >
                 <Select
-                  disabled={
-                    !isEdit || !selectedTemplateServiceId || !selectedExamPartId
-                  }
+                  disabled={!isEdit || !idTemplateService || !idExamPart}
                   placeholder={
-                    !selectedTemplateServiceId || !selectedExamPartId
+                    !idTemplateService || !idExamPart
                       ? "Chọn Phân hệ & Bộ phận trước"
                       : "Chọn tên mẫu"
                   }
                   showSearch
                   optionFilterProp="children"
                   notFoundContent={
-                    selectedTemplateServiceId && selectedExamPartId
+                    idTemplateService && idExamPart
                       ? "Không có tên mẫu phù hợp"
                       : "Chưa đủ điều kiện để chọn"
                   }
