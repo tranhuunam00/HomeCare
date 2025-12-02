@@ -191,6 +191,10 @@ function App() {
             element={<DoctorUseDFormVer2 isUse={true} />}
           />
           <Route
+            path="form-drad/use/patient-diagnose/:patient_diagnose_id"
+            element={<DoctorUseDFormVer2 isUse={true} />}
+          />
+          <Route
             path="form-drad/use"
             element={<DoctorUseDFormVer2 isUse={true} />}
           />
@@ -205,6 +209,7 @@ function App() {
           />
 
           <Route path="form-drad/detail/:id" element={<DFormVer2 />} />
+
           <Route path="form-drad" element={<DFormVer2 />} />
           <Route path="form-drad-list" element={<FormVer2List />} />
           <Route path="form-ver2-names" element={<FormVer2NameList />} />

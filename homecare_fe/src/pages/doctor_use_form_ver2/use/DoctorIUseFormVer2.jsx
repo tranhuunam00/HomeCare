@@ -32,6 +32,7 @@ import {
   mapApiToForm,
 } from "../../formver2/utils";
 import {
+  getAge,
   sortTemplateServices,
   TRANSLATE_LANGUAGE,
   translateLabel,
@@ -143,15 +144,19 @@ export default function DoctorUseDFormVer2({
   }, []);
   const { provinces, wards, setSelectedProvince } = useVietnamAddress();
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { id, patient_diagnose_id } = useParams();
   useEffect(() => {
     if (id && id !== idEdit) {
       setIdEdit(id);
     }
   }, [id]);
   const [idEdit, setIdEdit] = useState(id);
+  const [idPatientDiagnose, setIdPatientDiagnose] =
+    useState(patient_diagnose_id);
+
   const [historyOpen, setHistoryOpen] = useState(false);
   const [translateOpen, setTranslateOpen] = useState(false);
+  const [patientDiagnose, setPatientDiagnose] = useState(null);
 
   const [imageList, setImageList] = useState([{}, {}, {}]);
 
@@ -266,6 +271,10 @@ export default function DoctorUseDFormVer2({
         setImageDescEditor(apiData.imageDescEditor || "");
         setPrintTemplate(apiData?.id_print_template_print_template);
 
+        if (apiData.id_patient_diagnose) {
+          setIdPatientDiagnose(apiData.id_patient_diagnose);
+        }
+
         setInitialSnap({
           formValues,
           apiData,
@@ -309,6 +318,49 @@ export default function DoctorUseDFormVer2({
 
     fetchTemplates();
   }, []);
+
+  useEffect(() => {
+    const fetchTemplates = async () => {
+      try {
+        setLoading(true);
+        const [serverData] = await Promise.all([
+          API_CALL.get("/patient-diagnose/" + idPatientDiagnose, {}),
+        ]);
+
+        const patientDiagnose =
+          serverData.data.data?.data || serverData.data.data || [];
+
+        const formValues = {
+          benh_nhan_ho_ten: patientDiagnose.name,
+          benh_nhan_gioi_tinh: patientDiagnose.gender,
+          benh_nhan_tuoi: getAge(patientDiagnose.dob),
+          benh_nhan_quoc_tich: patientDiagnose.countryCode,
+          benh_nhan_dien_thoai: patientDiagnose.phoneNumber,
+          benh_nhan_email: patientDiagnose.email,
+          benh_nhan_pid: patientDiagnose.PID,
+          benh_nhan_sid: patientDiagnose.SID,
+          benh_nhan_lam_sang: patientDiagnose.Indication,
+          benh_nhan_dia_chi_so_nha: patientDiagnose.address,
+          benh_nhan_dia_chi_xa_phuong: patientDiagnose.ward_code,
+          benh_nhan_dia_chi_tinh_thanh_pho: patientDiagnose.province_code,
+        };
+
+        setSelectedProvince(patientDiagnose.province_code);
+
+        form.setFieldsValue(formValues);
+        setPatientDiagnose(patientDiagnose);
+
+        console.log("patientDiagnose", patientDiagnose);
+      } catch (error) {
+        console.error(error);
+        toast.error("Không thể tải thông tin ca bệnh");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (idPatientDiagnose) fetchTemplates();
+  }, [idPatientDiagnose]);
 
   useEffect(() => {
     if (
@@ -444,6 +496,7 @@ export default function DoctorUseDFormVer2({
         prev_id: initialSnap?.apiData?.id,
         id_root: initialSnap?.apiData?.id_root || initialSnap?.apiData?.id,
         imageList,
+        id_patient_diagnose: idPatientDiagnose,
       });
 
       const res = await API_CALL.postForm(`/doctor-use-form-ver2`, fd, {

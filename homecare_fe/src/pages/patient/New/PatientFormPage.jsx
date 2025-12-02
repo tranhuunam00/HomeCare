@@ -383,12 +383,19 @@ const PatientFormPage = () => {
           <Row gutter={16}>
             <Col span={8}>
               <Form.Item name="pid" label="PID" rules={[{ required: true }]}>
-                <Input />
+                <Input
+                  onChange={(e) => {
+                    form.setFieldValue(
+                      "sid",
+                      `${e.target.value}-${dayjs().format("DDMMYY-HHmmss")}`
+                    );
+                  }}
+                />
               </Form.Item>
             </Col>
             <Col span={8}>
               <Form.Item name="sid" label="SID" rules={[{ required: true }]}>
-                <Input />
+                <Input disabled />
               </Form.Item>
             </Col>
             <Col span={8}>

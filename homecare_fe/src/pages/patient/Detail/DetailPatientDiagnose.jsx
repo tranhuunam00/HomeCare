@@ -181,17 +181,14 @@ const PatientDiagnoiseDetailPage = () => {
           </Col>
         </Row>
 
-        <Row gutter={24} style={{ marginTop: 40 }}>
+        {/* <Row gutter={24} style={{ marginTop: 40 }}>
           <h2>Hành động</h2>
         </Row>
-        <StatusButtonPatientDiagnose id={data.id} status={data.status} />
+        <StatusButtonPatientDiagnose id={data.id} status={data.status} /> */}
         <Row gutter={24} style={{ marginTop: 40 }}>
           <h2>Hành động phiên bản 2</h2>
         </Row>
-        <GroupProcessPatientDiagnoiseFormVer2
-          id={data.id}
-          status={data.status}
-        />
+        <GroupProcessPatientDiagnoiseFormVer2 patientDiagnose={data} />
 
         <Row gutter={24} style={{ marginTop: 40 }}>
           <h2>Lịch sử</h2>

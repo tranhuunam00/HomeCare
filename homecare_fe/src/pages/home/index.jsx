@@ -24,26 +24,22 @@ const Sidebar = ({ collapsed }) => {
   const navigate = useNavigate();
 
   const menuItems = [
-    // user?.id_role === USER_ROLE.ADMIN && {
-    //   key: "Ca chẩn đoán",
-    //   icon: (
-    //     <Avatar
-    //       src="https://stockdep.net/files/images/27167199.jpg"
-    //       size={40}
-    //       style={{ marginTop: -2 }}
-    //     />
-    //   ),
-    //   label: "Ca chẩn đoán",
-    //   children:
-    //     user.id_role == USER_ROLE.ADMIN
-    //       ? [
-    //           {
-    //             key: "patients-diagnose",
-    //             label: "Danh sách",
-    //           },
-    //         ]
-    //       : [],
-    // },
+    user?.id_role === USER_ROLE.ADMIN && {
+      key: "Ca chẩn đoán",
+      icon: (
+        <Avatar src="/icons/patient.png" size={40} style={{ marginTop: -2 }} />
+      ),
+      label: "Ca chẩn đoán",
+      children:
+        user.id_role == USER_ROLE.ADMIN
+          ? [
+              {
+                key: "/home/patients-diagnose",
+                label: "Danh sách",
+              },
+            ]
+          : [],
+    },
     // user?.id_role === USER_ROLE.ADMIN && {
     //   key: "Mẫu kết quả",
     //   icon: (

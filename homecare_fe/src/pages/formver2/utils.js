@@ -528,6 +528,7 @@ export function buildFormDataDoctorUseFormVer2(values, extra) {
 
   fd.append("tables", JSON.stringify(extra?.tablesData ?? []));
   fd.append("imageDescEditor", extra?.imageDescEditor);
+  fd.append("id_patient_diagnose", extra?.id_patient_diagnose);
 
   // ---- auto_code nếu cần
 

@@ -106,7 +106,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
       { title: "SID", dataIndex: "SID", key: "SID", width: 120 },
       {
         width: 220,
-        title: "Chỉnh định",
+        title: "Chỉ định",
         dataIndex: "id_template_service",
         key: "id_template_service",
         render: (val) => templateServices?.find((t) => t.id == val)?.name,
