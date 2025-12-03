@@ -648,7 +648,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         )}
       </Row>
 
-      <h3>Tổng cộng: {total} bản ghi</h3>
+      <h3>Tổng cộng: {total} ca bệnh được lọc</h3>
 
       <Table
         rowKey="id"
