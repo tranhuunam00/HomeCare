@@ -1004,7 +1004,13 @@ const UltrasoundBungForm = () => {
           else setIsEdit(user.id_role == USER_ROLE.ADMIN || !idEdit);
         }}
         onApprove={async () => {
-          handleSave(SONO_STATUS.APPROVED);
+          try {
+            const res = await API_CALL.patch("/sono/" + id + "/approve");
+            toast.success("Phê duyệt thành công!");
+            navigate(`/home/patients-diagnose`);
+          } catch (error) {
+            toast.error("Phê duyệt thất bại!");
+          }
         }}
         keys={[
           KEY_ACTION_BUTTON.reset,
