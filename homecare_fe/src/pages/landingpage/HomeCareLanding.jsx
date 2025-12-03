@@ -318,22 +318,19 @@ const HomeCareLanding = () => {
         <div className={styles["homecare__footer-content"]}>
           <div className={styles["homecare__footer-col"]}>
             <img src="/daogroup.png" alt="logo" />
-            <p> Kiến tạo cuộc sống số - Digital for life</p>
-            <p>www.daogroup.vn</p>
+            <h3>Thông tin bản quyền tác giả:</h3>
+            <p>Tác giả và chủ sở hữu: ĐÀO DANH VĨNH</p>
+            <p>Quốc tịch: Việt Nam</p>
+            <p>CCCD: 033080002151</p>
             <p>
-              <a
-                href="/privacy-policy"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: "white" }}
-              >
-                Chính sách bảo mật | Private policy
-              </a>
+              Giấy chứng nhận quyền tác giả số 10506/2025/QTG, cấp bởi Cục bản
+              quyền tác giả - Bộ văn hóa, thể thao và du lịch
             </p>
           </div>
 
           <div className={styles["homecare__footer-col"]}>
-            <h4 style={{ color: "white" }}>Thông Tin Liên Hệ</h4>
+            <h3>Thông tin đơn vị vận hành:</h3>
+            <p>Công ty TNHH ĐẦU TƯ & CÔNG NGHỆ DAOGROUP</p>
             <p>
               <FaMapMarkerAlt /> Số 22, đường 3.7/10, KĐT Gamuda Gardens, Hoàng
               Mai, Hà Nội
@@ -343,6 +340,17 @@ const HomeCareLanding = () => {
             </p>
             <p>
               <FaEnvelope /> daogroupltd@gmail.com
+            </p>
+
+            <p style={{ color: "white", marginTop: 70 }}>
+              <a
+                href="/privacy-policy"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: "white" }}
+              >
+                Chính sách bảo mật | Private policy
+              </a>
             </p>
           </div>
         </div>
