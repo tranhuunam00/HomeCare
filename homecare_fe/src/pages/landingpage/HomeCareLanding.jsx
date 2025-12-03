@@ -317,7 +317,6 @@ const HomeCareLanding = () => {
       <footer className={styles["homecare__footer"]}>
         <div className={styles["homecare__footer-content"]}>
           <div className={styles["homecare__footer-col"]}>
-            <img src="/daogroup.png" alt="logo" />
             <h3>Thông tin bản quyền tác giả:</h3>
             <p>Tác giả và chủ sở hữu: ĐÀO DANH VĨNH</p>
             <p>Quốc tịch: Việt Nam</p>
@@ -342,7 +341,7 @@ const HomeCareLanding = () => {
               <FaEnvelope /> daogroupltd@gmail.com
             </p>
 
-            <p style={{ color: "white", marginTop: 70 }}>
+            <p style={{ color: "white", marginTop: 10 }}>
               <a
                 href="/privacy-policy"
                 target="_blank"
@@ -356,8 +355,7 @@ const HomeCareLanding = () => {
         </div>
 
         <div className={styles["homecare__copyright"]}>
-          &nbsp;|&nbsp; © 2025 Home Care by DAO Group. All Rights Reserved.
-          &nbsp;|&nbsp;
+          &nbsp;|&nbsp; Bản quyền 2025 @ ĐÀO DANH VĨNH &nbsp;|&nbsp;
         </div>
       </footer>
 

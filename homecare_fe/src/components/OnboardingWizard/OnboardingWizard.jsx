@@ -69,7 +69,7 @@ const OnboardingWizard = ({ open, onClose, doctorId, is_use_onboard }) => {
 
   // ==== Package registration ====
   const [selectedPackage, setSelectedPackage] = useState(null);
-  const [duration, setDuration] = useState(1);
+  const [duration, setDuration] = useState(null);
   const [note, setNote] = useState("");
   const [loadingPackage, setLoadingPackage] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
@@ -96,7 +96,7 @@ const OnboardingWizard = ({ open, onClose, doctorId, is_use_onboard }) => {
 
       const payload = {
         package_code: selectedPackage,
-        duration_months: duration,
+        duration_months: 1, // Dùng thử 1 tháng
         type: "new",
         note,
       };
@@ -563,6 +563,25 @@ const OnboardingWizard = ({ open, onClose, doctorId, is_use_onboard }) => {
               Bạn đang chọn gói:{" "}
               <strong style={{ color: "#1677ff" }}>{selectedPackage}</strong>
             </p>
+
+            <div style={{ marginTop: 12 }}>
+              <label>Gói dùng thử</label>
+              <Select
+                style={{ width: "100%", marginTop: 4 }}
+                value={1}
+                onChange={(val) => setDuration(val)}
+              >
+                {[{ value: 1, label: "Dùng thử 1 tháng" }].map((d) => {
+                  const feeItem = fees?.find((f) => f.value === d.value);
+
+                  return (
+                    <Option key={d.value} value={d.value} disabled={true}>
+                      {`${d.label} – ${feeItem?.label} đ`}
+                    </Option>
+                  );
+                })}
+              </Select>
+            </div>
             <div style={{ marginTop: 12 }}>
               <label>Chu kỳ thanh toán</label>
               <Select
@@ -585,11 +604,7 @@ const OnboardingWizard = ({ open, onClose, doctorId, is_use_onboard }) => {
                   const saving = originalPrice - fee;
 
                   return (
-                    <Option
-                      key={d.value}
-                      value={d.value}
-                      disabled={d.value != 1}
-                    >
+                    <Option key={d.value} value={d.value} disabled={true}>
                       {`${d.label} – ${feeItem?.label} đ`}
                       {saving > 0 && (
                         <span style={{ color: "#52c41a", marginLeft: 6 }}>
@@ -597,9 +612,9 @@ const OnboardingWizard = ({ open, onClose, doctorId, is_use_onboard }) => {
                         </span>
                       )}
                       {d.value == 1 && (
-                        <span style={{ color: "#52c41a", marginLeft: 6 }}>
-                          (Trải nghiệm 30 ngày miễn phí)
-                        </span>
+                        <span
+                          style={{ color: "#52c41a", marginLeft: 6 }}
+                        ></span>
                       )}
                     </Option>
                   );

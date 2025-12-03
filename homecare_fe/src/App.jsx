@@ -84,6 +84,7 @@ function App() {
   } = useGlobalAuth();
   const [wizardOpen, setWizardOpen] = useState(false);
 
+  console.log("userPackages", userPackages);
   const isProfileIncomplete = (doc) => {
     if (!doc) return true;
     return (
@@ -139,11 +140,12 @@ function App() {
         !printTemplateGlobal?.length ||
         !getUsablePackageCodes(userPackages).length)
     ) {
+      console.log("hehehe");
       setWizardOpen(true);
     } else {
       setWizardOpen(false);
     }
-  }, [doctor, printTemplateGlobal]);
+  }, [doctor, printTemplateGlobal, userPackages]);
 
   return (
     <BrowserRouter>
