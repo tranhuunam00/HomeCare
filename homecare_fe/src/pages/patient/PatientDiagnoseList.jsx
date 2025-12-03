@@ -48,10 +48,10 @@ const PATIENT_DIAGNOSE_STATUS = {
 };
 
 const PATIENT_DIAGNOSE_COLOR = {
-  1: "blue",
-  2: "gold",
-  3: "orange",
-  4: "green",
+  1: "#0b56e3d3", // New
+  2: "#F59E0B", // Reading
+  3: "#EF4444", // Waiting
+  4: "#10B981", // Done
 };
 
 const defaultVisibleKeys = [
@@ -412,23 +412,42 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         </Col>
       </Row>
       <Row gutter={16} style={{ marginBottom: 12 }}>
-        <Col span={6}>
-          <Select
-            mode="multiple"
-            allowClear
-            style={{ width: "100%" }}
-            placeholder="Lọc theo trạng thái"
-            value={filters.status}
-            onChange={(value) =>
-              setFilters((prev) => ({ ...prev, status: value }))
-            }
-          >
-            {Object.entries(PATIENT_DIAGNOSE_STATUS).map(([key, label]) => (
-              <Option key={key} value={parseInt(key)}>
-                {label}
-              </Option>
-            ))}
-          </Select>
+        <Col span={12}>
+          <Space wrap>
+            {Object.entries(PATIENT_DIAGNOSE_STATUS).map(([key, label]) => {
+              const intKey = parseInt(key);
+              const isActive = filters.status?.includes(intKey);
+
+              return (
+                <Button
+                  key={key}
+                  type="default"
+                  style={{
+                    backgroundColor: PATIENT_DIAGNOSE_COLOR[intKey],
+                    color: "white",
+                    borderColor: isActive
+                      ? "#030000ff"
+                      : PATIENT_DIAGNOSE_COLOR[intKey],
+                    opacity: isActive ? 1 : 0.5,
+                  }}
+                  onClick={() => {
+                    setFilters((prev) => {
+                      const current = prev.status || [];
+                      return {
+                        ...prev,
+                        status: isActive
+                          ? current.filter((s) => s !== intKey)
+                          : [...current, intKey],
+                      };
+                    });
+                    setPage(1);
+                  }}
+                >
+                  {label}
+                </Button>
+              );
+            })}
+          </Space>
         </Col>
 
         {/* Bộ lọc chỉ định */}

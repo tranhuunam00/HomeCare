@@ -37,6 +37,12 @@ const Sidebar = ({ collapsed }) => {
                 key: "/home/patients-diagnose",
                 label: "Danh sách",
               },
+
+              {
+                key: "/home/doctor-use-form-drad",
+                // icon: <Avatar src={"/icons/ketquadadoc.png"} size={40} />,
+                label: "Kết quả đã đọc",
+              },
             ]
           : [],
     },
@@ -89,12 +95,6 @@ const Sidebar = ({ collapsed }) => {
       key: "/home/form-drad/use",
       icon: <Avatar src={"/icons/useNow.png"} size={40} />,
       label: "Đọc kết quả",
-    },
-
-    {
-      key: "/home/doctor-use-form-drad",
-      icon: <Avatar src={"/icons/ketquadadoc.png"} size={40} />,
-      label: "Kết quả đã đọc",
     },
 
     {
