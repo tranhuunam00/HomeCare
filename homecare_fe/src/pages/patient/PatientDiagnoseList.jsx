@@ -437,7 +437,10 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
           <Input
             placeholder="Tìm theo tên"
             onChange={(e) =>
-              setPendingFilters({ ...pendingFilters, name: e.target.value })
+              setPendingFilters({
+                ...pendingFilters,
+                name: e.target.value ?? null,
+              })
             }
             allowClear
           />
@@ -446,7 +449,10 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
           <Input
             placeholder="Tìm theo PID"
             onChange={(e) =>
-              setPendingFilters({ ...pendingFilters, PID: e.target.value })
+              setPendingFilters({
+                ...pendingFilters,
+                PID: e.target.value ?? null,
+              })
             }
             allowClear
           />
@@ -455,7 +461,10 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
           <Input
             placeholder="Tìm theo SID"
             onChange={(e) =>
-              setPendingFilters({ ...pendingFilters, SID: e.target.value })
+              setPendingFilters({
+                ...pendingFilters,
+                SID: e.target.value ?? null,
+              })
             }
             allowClear
           />
