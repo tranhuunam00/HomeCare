@@ -18,8 +18,51 @@ import { Button } from "antd";
 
 const GroupProcessPatientDiagnoiseFormVer2 = ({ patientDiagnose }) => {
   const { id, status, id_doctor_in_processing } = patientDiagnose;
-  const { doctor } = useGlobalAuth();
+  const { doctor, templateServices } = useGlobalAuth();
   const navigate = useNavigate();
+
+  const onCheckandCreate = async () => {
+    try {
+      if (
+        templateServices
+          .find((t) => t.id == patientDiagnose.id_template_service)
+          ?.name.toLowerCase()
+          .includes("d-sono")
+      ) {
+        const sonoResult = await API_CALL.get(`/sono`, {
+          params: {
+            id_patient_diagnose: id,
+            id_doctor: doctor.id,
+          },
+        });
+
+        if (sonoResult.data.data.data.data?.length) {
+          navigate(`/home/sono/bung/${sonoResult.data.data.data.data[0].id}`);
+        } else {
+          navigate(`/home/sono/use/patient-diagnose/${id}`);
+        }
+      } else {
+        const doctorUseDFormVer2 = await API_CALL.get(`/doctor-use-form-ver2`, {
+          params: {
+            id_patient_diagnose: id,
+            id_doctor: doctor.id,
+            orderBy: "id",
+            orderDir: "DESC",
+          },
+        });
+
+        if (doctorUseDFormVer2.data.data.items?.length) {
+          navigate(
+            `/home/doctor-use-form-drad/detail/${doctorUseDFormVer2.data.data.items[0].id}`
+          );
+        } else {
+          navigate(`/home/form-drad/use/patient-diagnose/${id}`);
+        }
+      }
+    } catch (error) {
+      toast.error("Không cập nhật được trạng thái đọc ca bệnh");
+    }
+  };
 
   const steps = [
     {
@@ -36,10 +79,7 @@ const GroupProcessPatientDiagnoiseFormVer2 = ({ patientDiagnose }) => {
             ...patientDiagnose,
             status: PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESS,
           });
-          toast.success("Đã cập nhật trạng thái đọc ca bệnh");
-
-          navigate(`/home/form-drad/use/patient-diagnose/${id}`);
-          console.log("hehe");
+          await onCheckandCreate();
         } catch (error) {
           toast.error("Không cập nhật được trạng thái đọc ca bệnh");
         }
@@ -50,26 +90,7 @@ const GroupProcessPatientDiagnoiseFormVer2 = ({ patientDiagnose }) => {
       icon: <ReadOutlined />,
       onStepClick: async () => {
         try {
-          const doctorUseDFormVer2 = await API_CALL.get(
-            `/doctor-use-form-ver2`,
-            {
-              params: {
-                id_patient_diagnose: id,
-                id_doctor: doctor.id,
-                orderBy: "id",
-                orderDir: "DESC",
-              },
-            }
-          );
-
-          if (doctorUseDFormVer2.data.data.items?.length) {
-            navigate(
-              `/home/doctor-use-form-drad/detail/${doctorUseDFormVer2.data.data.items[0].id}`
-            );
-          } else {
-            navigate(`/home/form-drad/use/patient-diagnose/${id}`);
-          }
-          console.log("hehe");
+          await onCheckandCreate();
         } catch (error) {
           toast.error("Không cập nhật được trạng thái đọc ca bệnh");
         }
@@ -85,25 +106,7 @@ const GroupProcessPatientDiagnoiseFormVer2 = ({ patientDiagnose }) => {
       icon: <PrinterOutlined />,
       onStepClick: async () => {
         try {
-          const doctorUseDFormVer2 = await API_CALL.get(
-            `/doctor-use-form-ver2`,
-            {
-              params: {
-                id_patient_diagnose: id,
-                id_doctor: doctor.id,
-                orderBy: "id",
-                orderDir: "DESC",
-              },
-            }
-          );
-
-          if (doctorUseDFormVer2.data.data.items?.length) {
-            navigate(
-              `/home/doctor-use-form-drad/detail/${doctorUseDFormVer2.data.data.items[0].id}`
-            );
-          } else {
-            toast.error("Lỗi lấy thông tin");
-          }
+          await onCheckandCreate();
         } catch (error) {
           toast.error("Lỗi lấy thông tin");
         }

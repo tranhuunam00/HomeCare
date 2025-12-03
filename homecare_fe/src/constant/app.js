@@ -235,3 +235,13 @@ export const getAge = (dobString) => {
 
   return age;
 };
+
+export const getSonoTemplateService = (templateServices) => {
+  return templateServices.find((t) => t.name.toLowerCase().includes("d-sono"));
+};
+
+export const getExamPartSono = (examParts, sonoTemplateService) => {
+  return examParts.filter(
+    (e) => e.id_template_service === sonoTemplateService?.id
+  );
+};

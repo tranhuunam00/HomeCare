@@ -98,7 +98,6 @@ const PatientFormPage = () => {
           form.setFieldsValue(dataMapping);
           setInitialValues(dataMapping);
           setIdTemplateService(data.id_template_service);
-
           setSelectedProvince(data.province_code);
         } catch (err) {
           message.error("Không thể tải thông tin bệnh nhân");
@@ -177,7 +176,12 @@ const PatientFormPage = () => {
         title={id ? "Cập nhật thông tin bệnh nhân" : "Tạo mới ca chẩn đoán"}
         bordered
       >
-        <Form form={form} layout="vertical" onFinish={onFinish}>
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={onFinish}
+          initialValues={{ country: "Vietnam" }}
+        >
           {/* Họ tên + Giới tính */}
           <Row gutter={16}>
             <Col span={8}>
@@ -238,7 +242,7 @@ const PatientFormPage = () => {
                 placeholder="Chọn bộ phận thăm khám"
               >
                 {examParts
-                  .filter((e) => (e.id_template_service = idTemplateService))
+                  .filter((e) => e.id_template_service == idTemplateService)
                   .map((s) => (
                     <Option key={s.id} value={s.id}>
                       {s.name}

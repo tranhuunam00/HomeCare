@@ -184,6 +184,10 @@ function App() {
           <Route path="products" element={<ProductList />} />
           <Route path="templates" element={<TemplateList />} />
           <Route path="partners" element={<PartnerList />} />
+          <Route
+            path="sono/use/patient-diagnose/:patient_diagnose_id"
+            element={<UltrasoundBungForm />}
+          />
           <Route path="sono/bung/:id" element={<UltrasoundBungForm />} />
           <Route path="sono/bung" element={<UltrasoundBungForm />} />
           <Route path="sono/list" element={<SonoList />} />

@@ -18,6 +18,9 @@ import { toast } from "react-toastify";
 import { TUYEN_GIAP_STRUCTURE_OPTIONS } from "../tuyengiap/tuyengiap.constants";
 import { TUYEN_VU_STRUCTURE_OPTIONS } from "../tuyenvu/tuyenvu.constants";
 import {
+  getAge,
+  getExamPartSono,
+  getSonoTemplateService,
   TRANSLATE_LANGUAGE,
   translateLabel,
   USER_ROLE,
@@ -59,12 +62,28 @@ const groupConclusionsByField = (list) => {
 
 const UltrasoundBungForm = () => {
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { id, patient_diagnose_id } = useParams();
   const [form] = Form.useForm();
-  const { doctor, user, printTemplateGlobal } = useGlobalAuth();
+  const { doctor, user, printTemplateGlobal, examParts, templateServices } =
+    useGlobalAuth();
+  const [idExamPart, setIdExamPart] = useState(null);
+  const [sonoTemplateService, setSonoTemplateService] = useState(null);
+  const [sonoExamParts, setSonoExamParts] = useState([]);
+  const [field1, setField1] = useState(null);
+
+  useEffect(() => {
+    const sonoTemplateServiceDB = getSonoTemplateService(
+      templateServices || []
+    );
+    setSonoTemplateService(sonoTemplateServiceDB);
+    const sonoExamPartsDB = getExamPartSono(examParts, sonoTemplateServiceDB);
+    setSonoExamParts(sonoExamPartsDB);
+  }, [examParts, templateServices]);
+
+  const [idPatientDiagnose, setIdPatientDiagnose] =
+    useState(patient_diagnose_id);
 
   // current selected field1
-  const [field1, setField1] = useState(null);
 
   // rowsByField: mỗi field1 có một bộ rows riêng
   const [rowsByField, setRowsByField] = useState({
@@ -136,6 +155,9 @@ const UltrasoundBungForm = () => {
       ...data,
       id_print_template: data.id_print_template,
     });
+
+    if (data.id_patient_diagnose)
+      setIdPatientDiagnose(data.id_patient_diagnose);
   };
 
   // fetch detail if id present
@@ -159,6 +181,47 @@ const UltrasoundBungForm = () => {
     fetchDetail();
     // eslint-disable-next-line
   }, [id]);
+
+  useEffect(() => {
+    const fetchTemplates = async () => {
+      try {
+        const [serverData] = await Promise.all([
+          API_CALL.get("/patient-diagnose/" + idPatientDiagnose, {}),
+        ]);
+
+        const patientDiagnose =
+          serverData.data.data?.data || serverData.data.data || [];
+
+        const formValues = {
+          benh_nhan_ho_ten: patientDiagnose.name,
+          benh_nhan_gioi_tinh: patientDiagnose.gender,
+          benh_nhan_tuoi: getAge(patientDiagnose.dob),
+          benh_nhan_quoc_tich: patientDiagnose.countryCode,
+          benh_nhan_dien_thoai: patientDiagnose.phoneNumber,
+          benh_nhan_email: patientDiagnose.email,
+          benh_nhan_pid: patientDiagnose.PID,
+          benh_nhan_sid: patientDiagnose.SID,
+          benh_nhan_lam_sang: patientDiagnose.Indication,
+          benh_nhan_dia_chi_so_nha: patientDiagnose.address,
+          benh_nhan_dia_chi_xa_phuong: patientDiagnose.ward_code,
+          benh_nhan_dia_chi_tinh_thanh_pho: patientDiagnose.province_code,
+        };
+
+        setSelectedProvince(patientDiagnose.province_code);
+
+        setIdExamPart(patientDiagnose.id_exam_part);
+        form.setFieldsValue(formValues);
+
+        console.log("patientDiagnose", patientDiagnose);
+      } catch (error) {
+        console.error(error);
+        toast.error("Không thể tải thông tin ca bệnh");
+      } finally {
+      }
+    };
+
+    if (idPatientDiagnose) fetchTemplates();
+  }, [idPatientDiagnose]);
 
   useEffect(() => {
     const printT = printTemplateGlobal.find(
@@ -500,9 +563,19 @@ const UltrasoundBungForm = () => {
   // determine STRUCT by current field1 (cached)
   const STRUCT = getSTRUCT(field1);
 
-  // init on first mount: if no field1, set default field1 to first option and init
   useEffect(() => {
-    if (!field1) {
+    console.log("idExamPart", idExamPart);
+
+    console.log("sonoExamParts", sonoExamParts);
+    const checkF1 = sonoExamParts.find((s) => s.id == idExamPart)?.name;
+    if (checkF1) {
+      setField1(checkF1);
+
+      form.setFieldsValue({
+        id_template_service: "D-SONO",
+        language: "vi",
+      });
+    } else {
       const defaultField = FIELD1_OPTIONS[0];
       setField1(defaultField);
       const existing = rowsByField[defaultField];
@@ -515,8 +588,7 @@ const UltrasoundBungForm = () => {
         language: "vi",
       });
     }
-    // eslint-disable-next-line
-  }, []);
+  }, [idExamPart, sonoExamParts]);
 
   // ---------- Render ----------
   return (
