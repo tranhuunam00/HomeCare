@@ -24,27 +24,24 @@ const Sidebar = ({ collapsed }) => {
   const navigate = useNavigate();
 
   const menuItems = [
-    user?.id_role === USER_ROLE.ADMIN && {
+    {
       key: "Ca chẩn đoán",
       icon: (
         <Avatar src="/icons/patient.png" size={40} style={{ marginTop: -2 }} />
       ),
       label: "Ca chẩn đoán",
-      children:
-        user.id_role == USER_ROLE.ADMIN
-          ? [
-              {
-                key: "/home/patients-diagnose",
-                label: "Danh sách",
-              },
+      children: [
+        {
+          key: "/home/patients-diagnose",
+          label: "Danh sách",
+        },
 
-              {
-                key: "/home/doctor-use-form-drad",
-                // icon: <Avatar src={"/icons/ketquadadoc.png"} size={40} />,
-                label: "Kết quả đã đọc",
-              },
-            ]
-          : [],
+        {
+          key: "/home/doctor-use-form-drad",
+          // icon: <Avatar src={"/icons/ketquadadoc.png"} size={40} />,
+          label: "Kết quả đã đọc",
+        },
+      ],
     },
     // user?.id_role === USER_ROLE.ADMIN && {
     //   key: "Mẫu kết quả",

@@ -89,7 +89,9 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
     to_date: null,
   });
 
-  const [filters, setFilters] = useState({});
+  const [filters, setFilters] = useState({
+    PID: PID,
+  });
 
   useEffect(() => {
     fetchPatients();
