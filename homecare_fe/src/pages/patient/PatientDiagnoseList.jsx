@@ -37,7 +37,6 @@ const DATE_OPTIONS = [
   { label: "Hôm nay", value: "today" },
   { label: "Hôm qua", value: "yesterday" },
   { label: "Tuần này", value: "this_week" },
-  { label: "Khoảng thời gian", value: "range" },
 ];
 
 const PATIENT_DIAGNOSE_STATUS = {
@@ -78,6 +77,24 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
   const { user, doctor, examParts, templateServices } = useGlobalAuth();
   const [clinics, setClinics] = useState([]);
 
+  const [pendingFilters, setPendingFilters] = useState({
+    name: null,
+    PID: PID,
+    SID: null,
+    id_clinic: null,
+    status: [],
+    id_template_service: null,
+    date_type: null,
+    from_date: null,
+    to_date: null,
+  });
+
+  const [filters, setFilters] = useState({});
+
+  useEffect(() => {
+    fetchPatients();
+  }, [filters, page, limit]);
+
   const allColumns = useMemo(
     () => [
       {
@@ -110,6 +127,22 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         dataIndex: "id_template_service",
         key: "id_template_service",
         render: (val) => templateServices?.find((t) => t.id == val)?.name,
+      },
+
+      {
+        width: 220,
+        title: "Bộ phận",
+        dataIndex: "id_exam_part",
+        key: "id_exam_part",
+        render: (val) => examParts?.find((t) => t.id == val)?.name,
+      },
+
+      {
+        width: 220,
+        title: "Phòng khám",
+        dataIndex: "id_clinic",
+        key: "id_clinic",
+        render: (val) => clinics?.find((t) => t.id == val)?.name,
       },
       { title: "Giới tính", dataIndex: "gender", key: "gender", width: 120 },
       { title: "CCCD", dataIndex: "CCCD", key: "CCCD", width: 160 },
@@ -233,23 +266,31 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
     fetchClinics();
   }, []);
 
-  const [filters, setFilters] = useState({
-    name: null,
-    PID: PID,
-    SID: null,
-    id_clinic: null,
-    statuses: [],
-    id_template_service: null,
-  });
-
   useEffect(() => {
     fetchPatients();
   }, [filters, page, limit]);
 
+  const cleanParams = (obj) => {
+    const cleaned = {};
+
+    Object.entries(obj).forEach(([key, value]) => {
+      if (
+        value !== null &&
+        value !== undefined &&
+        value !== "" &&
+        !(Array.isArray(value) && value.length === 0)
+      ) {
+        cleaned[key] = value;
+      }
+    });
+
+    return cleaned;
+  };
+
   const fetchPatients = async () => {
     try {
       const res = await API_CALL.get("/patient-diagnose", {
-        params: { ...filters, page, limit },
+        params: { ...cleanParams(filters), page, limit },
       });
       const responseData = res.data.data;
       setData(responseData?.rows || []);
@@ -286,15 +327,6 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
       toast.error("Clone thất bại");
     }
   };
-
-  const handleFilterChange = useMemo(
-    () =>
-      debounce((key, value) => {
-        setFilters((prev) => ({ ...prev, [key]: value }));
-        setPage(1);
-      }, 300),
-    []
-  );
 
   const toggleColumn = (key) => {
     const updated = visibleKeys.includes(key)
@@ -366,25 +398,65 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         </Space>
       </Space>
 
+      <Row style={{ marginBottom: 16 }}>
+        <Space>
+          <Button
+            type="primary"
+            onClick={() => {
+              setPage(1);
+              setFilters(pendingFilters);
+            }}
+          >
+            Tìm kiếm
+          </Button>
+
+          <Button
+            onClick={() => {
+              setPendingFilters({
+                name: null,
+                PID: PID,
+                SID: null,
+                id_clinic: null,
+                status: [],
+                id_template_service: null,
+                date_type: null,
+                from_date: null,
+                to_date: null,
+              });
+              setFilters({});
+              setPage(1);
+            }}
+          >
+            Xóa lọc
+          </Button>
+        </Space>
+      </Row>
+
       <Row gutter={16} style={{ marginBottom: 12 }}>
         <Col span={6}>
           <Input
             placeholder="Tìm theo tên"
-            onChange={(e) => handleFilterChange("name", e.target.value)}
+            onChange={(e) =>
+              setPendingFilters({ ...pendingFilters, name: e.target.value })
+            }
             allowClear
           />
         </Col>
         <Col span={4}>
           <Input
             placeholder="Tìm theo PID"
-            onChange={(e) => handleFilterChange("PID", e.target.value)}
+            onChange={(e) =>
+              setPendingFilters({ ...pendingFilters, PID: e.target.value })
+            }
             allowClear
           />
         </Col>
         <Col span={4}>
           <Input
             placeholder="Tìm theo SID"
-            onChange={(e) => handleFilterChange("SID", e.target.value)}
+            onChange={(e) =>
+              setPendingFilters({ ...pendingFilters, SID: e.target.value })
+            }
             allowClear
           />
         </Col>
@@ -395,9 +467,11 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
             style={{ width: "100%" }}
             placeholder="Chọn phòng khám"
             optionFilterProp="children"
-            value={filters.id_clinic}
             onChange={(value) =>
-              setFilters((prev) => ({ ...prev, id_clinic: value }))
+              setPendingFilters((prev) => ({
+                ...prev,
+                id_clinic: value ?? null,
+              }))
             }
             filterOption={(input, option) =>
               option?.children?.toLowerCase().includes(input.toLowerCase())
@@ -440,6 +514,16 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
                           : [...current, intKey],
                       };
                     });
+
+                    setPendingFilters((prev) => {
+                      const current = prev.status || [];
+                      return {
+                        ...prev,
+                        status: isActive
+                          ? current.filter((s) => s !== intKey)
+                          : [...current, intKey],
+                      };
+                    });
                     setPage(1);
                   }}
                 >
@@ -456,9 +540,11 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
             allowClear
             style={{ width: "100%" }}
             placeholder="Chỉ định"
-            value={filters.id_template_service}
             onChange={(value) =>
-              setFilters((prev) => ({ ...prev, id_template_service: value }))
+              setPendingFilters((prev) => ({
+                ...prev,
+                id_template_service: value,
+              }))
             }
           >
             {templateServices?.map((se) => (
@@ -466,6 +552,32 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
                 {se.name}
               </Option>
             ))}
+          </Select>
+        </Col>
+
+        <Col span={6}>
+          <Select
+            allowClear
+            disabled={pendingFilters.id_template_service == null}
+            style={{ width: "100%" }}
+            placeholder="Bộ phận"
+            onChange={(value) =>
+              setPendingFilters((prev) => ({
+                ...prev,
+                id_exam_part: value ?? null,
+              }))
+            }
+          >
+            {examParts
+              .filter(
+                (e) =>
+                  e.id_template_service == pendingFilters.id_template_service
+              )
+              ?.map((se) => (
+                <Option key={se.id} value={parseInt(se.id)}>
+                  {se.name}
+                </Option>
+              ))}
           </Select>
         </Col>
       </Row>
@@ -477,9 +589,8 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
             allowClear
             style={{ width: "100%" }}
             placeholder="Lọc theo thời gian"
-            value={filters.date_type}
             onChange={(value) =>
-              setFilters((prev) => ({
+              setPendingFilters((prev) => ({
                 ...prev,
                 date_type: value,
                 ...(value !== "range" && {
@@ -499,23 +610,29 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
 
         {/* RangePicker chỉ hiển thị khi chọn 'range' */}
         {filters.date_type === "range" && (
-          <Col span={12}>
-            <RangePicker
+          <Col span={6}>
+            <Select
+              allowClear
               style={{ width: "100%" }}
-              value={
-                filters.from_date && filters.to_date
-                  ? [dayjs(filters.from_date), dayjs(filters.to_date)]
-                  : null
-              }
-              onChange={(dates) => {
-                const [from, to] = dates || [];
-                setFilters((prev) => ({
+              placeholder="Lọc theo thời gian"
+              value={pendingFilters.date_type}
+              onChange={(value) =>
+                setPendingFilters((prev) => ({
                   ...prev,
-                  from_date: from ? from.format("YYYY-MM-DD") : undefined,
-                  to_date: to ? to.format("YYYY-MM-DD") : undefined,
-                }));
-              }}
-            />
+                  date_type: value ?? null,
+                  ...(value !== "range" && {
+                    from_date: undefined,
+                    to_date: undefined,
+                  }),
+                }))
+              }
+            >
+              {DATE_OPTIONS.map(({ label, value }) => (
+                <Option key={value} value={value}>
+                  {label}
+                </Option>
+              ))}
+            </Select>
           </Col>
         )}
       </Row>

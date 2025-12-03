@@ -34,6 +34,7 @@ const PatientFormPage = () => {
   const [clinics, setClinics] = useState([]);
   const { user, doctor, examParts, templateServices } = useGlobalAuth();
   const [initialValues, setInitialValues] = useState(null);
+  const [idTemplateService, setIdTemplateService] = useState(null);
 
   const fetchClinics = async () => {
     try {
@@ -96,6 +97,7 @@ const PatientFormPage = () => {
           };
           form.setFieldsValue(dataMapping);
           setInitialValues(dataMapping);
+          setIdTemplateService(data.id_template_service);
 
           setSelectedProvince(data.province_code);
         } catch (err) {
@@ -208,7 +210,14 @@ const PatientFormPage = () => {
                 name="id_template_service"
                 rules={[{ required: true }]}
               >
-                <Select placeholder="Chọn chỉ định">
+                <Select
+                  onChange={(e) => {
+                    console.log("e", e);
+                    setIdTemplateService(e);
+                    form.setFieldsValue({ id_exam_part: undefined });
+                  }}
+                  placeholder="Chọn chỉ định"
+                >
                   {templateServices.map((s) => (
                     <Option key={s.id} value={s.id}>
                       {s.name}
@@ -224,12 +233,17 @@ const PatientFormPage = () => {
               name="id_exam_part"
               rules={[{ required: true }]}
             >
-              <Select placeholder="Chọn bộ phận thăm khám">
-                {examParts.map((s) => (
-                  <Option key={s.id} value={s.id}>
-                    {s.name}
-                  </Option>
-                ))}
+              <Select
+                disabled={!idTemplateService}
+                placeholder="Chọn bộ phận thăm khám"
+              >
+                {examParts
+                  .filter((e) => (e.id_template_service = idTemplateService))
+                  .map((s) => (
+                    <Option key={s.id} value={s.id}>
+                      {s.name}
+                    </Option>
+                  ))}
               </Select>
             </Form.Item>
           </Col>
