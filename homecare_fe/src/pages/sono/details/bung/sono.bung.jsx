@@ -228,6 +228,9 @@ const UltrasoundBungForm = () => {
       (t) => t.id == initialSnap.id_print_template
     );
     setPrintTemplate(printT);
+    form.setFieldsValue({
+      id_print_template: printT?.id || null,
+    });
   }, [printTemplateGlobal, initialSnap]);
 
   // init speech recognition if supported

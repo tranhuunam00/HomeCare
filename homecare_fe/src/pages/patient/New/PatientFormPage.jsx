@@ -169,6 +169,32 @@ const PatientFormPage = () => {
     }
   };
 
+  useEffect(() => {
+    if (!initialValues) return;
+
+    if (!templateServices.length || !examParts.length) return;
+
+    // set lại form khi options đã load xong
+    if (initialValues.id_template_service) {
+      form.setFieldsValue({
+        id_template_service: initialValues.id_template_service,
+      });
+      setIdTemplateService(initialValues.id_template_service);
+    }
+
+    if (initialValues.id_exam_part) {
+      form.setFieldsValue({
+        id_exam_part: initialValues.id_exam_part,
+      });
+    }
+
+    if (clinics.length && initialValues.id_clinic) {
+      form.setFieldsValue({
+        id_clinic: +initialValues.id_clinic,
+      });
+    }
+  }, [initialValues, templateServices, examParts, clinics]);
+
   console.log(form.getFieldsValue());
   return (
     <div style={{ padding: "2rem" }}>
