@@ -572,11 +572,9 @@ const OnboardingWizard = ({ open, onClose, doctorId, is_use_onboard }) => {
                 onChange={(val) => setDuration(val)}
               >
                 {[{ value: 1, label: "Dùng thử 1 tháng" }].map((d) => {
-                  const feeItem = fees?.find((f) => f.value === d.value);
-
                   return (
                     <Option key={d.value} value={d.value} disabled={true}>
-                      {`${d.label} – ${feeItem?.label} đ`}
+                      {`${d.label} – ${0} đ`}
                     </Option>
                   );
                 })}

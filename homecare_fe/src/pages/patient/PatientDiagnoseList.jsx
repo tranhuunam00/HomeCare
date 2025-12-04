@@ -37,6 +37,8 @@ const DATE_OPTIONS = [
   { label: "Hôm nay", value: "today" },
   { label: "Hôm qua", value: "yesterday" },
   { label: "Tuần này", value: "this_week" },
+  { label: "Tháng này", value: "this_month" },
+  { label: "Range", value: "range" },
 ];
 
 const PATIENT_DIAGNOSE_STATUS = {
@@ -434,44 +436,40 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         </Space>
       </Row>
 
-      <Row gutter={16} style={{ marginBottom: 12 }}>
-        <Col span={6}>
+      <Row gutter={16} style={{ marginBottom: 16 }}>
+        <Col span={8}>
           <Input
             placeholder="Tìm theo tên"
             onChange={(e) =>
-              setPendingFilters({
-                ...pendingFilters,
-                name: e.target.value ?? null,
-              })
+              setPendingFilters({ ...pendingFilters, name: e.target.value })
             }
             allowClear
           />
         </Col>
-        <Col span={4}>
+
+        <Col span={8}>
           <Input
             placeholder="Tìm theo PID"
             onChange={(e) =>
-              setPendingFilters({
-                ...pendingFilters,
-                PID: e.target.value ?? null,
-              })
+              setPendingFilters({ ...pendingFilters, PID: e.target.value })
             }
             allowClear
           />
         </Col>
-        <Col span={4}>
+
+        <Col span={8}>
           <Input
             placeholder="Tìm theo SID"
             onChange={(e) =>
-              setPendingFilters({
-                ...pendingFilters,
-                SID: e.target.value ?? null,
-              })
+              setPendingFilters({ ...pendingFilters, SID: e.target.value })
             }
             allowClear
           />
         </Col>
-        <Col span={10}>
+      </Row>
+
+      <Row gutter={16} style={{ marginBottom: 16 }}>
+        <Col span={8}>
           <Select
             allowClear
             showSearch
@@ -479,63 +477,115 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
             placeholder="Chọn phòng khám"
             optionFilterProp="children"
             onChange={(value) =>
-              setPendingFilters((prev) => ({
-                ...prev,
-                id_clinic: value ?? null,
-              }))
-            }
-            filterOption={(input, option) =>
-              option?.children?.toLowerCase().includes(input.toLowerCase())
+              setPendingFilters({ ...pendingFilters, id_clinic: value })
             }
           >
-            {clinics?.map((clinic) => (
-              <Option key={clinic.id} value={clinic.id}>
-                {clinic.name}
+            {clinics?.map((c) => (
+              <Option key={c.id} value={c.id}>
+                {c.name}
               </Option>
             ))}
           </Select>
         </Col>
+
+        <Col span={8}>
+          <Select
+            allowClear
+            style={{ width: "100%" }}
+            placeholder="Chỉ định"
+            onChange={(value) =>
+              setPendingFilters({
+                ...pendingFilters,
+                id_template_service: value,
+              })
+            }
+          >
+            {templateServices?.map((t) => (
+              <Option key={t.id} value={t.id}>
+                {t.name}
+              </Option>
+            ))}
+          </Select>
+        </Col>
+
+        <Col span={8}>
+          <Select
+            allowClear
+            disabled={!pendingFilters.id_template_service}
+            style={{ width: "100%" }}
+            placeholder="Bộ phận"
+            onChange={(value) =>
+              setPendingFilters({ ...pendingFilters, id_exam_part: value })
+            }
+          >
+            {examParts
+              ?.filter(
+                (e) =>
+                  e.id_template_service == pendingFilters.id_template_service
+              )
+              ?.map((e) => (
+                <Option key={e.id} value={e.id}>
+                  {e.name}
+                </Option>
+              ))}
+          </Select>
+        </Col>
       </Row>
-      <Row gutter={16} style={{ marginBottom: 12 }}>
-        <Col span={12}>
+
+      <Row style={{ marginBottom: 16 }}>
+        <Col span={24}>
           <Space wrap>
+            <h3>Trạng thái:</h3>
             {Object.entries(PATIENT_DIAGNOSE_STATUS).map(([key, label]) => {
-              const intKey = parseInt(key);
-              const isActive = filters.status?.includes(intKey);
+              const intKey = Number(key);
+              const isActive = pendingFilters.status?.includes(intKey);
 
               return (
                 <Button
                   key={key}
-                  type="default"
                   style={{
                     backgroundColor: PATIENT_DIAGNOSE_COLOR[intKey],
                     color: "white",
-                    borderColor: isActive
-                      ? "#030000ff"
-                      : PATIENT_DIAGNOSE_COLOR[intKey],
-                    opacity: isActive ? 1 : 0.5,
+                    opacity: isActive ? 1 : 0.4,
                   }}
                   onClick={() => {
-                    setFilters((prev) => {
-                      const current = prev.status || [];
-                      return {
-                        ...prev,
-                        status: isActive
-                          ? current.filter((s) => s !== intKey)
-                          : [...current, intKey],
-                      };
-                    });
+                    const current = pendingFilters.status || [];
+                    const newStatus = isActive
+                      ? current.filter((x) => x !== intKey)
+                      : [...current, intKey];
 
-                    setPendingFilters((prev) => {
-                      const current = prev.status || [];
-                      return {
-                        ...prev,
-                        status: isActive
-                          ? current.filter((s) => s !== intKey)
-                          : [...current, intKey],
-                      };
+                    setPendingFilters({ ...pendingFilters, status: newStatus });
+                  }}
+                >
+                  {label}
+                </Button>
+              );
+            })}
+          </Space>
+        </Col>
+      </Row>
+
+      <Row gutter={16} style={{ marginBottom: 16 }}>
+        <Col span={24}>
+          <Space wrap>
+            <h3>Thời gian:</h3>
+
+            {DATE_OPTIONS.map(({ label, value }) => {
+              const isActive = pendingFilters.date_type === value;
+
+              return (
+                <Button
+                  key={value}
+                  type={isActive ? "primary" : "default"}
+                  onClick={() => {
+                    setPendingFilters({
+                      ...pendingFilters,
+                      date_type: value,
+                      ...(value !== "range" && {
+                        from_date: null,
+                        to_date: null,
+                      }),
                     });
-                    setPage(1);
                   }}
                 >
                   {label}
@@ -545,105 +595,23 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
           </Space>
         </Col>
 
-        {/* Bộ lọc chỉ định */}
-        <Col span={6}>
-          <Select
-            allowClear
-            style={{ width: "100%" }}
-            placeholder="Chỉ định"
-            onChange={(value) =>
-              setPendingFilters((prev) => ({
-                ...prev,
-                id_template_service: value,
-              }))
-            }
-          >
-            {templateServices?.map((se) => (
-              <Option key={se.id} value={parseInt(se.id)}>
-                {se.name}
-              </Option>
-            ))}
-          </Select>
-        </Col>
-
-        <Col span={6}>
-          <Select
-            allowClear
-            disabled={pendingFilters.id_template_service == null}
-            style={{ width: "100%" }}
-            placeholder="Bộ phận"
-            onChange={(value) =>
-              setPendingFilters((prev) => ({
-                ...prev,
-                id_exam_part: value ?? null,
-              }))
-            }
-          >
-            {examParts
-              .filter(
-                (e) =>
-                  e.id_template_service == pendingFilters.id_template_service
-              )
-              ?.map((se) => (
-                <Option key={se.id} value={parseInt(se.id)}>
-                  {se.name}
-                </Option>
-              ))}
-          </Select>
-        </Col>
-      </Row>
-
-      <Row gutter={16} style={{ marginBottom: 16 }}>
-        {/* Bộ lọc theo thời gian */}
-        <Col span={6}>
-          <Select
-            allowClear
-            style={{ width: "100%" }}
-            placeholder="Lọc theo thời gian"
-            onChange={(value) =>
-              setPendingFilters((prev) => ({
-                ...prev,
-                date_type: value,
-                ...(value !== "range" && {
-                  from_date: undefined,
-                  to_date: undefined,
-                }),
-              }))
-            }
-          >
-            {DATE_OPTIONS.map(({ label, value }) => (
-              <Option key={value} value={value}>
-                {label}
-              </Option>
-            ))}
-          </Select>
-        </Col>
-
-        {/* RangePicker chỉ hiển thị khi chọn 'range' */}
-        {filters.date_type === "range" && (
-          <Col span={6}>
-            <Select
-              allowClear
+        {/* Hiện RangePicker nếu chọn RANGE */}
+        {pendingFilters.date_type === "range" && (
+          <Col span={8} style={{ marginTop: 12 }}>
+            <RangePicker
               style={{ width: "100%" }}
-              placeholder="Lọc theo thời gian"
-              value={pendingFilters.date_type}
-              onChange={(value) =>
-                setPendingFilters((prev) => ({
-                  ...prev,
-                  date_type: value ?? null,
-                  ...(value !== "range" && {
-                    from_date: undefined,
-                    to_date: undefined,
-                  }),
-                }))
+              onChange={(dates) =>
+                setPendingFilters({
+                  ...pendingFilters,
+                  from_date: dates?.[0]
+                    ? dayjs(dates[0]).format("YYYY-MM-DD")
+                    : null,
+                  to_date: dates?.[1]
+                    ? dayjs(dates[1]).format("YYYY-MM-DD")
+                    : null,
+                })
               }
-            >
-              {DATE_OPTIONS.map(({ label, value }) => (
-                <Option key={value} value={value}>
-                  {label}
-                </Option>
-              ))}
-            </Select>
+            />
           </Col>
         )}
       </Row>

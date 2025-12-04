@@ -347,6 +347,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
               /> */}
             </div>
           </>
+
           <p
             className={styles.paragraph}
             style={{
@@ -415,6 +416,23 @@ const PrintPreviewVer2NotDataDiagnose = ({
               </p>
             </section>
           </div>
+
+          <h3
+            style={{
+              textAlign: "left",
+              color: "#2f6db8",
+              margin: 0,
+              padding: 0,
+              marginBottom: 0,
+              marginTop: 20,
+            }}
+          >
+            {translateLabel(
+              languageTranslate,
+              "imagingFindings",
+              false
+            ).toUpperCase()}
+          </h3>
 
           {/* <TablesSnapshotPreview tablesSnapshot={tablesSnapshot} /> */}
           <InnerHTMLFormEditor data={imageDescEditor} />
