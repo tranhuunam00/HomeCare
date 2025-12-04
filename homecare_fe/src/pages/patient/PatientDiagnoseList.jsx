@@ -377,7 +377,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
   );
 
   return (
-    <div style={{ padding: 24 }}>
+    <div style={{ padding: 0 }}>
       <Space
         style={{
           marginBottom: 16,
@@ -592,29 +592,29 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
                 </Button>
               );
             })}
+            {pendingFilters.date_type === "range" && (
+              <RangePicker
+                style={{ width: "100%" }}
+                onChange={(dates) =>
+                  setPendingFilters({
+                    ...pendingFilters,
+                    from_date: dates?.[0]
+                      ? dayjs(dates[0]).format("YYYY-MM-DD")
+                      : null,
+                    to_date: dates?.[1]
+                      ? dayjs(dates[1]).format("YYYY-MM-DD")
+                      : null,
+                  })
+                }
+              />
+            )}
           </Space>
         </Col>
 
         {/* Hiện RangePicker nếu chọn RANGE */}
-        {pendingFilters.date_type === "range" && (
-          <Col span={8} style={{ marginTop: 12 }}>
-            <RangePicker
-              style={{ width: "100%" }}
-              onChange={(dates) =>
-                setPendingFilters({
-                  ...pendingFilters,
-                  from_date: dates?.[0]
-                    ? dayjs(dates[0]).format("YYYY-MM-DD")
-                    : null,
-                  to_date: dates?.[1]
-                    ? dayjs(dates[1]).format("YYYY-MM-DD")
-                    : null,
-                })
-              }
-            />
-          </Col>
-        )}
       </Row>
+
+      <Divider />
 
       <h3>Tổng cộng: {total} ca bệnh được lọc</h3>
 
