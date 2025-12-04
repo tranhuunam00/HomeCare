@@ -39,6 +39,7 @@ const DATE_OPTIONS = [
   { label: "Tuần này", value: "this_week" },
   { label: "Tháng này", value: "this_month" },
   { label: "Range", value: "range" },
+  { label: "Tất cả", value: "all" },
 ];
 
 const PATIENT_DIAGNOSE_STATUS = {
