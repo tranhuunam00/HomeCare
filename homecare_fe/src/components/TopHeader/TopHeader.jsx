@@ -61,12 +61,9 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
   return (
     <div className={styles.topHeader}>
       {/* --- Logo & Toggle --- */}
-      <div
-        onClick={() => window.open(currentEndpont)}
-        className={styles.topHeader__left}
-        style={{ cursor: "pointer" }}
-      >
+      <div className={styles.topHeader__left} style={{ cursor: "pointer" }}>
         <img
+          onClick={() => window.open(currentEndpont)}
           src="/logo_home_care.png"
           className={styles.topHeader__logo}
           alt="logo"
@@ -81,11 +78,6 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
 
       {/* --- Right side --- */}
       <div className={styles.topHeader__right}>
-        <Input
-          placeholder="Chi tiết eg. nhập tối thiểu 3 ký tự"
-          className={styles.topHeader__search}
-        />
-
         {/* Avatar Dropdown */}
         <Dropdown
           overlay={userMenu}

@@ -318,27 +318,7 @@ export default function DoctorUseFormVer2List() {
     <div className={styles.page}>
       <div className={styles.header}>
         <Title level={3}>Danh sách kết quả đã đọc</Title>
-        <Space>
-          <Dropdown overlay={columnMenu} trigger={["click"]}>
-            <Button icon={<SettingOutlined />}>Chọn cột</Button>
-          </Dropdown>
-          <Tooltip title="Làm mới">
-            <Button icon={<ReloadOutlined />} onClick={() => fetchList()} />
-          </Tooltip>
-          <Tooltip title="">
-            <Button
-              type="primary"
-              icon={<CheckOutlined />}
-              onClick={() => {
-                navigate(`/home/form-drad/use`);
-              }}
-            >
-              Đọc kết quả mới
-            </Button>
-          </Tooltip>
-        </Space>
       </div>
-      <Divider />
 
       <Card
         size="small"
@@ -351,7 +331,6 @@ export default function DoctorUseFormVer2List() {
         extra={
           <Space>
             <Button
-              size="small"
               onClick={() => {
                 setFiltersDraft(DEFAULT_FILTERS);
                 setFilters(DEFAULT_FILTERS);
@@ -361,11 +340,28 @@ export default function DoctorUseFormVer2List() {
             </Button>
             <Button
               type="primary"
-              size="small"
               onClick={() => setFilters({ ...filtersDraft, page: 1 })}
             >
               Tìm kiếm
             </Button>
+
+            <Space>
+              <Dropdown overlay={columnMenu} trigger={["click"]}>
+                <Button icon={<SettingOutlined />}>Chọn cột</Button>
+              </Dropdown>
+
+              <Tooltip title="">
+                <Button
+                  type="primary"
+                  icon={<CheckOutlined />}
+                  onClick={() => {
+                    navigate(`/home/form-drad/use`);
+                  }}
+                >
+                  Đọc kết quả mới
+                </Button>
+              </Tooltip>
+            </Space>
           </Space>
         }
       >

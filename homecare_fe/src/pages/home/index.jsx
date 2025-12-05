@@ -83,15 +83,7 @@ const Sidebar = ({ collapsed }) => {
             },
           ],
         },
-        {
-          key: "/home/intergrate",
-          icon: <Avatar src="/icons/sono.png" size={40} />,
-          label: "D-SONO",
-          children: [
-            { key: "/home/sono/bung", label: "Đọc ngay" },
-            { key: "/home/sono/list", label: "Danh sách đã đọc" },
-          ],
-        },
+
         {
           key: "/home/templates-print",
           icon: <Avatar src="/icons/printTemplate.png" size={40} />,
@@ -137,6 +129,15 @@ const Sidebar = ({ collapsed }) => {
       icon: <Avatar src={"/icons/tienich.png"} size={40} />,
       label: "Ứng dụng",
       children: [
+        {
+          key: "/home/intergrate",
+          icon: <Avatar src="/icons/sono.png" size={40} />,
+          label: "D-SONO",
+          children: [
+            { key: "/home/sono/bung", label: "Đọc ngay" },
+            { key: "/home/sono/list", label: "Danh sách đã đọc" },
+          ],
+        },
         // { key: "/tirads_nn", label: "Phần mềm D-TIRADS" },
         { key: "/home/recist_nn", label: "Ứng dụng D-RECIST" },
         { key: "/home/tirad", label: "Ứng dụng D-TIRADS" },
@@ -228,7 +229,7 @@ const Sidebar = ({ collapsed }) => {
 };
 
 const Home = () => {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const [logo, setLogo] = useState("/logo_home_care.png");
   const navigate = useNavigate();
 
@@ -282,16 +283,16 @@ const Home = () => {
             <Sidebar collapsed={collapsed} />
           </Sider>
 
-          <Content style={{ padding: 16, background: "#fff" }}>
+          <Content style={{ padding: 8, background: "#fff" }}>
             <div style={{ marginBottom: 8 }}>
-              <ArrowLeftOutlined
+              {/* <ArrowLeftOutlined
                 onClick={() => navigate(-1)} // quay lại trang trước
                 style={{
                   fontSize: 20,
                   cursor: "pointer",
                   color: "#1890ff",
                 }}
-              />
+              /> */}
             </div>
 
             <Outlet />

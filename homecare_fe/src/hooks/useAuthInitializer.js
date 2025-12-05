@@ -33,6 +33,7 @@ const useAuthInitializer = () => {
     setPrintTemplateGlobal,
     doctors,
     setDoctors,
+    setClinicsAll,
   } = useGlobalAuth();
   const { showWarning } = useToast();
 
@@ -83,6 +84,16 @@ const useAuthInitializer = () => {
         })
         .catch(() => {
           showWarning("Không thể tải danh sách form ver2");
+        });
+
+      fetchWithRetry(() =>
+        API_CALL.get(`/clinics`, { params: { page: 1, limit: 5000 } })
+      )
+        .then((res) => {
+          setClinicsAll(res.data?.data.data);
+        })
+        .catch(() => {
+          showWarning("Không thể tải danh sách phòng khám");
         });
     }
   }, []);

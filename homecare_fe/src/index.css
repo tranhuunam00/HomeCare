@@ -73,16 +73,6 @@ button:focus-visible {
   padding: 0 !important;
 }
 
-.ant-table,
-.ant-table th,
-.ant-table td {
-  font-size: 16px;
-}
-
-.ant-btn, .ant-input, .ant-select, .ant-radio-wrapper, .ant-picker {
-  font-size: 16px;
-}
-
 
 
 div[style*="text-align: left"], div[style*="textAlign: left"], td:first-child, th {

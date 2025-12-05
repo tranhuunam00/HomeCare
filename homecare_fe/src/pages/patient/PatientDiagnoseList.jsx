@@ -14,6 +14,7 @@ import {
   Select,
   message,
   DatePicker,
+  ConfigProvider,
 } from "antd";
 import {
   SettingOutlined,
@@ -30,6 +31,7 @@ import { PATIENT_DIAGNOSE_STATUS_CODE, USER_ROLE } from "../../constant/app";
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
 const { RangePicker } = DatePicker;
+import styles from "./PatientDiagnoseList.module.scss";
 
 const { Option } = Select;
 
@@ -77,8 +79,8 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [visibleKeys, setVisibleKeys] = useState([]);
-  const { user, doctor, examParts, templateServices } = useGlobalAuth();
-  const [clinics, setClinics] = useState([]);
+  const { user, doctor, examParts, templateServices, clinicsAll } =
+    useGlobalAuth();
 
   const [pendingFilters, setPendingFilters] = useState({
     name: null,
@@ -127,7 +129,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
       { title: "PID", dataIndex: "PID", key: "PID", width: 120 },
       { title: "SID", dataIndex: "SID", key: "SID", width: 120 },
       {
-        width: 220,
+        width: 170,
         title: "Chỉ định",
         dataIndex: "id_template_service",
         key: "id_template_service",
@@ -135,7 +137,18 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
       },
 
       {
-        width: 220,
+        title: "Trạng thái",
+        dataIndex: "status",
+        key: "status",
+        width: 100,
+        render: (status) => (
+          <Tag color={PATIENT_DIAGNOSE_COLOR[status]}>
+            {PATIENT_DIAGNOSE_STATUS[status]}
+          </Tag>
+        ),
+      },
+      {
+        width: 150,
         title: "Bộ phận",
         dataIndex: "id_exam_part",
         key: "id_exam_part",
@@ -147,7 +160,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         title: "Phòng khám",
         dataIndex: "id_clinic",
         key: "id_clinic",
-        render: (val) => clinics?.find((t) => t.id == val)?.name,
+        render: (val) => clinicsAll?.find((t) => t.id == val)?.name,
       },
       { title: "Giới tính", dataIndex: "gender", key: "gender", width: 120 },
       { title: "CCCD", dataIndex: "CCCD", key: "CCCD", width: 160 },
@@ -177,17 +190,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         key: "ward_code",
         width: 140,
       },
-      {
-        title: "Trạng thái",
-        dataIndex: "status",
-        key: "status",
-        width: 150,
-        render: (status) => (
-          <Tag color={PATIENT_DIAGNOSE_COLOR[status]}>
-            {PATIENT_DIAGNOSE_STATUS[status]}
-          </Tag>
-        ),
-      },
+
       {
         title: "Ngày tạo",
         dataIndex: "createdAt",
@@ -200,12 +203,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         key: "updatedAt",
         width: 180,
       },
-      {
-        title: "Mã phòng khám",
-        dataIndex: "id_clinic",
-        key: "id_clinic",
-        width: 120,
-      },
+
       {
         title: "Người tạo",
         dataIndex: "createdBy",
@@ -251,24 +249,12 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
           ),
       },
     ],
-    [user]
+    [user, clinicsAll, examParts, templateServices, page]
   );
-
-  const fetchClinics = async () => {
-    try {
-      const res = await API_CALL.get("/clinics", {
-        params: { page: 1, limit: 100 },
-      });
-      setClinics(res.data.data.data);
-    } catch (err) {
-      toast.error(err?.response?.data?.message);
-    }
-  };
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     setVisibleKeys(saved ? JSON.parse(saved) : defaultVisibleKeys);
-    fetchClinics();
   }, []);
 
   useEffect(() => {
@@ -386,7 +372,6 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
           width: "100%",
         }}
       >
-        <Typography.Title level={4}>WORK LIST</Typography.Title>
         <Space>
           <Dropdown overlay={columnMenu} trigger={["click"]}>
             <Button icon={<SettingOutlined />}>Chọn cột</Button>
@@ -401,44 +386,49 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
             </Button>
           )}
         </Space>
+        <Typography.Title level={4}>
+          WORK LIST : {total} ca bệnh được lọc
+        </Typography.Title>
+
+        <Space>
+          <Row style={{ marginBottom: 16 }}>
+            <Space>
+              <Button
+                type="primary"
+                onClick={() => {
+                  setPage(1);
+                  setFilters(pendingFilters);
+                }}
+              >
+                Tìm kiếm
+              </Button>
+
+              <Button
+                onClick={() => {
+                  setPendingFilters({
+                    name: null,
+                    PID: PID,
+                    SID: null,
+                    id_clinic: null,
+                    status: [],
+                    id_template_service: null,
+                    date_type: null,
+                    from_date: null,
+                    to_date: null,
+                  });
+                  setFilters({});
+                  setPage(1);
+                }}
+              >
+                Xóa lọc
+              </Button>
+            </Space>
+          </Row>
+        </Space>
       </Space>
 
-      <Row style={{ marginBottom: 16 }}>
-        <Space>
-          <Button
-            type="primary"
-            onClick={() => {
-              setPage(1);
-              setFilters(pendingFilters);
-            }}
-          >
-            Tìm kiếm
-          </Button>
-
-          <Button
-            onClick={() => {
-              setPendingFilters({
-                name: null,
-                PID: PID,
-                SID: null,
-                id_clinic: null,
-                status: [],
-                id_template_service: null,
-                date_type: null,
-                from_date: null,
-                to_date: null,
-              });
-              setFilters({});
-              setPage(1);
-            }}
-          >
-            Xóa lọc
-          </Button>
-        </Space>
-      </Row>
-
-      <Row gutter={16} style={{ marginBottom: 16 }}>
-        <Col span={8}>
+      <Row gutter={24} style={{ marginBottom: 16 }}>
+        <Col span={4}>
           <Input
             placeholder="Tìm theo tên"
             onChange={(e) =>
@@ -448,29 +438,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
           />
         </Col>
 
-        <Col span={8}>
-          <Input
-            placeholder="Tìm theo PID"
-            onChange={(e) =>
-              setPendingFilters({ ...pendingFilters, PID: e.target.value })
-            }
-            allowClear
-          />
-        </Col>
-
-        <Col span={8}>
-          <Input
-            placeholder="Tìm theo SID"
-            onChange={(e) =>
-              setPendingFilters({ ...pendingFilters, SID: e.target.value })
-            }
-            allowClear
-          />
-        </Col>
-      </Row>
-
-      <Row gutter={16} style={{ marginBottom: 16 }}>
-        <Col span={8}>
+        <Col span={6}>
           <Select
             allowClear
             showSearch
@@ -481,7 +449,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
               setPendingFilters({ ...pendingFilters, id_clinic: value })
             }
           >
-            {clinics?.map((c) => (
+            {clinicsAll?.map((c) => (
               <Option key={c.id} value={c.id}>
                 {c.name}
               </Option>
@@ -489,7 +457,16 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
           </Select>
         </Col>
 
-        <Col span={8}>
+        <Col span={4}>
+          <Input
+            placeholder="Tìm theo PID"
+            onChange={(e) =>
+              setPendingFilters({ ...pendingFilters, PID: e.target.value })
+            }
+            allowClear
+          />
+        </Col>
+        <Col span={4}>
           <Select
             allowClear
             style={{ width: "100%" }}
@@ -509,7 +486,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
           </Select>
         </Col>
 
-        <Col span={8}>
+        <Col span={4}>
           <Select
             allowClear
             disabled={!pendingFilters.id_template_service}
@@ -534,9 +511,9 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
       </Row>
 
       <Row style={{ marginBottom: 16 }}>
-        <Col span={24}>
+        <Col span={10}>
           <Space wrap>
-            <h3>Trạng thái:</h3>
+            <h4>Trạng thái:</h4>
             {Object.entries(PATIENT_DIAGNOSE_STATUS).map(([key, label]) => {
               const intKey = Number(key);
               const isActive = pendingFilters.status?.includes(intKey);
@@ -564,12 +541,9 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
             })}
           </Space>
         </Col>
-      </Row>
-
-      <Row gutter={16} style={{ marginBottom: 16 }}>
-        <Col span={24}>
+        <Col span={14}>
           <Space wrap>
-            <h3>Thời gian:</h3>
+            <h4>Thời gian:</h4>
 
             {DATE_OPTIONS.map(({ label, value }) => {
               const isActive = pendingFilters.date_type === value;
@@ -611,35 +585,43 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
             )}
           </Space>
         </Col>
-
-        {/* Hiện RangePicker nếu chọn RANGE */}
       </Row>
 
-      <Divider />
-
-      <h3>Tổng cộng: {total} ca bệnh được lọc</h3>
-
-      <Table
-        rowKey="id"
-        columns={columnsToRender}
-        dataSource={data}
-        bordered
-        scroll={{ x: 1200 }}
-        pagination={{
-          current: page,
-          pageSize: limit,
-          total,
-          showSizeChanger: true,
-          onChange: (p, l) => {
-            setPage(p);
-            setLimit(l);
+      <Divider style={{ margin: 0, marginBottom: 10 }} />
+      <ConfigProvider
+        theme={{
+          components: {
+            Table: {
+              fontSize: 13, // Cỡ chữ mặc định của bảng
+              cellPaddingBlock: 0, // Giảm chiều cao dòng (padding trên/dưới)
+            },
           },
         }}
-        onRow={(record) => ({
-          onClick: () => navigate(`/home/patients-diagnose/${record.id}`),
-          style: { cursor: "pointer" },
-        })}
-      />
+      >
+        <Table
+          rowKey="id"
+          size="small"
+          rootClassName={styles.patientTable}
+          columns={columnsToRender}
+          dataSource={data}
+          bordered
+          scroll={{ x: 1200 }}
+          pagination={{
+            current: page,
+            pageSize: limit,
+            total,
+            showSizeChanger: true,
+            onChange: (p, l) => {
+              setPage(p);
+              setLimit(l);
+            },
+          }}
+          onRow={(record) => ({
+            onClick: () => navigate(`/home/patients-diagnose/${record.id}`),
+            style: { cursor: "pointer" },
+          })}
+        />
+      </ConfigProvider>
     </div>
   );
 };
