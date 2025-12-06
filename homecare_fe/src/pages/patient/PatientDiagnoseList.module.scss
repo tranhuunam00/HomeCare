@@ -1,16 +1,11 @@
-:global(.patientTable) {
-  .ant-table,
-  .ant-table th,
-  .ant-table td,
-  .ant-table .ant-table-cell {
-    font-size: 16px !important;
+:global(.smallSelect) {
+  .ant-select-selector {
+    min-height: 28px !important;
   }
 
-  .ant-btn,
-  .ant-input,
-  .ant-select,
-  .ant-radio-wrapper,
-  .ant-picker {
-    font-size: 16px !important;
+  .ant-select-selection-item,
+  .ant-select-selection-placeholder {
+    font-size: 12px !important;
+    line-height: 26px !important;
   }
 }

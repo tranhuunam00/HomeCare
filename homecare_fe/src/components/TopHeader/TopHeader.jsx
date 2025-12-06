@@ -16,7 +16,8 @@ const currentEndpont = `${
 
 const TopHeader = ({ collapsed, toggleSidebar }) => {
   const [rightDrawerVisible, setRightDrawerVisible] = useState(false);
-  const { user, doctor, handleLogoutGlobal } = useGlobalAuth();
+  const { user, doctor, handleLogoutGlobal, isOnWorkList, setIsOnWorkList } =
+    useGlobalAuth();
   const { showWarning } = useToast();
   const [selectedMenu, setSelectedMenu] = useState("profile");
   const navigate = useNavigate();
@@ -57,7 +58,9 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
       <Menu.Item key="logout">Đăng Xuất</Menu.Item>
     </Menu>
   );
-
+  if (isOnWorkList) {
+    return <div className={styles.topHeader} style={{ height: 1 }}></div>;
+  }
   return (
     <div className={styles.topHeader}>
       {/* --- Logo & Toggle --- */}

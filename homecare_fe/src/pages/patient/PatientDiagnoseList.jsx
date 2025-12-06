@@ -36,12 +36,12 @@ import styles from "./PatientDiagnoseList.module.scss";
 const { Option } = Select;
 
 const DATE_OPTIONS = [
+  { label: "Tất cả", value: "all" },
   { label: "Hôm nay", value: "today" },
   { label: "Hôm qua", value: "yesterday" },
   { label: "Tuần này", value: "this_week" },
   { label: "Tháng này", value: "this_month" },
   { label: "Range", value: "range" },
-  { label: "Tất cả", value: "all" },
 ];
 
 const PATIENT_DIAGNOSE_STATUS = {
@@ -77,10 +77,24 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [limit, setLimit] = useState(15);
   const [visibleKeys, setVisibleKeys] = useState([]);
-  const { user, doctor, examParts, templateServices, clinicsAll } =
-    useGlobalAuth();
+  const {
+    user,
+    doctor,
+    examParts,
+    templateServices,
+    clinicsAll,
+    isOnWorkList,
+    setIsOnWorkList,
+    setCollapsed,
+  } = useGlobalAuth();
+
+  useEffect(() => {
+    setIsOnWorkList(true);
+    setCollapsed(true);
+    return () => setIsOnWorkList(false);
+  }, []);
 
   const [pendingFilters, setPendingFilters] = useState({
     name: null,
@@ -364,17 +378,13 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
   );
 
   return (
-    <div style={{ padding: 0 }}>
-      <Space
-        style={{
-          marginBottom: 16,
-          justifyContent: "space-between",
-          width: "100%",
-        }}
-      >
-        <Space>
+    <div style={{ display: "flex", flexDirection: "row", gap: 8 }}>
+      <div style={{ width: 175 }}>
+        <Typography.Title level={4}>Số Ca: {total}</Typography.Title>
+
+        <Space style={{ justifyContent: "space-around", display: "flex" }}>
           <Dropdown overlay={columnMenu} trigger={["click"]}>
-            <Button icon={<SettingOutlined />}>Chọn cột</Button>
+            <Button icon={<SettingOutlined />}></Button>
           </Dropdown>
           {!isNotCreate && (
             <Button
@@ -386,87 +396,74 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
             </Button>
           )}
         </Space>
-        <Typography.Title level={4}>
-          WORK LIST : {total} ca bệnh được lọc
-        </Typography.Title>
+        <Divider style={{ margin: 16 }} />
+        <Row style={{ marginBottom: 16 }}>
+          <Space>
+            <Button
+              type="primary"
+              onClick={() => {
+                setPage(1);
+                setFilters(pendingFilters);
+              }}
+            >
+              Tìm kiếm
+            </Button>
 
-        <Space>
-          <Row style={{ marginBottom: 16 }}>
-            <Space>
-              <Button
-                type="primary"
-                onClick={() => {
-                  setPage(1);
-                  setFilters(pendingFilters);
-                }}
-              >
-                Tìm kiếm
-              </Button>
+            <Button
+              onClick={() => {
+                setPendingFilters({
+                  name: null,
+                  PID: PID,
+                  SID: null,
+                  id_clinic: null,
+                  status: [],
+                  id_template_service: null,
+                  date_type: null,
+                  from_date: null,
+                  to_date: null,
+                });
+                setFilters({});
+                setPage(1);
+              }}
+            >
+              Xóa lọc
+            </Button>
+          </Space>
+        </Row>
+        <Divider style={{ margin: 16 }} />
+        <ConfigProvider
+          theme={{
+            components: {
+              Select: {
+                fontSize: 13,
+              },
+            },
+          }}
+        >
+          <Col>
+            <Select
+              className="smallSelect"
+              allowClear
+              showSearch
+              placeholder="Chọn phòng khám"
+              style={{ width: 175 }}
+              optionFilterProp="children"
+              onChange={(value) =>
+                setPendingFilters({ ...pendingFilters, id_clinic: value })
+              }
+            >
+              {clinicsAll?.map((c) => (
+                <Option key={c.id} value={c.id}>
+                  {c.name}
+                </Option>
+              ))}
+            </Select>
+          </Col>
+        </ConfigProvider>
 
-              <Button
-                onClick={() => {
-                  setPendingFilters({
-                    name: null,
-                    PID: PID,
-                    SID: null,
-                    id_clinic: null,
-                    status: [],
-                    id_template_service: null,
-                    date_type: null,
-                    from_date: null,
-                    to_date: null,
-                  });
-                  setFilters({});
-                  setPage(1);
-                }}
-              >
-                Xóa lọc
-              </Button>
-            </Space>
-          </Row>
-        </Space>
-      </Space>
+        <Divider style={{ margin: 16 }} />
 
-      <Row gutter={24} style={{ marginBottom: 16 }}>
-        <Col span={4}>
-          <Input
-            placeholder="Tìm theo tên"
-            onChange={(e) =>
-              setPendingFilters({ ...pendingFilters, name: e.target.value })
-            }
-            allowClear
-          />
-        </Col>
-
-        <Col span={6}>
-          <Select
-            allowClear
-            showSearch
-            style={{ width: "100%" }}
-            placeholder="Chọn phòng khám"
-            optionFilterProp="children"
-            onChange={(value) =>
-              setPendingFilters({ ...pendingFilters, id_clinic: value })
-            }
-          >
-            {clinicsAll?.map((c) => (
-              <Option key={c.id} value={c.id}>
-                {c.name}
-              </Option>
-            ))}
-          </Select>
-        </Col>
-
-        <Col span={4}>
-          <Input
-            placeholder="Tìm theo PID"
-            onChange={(e) =>
-              setPendingFilters({ ...pendingFilters, PID: e.target.value })
-            }
-            allowClear
-          />
-        </Col>
-        <Col span={4}>
+        <Col>
           <Select
             allowClear
             style={{ width: "100%" }}
@@ -485,8 +482,9 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
             ))}
           </Select>
         </Col>
+        <Divider style={{ margin: 8 }} />
 
-        <Col span={4}>
+        <Col>
           <Select
             allowClear
             disabled={!pendingFilters.id_template_service}
@@ -508,9 +506,8 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
               ))}
           </Select>
         </Col>
-      </Row>
+        <Divider style={{ margin: 8 }} />
 
-      <Row style={{ marginBottom: 16 }}>
         <Col span={10}>
           <Space wrap>
             <h4>Trạng thái:</h4>
@@ -525,6 +522,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
                     backgroundColor: PATIENT_DIAGNOSE_COLOR[intKey],
                     color: "white",
                     opacity: isActive ? 1 : 0.4,
+                    width: 175,
                   }}
                   onClick={() => {
                     const current = pendingFilters.status || [];
@@ -532,34 +530,9 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
                       ? current.filter((x) => x !== intKey)
                       : [...current, intKey];
 
-                    setPendingFilters({ ...pendingFilters, status: newStatus });
-                  }}
-                >
-                  {label}
-                </Button>
-              );
-            })}
-          </Space>
-        </Col>
-        <Col span={14}>
-          <Space wrap>
-            <h4>Thời gian:</h4>
-
-            {DATE_OPTIONS.map(({ label, value }) => {
-              const isActive = pendingFilters.date_type === value;
-
-              return (
-                <Button
-                  key={value}
-                  type={isActive ? "primary" : "default"}
-                  onClick={() => {
                     setPendingFilters({
                       ...pendingFilters,
-                      date_type: value,
-                      ...(value !== "range" && {
-                        from_date: null,
-                        to_date: null,
-                      }),
+                      status: newStatus,
                     });
                   }}
                 >
@@ -567,61 +540,122 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
                 </Button>
               );
             })}
-            {pendingFilters.date_type === "range" && (
-              <RangePicker
-                style={{ width: "100%" }}
-                onChange={(dates) =>
-                  setPendingFilters({
-                    ...pendingFilters,
-                    from_date: dates?.[0]
-                      ? dayjs(dates[0]).format("YYYY-MM-DD")
-                      : null,
-                    to_date: dates?.[1]
-                      ? dayjs(dates[1]).format("YYYY-MM-DD")
-                      : null,
-                  })
-                }
-              />
-            )}
           </Space>
         </Col>
-      </Row>
+      </div>
+      <div style={{ padding: 0, flex: 1 }}>
+        <Space
+          style={{
+            marginBottom: 16,
+            justifyContent: "space-between",
+            width: "100%",
+          }}
+        >
+          <Space></Space>
+        </Space>
 
-      <Divider style={{ margin: 0, marginBottom: 10 }} />
-      <ConfigProvider
-        theme={{
-          components: {
-            Table: {
-              fontSize: 13, // Cỡ chữ mặc định của bảng
-              cellPaddingBlock: 0, // Giảm chiều cao dòng (padding trên/dưới)
-            },
-          },
-        }}
-      >
-        <Table
-          rowKey="id"
-          size="small"
-          rootClassName={styles.patientTable}
-          columns={columnsToRender}
-          dataSource={data}
-          bordered
-          scroll={{ x: 1200 }}
-          pagination={{
-            current: page,
-            pageSize: limit,
-            total,
-            showSizeChanger: true,
-            onChange: (p, l) => {
-              setPage(p);
-              setLimit(l);
+        <Row gutter={24} style={{ marginBottom: 16 }}>
+          <Col span={4}>
+            <Input
+              placeholder="Tìm theo tên"
+              onChange={(e) =>
+                setPendingFilters({ ...pendingFilters, name: e.target.value })
+              }
+              allowClear
+            />
+          </Col>
+
+          <Col span={4}>
+            <Input
+              placeholder="Tìm theo PID"
+              onChange={(e) =>
+                setPendingFilters({ ...pendingFilters, PID: e.target.value })
+              }
+              allowClear
+            />
+          </Col>
+          <Col span={14}>
+            <Space wrap>
+              <h4>Thời gian:</h4>
+
+              {DATE_OPTIONS.map(({ label, value }) => {
+                const isActive = pendingFilters.date_type === value;
+
+                return (
+                  <Button
+                    key={value}
+                    type={isActive ? "primary" : "default"}
+                    onClick={() => {
+                      setPendingFilters({
+                        ...pendingFilters,
+                        date_type: value,
+                        ...(value !== "range" && {
+                          from_date: null,
+                          to_date: null,
+                        }),
+                      });
+                    }}
+                  >
+                    {label}
+                  </Button>
+                );
+              })}
+              {pendingFilters.date_type === "range" && (
+                <RangePicker
+                  style={{ width: "100%" }}
+                  onChange={(dates) =>
+                    setPendingFilters({
+                      ...pendingFilters,
+                      from_date: dates?.[0]
+                        ? dayjs(dates[0]).format("YYYY-MM-DD")
+                        : null,
+                      to_date: dates?.[1]
+                        ? dayjs(dates[1]).format("YYYY-MM-DD")
+                        : null,
+                    })
+                  }
+                />
+              )}
+            </Space>
+          </Col>
+        </Row>
+
+        <Divider style={{ margin: 0, marginBottom: 10 }} />
+        <ConfigProvider
+          theme={{
+            components: {
+              Table: {
+                fontSize: 13, // Cỡ chữ mặc định của bảng
+                cellPaddingBlock: 0, // Giảm chiều cao dòng (padding trên/dưới)
+              },
             },
           }}
-          onRow={(record) => ({
-            onClick: () => navigate(`/home/patients-diagnose/${record.id}`),
-            style: { cursor: "pointer" },
-          })}
-        />
-      </ConfigProvider>
+        >
+          <Table
+            rowKey="id"
+            size="small"
+            rootClassName={styles.patientTable}
+            columns={columnsToRender}
+            dataSource={data}
+            bordered
+            scroll={{ x: 1200 }}
+            pagination={{
+              current: page,
+              pageSize: limit,
+              total,
+              showSizeChanger: true,
+              onChange: (p, l) => {
+                setPage(p);
+                setLimit(l);
+              },
+            }}
+            onRow={(record) => ({
+              onClick: () => navigate(`/home/patients-diagnose/${record.id}`),
+              style: { cursor: "pointer" },
+            })}
+          />
+        </ConfigProvider>
+      </div>
     </div>
   );
 };

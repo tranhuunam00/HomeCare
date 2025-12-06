@@ -20,6 +20,8 @@ export const GlobalAuthProvider = ({ children }) => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [doctors, setDoctors] = useState([]);
   const [clinicsAll, setClinicsAll] = useState([]);
+  const [isOnWorkList, setIsOnWorkList] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
 
   const handleLoginContext = ({ token, user, doctor }) => {
     storage.saveAuth({ token, user, doctor });
@@ -67,6 +69,10 @@ export const GlobalAuthProvider = ({ children }) => {
         setDoctors,
         clinicsAll,
         setClinicsAll,
+        isOnWorkList,
+        setIsOnWorkList,
+        collapsed,
+        setCollapsed,
       }}
     >
       {children}

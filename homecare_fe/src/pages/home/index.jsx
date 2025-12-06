@@ -19,7 +19,8 @@ import { hasProOrBusiness } from "../../constant/permission";
 const { Header } = Layout;
 
 const Sidebar = ({ collapsed }) => {
-  const { user, isReadingForm, userPackages } = useGlobalAuth();
+  const { user, isReadingForm, userPackages, isOnWorkList, setIsOnWorkList } =
+    useGlobalAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -229,7 +230,7 @@ const Sidebar = ({ collapsed }) => {
 };
 
 const Home = () => {
-  const [collapsed, setCollapsed] = useState(true);
+  const { collapsed, setCollapsed } = useGlobalAuth();
   const [logo, setLogo] = useState("/logo_home_care.png");
   const navigate = useNavigate();
 
@@ -240,7 +241,11 @@ const Home = () => {
         toggleSidebar={() => setCollapsed(!collapsed)}
       />
 
-      <Layout style={{ minHeight: "100vh" }}>
+      <Layout
+        style={{
+          minHeight: "100vh",
+        }}
+      >
         <>
           <Sider
             collapsible
@@ -284,17 +289,6 @@ const Home = () => {
           </Sider>
 
           <Content style={{ padding: 8, background: "#fff" }}>
-            <div style={{ marginBottom: 8 }}>
-              {/* <ArrowLeftOutlined
-                onClick={() => navigate(-1)} // quay lại trang trước
-                style={{
-                  fontSize: 20,
-                  cursor: "pointer",
-                  color: "#1890ff",
-                }}
-              /> */}
-            </div>
-
             <Outlet />
           </Content>
         </>
