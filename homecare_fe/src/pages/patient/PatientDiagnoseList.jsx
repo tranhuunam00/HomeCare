@@ -32,6 +32,8 @@ import { toast } from "react-toastify";
 import dayjs from "dayjs";
 const { RangePicker } = DatePicker;
 import styles from "./PatientDiagnoseList.module.scss";
+import ColumnSettingModal from "./setting/ColumnSettingModal";
+import DragDropExample from "./setting/ColumnSettingModal";
 
 const { Option } = Select;
 
@@ -78,6 +80,9 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(15);
+  const [openColumnModal, setOpenColumnModal] = useState(false);
+  const [customColumns, setCustomColumns] = useState([]);
+
   const [visibleKeys, setVisibleKeys] = useState([]);
   const {
     user,
@@ -120,7 +125,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
     () => [
       {
         title: "STT",
-        key: "index",
+        key: "STT",
         align: "center",
         width: 70,
         render: (_, __, index) => (page - 1) * 10 + index + 1,
@@ -377,15 +382,32 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
     </div>
   );
 
+  const handleSaveColumnSettings = ({
+    orderedKeys,
+    visibleKeys: newVisibleKeys,
+    widths,
+  }) => {
+    setVisibleKeys(newVisibleKeys);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(newVisibleKeys));
+
+    const reOrderedColumns = orderedKeys.map((key) =>
+      allColumns.find((c) => c.key === key)
+    );
+
+    const finalColumns = reOrderedColumns.map((col) => ({
+      ...col,
+      width: widths[col.key] || col.width,
+    }));
+
+    setCustomColumns(finalColumns);
+  };
+
   return (
     <div style={{ display: "flex", flexDirection: "row", gap: 8 }}>
       <div style={{ width: 175 }}>
         <Typography.Title level={4}>Số Ca: {total}</Typography.Title>
 
         <Space style={{ justifyContent: "space-around", display: "flex" }}>
-          <Dropdown overlay={columnMenu} trigger={["click"]}>
-            <Button icon={<SettingOutlined />}></Button>
-          </Dropdown>
           {!isNotCreate && (
             <Button
               type="primary"
@@ -395,7 +417,13 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
               Thêm mới
             </Button>
           )}
+          <Button
+            onClick={() => setOpenColumnModal(true)}
+            icon={<SettingOutlined />}
+          ></Button>
         </Space>
+        <Divider style={{ margin: 16 }} />
+
         <Divider style={{ margin: 16 }} />
         <Row style={{ marginBottom: 16 }}>
           <Space>
@@ -635,7 +663,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
             rowKey="id"
             size="small"
             rootClassName={styles.patientTable}
-            columns={columnsToRender}
+            columns={customColumns.length > 0 ? customColumns : columnsToRender}
             dataSource={data}
             bordered
             scroll={{ x: 1200 }}
@@ -657,6 +685,14 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
           />
         </ConfigProvider>
       </div>
+
+      <ColumnSettingModal
+        open={openColumnModal}
+        onClose={() => setOpenColumnModal(false)}
+        allColumns={allColumns}
+        visibleKeys={visibleKeys}
+        onSave={handleSaveColumnSettings}
+      />
     </div>
   );
 };

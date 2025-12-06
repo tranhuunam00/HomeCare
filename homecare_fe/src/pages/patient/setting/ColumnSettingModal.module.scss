@@ -1,0 +1,31 @@
+.container {
+  overflow-y: auto;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  padding: 8px 10px;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  background: white;
+  transition: 0.15s ease;
+}
+
+.dragging {
+  background: #e6f7ff;
+  border-color: #91d5ff;
+}
+
+.dragHandle {
+  font-size: 18px;
+  cursor: grab;
+  margin-right: 12px;
+  opacity: 0.6;
+}
+
+.widthInput {
+  margin-left: auto;
+  width: 80px;
+}
