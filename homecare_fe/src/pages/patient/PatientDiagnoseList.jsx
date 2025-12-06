@@ -644,6 +644,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
               pageSize: limit,
               total,
               showSizeChanger: true,
+              position: ["bottomCenter"],
               onChange: (p, l) => {
                 setPage(p);
                 setLimit(l);
