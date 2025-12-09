@@ -12,7 +12,7 @@ import {
   Modal,
   Divider,
 } from "antd";
-import { QuestionCircleOutlined } from "@ant-design/icons";
+import { QuestionCircleOutlined, ReloadOutlined } from "@ant-design/icons";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { toast } from "react-toastify";
@@ -134,7 +134,11 @@ export default function DoctorUseDFormVer2({
     formVer2Names,
     setIsReadingForm,
     userPackages,
+    setExamParts,
+    setTemplateServices,
   } = useGlobalAuth();
+
+  const [reloading, setReloading] = useState(false);
 
   useEffect(() => {
     setIsReadingForm(true);
@@ -142,6 +146,26 @@ export default function DoctorUseDFormVer2({
       setIsReadingForm(false);
     };
   }, []);
+
+  const reloadTemplateAndExamPart = async () => {
+    try {
+      setReloading(true);
+
+      const [tsRes, epRes] = await Promise.all([
+        API_CALL.get("/ts", { params: { page: 1, limit: 1000 } }),
+        API_CALL.get("/ts/exam-parts", { params: { page: 1, limit: 1000 } }),
+      ]);
+
+      setTemplateServices(tsRes.data.data.data || []);
+      setExamParts(epRes.data.data.data || []);
+
+      toast.success("Đã tải lại Phân hệ & Bộ phận");
+    } catch (e) {
+      toast.error("Không thể tải lại danh sách");
+    } finally {
+      setReloading(false);
+    }
+  };
   const { provinces, wards, setSelectedProvince } = useVietnamAddress();
   const navigate = useNavigate();
   const { id, patient_diagnose_id } = useParams();
@@ -716,7 +740,17 @@ export default function DoctorUseDFormVer2({
               </Form.Item>
             </Col>
 
-            <Col xs={24} md={9}>
+            <Col xs={2} md={1}>
+              <Tooltip title="Tải lại phân hệ & bộ phận">
+                <Button
+                  icon={<ReloadOutlined />}
+                  loading={reloading}
+                  onClick={reloadTemplateAndExamPart}
+                />
+              </Tooltip>
+            </Col>
+
+            <Col xs={24} md={7}>
               <Form.Item
                 label={translateLabel(languageTranslate, "bodyPart", false)}
                 name="id_exam_part"
