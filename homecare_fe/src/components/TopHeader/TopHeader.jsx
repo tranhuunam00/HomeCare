@@ -58,9 +58,9 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
       <Menu.Item key="logout">Đăng Xuất</Menu.Item>
     </Menu>
   );
-  if (isOnWorkList) {
-    return <div className={styles.topHeader} style={{ height: 1 }}></div>;
-  }
+  // if (isOnWorkList) {
+  //   return <div className={styles.topHeader} style={{ height: 1 }}></div>;
+  // }
   return (
     <div className={styles.topHeader}>
       {/* --- Logo & Toggle --- */}

@@ -1,4 +1,5 @@
 import { TRANSLATE_MULTI_REPORT } from "./translate.report";
+import dayjs from "dayjs";
 
 export const ROLE = {
   admin: "ADMIN",
@@ -244,4 +245,14 @@ export const getExamPartSono = (examParts, sonoTemplateService) => {
   return examParts.filter(
     (e) => e.id_template_service === sonoTemplateService?.id
   );
+};
+
+export const generateSorter = (dataIndex) => (a, b) => {
+  const v1 = a[dataIndex];
+  const v2 = b[dataIndex];
+
+  if (typeof v1 === "number") return v1 - v2;
+  if (dayjs(v1).isValid()) return dayjs(v1).diff(dayjs(v2));
+
+  return String(v1 || "").localeCompare(String(v2 || ""));
 };

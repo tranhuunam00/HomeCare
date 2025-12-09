@@ -27,7 +27,11 @@ import debounce from "lodash.debounce";
 import { useNavigate } from "react-router-dom";
 import API_CALL from "../../services/axiosClient";
 import { useGlobalAuth } from "../../contexts/AuthContext";
-import { PATIENT_DIAGNOSE_STATUS_CODE, USER_ROLE } from "../../constant/app";
+import {
+  getAge,
+  PATIENT_DIAGNOSE_STATUS_CODE,
+  USER_ROLE,
+} from "../../constant/app";
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
 const { RangePicker } = DatePicker;
@@ -64,11 +68,10 @@ const defaultVisibleKeys = [
   "STT",
   "id",
   "name",
-  "id_template_service",
-  "PID",
-  "SID",
   "status",
-  "action",
+  "dob",
+  "gender",
+  "Indication",
 ];
 
 const STORAGE_KEY = "visibleColumns_patientDiagnose";
@@ -118,6 +121,15 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
   });
 
   useEffect(() => {
+    const handler = setTimeout(() => {
+      setPage(1);
+      setFilters(pendingFilters);
+    }, 500); // ⏱ 300–500ms là hợp lý
+
+    return () => clearTimeout(handler);
+  }, [pendingFilters]);
+
+  useEffect(() => {
     fetchPatients();
   }, [filters, page, limit]);
 
@@ -137,22 +149,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         fixed: "left",
         width: 80,
         align: "center",
-      },
-      {
-        title: "Họ tên",
-        dataIndex: "name",
-        key: "name",
-        width: 200,
-        render: (text) => text?.toUpperCase(),
-      },
-      { title: "PID", dataIndex: "PID", key: "PID", width: 120 },
-      { title: "SID", dataIndex: "SID", key: "SID", width: 120 },
-      {
-        width: 170,
-        title: "Chỉ định",
-        dataIndex: "id_template_service",
-        key: "id_template_service",
-        render: (val) => templateServices?.find((t) => t.id == val)?.name,
+        sorter: true,
       },
 
       {
@@ -161,11 +158,55 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         key: "status",
         width: 100,
         render: (status) => (
-          <Tag color={PATIENT_DIAGNOSE_COLOR[status]}>
+          <Tag style={{ width: 80 }} color={PATIENT_DIAGNOSE_COLOR[status]}>
             {PATIENT_DIAGNOSE_STATUS[status]}
           </Tag>
         ),
+        sorter: true,
       },
+      {
+        title: "Họ tên",
+        dataIndex: "name",
+        key: "name",
+        width: 200,
+        render: (text) => text?.toUpperCase(),
+        sorter: true,
+      },
+
+      {
+        title: "Tuổi",
+        dataIndex: "dob",
+        key: "dob",
+        width: 80,
+        render: (val) => getAge(val),
+      },
+      { title: "Giới tính", dataIndex: "gender", key: "gender", width: 80 },
+      {
+        title: "Lâm sàng",
+        dataIndex: "Indication",
+        key: "Indication",
+        width: 120,
+      },
+
+      {
+        width: 170,
+        title: "Chỉ định",
+        dataIndex: "id_template_service",
+        key: "id_template_service",
+        render: (val) => templateServices?.find((t) => t.id == val)?.name,
+        sorter: true,
+      },
+
+      { title: "CCCD", dataIndex: "CCCD", key: "CCCD", width: 160 },
+      { title: "PID", dataIndex: "PID", key: "PID", width: 120 },
+      { title: "SID", dataIndex: "SID", key: "SID", width: 120 },
+      {
+        title: "SĐT",
+        dataIndex: "phoneNumber",
+        key: "phoneNumber",
+        width: 140,
+      },
+
       {
         width: 150,
         title: "Bộ phận",
@@ -181,14 +222,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         key: "id_clinic",
         render: (val) => clinicsAll?.find((t) => t.id == val)?.name,
       },
-      { title: "Giới tính", dataIndex: "gender", key: "gender", width: 120 },
-      { title: "CCCD", dataIndex: "CCCD", key: "CCCD", width: 160 },
-      {
-        title: "SĐT",
-        dataIndex: "phoneNumber",
-        key: "phoneNumber",
-        width: 140,
-      },
+
       { title: "Email", dataIndex: "email", key: "email", width: 200 },
       { title: "Địa chỉ", dataIndex: "address", key: "address", width: 220 },
       {
@@ -346,6 +380,13 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
   };
 
+  useEffect(() => {
+    const cols = allColumns
+      .filter((c) => visibleKeys.includes(c.key))
+      .map((c) => ({ ...c }));
+    setCustomColumns(cols);
+  }, [visibleKeys, allColumns]);
+
   const columnsToRender = useMemo(
     () => allColumns.filter((col) => visibleKeys.includes(col.key)),
     [visibleKeys, allColumns]
@@ -394,10 +435,12 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
       allColumns.find((c) => c.key === key)
     );
 
-    const finalColumns = reOrderedColumns.map((col) => ({
-      ...col,
-      width: widths[col.key] || col.width,
-    }));
+    const finalColumns = reOrderedColumns
+      .filter((key) => newVisibleKeys.includes(key))
+      .map((col) => ({
+        ...col,
+        width: widths[col.key] || col.width,
+      }));
 
     setCustomColumns(finalColumns);
   };
@@ -427,16 +470,6 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         <Divider style={{ margin: 16 }} />
         <Row style={{ marginBottom: 16 }}>
           <Space>
-            <Button
-              type="primary"
-              onClick={() => {
-                setPage(1);
-                setFilters(pendingFilters);
-              }}
-            >
-              Tìm kiếm
-            </Button>
-
             <Button
               onClick={() => {
                 setPendingFilters({
@@ -604,8 +637,6 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
           </Col>
           <Col span={14}>
             <Space wrap>
-              <h4>Thời gian:</h4>
-
               {DATE_OPTIONS.map(({ label, value }) => {
                 const isActive = pendingFilters.date_type === value;
 
@@ -677,6 +708,48 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
                 setPage(p);
                 setLimit(l);
               },
+            }}
+            onChange={(pagination, _filters, sorter) => {
+              // ✅ 1. Pagination luôn xử lý
+              if (
+                pagination.current !== page ||
+                pagination.pageSize !== limit
+              ) {
+                setPage(pagination.current);
+                setLimit(pagination.pageSize);
+              }
+
+              // ✅ 2. Sort
+              if (sorter?.order) {
+                setFilters((prev) => {
+                  const newSortBy = sorter.field;
+                  const newSortOrder =
+                    sorter.order === "ascend" ? "asc" : "desc";
+
+                  // ✅ CHỈ reset page khi sort thay đổi
+                  if (
+                    prev.sort_by !== newSortBy ||
+                    prev.sort_order !== newSortOrder
+                  ) {
+                    setPage(1);
+                  }
+
+                  return {
+                    ...prev,
+                    sort_by: newSortBy,
+                    sort_order: newSortOrder,
+                  };
+                });
+              } else {
+                // ✅ Khi clear sort
+                setFilters((prev) => {
+                  if (prev.sort_by || prev.sort_order) {
+                    setPage(1); // clear sort cũng reset page
+                  }
+                  const { sort_by, sort_order, ...rest } = prev;
+                  return rest;
+                });
+              }
             }}
             onRow={(record) => ({
               onClick: () => navigate(`/home/patients-diagnose/${record.id}`),
