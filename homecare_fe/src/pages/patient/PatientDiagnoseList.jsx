@@ -57,6 +57,13 @@ const PATIENT_DIAGNOSE_STATUS = {
   4: "Đã xác nhận",
 };
 
+const PATIENT_DIAGNOSE_STATUS_FILTER = {
+  1: "Chưa đọc (Mới)",
+  2: "Đang đọc",
+  3: "Đã đọc (Chờ xác nhận)",
+  4: "Đã duyệt (Đã xác nhận)",
+};
+
 const PATIENT_DIAGNOSE_COLOR = {
   1: "#0b56e3d3", // New
   2: "#F59E0B", // Reading
@@ -138,7 +145,9 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
       {
         title: "STT",
         key: "STT",
-        align: "center",
+
+        align: "right", // ✅ CĂN BÊN PHẢI
+
         width: 70,
         render: (_, __, index) => (page - 1) * 10 + index + 1,
       },
@@ -178,6 +187,8 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         dataIndex: "dob",
         key: "dob",
         width: 80,
+        align: "right", // ✅ CĂN BÊN PHẢI
+
         render: (val) => getAge(val),
       },
       { title: "Giới tính", dataIndex: "gender", key: "gender", width: 80 },
@@ -448,7 +459,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
   return (
     <div style={{ display: "flex", flexDirection: "row", gap: 8 }}>
       <div style={{ width: 175 }}>
-        <Typography.Title level={4}>Số Ca: {total}</Typography.Title>
+        <Typography.Title level={4}>Số Ca = {total}</Typography.Title>
 
         <Space style={{ justifyContent: "space-around", display: "flex" }}>
           {!isNotCreate && (
@@ -471,6 +482,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         <Row style={{ marginBottom: 16 }}>
           <Space>
             <Button
+              style={{ width: 175 }}
               onClick={() => {
                 setPendingFilters({
                   name: null,
@@ -572,35 +584,37 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         <Col span={10}>
           <Space wrap>
             <h4>Trạng thái:</h4>
-            {Object.entries(PATIENT_DIAGNOSE_STATUS).map(([key, label]) => {
-              const intKey = Number(key);
-              const isActive = pendingFilters.status?.includes(intKey);
+            {Object.entries(PATIENT_DIAGNOSE_STATUS_FILTER).map(
+              ([key, label]) => {
+                const intKey = Number(key);
+                const isActive = pendingFilters.status?.includes(intKey);
 
-              return (
-                <Button
-                  key={key}
-                  style={{
-                    backgroundColor: PATIENT_DIAGNOSE_COLOR[intKey],
-                    color: "white",
-                    opacity: isActive ? 1 : 0.4,
-                    width: 175,
-                  }}
-                  onClick={() => {
-                    const current = pendingFilters.status || [];
-                    const newStatus = isActive
-                      ? current.filter((x) => x !== intKey)
-                      : [...current, intKey];
+                return (
+                  <Button
+                    key={key}
+                    style={{
+                      backgroundColor: PATIENT_DIAGNOSE_COLOR[intKey],
+                      color: "white",
+                      opacity: isActive ? 1 : 0.4,
+                      width: 175,
+                    }}
+                    onClick={() => {
+                      const current = pendingFilters.status || [];
+                      const newStatus = isActive
+                        ? current.filter((x) => x !== intKey)
+                        : [...current, intKey];
 
-                    setPendingFilters({
-                      ...pendingFilters,
-                      status: newStatus,
-                    });
-                  }}
-                >
-                  {label}
-                </Button>
-              );
-            })}
+                      setPendingFilters({
+                        ...pendingFilters,
+                        status: newStatus,
+                      });
+                    }}
+                  >
+                    {label}
+                  </Button>
+                );
+              }
+            )}
           </Space>
         </Col>
       </div>
