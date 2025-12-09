@@ -27,6 +27,22 @@ import { ACADEMIC_TITLES, DEGREES } from "../../constant/app";
 const { Option } = Select;
 const { Title, Text } = Typography;
 
+export const E_SIGNATURE_TYPES = {
+  NONE: "none",
+  SMARTCA: "smartca",
+};
+
+export const E_SIGNATURE_OPTIONS = [
+  {
+    value: E_SIGNATURE_TYPES.NONE,
+    label: "Không set",
+  },
+  {
+    value: E_SIGNATURE_TYPES.SMARTCA,
+    label: "SmartCa VNPT",
+  },
+];
+
 const Profile = () => {
   const { idDoctor } = useParams();
   const [form] = Form.useForm();
@@ -39,12 +55,38 @@ const Profile = () => {
   const [loading, setLoading] = useState(false);
   const { user, doctor } = useGlobalAuth();
   const { showSuccess, showError } = useToast();
+  const eSignatureType = Form.useWatch("e_signature_url", form);
 
   const realId = idDoctor || doctor?.id;
+
+  const fetchDoctorSignInfo = async () => {
+    try {
+      const res = await API_CALL.get("/doctor-sign/info");
+      const signInfo = res.data?.data;
+
+      if (!signInfo) return;
+
+      // Ví dụ response
+      // {
+      //   type: "smartca",
+      //   username: "abc123",
+      //   status: "ACTIVE"
+      // }
+
+      form.setFieldsValue({
+        e_signature_url: signInfo.partnerName || "none",
+        smartca_username: signInfo.username,
+        smartca_password: signInfo.password,
+      });
+    } catch (error) {
+      console.error("Lỗi lấy thông tin chữ ký:", error);
+    }
+  };
 
   useEffect(() => {
     if (realId) {
       fetchDoctorById(realId);
+      fetchDoctorSignInfo(); // ✅ call chữ ký
     }
   }, [realId]);
 
@@ -101,32 +143,49 @@ const Profile = () => {
   };
 
   const onFinish = async (values) => {
-    const formData = new FormData();
-    formData.append("full_name", values.full_name);
-    formData.append("phone_number", values.phone_number);
-    formData.append("description", values.description);
-    formData.append("id_clinic", values.id_clinic);
-    formData.append("gender", values.gender);
-    formData.append("e_signature_url", values.e_signature_url);
-    formData.append("academic_title", values.academic_title || "");
-    formData.append("degree", values.degree || "");
-
-    formData.append(
-      "dob",
-      values.dob ? dayjs(values.dob).format("YYYY-MM-DD") : null
-    );
-    if (avatarFile) formData.append("avatar", avatarFile);
-    if (signatureFile) formData.append("signature", signatureFile);
-
     try {
+      setLoading(true);
+
+      if (values.e_signature_url === E_SIGNATURE_TYPES.NONE) {
+        await API_CALL.get("/doctor-sign/delete");
+      }
+
+      if (values.e_signature_url !== E_SIGNATURE_TYPES.NONE) {
+        await API_CALL.post("/doctor-sign/apply-sign", {
+          username: values.smartca_username,
+          password: values.smartca_password,
+          partnerName: values.e_signature_url,
+        });
+      }
+
+      const formData = new FormData();
+      formData.append("full_name", values.full_name);
+      formData.append("phone_number", values.phone_number);
+      formData.append("description", values.description);
+      formData.append("id_clinic", values.id_clinic);
+      formData.append("gender", values.gender);
+      formData.append("e_signature_url", values.e_signature_url);
+      formData.append("academic_title", values.academic_title || "");
+      formData.append("degree", values.degree || "");
+      formData.append(
+        "dob",
+        values.dob ? dayjs(values.dob).format("YYYY-MM-DD") : null
+      );
+
+      if (avatarFile) formData.append("avatar", avatarFile);
+      if (signatureFile) formData.append("signature", signatureFile);
+
       await API_CALL.put(`/doctor/${realId}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      showSuccess("Cập nhật thành công");
+
+      showSuccess("Cập nhật thông tin & chữ ký thành công");
       setIsEditing(false);
     } catch (error) {
       console.error("Update error:", error);
-      showError("Cập nhật thất bại:  " + error?.response?.data?.message);
+      showError(error?.response?.data?.message || "Cập nhật thất bại");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -416,13 +475,70 @@ const Profile = () => {
               </Form.Item>
             </Col>
           </Row>
-          <Col span={20}>
-            {renderItem(
-              "Chữ kí điện tử",
-              "e_signature_url",
-              <Input placeholder="Nguyễn Văn A" />
+          <Form.Item
+            label="Chữ ký điện tử"
+            name="e_signature_url"
+            rules={[
+              { required: true, message: "Vui lòng chọn chữ ký điện tử" },
+            ]}
+          >
+            {isEditing ? (
+              <Select placeholder="Chọn loại chữ ký">
+                {E_SIGNATURE_OPTIONS.map((item) => (
+                  <Option key={item.value} value={item.value}>
+                    {item.label}
+                  </Option>
+                ))}
+              </Select>
+            ) : (
+              <Text>
+                {E_SIGNATURE_OPTIONS.find(
+                  (item) => item.value === form.getFieldValue("e_signature_url")
+                )?.label || "Không set"}
+              </Text>
             )}
-          </Col>
+          </Form.Item>
+
+          {eSignatureType === "smartca" && (
+            <Row gutter={16}>
+              <Col span={6}>
+                <Form.Item
+                  label="SmartCA Username"
+                  name="smartca_username"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Vui lòng nhập username SmartCA",
+                    },
+                  ]}
+                >
+                  <Input
+                    disabled={!isEditing}
+                    placeholder="Nhập username SmartCA"
+                  />
+                </Form.Item>
+              </Col>
+
+              <Col span={6}>
+                <Form.Item
+                  label="SmartCA Password"
+                  name="smartca_password"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Vui lòng nhập password SmartCA",
+                    },
+                  ]}
+                >
+                  <Input.Password
+                    disabled={!isEditing}
+                    placeholder="Nhập password SmartCA"
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+          )}
+
           <Row justify="space-between" style={{ marginTop: 24 }}>
             <Col>
               {isEditing && (
