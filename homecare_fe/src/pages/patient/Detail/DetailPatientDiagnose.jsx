@@ -186,7 +186,7 @@ const PatientDiagnoiseDetailPage = () => {
         </Row>
         <StatusButtonPatientDiagnose id={data.id} status={data.status} /> */}
         <Row gutter={24} style={{ marginTop: 40 }}>
-          <h2>Hành động phiên bản 2</h2>
+          <h2>Hành động</h2>
         </Row>
         <GroupProcessPatientDiagnoiseFormVer2 patientDiagnose={data} />
 

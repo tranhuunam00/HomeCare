@@ -57,6 +57,10 @@ const Profile = () => {
   const { showSuccess, showError } = useToast();
   const eSignatureType = Form.useWatch("e_signature_url", form);
 
+  const [credentialOptions, setCredentialOptions] = useState([]);
+
+  const [signVerified, setSignVerified] = useState(false);
+
   const realId = idDoctor || doctor?.id;
 
   const fetchDoctorSignInfo = async () => {
@@ -78,6 +82,24 @@ const Profile = () => {
         smartca_username: signInfo.username,
         smartca_password: signInfo.password,
       });
+
+      console.log("signInfo", signInfo);
+
+      if (signInfo.partnerName == "smartca" && signInfo.credentialId) {
+        console.log("hehe----");
+        setCredentialOptions([
+          {
+            value: signInfo.credentialId,
+            label: `Credential: ${signInfo.credentialId}`,
+          },
+        ]);
+
+        form.setFieldsValue({
+          credentialId: signInfo.credentialId,
+        });
+
+        setSignVerified(true);
+      }
     } catch (error) {
       console.error("Lỗi lấy thông tin chữ ký:", error);
     }
@@ -90,6 +112,14 @@ const Profile = () => {
     }
   }, [realId]);
 
+  useEffect(() => {
+    if (eSignatureType === "none") {
+      setCredentialOptions([]);
+      form.setFieldsValue({ credentialId: null });
+      setSignVerified(false);
+    }
+  }, [eSignatureType]);
+
   const fetchClinics = async () => {
     try {
       const res = await API_CALL.get("/clinics", {
@@ -98,6 +128,62 @@ const Profile = () => {
       setClinics(res.data.data.data);
     } catch (error) {
       console.error("Lỗi lấy danh sách phòng khám:", error);
+    }
+  };
+
+  const handleCheckSmartCA = async () => {
+    setCredentialOptions([]);
+    form.setFieldsValue({ credentialId: null });
+
+    const username = form.getFieldValue("smartca_username");
+    const password = form.getFieldValue("smartca_password");
+    const partnerName = form.getFieldValue("e_signature_url");
+
+    if (!username || !password) {
+      showError("Vui lòng nhập Username và Password SmartCA");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const res = await API_CALL.post("/doctor-sign/check-login-smartCa", {
+        username,
+        password,
+        partnerName,
+      });
+
+      const data = res.data?.data;
+
+      if (!data) {
+        showError("Không có credential nào được trả về");
+        return;
+      }
+
+      // Convert object → dropdown options
+      const options = Object.entries(data).map(([credentialId, info]) => {
+        const subject = info.cert?.subjectDN || "";
+        const cnMatch = subject.match(/CN=([^,]+)/);
+        const cn = cnMatch ? cnMatch[1] : "Không rõ tên";
+
+        const validTo = info.cert?.validTo;
+        const readableDate = validTo ? validTo.slice(0, 8) : "";
+
+        return {
+          value: credentialId,
+          label: `${cn} - Hết hạn: ${readableDate}`,
+        };
+      });
+
+      setCredentialOptions(options);
+      setSignVerified(true);
+
+      showSuccess("Đăng nhập SmartCA thành công!");
+    } catch (error) {
+      showError("Sai username hoặc password SmartCA");
+      setSignVerified(false);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -144,10 +230,21 @@ const Profile = () => {
 
   const onFinish = async (values) => {
     try {
+      if (values.e_signature_url === "smartca") {
+        if (!values.credentialId) {
+          showError("Vui lòng chọn Credential ID trước khi lưu chữ ký");
+          return;
+        }
+
+        if (!signVerified) {
+          showError("Vui lòng kiểm tra SmartCA trước khi lưu");
+          return;
+        }
+      }
       setLoading(true);
 
       if (values.e_signature_url === E_SIGNATURE_TYPES.NONE) {
-        await API_CALL.get("/doctor-sign/delete");
+        await API_CALL.del("/doctor-sign/delete");
       }
 
       if (values.e_signature_url !== E_SIGNATURE_TYPES.NONE) {
@@ -155,6 +252,7 @@ const Profile = () => {
           username: values.smartca_username,
           password: values.smartca_password,
           partnerName: values.e_signature_url,
+          credentialId: values.credentialId,
         });
       }
 
@@ -536,13 +634,64 @@ const Profile = () => {
                   />
                 </Form.Item>
               </Col>
+
+              <Col span={4} style={{ display: "flex", alignItems: "center" }}>
+                <Button
+                  type="primary"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('"ehe"', "ehe");
+                    handleCheckSmartCA();
+                  }}
+                  disabled={!isEditing}
+                  htmlType="button"
+                >
+                  Check
+                </Button>
+
+                {signVerified ? (
+                  <Text type="success" style={{ marginLeft: 8 }}>
+                    ✔ OK
+                  </Text>
+                ) : (
+                  <Text type="danger" style={{ marginLeft: 8 }}>
+                    ✖ Not verified
+                  </Text>
+                )}
+              </Col>
+            </Row>
+          )}
+          {signVerified && credentialOptions.length > 0 && (
+            <Row gutter={16} style={{ marginTop: 12 }}>
+              <Col span={12}>
+                <Form.Item
+                  label="Credential ID"
+                  name="credentialId"
+                  rules={[
+                    { required: true, message: "Vui lòng chọn Credential ID!" },
+                  ]}
+                >
+                  <Select placeholder="Chọn Credential ID">
+                    {credentialOptions.map((opt) => (
+                      <Select.Option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
             </Row>
           )}
 
           <Row justify="space-between" style={{ marginTop: 24 }}>
             <Col>
               {isEditing && (
-                <Button type="primary" htmlType="submit">
+                <Button
+                  disabled={eSignatureType === "smartca" && !signVerified}
+                  type="primary"
+                  htmlType="submit"
+                >
                   Lưu thay đổi
                 </Button>
               )}
