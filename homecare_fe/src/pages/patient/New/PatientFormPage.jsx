@@ -199,7 +199,7 @@ const PatientFormPage = () => {
 
   console.log(form.getFieldsValue());
   return (
-    <div style={{ paddingLeft: 100, paddingRight: 100 }}>
+    <div style={{ paddingLeft: "20%", paddingRight: "20%" }}>
       <Card bordered>
         <ThamKhaoLinkHomeCare
           name={""}
@@ -258,50 +258,7 @@ const PatientFormPage = () => {
               </Form.Item>
             </Col>
           </Row>
-          <Row gutter={16}>
-            <Col span={10}>
-              <Form.Item
-                name="phone"
-                label="Số điện thoại"
-                rules={[{ required: true }]}
-              >
-                <Input />
-              </Form.Item>
-            </Col>
-            <Col span={8}>
-              <Form.Item
-                name="email"
-                label="Email"
-                // rules={[{ required: true }]}
-              >
-                <Input />
-              </Form.Item>
-            </Col>
-            <Col span={6}>
-              <Form.Item
-                name="country"
-                label="Quốc tịch"
-                rules={[{ required: true }]}
-              >
-                <Select
-                  showSearch
-                  placeholder="Chọn quốc gia"
-                  optionFilterProp="children"
-                  filterOption={(input, option) =>
-                    option?.children
-                      ?.toLowerCase()
-                      .includes(input.toLowerCase())
-                  }
-                >
-                  {countries.map((c) => (
-                    <Option key={c} value={c}>
-                      {c}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-          </Row>
+
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
@@ -350,6 +307,7 @@ const PatientFormPage = () => {
               </Form.Item>
             </Col>
           </Row>
+
           <Row>
             <Col span={24}>
               <Form.Item name="detail" label="Chi tiết địa chỉ">
@@ -357,6 +315,50 @@ const PatientFormPage = () => {
                   placeholder="Nhập địa chỉ cụ thể (số nhà, ngõ...)"
                   autoSize={{ minRows: 2, maxRows: 4 }}
                 />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col span={8}>
+              <Form.Item
+                name="phone"
+                label="Số điện thoại"
+                rules={[{ required: true }]}
+              >
+                <Input />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item
+                name="email"
+                label="Email"
+                // rules={[{ required: true }]}
+              >
+                <Input />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item
+                name="country"
+                label="Quốc tịch"
+                rules={[{ required: true }]}
+              >
+                <Select
+                  showSearch
+                  placeholder="Chọn quốc gia"
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    option?.children
+                      ?.toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                >
+                  {countries.map((c) => (
+                    <Option key={c} value={c}>
+                      {c}
+                    </Option>
+                  ))}
+                </Select>
               </Form.Item>
             </Col>
           </Row>

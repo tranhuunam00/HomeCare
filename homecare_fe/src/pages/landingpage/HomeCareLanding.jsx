@@ -135,9 +135,9 @@ const HomeCareLanding = () => {
                 <Button
                   type="primary"
                   className={styles["homecare__contact"]}
-                  onClick={() => navigate("/home/form-drad/use")} // hoặc route bạn muốn
+                  onClick={() => navigate("/home")} // hoặc route bạn muốn
                 >
-                  ĐỌC KẾT QUẢ
+                  DANH SÁCH CA ĐỌC
                 </Button>
                 <Button
                   type="primary"

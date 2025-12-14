@@ -130,15 +130,15 @@ const Sidebar = ({ collapsed }) => {
       icon: <Avatar src={"/icons/tienich.png"} size={40} />,
       label: "Ứng dụng",
       children: [
-        {
-          key: "/home/intergrate",
-          icon: <Avatar src="/icons/sono.png" size={40} />,
-          label: "D-SONO",
-          children: [
-            { key: "/home/sono/bung", label: "Đọc ngay" },
-            { key: "/home/sono/list", label: "Danh sách đã đọc" },
-          ],
-        },
+        // {
+        //   key: "/home/intergrate",
+        //   icon: <Avatar src="/icons/sono.png" size={40} />,
+        //   label: "D-SONO",
+        //   children: [
+        //     { key: "/home/sono/bung", label: "Đọc ngay" },
+        //     { key: "/home/sono/list", label: "Danh sách đã đọc" },
+        //   ],
+        // },
         // { key: "/tirads_nn", label: "Phần mềm D-TIRADS" },
         { key: "/home/recist_nn", label: "Ứng dụng D-RECIST" },
         { key: "/home/tirad", label: "Ứng dụng D-TIRADS" },

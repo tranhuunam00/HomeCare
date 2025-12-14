@@ -595,460 +595,470 @@ const UltrasoundBungForm = () => {
 
   // ---------- Render ----------
   return (
-    <Form
-      form={form}
-      layout="horizontal"
-      labelAlign="left"
-      labelCol={{ flex: "0 0 180px" }}
-      wrapperCol={{ flex: "1 0 0" }}
-      colon={false}
-      requiredMark={(label, { required }) =>
-        required ? (
-          <span>
-            {label}
-            <span style={{ color: "red", marginLeft: 4 }}>*</span>
-          </span>
-        ) : (
-          label
-        )
-      }
-      initialValues={{
-        id_template_service: "D-SONO",
-        language: "vi",
-      }}
-    >
-      <Card>
-        <ThamKhaoLinkHomeCare
-          name={"D-SONO"}
-          title={"BÁO CÁO KẾT QUẢ SIÊU ÂM THÔNG MINH"}
-        />
+    <div style={{ maxWidth: 1100, margin: "0 auto", padding: 0 }}>
+      <Form
+        form={form}
+        layout="horizontal"
+        labelAlign="left"
+        labelCol={{ flex: "0 0 180px" }}
+        wrapperCol={{ flex: "1 0 0" }}
+        colon={false}
+        requiredMark={(label, { required }) =>
+          required ? (
+            <span>
+              {label}
+              <span style={{ color: "red", marginLeft: 4 }}>*</span>
+            </span>
+          ) : (
+            label
+          )
+        }
+        initialValues={{
+          id_template_service: "D-SONO",
+          language: "vi",
+        }}
+      >
+        <Card>
+          <ThamKhaoLinkHomeCare
+            name={"D-SONO"}
+            title={"BÁO CÁO KẾT QUẢ SIÊU ÂM THÔNG MINH"}
+          />
 
-        <PatientInfoSection
-          form={form}
-          isEdit={isEdit}
-          languageTranslate={TRANSLATE_LANGUAGE.VI}
-          provinces={provinces}
-          wards={wards}
-          setSelectedProvince={setSelectedProvince}
-          translateLabel={translateLabel}
-        />
+          <PatientInfoSection
+            form={form}
+            isEdit={isEdit}
+            languageTranslate={TRANSLATE_LANGUAGE.VI}
+            provinces={provinces}
+            wards={wards}
+            setSelectedProvince={setSelectedProvince}
+            translateLabel={translateLabel}
+          />
 
-        <Row gutter={16} justify={"space-between"}>
-          <Col xs={24} md={9}>
-            <Form.Item
-              label={"Phân hệ"}
-              name="id_template_service"
-              rules={[{ required: true, message: "Chọn kỹ thuật" }]}
-              labelCol={{ flex: "0 0 90px" }}
-            >
-              <Select placeholder="Chọn kỹ thuật" disabled={!isEdit} allowClear>
-                <Option key={"D-SONO"} value={"D-SONO"}>
-                  {"D-SONO"}
-                </Option>
-              </Select>
-            </Form.Item>
-          </Col>
-
-          <Col xs={24} md={9}>
-            <Form.Item
-              label={"Bộ phận"}
-              name="field_1"
-              rules={[{ required: true, message: "Chọn bộ phận" }]}
-              labelCol={{ flex: "0 0 90px" }}
-            >
-              <Select
-                placeholder="Chọn bộ phận"
-                disabled={!isEdit}
-                allowClear
-                value={field1}
-                onChange={(v) => handleField1Change(v)}
+          <Row gutter={16} justify={"space-between"}>
+            <Col xs={24} md={9}>
+              <Form.Item
+                label={"Phân hệ"}
+                name="id_template_service"
+                rules={[{ required: true, message: "Chọn kỹ thuật" }]}
+                labelCol={{ flex: "0 0 90px" }}
               >
-                {FIELD1_OPTIONS.map((o) => (
-                  <Option key={o} value={o}>
-                    {o}
+                <Select
+                  placeholder="Chọn kỹ thuật"
+                  disabled={!isEdit}
+                  allowClear
+                >
+                  <Option key={"D-SONO"} value={"D-SONO"}>
+                    {"D-SONO"}
                   </Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </Col>
+                </Select>
+              </Form.Item>
+            </Col>
 
-          <Col xs={24} md={6}>
-            <Form.Item
-              label={"Ngôn ngữ"}
-              name="language"
-              rules={[{ required: true }]}
-              labelCol={{ flex: "0 0 90px" }}
-            >
-              <Select disabled={!isEdit} placeholder="VI / EN">
-                {LANGUAGE_OPTIONS.map((opt) => (
-                  <Option
-                    key={opt.value}
-                    value={opt.value}
-                    disabled={
-                      idEdit || (!idEdit && !["vi"].includes(opt.value))
-                    }
-                  >
-                    {opt.label}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={16} style={{ marginBottom: 24 }}>
-          <Col span={12}>
-            <Form.Item
-              label={translateLabel(
-                TRANSLATE_LANGUAGE.VI,
-                "resultPrint",
-                false
-              )}
-              name="id_print_template"
-              rules={[{ required: true, message: "Chọn mẫu in" }]}
-              labelCol={{ flex: "0 0 150px" }}
-            >
-              <Select
-                disabled={!isEdit}
-                showSearch
-                allowClear
-                style={{ width: "100%" }}
-                placeholder="Chọn mẫu in"
-                optionFilterProp="children"
-                onChange={(val) => {
-                  const printT = printTemplateGlobal.find((t) => t.id == val);
-                  setPrintTemplate(printT);
-                  form.setFieldsValue({ id_print_template: printT?.id });
-                }}
-                filterOption={(input, option) =>
-                  option?.children?.toLowerCase()?.includes(input.toLowerCase())
-                }
+            <Col xs={24} md={9}>
+              <Form.Item
+                label={"Bộ phận"}
+                name="field_1"
+                rules={[{ required: true, message: "Chọn bộ phận" }]}
+                labelCol={{ flex: "0 0 90px" }}
               >
-                {printTemplateGlobal.map((tpl) => (
-                  <Option key={tpl.id} value={tpl.id}>
-                    {tpl.name}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </Col>
-        </Row>
+                <Select
+                  placeholder="Chọn bộ phận"
+                  disabled={!isEdit}
+                  allowClear
+                  value={field1}
+                  onChange={(v) => handleField1Change(v)}
+                >
+                  {FIELD1_OPTIONS.map((o) => (
+                    <Option key={o} value={o}>
+                      {o}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
 
-        {!field1 && (
-          <div style={{ marginTop: 32, textAlign: "center" }}>
-            <img
-              src="/images/sono_start.png"
-              style={{ maxWidth: 260, opacity: 0.7 }}
-            />
-            <p>
-              <i>Vui lòng chọn vùng khảo sát để bắt đầu.</i>
-            </p>
-          </div>
-        )}
+            <Col xs={24} md={6}>
+              <Form.Item
+                label={"Ngôn ngữ"}
+                name="language"
+                rules={[{ required: true }]}
+                labelCol={{ flex: "0 0 90px" }}
+              >
+                <Select disabled={!isEdit} placeholder="VI / EN">
+                  {LANGUAGE_OPTIONS.map((opt) => (
+                    <Option
+                      key={opt.value}
+                      value={opt.value}
+                      disabled={
+                        idEdit || (!idEdit && !["vi"].includes(opt.value))
+                      }
+                    >
+                      {opt.label}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
 
-        {field1 && (
-          <>
-            <Card title="MÔ TẢ HÌNH ẢNH" style={{ marginTop: 24 }}>
-              {rows.map((parent, pIdx) => {
-                const structureOptions = STRUCT ? Object.keys(STRUCT) : [];
-                const statusOptions =
-                  parent.structure && STRUCT && STRUCT[parent.structure]
-                    ? STRUCT[parent.structure].status
-                    : [];
-                const positionOptions =
-                  parent.structure && STRUCT && STRUCT[parent.structure]
-                    ? STRUCT[parent.structure].position
-                    : [];
+          <Row gutter={16} style={{ marginBottom: 24 }}>
+            <Col span={12}>
+              <Form.Item
+                label={translateLabel(
+                  TRANSLATE_LANGUAGE.VI,
+                  "resultPrint",
+                  false
+                )}
+                name="id_print_template"
+                rules={[{ required: true, message: "Chọn mẫu in" }]}
+                labelCol={{ flex: "0 0 150px" }}
+              >
+                <Select
+                  disabled={!isEdit}
+                  showSearch
+                  allowClear
+                  style={{ width: "100%" }}
+                  placeholder="Chọn mẫu in"
+                  optionFilterProp="children"
+                  onChange={(val) => {
+                    const printT = printTemplateGlobal.find((t) => t.id == val);
+                    setPrintTemplate(printT);
+                    form.setFieldsValue({ id_print_template: printT?.id });
+                  }}
+                  filterOption={(input, option) =>
+                    option?.children
+                      ?.toLowerCase()
+                      ?.includes(input.toLowerCase())
+                  }
+                >
+                  {printTemplateGlobal.map((tpl) => (
+                    <Option key={tpl.id} value={tpl.id}>
+                      {tpl.name}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
 
-                return (
-                  <Card
-                    key={pIdx}
-                    size="small"
-                    style={{ marginBottom: 12, background: "#fafafa" }}
-                  >
-                    <Row gutter={12} align="middle">
-                      <Col xs={24} md={8}>
-                        {pIdx === 0 && <b>Cấu trúc</b>}
-                        <Select
-                          style={{ width: "100%", marginTop: 4 }}
-                          disabled
-                          value={parent.structure}
-                          onChange={(v) => changeParentStructure(pIdx, v)}
-                          options={structureOptions.map((s) => ({
-                            label: s,
-                            value: s,
-                          }))}
-                        />
-                      </Col>
+          {!field1 && (
+            <div style={{ marginTop: 32, textAlign: "center" }}>
+              <img
+                src="/images/sono_start.png"
+                style={{ maxWidth: 260, opacity: 0.7 }}
+              />
+              <p>
+                <i>Vui lòng chọn vùng khảo sát để bắt đầu.</i>
+              </p>
+            </div>
+          )}
 
-                      <Col xs={24} md={12}>
-                        {pIdx === 0 && <b>Trạng thái (chọn nhiều)</b>}
-                        <Select
-                          mode="multiple"
-                          allowClear
-                          placeholder="Chọn trạng thái (multi)"
-                          style={{ width: "100%", marginTop: 4 }}
-                          value={parent.statuses}
-                          disabled={!parent.structure}
-                          onChange={(vals) => onStatusChange(vals, pIdx)}
-                          options={statusOptions.map((s) => ({
-                            label: s,
-                            value: s,
-                          }))}
-                        />
-                      </Col>
-                    </Row>
+          {field1 && (
+            <>
+              <Card title="MÔ TẢ HÌNH ẢNH" style={{ marginTop: 24 }}>
+                {rows.map((parent, pIdx) => {
+                  const structureOptions = STRUCT ? Object.keys(STRUCT) : [];
+                  const statusOptions =
+                    parent.structure && STRUCT && STRUCT[parent.structure]
+                      ? STRUCT[parent.structure].status
+                      : [];
+                  const positionOptions =
+                    parent.structure && STRUCT && STRUCT[parent.structure]
+                      ? STRUCT[parent.structure].position
+                      : [];
 
-                    {parent.children && parent.children.length > 0 && (
-                      <>
-                        <Divider style={{ margin: "8px 0" }} />
-                        {parent.children.map((child, cIdx) => {
-                          const needSize =
-                            parent.structure &&
-                            STRUCT &&
-                            STRUCT[parent.structure] &&
-                            STRUCT[parent.structure].needSize.includes(
-                              child.status
-                            );
+                  return (
+                    <Card
+                      key={pIdx}
+                      size="small"
+                      style={{ marginBottom: 12, background: "#fafafa" }}
+                    >
+                      <Row gutter={12} align="middle">
+                        <Col xs={24} md={4}>
+                          {pIdx === 0 && <b>Cấu trúc</b>}
+                          <Select
+                            style={{ width: "100%", marginTop: 4 }}
+                            disabled
+                            value={parent.structure}
+                            onChange={(v) => changeParentStructure(pIdx, v)}
+                            options={structureOptions.map((s) => ({
+                              label: s,
+                              value: s,
+                            }))}
+                          />
+                        </Col>
 
-                          return (
-                            <Row
-                              gutter={12}
-                              key={cIdx}
-                              style={{ marginBottom: 8 }}
-                            >
-                              <Col
-                                xs={24}
-                                md={8}
-                                style={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                }}
+                        <Col xs={24} md={8}>
+                          {pIdx === 0 && <b>Trạng thái (chọn nhiều)</b>}
+                          <Select
+                            mode="multiple"
+                            allowClear
+                            placeholder="Chọn trạng thái (multi)"
+                            style={{ width: "100%", marginTop: 4 }}
+                            value={parent.statuses}
+                            disabled={!parent.structure}
+                            onChange={(vals) => onStatusChange(vals, pIdx)}
+                            options={statusOptions.map((s) => ({
+                              label: s,
+                              value: s,
+                            }))}
+                          />
+                        </Col>
+                      </Row>
+
+                      {parent.children && parent.children.length > 0 && (
+                        <>
+                          <Divider style={{ margin: "8px 0" }} />
+                          {parent.children.map((child, cIdx) => {
+                            const needSize =
+                              parent.structure &&
+                              STRUCT &&
+                              STRUCT[parent.structure] &&
+                              STRUCT[parent.structure].needSize.includes(
+                                child.status
+                              );
+
+                            return (
+                              <Row
+                                gutter={12}
+                                key={cIdx}
+                                style={{ marginBottom: 8 }}
                               >
-                                <div style={{ fontWeight: 600 }}>
-                                  <p style={{ margin: 0 }}>{child.status}</p>
-                                </div>
-                              </Col>
-
-                              <Col xs={24} md={8}>
-                                <div
+                                <Col
+                                  xs={24}
+                                  md={8}
                                   style={{
                                     display: "flex",
                                     alignItems: "center",
                                   }}
                                 >
-                                  <div style={{ width: 80 }}>{"Ở vị trí:"}</div>
-                                  <Select
-                                    style={{ width: "100%" }}
-                                    placeholder="Chọn vị trí"
-                                    value={child.position}
-                                    disabled={
-                                      child.status === "Không thấy bất thường"
-                                    }
-                                    options={positionOptions.map((p) => ({
-                                      label: p,
-                                      value: p,
-                                    }))}
-                                    onChange={(v) =>
-                                      updateChild(pIdx, cIdx, "position", v)
-                                    }
-                                  />
-                                </div>
-                              </Col>
-
-                              <Col xs={24} md={4}>
-                                <div
-                                  style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                  }}
-                                >
-                                  <div style={{ width: 220 }}>
-                                    {"Có kích thước:"}
+                                  <div style={{ fontWeight: 600 }}>
+                                    <p style={{ margin: 0 }}>{child.status}</p>
                                   </div>
-                                  {needSize ? (
-                                    <InputNumber
+                                </Col>
+
+                                <Col xs={24} md={8}>
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                    }}
+                                  >
+                                    <div style={{ width: 80 }}>
+                                      {"Ở vị trí:"}
+                                    </div>
+                                    <Select
                                       style={{ width: "100%" }}
-                                      min={1}
-                                      placeholder="mm"
-                                      value={child.size}
+                                      placeholder="Chọn vị trí"
+                                      value={child.position}
+                                      disabled={
+                                        child.status === "Không thấy bất thường"
+                                      }
+                                      options={positionOptions.map((p) => ({
+                                        label: p,
+                                        value: p,
+                                      }))}
                                       onChange={(v) =>
-                                        updateChild(pIdx, cIdx, "size", v)
+                                        updateChild(pIdx, cIdx, "position", v)
                                       }
                                     />
-                                  ) : (
-                                    <InputNumber
-                                      style={{ width: "100%" }}
-                                      disabled
-                                      placeholder="Không yêu cầu"
-                                    />
-                                  )}
-                                </div>
-                              </Col>
-                            </Row>
-                          );
-                        })}
-                      </>
-                    )}
-                  </Card>
-                );
-              })}
-            </Card>
+                                  </div>
+                                </Col>
 
-            {/* Voice */}
-            {!isRecording ? (
-              <Button block onClick={startVoice}>
-                🎤 Bắt đầu ghi âm
-              </Button>
-            ) : (
-              <Button block danger onClick={stopVoice}>
-                ⛔ Dừng ghi âm
-              </Button>
-            )}
+                                <Col xs={24} md={8}>
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                    }}
+                                  >
+                                    <div style={{ width: 220 }}>
+                                      {"Có kích thước:"}
+                                    </div>
+                                    {needSize ? (
+                                      <InputNumber
+                                        style={{ width: "100%" }}
+                                        min={1}
+                                        placeholder="mm"
+                                        value={child.size}
+                                        onChange={(v) =>
+                                          updateChild(pIdx, cIdx, "size", v)
+                                        }
+                                      />
+                                    ) : (
+                                      <InputNumber
+                                        style={{ width: "100%" }}
+                                        disabled
+                                        placeholder="Không yêu cầu"
+                                      />
+                                    )}
+                                  </div>
+                                </Col>
+                              </Row>
+                            );
+                          })}
+                        </>
+                      )}
+                    </Card>
+                  );
+                })}
+              </Card>
 
-            <Card title="Bạn đã nói" style={{ marginTop: 16 }}>
-              {voiceList.length === 0 ? (
-                <i>Chưa có âm thanh nào.</i>
+              {/* Voice */}
+              {!isRecording ? (
+                <Button block onClick={startVoice}>
+                  🎤 Bắt đầu ghi âm
+                </Button>
               ) : (
-                voiceList.map((txt, idx) => <p key={idx}>• {txt}</p>)
+                <Button block danger onClick={stopVoice}>
+                  ⛔ Dừng ghi âm
+                </Button>
               )}
-            </Card>
 
-            <Button
-              type="primary"
-              block
-              style={{ marginTop: 16 }}
-              disabled={voiceList.length === 0}
-              onClick={analyzeVoice}
-              loading={loadingAI}
-            >
-              Phân tích AI
-            </Button>
+              <Card title="Bạn đã nói" style={{ marginTop: 16 }}>
+                {voiceList.length === 0 ? (
+                  <i>Chưa có âm thanh nào.</i>
+                ) : (
+                  voiceList.map((txt, idx) => <p key={idx}>• {txt}</p>)
+                )}
+              </Card>
 
-            <Card title="KẾT LUẬN, CHẨN ĐOÁN" style={{ marginTop: 24 }}>
-              {list.length === 0 ? (
-                <i>Chưa có mô tả nào.</i>
-              ) : (
-                Object.entries(
-                  list.reduce((acc, item) => {
-                    if (!acc[item.field1]) acc[item.field1] = [];
-                    acc[item.field1].push(item);
-                    return acc;
-                  }, {})
-                ).map(([field, items], groupIdx) => (
-                  <div key={groupIdx} style={{ marginBottom: 16 }}>
-                    {/* dòng dẫn */}
-                    <p style={{ fontWeight: 600 }}>
-                      • Hình ảnh siêu âm {field}
-                    </p>
+              <Button
+                type="primary"
+                block
+                style={{ marginTop: 16 }}
+                disabled={voiceList.length === 0}
+                onClick={analyzeVoice}
+                loading={loadingAI}
+              >
+                Phân tích AI
+              </Button>
 
-                    {/* từng mô tả */}
-                    {items.map((item) => {
-                      const globalIndex = list.findIndex(
-                        (x) => x.id === item.id
-                      );
+              <Card title="KẾT LUẬN, CHẨN ĐOÁN" style={{ marginTop: 24 }}>
+                {list.length === 0 ? (
+                  <i>Chưa có mô tả nào.</i>
+                ) : (
+                  Object.entries(
+                    list.reduce((acc, item) => {
+                      if (!acc[item.field1]) acc[item.field1] = [];
+                      acc[item.field1].push(item);
+                      return acc;
+                    }, {})
+                  ).map(([field, items], groupIdx) => (
+                    <div key={groupIdx} style={{ marginBottom: 16 }}>
+                      {/* dòng dẫn */}
+                      <p style={{ fontWeight: 600 }}>
+                        • Hình ảnh siêu âm {field}
+                      </p>
 
-                      return (
-                        <div
-                          key={item.id}
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            padding: "6px 0",
-                            borderBottom: "1px dashed #ddd",
-                          }}
-                        >
-                          <span style={{ flex: 1, marginLeft: 16 }}>
-                            {item.text
-                              .replace(`Hình ảnh siêu âm ${field}`, "")
-                              .trim()}
-                          </span>
+                      {/* từng mô tả */}
+                      {items.map((item) => {
+                        const globalIndex = list.findIndex(
+                          (x) => x.id === item.id
+                        );
 
-                          <Button
-                            danger
-                            size="small"
-                            onClick={() => removeListItem(globalIndex)}
+                        return (
+                          <div
+                            key={item.id}
+                            style={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              padding: "6px 0",
+                              borderBottom: "1px dashed #ddd",
+                            }}
                           >
-                            X
-                          </Button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ))
-              )}
-            </Card>
-          </>
+                            <span style={{ flex: 1, marginLeft: 16 }}>
+                              {item.text
+                                .replace(`Hình ảnh siêu âm ${field}`, "")
+                                .trim()}
+                            </span>
+
+                            <Button
+                              danger
+                              size="small"
+                              onClick={() => removeListItem(globalIndex)}
+                            >
+                              X
+                            </Button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ))
+                )}
+              </Card>
+            </>
+          )}
+        </Card>
+
+        <FormActionBar
+          languageTranslate={TRANSLATE_LANGUAGE.VI}
+          approvalStatus={initialSnap.status}
+          onAction={() => handleSave(SONO_STATUS.PENDING)}
+          editId={idEdit}
+          onPreview={() => {
+            form
+              .validateFields()
+              .then(() => setOpenPreview(true))
+              .catch(() => setOpenPreview(true));
+          }}
+          onExit={() => {
+            if (!window.confirm("Bạn có chắc muốn thoát không?")) return;
+            navigate(`/home/sono/bung`);
+          }}
+          isEdit={isEdit}
+          onReset={() => {
+            mapSonoDataToForm(initialSnap);
+          }}
+          onEdit={() => {
+            if (isEdit === true) setIsEdit(false);
+            else setIsEdit(user.id_role == USER_ROLE.ADMIN || !idEdit);
+          }}
+          onApprove={async () => {
+            try {
+              const res = await API_CALL.patch("/sono/" + id + "/approve");
+              toast.success("Phê duyệt thành công!");
+              navigate(`/home/patients-diagnose`);
+            } catch (error) {
+              toast.error("Phê duyệt thất bại!");
+            }
+          }}
+          keys={[
+            KEY_ACTION_BUTTON.reset,
+            KEY_ACTION_BUTTON.save,
+            KEY_ACTION_BUTTON.edit,
+            KEY_ACTION_BUTTON.approve,
+            KEY_ACTION_BUTTON.preview,
+            KEY_ACTION_BUTTON.exit,
+          ]}
+        />
+
+        {openPreview && (
+          <Modal
+            width={900}
+            open={openPreview}
+            onCancel={() => setOpenPreview(false)}
+            footer={null}
+            style={{ top: 20 }}
+          >
+            <PreviewSono
+              // pass the current live state (no need to parse JSON in preview)
+              formSnapshot={{ ...initialSnap, ...form.getFieldsValue() }}
+              rows={rows}
+              field1={field1}
+              ket_qua_chan_doan={list}
+              doctor={doctor}
+              languageTranslate={TRANSLATE_LANGUAGE.VI}
+              approvalStatus={initialSnap.status}
+              editId={idEdit}
+              printTemplate={printTemplate}
+              rowsByField={rowsByField}
+            />
+          </Modal>
         )}
-      </Card>
-
-      <FormActionBar
-        languageTranslate={TRANSLATE_LANGUAGE.VI}
-        approvalStatus={initialSnap.status}
-        onAction={() => handleSave(SONO_STATUS.PENDING)}
-        editId={idEdit}
-        onPreview={() => {
-          form
-            .validateFields()
-            .then(() => setOpenPreview(true))
-            .catch(() => setOpenPreview(true));
-        }}
-        onExit={() => {
-          if (!window.confirm("Bạn có chắc muốn thoát không?")) return;
-          navigate(`/home/sono/bung`);
-        }}
-        isEdit={isEdit}
-        onReset={() => {
-          mapSonoDataToForm(initialSnap);
-        }}
-        onEdit={() => {
-          if (isEdit === true) setIsEdit(false);
-          else setIsEdit(user.id_role == USER_ROLE.ADMIN || !idEdit);
-        }}
-        onApprove={async () => {
-          try {
-            const res = await API_CALL.patch("/sono/" + id + "/approve");
-            toast.success("Phê duyệt thành công!");
-            navigate(`/home/patients-diagnose`);
-          } catch (error) {
-            toast.error("Phê duyệt thất bại!");
-          }
-        }}
-        keys={[
-          KEY_ACTION_BUTTON.reset,
-          KEY_ACTION_BUTTON.save,
-          KEY_ACTION_BUTTON.edit,
-          KEY_ACTION_BUTTON.approve,
-          KEY_ACTION_BUTTON.preview,
-          KEY_ACTION_BUTTON.exit,
-        ]}
-      />
-
-      {openPreview && (
-        <Modal
-          width={900}
-          open={openPreview}
-          onCancel={() => setOpenPreview(false)}
-          footer={null}
-          style={{ top: 20 }}
-        >
-          <PreviewSono
-            // pass the current live state (no need to parse JSON in preview)
-            formSnapshot={{ ...initialSnap, ...form.getFieldsValue() }}
-            rows={rows}
-            field1={field1}
-            ket_qua_chan_doan={list}
-            doctor={doctor}
-            languageTranslate={TRANSLATE_LANGUAGE.VI}
-            approvalStatus={initialSnap.status}
-            editId={idEdit}
-            printTemplate={printTemplate}
-            rowsByField={rowsByField}
-          />
-        </Modal>
-      )}
-    </Form>
+      </Form>
+    </div>
   );
 };
 

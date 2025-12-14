@@ -68,7 +68,7 @@ const CompletionActionsDiagnose = ({
               }}
               onClick={handleRead}
             >
-              Đọc kết quả
+              Đọc kết quả 2
             </Button>
           )}
 
