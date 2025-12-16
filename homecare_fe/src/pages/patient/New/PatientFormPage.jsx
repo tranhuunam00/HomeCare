@@ -10,6 +10,7 @@ import {
   Row,
   Col,
   Card,
+  Divider,
 } from "antd";
 import axios from "axios";
 import dayjs from "dayjs";
@@ -22,6 +23,7 @@ import {
   USER_ROLE,
 } from "../../../constant/app";
 import { toast } from "react-toastify";
+import { ThamKhaoLinkHomeCare } from "../../advance/component_common/Thamkhao";
 
 const { Option } = Select;
 
@@ -197,11 +199,13 @@ const PatientFormPage = () => {
 
   console.log(form.getFieldsValue());
   return (
-    <div style={{ padding: "2rem" }}>
-      <Card
-        title={id ? "Cập nhật thông tin bệnh nhân" : "Tạo mới ca chẩn đoán"}
-        bordered
-      >
+    <div style={{ paddingLeft: 100, paddingRight: 100 }}>
+      <Card bordered>
+        <ThamKhaoLinkHomeCare
+          name={""}
+          title={id ? "CẬP NHẬT CA" : "THÊM CA MỚI"}
+        />
+
         <Form
           form={form}
           layout="vertical"
@@ -209,8 +213,9 @@ const PatientFormPage = () => {
           initialValues={{ country: "Vietnam" }}
         >
           {/* Họ tên + Giới tính */}
-          <Row gutter={16}>
-            <Col span={8}>
+          <h3 style={{ color: "#1677ff" }}>THÔNG TIN HÀNH CHÍNH</h3>
+          <Row gutter={24}>
+            <Col span={12}>
               <Form.Item
                 name="name"
                 label="Họ và tên"
@@ -220,7 +225,7 @@ const PatientFormPage = () => {
                 <Input />
               </Form.Item>
             </Col>
-            <Col span={4}>
+            <Col span={12}>
               <Form.Item
                 name="gender"
                 label="Giới tính"
@@ -233,69 +238,8 @@ const PatientFormPage = () => {
                 </Select>
               </Form.Item>
             </Col>
-
-            <Col span={12}>
-              <Form.Item
-                label="Chỉ định"
-                name="id_template_service"
-                rules={[{ required: true }]}
-              >
-                <Select
-                  onChange={(e) => {
-                    console.log("e", e);
-                    setIdTemplateService(e);
-                    form.setFieldsValue({ id_exam_part: undefined });
-                  }}
-                  placeholder="Chọn chỉ định"
-                >
-                  {templateServices.map((s) => (
-                    <Option key={s.id} value={s.id}>
-                      {s.name}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
           </Row>
-          <Col span={12}>
-            <Form.Item
-              label="Bộ phận thăm khám"
-              name="id_exam_part"
-              rules={[{ required: true }]}
-            >
-              <Select
-                disabled={!idTemplateService}
-                placeholder="Chọn bộ phận thăm khám"
-              >
-                {examParts
-                  .filter((e) => e.id_template_service == idTemplateService)
-                  .map((s) => (
-                    <Option key={s.id} value={s.id}>
-                      {s.name}
-                    </Option>
-                  ))}
-              </Select>
-            </Form.Item>
-          </Col>
-          {user.id_role == USER_ROLE.ADMIN && (
-            <Form.Item
-              label="Phòng khám"
-              name="id_clinic"
-              rules={[{ required: true }]}
-            >
-              <Select placeholder="Chọn phòng khám">
-                {clinics.map((clinic) => (
-                  <Option key={clinic.id} value={clinic.id}>
-                    {clinic.name}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-          )}
-          {/* Quốc tịch */}
-
-          {/* Ngày sinh + tuổi */}
-          <Row gutter={16}>
+          <Row gutter={24}>
             <Col span={12}>
               <Form.Item
                 name="dob"
@@ -314,10 +258,8 @@ const PatientFormPage = () => {
               </Form.Item>
             </Col>
           </Row>
-
-          {/* Số điện thoại */}
           <Row gutter={16}>
-            <Col span={5}>
+            <Col span={10}>
               <Form.Item
                 name="phone"
                 label="Số điện thoại"
@@ -335,7 +277,7 @@ const PatientFormPage = () => {
                 <Input />
               </Form.Item>
             </Col>
-            <Col>
+            <Col span={6}>
               <Form.Item
                 name="country"
                 label="Quốc tịch"
@@ -360,10 +302,8 @@ const PatientFormPage = () => {
               </Form.Item>
             </Col>
           </Row>
-
-          {/* Tỉnh - Huyện - Xã */}
           <Row gutter={16}>
-            <Col span={8}>
+            <Col span={12}>
               <Form.Item
                 name="province"
                 label="Tỉnh/Thành phố"
@@ -387,7 +327,7 @@ const PatientFormPage = () => {
                 </Select>
               </Form.Item>
             </Col>
-            <Col span={8}>
+            <Col span={12}>
               <Form.Item
                 name="ward"
                 label="Phường/Xã"
@@ -410,8 +350,6 @@ const PatientFormPage = () => {
               </Form.Item>
             </Col>
           </Row>
-
-          {/* Chi tiết địa chỉ */}
           <Row>
             <Col span={24}>
               <Form.Item name="detail" label="Chi tiết địa chỉ">
@@ -422,9 +360,12 @@ const PatientFormPage = () => {
               </Form.Item>
             </Col>
           </Row>
-
-          {/* PID - SID - CCCD */}
           <Row gutter={16}>
+            <Col span={8}>
+              <Form.Item name="cccd" label="CCCD">
+                <Input placeholder="Nhập số CCCD / CMND" />
+              </Form.Item>
+            </Col>
             <Col span={8}>
               <Form.Item name="pid" label="PID" rules={[{ required: true }]}>
                 <Input
@@ -442,12 +383,80 @@ const PatientFormPage = () => {
                 <Input disabled />
               </Form.Item>
             </Col>
-            <Col span={8}>
-              <Form.Item name="cccd" label="CCCD">
-                <Input placeholder="Nhập số CCCD / CMND" />
+          </Row>
+          <Divider />
+          <h3 style={{ color: "#1677ff" }}>THÔNG TIN CHỈ ĐỊNH</h3>
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                label="Chỉ định"
+                name="id_template_service"
+                rules={[{ required: true }]}
+              >
+                <Select
+                  onChange={(e) => {
+                    console.log("e", e);
+                    setIdTemplateService(e);
+                    form.setFieldsValue({ id_exam_part: undefined });
+                  }}
+                  placeholder="Chọn chỉ định"
+                >
+                  {templateServices.map((s) => (
+                    <Option key={s.id} value={s.id}>
+                      {s.name}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                label="Bộ phận thăm khám"
+                name="id_exam_part"
+                rules={[{ required: true }]}
+              >
+                <Select
+                  disabled={!idTemplateService}
+                  placeholder="Chọn bộ phận thăm khám"
+                >
+                  {examParts
+                    .filter((e) => e.id_template_service == idTemplateService)
+                    .map((s) => (
+                      <Option key={s.id} value={s.id}>
+                        {s.name}
+                      </Option>
+                    ))}
+                </Select>
               </Form.Item>
             </Col>
           </Row>
+
+          {user.id_role == USER_ROLE.ADMIN && (
+            <Form.Item
+              label="Phòng khám"
+              name="id_clinic"
+              rules={[{ required: true }]}
+            >
+              <Select placeholder="Chọn phòng khám">
+                {clinics.map((clinic) => (
+                  <Option key={clinic.id} value={clinic.id}>
+                    {clinic.name}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+          )}
+          {/* Quốc tịch */}
+
+          {/* Ngày sinh + tuổi */}
+
+          {/* Số điện thoại */}
+
+          {/* Tỉnh - Huyện - Xã */}
+
+          {/* Chi tiết địa chỉ */}
+
+          {/* PID - SID - CCCD */}
 
           {/* Nút Submit */}
           <Row justify="end" gutter={8}>
