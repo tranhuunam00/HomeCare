@@ -26,27 +26,27 @@ const Sidebar = ({ collapsed }) => {
 
   const menuItems = [
     {
-      key: "WORKLIST",
       icon: (
         <Avatar src="/icons/patient.png" size={40} style={{ marginTop: -2 }} />
       ),
       label: "WORKLIST",
-      children: [
-        {
-          key: "/home/patients-diagnose",
-          label: "Danh sách",
-        },
+      key: "/home/patients-diagnose",
+      // children: [
+      //   {
+      //     key: "/home/patients-diagnose",
+      //     label: "Danh sách",
+      //   },
 
-        {
-          key: "/home/form-drad/use",
-          label: "Đọc ca mới",
-        },
-        {
-          key: "/home/doctor-use-form-drad",
-          // icon: <Avatar src={"/icons/ketquadadoc.png"} size={40} />,
-          label: "Kết quả đã đọc",
-        },
-      ],
+      //   // {
+      //   //   key: "/home/form-drad/use",
+      //   //   label: "Đọc ca mới",
+      //   // },
+      //   // {
+      //   //   key: "/home/doctor-use-form-drad",
+      //   //   // icon: <Avatar src={"/icons/ketquadadoc.png"} size={40} />,
+      //   //   label: "Kết quả đã đọc",
+      //   // },
+      // ],
     },
 
     {
