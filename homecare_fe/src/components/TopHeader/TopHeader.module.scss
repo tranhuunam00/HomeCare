@@ -148,3 +148,23 @@
     font-weight: bold;
   }
 }
+.topHeader__right_name {
+  font-size: 12px;
+}
+.topHeader__right_avatar {
+  width: 50px;
+  height: 50px;
+}
+
+@media (max-width: 768px) {
+  .topHeader__right_name {
+    font-size: 8px;
+  }
+  .topHeader__right {
+    margin-left: 30px;
+  }
+  .topHeader__right_avatar {
+    width: 50px;
+    height: 30px;
+  }
+}

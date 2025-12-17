@@ -539,6 +539,7 @@ const UltrasoundBungForm = () => {
           list,
         }),
         id: idEdit,
+        id_patient_diagnose: idPatientDiagnose,
       };
 
       const res = await API_CALL.post("/sono", payload);

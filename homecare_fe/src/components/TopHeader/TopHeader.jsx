@@ -89,7 +89,7 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
         >
           <div style={{ display: "flex", alignItems: "center" }}>
             <Avatar
-              size={36}
+              className={styles.topHeader__right_avatar}
               style={{
                 backgroundColor: "#d9d9d9",
                 cursor: "pointer",
@@ -99,7 +99,10 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
                 "https://cdn-icons-png.flaticon.com/512/149/149071.png"
               }
             />
-            <div style={{ marginLeft: 8, fontWeight: "bold", fontSize: 12 }}>
+            <div
+              className={styles.topHeader__right_name}
+              style={{ marginLeft: 8, fontWeight: "bold" }}
+            >
               {[
                 doctor?.academic_title ? `${doctor.academic_title}.` : null,
                 doctor?.degree ? `${doctor.degree}.` : null,
