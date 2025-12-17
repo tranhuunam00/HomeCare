@@ -15,6 +15,9 @@ import { useGlobalAuth } from "../../contexts/AuthContext";
 import { USER_ROLE } from "../../constant/app";
 import { toast } from "react-toastify";
 import { hasProOrBusiness } from "../../constant/permission";
+import { Grid } from "antd";
+
+const { useBreakpoint } = Grid;
 
 const { Header } = Layout;
 
@@ -233,7 +236,8 @@ const Home = () => {
   const { collapsed, setCollapsed } = useGlobalAuth();
   const [logo, setLogo] = useState("/logo_home_care.png");
   const navigate = useNavigate();
-
+  const screens = useBreakpoint();
+  const deviceIsMobile = !screens.md;
   return (
     <>
       <TopHeader
@@ -254,7 +258,8 @@ const Home = () => {
             width={240}
             style={{
               background: "rgba(202, 196, 250, 0.1)",
-              paddingTop: 16,
+              paddingTop: 0,
+              display: deviceIsMobile ? "none" : "block",
             }}
           >
             {!collapsed && (
