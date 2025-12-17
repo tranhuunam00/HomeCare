@@ -225,39 +225,82 @@ const HomeCareLanding = () => {
           onClose={() => setMobileMenuOpen(false)}
           width={260}
         >
-          <Menu mode="vertical" selectable={false}>
-            <Menu.Item
-              onClick={() => (window.location.href = "https://home-care.vn/")}
-            >
-              Trang chủ
-            </Menu.Item>
+          <Menu
+            mode="vertical"
+            selectable={false}
+            onClick={({ key }) => {
+              // đóng drawer trước
+              setMobileMenuOpen(false);
 
-            <Menu.Item onClick={() => navigate("/home")}>
-              Phần mềm D-RADS
-            </Menu.Item>
+              switch (key) {
+                case "root":
+                  window.location.href = "https://home-care.vn/";
+                  break;
 
-            <Menu.Item onClick={() => navigate("/contact")}>
-              Hỗ trợ kỹ thuật
-            </Menu.Item>
+                case "home":
+                  navigate("/home");
+                  break;
 
-            {isLoggedIn ? (
-              <>
-                <Menu.Item onClick={() => navigate("/home/profile")}>
-                  Trang cá nhân
-                </Menu.Item>
-                <Menu.Item onClick={handleLogoutGlobal}>Đăng xuất</Menu.Item>
-              </>
-            ) : (
-              <>
-                <Menu.Item onClick={() => navigate("/login")}>
-                  Đăng nhập
-                </Menu.Item>
-                <Menu.Item onClick={() => navigate("/register")}>
-                  Đăng ký
-                </Menu.Item>
-              </>
-            )}
-          </Menu>
+                case "contact":
+                  navigate("/contact");
+                  break;
+
+                case "profile":
+                  navigate("/home/profile");
+                  break;
+
+                case "login":
+                  navigate("/login");
+                  break;
+
+                case "register":
+                  navigate("/register");
+                  break;
+
+                case "logout":
+                  handleLogoutGlobal();
+                  break;
+
+                default:
+                  break;
+              }
+            }}
+            items={[
+              {
+                key: "root",
+                label: "Trang chủ",
+              },
+              {
+                key: "home",
+                label: "Phần mềm D-RADS",
+              },
+              {
+                key: "contact",
+                label: "Hỗ trợ kỹ thuật",
+              },
+              ...(isLoggedIn
+                ? [
+                    {
+                      key: "profile",
+                      label: "Trang cá nhân",
+                    },
+                    {
+                      key: "logout",
+                      label: "Đăng xuất",
+                    },
+                  ]
+                : [
+                    {
+                      key: "login",
+                      label: "Đăng nhập",
+                    },
+                    {
+                      key: "register",
+                      label: "Đăng ký",
+                    },
+                  ]),
+            ]}
+          />
         </Drawer>
       </div>
 
