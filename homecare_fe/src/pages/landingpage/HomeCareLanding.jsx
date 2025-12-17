@@ -229,75 +229,57 @@ const HomeCareLanding = () => {
             mode="vertical"
             selectable={false}
             onClick={({ key }) => {
-              // đóng drawer trước
+              // 1️⃣ đóng drawer trước
               setMobileMenuOpen(false);
 
-              switch (key) {
-                case "root":
-                  window.location.href = "https://home-care.vn/";
-                  break;
+              // 2️⃣ delay navigate để tránh unmount
+              setTimeout(() => {
+                switch (key) {
+                  case "root":
+                    window.location.href = "https://home-care.vn/";
+                    break;
 
-                case "home":
-                  navigate("/home");
-                  break;
+                  case "home":
+                    navigate("/home");
+                    break;
 
-                case "contact":
-                  navigate("/contact");
-                  break;
+                  case "contact":
+                    navigate("/contact");
+                    break;
 
-                case "profile":
-                  navigate("/home/profile");
-                  break;
+                  case "profile":
+                    navigate("/home/profile");
+                    break;
 
-                case "login":
-                  navigate("/login");
-                  break;
+                  case "login":
+                    navigate("/login");
+                    break;
 
-                case "register":
-                  navigate("/register");
-                  break;
+                  case "register":
+                    navigate("/register");
+                    break;
 
-                case "logout":
-                  handleLogoutGlobal();
-                  break;
+                  case "logout":
+                    handleLogoutGlobal();
+                    break;
 
-                default:
-                  break;
-              }
+                  default:
+                    break;
+                }
+              }, 150); // ⬅️ QUAN TRỌNG
             }}
             items={[
-              {
-                key: "root",
-                label: "Trang chủ",
-              },
-              {
-                key: "home",
-                label: "Phần mềm D-RADS",
-              },
-              {
-                key: "contact",
-                label: "Hỗ trợ kỹ thuật",
-              },
+              { key: "root", label: "Trang chủ" },
+              { key: "home", label: "Phần mềm D-RADS" },
+              { key: "contact", label: "Hỗ trợ kỹ thuật" },
               ...(isLoggedIn
                 ? [
-                    {
-                      key: "profile",
-                      label: "Trang cá nhân",
-                    },
-                    {
-                      key: "logout",
-                      label: "Đăng xuất",
-                    },
+                    { key: "profile", label: "Trang cá nhân" },
+                    { key: "logout", label: "Đăng xuất" },
                   ]
                 : [
-                    {
-                      key: "login",
-                      label: "Đăng nhập",
-                    },
-                    {
-                      key: "register",
-                      label: "Đăng ký",
-                    },
+                    { key: "login", label: "Đăng nhập" },
+                    { key: "register", label: "Đăng ký" },
                   ]),
             ]}
           />
