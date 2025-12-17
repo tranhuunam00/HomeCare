@@ -29,12 +29,12 @@ export const ThamKhaoLinkHomeCare = ({
           marginBottom: 8,
           marginTop: 0,
           color: "rgba(18, 119, 49, 1)",
-          fontSize: isMobile ? 18 : 24,
+          fontSize: isMobile ? 14 : 24,
         }}
       >
         {title}
       </h3>
-      <h2 style={{ marginBottom: 4, fontSize: isMobile ? 16 : 20 }}>{name}</h2>
+      <h2 style={{ marginBottom: 4, fontSize: isMobile ? 12 : 20 }}>{name}</h2>
       <h5>{desc}</h5>
       <h5>
         {"Xem thêm tại "}
@@ -42,7 +42,7 @@ export const ThamKhaoLinkHomeCare = ({
           www.home-care.vn
         </a>
       </h5>
-      <Divider />
+      <Divider style={{ margin: isMobile ? 5 : 24 }} />
     </div>
   );
 };

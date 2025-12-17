@@ -786,7 +786,20 @@ const UltrasoundBungForm = () => {
 
           {field1 && (
             <>
-              <Card title="MÔ TẢ HÌNH ẢNH" style={{ marginTop: 24 }}>
+              <Card
+                title="MÔ TẢ HÌNH ẢNH"
+                style={{
+                  marginTop: 24,
+                }}
+                styles={{
+                  header: {
+                    paddingRight: deviceIsMobile ? 0 : 24,
+                    paddingLeft: deviceIsMobile ? 0 : 24,
+                    minHeight: "unset",
+                  },
+                  body: { padding: deviceIsMobile ? 5 : 24 },
+                }}
+              >
                 {rows.map((parent, pIdx) => {
                   const structureOptions = STRUCT ? Object.keys(STRUCT) : [];
                   const statusOptions =
