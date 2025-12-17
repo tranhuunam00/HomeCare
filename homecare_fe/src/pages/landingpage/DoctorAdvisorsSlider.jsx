@@ -52,7 +52,7 @@ const DoctorAdvisorsSlider = ({ doctors = [] }) => {
           >
             <div className={styles["avatar-wrapper"]}>
               <Avatar
-                size={120}
+                className={styles["avatar-wrapper-avatar"]}
                 src={doc.avatar_url || "/default_doctor.png"}
                 style={{
                   border: "2px solid #04580f",
@@ -85,14 +85,14 @@ const DoctorAdvisorsSlider = ({ doctors = [] }) => {
             onClick={(e) => e.stopPropagation()} // 👉 chặn click bên trong popup làm tắt
           >
             <Avatar
-              size={160}
+              className={styles["popup-content_avatar"]}
               src={selectedDoctor.avatar_url || "/default_doctor.png"}
               style={{
                 border: "3px solid #04580f",
                 marginBottom: 20,
               }}
             />
-            <h3>
+            <h3 className={styles["popup-content_name"]}>
               {[
                 selectedDoctor.academic_title
                   ? `${selectedDoctor.academic_title}.`

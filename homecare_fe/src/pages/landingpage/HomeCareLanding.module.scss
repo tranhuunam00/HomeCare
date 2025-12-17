@@ -102,7 +102,6 @@
       text-align: center;
 
       img {
-        width: 80%;
         max-width: 300px;
         margin-bottom: 20px;
       }
@@ -114,7 +113,9 @@
       }
 
       p {
-        font-size: 16px;
+        text-align: center;
+        font-size: 24px;
+        font-weight: 500;
         color: #555;
       }
     }
@@ -448,5 +449,155 @@
     color: #ddd;
     border-top: 1px solid rgba(255, 255, 255, 0.2);
     background-color: #014e3e;
+  }
+}
+
+.homecare {
+  &__mobile-menu {
+    display: none;
+    font-size: 26px;
+    cursor: pointer;
+  }
+}
+.homecare__container_2 {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+  gap: 30px;
+  // juss: "center",
+  // marginBottom: "30px",
+  // gap: 30,
+}
+.homecare__logo_head {
+  width: 200px;
+}
+.homecare__avatar_head {
+  width: 70px;
+  height: 70px;
+}
+.homecare__avatar_head_name {
+  margin-top: 8px;
+  font-weight: bold;
+  font-size: 12px;
+}
+.homecare__agency-left_logo {
+  width: 150px;
+  height: 150px;
+}
+@media (max-width: 768px) {
+  .homecare {
+    /* ❌ ẨN TOÀN BỘ HEADER CŨ */
+    &__desktop-only {
+      display: none !important;
+    }
+
+    /* ✅ CHỈ HIỆN ☰ */
+    &__mobile-menu {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+  .homecare__container {
+    display: none;
+  }
+  .homecare__container_2 {
+    display: none;
+  }
+  .homecare__logo_head {
+    width: 80px;
+  }
+  .homecare__avatar_head {
+    width: 50px;
+    height: 50px;
+    margin-top: 20px;
+  }
+  .homecare__avatar_head_name {
+    margin-top: 4px;
+    font-weight: bold;
+    font-size: 8px;
+  }
+  .homecare__hero {
+    height: 200px;
+  }
+  .homecare__advisors {
+    h2 {
+      font-size: 12px;
+    }
+  }
+  .homecare__agency-left_logo {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 0px !important;
+  }
+  .homecare__agency {
+    padding: 0;
+
+    &-left {
+      flex: 1 1 40%;
+      text-align: center;
+
+      h2 {
+        margin: 0;
+        font-size: 20px;
+      }
+
+      p {
+        font-size: 14px;
+      }
+    }
+    &-services {
+      list-style: none;
+
+      li {
+        strong {
+          font-size: 11px;
+          font-weight: 600;
+          color: #000;
+        }
+      }
+    }
+  }
+  .contact {
+    font-size: 10px;
+  }
+  .homecare__agency-right {
+    width: 70%;
+  }
+  .homecare__footer {
+    padding: 10px;
+
+    &-content {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 32px;
+    }
+
+    &-col {
+      p {
+        margin-bottom: 12px;
+        font-size: 11px;
+        line-height: 1.6;
+      }
+
+      h4 {
+        font-size: 13px;
+        font-weight: 700;
+        margin-bottom: 12px;
+      }
+
+      ul {
+        padding: 0;
+        list-style: none;
+
+        li {
+          font-size: 12px;
+          margin-bottom: 6px;
+          cursor: pointer;
+        }
+      }
+    }
   }
 }

@@ -130,10 +130,22 @@ const GroupProcessPatientDiagnoiseFormVer2 = ({ patientDiagnose }) => {
     <div>
       <CustomSteps steps={steps} current={status} />
 
-      {status == PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESS &&
-        id_doctor_in_processing == doctor.id && (
-          <div style={{ marginTop: 16, textAlign: "center" }}>
-            <Button danger type="primary" onClick={handleCancelReading}>
+      {status === PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESS &&
+        id_doctor_in_processing === doctor.id && (
+          <div style={{ marginTop: 16 }}>
+            <Button
+              danger
+              type="primary"
+              onClick={() => {
+                const ok = window.confirm(
+                  "Bạn có chắc chắn muốn hủy đọc kết quả?\n\nNếu hủy, ca sẽ được trả về trạng thái MỚI."
+                );
+
+                if (ok) {
+                  handleCancelReading();
+                }
+              }}
+            >
               Hủy đọc kết quả
             </Button>
           </div>

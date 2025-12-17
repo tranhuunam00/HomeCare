@@ -165,7 +165,7 @@ function App() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<DoctorUseFormVer2List />} />
+          <Route index element={<PatientTablePage />} />
           <Route path="tirad" element={<TiradsForm />} />
           <Route path="lungrad" element={<LungRADSForm />} />
           <Route path="birad" element={<BiradsForm />} />

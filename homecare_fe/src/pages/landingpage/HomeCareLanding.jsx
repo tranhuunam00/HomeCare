@@ -14,18 +14,18 @@ import DropdownNav from "../../components/DropdownNav";
 import { toast } from "react-toastify";
 import API_CALL from "../../services/axiosClient";
 import DoctorAdvisorsSlider from "./DoctorAdvisorsSlider";
+import { Drawer } from "antd";
+import { MenuOutlined } from "@ant-design/icons";
 
 const textVariants = {
-  hidden: { opacity: 0, x: 30 },
+  hidden: { opacity: 0, y: 20 },
   visible: (i) => ({
     opacity: 1,
-    x: 0,
+    y: 0,
     transition: {
-      delay: i * 0.2,
-      duration: 2,
+      delay: i * 0.15,
+      duration: 0.8,
       ease: "easeOut",
-      repeat: Infinity,
-      repeatDelay: 2, // l
     },
   }),
 };
@@ -34,6 +34,8 @@ const HomeCareLanding = () => {
   const navigate = useNavigate();
   const { isLoggedIn, user, doctor, handleLogoutGlobal, doctors } =
     useGlobalAuth();
+
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const [isContactOpen, setIsContactOpen] = useState(false);
 
@@ -63,8 +65,8 @@ const HomeCareLanding = () => {
             onClick={() => (window.location.href = "https://home-care.vn/")}
             src="/logo_home_care.png"
             alt=""
-            width={200}
             style={{ cursor: "pointer" }}
+            className={styles["homecare__logo_head"]}
           />
         </div>
 
@@ -108,14 +110,7 @@ const HomeCareLanding = () => {
               </Menu>
             </div>
           </div>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              marginBottom: "30px",
-              gap: 30,
-            }}
-          >
+          <div className={styles["homecare__container_2"]}>
             {isLoggedIn ? (
               <div
                 style={{
@@ -201,12 +196,12 @@ const HomeCareLanding = () => {
                 }}
               >
                 <Avatar
-                  size={70}
+                  className={styles["homecare__avatar_head"]}
                   src={doctor?.avatar_url}
                   icon={!user?.avatar_url && <UserOutlined />}
                   style={{ cursor: "pointer", border: "1px solid #000" }}
                 />
-                <div style={{ marginTop: 8, fontWeight: "bold", fontSize: 12 }}>
+                <div className={styles["homecare__avatar_head_name"]}>
                   {[
                     doctor.academic_title ? `${doctor.academic_title}.` : null,
                     doctor.degree ? `${doctor.degree}.` : null,
@@ -221,6 +216,49 @@ const HomeCareLanding = () => {
             <></>
           )}
         </div>
+        <div className={styles["homecare__mobile-menu"]}>
+          <MenuOutlined onClick={() => setMobileMenuOpen(true)} />
+        </div>
+        <Drawer
+          placement="right"
+          open={mobileMenuOpen}
+          onClose={() => setMobileMenuOpen(false)}
+          width={260}
+        >
+          <Menu mode="vertical" selectable={false}>
+            <Menu.Item
+              onClick={() => (window.location.href = "https://home-care.vn/")}
+            >
+              Trang chủ
+            </Menu.Item>
+
+            <Menu.Item onClick={() => navigate("/home")}>
+              Phần mềm D-RADS
+            </Menu.Item>
+
+            <Menu.Item onClick={() => navigate("/contact")}>
+              Hỗ trợ kỹ thuật
+            </Menu.Item>
+
+            {isLoggedIn ? (
+              <>
+                <Menu.Item onClick={() => navigate("/home/profile")}>
+                  Trang cá nhân
+                </Menu.Item>
+                <Menu.Item onClick={handleLogoutGlobal}>Đăng xuất</Menu.Item>
+              </>
+            ) : (
+              <>
+                <Menu.Item onClick={() => navigate("/login")}>
+                  Đăng nhập
+                </Menu.Item>
+                <Menu.Item onClick={() => navigate("/register")}>
+                  Đăng ký
+                </Menu.Item>
+              </>
+            )}
+          </Menu>
+        </Drawer>
       </div>
 
       <section ref={topRef} className={styles["homecare__hero"]}></section>
@@ -248,22 +286,11 @@ const HomeCareLanding = () => {
         <div className={styles["homecare__agency-container"]}>
           <div className={styles["homecare__agency-left"]}>
             <img
-              style={{ width: 100 }}
+              className={styles["homecare__agency-left_logo"]}
               src="/logo_home_care.png"
-              alt="Rocket launch"
             />
             <h2>D-RADS</h2>
-            <p
-              style={{
-                textAlign: "center",
-                fontSize: 24,
-                fontWeight: "bold",
-                padding: 10,
-                borderRadius: 8,
-              }}
-            >
-              Nhanh hơn - Dễ hơn - Chuẩn hơn
-            </p>
+            <p>Nhanh hơn - Dễ hơn - Chuẩn hơn</p>
           </div>
           <div className={styles["homecare__agency-right"]}>
             <ul className={styles["homecare__agency-services"]}>
@@ -310,6 +337,7 @@ const HomeCareLanding = () => {
           onClick={() => {
             navigate("/contact");
           }}
+          className={styles["contact"]}
         >
           {"Gửi yêu cầu, góp ý cho chúng tôi".toUpperCase()}
         </Button>

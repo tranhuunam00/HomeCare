@@ -54,15 +54,15 @@ const DATE_OPTIONS = [
 const PATIENT_DIAGNOSE_STATUS = {
   1: "Mới",
   2: "Đang đọc",
-  3: "Chờ xác nhận",
-  4: "Đã xác nhận",
+  3: "Đã đọc",
+  4: "Đã duyệt",
 };
 
 const PATIENT_DIAGNOSE_STATUS_FILTER = {
   1: "Chưa đọc (Mới)",
   2: "Đang đọc",
-  3: "Đã đọc (Chờ xác nhận)",
-  4: "Đã duyệt (Đã xác nhận)",
+  3: "Đã đọc",
+  4: "Đã duyệt",
 };
 
 const PATIENT_DIAGNOSE_COLOR = {

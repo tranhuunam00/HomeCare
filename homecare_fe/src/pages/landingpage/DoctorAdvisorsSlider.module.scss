@@ -36,6 +36,14 @@
   padding: 8px 16px;
   cursor: pointer;
 }
+.avatar-wrapper-avatar {
+  height: 100px;
+  width: 100px;
+}
+.popup-content_avatar {
+  height: 160px;
+  width: 160px;
+}
 
 @keyframes fadeIn {
   from {
@@ -54,5 +62,24 @@
   to {
     transform: scale(1);
     opacity: 1;
+  }
+}
+@media (max-width: 768px) {
+  .avatar-wrapper-avatar {
+    height: 70px;
+    width: 70px;
+  }
+  .doctor-name {
+    font-size: 10px;
+  }
+  .popup-content_avatar {
+    height: 80px;
+    width: 80px;
+  }
+  .popup-content_name {
+    font-size: 10px;
+  }
+  .popup-desc {
+    font-size: 8px;
   }
 }
