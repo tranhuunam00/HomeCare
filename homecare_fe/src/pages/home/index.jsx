@@ -254,7 +254,7 @@ const Home = () => {
             width={240}
             style={{
               background: "rgba(202, 196, 250, 0.1)",
-              paddingTop: 16,
+              paddingTop: 0,
             }}
           >
             {!collapsed && (

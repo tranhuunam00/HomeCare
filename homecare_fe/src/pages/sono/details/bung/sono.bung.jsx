@@ -35,7 +35,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import PreviewSono from "../../preview/PreviewSono";
 import { LANGUAGE_OPTIONS } from "../../../doctor_use_form_ver2/use/DoctorIUseFormVer2";
 import { ThamKhaoLinkHomeCare } from "../../../advance/component_common/Thamkhao";
-
+import { Grid } from "antd";
+const { useBreakpoint } = Grid;
 const { Option } = Select;
 
 export const SONO_STATUS = {
@@ -70,6 +71,20 @@ const UltrasoundBungForm = () => {
   const [sonoTemplateService, setSonoTemplateService] = useState(null);
   const [sonoExamParts, setSonoExamParts] = useState([]);
   const [field1, setField1] = useState(null);
+  const screens = useBreakpoint();
+
+  const deviceIsMobile = !screens.md;
+  const formItemLayout = {
+    layout: deviceIsMobile ? "vertical" : "horizontal",
+    labelCol: {
+      xs: { span: 24 },
+      md: { span: 8 },
+    },
+    wrapperCol: {
+      xs: { span: 24 },
+      md: { span: 16 },
+    },
+  };
 
   useEffect(() => {
     const sonoTemplateServiceDB = getSonoTemplateService(
@@ -596,7 +611,13 @@ const UltrasoundBungForm = () => {
 
   // ---------- Render ----------
   return (
-    <div style={{ maxWidth: 1100, margin: "0 auto", padding: 0 }}>
+    <div
+      style={{
+        maxWidth: 1100,
+        margin: "0 auto",
+        padding: 0,
+      }}
+    >
       <Form
         form={form}
         layout="horizontal"
@@ -619,10 +640,11 @@ const UltrasoundBungForm = () => {
           language: "vi",
         }}
       >
-        <Card>
+        <Card styles={{ body: { padding: deviceIsMobile ? 5 : 24 } }}>
           <ThamKhaoLinkHomeCare
             name={"D-SONO"}
             title={"BÁO CÁO KẾT QUẢ SIÊU ÂM THÔNG MINH"}
+            isMobile={deviceIsMobile}
           />
 
           <PatientInfoSection
@@ -633,15 +655,17 @@ const UltrasoundBungForm = () => {
             wards={wards}
             setSelectedProvince={setSelectedProvince}
             translateLabel={translateLabel}
+            isMobile={deviceIsMobile}
           />
 
-          <Row gutter={16} justify={"space-between"}>
-            <Col xs={24} md={9}>
+          <Row gutter={[24, deviceIsMobile ? 0 : 24]} justify={"space-between"}>
+            <Col xs={24} md={8}>
               <Form.Item
+                {...formItemLayout}
                 label={"Phân hệ"}
                 name="id_template_service"
                 rules={[{ required: true, message: "Chọn kỹ thuật" }]}
-                labelCol={{ flex: "0 0 90px" }}
+                style={{ marginBottom: deviceIsMobile ? 40 : 24 }}
               >
                 <Select
                   placeholder="Chọn kỹ thuật"
@@ -655,12 +679,13 @@ const UltrasoundBungForm = () => {
               </Form.Item>
             </Col>
 
-            <Col xs={24} md={9}>
+            <Col xs={24} md={8}>
               <Form.Item
+                {...formItemLayout}
                 label={"Bộ phận"}
                 name="field_1"
                 rules={[{ required: true, message: "Chọn bộ phận" }]}
-                labelCol={{ flex: "0 0 90px" }}
+                style={{ marginBottom: deviceIsMobile ? 40 : 24 }}
               >
                 <Select
                   placeholder="Chọn bộ phận"
@@ -678,12 +703,13 @@ const UltrasoundBungForm = () => {
               </Form.Item>
             </Col>
 
-            <Col xs={24} md={6}>
+            <Col xs={24} md={8}>
               <Form.Item
+                {...formItemLayout}
                 label={"Ngôn ngữ"}
                 name="language"
                 rules={[{ required: true }]}
-                labelCol={{ flex: "0 0 90px" }}
+                style={{ marginBottom: deviceIsMobile ? 40 : 24 }}
               >
                 <Select disabled={!isEdit} placeholder="VI / EN">
                   {LANGUAGE_OPTIONS.map((opt) => (
@@ -702,9 +728,10 @@ const UltrasoundBungForm = () => {
             </Col>
           </Row>
 
-          <Row gutter={16} style={{ marginBottom: 24 }}>
-            <Col span={12}>
+          <Row gutter={[24, deviceIsMobile ? 16 : 0]}>
+            <Col xs={24} md={12}>
               <Form.Item
+                {...formItemLayout}
                 label={translateLabel(
                   TRANSLATE_LANGUAGE.VI,
                   "resultPrint",
@@ -712,7 +739,10 @@ const UltrasoundBungForm = () => {
                 )}
                 name="id_print_template"
                 rules={[{ required: true, message: "Chọn mẫu in" }]}
-                labelCol={{ flex: "0 0 150px" }}
+                // labelCol={{ flex: "0 0 150px" }}
+                style={{
+                  marginBottom: deviceIsMobile ? 16 : 24,
+                }}
               >
                 <Select
                   disabled={!isEdit}
@@ -772,10 +802,16 @@ const UltrasoundBungForm = () => {
                     <Card
                       key={pIdx}
                       size="small"
-                      style={{ marginBottom: 12, background: "#fafafa" }}
+                      style={{
+                        marginBottom: 12,
+                        background: "#fafafa",
+                      }}
                     >
-                      <Row gutter={12} align="middle">
-                        <Col xs={24} md={4}>
+                      <Row
+                        gutter={[12, deviceIsMobile ? 12 : 0]}
+                        align="middle"
+                      >
+                        <Col xs={24} md={8}>
                           {pIdx === 0 && <b>Cấu trúc</b>}
                           <Select
                             style={{ width: "100%", marginTop: 4 }}
@@ -789,7 +825,7 @@ const UltrasoundBungForm = () => {
                           />
                         </Col>
 
-                        <Col xs={24} md={8}>
+                        <Col xs={24} md={16}>
                           {pIdx === 0 && <b>Trạng thái (chọn nhiều)</b>}
                           <Select
                             mode="multiple"
@@ -821,13 +857,20 @@ const UltrasoundBungForm = () => {
 
                             return (
                               <Row
-                                gutter={12}
+                                gutter={[12, 12]}
                                 key={cIdx}
-                                style={{ marginBottom: 8 }}
+                                style={{
+                                  marginBottom: 16,
+                                  padding: deviceIsMobile ? "12px" : "0",
+                                  border: deviceIsMobile
+                                    ? "1px solid #eee"
+                                    : "none",
+                                  borderRadius: 8,
+                                }}
                               >
                                 <Col
                                   xs={24}
-                                  md={8}
+                                  md={16}
                                   style={{
                                     display: "flex",
                                     alignItems: "center",
@@ -838,15 +881,26 @@ const UltrasoundBungForm = () => {
                                   </div>
                                 </Col>
 
-                                <Col xs={24} md={8}>
+                                <Col xs={24} md={9}>
                                   <div
                                     style={{
                                       display: "flex",
-                                      alignItems: "center",
+                                      flexDirection: deviceIsMobile
+                                        ? "column"
+                                        : "row", // Dọc trên mobile
+                                      alignItems: deviceIsMobile
+                                        ? "flex-start"
+                                        : "center",
+                                      gap: 4,
                                     }}
                                   >
-                                    <div style={{ width: 80 }}>
-                                      {"Ở vị trí:"}
+                                    <div
+                                      style={{
+                                        width: deviceIsMobile ? "auto" : 80,
+                                        flexShrink: 0,
+                                      }}
+                                    >
+                                      Ở vị trí:
                                     </div>
                                     <Select
                                       style={{ width: "100%" }}
@@ -866,15 +920,28 @@ const UltrasoundBungForm = () => {
                                   </div>
                                 </Col>
 
-                                <Col xs={24} md={8}>
+                                <Col xs={24} md={9}>
                                   <div
                                     style={{
                                       display: "flex",
-                                      alignItems: "center",
+                                      flexDirection: deviceIsMobile
+                                        ? "column"
+                                        : "row", // Dọc trên mobile
+                                      alignItems: deviceIsMobile
+                                        ? "flex-start"
+                                        : "center",
+                                      gap: 4,
                                     }}
                                   >
-                                    <div style={{ width: 220 }}>
-                                      {"Có kích thước:"}
+                                    <div
+                                      style={{
+                                        width: deviceIsMobile ? "auto" : 100,
+                                        flexShrink: 0,
+                                      }}
+                                    >
+                                      {" "}
+                                      {/* Giảm từ 220 xuống 100 trên Desktop */}
+                                      Kích thước:
                                     </div>
                                     {needSize ? (
                                       <InputNumber
