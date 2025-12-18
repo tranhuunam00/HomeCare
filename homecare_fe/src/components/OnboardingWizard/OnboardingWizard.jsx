@@ -649,6 +649,7 @@ const OnboardingWizard = ({ open, onClose, doctorId, is_use_onboard }) => {
     try {
       await form.validateFields();
       const values = form.getFieldsValue();
+      let newIDClinic = null;
 
       // Bước 1: tạo clinic
       if (current === 1 && createClinicMode) {
@@ -671,6 +672,7 @@ const OnboardingWizard = ({ open, onClose, doctorId, is_use_onboard }) => {
           setClinics(res.data.data.data || []);
 
           form.setFieldValue("id_clinic", newClinic.id);
+          newIDClinic = newClinic.id;
           setCreateClinicMode(false);
         } catch (err) {
           console.error("Tạo phòng khám lỗi:", err);
@@ -746,7 +748,7 @@ const OnboardingWizard = ({ open, onClose, doctorId, is_use_onboard }) => {
         append("full_name", values.full_name);
         append("phone_number", values.phone_number);
         append("description", values.description);
-        append("id_clinic", values.id_clinic);
+        append("id_clinic", values.id_clinic || newIDClinic);
         append("gender", values.gender);
         append("e_signature_url", values.e_signature_url);
         append("academic_title", values.academic_title);
