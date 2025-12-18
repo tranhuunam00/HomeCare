@@ -132,7 +132,7 @@ const HomeCareLanding = () => {
                   className={styles["homecare__contact"]}
                   onClick={() => navigate("/home")} // hoặc route bạn muốn
                 >
-                  DANH SÁCH CA ĐỌC
+                  ĐỌC CA MỚI
                 </Button>
                 <Button
                   type="primary"
@@ -320,11 +320,11 @@ const HomeCareLanding = () => {
           <div className={styles["homecare__agency-right"]}>
             <ul className={styles["homecare__agency-services"]}>
               {[
-                "Sở hữu hơn 3.000 mẫu kết quả bình thường và bệnh lý trong các lĩnh vực Siêu âm, X Quang, MSCT, MRI, Điện quang can thiệp, Thăm dò chức năng…",
-                "Nội dung chuyên môn được chuẩn hóa theo các phân loại quốc tế Lung RADS, TIRADS, BIRADS, ORADS, TNM, CTSI, AAST, ARCO, FICAT….",
-                "Thiết kế chuẩn hóa theo Thông tư 32 Bộ y tế, phân loại mã bệnh quốc tế ICD-10 để dễ dàng đồng bộ với yêu cầu và quy chuẩn của hệ thống BHYT",
-                "Tích hợp AI dịch kết quả từ tiếng Việt sang hơn 30 ngôn ngữ khác",
-                "Dễ dàng tích hợp với các hệ thống HIS/RIS/PACS/eHOS/EMR…",
+                "Ngân hàng mẫu kết quả gồm hơn 3.000 mẫu Template bình thường và bệnh lý được chuẩn hóa theo các phân loại quốc tế, dành cho Siêu âm, X quang, Cắt lớp vi tính MSCT, Cộng hưởng từ MRI, Điện quang can thiệp, Nội soi tiêu hóa, Thăm dò chức năng và Giải phẫu bệnh.",
+                "Tích hợp công cụ AI dịch kết quả từ tiếng Việt sang tiếng Anh và hơn 30 ngôn ngữ khác với độ chính xác theo ngôn ngữ y khoa đạt hơn 90%. ",
+                "Tích hợp bộ công cụ phổ biến hỗ trợ Bác sĩ đọc kết quả: TI-RADS, BI-RADS, Lung-RADS, LI-RADS, PI-RADS, O-RADS, C-RADS, Bone-RADS, Bone-Age, CTSI, AAST 1994, RECIST...",
+                "Tích hợp với danh mục phân loại mã bệnh quốc tế ICD-10",
+                "Tích hợp 2 chiều với các hệ thống quản lý thông tin bệnh viện HIS/RIS/PACS/EMR…",
               ].map((text, index) => (
                 <motion.li
                   key={index}

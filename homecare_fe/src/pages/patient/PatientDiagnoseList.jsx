@@ -59,7 +59,7 @@ const PATIENT_DIAGNOSE_STATUS = {
 };
 
 const PATIENT_DIAGNOSE_STATUS_FILTER = {
-  1: "Chưa đọc (Mới)",
+  1: "Chưa đọc",
   2: "Đang đọc",
   3: "Đã đọc",
   4: "Đã duyệt",
