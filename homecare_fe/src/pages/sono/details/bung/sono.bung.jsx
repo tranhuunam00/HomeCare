@@ -1099,7 +1099,7 @@ const UltrasoundBungForm = () => {
           }}
           onExit={() => {
             if (!window.confirm("Bạn có chắc muốn thoát không?")) return;
-            navigate(`/home/sono/bung`);
+            navigate(`/home/`);
           }}
           isEdit={isEdit}
           onReset={() => {
