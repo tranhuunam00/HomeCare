@@ -119,6 +119,7 @@ const UltrasoundBungForm = () => {
   const [initialSnap, setInitialSnap] = useState({});
   const [idEdit, setIdEdit] = useState(id);
   const [openPreview, setOpenPreview] = useState(false);
+  const [patientDiagnose, setPatientDiagnose] = useState(null);
 
   // voice
   const recognitionRef = useRef(null);
@@ -223,7 +224,7 @@ const UltrasoundBungForm = () => {
         };
 
         setSelectedProvince(patientDiagnose.province_code);
-
+        setPatientDiagnose(patientDiagnose);
         setIdExamPart(patientDiagnose.id_exam_part);
         form.setFieldsValue(formValues);
 
@@ -1105,14 +1106,19 @@ const UltrasoundBungForm = () => {
               toast.error("Phê duyệt thất bại!");
             }
           }}
-          keys={[
-            KEY_ACTION_BUTTON.reset,
-            KEY_ACTION_BUTTON.save,
-            KEY_ACTION_BUTTON.edit,
-            KEY_ACTION_BUTTON.approve,
-            KEY_ACTION_BUTTON.preview,
-            KEY_ACTION_BUTTON.exit,
-          ]}
+          actionKeys={
+            patientDiagnose?.id_doctor_in_processing &&
+            patientDiagnose?.id_doctor_in_processing != doctor.id
+              ? [KEY_ACTION_BUTTON.preview]
+              : [
+                  KEY_ACTION_BUTTON.reset,
+                  KEY_ACTION_BUTTON.save,
+                  KEY_ACTION_BUTTON.edit,
+                  KEY_ACTION_BUTTON.approve,
+                  KEY_ACTION_BUTTON.preview,
+                  KEY_ACTION_BUTTON.exit,
+                ]
+          }
         />
 
         {openPreview && (

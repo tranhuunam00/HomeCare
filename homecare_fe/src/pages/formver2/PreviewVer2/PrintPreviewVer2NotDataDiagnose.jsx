@@ -672,7 +672,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
       </div>
       <FormActionBar
         onPrint={() => handlePrint(printRef)}
-        keys={["print"]}
+        actionKeys={["print"]}
         editId={editId}
         approvalStatus={approvalStatus}
       />

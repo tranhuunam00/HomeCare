@@ -619,7 +619,7 @@ export default function DFormVer2({
             user.id_role == USER_ROLE.ADMIN ||
             !editId) && (
             <FormActionBar
-              keys={[
+              actionKeys={[
                 KEY_ACTION_BUTTON.reset,
                 KEY_ACTION_BUTTON.save,
                 KEY_ACTION_BUTTON.edit,

@@ -190,8 +190,11 @@ export default function DoctorUseDFormVer2({
     TRANSLATE_LANGUAGE.VI
   );
 
-  console.log("filteredFormVer2Names", filteredFormVer2Names);
-
+  console.log("patientDiagnose", patientDiagnose);
+  console.log(
+    "patientDiagnose?.id_doctor_in_processing &&",
+    patientDiagnose?.id_doctor_in_processing != doctor.id
+  );
   const [status, setStatus] = useState(APPROVAL_STATUS.DRAFT);
 
   const [initialSnap, setInitialSnap] = useState({
@@ -1088,17 +1091,22 @@ export default function DoctorUseDFormVer2({
             <FormActionBar
               languageTranslate={languageTranslate}
               approvalStatus={status}
-              keys={[
-                KEY_ACTION_BUTTON.reset,
-                KEY_ACTION_BUTTON.save,
-                KEY_ACTION_BUTTON.edit,
-                KEY_ACTION_BUTTON.approve,
-                KEY_ACTION_BUTTON.preview,
-                KEY_ACTION_BUTTON.AI,
-                KEY_ACTION_BUTTON.exit,
-                KEY_ACTION_BUTTON.translate_multi,
-                KEY_ACTION_BUTTON.translate_en,
-              ]}
+              actionKeys={
+                patientDiagnose?.id_doctor_in_processing &&
+                patientDiagnose?.id_doctor_in_processing != doctor.id
+                  ? [KEY_ACTION_BUTTON.preview]
+                  : [
+                      KEY_ACTION_BUTTON.reset,
+                      KEY_ACTION_BUTTON.save,
+                      KEY_ACTION_BUTTON.edit,
+                      KEY_ACTION_BUTTON.approve,
+                      KEY_ACTION_BUTTON.preview,
+                      KEY_ACTION_BUTTON.AI,
+                      KEY_ACTION_BUTTON.exit,
+                      KEY_ACTION_BUTTON.translate_multi,
+                      KEY_ACTION_BUTTON.translate_en,
+                    ]
+              }
               onExit={() => {
                 if (!window.confirm("Bạn có chắc muốn thoát không?")) {
                   return;

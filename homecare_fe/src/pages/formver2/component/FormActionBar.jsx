@@ -47,7 +47,7 @@ export default function FormActionBar({
   onPreview,
   onApprove,
   onGenAi,
-  keys,
+  actionKeys,
   onEdit,
   isEdit = false,
   editId,
@@ -249,10 +249,10 @@ export default function FormActionBar({
 
       <div className={styles.actionBar}>
         <div className={styles.actionGrid}>
-          {!keys?.length
+          {!actionKeys?.length
             ? items.map((it) => genButtonC(it))
             : items
-                .filter((i) => keys.includes(i.key))
+                .filter((i) => actionKeys.includes(i.key))
                 .map((it) => genButtonC(it))}
         </div>
       </div>
