@@ -375,8 +375,8 @@ const HomeCareLanding = () => {
             <p>Quốc tịch: Việt Nam</p>
             <p>CCCD: 033080002151</p>
             <p>
-              Giấy chứng nhận quyền tác giả số 10506/2025/QTG, cấp bởi Cục bản
-              quyền tác giả - Bộ văn hóa, thể thao và du lịch
+              Chứng nhận số 10506/2025/QTG, cấp bởi Cục bản quyền tác giả, Bộ
+              VHTT và Du lịch
             </p>
           </div>
 

@@ -175,34 +175,66 @@ const RegisterPage = () => {
                 Đăng ký
               </Button>
             </Form.Item>
+            <Divider plain>Hoặc</Divider>
+
+            <GoogleLogin
+              onSuccess={async (credentialResponse) => {
+                try {
+                  const id_token = credentialResponse.credential;
+                  const res = await API_CALL.post("/auth/google-login", {
+                    id_token,
+                  });
+
+                  const { token, user, doctor } = res.data.data;
+                  handleLoginContext({ token, user, doctor });
+                  showSuccess(`Đăng nhập thành công!`);
+                  navigate("/");
+                } catch (err) {
+                  const message =
+                    err?.response?.data?.message ||
+                    "Đăng nhập Google thất bại!";
+                  showError(message);
+                }
+              }}
+              onError={() => {
+                showError("Google đăng nhập thất bại!");
+              }}
+              width="100%"
+              locale="vi"
+            />
+            <div style={{ marginTop: 16 }}>
+              <Title level={5} style={{ textAlign: "center" }}>
+                Hướng dẫn đăng ký tài khoản D-RADS
+              </Title>
+
+              <div
+                style={{
+                  position: "relative",
+                  paddingBottom: "56.25%", // 16:9
+                  height: 0,
+                  overflow: "hidden",
+                  borderRadius: 8,
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                  marginTop: 12,
+                }}
+              >
+                <iframe
+                  src="https://www.youtube.com/embed/nWGpaW54LYQ"
+                  title="Hướng dẫn đăng ký D-RADS"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "100%",
+                  }}
+                />
+              </div>
+            </div>
           </Form>
-
-          <Divider plain>Hoặc</Divider>
-
-          <GoogleLogin
-            onSuccess={async (credentialResponse) => {
-              try {
-                const id_token = credentialResponse.credential;
-                const res = await API_CALL.post("/auth/google-login", {
-                  id_token,
-                });
-
-                const { token, user, doctor } = res.data.data;
-                handleLoginContext({ token, user, doctor });
-                showSuccess(`Đăng nhập thành công!`);
-                navigate("/");
-              } catch (err) {
-                const message =
-                  err?.response?.data?.message || "Đăng nhập Google thất bại!";
-                showError(message);
-              }
-            }}
-            onError={() => {
-              showError("Google đăng nhập thất bại!");
-            }}
-            width="100%"
-            locale="vi"
-          />
         </Card>
       </div>
     </div>
