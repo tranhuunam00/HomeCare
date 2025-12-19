@@ -36,7 +36,6 @@ import PreviewSono from "../../preview/PreviewSono";
 import { LANGUAGE_OPTIONS } from "../../../doctor_use_form_ver2/use/DoctorIUseFormVer2";
 import { ThamKhaoLinkHomeCare } from "../../../advance/component_common/Thamkhao";
 import { Grid } from "antd";
-import { ArrowLeftOutlined } from "@ant-design/icons";
 const { useBreakpoint } = Grid;
 const { Option } = Select;
 
@@ -582,20 +581,32 @@ const UltrasoundBungForm = () => {
   };
 
   // determine STRUCT by current field1 (cached)
-  const STRUCT = getSTRUCT(field1);
+  const [STRUCT, setSTRUCT] = useState({});
 
   useEffect(() => {
-    console.log("idExamPart", idExamPart);
+    if (!field1) return;
 
-    console.log("sonoExamParts", sonoExamParts);
+    const struct = getSTRUCT(field1);
+    setSTRUCT(struct);
+
+    const existing = rowsByField[field1];
+    if (!existing || existing.length === 0) {
+      initWorkspaceForField(field1);
+    } else {
+      setRows(existing);
+    }
+  }, [field1]);
+
+  useEffect(() => {
     const checkF1 = sonoExamParts.find((s) => s.id == idExamPart)?.name;
+    console.log("checkF1", checkF1);
     if (checkF1) {
-      setField1(checkF1);
-
       form.setFieldsValue({
         id_template_service: "D-SONO",
         language: "vi",
+        field_1: checkF1,
       });
+      setField1(checkF1);
     } else {
       const defaultField = FIELD1_OPTIONS[0];
       setField1(defaultField);
@@ -643,16 +654,6 @@ const UltrasoundBungForm = () => {
         }}
       >
         <Card styles={{ body: { padding: deviceIsMobile ? 5 : 24 } }}>
-          <Button
-            type="text"
-            icon={<ArrowLeftOutlined />}
-            onClick={() => navigate(-1)}
-            style={{
-              // display: "flex",
-              alignItems: "center",
-              display: deviceIsMobile ? "flex" : "none",
-            }}
-          />
           <ThamKhaoLinkHomeCare
             name={"D-SONO"}
             title={"BÁO CÁO KẾT QUẢ SIÊU ÂM THÔNG MINH"}
