@@ -143,7 +143,8 @@ const GroupProcessPatientDiagnoiseFormVer2 = ({
     <div>
       <CustomSteps steps={steps} current={status} />
 
-      {status === PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESS &&
+      {(status === PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESS ||
+        status === PATIENT_DIAGNOSE_STATUS_NAME.WAITING) &&
         id_doctor_in_processing === doctor.id && (
           <div style={{ marginTop: 16 }}>
             <Button

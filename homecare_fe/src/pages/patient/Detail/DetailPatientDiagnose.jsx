@@ -123,7 +123,11 @@ const PatientDiagnoiseDetailPage = ({ idFromList }) => {
           <Divider />
 
           <Row gutter={24}>
-            <Col span={6}>
+            <Col span={2}>
+              <Title level={5}>ID</Title>
+              <Text>{data.id}</Text>
+            </Col>
+            <Col span={5}>
               <Title level={5}>PID:</Title>
               <Text>{data.PID}</Text>
             </Col>
@@ -131,7 +135,7 @@ const PatientDiagnoiseDetailPage = ({ idFromList }) => {
               <Title level={5}>SID:</Title>
               <Text>{data.SID}</Text>
             </Col>
-            <Col span={6}>
+            <Col span={5}>
               <Title level={5}>CCCD:</Title>
               <Text>{data.CCCD}</Text>
             </Col>
