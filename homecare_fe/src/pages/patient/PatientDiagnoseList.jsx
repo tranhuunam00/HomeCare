@@ -54,7 +54,7 @@ const DATE_OPTIONS = [
 ];
 
 const PATIENT_DIAGNOSE_STATUS = {
-  1: "Mới",
+  1: "Chưa đọc",
   2: "Đang đọc",
   3: "Chờ duyệt",
   4: "Đã duyệt",
