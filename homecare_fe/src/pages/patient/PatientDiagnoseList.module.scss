@@ -5,7 +5,16 @@
 
   .ant-select-selection-item,
   .ant-select-selection-placeholder {
-    font-size: 12px !important;
+    font-size: 11px !important;
     line-height: 26px !important;
+  }
+}
+
+.patientTable {
+  :global {
+    .ant-table-thead > tr > th {
+      padding: 4px 6px; // 👈 thu gọn chiều cao header
+      line-height: 1;
+    }
   }
 }

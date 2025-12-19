@@ -39,6 +39,7 @@ const { RangePicker } = DatePicker;
 import styles from "./PatientDiagnoseList.module.scss";
 import ColumnSettingModal from "./setting/ColumnSettingModal";
 import DragDropExample from "./setting/ColumnSettingModal";
+import PatientDiagnoiseDetailPage from "./Detail/DetailPatientDiagnose";
 
 const { Option } = Select;
 
@@ -88,11 +89,16 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
   const navigate = useNavigate();
 
   const [data, setData] = useState([]);
+  const [sameCCCDData, setSameCCCDData] = useState([]);
+
+  console.log("sameCCCDData", sameCCCDData);
+
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(15);
+  const [limit, setLimit] = useState(10);
   const [openColumnModal, setOpenColumnModal] = useState(false);
   const [customColumns, setCustomColumns] = useState([]);
+  const [chosenRecord, setChosenRecord] = useState();
 
   const [visibleKeys, setVisibleKeys] = useState([]);
   const {
@@ -323,8 +329,12 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
   }, []);
 
   useEffect(() => {
-    fetchPatients();
+    fetchPatients(filters);
   }, [filters, page, limit]);
+
+  useEffect(() => {
+    if (chosenRecord) fetchPatientsByChosen();
+  }, [chosenRecord]);
 
   const cleanParams = (obj) => {
     const cleaned = {};
@@ -343,7 +353,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
     return cleaned;
   };
 
-  const fetchPatients = async () => {
+  const fetchPatients = async (filters) => {
     try {
       const res = await API_CALL.get("/patient-diagnose", {
         params: { ...cleanParams(filters), page, limit },
@@ -351,6 +361,26 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
       const responseData = res.data.data;
       setData(responseData?.rows || []);
       setTotal(responseData?.count || 0);
+    } catch (err) {
+      console.error("Lỗi lấy danh sách:", err);
+    }
+  };
+
+  const fetchPatientsByChosen = async () => {
+    try {
+      if (!chosenRecord?.CCCD && !chosenRecord?.PID) {
+        setSameCCCDData([]);
+        return;
+      }
+      const res = chosenRecord?.CCCD
+        ? await API_CALL.get("/patient-diagnose", {
+            params: { CCCD: chosenRecord?.CCCD, page: 1, limit: 10 },
+          })
+        : await API_CALL.get("/patient-diagnose", {
+            params: { PID: chosenRecord?.PID, page: 1, limit: 10 },
+          });
+      const responseData = res.data.data;
+      setSameCCCDData(responseData?.rows || []);
     } catch (err) {
       console.error("Lỗi lấy danh sách:", err);
     }
@@ -404,37 +434,6 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
     [visibleKeys, allColumns]
   );
 
-  const columnMenu = (
-    <div style={{ padding: 12, maxHeight: 300, overflowY: "auto" }}>
-      <Typography.Text strong style={{ display: "block", marginBottom: 8 }}>
-        Chọn cột hiển thị
-      </Typography.Text>
-      {allColumns.map((col) => (
-        <div
-          key={col.key}
-          style={{ padding: "4px 0", backgroundColor: "white" }}
-        >
-          <Checkbox
-            checked={visibleKeys.includes(col.key)}
-            onChange={() => toggleColumn(col.key)}
-          >
-            {col.title}
-          </Checkbox>
-        </div>
-      ))}
-      <Divider style={{ margin: "8px 0" }} />
-      <Button
-        size="small"
-        onClick={() => {
-          setVisibleKeys(defaultVisibleKeys);
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultVisibleKeys));
-        }}
-      >
-        Khôi phục mặc định
-      </Button>
-    </div>
-  );
-
   const handleSaveColumnSettings = ({
     orderedKeys,
     visibleKeys: newVisibleKeys,
@@ -456,6 +455,9 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
 
     setCustomColumns(finalColumns);
   };
+
+  const tableColumns =
+    customColumns.length > 0 ? customColumns : columnsToRender;
 
   return (
     <div style={{ display: "flex", flexDirection: "row", gap: 8 }}>
@@ -619,7 +621,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
           </Space>
         </Col>
       </div>
-      <div style={{ padding: 0, flex: 1 }}>
+      <div style={{ padding: 0, flex: 1, width: 200 }}>
         <Space
           style={{
             marginBottom: 16,
@@ -631,7 +633,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         </Space>
 
         <Row gutter={24} style={{ marginBottom: 16 }}>
-          <Col span={4}>
+          <Col span={chosenRecord ? 12 : 5}>
             <Input
               placeholder="Tìm theo tên"
               onChange={(e) =>
@@ -641,7 +643,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
             />
           </Col>
 
-          <Col span={4}>
+          <Col span={chosenRecord ? 12 : 5}>
             <Input
               placeholder="Tìm theo PID"
               onChange={(e) =>
@@ -650,7 +652,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
               allowClear
             />
           </Col>
-          <Col span={14}>
+          <Col span={chosenRecord ? 24 : 14}>
             <Space wrap>
               {DATE_OPTIONS.map(({ label, value }) => {
                 const isActive = pendingFilters.date_type === value;
@@ -699,80 +701,135 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
           theme={{
             components: {
               Table: {
-                fontSize: 13, // Cỡ chữ mặc định của bảng
-                cellPaddingBlock: 0, // Giảm chiều cao dòng (padding trên/dưới)
+                fontSize: 11,
+                cellPaddingBlock: 0,
               },
             },
           }}
         >
-          <Table
-            rowKey="id"
-            size="small"
-            rootClassName={styles.patientTable}
-            columns={customColumns.length > 0 ? customColumns : columnsToRender}
-            dataSource={data}
-            bordered
-            scroll={{ x: 1200 }}
-            pagination={{
-              current: page,
-              pageSize: limit,
-              total,
-              showSizeChanger: true,
-              position: ["bottomCenter"],
-              onChange: (p, l) => {
-                setPage(p);
-                setLimit(l);
-              },
+          <div
+            style={{
+              padding: 0,
+              flex: 1,
+              overflowX: "hide",
+              maxWidth: "100%", //
             }}
-            onChange={(pagination, _filters, sorter) => {
-              // ✅ 1. Pagination luôn xử lý
-              if (
-                pagination.current !== page ||
-                pagination.pageSize !== limit
-              ) {
-                setPage(pagination.current);
-                setLimit(pagination.pageSize);
+          >
+            <Table
+              rowKey="id"
+              size="small"
+              rootClassName={styles.patientTable}
+              columns={
+                customColumns.length > 0 ? customColumns : columnsToRender
               }
+              dataSource={data}
+              bordered
+              scroll={{ x: 1200, y: 800 }}
+              pagination={{
+                current: page,
+                pageSize: limit,
+                total,
+                showSizeChanger: true,
+                position: ["bottomCenter"],
+                onChange: (p, l) => {
+                  setPage(p);
+                  setLimit(l);
+                },
+              }}
+              onChange={(pagination, _filters, sorter) => {
+                // ✅ 1. Pagination luôn xử lý
+                if (
+                  pagination.current !== page ||
+                  pagination.pageSize !== limit
+                ) {
+                  setPage(pagination.current);
+                  setLimit(pagination.pageSize);
+                }
 
-              // ✅ 2. Sort
-              if (sorter?.order) {
-                setFilters((prev) => {
-                  const newSortBy = sorter.field;
-                  const newSortOrder =
-                    sorter.order === "ascend" ? "asc" : "desc";
+                // ✅ 2. Sort
+                if (sorter?.order) {
+                  setFilters((prev) => {
+                    const newSortBy = sorter.field;
+                    const newSortOrder =
+                      sorter.order === "ascend" ? "asc" : "desc";
 
-                  // ✅ CHỈ reset page khi sort thay đổi
-                  if (
-                    prev.sort_by !== newSortBy ||
-                    prev.sort_order !== newSortOrder
-                  ) {
-                    setPage(1);
-                  }
+                    // ✅ CHỈ reset page khi sort thay đổi
+                    if (
+                      prev.sort_by !== newSortBy ||
+                      prev.sort_order !== newSortOrder
+                    ) {
+                      setPage(1);
+                    }
 
-                  return {
-                    ...prev,
-                    sort_by: newSortBy,
-                    sort_order: newSortOrder,
-                  };
-                });
-              } else {
-                // ✅ Khi clear sort
-                setFilters((prev) => {
-                  if (prev.sort_by || prev.sort_order) {
-                    setPage(1); // clear sort cũng reset page
-                  }
-                  const { sort_by, sort_order, ...rest } = prev;
-                  return rest;
-                });
-              }
-            }}
-            onRow={(record) => ({
-              onClick: () => navigate(`/home/patients-diagnose/${record.id}`),
-              style: { cursor: "pointer" },
-            })}
-          />
+                    return {
+                      ...prev,
+                      sort_by: newSortBy,
+                      sort_order: newSortOrder,
+                    };
+                  });
+                } else {
+                  // ✅ Khi clear sort
+                  setFilters((prev) => {
+                    if (prev.sort_by || prev.sort_order) {
+                      setPage(1); // clear sort cũng reset page
+                    }
+                    const { sort_by, sort_order, ...rest } = prev;
+                    return rest;
+                  });
+                }
+              }}
+              onRow={(record) => ({
+                onClick: () => {
+                  setChosenRecord(record);
+                  // navigate(`/home/patients-diagnose/${record.id}`)
+                },
+                style: { cursor: "pointer" },
+              })}
+            />
+          </div>
         </ConfigProvider>
+        {sameCCCDData.length > 0 && (
+          <>
+            <Divider style={{ margin: "12px 0" }} />
+
+            <Typography.Text strong style={{ color: "#cf1322" }}>
+              Các ca có cùng CCCD hoặc PID ({sameCCCDData.length})
+            </Typography.Text>
+            <ConfigProvider
+              theme={{
+                components: {
+                  Table: {
+                    fontSize: 11,
+                    cellPaddingBlock: 0,
+                  },
+                },
+              }}
+            >
+              <Table
+                rowKey="id"
+                size="small"
+                columns={tableColumns}
+                dataSource={sameCCCDData}
+                bordered
+                pagination={false}
+                scroll={{ x: 1200 }}
+                style={{ marginTop: 8 }}
+                onRow={(record) => ({
+                  onClick: () => {
+                    setChosenRecord(record);
+                  },
+                  style: { cursor: "pointer", background: "#fafafa" },
+                })}
+              />
+            </ConfigProvider>
+          </>
+        )}
       </div>
+      {chosenRecord && (
+        <div style={{ padding: 0, flex: 1, width: 200 }}>
+          <PatientDiagnoiseDetailPage idFromList={+chosenRecord?.id} />
+        </div>
+      )}
 
       <ColumnSettingModal
         open={openColumnModal}
