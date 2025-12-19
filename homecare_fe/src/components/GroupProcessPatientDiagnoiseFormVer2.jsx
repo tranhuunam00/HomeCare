@@ -5,7 +5,7 @@ import {
   CheckCircleOutlined,
   PrinterOutlined,
 } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
+import { data, useNavigate } from "react-router-dom";
 import CustomSteps from "./CustomSteps/CustomSteps";
 import API_CALL from "../services/axiosClient";
 import {
@@ -16,7 +16,10 @@ import { toast } from "react-toastify";
 import { useGlobalAuth } from "../contexts/AuthContext";
 import { Button } from "antd";
 
-const GroupProcessPatientDiagnoiseFormVer2 = ({ patientDiagnose }) => {
+const GroupProcessPatientDiagnoiseFormVer2 = ({
+  patientDiagnose,
+  setPatientDiagnose,
+}) => {
   const { id, status, id_doctor_in_processing } = patientDiagnose;
   const { doctor, templateServices } = useGlobalAuth();
   const navigate = useNavigate();
@@ -79,6 +82,7 @@ const GroupProcessPatientDiagnoiseFormVer2 = ({ patientDiagnose }) => {
             ...patientDiagnose,
             status: PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESS,
           });
+
           await onCheckandCreate();
         } catch (error) {
           toast.error("Không cập nhật được trạng thái đọc ca bệnh");
@@ -99,7 +103,13 @@ const GroupProcessPatientDiagnoiseFormVer2 = ({ patientDiagnose }) => {
     {
       title: "Xác nhận kết quả",
       icon: <CheckCircleOutlined />,
-      onStepClick: () => {},
+      onStepClick: async () => {
+        try {
+          await onCheckandCreate();
+        } catch (error) {
+          toast.error("Không cập nhật được trạng thái đọc ca bệnh");
+        }
+      },
     },
     {
       title: "In kết quả",
@@ -114,12 +124,15 @@ const GroupProcessPatientDiagnoiseFormVer2 = ({ patientDiagnose }) => {
     },
   ];
 
-  const handleCancelReading = async () => {
+  const handleCancelReading = async (
+    changedStatus = PATIENT_DIAGNOSE_STATUS_NAME.NEW
+  ) => {
     try {
       await API_CALL.put(`/patient-diagnose/${id}`, {
         ...patientDiagnose,
-        status: PATIENT_DIAGNOSE_STATUS_NAME.NEW, // hoặc trạng thái bạn muốn
+        status: changedStatus, // hoặc trạng thái bạn muốn
       });
+      setPatientDiagnose({ ...patientDiagnose, status: changedStatus });
       navigate(`/home/patients-diagnose`);
       toast.success("Đã hủy đọc ca bệnh");
     } catch (error) {
@@ -130,7 +143,8 @@ const GroupProcessPatientDiagnoiseFormVer2 = ({ patientDiagnose }) => {
     <div>
       <CustomSteps steps={steps} current={status} />
 
-      {status === PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESS &&
+      {(status === PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESS ||
+        status === PATIENT_DIAGNOSE_STATUS_NAME.WAITING) &&
         id_doctor_in_processing === doctor.id && (
           <div style={{ marginTop: 16 }}>
             <Button
@@ -147,6 +161,27 @@ const GroupProcessPatientDiagnoiseFormVer2 = ({ patientDiagnose }) => {
               }}
             >
               Hủy đọc kết quả
+            </Button>
+          </div>
+        )}
+
+      {status === PATIENT_DIAGNOSE_STATUS_NAME.VERIFY &&
+        id_doctor_in_processing === doctor.id && (
+          <div style={{ marginTop: 16 }}>
+            <Button
+              danger
+              type="primary"
+              onClick={() => {
+                const ok = window.confirm(
+                  "Bạn có chắc chắn muốn hủy kết quả đã duyệt\n\nNếu hủy, ca sẽ được trả về trạng thái CHỜ DUYỆT."
+                );
+
+                if (ok) {
+                  handleCancelReading(PATIENT_DIAGNOSE_STATUS_NAME.WAITING);
+                }
+              }}
+            >
+              Hủy duyệt
             </Button>
           </div>
         )}
