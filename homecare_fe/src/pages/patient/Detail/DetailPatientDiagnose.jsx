@@ -220,7 +220,10 @@ const PatientDiagnoiseDetailPage = ({ idFromList }) => {
               </Text>
             </Col>
           </Row>
-          <GroupProcessPatientDiagnoiseFormVer2 patientDiagnose={data} />
+          <GroupProcessPatientDiagnoiseFormVer2
+            patientDiagnose={data}
+            setPatientDiagnose={setData}
+          />
 
           {/* <Row gutter={24} style={{ marginTop: 40 }}>
           <h2>Lịch sử</h2>

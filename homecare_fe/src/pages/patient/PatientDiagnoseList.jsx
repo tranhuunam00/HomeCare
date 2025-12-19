@@ -56,21 +56,21 @@ const DATE_OPTIONS = [
 const PATIENT_DIAGNOSE_STATUS = {
   1: "Mới",
   2: "Đang đọc",
-  3: "Đã đọc",
+  3: "Chờ duyệt",
   4: "Đã duyệt",
 };
 
 const PATIENT_DIAGNOSE_STATUS_FILTER = {
   1: "Chưa đọc",
   2: "Đang đọc",
-  3: "Đã đọc",
+  3: "Chờ duyệt",
   4: "Đã duyệt",
 };
 
 const PATIENT_DIAGNOSE_COLOR = {
   1: "#0b56e3d3", // New
   2: "#F59E0B", // Reading
-  3: "#EF4444", // Waiting
+  3: "#8317c6ff", // Waiting
   4: "#10B981", // Done
 };
 
