@@ -36,6 +36,7 @@ import PreviewSono from "../../preview/PreviewSono";
 import { LANGUAGE_OPTIONS } from "../../../doctor_use_form_ver2/use/DoctorIUseFormVer2";
 import { ThamKhaoLinkHomeCare } from "../../../advance/component_common/Thamkhao";
 import { Grid } from "antd";
+import { ArrowLeftOutlined } from "@ant-design/icons";
 const { useBreakpoint } = Grid;
 const { Option } = Select;
 
@@ -642,6 +643,16 @@ const UltrasoundBungForm = () => {
         }}
       >
         <Card styles={{ body: { padding: deviceIsMobile ? 5 : 24 } }}>
+          <Button
+            type="text"
+            icon={<ArrowLeftOutlined />}
+            onClick={() => navigate(-1)}
+            style={{
+              // display: "flex",
+              alignItems: "center",
+              display: deviceIsMobile ? "flex" : "none",
+            }}
+          />
           <ThamKhaoLinkHomeCare
             name={"D-SONO"}
             title={"BÁO CÁO KẾT QUẢ SIÊU ÂM THÔNG MINH"}

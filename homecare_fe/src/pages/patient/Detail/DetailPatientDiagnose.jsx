@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import React, { useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   Card,
   Row,
@@ -10,18 +10,29 @@ import {
   Button,
   Divider,
   ConfigProvider,
+  Grid,
+  Table,
+  Space,
 } from "antd";
 import dayjs from "dayjs";
 import useVietnamAddress from "../../../hooks/useVietnamAddress";
 import API_CALL from "../../../services/axiosClient";
 import {
+  getAge,
   PATIENT_DIAGNOSE_COLOR,
   PATIENT_DIAGNOSE_STATUS,
+  USER_ROLE,
 } from "../../../constant/app";
 import PatientTablePage from "../PatientDiagnoseList";
 import StatusButtonPatientDiagnose from "../../../components/Status2ButtonPatientDiagnose";
 import { useGlobalAuth } from "../../../contexts/AuthContext";
 import GroupProcessPatientDiagnoiseFormVer2 from "../../../components/GroupProcessPatientDiagnoiseFormVer2";
+import {
+  EditOutlined,
+  DeleteOutlined,
+  CopyOutlined,
+  ArrowLeftOutlined,
+} from "@ant-design/icons";
 
 const { Title, Text } = Typography;
 
@@ -34,12 +45,87 @@ const calculateAge = (dob) => {
 
 const PatientDiagnoiseDetailPage = ({ idFromList }) => {
   const { id } = useParams();
+  const location = useLocation();
+  const chosenRecord = location.state?.record;
   const [data, setData] = useState(null);
   const [clinics, setClinics] = useState([]);
   const [clinicName, setClinicName] = useState("");
+
   const navigate = useNavigate();
-  const { user, doctor, examParts, templateServices } = useGlobalAuth();
+  const { user, doctor, examParts, templateServices, clinicsAll } =
+    useGlobalAuth();
   const [idEdit, setIdEdit] = useState();
+
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [sameCCCDData, setSameCCCDData] = useState([]);
+
+  const { useBreakpoint } = Grid;
+  const screens = useBreakpoint();
+  const deviceIsMobile = !screens.md;
+
+  const allColumns = useMemo(
+    () => [
+      {
+        title: "STT",
+        key: "STT",
+
+        align: "right", // ✅ CĂN BÊN PHẢI
+
+        width: 20,
+        render: (_, __, index) => (page - 1) * 10 + index + 1,
+      },
+      {
+        title: "ID",
+        dataIndex: "id",
+        key: "id",
+        fixed: "left",
+        width: 20,
+        align: "center",
+        sorter: true,
+      },
+
+      {
+        title: "Trạng thái",
+        dataIndex: "status",
+        key: "status",
+        width: 40,
+        render: (status) => (
+          <Tag style={{ width: 80 }} color={PATIENT_DIAGNOSE_COLOR[status]}>
+            {PATIENT_DIAGNOSE_STATUS[status]}
+          </Tag>
+        ),
+        sorter: true,
+      },
+      {
+        title: "Họ tên",
+        dataIndex: "name",
+        key: "name",
+        width: 40,
+        render: (text) => text?.toUpperCase(),
+        sorter: true,
+      },
+
+      {
+        title: "Tuổi",
+        dataIndex: "dob",
+        key: "dob",
+        width: 30,
+        align: "right", // ✅ CĂN BÊN PHẢI
+
+        render: (val) => getAge(val),
+      },
+      { title: "Giới tính", dataIndex: "gender", key: "gender", width: 30 },
+      {
+        title: "Lâm sàng",
+        dataIndex: "Indication",
+        key: "Indication",
+        width: 40,
+      },
+    ],
+    [user, clinicsAll, examParts, templateServices, page]
+  );
 
   useEffect(() => {
     setIdEdit(idFromList || id);
@@ -87,10 +173,90 @@ const PatientDiagnoiseDetailPage = ({ idFromList }) => {
     }
   }, [data, provinces]);
 
+  useEffect(() => {
+    if (chosenRecord) fetchPatientsByChosen();
+  }, [chosenRecord]);
+
+  const fetchPatientsByChosen = async () => {
+    try {
+      if (!chosenRecord?.CCCD && !chosenRecord?.PID) {
+        setSameCCCDData([]);
+        return;
+      }
+      const res = chosenRecord?.CCCD
+        ? await API_CALL.get("/patient-diagnose", {
+            params: {
+              CCCD: chosenRecord?.CCCD,
+              page: 1,
+              limit: 10,
+            },
+          })
+        : await API_CALL.get("/patient-diagnose", {
+            params: {
+              PID: chosenRecord?.PID,
+              page: 1,
+              limit: 10,
+            },
+          });
+      const responseData = res.data.data;
+      setSameCCCDData(responseData?.rows || []);
+    } catch (err) {
+      console.error("Lỗi lấy danh sách:", err);
+    }
+  };
+
   if (!data) return <Spin />;
 
   return (
-    <div style={{ padding: "2rem" }}>
+    <div
+      style={{
+        padding: deviceIsMobile ? 0 : "2rem",
+      }}
+    >
+      <div style={{ display: deviceIsMobile ? "block" : "none" }}>
+        <Space align="center" style={{ marginBottom: 8 }}>
+          <Button
+            type="text"
+            icon={<ArrowLeftOutlined />}
+            onClick={() => navigate(`/home/`)}
+            style={{ display: "flex", alignItems: "center" }}
+          />
+
+          <Typography.Text strong style={{ color: "#cf1322", fontSize: 14 }}>
+            Các ca có cùng CCCD hoặc PID ({sameCCCDData.length})
+          </Typography.Text>
+        </Space>
+        <ConfigProvider
+          theme={{
+            components: {
+              Table: {
+                fontSize: 11,
+                cellPaddingBlock: 0,
+              },
+            },
+          }}
+        >
+          <Table
+            rowKey="id"
+            size="small"
+            columns={allColumns}
+            dataSource={sameCCCDData || []}
+            bordered
+            pagination={false}
+            scroll={{ x: 1200 }}
+            style={{ marginTop: 8 }}
+            onRow={(record) => ({
+              onClick: () => {
+                navigate(`/home/patients-diagnose/${record.id}`, {
+                  state: { record },
+                });
+              },
+              style: { cursor: "pointer", background: "#fafafa" },
+            })}
+          />
+        </ConfigProvider>
+      </div>
+
       <ConfigProvider
         theme={{
           token: {
