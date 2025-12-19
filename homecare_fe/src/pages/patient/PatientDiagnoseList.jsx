@@ -97,7 +97,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
   const [data, setData] = useState([]);
   const [sameCCCDData, setSameCCCDData] = useState([]);
 
-  console.log("sameCCCDData", sameCCCDData);
+  // console.log("sameCCCDData", sameCCCDData);
 
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -105,6 +105,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
   const [openColumnModal, setOpenColumnModal] = useState(false);
   const [customColumns, setCustomColumns] = useState([]);
   const [chosenRecord, setChosenRecord] = useState();
+  // console.log("chosenRecord1", chosenRecord);
 
   const [visibleKeys, setVisibleKeys] = useState([]);
   const {
@@ -464,6 +465,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
 
   const tableColumns =
     customColumns.length > 0 ? customColumns : columnsToRender;
+  console.log("tableColumns21221", columnsToRender);
 
   return (
     <div
@@ -474,167 +476,234 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
       }}
     >
       <div style={{ width: !deviceIsMobile ? 175 : "100%" }}>
-        <Typography.Title level={4}>Số Ca = {total}</Typography.Title>
-
-        <Space style={{ justifyContent: "space-around", display: "flex" }}>
-          {!isNotCreate && (
-            <Button
-              type="primary"
-              icon={<UserAddOutlined />}
-              onClick={() => navigate("/home/patients-diagnose/create")}
-            >
-              Thêm mới
-            </Button>
-          )}
-          <Button
-            onClick={() => setOpenColumnModal(true)}
-            icon={<SettingOutlined />}
-          ></Button>
-        </Space>
-        <Divider style={{ margin: 16 }} />
-
-        <Divider style={{ margin: 16 }} />
-        <Row style={{ marginBottom: 16 }}>
-          <Space>
-            <Button
-              style={{ width: 175 }}
-              onClick={() => {
-                setPendingFilters({
-                  name: null,
-                  PID: PID,
-                  SID: null,
-                  id_clinic: null,
-                  status: [],
-                  id_template_service: null,
-                  date_type: null,
-                  from_date: null,
-                  to_date: null,
-                });
-                setFilters({});
-                setPage(1);
-              }}
-            >
-              Xóa lọc
-            </Button>
-          </Space>
-        </Row>
-        <Divider style={{ margin: 16 }} />
-        <ConfigProvider
-          theme={{
-            components: {
-              Select: {
-                fontSize: 13,
-              },
-            },
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: "12px",
+            marginBottom: 16,
           }}
         >
-          <Col>
+          <Typography.Title
+            level={4}
+            style={{ margin: 0, whiteSpace: "nowrap" }}
+          >
+            Số Ca = {total}
+          </Typography.Title>
+
+          <Space style={{ justifyContent: "space-around", display: "flex" }}>
+            {!isNotCreate && (
+              <Button
+                type="primary"
+                icon={<UserAddOutlined />}
+                onClick={() => navigate("/home/patients-diagnose/create")}
+              >
+                Thêm mới
+              </Button>
+            )}
+            <Button
+              onClick={() => setOpenColumnModal(true)}
+              icon={<SettingOutlined />}
+            ></Button>
+          </Space>
+        </div>
+
+        <Divider
+          style={{ margin: 16, display: deviceIsMobile ? "none" : "block" }}
+        />
+
+        <Divider
+          style={{ margin: 16, display: deviceIsMobile ? "none" : "block" }}
+        />
+        <div
+          style={{
+            display: deviceIsMobile ? "flex" : "block",
+            justifyContent: "end",
+            gap: "12px",
+          }}
+        >
+          <Row style={{ marginBottom: !deviceIsMobile ? 16 : 0, order: 1 }}>
+            <Space>
+              <Button
+                style={{ width: !deviceIsMobile ? 175 : "100%" }}
+                onClick={() => {
+                  setPendingFilters({
+                    name: null,
+                    PID: PID,
+                    SID: null,
+                    id_clinic: null,
+                    status: [],
+                    id_template_service: null,
+                    date_type: null,
+                    from_date: null,
+                    to_date: null,
+                  });
+                  setFilters({});
+                  setPage(1);
+                }}
+              >
+                Xóa lọc
+              </Button>
+            </Space>
+          </Row>
+          <Divider
+            style={{ margin: 16, display: deviceIsMobile ? "none" : "block" }}
+          />
+          <ConfigProvider
+            theme={{
+              components: {
+                Select: {
+                  fontSize: 13,
+                },
+              },
+            }}
+          >
+            <Col>
+              <Select
+                className="smallSelect"
+                allowClear
+                showSearch
+                placeholder="Chọn phòng khám"
+                style={{ width: deviceIsMobile ? 250 : 175 }}
+                optionFilterProp="children"
+                onChange={(value) =>
+                  setPendingFilters({ ...pendingFilters, id_clinic: value })
+                }
+              >
+                {clinicsAll?.map((c) => (
+                  <Option key={c.id} value={c.id}>
+                    {c.name}
+                  </Option>
+                ))}
+              </Select>
+            </Col>
+          </ConfigProvider>
+        </div>
+
+        <Divider
+          style={{ margin: 16, display: deviceIsMobile ? "none" : "block" }}
+        />
+
+        <div
+          style={{
+            display: "flex",
+            flexDirection: !deviceIsMobile ? "column" : "row",
+            width: "100%",
+            gap: 8,
+            marginTop: deviceIsMobile ? 8 : 0,
+          }}
+        >
+          <Col style={{ flex: 1 }}>
             <Select
-              className="smallSelect"
               allowClear
-              showSearch
-              placeholder="Chọn phòng khám"
-              style={{ width: 175 }}
-              optionFilterProp="children"
+              style={{ width: "100%", maxWidth: 175 }}
+              placeholder="Chỉ định"
               onChange={(value) =>
-                setPendingFilters({ ...pendingFilters, id_clinic: value })
+                setPendingFilters({
+                  ...pendingFilters,
+                  id_template_service: value,
+                })
               }
             >
-              {clinicsAll?.map((c) => (
-                <Option key={c.id} value={c.id}>
-                  {c.name}
+              {templateServices?.map((t) => (
+                <Option key={t.id} value={t.id}>
+                  {t.name}
                 </Option>
               ))}
             </Select>
           </Col>
-        </ConfigProvider>
 
-        <Divider style={{ margin: 16 }} />
+          <Divider
+            style={{ margin: 8, display: deviceIsMobile ? "none" : "block" }}
+          />
 
-        <Col>
-          <Select
-            allowClear
-            style={{ width: "100%" }}
-            placeholder="Chỉ định"
-            onChange={(value) =>
-              setPendingFilters({
-                ...pendingFilters,
-                id_template_service: value,
-              })
-            }
-          >
-            {templateServices?.map((t) => (
-              <Option key={t.id} value={t.id}>
-                {t.name}
-              </Option>
-            ))}
-          </Select>
-        </Col>
-        <Divider style={{ margin: 8 }} />
-
-        <Col>
-          <Select
-            allowClear
-            disabled={!pendingFilters.id_template_service}
-            style={{ width: "100%" }}
-            placeholder="Bộ phận"
-            onChange={(value) =>
-              setPendingFilters({ ...pendingFilters, id_exam_part: value })
-            }
-          >
-            {examParts
-              ?.filter(
-                (e) =>
-                  e.id_template_service == pendingFilters.id_template_service
-              )
-              ?.map((e) => (
-                <Option key={e.id} value={e.id}>
-                  {e.name}
-                </Option>
-              ))}
-          </Select>
-        </Col>
-        <Divider style={{ margin: 8 }} />
-
-        <Col span={10}>
-          <Space wrap>
-            <h4>Trạng thái:</h4>
-            {Object.entries(PATIENT_DIAGNOSE_STATUS_FILTER).map(
-              ([key, label]) => {
-                const intKey = Number(key);
-                const isActive = pendingFilters.status?.includes(intKey);
-
-                return (
-                  <Button
-                    key={key}
-                    style={{
-                      backgroundColor: PATIENT_DIAGNOSE_COLOR[intKey],
-                      color: "white",
-                      opacity: isActive ? 1 : 0.4,
-                      width: 175,
-                    }}
-                    onClick={() => {
-                      const current = pendingFilters.status || [];
-                      const newStatus = isActive
-                        ? current.filter((x) => x !== intKey)
-                        : [...current, intKey];
-
-                      setPendingFilters({
-                        ...pendingFilters,
-                        status: newStatus,
-                      });
-                    }}
-                  >
-                    {label}
-                  </Button>
-                );
+          <Col style={{ flex: 1 }}>
+            <Select
+              allowClear
+              disabled={!pendingFilters.id_template_service}
+              style={{ width: "100%" }}
+              placeholder="Bộ phận"
+              onChange={(value) =>
+                setPendingFilters({ ...pendingFilters, id_exam_part: value })
               }
-            )}
-          </Space>
+            >
+              {examParts
+                ?.filter(
+                  (e) =>
+                    e.id_template_service == pendingFilters.id_template_service
+                )
+                ?.map((e) => (
+                  <Option key={e.id} value={e.id}>
+                    {e.name}
+                  </Option>
+                ))}
+            </Select>
+          </Col>
+        </div>
+
+        <Divider style={{ margin: 8 }} />
+
+        <Col span={24}>
+          <div style={{ width: "100%" }}>
+            <h4 style={{ display: deviceIsMobile ? "none" : "block" }}>
+              Trạng thái:
+            </h4>
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 8,
+                width: "100%",
+              }}
+            >
+              {Object.entries(PATIENT_DIAGNOSE_STATUS_FILTER).map(
+                ([key, label]) => {
+                  const intKey = Number(key);
+                  const isActive = pendingFilters.status?.includes(intKey);
+                  return (
+                    <Button
+                      key={key}
+                      style={{
+                        backgroundColor: PATIENT_DIAGNOSE_COLOR[intKey],
+                        color: "white",
+                        opacity: isActive ? 1 : 0.4,
+                        width: !deviceIsMobile ? "100%" : "calc(50% - 4px)",
+                        minWidth: !deviceIsMobile ? 175 : "unset",
+                        height: "auto",
+                        padding: "8px 4px",
+                        fontSize: 13,
+                        border: "none",
+                      }}
+                      onClick={() => {
+                        const current = pendingFilters.status || [];
+                        const newStatus = isActive
+                          ? current.filter((x) => x !== intKey)
+                          : [...current, intKey];
+
+                        setPendingFilters({
+                          ...pendingFilters,
+                          status: newStatus,
+                        });
+                      }}
+                    >
+                      {label}
+                    </Button>
+                  );
+                }
+              )}
+            </div>
+          </div>
         </Col>
       </div>
+
       <div
-        style={{ padding: 0, flex: 1, width: !deviceIsMobile ? 200 : "100%" }}
+        style={{
+          padding: 0,
+          flex: 1,
+          width: !deviceIsMobile ? 200 : "100%",
+        }}
       >
         <Space
           style={{
@@ -643,11 +712,14 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
             width: "100%",
           }}
         >
-          <Space></Space>
+          {/* <Space></Space> */}
         </Space>
 
         <Row gutter={24} style={{ marginBottom: 16 }}>
-          <Col span={chosenRecord || deviceIsMobile ? 12 : 5}>
+          <Col
+            span={chosenRecord || deviceIsMobile ? 12 : 5}
+            style={{ marginBottom: 5 }}
+          >
             <Input
               placeholder="Tìm theo tên"
               onChange={(e) =>
@@ -657,7 +729,10 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
             />
           </Col>
 
-          <Col span={chosenRecord || deviceIsMobile ? 12 : 5}>
+          <Col
+            span={chosenRecord || deviceIsMobile ? 12 : 5}
+            style={{ marginBottom: 5 }}
+          >
             <Input
               placeholder="Tìm theo PID"
               onChange={(e) =>
@@ -667,10 +742,15 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
             />
           </Col>
           <Col span={chosenRecord || deviceIsMobile ? 24 : 14}>
-            <Space wrap>
+            <Space
+              wrap
+              style={{
+                width: "100%",
+                justifyContent: deviceIsMobile ? "space-between" : "flex-start",
+              }}
+            >
               {DATE_OPTIONS.map(({ label, value }) => {
                 const isActive = pendingFilters.date_type === value;
-
                 return (
                   <Button
                     key={value}
@@ -685,6 +765,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
                         }),
                       });
                     }}
+                    style={{ width: deviceIsMobile ? 100 : "auto" }}
                   >
                     {label}
                   </Button>
@@ -796,7 +877,9 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
                 onClick: () => {
                   !deviceIsMobile
                     ? setChosenRecord(record)
-                    : navigate(`/home/patients-diagnose/${record.id}`);
+                    : navigate(`/home/patients-diagnose/${record.id}`, {
+                        state: { record },
+                      });
                 },
                 style: { cursor: "pointer" },
               })}

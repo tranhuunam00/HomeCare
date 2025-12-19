@@ -27,9 +27,7 @@ const CustomSteps = ({ steps = [], current = 0 }) => {
                   "arrow " +
                   (isCompleted ? "completed" : isActive ? "active" : "disabled")
                 }
-              >
-                →
-              </div>
+              ></div>
             )}
           </div>
         );
