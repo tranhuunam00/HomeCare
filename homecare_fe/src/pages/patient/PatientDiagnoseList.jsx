@@ -15,6 +15,7 @@ import {
   message,
   DatePicker,
   ConfigProvider,
+  Grid,
 } from "antd";
 import {
   SettingOutlined,
@@ -87,6 +88,11 @@ const STORAGE_KEY = "visibleColumns_patientDiagnose";
 
 const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
   const navigate = useNavigate();
+  const { useBreakpoint } = Grid;
+
+  const screens = useBreakpoint();
+
+  const deviceIsMobile = !screens.md;
 
   const [data, setData] = useState([]);
   const [sameCCCDData, setSameCCCDData] = useState([]);
@@ -460,8 +466,14 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
     customColumns.length > 0 ? customColumns : columnsToRender;
 
   return (
-    <div style={{ display: "flex", flexDirection: "row", gap: 8 }}>
-      <div style={{ width: 175 }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: !deviceIsMobile ? "row" : "column",
+        gap: 8,
+      }}
+    >
+      <div style={{ width: !deviceIsMobile ? 175 : "100%" }}>
         <Typography.Title level={4}>Số Ca = {total}</Typography.Title>
 
         <Space style={{ justifyContent: "space-around", display: "flex" }}>
@@ -621,7 +633,9 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
           </Space>
         </Col>
       </div>
-      <div style={{ padding: 0, flex: 1, width: 200 }}>
+      <div
+        style={{ padding: 0, flex: 1, width: !deviceIsMobile ? 200 : "100%" }}
+      >
         <Space
           style={{
             marginBottom: 16,
@@ -633,7 +647,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         </Space>
 
         <Row gutter={24} style={{ marginBottom: 16 }}>
-          <Col span={chosenRecord ? 12 : 5}>
+          <Col span={chosenRecord || deviceIsMobile ? 12 : 5}>
             <Input
               placeholder="Tìm theo tên"
               onChange={(e) =>
@@ -643,7 +657,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
             />
           </Col>
 
-          <Col span={chosenRecord ? 12 : 5}>
+          <Col span={chosenRecord || deviceIsMobile ? 12 : 5}>
             <Input
               placeholder="Tìm theo PID"
               onChange={(e) =>
@@ -652,7 +666,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
               allowClear
             />
           </Col>
-          <Col span={chosenRecord ? 24 : 14}>
+          <Col span={chosenRecord || deviceIsMobile ? 24 : 14}>
             <Space wrap>
               {DATE_OPTIONS.map(({ label, value }) => {
                 const isActive = pendingFilters.date_type === value;
@@ -780,8 +794,9 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
               }}
               onRow={(record) => ({
                 onClick: () => {
-                  setChosenRecord(record);
-                  // navigate(`/home/patients-diagnose/${record.id}`)
+                  !deviceIsMobile
+                    ? setChosenRecord(record)
+                    : navigate(`/home/patients-diagnose/${record.id}`);
                 },
                 style: { cursor: "pointer" },
               })}
@@ -816,7 +831,9 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
                 style={{ marginTop: 8 }}
                 onRow={(record) => ({
                   onClick: () => {
-                    setChosenRecord(record);
+                    !deviceIsMobile
+                      ? setChosenRecord(record)
+                      : navigate(`/home/patients-diagnose/${record.id}`);
                   },
                   style: { cursor: "pointer", background: "#fafafa" },
                 })}
