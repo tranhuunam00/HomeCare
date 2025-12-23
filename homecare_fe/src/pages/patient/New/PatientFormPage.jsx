@@ -197,6 +197,10 @@ const PatientFormPage = () => {
     }
   }, [initialValues, templateServices, examParts, clinics]);
 
+  const disabledDate = (current) => {
+    return current && current > dayjs().endOf("day");
+  };
+
   console.log(form.getFieldsValue());
   return (
     <div style={{ paddingLeft: "20%", paddingRight: "20%" }}>
@@ -219,7 +223,12 @@ const PatientFormPage = () => {
               <Form.Item
                 name="name"
                 label="Họ và tên"
-                rules={[{ required: true }]}
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng nhập không để trống trường dữ liệu",
+                  },
+                ]}
                 normalize={(value) => value?.toUpperCase()}
               >
                 <Input />
@@ -229,7 +238,12 @@ const PatientFormPage = () => {
               <Form.Item
                 name="gender"
                 label="Giới tính"
-                rules={[{ required: true }]}
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng nhập không để trống trường dữ liệu",
+                  },
+                ]}
               >
                 <Select placeholder="Chọn giới tính">
                   <Option value="Nam">Nam</Option>
@@ -247,8 +261,10 @@ const PatientFormPage = () => {
                 rules={[{ required: false }]}
               >
                 <DatePicker
+                  disabledDate={disabledDate}
                   onChange={handleDobChange}
                   style={{ width: "100%" }}
+                  format="DD/MM/YYYY"
                 />
               </Form.Item>
             </Col>
@@ -264,7 +280,12 @@ const PatientFormPage = () => {
               <Form.Item
                 name="province"
                 label="Tỉnh/Thành phố"
-                rules={[{ required: true }]}
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng nhập không để trống trường dữ liệu",
+                  },
+                ]}
               >
                 <Select
                   placeholder="Chọn Tỉnh / Thành phố"
@@ -288,7 +309,12 @@ const PatientFormPage = () => {
               <Form.Item
                 name="ward"
                 label="Phường/Xã"
-                rules={[{ required: true }]}
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng nhập không để trống trường dữ liệu",
+                  },
+                ]}
               >
                 <Select
                   onChange={(val) => {
@@ -323,16 +349,26 @@ const PatientFormPage = () => {
               <Form.Item
                 name="phone"
                 label="Số điện thoại"
-                rules={[{ required: true }]}
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng nhập không để trống trường dữ liệu",
+                  },
+                  {
+                    pattern: /^(0[3|5|7|8|9])([0-9]{8})$/,
+                    message:
+                      "Số điện thoại không đúng định dạng (10 số, bắt đầu bằng 03, 05, 07, 08, 09)!",
+                  },
+                ]}
               >
-                <Input />
+                <Input type="number" maxLength={10} />
               </Form.Item>
             </Col>
             <Col span={8}>
               <Form.Item
                 name="email"
                 label="Email"
-                // rules={[{ required: true }]}
+                // rules={[{ required: true, message: "Vui lòng nhập không để trống trường dữ liệu" }]}
               >
                 <Input />
               </Form.Item>
@@ -341,7 +377,12 @@ const PatientFormPage = () => {
               <Form.Item
                 name="country"
                 label="Quốc tịch"
-                rules={[{ required: true }]}
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng nhập không để trống trường dữ liệu",
+                  },
+                ]}
               >
                 <Select
                   showSearch
@@ -369,7 +410,16 @@ const PatientFormPage = () => {
               </Form.Item>
             </Col>
             <Col span={8}>
-              <Form.Item name="pid" label="PID" rules={[{ required: true }]}>
+              <Form.Item
+                name="pid"
+                label="PID"
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng nhập không để trống trường dữ liệu",
+                  },
+                ]}
+              >
                 <Input
                   onChange={(e) => {
                     form.setFieldValue(
@@ -381,7 +431,16 @@ const PatientFormPage = () => {
               </Form.Item>
             </Col>
             <Col span={8}>
-              <Form.Item name="sid" label="SID" rules={[{ required: true }]}>
+              <Form.Item
+                name="sid"
+                label="SID"
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng nhập không để trống trường dữ liệu",
+                  },
+                ]}
+              >
                 <Input disabled />
               </Form.Item>
             </Col>
@@ -393,7 +452,12 @@ const PatientFormPage = () => {
               <Form.Item
                 label="Chỉ định"
                 name="id_template_service"
-                rules={[{ required: true }]}
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng nhập không để trống trường dữ liệu",
+                  },
+                ]}
               >
                 <Select
                   onChange={(e) => {
@@ -415,7 +479,12 @@ const PatientFormPage = () => {
               <Form.Item
                 label="Bộ phận thăm khám"
                 name="id_exam_part"
-                rules={[{ required: true }]}
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng nhập không để trống trường dữ liệu",
+                  },
+                ]}
               >
                 <Select
                   disabled={!idTemplateService}
@@ -437,7 +506,12 @@ const PatientFormPage = () => {
             <Form.Item
               label="Phòng khám"
               name="id_clinic"
-              rules={[{ required: true }]}
+              rules={[
+                {
+                  required: true,
+                  message: "Vui lòng nhập không để trống trường dữ liệu",
+                },
+              ]}
             >
               <Select placeholder="Chọn phòng khám">
                 {clinics.map((clinic) => (
