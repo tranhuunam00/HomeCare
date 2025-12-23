@@ -19,6 +19,7 @@ import { Button } from "antd";
 const GroupProcessPatientDiagnoiseFormVer2 = ({
   patientDiagnose,
   setPatientDiagnose,
+  onStatusChange,
 }) => {
   const { id, status, id_doctor_in_processing } = patientDiagnose;
   const { doctor, templateServices } = useGlobalAuth();
@@ -133,6 +134,9 @@ const GroupProcessPatientDiagnoiseFormVer2 = ({
         status: changedStatus, // hoặc trạng thái bạn muốn
       });
       setPatientDiagnose({ ...patientDiagnose, status: changedStatus });
+      if (onStatusChange) {
+        onStatusChange();
+      }
       navigate(`/home/patients-diagnose`);
       toast.success("Đã hủy đọc ca bệnh");
     } catch (error) {
