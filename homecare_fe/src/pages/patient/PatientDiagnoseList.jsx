@@ -97,15 +97,13 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
   const [data, setData] = useState([]);
   const [sameCCCDData, setSameCCCDData] = useState([]);
 
-  // console.log("sameCCCDData", sameCCCDData);
-
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [openColumnModal, setOpenColumnModal] = useState(false);
   const [customColumns, setCustomColumns] = useState([]);
   const [chosenRecord, setChosenRecord] = useState();
-  // console.log("chosenRecord1", chosenRecord);
+  const [returnStatus, setReturnStatus] = useState(false);
 
   const [visibleKeys, setVisibleKeys] = useState([]);
   const {
@@ -337,11 +335,11 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
 
   useEffect(() => {
     fetchPatients(filters);
-  }, [filters, page, limit]);
+  }, [filters, page, limit, returnStatus]);
 
   useEffect(() => {
     if (chosenRecord) fetchPatientsByChosen();
-  }, [chosenRecord]);
+  }, [chosenRecord, returnStatus]);
 
   const cleanParams = (obj) => {
     const cleaned = {};
@@ -465,7 +463,6 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
 
   const tableColumns =
     customColumns.length > 0 ? customColumns : columnsToRender;
-  console.log("tableColumns21221", columnsToRender);
 
   return (
     <div
@@ -927,7 +924,10 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
       </div>
       {chosenRecord && (
         <div style={{ padding: 0, flex: 1, width: 200 }}>
-          <PatientDiagnoiseDetailPage idFromList={+chosenRecord?.id} />
+          <PatientDiagnoiseDetailPage
+            idFromList={+chosenRecord?.id}
+            onStatusChange={() => setReturnStatus((prev) => !prev)}
+          />
         </div>
       )}
 

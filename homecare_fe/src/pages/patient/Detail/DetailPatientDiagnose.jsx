@@ -43,7 +43,7 @@ const calculateAge = (dob) => {
   return today.diff(birthDate, "year");
 };
 
-const PatientDiagnoiseDetailPage = ({ idFromList }) => {
+const PatientDiagnoiseDetailPage = ({ idFromList, onStatusChange }) => {
   const { id } = useParams();
   const location = useLocation();
   const chosenRecord = location.state?.record;
@@ -393,6 +393,7 @@ const PatientDiagnoiseDetailPage = ({ idFromList }) => {
           <GroupProcessPatientDiagnoiseFormVer2
             patientDiagnose={data}
             setPatientDiagnose={setData}
+            onStatusChange={onStatusChange}
           />
 
           {/* <Row gutter={24} style={{ marginTop: 40 }}>
