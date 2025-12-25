@@ -70,9 +70,7 @@ const PatientDiagnoiseDetailPage = ({ idFromList, onStatusChange }) => {
       {
         title: "STT",
         key: "STT",
-
         align: "right", // ✅ CĂN BÊN PHẢI
-
         width: 20,
         render: (_, __, index) => (page - 1) * 10 + index + 1,
       },
@@ -103,8 +101,13 @@ const PatientDiagnoiseDetailPage = ({ idFromList, onStatusChange }) => {
         dataIndex: "name",
         key: "name",
         width: 40,
-        render: (text) => text?.toUpperCase(),
+
         sorter: true,
+        render: (text, record) => {
+          const nameUpdated = record.sono_results?.[0]?.benh_nhan_ho_ten;
+          const displayName = nameUpdated || text;
+          return displayName ? displayName.toUpperCase() : "-";
+        },
       },
 
       {
@@ -114,14 +117,40 @@ const PatientDiagnoiseDetailPage = ({ idFromList, onStatusChange }) => {
         width: 30,
         align: "right", // ✅ CĂN BÊN PHẢI
 
-        render: (val) => getAge(val),
+        render: (val, record) => {
+          const ageUpdated = record.sono_results?.[0]?.benh_nhan_tuoi;
+          if (ageUpdated !== undefined && ageUpdated !== null) {
+            return <span>{ageUpdated}</span>;
+          }
+          return val ? getAge(val) : "-";
+        },
       },
-      { title: "Giới tính", dataIndex: "gender", key: "gender", width: 30 },
+      {
+        title: "Giới tính",
+        dataIndex: "gender",
+        key: "gender",
+        width: 30,
+        render: (text, record) => {
+          const genderUpdated = record.sono_results?.[0]?.benh_nhan_gioi_tinh;
+          return genderUpdated || text || "-";
+        },
+      },
       {
         title: "Lâm sàng",
         dataIndex: "Indication",
         key: "Indication",
         width: 40,
+        render: (text, record) => {
+          const clinicalUpdated = record.sono_results?.[0]?.benh_nhan_lam_sang;
+          const displayValue = clinicalUpdated || text;
+
+          const limit = 20;
+          const isOverLimit = displayValue.length > limit;
+          const truncatedText = isOverLimit
+            ? `${displayValue.substring(0, limit)}...`
+            : displayValue;
+          return <div>{truncatedText || "-"}</div>;
+        },
       },
     ],
     [user, clinicsAll, examParts, templateServices, page]
@@ -207,6 +236,25 @@ const PatientDiagnoiseDetailPage = ({ idFromList, onStatusChange }) => {
 
   if (!data) return <Spin />;
 
+  // Lấy bản ghi siêu âm đầu tiên nếu có
+  const sono = data?.sono_results?.[0];
+
+  const displayData = {
+    name: (sono?.benh_nhan_ho_ten || data?.name || "")?.toUpperCase(),
+    gender: sono?.benh_nhan_gioi_tinh || data?.gender || "-",
+    age: sono?.benh_nhan_tuoi || calculateAge(data?.dob) || "-",
+    phone: sono?.benh_nhan_dien_thoai || data?.phoneNumber || "-",
+    address: sono?.benh_nhan_dia_chi_so_nha || data?.address || "-",
+    clinical: sono?.benh_nhan_lam_sang || data?.Indication || "-",
+    id_exam_part: sono?.id_exam_part || data?.id_exam_part,
+    PID: sono?.benh_nhan_pid || data?.PID || "-",
+    SID: sono?.benh_nhan_sid || data?.SID || "-",
+    CCCD: sono?.benh_nhan_cccd || data?.CCCD || "-",
+    email: sono?.benh_nhan_email || data?.email || "-",
+    countryCode: sono?.benh_nhan_quoc_tich || data?.countryCode || "-",
+    id_template_service: sono?.id_template_service || data?.id_template_service,
+  };
+
   return (
     <div
       style={{
@@ -270,11 +318,11 @@ const PatientDiagnoiseDetailPage = ({ idFromList, onStatusChange }) => {
           <Row gutter={24}>
             <Col span={8}>
               <Title level={5}>Họ và tên:</Title>
-              <Text>{data.name}</Text>
+              <Text>{displayData.name}</Text>
             </Col>
             <Col span={6}>
               <Title level={5}>Giới tính:</Title>
-              <Text>{data.gender}</Text>
+              <Text>{displayData.gender}</Text>
             </Col>
             <Col span={6}>
               <Title level={5}>Ngày sinh:</Title>
@@ -282,7 +330,7 @@ const PatientDiagnoiseDetailPage = ({ idFromList, onStatusChange }) => {
             </Col>
             <Col span={4}>
               <Title level={5}>Tuổi:</Title>
-              <Text>{calculateAge(data.dob)}</Text>
+              <Text>{displayData.age}</Text>
             </Col>
           </Row>
 
@@ -295,15 +343,15 @@ const PatientDiagnoiseDetailPage = ({ idFromList, onStatusChange }) => {
             </Col>
             <Col span={5}>
               <Title level={5}>PID:</Title>
-              <Text>{data.PID}</Text>
+              <Text>{displayData.PID}</Text>
             </Col>
             <Col span={12}>
               <Title level={5}>SID:</Title>
-              <Text>{data.SID}</Text>
+              <Text>{displayData.SID}</Text>
             </Col>
             <Col span={5}>
               <Title level={5}>CCCD:</Title>
-              <Text>{data.CCCD}</Text>
+              <Text>{displayData.CCCD}</Text>
             </Col>
           </Row>
 
@@ -323,34 +371,34 @@ const PatientDiagnoiseDetailPage = ({ idFromList, onStatusChange }) => {
           <Row gutter={24} style={{ marginTop: 6 }}>
             <Col span={6}>
               <Title level={5}>SĐT:</Title>
-              <Text>{data.phoneNumber}</Text>
+              <Text>{displayData.phone}</Text>
             </Col>
             <Col span={12}>
               <Title level={5}>Email:</Title>
-              <Text>{data.email}</Text>
+              <Text>{displayData.email}</Text>
             </Col>
             <Col span={6}>
               <Title level={5}>Quốc tịch:</Title>
-              <Text>{data.countryCode}</Text>
+              <Text>{displayData.countryCode}</Text>
             </Col>
           </Row>
 
           {/* <Row gutter={24} style={{ marginTop: 6 }}>
           <Col span={12}>
             <Title level={5}>Phường/Xã:</Title>
-            <Text>{getNameByCode(wards, data.ward_code)}</Text>
+            <Text>{getNameByCode(wards, displayData.ward_code)}</Text>
           </Col>
 
           <Col span={12}>
             <Title level={5}>Tỉnh/Thành phố:</Title>
-            <Text>{getNameByCode(provinces, data.province_code)}</Text>
+            <Text>{getNameByCode(provinces, displayData.province_code)}</Text>
           </Col>
         </Row> */}
 
           {/* <Row gutter={24} style={{ marginTop: 6 }}>
           <Col span={24}>
             <Title level={5}>Địa chỉ chi tiết:</Title>
-            <Text>{data.address}</Text>
+            <Text>{displayData.address}</Text>
           </Col>
         </Row> */}
           <Row gutter={24} style={{ marginTop: 6 }}>
@@ -360,14 +408,16 @@ const PatientDiagnoiseDetailPage = ({ idFromList, onStatusChange }) => {
             </Col>
             <Col span={12}>
               <Title level={5}>Cập nhật gần nhất:</Title>
-              <Text>{dayjs(data.updatedAt).format("HH:mm DD/MM/YYYY")}</Text>
+              <Text>
+                {dayjs(displayData.updatedAt).format("HH:mm DD/MM/YYYY")}
+              </Text>
             </Col>
           </Row>
 
           {/* <Row gutter={24} style={{ marginTop: 40 }}>
           <h2>Hành động</h2>
         </Row>
-        <StatusButtonPatientDiagnose id={data.id} status={data.status} /> */}
+        <StatusButtonPatientDiagnose id={displayData.id} status={displayData.status} /> */}
           {/* <Row gutter={24} style={{ marginTop: 40 }}>
           <h2>Hành động</h2>
         </Row> */}
@@ -378,7 +428,7 @@ const PatientDiagnoiseDetailPage = ({ idFromList, onStatusChange }) => {
               <Text>
                 {
                   templateServices?.find(
-                    (t) => t.id == data.id_template_service
+                    (t) => t.id == displayData.id_template_service
                   )?.name
                 }
               </Text>
@@ -386,7 +436,7 @@ const PatientDiagnoiseDetailPage = ({ idFromList, onStatusChange }) => {
             <Col span={10}>
               <Title level={5}>Bộ phận thăm khám:</Title>
               <Text>
-                {examParts?.find((t) => t.id == data.id_exam_part)?.name}
+                {examParts?.find((t) => t.id == displayData.id_exam_part)?.name}
               </Text>
             </Col>
           </Row>

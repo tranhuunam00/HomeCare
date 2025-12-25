@@ -190,8 +190,12 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         dataIndex: "name",
         key: "name",
         width: 200,
-        render: (text) => text?.toUpperCase(),
         sorter: true,
+        render: (text, record) => {
+          const nameUpdated = record.sono_results?.[0]?.benh_nhan_ho_ten;
+          const displayName = nameUpdated || text;
+          return displayName ? displayName.toUpperCase() : "-";
+        },
       },
 
       {
@@ -200,15 +204,40 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         key: "dob",
         width: 80,
         align: "right", // ✅ CĂN BÊN PHẢI
-
-        render: (val) => getAge(val),
+        render: (val, record) => {
+          const ageUpdated = record.sono_results?.[0]?.benh_nhan_tuoi;
+          if (ageUpdated !== undefined && ageUpdated !== null) {
+            return <span>{ageUpdated}</span>;
+          }
+          return val ? getAge(val) : "-";
+        },
       },
-      { title: "Giới tính", dataIndex: "gender", key: "gender", width: 80 },
+      {
+        title: "Giới tính",
+        dataIndex: "gender",
+        key: "gender",
+        width: 80,
+        render: (text, record) => {
+          const genderUpdated = record.sono_results?.[0]?.benh_nhan_gioi_tinh;
+          return genderUpdated || text || "-";
+        },
+      },
       {
         title: "Lâm sàng",
         dataIndex: "Indication",
         key: "Indication",
         width: 120,
+        render: (text, record) => {
+          const clinicalUpdated = record.sono_results?.[0]?.benh_nhan_lam_sang;
+          const displayValue = clinicalUpdated || text;
+
+          const limit = 20;
+          const isOverLimit = displayValue.length > limit;
+          const truncatedText = isOverLimit
+            ? `${displayValue.substring(0, limit)}...`
+            : displayValue;
+          return <div>{truncatedText || "-"}</div>;
+        },
       },
 
       {
@@ -342,6 +371,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
   }, [chosenRecord, returnStatus]);
 
   const cleanParams = (obj) => {
+    if (!obj) return {};
     const cleaned = {};
 
     Object.entries(obj).forEach(([key, value]) => {
