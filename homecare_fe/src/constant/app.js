@@ -256,3 +256,9 @@ export const generateSorter = (dataIndex) => (a, b) => {
 
   return String(v1 || "").localeCompare(String(v2 || ""));
 };
+
+export const DoctorSignFileStatus = {
+  WAITING: 1,
+  FAIL: 2,
+  SUCCESS: 3,
+};

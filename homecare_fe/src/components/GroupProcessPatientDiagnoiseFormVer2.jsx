@@ -36,7 +36,7 @@ const GroupProcessPatientDiagnoiseFormVer2 = ({
         const sonoResult = await API_CALL.get(`/sono`, {
           params: {
             id_patient_diagnose: id,
-            id_doctor: doctor.id,
+            // id_doctor: doctor.id,
           },
         });
 
@@ -49,7 +49,7 @@ const GroupProcessPatientDiagnoiseFormVer2 = ({
         const doctorUseDFormVer2 = await API_CALL.get(`/doctor-use-form-ver2`, {
           params: {
             id_patient_diagnose: id,
-            id_doctor: doctor.id,
+            // id_doctor: doctor.id,
             orderBy: "id",
             orderDir: "DESC",
           },

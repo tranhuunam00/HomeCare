@@ -11,6 +11,7 @@ import {
   LogoutOutlined,
   GatewayOutlined,
   TranslationOutlined,
+  SignatureOutlined,
 } from "@ant-design/icons";
 import styles from "./FormActionBar.module.scss";
 import { useNavigate } from "react-router-dom";
@@ -38,6 +39,8 @@ export const KEY_ACTION_BUTTON = {
   exit: "exit",
   translate_multi: "translate_multi",
   translate_en: "translate_en",
+  sign: "sign",
+  verifySign: "verifySign",
 };
 
 export default function FormActionBar({
@@ -56,6 +59,8 @@ export default function FormActionBar({
   onExit = undefined,
   approvalStatus = APPROVAL_STATUS.DRAFT,
   languageTranslate,
+  onSign,
+  onVerifySign,
 }) {
   console.log("approvalStatus", approvalStatus);
   const navigate = useNavigate();
@@ -159,6 +164,20 @@ export default function FormActionBar({
           navigate(-1);
         }
       },
+    },
+    {
+      key: "sign",
+      label: "KÝ",
+      onClick: onSign ?? emptyF,
+      icon: <SignatureOutlined />,
+      disabled: approvalStatus != APPROVAL_STATUS.APPROVED,
+    },
+
+    {
+      key: "verifySign",
+      label: "Xác thực chữ ký",
+      icon: <SignatureOutlined />,
+      disabled: approvalStatus != APPROVAL_STATUS.APPROVED,
     },
   ];
 

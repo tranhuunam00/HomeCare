@@ -46,6 +46,7 @@ import TranslateListRecords from "./items/TranslateListRecords";
 import { APPROVAL_STATUS } from "../../../components/ApprovalStatusTag";
 import { handleTranslateToLanguage, toISODate } from "./util";
 import { hasProOrBusiness } from "../../../constant/permission";
+import SmartCASignModal from "../SmartCASignModal/SmartCASignModal";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -139,6 +140,8 @@ export default function DoctorUseDFormVer2({
   } = useGlobalAuth();
 
   const [reloading, setReloading] = useState(false);
+
+  const [signModalOpen, setSignModalOpen] = useState(false);
 
   useEffect(() => {
     setIsReadingForm(true);
@@ -1102,11 +1105,13 @@ export default function DoctorUseDFormVer2({
                       KEY_ACTION_BUTTON.approve,
                       KEY_ACTION_BUTTON.preview,
                       KEY_ACTION_BUTTON.AI,
-                      KEY_ACTION_BUTTON.exit,
                       KEY_ACTION_BUTTON.translate_multi,
                       KEY_ACTION_BUTTON.translate_en,
+                      KEY_ACTION_BUTTON.sign,
+                      KEY_ACTION_BUTTON.exit,
                     ]
               }
+              onSign={() => setSignModalOpen(true)}
               onExit={() => {
                 if (!window.confirm("Bạn có chắc muốn thoát không?")) {
                   return;
@@ -1329,6 +1334,12 @@ export default function DoctorUseDFormVer2({
         idRoot={initialSnap.apiData?.id_root || idEdit}
         idCurrent={idEdit}
         language={languageTranslate}
+      />
+
+      <SmartCASignModal
+        open={signModalOpen}
+        onClose={() => setSignModalOpen(false)}
+        id_sono_result={idEdit}
       />
     </div>
   );

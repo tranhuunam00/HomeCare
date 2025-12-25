@@ -36,6 +36,7 @@ import PreviewSono from "../../preview/PreviewSono";
 import { LANGUAGE_OPTIONS } from "../../../doctor_use_form_ver2/use/DoctorIUseFormVer2";
 import { ThamKhaoLinkHomeCare } from "../../../advance/component_common/Thamkhao";
 import { Grid } from "antd";
+import SmartCASignModal from "../../../doctor_use_form_ver2/SmartCASignModal/SmartCASignModal";
 const { useBreakpoint } = Grid;
 const { Option } = Select;
 
@@ -71,6 +72,8 @@ const UltrasoundBungForm = () => {
   const [sonoTemplateService, setSonoTemplateService] = useState(null);
   const [sonoExamParts, setSonoExamParts] = useState([]);
   const [field1, setField1] = useState(null);
+  const [signModalOpen, setSignModalOpen] = useState(false);
+
   const screens = useBreakpoint();
 
   const deviceIsMobile = !screens.md;
@@ -1121,6 +1124,7 @@ const UltrasoundBungForm = () => {
           approvalStatus={initialSnap.status}
           onAction={() => handleSave(SONO_STATUS.PENDING)}
           editId={idEdit}
+          onSign={() => setSignModalOpen(true)}
           onPreview={() => {
             form
               .validateFields()
@@ -1158,6 +1162,8 @@ const UltrasoundBungForm = () => {
                   KEY_ACTION_BUTTON.edit,
                   KEY_ACTION_BUTTON.approve,
                   KEY_ACTION_BUTTON.preview,
+                  KEY_ACTION_BUTTON.sign,
+                  KEY_ACTION_BUTTON.verifySign,
                   KEY_ACTION_BUTTON.exit,
                 ]
           }
@@ -1187,6 +1193,12 @@ const UltrasoundBungForm = () => {
           </Modal>
         )}
       </Form>
+
+      <SmartCASignModal
+        open={signModalOpen}
+        onClose={() => setSignModalOpen(false)}
+        id_sono_result={idEdit}
+      />
     </div>
   );
 };
