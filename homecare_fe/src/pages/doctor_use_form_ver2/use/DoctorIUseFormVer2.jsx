@@ -1097,7 +1097,7 @@ export default function DoctorUseDFormVer2({
               actionKeys={
                 patientDiagnose?.id_doctor_in_processing &&
                 patientDiagnose?.id_doctor_in_processing != doctor.id
-                  ? [KEY_ACTION_BUTTON.preview]
+                  ? [KEY_ACTION_BUTTON.preview, KEY_ACTION_BUTTON.sign]
                   : [
                       KEY_ACTION_BUTTON.reset,
                       KEY_ACTION_BUTTON.save,
@@ -1339,7 +1339,7 @@ export default function DoctorUseDFormVer2({
       <SmartCASignModal
         open={signModalOpen}
         onClose={() => setSignModalOpen(false)}
-        id_sono_result={idEdit}
+        id_doctor_use_form_ver2={idEdit}
       />
     </div>
   );
