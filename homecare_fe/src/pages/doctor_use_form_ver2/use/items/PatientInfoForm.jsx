@@ -1,5 +1,5 @@
 import React from "react";
-import { Form, Input, Select, Row, Col } from "antd";
+import { Form, Input, Select, Row, Col, InputNumber } from "antd";
 import dayjs from "dayjs";
 
 const { TextArea } = Input;
@@ -14,6 +14,7 @@ export default function PatientInfoSection({
   setSelectedProvince,
   translateLabel,
   isMobile,
+  isApproved,
 }) {
   const formItemLayout = {
     layout: isMobile ? "vertical" : "horizontal",
@@ -37,7 +38,10 @@ export default function PatientInfoSection({
             rules={[{ required: true, message: "Nhập họ tên bệnh nhân" }]}
             style={{ marginBottom: isMobile ? 40 : 24 }}
           >
-            <Input disabled={!isEdit} placeholder="VD: Nguyễn Văn A" />
+            <Input
+              disabled={!isEdit || isApproved}
+              placeholder="VD: Nguyễn Văn A"
+            />
           </Form.Item>
         </Col>
         <Col xs={24} md={12}>
@@ -48,7 +52,10 @@ export default function PatientInfoSection({
             rules={[{ required: true, message: "Chọn giới tính" }]}
             style={{ marginBottom: isMobile ? 40 : 24 }}
           >
-            <Select disabled={!isEdit} placeholder="Chọn giới tính">
+            <Select
+              disabled={!isEdit || isApproved}
+              placeholder="Chọn giới tính"
+            >
               <Option value="Nam">Nam</Option>
               <Option value="Nữ">Nữ</Option>
               <Option value="Khác">Khác</Option>
@@ -66,7 +73,11 @@ export default function PatientInfoSection({
             rules={[{ required: true, message: "Nhập tuổi bệnh nhân" }]}
             style={{ marginBottom: isMobile ? 40 : 24 }}
           >
-            <Input disabled={!isEdit} type="number" placeholder="VD: 45" />
+            <InputNumber
+              disabled={!isEdit || isApproved}
+              type="number"
+              placeholder="VD: 45"
+            />
           </Form.Item>
         </Col>
         <Col xs={24} md={12}>
@@ -76,7 +87,10 @@ export default function PatientInfoSection({
             name="benh_nhan_quoc_tich"
             style={{ marginBottom: isMobile ? 40 : 24 }}
           >
-            <Input disabled={!isEdit} placeholder="VD: Việt Nam" />
+            <Input
+              disabled={!isEdit || isApproved}
+              placeholder="VD: Việt Nam"
+            />
           </Form.Item>
         </Col>
       </Row>
@@ -89,7 +103,7 @@ export default function PatientInfoSection({
             name="benh_nhan_dien_thoai"
             style={{ marginBottom: isMobile ? 40 : 24 }}
           >
-            <Input disabled={!isEdit} placeholder="SĐT liên hệ" />
+            <Input disabled={!isEdit || isApproved} placeholder="SĐT liên hệ" />
           </Form.Item>
         </Col>
         <Col xs={24} md={12}>
@@ -100,7 +114,7 @@ export default function PatientInfoSection({
             style={{ marginBottom: isMobile ? 40 : 24 }}
           >
             <Input
-              disabled={!isEdit}
+              disabled={!isEdit || isApproved}
               type="email"
               placeholder="Email liên hệ"
             />
@@ -119,7 +133,7 @@ export default function PatientInfoSection({
             style={{ marginBottom: isMobile ? 40 : 24 }}
           >
             <Input
-              disabled={!isEdit}
+              disabled={!isEdit || isApproved}
               onChange={(e) => {
                 form.setFieldValue(
                   "benh_nhan_sid",
@@ -151,10 +165,10 @@ export default function PatientInfoSection({
             label={translateLabel(languageTranslate, "province", false)}
             // rules={[{ required: true, message: "Chọn tỉnh/thành phố" }]}
             style={{ marginBottom: isMobile ? 40 : 24 }}
-            disabled={!isEdit}
+            disabled={!isEdit || isApproved}
           >
             <Select
-              disabled={!isEdit}
+              disabled={!isEdit || isApproved}
               placeholder={translateLabel(languageTranslate, "province", false)}
               onChange={(val) => {
                 form.setFieldsValue({
@@ -187,7 +201,7 @@ export default function PatientInfoSection({
                 });
               }}
               placeholder="Chọn Xã / Phường"
-              disabled={!wards.length || !isEdit}
+              disabled={!wards.length || !isEdit || isApproved}
             >
               {wards.map((ward) => (
                 <Option key={ward.code} value={ward.code}>
@@ -208,7 +222,10 @@ export default function PatientInfoSection({
             name="benh_nhan_dia_chi_so_nha"
             style={{ marginBottom: isMobile ? 10 : 30 }}
           >
-            <Input disabled={!isEdit} placeholder="VD: 123 Lê Lợi" />
+            <Input
+              disabled={!isEdit || isApproved}
+              placeholder="VD: 123 Lê Lợi"
+            />
           </Form.Item>
         </Col>
       </Row>
@@ -224,7 +241,7 @@ export default function PatientInfoSection({
             style={{ marginBottom: isMobile ? 10 : 24 }}
           >
             <TextArea
-              disabled={!isEdit}
+              disabled={!isEdit || isApproved}
               autoSize={{ minRows: 3, maxRows: isMobile ? 3 : 6 }}
               placeholder="Nhập triệu chứng lâm sàng..."
             />

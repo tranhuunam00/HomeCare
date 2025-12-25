@@ -115,6 +115,7 @@ const UltrasoundBungForm = () => {
 
   const [loadingAI, setLoadingAI] = useState(false);
   const [isEdit, setIsEdit] = useState(true);
+  const [isApproved, setIsApproved] = useState(false);
   const [printTemplate, setPrintTemplate] = useState(null);
   const [initialSnap, setInitialSnap] = useState({});
   const [idEdit, setIdEdit] = useState(id);
@@ -201,43 +202,62 @@ const UltrasoundBungForm = () => {
   useEffect(() => {
     const fetchTemplates = async () => {
       try {
-        const [serverData] = await Promise.all([
+        const [diagnoseRes, sonoRes] = await Promise.all([
           API_CALL.get("/patient-diagnose/" + idPatientDiagnose, {}),
+          id ? API_CALL.get("/sono/" + id) : Promise.resolve(null),
         ]);
 
         const patientDiagnose =
-          serverData.data.data?.data || serverData.data.data || [];
-
+          diagnoseRes.data.data?.data || diagnoseRes.data.data || [];
+        const sonoDetail = sonoRes?.data?.data?.data || null;
+        console.log(sonoDetail);
         const formValues = {
-          benh_nhan_ho_ten: patientDiagnose.name,
-          benh_nhan_gioi_tinh: patientDiagnose.gender,
-          benh_nhan_tuoi: getAge(patientDiagnose.dob),
-          benh_nhan_quoc_tich: patientDiagnose.countryCode,
-          benh_nhan_dien_thoai: patientDiagnose.phoneNumber,
-          benh_nhan_email: patientDiagnose.email,
-          benh_nhan_pid: patientDiagnose.PID,
-          benh_nhan_sid: patientDiagnose.SID,
-          benh_nhan_lam_sang: patientDiagnose.Indication,
-          benh_nhan_dia_chi_so_nha: patientDiagnose.address,
-          benh_nhan_dia_chi_xa_phuong: patientDiagnose.ward_code,
-          benh_nhan_dia_chi_tinh_thanh_pho: patientDiagnose.province_code,
+          benh_nhan_ho_ten:
+            sonoDetail?.benh_nhan_ho_ten || patientDiagnose.name,
+          benh_nhan_gioi_tinh:
+            sonoDetail?.benh_nhan_gioi_tinh || patientDiagnose.gender,
+          benh_nhan_tuoi:
+            sonoDetail?.benh_nhan_tuoi || getAge(patientDiagnose.dob),
+          benh_nhan_quoc_tich:
+            sonoDetail?.benh_nhan_quoc_tich || patientDiagnose.countryCode,
+          benh_nhan_dien_thoai:
+            sonoDetail?.benh_nhan_dien_thoai || patientDiagnose.phoneNumber,
+          benh_nhan_email: sonoDetail?.benh_nhan_email || patientDiagnose.email,
+          benh_nhan_pid: sonoDetail?.benh_nhan_pid || patientDiagnose.PID,
+          benh_nhan_sid: sonoDetail?.benh_nhan_sid || patientDiagnose.SID,
+          benh_nhan_lam_sang:
+            sonoDetail?.benh_nhan_lam_sang || patientDiagnose.Indication,
+          benh_nhan_dia_chi_so_nha:
+            sonoDetail?.benh_nhan_dia_chi_so_nha || patientDiagnose.address,
+          benh_nhan_dia_chi_xa_phuong:
+            sonoDetail?.benh_nhan_dia_chi_xa_phuong ||
+            patientDiagnose.ward_code,
+          benh_nhan_dia_chi_tinh_thanh_pho:
+            sonoDetail?.benh_nhan_dia_chi_tinh_thanh_pho ||
+            patientDiagnose.province_code,
         };
 
-        setSelectedProvince(patientDiagnose.province_code);
-        setPatientDiagnose(patientDiagnose);
-        setIdExamPart(patientDiagnose.id_exam_part);
+        setSelectedProvince(formValues.benh_nhan_dia_chi_tinh_thanh_pho);
+        setPatientDiagnose(sonoDetail || patientDiagnose);
+        setIsApproved(
+          sonoDetail?.status === SONO_STATUS.APPROVED ? true : false
+        );
+        setIdExamPart(
+          sonoDetail.id_patient_diagnose || patientDiagnose.id_exam_part
+        );
+
+        // 4. Đưa dữ liệu vào form
         form.setFieldsValue(formValues);
 
-        console.log("patientDiagnose", patientDiagnose);
+        console.log("Dữ liệu hiển thị Form:", formValues);
       } catch (error) {
         console.error(error);
         toast.error("Không thể tải thông tin ca bệnh");
-      } finally {
       }
     };
 
     if (idPatientDiagnose) fetchTemplates();
-  }, [idPatientDiagnose]);
+  }, [idPatientDiagnose, id]);
 
   useEffect(() => {
     const printT = printTemplateGlobal.find(
@@ -545,7 +565,6 @@ const UltrasoundBungForm = () => {
       }
       setLoadingAI(true);
       const values = await form.validateFields();
-
       const payload = {
         ...values,
         status: status,
@@ -669,6 +688,7 @@ const UltrasoundBungForm = () => {
             setSelectedProvince={setSelectedProvince}
             translateLabel={translateLabel}
             isMobile={deviceIsMobile}
+            isApproved={isApproved}
           />
 
           <Row gutter={[24, deviceIsMobile ? 0 : 24]} justify={"space-between"}>
@@ -682,7 +702,7 @@ const UltrasoundBungForm = () => {
               >
                 <Select
                   placeholder="Chọn kỹ thuật"
-                  disabled={!isEdit}
+                  disabled={!isEdit || isApproved}
                   allowClear
                 >
                   <Option key={"D-SONO"} value={"D-SONO"}>
@@ -702,7 +722,7 @@ const UltrasoundBungForm = () => {
               >
                 <Select
                   placeholder="Chọn bộ phận"
-                  disabled={!isEdit}
+                  disabled={!isEdit || isApproved}
                   allowClear
                   value={field1}
                   onChange={(v) => handleField1Change(v)}
@@ -724,7 +744,7 @@ const UltrasoundBungForm = () => {
                 rules={[{ required: true }]}
                 style={{ marginBottom: deviceIsMobile ? 40 : 24 }}
               >
-                <Select disabled={!isEdit} placeholder="VI / EN">
+                <Select disabled={!isEdit || isApproved} placeholder="VI / EN">
                   {LANGUAGE_OPTIONS.map((opt) => (
                     <Option
                       key={opt.value}
@@ -758,7 +778,7 @@ const UltrasoundBungForm = () => {
                 }}
               >
                 <Select
-                  disabled={!isEdit}
+                  disabled={!isEdit || isApproved}
                   showSearch
                   allowClear
                   style={{ width: "100%" }}
@@ -859,7 +879,9 @@ const UltrasoundBungForm = () => {
                             placeholder="Chọn trạng thái (multi)"
                             style={{ width: "100%", marginTop: 4 }}
                             value={parent.statuses}
-                            disabled={!parent.structure}
+                            disabled={
+                              !parent.structure || isApproved || !isEdit
+                            }
                             onChange={(vals) => onStatusChange(vals, pIdx)}
                             options={statusOptions.map((s) => ({
                               label: s,
@@ -933,7 +955,10 @@ const UltrasoundBungForm = () => {
                                       placeholder="Chọn vị trí"
                                       value={child.position}
                                       disabled={
-                                        child.status === "Không thấy bất thường"
+                                        child.status ===
+                                          "Không thấy bất thường" ||
+                                        isApproved ||
+                                        !isEdit
                                       }
                                       options={positionOptions.map((p) => ({
                                         label: p,
@@ -1000,7 +1025,11 @@ const UltrasoundBungForm = () => {
 
               {/* Voice */}
               {!isRecording ? (
-                <Button block onClick={startVoice}>
+                <Button
+                  block
+                  onClick={startVoice}
+                  disabled={isApproved || !isEdit}
+                >
                   🎤 Bắt đầu ghi âm
                 </Button>
               ) : (
@@ -1072,6 +1101,7 @@ const UltrasoundBungForm = () => {
                               danger
                               size="small"
                               onClick={() => removeListItem(globalIndex)}
+                              disabled={!isEdit || isApproved}
                             >
                               X
                             </Button>
