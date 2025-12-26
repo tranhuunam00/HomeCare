@@ -191,7 +191,7 @@ export default function SmartCASignModal({
 
           {signedSuccess && (
             <Button icon={<CheckCircleOutlined />} onClick={handleVerify}>
-              Verify chữ ký
+              Xác nhận đã ký trên app
             </Button>
           )}
         </div>
