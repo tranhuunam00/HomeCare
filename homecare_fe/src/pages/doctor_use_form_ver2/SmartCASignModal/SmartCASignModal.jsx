@@ -69,6 +69,7 @@ export default function SmartCASignModal({
 
       const res = await API_CALL.post("/doctor-sign/smartca-sign", formData, {
         headers: { "Content-Type": "multipart/form-data" },
+        timeout: 120000,
       });
 
       if (res?.data?.success) {
@@ -90,10 +91,14 @@ export default function SmartCASignModal({
     try {
       setLoading(true);
 
-      const res = await API_CALL.post("/doctor-sign/smartca-sign-verify", {
-        id_sono_result,
-        id_doctor_use_form_ver2,
-      });
+      const res = await API_CALL.post(
+        "/doctor-sign/smartca-sign-verify",
+        {
+          id_sono_result,
+          id_doctor_use_form_ver2,
+        },
+        { timeout: 120000 }
+      );
 
       if (res?.data?.success) {
         toast.success("Xác thực chữ ký thành công");
