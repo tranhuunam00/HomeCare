@@ -369,6 +369,12 @@ const PatientFormPage = () => {
                 name="email"
                 label="Email"
                 // rules={[{ required: true, message: "Vui lòng nhập không để trống trường dữ liệu" }]}
+                rules={[
+                  {
+                    type: "email",
+                    message: "Định dạng email không hợp lệ!",
+                  },
+                ]}
               >
                 <Input />
               </Form.Item>

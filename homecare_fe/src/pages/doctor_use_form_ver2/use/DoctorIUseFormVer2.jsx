@@ -192,12 +192,6 @@ export default function DoctorUseDFormVer2({
   const [languageTranslate, setLanguageTransslate] = useState(
     TRANSLATE_LANGUAGE.VI
   );
-
-  console.log("patientDiagnose", patientDiagnose);
-  console.log(
-    "patientDiagnose?.id_doctor_in_processing &&",
-    patientDiagnose?.id_doctor_in_processing != doctor.id
-  );
   const [status, setStatus] = useState(APPROVAL_STATUS.DRAFT);
 
   const [initialSnap, setInitialSnap] = useState({
@@ -373,28 +367,57 @@ export default function DoctorUseDFormVer2({
     const fetchTemplates = async () => {
       try {
         setLoading(true);
-        const [serverData] = await Promise.all([
-          API_CALL.get("/patient-diagnose/" + idPatientDiagnose, {}),
-        ]);
-
+        const apiCalls = [
+          API_CALL.get("/patient-diagnose/" + idPatientDiagnose),
+        ];
+        if (id) {
+          apiCalls.push(
+            API_CALL.get("/doctor-use-form-ver2/detail", {
+              params: { id: id, withFormVer2: true },
+            })
+          );
+        }
+        const [diagnoseRes, dradsRes] = await Promise.all(apiCalls);
         const patientDiagnose =
-          serverData.data.data?.data || serverData.data.data || [];
+          diagnoseRes.data.data?.data || diagnoseRes.data.data || [];
+        const dradsDetail =
+          dradsRes?.data?.data?.data || dradsRes?.data?.data || null;
 
         const formValues = {
-          benh_nhan_ho_ten: patientDiagnose.name,
-          benh_nhan_gioi_tinh: patientDiagnose.gender,
-          benh_nhan_tuoi: getAge(patientDiagnose.dob),
-          benh_nhan_quoc_tich: patientDiagnose.countryCode,
-          benh_nhan_dien_thoai: patientDiagnose.phoneNumber,
-          benh_nhan_email: patientDiagnose.email,
-          benh_nhan_pid: patientDiagnose.PID,
-          benh_nhan_sid: patientDiagnose.SID,
-          benh_nhan_lam_sang: patientDiagnose.Indication,
-          benh_nhan_dia_chi_so_nha: patientDiagnose.address,
-          benh_nhan_dia_chi_xa_phuong: patientDiagnose.ward_code,
-          benh_nhan_dia_chi_tinh_thanh_pho: patientDiagnose.province_code,
-          id_template_service: patientDiagnose.id_template_service,
-          id_exam_part: patientDiagnose.id_exam_part,
+          benh_nhan_ho_ten:
+            dradsDetail?.benh_nhan_ho_ten || patientDiagnose.name,
+          benh_nhan_gioi_tinh:
+            dradsDetail?.benh_nhan_gioi_tinh || patientDiagnose.gender,
+          benh_nhan_tuoi:
+            dradsDetail?.benh_nhan_tuoi || getAge(patientDiagnose.dob),
+          benh_nhan_quoc_tich:
+            dradsDetail?.benh_nhan_quoc_tich || patientDiagnose.countryCode,
+          benh_nhan_dien_thoai:
+            dradsDetail?.benh_nhan_dien_thoai || patientDiagnose.phoneNumber,
+          benh_nhan_email:
+            dradsDetail?.benh_nhan_email || patientDiagnose.email,
+          benh_nhan_pid: dradsDetail?.benh_nhan_pid || patientDiagnose.PID,
+          benh_nhan_sid: dradsDetail?.benh_nhan_sid || patientDiagnose.SID,
+          benh_nhan_lam_sang:
+            dradsDetail?.benh_nhan_lam_sang || patientDiagnose.Indication,
+          benh_nhan_dia_chi_so_nha:
+            dradsDetail?.benh_nhan_dia_chi_so_nha || patientDiagnose.address,
+          benh_nhan_dia_chi_xa_phuong:
+            dradsDetail?.benh_nhan_dia_chi_xa_phuong ||
+            patientDiagnose.ward_code,
+          benh_nhan_dia_chi_tinh_thanh_pho:
+            dradsDetail?.benh_nhan_dia_chi_tinh_thanh_pho ||
+            patientDiagnose.province_code,
+          id_template_service:
+            dradsDetail?.id_template_service ||
+            patientDiagnose.id_template_service,
+          id_exam_part:
+            dradsDetail?.id_exam_part || patientDiagnose.id_exam_part,
+          ket_luan: dradsDetail?.ket_luan || "",
+          khuyen_nghi: dradsDetail?.khuyen_nghi || "",
+          icd10: dradsDetail?.icd10 || "",
+          ket_qua_chan_doan: dradsDetail?.ket_qua_chan_doan || "",
+          ten_mau: dradsDetail?.ten_mau || "",
         };
 
         setSelectedProvince(patientDiagnose.province_code);
@@ -402,8 +425,6 @@ export default function DoctorUseDFormVer2({
         setIdTemplateService(patientDiagnose.id_template_service);
         form.setFieldsValue(formValues);
         setPatientDiagnose(patientDiagnose);
-
-        console.log("patientDiagnose", patientDiagnose);
       } catch (error) {
         console.error(error);
         toast.error("Không thể tải thông tin ca bệnh");
@@ -413,7 +434,7 @@ export default function DoctorUseDFormVer2({
     };
 
     if (idPatientDiagnose) fetchTemplates();
-  }, [idPatientDiagnose]);
+  }, [idPatientDiagnose, id]);
 
   useEffect(() => {
     if (
