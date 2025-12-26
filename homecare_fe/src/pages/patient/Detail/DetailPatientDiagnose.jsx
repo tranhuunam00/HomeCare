@@ -33,6 +33,7 @@ import {
   CopyOutlined,
   ArrowLeftOutlined,
 } from "@ant-design/icons";
+import SignedFilesBox from "../../doctor_use_form_ver2/SmartCASignModal/SignedFilesBox";
 
 const { Title, Text } = Typography;
 
@@ -445,6 +446,8 @@ const PatientDiagnoiseDetailPage = ({ idFromList, onStatusChange }) => {
             setPatientDiagnose={setData}
             onStatusChange={onStatusChange}
           />
+
+          <SignedFilesBox id_patient_diagnose={idEdit} />
 
           {/* <Row gutter={24} style={{ marginTop: 40 }}>
           <h2>Lịch sử</h2>

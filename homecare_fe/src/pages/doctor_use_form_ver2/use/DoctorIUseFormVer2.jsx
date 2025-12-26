@@ -47,6 +47,7 @@ import { APPROVAL_STATUS } from "../../../components/ApprovalStatusTag";
 import { handleTranslateToLanguage, toISODate } from "./util";
 import { hasProOrBusiness } from "../../../constant/permission";
 import SmartCASignModal from "../SmartCASignModal/SmartCASignModal";
+import SignedFilesBox from "../SmartCASignModal/SignedFilesBox";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -1286,6 +1287,7 @@ export default function DoctorUseDFormVer2({
           </Title>
         </Form>
       )}
+
       <Modal
         open={previewOpen}
         onCancel={() => setPreviewOpen(false)}
