@@ -102,6 +102,13 @@ export default function PatientInfoSection({
             label={translateLabel(languageTranslate, "phone", false)}
             name="benh_nhan_dien_thoai"
             style={{ marginBottom: isMobile ? 40 : 24 }}
+            rules={[
+              {
+                pattern: /^(0[3|5|7|8|9])([0-9]{8})$/,
+                message:
+                  "Số điện thoại không đúng định dạng (10 số, bắt đầu bằng 03, 05, 07, 08, 09)!",
+              },
+            ]}
           >
             <Input disabled={!isEdit || isApproved} placeholder="SĐT liên hệ" />
           </Form.Item>
@@ -117,6 +124,12 @@ export default function PatientInfoSection({
               disabled={!isEdit || isApproved}
               type="email"
               placeholder="Email liên hệ"
+              rules={[
+                {
+                  type: "email",
+                  message: "Định dạng email không hợp lệ!",
+                },
+              ]}
             />
           </Form.Item>
         </Col>

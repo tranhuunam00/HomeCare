@@ -192,7 +192,9 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         width: 200,
         sorter: true,
         render: (text, record) => {
-          const nameUpdated = record.sono_results?.[0]?.benh_nhan_ho_ten;
+          const nameUpdated =
+            record.sono_results?.[0]?.benh_nhan_ho_ten ||
+            record.doctor_use_form_ver2s?.[0]?.benh_nhan_ho_ten;
           const displayName = nameUpdated || text;
           return displayName ? displayName.toUpperCase() : "-";
         },
@@ -205,7 +207,9 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         width: 80,
         align: "right", // ✅ CĂN BÊN PHẢI
         render: (val, record) => {
-          const ageUpdated = record.sono_results?.[0]?.benh_nhan_tuoi;
+          const ageUpdated =
+            record.sono_results?.[0]?.benh_nhan_tuoi ||
+            record.doctor_use_form_ver2s?.[0]?.benh_nhan_tuoi;
           if (ageUpdated !== undefined && ageUpdated !== null) {
             return <span>{ageUpdated}</span>;
           }
@@ -218,7 +222,9 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         key: "gender",
         width: 80,
         render: (text, record) => {
-          const genderUpdated = record.sono_results?.[0]?.benh_nhan_gioi_tinh;
+          const genderUpdated =
+            record.sono_results?.[0]?.benh_nhan_gioi_tinh ||
+            record.doctor_use_form_ver2s?.[0]?.benh_nhan_gioi_tinh;
           return genderUpdated || text || "-";
         },
       },
@@ -228,7 +234,9 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         key: "Indication",
         width: 120,
         render: (text, record) => {
-          const clinicalUpdated = record.sono_results?.[0]?.benh_nhan_lam_sang;
+          const clinicalUpdated =
+            record.sono_results?.[0]?.benh_nhan_lam_sang ||
+            record.doctor_use_form_ver2s?.[0]?.benh_nhan_lam_sang;
           const displayValue = clinicalUpdated || text;
 
           const limit = 20;
@@ -920,6 +928,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
             <Typography.Text strong style={{ color: "#cf1322" }}>
               Các ca có cùng CCCD hoặc PID ({sameCCCDData.length})
             </Typography.Text>
+            
             <ConfigProvider
               theme={{
                 components: {

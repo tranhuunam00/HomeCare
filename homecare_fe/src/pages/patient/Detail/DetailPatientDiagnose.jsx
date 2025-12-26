@@ -105,7 +105,9 @@ const PatientDiagnoiseDetailPage = ({ idFromList, onStatusChange }) => {
 
         sorter: true,
         render: (text, record) => {
-          const nameUpdated = record.sono_results?.[0]?.benh_nhan_ho_ten;
+          const nameUpdated =
+            record.sono_results?.[0]?.benh_nhan_ho_ten ||
+            record.doctor_use_form_ver2s?.[0]?.benh_nhan_ho_ten;
           const displayName = nameUpdated || text;
           return displayName ? displayName.toUpperCase() : "-";
         },
@@ -236,24 +238,73 @@ const PatientDiagnoiseDetailPage = ({ idFromList, onStatusChange }) => {
   };
 
   if (!data) return <Spin />;
+  // console.log("data", data);
 
   // Lấy bản ghi siêu âm đầu tiên nếu có
   const sono = data?.sono_results?.[0];
+  const doctorUseFormVer2 = data?.doctor_use_form_ver2s?.[0];
 
   const displayData = {
-    name: (sono?.benh_nhan_ho_ten || data?.name || "")?.toUpperCase(),
-    gender: sono?.benh_nhan_gioi_tinh || data?.gender || "-",
-    age: sono?.benh_nhan_tuoi || calculateAge(data?.dob) || "-",
-    phone: sono?.benh_nhan_dien_thoai || data?.phoneNumber || "-",
+    name: (
+      sono?.benh_nhan_ho_ten ||
+      doctorUseFormVer2?.benh_nhan_ho_ten ||
+      data?.name ||
+      ""
+    )?.toUpperCase(),
+    gender:
+      sono?.benh_nhan_gioi_tinh ||
+      doctorUseFormVer2?.benh_nhan_gioi_tinh ||
+      data?.gender ||
+      "-",
+    age:
+      sono?.benh_nhan_tuoi ||
+      doctorUseFormVer2?.benh_nhan_tuoi ||
+      calculateAge(data?.dob) ||
+      "-",
+    phone:
+      sono?.benh_nhan_dien_thoai ||
+      doctorUseFormVer2?.benh_nhan_dien_thoai ||
+      data?.phoneNumber ||
+      "-",
     address: sono?.benh_nhan_dia_chi_so_nha || data?.address || "-",
-    clinical: sono?.benh_nhan_lam_sang || data?.Indication || "-",
-    id_exam_part: sono?.id_exam_part || data?.id_exam_part,
-    PID: sono?.benh_nhan_pid || data?.PID || "-",
-    SID: sono?.benh_nhan_sid || data?.SID || "-",
-    CCCD: sono?.benh_nhan_cccd || data?.CCCD || "-",
-    email: sono?.benh_nhan_email || data?.email || "-",
-    countryCode: sono?.benh_nhan_quoc_tich || data?.countryCode || "-",
-    id_template_service: sono?.id_template_service || data?.id_template_service,
+    clinical:
+      sono?.benh_nhan_lam_sang ||
+      doctorUseFormVer2?.benh_nhan_lam_sang ||
+      data?.Indication ||
+      "-",
+    id_exam_part:
+      sono?.id_exam_part ||
+      doctorUseFormVer2?.id_exam_part ||
+      data?.id_exam_part,
+    PID:
+      sono?.benh_nhan_pid ||
+      doctorUseFormVer2?.benh_nhan_pid ||
+      data?.PID ||
+      "-",
+    SID:
+      sono?.benh_nhan_sid ||
+      doctorUseFormVer2?.benh_nhan_sid ||
+      data?.SID ||
+      "-",
+    CCCD:
+      sono?.benh_nhan_cccd ||
+      doctorUseFormVer2?.benh_nhan_cccd ||
+      data?.CCCD ||
+      "-",
+    email:
+      sono?.benh_nhan_email ||
+      doctorUseFormVer2?.benh_nhan_email ||
+      data?.email ||
+      "-",
+    countryCode:
+      sono?.benh_nhan_quoc_tich ||
+      doctorUseFormVer2?.benh_nhan_quoc_tich ||
+      data?.countryCode ||
+      "-",
+    id_template_service:
+      sono?.id_template_service ||
+      doctorUseFormVer2?.id_template_service ||
+      data?.id_template_service,
   };
 
   return (

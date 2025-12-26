@@ -213,7 +213,7 @@ const UltrasoundBungForm = () => {
         const patientDiagnose =
           diagnoseRes.data.data?.data || diagnoseRes.data.data || [];
         const sonoDetail = sonoRes?.data?.data?.data || null;
-        console.log(sonoDetail);
+        
         const formValues = {
           benh_nhan_ho_ten:
             sonoDetail?.benh_nhan_ho_ten || patientDiagnose.name,
