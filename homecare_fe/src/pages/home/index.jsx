@@ -196,7 +196,7 @@ const Sidebar = ({ collapsed }) => {
       !hasProOrBusiness(userPackages) &&
       user.id_role != USER_ROLE.ADMIN
     ) {
-      toast.error("Bạn cần gói PRO hoặc BUSINESS để sử dụng tính năng này!");
+      toast.error("Bạn cần gói PRO hoặc HOSPITAL để sử dụng tính năng này!");
       return;
     }
 

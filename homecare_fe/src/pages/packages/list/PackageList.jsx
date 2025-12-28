@@ -57,6 +57,8 @@ const PackageList = () => {
     ? `/payment/${selectedFeeItem.qr}` // ví dụ: public/qr/650k.jpg
     : null;
 
+  const hasQR = !!qrImage;
+
   return (
     <div className={styles.wrapper}>
       <div className={styles.header}>
@@ -125,14 +127,16 @@ const PackageList = () => {
         </div>
 
         {/* Tiến hành thanh toán */}
-        <Button
-          type="default"
-          block
-          style={{ marginTop: 16 }}
-          onClick={() => setShowQR(true)}
-        >
-          Tiến hành thanh toán
-        </Button>
+        {hasQR && (
+          <Button
+            type="default"
+            block
+            style={{ marginTop: 16 }}
+            onClick={() => setShowQR(true)}
+          >
+            Tiến hành thanh toán
+          </Button>
+        )}
 
         {/* QR tự động từ PACKAGE_FEES */}
         {showQR && qrImage && (
@@ -154,7 +158,7 @@ const PackageList = () => {
           block
           style={{ marginTop: 16 }}
           loading={loading}
-          disabled={!showQR} // chỉ bật sau khi bấm “Tiến hành thanh toán”
+          disabled={hasQR && !showQR} // chỉ bật sau khi bấm “Tiến hành thanh toán”
           onClick={handleSubmit}
         >
           Xác nhận thanh toán

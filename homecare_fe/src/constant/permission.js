@@ -71,10 +71,11 @@ export const FEATURE_KEYS_PACKAGE = {
 };
 
 export const PACKAGE_FEATURES = {
-  ECO: {
-    code: "ECO",
-    name: "ECO",
-    description: "Gói cơ bản cho cá nhân và sử dụng hằng tháng",
+  BASIC: {
+    code: "BASIC",
+    name: "BASIC",
+    isFree: true,
+    description: "Mẫu kết quả bình thường và có sẵn",
     permissions: [
       FEATURE_KEYS_PACKAGE.SIEU_AM,
       FEATURE_KEYS_PACKAGE.X_QUANG,
@@ -91,7 +92,8 @@ export const PACKAGE_FEATURES = {
   PRO: {
     code: "PRO",
     name: "PRO",
-    description: "Gói cao cấp thích hợp cho cá nhân dùng song ngữ Anh-Việt",
+    description:
+      "Công cụ hỗ trợ TIRADS, BIRADS... Mẫu kết quả bệnh lý, dịch tiếng Anh",
     permissions: [
       FEATURE_KEYS_PACKAGE.SIEU_AM,
       FEATURE_KEYS_PACKAGE.X_QUANG,
@@ -109,11 +111,11 @@ export const PACKAGE_FEATURES = {
     ],
   },
 
-  BUSINESS: {
-    code: "BUSINESS",
-    name: "BUSINESS",
+  HOSPITAL: {
+    code: "HOSPITAL",
+    name: "HOSPITAL",
     description:
-      "Gói cao cấp cho tổ chức, có AI hỗ trợ chuyên môn và đa ngôn ngữ",
+      "Công cụ hỗ trợ TIRADS, BIRADS... Tích hợp HIS/EMR; Dịch hơn 30 ngôn ngữ",
     permissions: [
       FEATURE_KEYS_PACKAGE.SIEU_AM,
       FEATURE_KEYS_PACKAGE.X_QUANG,
@@ -141,17 +143,17 @@ export const DURATION_OPTIONS = [
   { value: 12, label: "12 tháng" },
 ];
 export const PACKAGE_FEES = {
-  ECO: [
-    { value: 1, label: "250.000", saving: 0, qr: "250k.jpg" },
-    { value: 3, label: "625.000", saving: 125000, qr: "625k.jpg" },
-    { value: 12, label: "2.250.000", saving: 750000, qr: "2250k.jpg" },
+  BASIC: [
+    { value: 1, label: "(miễn phí) 0", saving: "" },
+    { value: 3, label: "(miễn phí) 0", saving: "" },
+    { value: 12, label: "(miễn phí) 0", saving: "" },
   ],
   PRO: [
     { value: 1, label: "450.000", saving: 0, qr: "450k.jpg" },
     { value: 3, label: "1.125.000", saving: 225000, qr: "1125k.jpg" },
     { value: 12, label: "4.050.000", saving: 1350000, qr: "4050k.jpg" },
   ],
-  BUSINESS: [
+  HOSPITAL: [
     { value: 1, label: "650.000", saving: 0, qr: "650k.jpg" },
     { value: 3, label: "1.625.000", saving: 325000, qr: "1625k.jpg" },
     { value: 12, label: "5.850.000", saving: 2220000, qr: "5850k.jpg" },
@@ -173,5 +175,5 @@ export const hasProOrBusiness = (userPackages) =>
   userPackages?.some(
     (pkg) =>
       pkg.status === "active" &&
-      (pkg.package_code === "PRO" || pkg.package_code === "BUSINESS")
+      (pkg.package_code === "PRO" || pkg.package_code === "HOSPITAL")
   );

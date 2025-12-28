@@ -123,7 +123,7 @@ export default function FormActionBar({
       onClick: onGenAi || emptyF,
       disabled:
         approvalStatus == APPROVAL_STATUS.APPROVED ||
-        (!availblePackage.includes("BUSINESS") &&
+        (!availblePackage.includes("HOSPITAL") &&
           user.id_role != USER_ROLE.ADMIN),
     },
     {
@@ -140,7 +140,7 @@ export default function FormActionBar({
       onClick: () => setLangModalOpen(true), // ✅ mở popup chọn ngôn ngữ
       disabled:
         !editId ||
-        (!availblePackage.includes("BUSINESS") &&
+        (!availblePackage.includes("HOSPITAL") &&
           user.id_role != USER_ROLE.ADMIN),
     },
     {
@@ -189,15 +189,15 @@ export default function FormActionBar({
         return "Không thể chỉnh sửa mẫu đã được phê duyệt";
       if (it.key === "print" && approvalStatus !== APPROVAL_STATUS.APPROVED)
         return "Chỉ in được khi mẫu đã được phê duyệt";
-      if (it.key === "translate_multi" && !availblePackage.includes("BUSINESS"))
-        return "Chức năng dịch đa ngôn ngữ chỉ khả dụng cho gói BUSINESS";
+      if (it.key === "translate_multi" && !availblePackage.includes("HOSPITAL"))
+        return "Chức năng dịch đa ngôn ngữ chỉ khả dụng cho gói HOSPITAL";
       if (
         it.key === KEY_ACTION_BUTTON.AI &&
-        !availblePackage.includes("BUSINESS")
+        !availblePackage.includes("HOSPITAL")
       )
-        return "Chức năng AI đề xuất chỉ khả dụng cho gói BUSINESS";
+        return "Chức năng AI đề xuất chỉ khả dụng cho gói HOSPITAL";
       if (it.key === "translate_en" && !hasProOrBusiness(userPackages))
-        return "Chức năng dịch chỉ khả dụng cho gói PRO và BUSINESS";
+        return "Chức năng dịch chỉ khả dụng cho gói PRO và HOSPITAL";
       if (it.disabled) return "Chức năng hiện không khả dụng";
       return null;
     })();

@@ -696,24 +696,14 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
               {Object.entries(PATIENT_DIAGNOSE_STATUS_FILTER).map(
                 ([key, label]) => {
                   const intKey = Number(key);
-                  const isActive = pendingFilters.status?.includes(intKey);
+                  const isChecked = pendingFilters.status?.includes(intKey);
+
                   return (
-                    <Button
+                    <div
                       key={key}
-                      style={{
-                        backgroundColor: PATIENT_DIAGNOSE_COLOR[intKey],
-                        color: "white",
-                        opacity: isActive ? 1 : 0.4,
-                        width: !deviceIsMobile ? "100%" : "calc(50% - 4px)",
-                        minWidth: !deviceIsMobile ? 175 : "unset",
-                        height: "auto",
-                        padding: "8px 4px",
-                        fontSize: 13,
-                        border: "none",
-                      }}
                       onClick={() => {
                         const current = pendingFilters.status || [];
-                        const newStatus = isActive
+                        const newStatus = isChecked
                           ? current.filter((x) => x !== intKey)
                           : [...current, intKey];
 
@@ -722,9 +712,29 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
                           status: newStatus,
                         });
                       }}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                        backgroundColor: PATIENT_DIAGNOSE_COLOR[intKey],
+                        color: "#fff",
+                        opacity: isChecked ? 1 : 0.4,
+                        borderRadius: 6,
+                        padding: "8px 10px",
+                        cursor: "pointer",
+                        width: !deviceIsMobile ? "100%" : "calc(50% - 4px)",
+                        minWidth: !deviceIsMobile ? 175 : "unset",
+                      }}
                     >
-                      {label}
-                    </Button>
+                      <Checkbox
+                        checked={isChecked}
+                        onChange={() => {}}
+                        style={{ pointerEvents: "none" }} // click cả khối
+                      />
+                      <span style={{ fontSize: 13, fontWeight: 500 }}>
+                        {label}
+                      </span>
+                    </div>
                   );
                 }
               )}
@@ -928,7 +938,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
             <Typography.Text strong style={{ color: "#cf1322" }}>
               Các ca có cùng CCCD hoặc PID ({sameCCCDData.length})
             </Typography.Text>
-            
+
             <ConfigProvider
               theme={{
                 components: {
