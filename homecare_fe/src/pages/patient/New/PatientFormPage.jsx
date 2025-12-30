@@ -90,7 +90,7 @@ const PatientFormPage = () => {
             country: data.countryCode,
             province: data.province_code || undefined,
             ward: data.ward_code || undefined,
-            id_clinic: data.id_clinic,
+            id_clinic: data.id_clinic || doctor?.id_clinic || undefined,
             dob: data.dob ? dayjs(data.dob) : null,
             age: data.dob ? dayjs().diff(dayjs(data.dob), "year") : undefined,
             id_template_service: data.id_template_service,
