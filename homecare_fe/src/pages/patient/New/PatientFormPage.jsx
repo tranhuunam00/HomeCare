@@ -140,7 +140,7 @@ const PatientFormPage = () => {
         province_code: values.province + "",
         district_code: values.district + "",
         ward_code: values.ward + "",
-        id_clinic: values.id_clinic,
+        id_clinic: values.id_clinic || doctor?.id_clinic,
         createdBy: user?.id,
         status: PATIENT_DIAGNOSE_STATUS_CODE.NEW, // c
         dob: values.dob,
