@@ -96,7 +96,7 @@ export const PACKAGE_FEATURES = {
     code: "PRO",
     name: "PRO",
     description:
-      "Bác sĩ được đặc quyền tham gia đọc kết quả CĐHA từ xa với doanh thu tối thiểu 5tr/tháng",
+      "Bác sĩ được đặc quyền tham gia đọc kết quả CĐHA từ xa với doanh thu tối thiểu 3tr/tháng",
     permissions: [
       FEATURE_KEYS_PACKAGE.SIEU_AM,
       FEATURE_KEYS_PACKAGE.X_QUANG,
