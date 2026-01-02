@@ -29,10 +29,14 @@ const PackageCard = ({ planKey, plan, onSelect, isLanding }) => {
         <div className={styles.header}>
           <h3>{plan.name}</h3>
           {plan.isFree && (
-            <h4 style={{ color: "green", fontWeight: 400 }}>miễn phí</h4>
+            <h4 style={{ color: "green", fontWeight: 500, fontSize: 15 }}>
+              miễn phí
+            </h4>
           )}
           {!plan.isFree && (
-            <h4 style={{ color: "green", fontWeight: 400 }}>trả phí</h4>
+            <h4 style={{ color: "green", fontWeight: 500, fontSize: 15 }}>
+              trả phí
+            </h4>
           )}
           <p className={styles.desc}>{plan.description}</p>
         </div>

@@ -69,7 +69,7 @@ export const FEATURE_KEYS_PACKAGE = {
     description: "Tích hợp đồng bộ các tiện ích của PACS",
   },
   TELE_RADIOLOGY: {
-    label: "Thu nhập từ TeleRadiology",
+    label: "Doanh thu từ TeleRadiology",
   },
 };
 
