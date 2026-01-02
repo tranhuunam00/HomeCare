@@ -213,7 +213,7 @@ const UltrasoundBungForm = () => {
         const patientDiagnose =
           diagnoseRes.data.data?.data || diagnoseRes.data.data || [];
         const sonoDetail = sonoRes?.data?.data?.data || null;
-        
+
         const formValues = {
           benh_nhan_ho_ten:
             sonoDetail?.benh_nhan_ho_ten || patientDiagnose.name,
@@ -246,7 +246,7 @@ const UltrasoundBungForm = () => {
           sonoDetail?.status === SONO_STATUS.APPROVED ? true : false
         );
         setIdExamPart(
-          sonoDetail.id_patient_diagnose || patientDiagnose.id_exam_part
+          sonoDetail?.id_exam_part || patientDiagnose?.id_exam_part
         );
 
         // 4. Đưa dữ liệu vào form
@@ -898,6 +898,8 @@ const UltrasoundBungForm = () => {
                         <>
                           <Divider style={{ margin: "8px 0" }} />
                           {parent.children.map((child, cIdx) => {
+                            const isNormal =
+                              child.status === "Không thấy bất thường";
                             const needSize =
                               parent.structure &&
                               STRUCT &&
@@ -906,7 +908,7 @@ const UltrasoundBungForm = () => {
                                 child.status
                               );
 
-                            return (
+                            return !isNormal ? (
                               <Row
                                 gutter={[12, 12]}
                                 key={cIdx}
@@ -1017,7 +1019,7 @@ const UltrasoundBungForm = () => {
                                   </div>
                                 </Col>
                               </Row>
-                            );
+                            ) : null;
                           })}
                         </>
                       )}
@@ -1062,7 +1064,7 @@ const UltrasoundBungForm = () => {
 
               <Card title="KẾT LUẬN, CHẨN ĐOÁN" style={{ marginTop: 24 }}>
                 {list.length === 0 ? (
-                  <i>Chưa có mô tả nào.</i>
+                  <i>Không thấy hình ảnh bất thường</i>
                 ) : (
                   Object.entries(
                     list.reduce((acc, item) => {

@@ -68,6 +68,9 @@ export const FEATURE_KEYS_PACKAGE = {
     label: "Tích hợp PACS",
     description: "Tích hợp đồng bộ các tiện ích của PACS",
   },
+  TELE_RADIOLOGY: {
+    label: "Thu nhập từ TeleRadiology",
+  },
 };
 
 export const PACKAGE_FEATURES = {
@@ -75,7 +78,7 @@ export const PACKAGE_FEATURES = {
     code: "BASIC",
     name: "BASIC",
     isFree: true,
-    description: "Mẫu kết quả bình thường và có sẵn",
+    description: "Dành cho Bác sĩ có nhu cầu tối ưu hóa công việc chuyên môn",
     permissions: [
       FEATURE_KEYS_PACKAGE.SIEU_AM,
       FEATURE_KEYS_PACKAGE.X_QUANG,
@@ -93,7 +96,7 @@ export const PACKAGE_FEATURES = {
     code: "PRO",
     name: "PRO",
     description:
-      "Công cụ hỗ trợ TIRADS, BIRADS... Mẫu kết quả bệnh lý, dịch tiếng Anh",
+      "Bác sĩ được đặc quyền tham gia đọc kết quả CĐHA từ xa với doanh thu tối thiểu 5tr/tháng",
     permissions: [
       FEATURE_KEYS_PACKAGE.SIEU_AM,
       FEATURE_KEYS_PACKAGE.X_QUANG,
@@ -108,6 +111,7 @@ export const PACKAGE_FEATURES = {
       FEATURE_KEYS_PACKAGE.INTERGATE_FORM_ENGLISH,
       FEATURE_KEYS_PACKAGE.INTERGATE_SERVICE,
       FEATURE_KEYS_PACKAGE.ENGLISH_LANG,
+      FEATURE_KEYS_PACKAGE.TELE_RADIOLOGY,
     ],
   },
 
@@ -115,7 +119,7 @@ export const PACKAGE_FEATURES = {
     code: "HOSPITAL",
     name: "HOSPITAL",
     description:
-      "Công cụ hỗ trợ TIRADS, BIRADS... Tích hợp HIS/EMR; Dịch hơn 30 ngôn ngữ",
+      "Bệnh viện, Phòng khám có nhu cầu ưu hóa hiệu suất và yêu cầu chuyên môn",
     permissions: [
       FEATURE_KEYS_PACKAGE.SIEU_AM,
       FEATURE_KEYS_PACKAGE.X_QUANG,

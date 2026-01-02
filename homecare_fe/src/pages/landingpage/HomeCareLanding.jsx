@@ -16,6 +16,7 @@ import API_CALL from "../../services/axiosClient";
 import DoctorAdvisorsSlider from "./DoctorAdvisorsSlider";
 import { Drawer } from "antd";
 import { MenuOutlined } from "@ant-design/icons";
+import PackageList from "../packages/list/PackageList";
 
 const textVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -343,6 +344,8 @@ const HomeCareLanding = () => {
           </div>
         </div>
       </section>
+
+      <PackageList />
 
       <div
         style={{

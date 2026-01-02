@@ -12,7 +12,7 @@ import {
 
 const { Option } = Select;
 
-const PackageList = () => {
+const PackageList = ({ isLanding = false }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [duration, setDuration] = useState(1);
@@ -65,10 +65,15 @@ const PackageList = () => {
         <h2>Chọn gói dịch vụ DRADS phù hợp với bạn</h2>
       </div>
 
-      <Row gutter={[24, 24]} justify="center">
+      <Row gutter={[24, 24]} justify="center" className={styles.wrapper_cards}>
         {Object.entries(PACKAGE_FEATURES).map(([key, plan]) => (
           <Col xs={24} sm={12} md={8} key={key}>
-            <PackageCard planKey={key} plan={plan} onSelect={handleSelect} />
+            <PackageCard
+              planKey={key}
+              plan={plan}
+              onSelect={handleSelect}
+              isLanding={isLanding}
+            />
           </Col>
         ))}
       </Row>
