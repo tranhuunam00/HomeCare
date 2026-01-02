@@ -477,7 +477,7 @@ const OnboardingWizard = ({ open, onClose, doctorId, is_use_onboard }) => {
       content: (
         <>
           <div style={{ textAlign: "center", marginBottom: 16 }}>
-            <h3>Chọn gói dịch vụ DRADS phù hợp với bạn</h3>
+            <h3>Chọn gói sử dụng phần mềm D-RADS phù hợp</h3>
           </div>
           <Divider />
 

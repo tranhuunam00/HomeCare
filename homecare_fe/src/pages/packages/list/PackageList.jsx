@@ -62,7 +62,7 @@ const PackageList = ({ isLanding = false }) => {
   return (
     <div className={styles.wrapper}>
       <div className={styles.header}>
-        <h2>Chọn gói dịch vụ DRADS phù hợp với bạn</h2>
+        <h2>Chọn gói sử dụng phần mềm D-RADS phù hợp</h2>
       </div>
 
       <Row gutter={[24, 24]} justify="center" className={styles.wrapper_cards}>
