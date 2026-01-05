@@ -374,12 +374,21 @@ const HomeCareLanding = () => {
         <div className={styles["homecare__footer-content"]}>
           <div className={styles["homecare__footer-col"]}>
             <h3>Thông tin bản quyền tác giả:</h3>
-            <p>Tác giả và chủ sở hữu: ĐÀO DANH VĨNH</p>
-            <p>Quốc tịch: Việt Nam</p>
-            <p>CCCD: 033080002151</p>
+            <p>Số chứng nhận bản quyền: 10506/2025/QTG</p>
             <p>
-              Chứng nhận số 10506/2025/QTG, cấp bởi Cục bản quyền tác giả, Bộ
-              VHTT và Du lịch
+              Đơn vị cấp chứng nhận: cục Bản quyền tác giả, Bộ Văn hóa thể thao
+              và du lịch
+            </p>
+            <p>Phạm vi chứng nhận: Việt Nam</p>
+            <p style={{ color: "white", marginTop: 10 }}>
+              <a
+                href="/privacy-policy"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: "white" }}
+              >
+                Chính sách bảo mật | Private policy
+              </a>
             </p>
           </div>
 
@@ -396,22 +405,11 @@ const HomeCareLanding = () => {
             <p>
               <FaEnvelope /> daogroupltd@gmail.com
             </p>
-
-            <p style={{ color: "white", marginTop: 10 }}>
-              <a
-                href="/privacy-policy"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: "white" }}
-              >
-                Chính sách bảo mật | Private policy
-              </a>
-            </p>
           </div>
         </div>
 
         <div className={styles["homecare__copyright"]}>
-          &nbsp;|&nbsp; Bản quyền 2025 @ ĐÀO DANH VĨNH &nbsp;|&nbsp;
+          &nbsp;|&nbsp; Bản quyền 2025 &nbsp;|&nbsp;
         </div>
       </footer>
 
