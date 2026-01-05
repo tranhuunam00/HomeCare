@@ -219,6 +219,10 @@ function App() {
           <Route path="form-drad" element={<DFormVer2 />} />
           <Route path="form-drad-list" element={<FormVer2List />} />
           <Route path="form-ver2-names" element={<FormVer2NameList />} />
+          <Route
+            path="form-ver3-names"
+            element={<FormVer2NameList version="v.3" />}
+          />
 
           <Route path="form-choose-form/:id" element={<DoctorChooseForm />} />
 

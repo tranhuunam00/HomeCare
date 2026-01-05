@@ -69,7 +69,7 @@ const Sidebar = ({ collapsed }) => {
         user?.id_role === USER_ROLE.ADMIN && {
           key: "form-drad-list",
           icon: <Avatar src={"/icons/formver2.png"} size={40} />,
-          label: "Mẫu kết quả",
+          label: "Mẫu kết quả v.2",
           children: [
             user?.id_role === USER_ROLE.ADMIN && {
               key: "/home/form-drad",
@@ -88,6 +88,17 @@ const Sidebar = ({ collapsed }) => {
           ],
         },
 
+        user?.id_role === USER_ROLE.ADMIN && {
+          key: "form-drad-list v.3",
+          icon: <Avatar src={"/icons/formver2.png"} size={40} />,
+          label: "Mẫu kết quả v.3",
+          children: [
+            user?.id_role === USER_ROLE.ADMIN && {
+              key: "/home/form-ver3-names",
+              label: "Danh sách tên mẫu",
+            },
+          ],
+        },
         {
           key: "/home/templates-print",
           icon: <Avatar src="/icons/printTemplate.png" size={40} />,

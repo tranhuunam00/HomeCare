@@ -30,7 +30,12 @@ import { useGlobalAuth } from "../../../contexts/AuthContext";
 
 const { Option } = Select;
 
-const FormVer2NameList = () => {
+const VERSION_API = {
+  "v.2": "/form-ver2-names",
+  "v.3": "/formVer3_name",
+};
+
+const FormVer2NameList = ({ version = "v.2" }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -101,7 +106,7 @@ const FormVer2NameList = () => {
   const fetchList = async () => {
     setLoading(true);
     try {
-      const res = await API_CALL.get("/form-ver2-names", { params });
+      const res = await API_CALL.get(VERSION_API[version], { params });
       const data = res?.data?.data;
       setItems(data?.items || []);
       setTotal(data?.total || 0);
@@ -155,10 +160,10 @@ const FormVer2NameList = () => {
   const handleSubmit = async (values) => {
     try {
       if (editingId) {
-        await API_CALL.patch(`/form-ver2-names/${editingId}`, values);
+        await API_CALL.patch(`${VERSION_API[version]}/${editingId}`, values);
         toast.success("Cập nhật thành công");
       } else {
-        await API_CALL.post("/form-ver2-names", values);
+        await API_CALL.post(VERSION_API[version], values);
         toast.success("Thêm mới thành công");
       }
       setOpen(false);
@@ -172,7 +177,7 @@ const FormVer2NameList = () => {
 
   const handleDelete = async (id) => {
     try {
-      await API_CALL.del(`/form-ver2-names/${id}`);
+      await API_CALL.del(`${VERSION_API[version]}/${id}`);
       toast.success("Đã xoá");
       if ((items?.length || 0) <= 1 && page > 1) setPage(page - 1);
       else fetchList();
@@ -210,7 +215,7 @@ const FormVer2NameList = () => {
       formData.append("file", file);
 
       const res = await API_CALL.post(
-        "/form-ver2-names/import-formver2-name",
+        `${VERSION_API[version]}/import-formver2-name`,
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
@@ -370,7 +375,7 @@ const FormVer2NameList = () => {
   return (
     <div className={styles.wrapper}>
       <div className={styles.header}>
-        <h2 className={styles.title}>Danh sách tên mẫu form</h2>
+        <h2 className={styles.title}>Danh sách tên mẫu {version}</h2>
         <div className={styles.headerActions}>
           <Button icon={<ReloadOutlined />} onClick={fetchList}>
             Tải lại
