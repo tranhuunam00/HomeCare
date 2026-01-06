@@ -23,3 +23,25 @@ export const DEFAULT_IMAGING_ROWS = [
   { id: 6, name: "Xương cột sống", status: "normal", description: "" },
   { id: 7, name: "Phần mềm thành ngực", status: "normal", description: "" },
 ];
+
+export const defaultVisibleKeys = [
+  "stt",
+  "id",
+  "code",
+  "ten_mau",
+  "id_exam_part",
+  "id_template_service",
+  "language",
+  "ngay_thuc_hien",
+  "doctor_name",
+  "actions",
+  "ket_luan",
+  "icd10",
+];
+
+export const STATUS_FORMVER3_MAP = {
+  1: { text: "Nháp", color: "default" },
+  2: { text: "Đã duyệt", color: "blue" },
+  3: { text: "Đã ký", color: "green" },
+  4: { text: "Hủy", color: "red" },
+};

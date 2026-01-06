@@ -72,6 +72,7 @@ import PartnerList from "./pages/intergrate/partners/partnersList";
 import UltrasoundBungForm from "./pages/sono/details/bung/sono.bung";
 import SonoList from "./pages/sono/list/SonoList";
 import DFormVer3 from "./pages/formver3/FormVer3";
+import FormVer3List from "./pages/formver3/list/FormVer3List";
 
 function App() {
   useAuthInitializer();
@@ -216,11 +217,14 @@ function App() {
           />
 
           <Route path="form-drad/detail/:id" element={<DFormVer2 />} />
+          <Route path="form-drad-v3/detail/:id" element={<DFormVer3 />} />
 
           <Route path="form-drad" element={<DFormVer2 />} />
           <Route path="form-drad-v3" element={<DFormVer3 />} />
 
           <Route path="form-drad-list" element={<FormVer2List />} />
+          <Route path="form-drad-list-v3" element={<FormVer3List />} />
+
           <Route path="form-ver2-names" element={<FormVer2NameList />} />
           <Route
             path="form-ver3-names"

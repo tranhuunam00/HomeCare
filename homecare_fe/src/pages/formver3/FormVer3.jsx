@@ -20,6 +20,7 @@ import API_CALL from "../../services/axiosClient"; // axios instance của bạn
 import FormActionBar, {
   KEY_ACTION_BUTTON,
 } from "../formver2/component/FormActionBar";
+import dayjs from "dayjs";
 
 import { toast } from "react-toastify";
 import CustomSunEditor from "../../components/Suneditor/CustomSunEditor";
@@ -72,6 +73,75 @@ export default function DFormVer3({ id_formVer3 }) {
   const [imagingRows, setImagingRows] = useState(DEFAULT_IMAGING_ROWS);
 
   useEffect(() => {
+    if (!editId) return;
+
+    const fetchDetail = async () => {
+      try {
+        setLoading(true);
+
+        const res = await API_CALL.get(`/formVer3/${editId}`);
+        const data = res?.data?.data.data;
+        if (!data) return;
+
+        /* ===== Map API → Form ===== */
+        form.setFieldsValue({
+          id_template_service: data.id_template_service,
+          id_exam_part: data.id_exam_part,
+          id_formver3_name: data.id_formver3_name,
+
+          language: data.language || "vi",
+          createdAt: dayjs(data.createdAt).format("YYYY-MM-DD"),
+          doctor_name: data.id_doctor_doctor?.full_name,
+
+          advancedSample: data.advanced_sample ? "yes" : "no",
+          contrastInjection: data.contrastInjection,
+          imageQuality: data.imageQuatity,
+          additionalAction: data.addtionalImpletement,
+
+          quy_trinh_url: data.implementMethod,
+
+          icd10: data.icd10_classification,
+          phan_do_loai: data.classify,
+          chan_doan_phan_biet: data.DifferenceDiagnostic,
+          khuyen_nghi: data.recommendation,
+        });
+
+        /* ===== set state phụ thuộc ===== */
+        setSelectedIds({
+          id_template_service: data.id_template_service,
+          id_exam_part: data.id_exam_part,
+        });
+
+        /* ===== imaging rows ===== */
+        try {
+          const rows = JSON.parse(data.imageDescription || "[]");
+
+          setImagingRows(
+            Array.isArray(rows) && rows.length ? rows : DEFAULT_IMAGING_ROWS
+          );
+        } catch {
+          setImagingRows(DEFAULT_IMAGING_ROWS);
+        }
+
+        /* ===== snapshot ===== */
+        setInitialSnap({
+          formValues: form.getFieldsValue(),
+          apiData: data,
+        });
+
+        setIsEdit(false);
+      } catch (err) {
+        console.error(err);
+        toast.error("Không tải được dữ liệu FormVer3");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDetail();
+  }, [editId, templateServices, examParts]);
+
+  useEffect(() => {
     form.setFieldsValue({
       imagingStructures: imagingRows,
     });
@@ -98,7 +168,63 @@ export default function DFormVer3({ id_formVer3 }) {
     );
   }, [selectedIds]);
 
-  const onFinish = async (values) => {};
+  const onFinish = async (values) => {
+    try {
+      setLoading(true);
+
+      const payload = {
+        id_template_service: values.id_template_service,
+        id_exam_part: values.id_exam_part,
+        id_formver3_name: values.id_formver3_name,
+
+        implementMethod: values.quy_trinh_url,
+        contrastInjection: values.contrastInjection,
+        imageQuatity: values.imageQuality,
+        addtionalImpletement: values.additionalAction,
+
+        advanced_sample: values.advancedSample === "yes",
+        icd10_classification: values.icd10 || null,
+
+        imageDescription: JSON.stringify(imagingRows),
+
+        unUsualDescription: abnormalFindings.join("; "),
+
+        DifferenceDiagnostic: values.chan_doan_phan_biet || "",
+        classify: values.phan_do_loai || "",
+        recommendation: values.khuyen_nghi || "",
+      };
+
+      if (pendingAction.current === KEY_ACTION_BUTTON.save) {
+        if (!editId) {
+          const res = await API_CALL.post("/formVer3", payload);
+          toast.success("Tạo mới FormVer3 thành công");
+          const newId = res?.data?.id;
+          if (newId) {
+            navigate(`/form-ver3/${newId}`);
+          }
+          return;
+        }
+
+        if (editId && isEdit) {
+          await API_CALL.patch(`/formVer3/${editId}`, payload);
+          toast.success("Cập nhật FormVer3 thành công");
+          setIsEdit(false);
+          return;
+        }
+
+        toast.info("Vui lòng ấn EDIT trước khi lưu");
+        return;
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(
+        err?.response?.data?.message || "Có lỗi xảy ra, vui lòng thử lại"
+      );
+    } finally {
+      setLoading(false);
+      pendingAction.current = null;
+    }
+  };
 
   const onFinishFailed = (err) => {
     console.log("[onFinishFailed] errors:", err?.errorFields);
@@ -120,7 +246,7 @@ export default function DFormVer3({ id_formVer3 }) {
           params: {
             id_template_service: selectedIds.id_template_service,
             id_exam_part: selectedIds.id_exam_part,
-            isUsed: false,
+            isUsed: !editId ? false : undefined,
             limit: 50,
           },
         });
@@ -133,6 +259,8 @@ export default function DFormVer3({ id_formVer3 }) {
           });
         }
         setFilteredFormVer3Names(list);
+
+        console.log("list", list);
       } catch (err) {
         console.error(err);
         toast.error("Không tải được danh sách tên mẫu");
@@ -141,7 +269,6 @@ export default function DFormVer3({ id_formVer3 }) {
         setLoading(false);
       }
     };
-
     fetchFormVer3Names();
   }, [selectedIds]);
 
@@ -684,7 +811,7 @@ export default function DFormVer3({ id_formVer3 }) {
               onPreview={() => setPreviewOpen(!previewOpen)}
               isEdit={isEdit}
               onEdit={() => {
-                if (isEdit == true) {
+                if (isEdit) {
                   setIsEdit(false);
                 } else {
                   setIsEdit(

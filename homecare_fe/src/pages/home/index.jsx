@@ -101,6 +101,10 @@ const Sidebar = ({ collapsed }) => {
               key: "/home/form-drad-v3",
               label: "Tạo mẫu mới",
             },
+            user?.id_role === USER_ROLE.ADMIN && {
+              key: "/home/form-drad-list-v3",
+              label: "Danh sách mẫu",
+            },
           ],
         },
         {
