@@ -30,6 +30,12 @@ import {
   translateLabel,
   USER_ROLE,
 } from "../../constant/app";
+import {
+  ADDITIONAL_ACTION_OPTIONS,
+  CONTRAST_INJECTION_OPTIONS,
+  DEFAULT_IMAGING_ROWS,
+  IMAGE_QUALITY_OPTIONS,
+} from "./formver3.constant";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -49,6 +55,11 @@ export default function DFormVer3({ id_formVer3 }) {
   const [loading, setLoading] = useState();
   const [isEdit, setIsEdit] = useState(!editId);
 
+  const [selectedIds, setSelectedIds] = useState({
+    id_template_service: null,
+    id_exam_part: null,
+  });
+
   const { examParts, templateServices, user, doctor, formVer3Names } =
     useGlobalAuth();
 
@@ -58,15 +69,7 @@ export default function DFormVer3({ id_formVer3 }) {
     apiData: null,
   });
 
-  const [imagingRows, setImagingRows] = useState([
-    { id: 1, name: "Phổi", status: "normal", description: "" },
-    { id: 2, name: "Màng phổi", status: "normal", description: "" },
-    { id: 3, name: "Trung thất", status: "normal", description: "" },
-    { id: 4, name: "Xương sườn", status: "normal", description: "" },
-    { id: 5, name: "Xương đòn", status: "normal", description: "" },
-    { id: 6, name: "Xương cột sống", status: "normal", description: "" },
-    { id: 7, name: "Phần mềm thành ngực", status: "normal", description: "" },
-  ]);
+  const [imagingRows, setImagingRows] = useState(DEFAULT_IMAGING_ROWS);
 
   useEffect(() => {
     form.setFieldsValue({
@@ -75,9 +78,6 @@ export default function DFormVer3({ id_formVer3 }) {
   }, [imagingRows]);
 
   const [filteredFormVer3Names, setFilteredFormVer3Names] = useState([]);
-
-  const selectedTemplateServiceId = Form.useWatch("id_template_service", form);
-  const selectedExamPartId = Form.useWatch("id_exam_part", form);
 
   // Lọc local từ formVer3Names đã có sẵn trong context
 
@@ -89,16 +89,14 @@ export default function DFormVer3({ id_formVer3 }) {
     TRANSLATE_LANGUAGE.VI
   );
 
-  const currentFormVer3Name = useMemo(() => {
-    return null;
-  }, []);
-
   const filteredExamParts = useMemo(() => {
-    if (!selectedTemplateServiceId) return [];
+    if (!selectedIds.id_template_service) return [];
     return (examParts || []).filter(
-      (p) => Number(p.id_template_service) === Number(selectedTemplateServiceId)
+      (p) =>
+        Number(p.id_template_service) ===
+        Number(selectedIds.id_template_service)
     );
-  }, [examParts, selectedTemplateServiceId]);
+  }, [selectedIds]);
 
   const onFinish = async (values) => {};
 
@@ -107,9 +105,69 @@ export default function DFormVer3({ id_formVer3 }) {
     toast.error("Vui lòng kiểm tra các trường còn thiếu/không hợp lệ.");
   };
 
+  useEffect(() => {
+    // Chưa đủ điều kiện → clear
+    if (!selectedIds.id_template_service || !selectedIds.id_exam_part) {
+      setFilteredFormVer3Names([]);
+      return;
+    }
+
+    const fetchFormVer3Names = async () => {
+      try {
+        setLoading(true);
+
+        const res = await API_CALL.get("/formVer3_name", {
+          params: {
+            id_template_service: selectedIds.id_template_service,
+            id_exam_part: selectedIds.id_exam_part,
+            isUsed: false,
+            limit: 50,
+          },
+        });
+
+        const list = res?.data?.data?.items || [];
+        // Optional: auto select nếu chỉ có 1 mẫu
+        if (list.length === 1) {
+          form.setFieldsValue({
+            id_formver3_name: list[0].id,
+          });
+        }
+        setFilteredFormVer3Names(list);
+      } catch (err) {
+        console.error(err);
+        toast.error("Không tải được danh sách tên mẫu");
+        setFilteredFormVer3Names([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFormVer3Names();
+  }, [selectedIds]);
+
   const restoreFromSnapshot = () => {
+    const ok = window.confirm("Bạn có chắc muốn reset toàn bộ dữ liệu không?");
+    if (!ok) return;
     form.resetFields();
+    setImagingRows(DEFAULT_IMAGING_ROWS);
   };
+
+  const currentFormVer3Name = useMemo(() => {
+    const selectedId = form.getFieldValue("id_formver3_name");
+    if (!selectedId) return null;
+
+    return filteredFormVer3Names.find((item) => item.id === selectedId);
+  }, [filteredFormVer3Names, form]);
+  const abnormalFindings = useMemo(() => {
+    return imagingRows
+      .filter(
+        (r) =>
+          r.status === "abnormal" &&
+          r.description &&
+          r.description.trim() !== ""
+      )
+      .map((r) => r.description.trim());
+  }, [imagingRows]);
 
   return (
     <div style={{ maxWidth: 980, margin: "0 auto", padding: 0 }}>
@@ -137,10 +195,10 @@ export default function DFormVer3({ id_formVer3 }) {
             language: "vi",
             createdAt: ngayThucHienISO,
             doctor_name: doctor?.full_name,
-            ImageLeftDesc: "Cấu trúc giải phẫu",
-            ImageRightDesc: "Quy trình kỹ thuật",
-            ImageRightDescLink: "https://home-care.vn/",
-            ImageLeftDescLink: "https://home-care.vn/",
+            advancedSample: "no",
+            additionalAction: ADDITIONAL_ACTION_OPTIONS[0].value,
+            contrastInjection: CONTRAST_INJECTION_OPTIONS[0].value,
+            imageQuality: IMAGE_QUALITY_OPTIONS[0].value,
           }}
         >
           {/* Hàng 1 */}
@@ -155,13 +213,14 @@ export default function DFormVer3({ id_formVer3 }) {
                   placeholder="Chọn kỹ thuật"
                   disabled={!isEdit}
                   allowClear
-                  onChange={() => {
+                  onChange={(val) => {
                     // Clear các field phụ thuộc khi đổi phân hệ
                     form.setFieldsValue({
                       id_exam_part: undefined,
                       id_formver3_name: undefined,
                     });
                     setFilteredFormVer3Names([]);
+                    setSelectedIds((s) => ({ ...s, id_template_service: val }));
                   }}
                 >
                   {templateServices.map((s) => (
@@ -180,13 +239,14 @@ export default function DFormVer3({ id_formVer3 }) {
               >
                 <Select
                   placeholder="Chọn bộ phận thăm khám"
-                  disabled={!isEdit || !selectedTemplateServiceId}
+                  disabled={!isEdit || !selectedIds.id_template_service}
                   allowClear
-                  onChange={() => {
+                  onChange={(val) => {
                     form.setFieldsValue({ id_formver3_name: undefined });
+                    setSelectedIds((s) => ({ ...s, id_exam_part: val }));
                   }}
                   notFoundContent={
-                    selectedTemplateServiceId
+                    selectedIds.id_template_service
                       ? "Không có bộ phận cho phân hệ này"
                       : "Chọn Phân hệ trước"
                   }
@@ -210,17 +270,20 @@ export default function DFormVer3({ id_formVer3 }) {
               >
                 <Select
                   disabled={
-                    !isEdit || !selectedTemplateServiceId || !selectedExamPartId
+                    !isEdit ||
+                    !selectedIds.id_template_service ||
+                    !selectedIds.id_exam_part
                   }
                   placeholder={
-                    !selectedTemplateServiceId || !selectedExamPartId
+                    !selectedIds.id_template_service ||
+                    !selectedIds.id_exam_part
                       ? "Chọn Phân hệ & Bộ phận trước"
                       : "Chọn tên mẫu"
                   }
                   showSearch
                   optionFilterProp="children"
                   notFoundContent={
-                    selectedTemplateServiceId && selectedExamPartId
+                    selectedIds.id_template_service && selectedIds.id_exam_part
                       ? "Không có tên mẫu phù hợp"
                       : "Chưa đủ điều kiện để chọn"
                   }
@@ -260,6 +323,7 @@ export default function DFormVer3({ id_formVer3 }) {
                   value={currentFormVer3Name?.code || ""}
                   readOnly
                   disabled
+                  placeholder="Tự động theo mẫu đã chọn"
                 />
               </Form.Item>
             </Col>
@@ -287,6 +351,16 @@ export default function DFormVer3({ id_formVer3 }) {
           {/* Đánh giá kỹ thuật chụp (checkbox đúng UI) */}
           {/* Đánh giá kỹ thuật chụp */}
           <Row>
+            <Form.Item
+              label="MẪU NÂNG CAO"
+              name="advancedSample"
+              rules={[{ required: true, message: "Chọn thông tin tiêm thuốc" }]}
+            >
+              <Radio.Group disabled={!isEdit}>
+                <Radio value="no">Không</Radio>
+                <Radio value="yes">Có</Radio>
+              </Radio.Group>
+            </Form.Item>
             <Col xs={24}>
               {/* Tiêm thuốc đối quang */}
               <Form.Item
@@ -297,8 +371,11 @@ export default function DFormVer3({ id_formVer3 }) {
                 ]}
               >
                 <Radio.Group disabled={!isEdit}>
-                  <Radio value="no">Không</Radio>
-                  <Radio value="yes">Có</Radio>
+                  {CONTRAST_INJECTION_OPTIONS.map((opt) => (
+                    <Radio key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </Radio>
+                  ))}
                 </Radio.Group>
               </Form.Item>
 
@@ -311,9 +388,11 @@ export default function DFormVer3({ id_formVer3 }) {
                 ]}
               >
                 <Radio.Group disabled={!isEdit}>
-                  <Radio value="good">Đạt yêu cầu</Radio>
-                  <Radio value="limited">Đạt yêu cầu, có hạn chế</Radio>
-                  <Radio value="bad">Không đạt</Radio>
+                  {IMAGE_QUALITY_OPTIONS.map((opt) => (
+                    <Radio key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </Radio>
+                  ))}
                 </Radio.Group>
               </Form.Item>
 
@@ -324,9 +403,11 @@ export default function DFormVer3({ id_formVer3 }) {
                 rules={[{ required: true, message: "Chọn thực hiện bổ sung" }]}
               >
                 <Radio.Group disabled={!isEdit}>
-                  <Radio value="no">Không</Radio>
-                  <Radio value="extra">Chụp thêm</Radio>
-                  <Radio value="redo">Chụp lại</Radio>
+                  {ADDITIONAL_ACTION_OPTIONS.map((opt) => (
+                    <Radio key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </Radio>
+                  ))}
                 </Radio.Group>
               </Form.Item>
             </Col>
@@ -361,6 +442,7 @@ export default function DFormVer3({ id_formVer3 }) {
                 <th>Cấu trúc</th>
                 <th>Bình thường</th>
                 <th>Bất thường</th>
+                <th>Xóa</th>
               </tr>
             </thead>
             <tbody>
@@ -399,6 +481,25 @@ export default function DFormVer3({ id_formVer3 }) {
                         setImagingRows(next);
                       }}
                     />
+                  </td>
+                  <td style={{ textAlign: "center" }}>
+                    <Button
+                      danger
+                      size="small"
+                      disabled={imagingRows.length === 1}
+                      onClick={() => {
+                        const ok = window.confirm(
+                          "Bạn có chắc muốn xóa hàng này không?"
+                        );
+                        if (!ok) return;
+
+                        setImagingRows((prev) =>
+                          prev.filter((r) => r.id !== row.id)
+                        );
+                      }}
+                    >
+                      Xóa
+                    </Button>
                   </td>
                 </tr>
               ))}
@@ -465,7 +566,7 @@ export default function DFormVer3({ id_formVer3 }) {
               false
             ).toUpperCase()}
           </Title>
-          <Form.Item
+          {/* <Form.Item
             name="ket_qua_chan_doan"
             rules={[{ required: true, message: "Nhập kết luận" }]}
           >
@@ -474,7 +575,25 @@ export default function DFormVer3({ id_formVer3 }) {
               style={{ height: 200 }}
               placeholder="VD: U máu gan"
             />
-          </Form.Item>
+          </Form.Item> */}
+
+          <div style={{ fontWeight: 650, marginBottom: 8, fontSize: 15 }}>
+            Chẩn đoán hình ảnh
+          </div>
+
+          {abnormalFindings.length > 0 ? (
+            <ul style={{ paddingLeft: 24 }}>
+              {abnormalFindings.map((item, idx) => (
+                <li key={idx} style={{ marginBottom: 6 }}>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div style={{ fontStyle: "italic" }}>
+              Chưa ghi nhận bất thường hình ảnh.
+            </div>
+          )}
 
           <Form.Item
             label={

@@ -8,12 +8,9 @@
 .imagingTable {
   width: 100%;
   border-collapse: collapse;
-  background-color: #2b2b2b;
-  color: #ffffff;
   font-size: 14px;
 
   thead {
-    background-color: #3a3a3a;
   }
 
   th,
@@ -26,11 +23,9 @@
   th {
     font-weight: 600;
     text-align: left;
-    color: #ffffff;
   }
 
   td {
-    color: #f0f0f0;
   }
 
   /* STT */
@@ -45,20 +40,19 @@
   th:nth-child(4),
   td:nth-child(3),
   td:nth-child(4) {
-    width: 120px;
+    width: 250px;
     text-align: center;
   }
 
   /* Hover row */
   tbody tr:hover {
-    background-color: #3f3f3f;
+    // background-color: #3f3f3f;
   }
 
   /* Input trong bảng */
   :global(.ant-input) {
-    background-color: #1f1f1f;
-    border: 1px solid #555;
-    color: #ffffff;
+    // background-color: #1f1f1f;
+    // border: 1px solid #555;
   }
 
   :global(.ant-input::placeholder) {
@@ -67,7 +61,7 @@
 
   /* Radio style */
   :global(.ant-radio-inner) {
-    background-color: #1f1f1f;
+    // background-color: #1f1f1f;
     border-color: #aaa;
   }
 
@@ -100,8 +94,8 @@
   }
 
   :global(.ant-input) {
-    background-color: #1f1f1f;
-    border: 1px solid #555;
+    // background-color: #1f1f1f;
+    // border: 1px solid #555;
     color: #ffffff;
   }
 }
