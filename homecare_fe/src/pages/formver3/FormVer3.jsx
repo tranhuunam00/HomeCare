@@ -13,136 +13,65 @@ import {
 } from "antd";
 import { QuestionCircleOutlined } from "@ant-design/icons";
 import { useNavigate, useParams } from "react-router-dom";
-import ImageBlock from "./component/ImageBlock";
-import AdminFormVer2 from "./component/AdminFormVer2";
-import FormActionBar, { KEY_ACTION_BUTTON } from "./component/FormActionBar";
 import { useGlobalAuth } from "../../contexts/AuthContext";
 import API_CALL from "../../services/axiosClient"; // axios instance của bạn
-import {
-  buildFormData,
-  buildPrompt,
-  mapApiToForm,
-  normalizeTablesFromApi,
-} from "./utils";
+import FormActionBar, {
+  KEY_ACTION_BUTTON,
+} from "../formver2/component/FormActionBar";
+
 import { toast } from "react-toastify";
 import CustomSunEditor from "../../components/Suneditor/CustomSunEditor";
 
-import styles from "./FormVer2.module.scss";
-import PrintPreviewVer2NotDataDiagnose from "./PreviewVer2/PrintPreviewVer2NotDataDiagnose";
+import styles from "./FormVer3.module.scss";
 import {
   TRANSLATE_LANGUAGE,
   translateLabel,
   USER_ROLE,
 } from "../../constant/app";
+import { buildFormData, mapApiToForm } from "../formver2/utils";
 
 const { Title } = Typography;
 const { TextArea } = Input;
 const { Option } = Select;
 
-/* ============== CONSTS ============== */
-const LANGUAGE_OPTIONS = [
-  { label: "VI", value: "vi" },
-  { label: "EN", value: "en" },
-];
+const LANGUAGE_OPTIONS = [{ label: "VI", value: "vi" }];
 
 const toISODate = (d = new Date()) => new Date(d).toISOString().slice(0, 10); // YYYY-MM-DD
 
 /* ============== MAPPERS ============== */
 // Map API → Form initialValues
 
-export default function DFormVer3({
-  id_form_ver3,
-  isDoctor = false,
-  onFormChange,
-  onTablesChange,
-  onPrint,
-}) {
+export default function DFormVer3({ id_formVer3 }) {
   const [form] = Form.useForm();
+  const { id: idFromParam } = useParams();
+
+  const editId = id_formVer3 ?? idFromParam;
+  const [loading, setLoading] = useState();
+  const [isEdit, setIsEdit] = useState(!editId);
+
   const { examParts, templateServices, user, doctor, formVer3Names } =
     useGlobalAuth();
 
   const navigate = useNavigate();
-  const { id: idFromParam } = useParams();
 
   const [filteredFormVer3Names, setFilteredFormVer3Names] = useState([]);
 
-  const [initialSnap, setInitialSnap] = useState({
-    formValues: null,
-    tables: null,
-    imageDesc: null,
-    left: null,
-    right: null,
-    apiData: null,
-  });
-
-  const editId = id_form_ver3 ?? idFromParam;
-
   const selectedTemplateServiceId = Form.useWatch("id_template_service", form);
   const selectedExamPartId = Form.useWatch("id_exam_part", form);
-  const selectedFormVer3NameId = Form.useWatch("id_formver3_name", form);
 
-  const currentFormVer3Name = useMemo(() => {
-    const byPick = (formVer3Names || []).find(
-      (n) => n.id === selectedFormVer3NameId
-    );
-    if (byPick) return byPick;
-
-    // fallback cho case edit khi chưa đổi select
-    const snap = initialSnap?.apiData?.id_formver3_name_form_ver2_name;
-    return snap ? { id: snap.id, name: snap.name, code: snap.code } : null;
-  }, [selectedFormVer3NameId, formVer3Names, initialSnap]);
   // Lọc local từ formVer3Names đã có sẵn trong context
-  useEffect(() => {
-    if (!selectedTemplateServiceId || !selectedExamPartId) {
-      setFilteredFormVer3Names([]);
-      return;
-    }
-
-    const currentId = initialSnap?.apiData?.id_formver3_name_form_ver2_name?.id;
-    const filtered = (formVer3Names || []).filter(
-      (n) =>
-        Number(n.id_template_service) === Number(selectedTemplateServiceId) &&
-        Number(n.id_exam_part) === Number(selectedExamPartId) &&
-        (!n.isUsed || n.id == currentId)
-    );
-
-    setFilteredFormVer3Names(filtered);
-  }, [
-    formVer3Names,
-    selectedTemplateServiceId,
-    selectedExamPartId,
-    initialSnap,
-  ]);
 
   const pendingAction = useRef(null);
   const ngayThucHienISO = useMemo(() => toISODate(new Date()), []);
   const [previewOpen, setPreviewOpen] = useState(false);
 
-  // preview images (chỉ để xem), dữ liệu save lấy từ form
-  const [ImageLeftUrl, setImageLeftUrl] = useState("");
-  const [ImageRightUrl, setImageRightUrl] = useState("");
-
-  const [imageDescEditor, setImageDescEditor] = useState("");
-
-  const [tablesData, setTablesData] = useState([]);
-  const [loading, setLoading] = useState(editId);
-  const [isEdit, setIsEdit] = useState(!editId);
-
   const [languageTranslate, setLanguageTransslate] = useState(
     TRANSLATE_LANGUAGE.VI
   );
 
-  useEffect(() => {
-    onTablesChange?.(tablesData);
-  }, [tablesData, onTablesChange]);
-
-  useEffect(() => {
-    onFormChange?.({
-      ...form.getFieldsValue(),
-      ImageLeftUrl,
-      ImageRightUrl,
-    });
-  }, [ImageLeftUrl, ImageRightUrl]);
+  const currentFormVer3Name = useMemo(() => {
+    return null;
+  }, []);
 
   const filteredExamParts = useMemo(() => {
     if (!selectedTemplateServiceId) return [];
@@ -151,103 +80,7 @@ export default function DFormVer3({
     );
   }, [examParts, selectedTemplateServiceId]);
 
-  // ====== Fetch when edit ======
-  useEffect(() => {
-    if (!editId) return;
-    (async () => {
-      setLoading(true);
-      try {
-        const res = await API_CALL.get(
-          `/form-ver2/${editId}?withTables=true&withImages=true&includeDeleted=false`
-        );
-        const apiData = res?.data?.data?.data;
-        if (!apiData) throw new Error("Không đọc được dữ liệu form");
-
-        const formValues = mapApiToForm(apiData);
-        setLanguageTransslate(apiData?.language || "vi");
-        const imageDesc = apiData?.imageDescEditor
-          ? JSON.parse(apiData.imageDescEditor)
-          : "";
-
-        const left =
-          apiData?.image_form_ver2s?.find((x) => x.kind === "left")?.url || "";
-        const right =
-          apiData?.image_form_ver2s?.find((x) => x.kind === "right")?.url || "";
-        // set form state hiển thị
-        form.setFieldsValue(formValues);
-        setImageDescEditor(imageDesc);
-        setImageLeftUrl(left);
-        setImageRightUrl(right);
-
-        setInitialSnap({ formValues, imageDesc, left, right, apiData });
-      } catch (e) {
-        toast.error("Không tải được dữ liệu. Vui lòng thử lại.");
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [editId, form]);
-
-  const onFinish = async (values) => {
-    if (!isDoctor) {
-      try {
-        if (!editId) {
-          const leftFile = values.ImageLeftFile?.[0]?.originFileObj;
-          const rightFile = values.ImageRightFile?.[0]?.originFileObj;
-
-          if (!leftFile || !rightFile) {
-            toast.error(
-              "Vui lòng tải lên đủ 2 ảnh (trái và phải) trước khi lưu"
-            );
-            return; // dừng luôn
-          }
-        }
-
-        const fd = buildFormData(values, {
-          tablesData,
-          ngayThucHienISO,
-          imageDescEditor,
-        });
-
-        if (editId) {
-          await API_CALL.patchForm(`/form-ver2/${editId}`, fd, {
-            headers: { "Content-Type": "multipart/form-data" },
-          });
-          toast.success("Đã cập nhật mẫu thành công");
-        } else {
-          const res = await API_CALL.postForm(`/form-ver2`, fd, {
-            headers: { "Content-Type": "multipart/form-data" },
-          });
-          const newId = res?.data?.data?.data?.formId;
-          toast.success("Đã tạo mẫu thành công");
-          if (newId) {
-            navigate(`/home/form-drad/detail/${newId}`);
-            window.location.reload();
-          }
-        }
-
-        switch (pendingAction.current) {
-          case "approve":
-            toast.success("Đã APPROVE");
-            navigate(`/home/form-drad`);
-            window.location.reload();
-
-            break;
-          case "export":
-            toast.success("Đã EXPORT (payload form-data đã gửi)");
-            break;
-          case "print":
-            window.print();
-            break;
-        }
-      } catch (e) {
-        console.error(e);
-        toast.error("Lưu thất bại. Kiểm tra dữ liệu hoặc thử lại sau.");
-      } finally {
-        pendingAction.current = null;
-      }
-    }
-  };
+  const onFinish = async (values) => {};
 
   const onFinishFailed = (err) => {
     console.log("[onFinishFailed] errors:", err?.errorFields);
@@ -255,16 +88,7 @@ export default function DFormVer3({
   };
 
   const restoreFromSnapshot = () => {
-    if (!initialSnap) return;
-    const { formValues, tables, imageDesc, left, right } = initialSnap;
-
     form.resetFields();
-    form.setFieldsValue(formValues);
-
-    setTablesData(tables);
-    setImageDescEditor(imageDesc);
-    setImageLeftUrl(left);
-    setImageRightUrl(right);
   };
 
   return (
@@ -272,7 +96,7 @@ export default function DFormVer3({
       <Title level={3} style={{ textAlign: "center", marginBottom: 24 }}>
         {editId
           ? "CẬP NHẬT BỘ MẪU KẾT QUẢ D-FORM"
-          : "TẠO MỚI BỘ MẪU KẾT QUẢ D-FORM"}
+          : "TẠO MỚI BỘ MẪU KẾT QUẢ D-FORM V.3"}
       </Title>
 
       {loading ? (
@@ -298,13 +122,6 @@ export default function DFormVer3({
             ImageRightDescLink: "https://home-care.vn/",
             ImageLeftDescLink: "https://home-care.vn/",
           }}
-          onValuesChange={(_, allValues) => {
-            onFormChange?.({
-              ...allValues,
-              ImageLeftUrl,
-              ImageRightUrl,
-            });
-          }}
         >
           {/* Hàng 1 */}
           <Row gutter={16}>
@@ -316,7 +133,7 @@ export default function DFormVer3({
               >
                 <Select
                   placeholder="Chọn kỹ thuật"
-                  disabled={isDoctor || !isEdit}
+                  disabled={!isEdit}
                   allowClear
                   onChange={() => {
                     // Clear các field phụ thuộc khi đổi phân hệ
@@ -324,7 +141,7 @@ export default function DFormVer3({
                       id_exam_part: undefined,
                       id_formver3_name: undefined,
                     });
-                    setFilteredFormVer3Names([]); // làm sạch danh sách tên mẫu lọc theo
+                    setFilteredFormVer3Names([]);
                   }}
                 >
                   {templateServices.map((s) => (
@@ -343,7 +160,7 @@ export default function DFormVer3({
               >
                 <Select
                   placeholder="Chọn bộ phận thăm khám"
-                  disabled={isDoctor || !isEdit || !selectedTemplateServiceId}
+                  disabled={!isEdit || !selectedTemplateServiceId}
                   allowClear
                   onChange={() => {
                     form.setFieldsValue({ id_formver3_name: undefined });
@@ -360,37 +177,6 @@ export default function DFormVer3({
                     </Option>
                   ))}
                 </Select>
-              </Form.Item>
-            </Col>
-          </Row>
-
-          {/* Hàng 2 */}
-          <Row gutter={16}>
-            <Col xs={24} md={12}>
-              <Form.Item
-                label={translateLabel(languageTranslate, "language", false)}
-                name="language"
-                rules={[{ required: true }]}
-              >
-                <Select
-                  onChange={(lang) => {
-                    setLanguageTransslate(lang);
-                  }}
-                  disabled={!isEdit}
-                  options={LANGUAGE_OPTIONS}
-                  placeholder="VI / US"
-                />
-              </Form.Item>
-            </Col>
-            <Col xs={24} md={12}>
-              <Form.Item
-                label={translateLabel(languageTranslate, "codeForm", false)}
-              >
-                <Input
-                  value={currentFormVer3Name?.code || ""}
-                  readOnly
-                  disabled
-                />
               </Form.Item>
             </Col>
           </Row>
@@ -430,12 +216,31 @@ export default function DFormVer3({
           </Row>
 
           <Row gutter={16}>
-            <Col xs={24} md={24}>
+            <Col xs={24} md={12}>
               <Form.Item
-                label={translateLabel(languageTranslate, "formResult", false)}
-                name="ket_luan"
+                label={translateLabel(languageTranslate, "language", false)}
+                name="language"
+                rules={[{ required: true }]}
               >
-                <Input disabled={!isEdit} placeholder="VD: U máu gan" />
+                <Select
+                  onChange={(lang) => {
+                    setLanguageTransslate(lang);
+                  }}
+                  disabled={!isEdit}
+                  options={LANGUAGE_OPTIONS}
+                  placeholder="VI / US"
+                />
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={12}>
+              <Form.Item
+                label={translateLabel(languageTranslate, "codeForm", false)}
+              >
+                <Input
+                  value={currentFormVer3Name?.code || ""}
+                  readOnly
+                  disabled
+                />
               </Form.Item>
             </Col>
           </Row>
@@ -462,39 +267,8 @@ export default function DFormVer3({
 
           {/* Ảnh minh hoạ */}
           <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
-            {translateLabel(
-              languageTranslate,
-              "technicalProtocol",
-              false
-            ).toUpperCase()}
+            {"Kỹ thuật thực hiện".toUpperCase()}
           </Title>
-
-          <Row gutter={[16, 16]} style={{ justifyContent: "space-between" }}>
-            <Col xs={24} md={12}>
-              <ImageBlock
-                form={form}
-                namePrefix="ImageLeft"
-                src={ImageLeftUrl}
-                title=""
-                onChange={(value) => {
-                  setImageLeftUrl(value);
-                }}
-                disabled={!isEdit}
-              />
-            </Col>
-            <Col xs={24} md={12}>
-              <ImageBlock
-                form={form}
-                namePrefix="ImageRight"
-                src={ImageRightUrl}
-                title=""
-                onChange={(value) => {
-                  setImageRightUrl(value);
-                }}
-                disabled={!isEdit}
-              />
-            </Col>
-          </Row>
 
           <Form.Item name="quy_trinh_url" label="" tooltip="Short text">
             <TextArea
@@ -512,22 +286,6 @@ export default function DFormVer3({
               false
             ).toUpperCase()}
           </Title>
-          {/* <AdminFormVer2
-            value={tablesData} // state ở cha
-            onChange={(next) => {
-              // giữ nguyên id theo tid (nếu CreateFormVer2 tạo object mới)
-              setTablesData((prev) => {
-                const prevByTid = new Map(prev.map((t) => [t.tid, t]));
-                return next.map((t) => ({ ...prevByTid.get(t.tid), ...t }));
-              });
-            }}
-          /> */}
-          <CustomSunEditor
-            value={imageDescEditor}
-            onChange={setImageDescEditor}
-            className={styles.formVer2Editor}
-            disabled={!isEdit}
-          />
 
           {/* Kết luận */}
           <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
@@ -684,29 +442,6 @@ export default function DFormVer3({
           )}
         </Form>
       )}
-
-      <Modal
-        open={previewOpen}
-        onCancel={() => setPreviewOpen(false)}
-        footer={null}
-        width={1100}
-      >
-        <PrintPreviewVer2NotDataDiagnose
-          formSnapshot={form.getFieldsValue()}
-          selectedExamPart={examParts?.find(
-            (ex) => ex.id == form.getFieldValue("id_exam_part")
-          )}
-          selectedTemplateService={templateServices?.find(
-            (ex) => ex.id == form.getFieldValue("id_template_service")
-          )}
-          ImageLeftUrl={ImageLeftUrl}
-          ImageRightUrl={ImageRightUrl}
-          imageDescEditor={imageDescEditor}
-          initialSnap={initialSnap}
-          currentFormVer3Name={currentFormVer3Name}
-          editId={editId}
-        />
-      </Modal>
     </div>
   );
 }
