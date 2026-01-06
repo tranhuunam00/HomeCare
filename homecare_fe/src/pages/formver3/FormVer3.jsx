@@ -52,7 +52,7 @@ const toISODate = (d = new Date()) => new Date(d).toISOString().slice(0, 10); //
 export default function DFormVer3({ id_formVer3 }) {
   const [form] = Form.useForm();
   const { id: idFromParam } = useParams();
-  const editId = id_formVer3 ?? idFromParam;
+  const [editId, setEditId] = useState(id_formVer3 ?? idFromParam);
   const [loading, setLoading] = useState();
   const [isEdit, setIsEdit] = useState(!editId);
 
@@ -197,11 +197,16 @@ export default function DFormVer3({ id_formVer3 }) {
       if (pendingAction.current === KEY_ACTION_BUTTON.save) {
         if (!editId) {
           const res = await API_CALL.post("/formVer3", payload);
-          toast.success("Tạo mới FormVer3 thành công");
-          const newId = res?.data?.id;
-          if (newId) {
-            navigate(`/form-ver3/${newId}`);
+
+          const newId = res?.data?.data?.id || res?.data?.id;
+
+          if (!newId) {
+            toast.error("Không nhận được ID sau khi lưu");
+            return;
           }
+          toast.success("Tạo mới Form D-RADS V3 thành công");
+          setEditId(newId);
+          navigate(`/home/form-drad-v3/detail/${newId}`);
           return;
         }
 
@@ -229,6 +234,43 @@ export default function DFormVer3({ id_formVer3 }) {
   const onFinishFailed = (err) => {
     console.log("[onFinishFailed] errors:", err?.errorFields);
     toast.error("Vui lòng kiểm tra các trường còn thiếu/không hợp lệ.");
+  };
+
+  const onApprove = async () => {
+    if (!editId) return;
+
+    const ok = window.confirm("Bạn có chắc muốn DUYỆT kết quả này không?");
+    if (!ok) return;
+
+    try {
+      setLoading(true);
+
+      await API_CALL.patch(`/formVer3/${editId}/approve`);
+
+      toast.success("Duyệt FormVer3 thành công");
+
+      // Reload lại detail để sync data mới
+      const res = await API_CALL.get(`/formVer3/${editId}`);
+      const data = res?.data?.data?.data;
+
+      if (data) {
+        form.setFieldsValue({
+          ...initialSnap.formValues,
+        });
+
+        setInitialSnap({
+          formValues: form.getFieldsValue(),
+          apiData: data,
+        });
+
+        setIsEdit(false);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Không thể duyệt FormVer3");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -275,8 +317,30 @@ export default function DFormVer3({ id_formVer3 }) {
   const restoreFromSnapshot = () => {
     const ok = window.confirm("Bạn có chắc muốn reset toàn bộ dữ liệu không?");
     if (!ok) return;
-    form.resetFields();
-    setImagingRows(DEFAULT_IMAGING_ROWS);
+
+    // 🟢 CASE CREATE
+    if (!editId) {
+      form.resetFields();
+      setImagingRows(DEFAULT_IMAGING_ROWS);
+      return;
+    }
+
+    // 🟢 CASE EDIT → reset về dữ liệu load ban đầu
+    if (initialSnap?.formValues && initialSnap?.apiData) {
+      form.setFieldsValue(initialSnap.formValues);
+
+      // imagingRows phải set riêng
+      try {
+        const rows = JSON.parse(initialSnap.apiData.imageDescription || "[]");
+        setImagingRows(
+          Array.isArray(rows) && rows.length ? rows : DEFAULT_IMAGING_ROWS
+        );
+      } catch {
+        setImagingRows(DEFAULT_IMAGING_ROWS);
+      }
+
+      setIsEdit(false);
+    }
   };
 
   const currentFormVer3Name = useMemo(() => {
@@ -806,6 +870,7 @@ export default function DFormVer3({ id_formVer3 }) {
                 pendingAction.current = key;
                 form.submit();
               }}
+              onApprove={onApprove}
               onPrint={() => {}}
               onReset={restoreFromSnapshot}
               onPreview={() => setPreviewOpen(!previewOpen)}
