@@ -10,6 +10,8 @@ import {
   Tooltip,
   Spin,
   Modal,
+  Checkbox,
+  Radio,
 } from "antd";
 import { QuestionCircleOutlined } from "@ant-design/icons";
 import { useNavigate, useParams } from "react-router-dom";
@@ -28,7 +30,6 @@ import {
   translateLabel,
   USER_ROLE,
 } from "../../constant/app";
-import { buildFormData, mapApiToForm } from "../formver2/utils";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -44,7 +45,6 @@ const toISODate = (d = new Date()) => new Date(d).toISOString().slice(0, 10); //
 export default function DFormVer3({ id_formVer3 }) {
   const [form] = Form.useForm();
   const { id: idFromParam } = useParams();
-
   const editId = id_formVer3 ?? idFromParam;
   const [loading, setLoading] = useState();
   const [isEdit, setIsEdit] = useState(!editId);
@@ -53,6 +53,26 @@ export default function DFormVer3({ id_formVer3 }) {
     useGlobalAuth();
 
   const navigate = useNavigate();
+  const [initialSnap, setInitialSnap] = useState({
+    formValues: null,
+    apiData: null,
+  });
+
+  const [imagingRows, setImagingRows] = useState([
+    { id: 1, name: "Phổi", status: "normal", description: "" },
+    { id: 2, name: "Màng phổi", status: "normal", description: "" },
+    { id: 3, name: "Trung thất", status: "normal", description: "" },
+    { id: 4, name: "Xương sườn", status: "normal", description: "" },
+    { id: 5, name: "Xương đòn", status: "normal", description: "" },
+    { id: 6, name: "Xương cột sống", status: "normal", description: "" },
+    { id: 7, name: "Phần mềm thành ngực", status: "normal", description: "" },
+  ]);
+
+  useEffect(() => {
+    form.setFieldsValue({
+      imagingStructures: imagingRows,
+    });
+  }, [imagingRows]);
 
   const [filteredFormVer3Names, setFilteredFormVer3Names] = useState([]);
 
@@ -264,6 +284,53 @@ export default function DFormVer3({ id_formVer3 }) {
               </Form.Item>
             </Col>
           </Row>
+          {/* Đánh giá kỹ thuật chụp (checkbox đúng UI) */}
+          {/* Đánh giá kỹ thuật chụp */}
+          <Row>
+            <Col xs={24}>
+              {/* Tiêm thuốc đối quang */}
+              <Form.Item
+                label="Tiêm thuốc đối quang"
+                name="contrastInjection"
+                rules={[
+                  { required: true, message: "Chọn thông tin tiêm thuốc" },
+                ]}
+              >
+                <Radio.Group disabled={!isEdit}>
+                  <Radio value="no">Không</Radio>
+                  <Radio value="yes">Có</Radio>
+                </Radio.Group>
+              </Form.Item>
+
+              {/* Chất lượng hình ảnh */}
+              <Form.Item
+                label="Chất lượng hình ảnh"
+                name="imageQuality"
+                rules={[
+                  { required: true, message: "Đánh giá chất lượng hình ảnh" },
+                ]}
+              >
+                <Radio.Group disabled={!isEdit}>
+                  <Radio value="good">Đạt yêu cầu</Radio>
+                  <Radio value="limited">Đạt yêu cầu, có hạn chế</Radio>
+                  <Radio value="bad">Không đạt</Radio>
+                </Radio.Group>
+              </Form.Item>
+
+              {/* Thực hiện bổ sung */}
+              <Form.Item
+                label="Thực hiện bổ sung"
+                name="additionalAction"
+                rules={[{ required: true, message: "Chọn thực hiện bổ sung" }]}
+              >
+                <Radio.Group disabled={!isEdit}>
+                  <Radio value="no">Không</Radio>
+                  <Radio value="extra">Chụp thêm</Radio>
+                  <Radio value="redo">Chụp lại</Radio>
+                </Radio.Group>
+              </Form.Item>
+            </Col>
+          </Row>
 
           {/* Ảnh minh hoạ */}
           <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
@@ -286,6 +353,109 @@ export default function DFormVer3({ id_formVer3 }) {
               false
             ).toUpperCase()}
           </Title>
+
+          <table className={styles.imagingTable}>
+            <thead>
+              <tr>
+                <th>STT</th>
+                <th>Cấu trúc</th>
+                <th>Bình thường</th>
+                <th>Bất thường</th>
+              </tr>
+            </thead>
+            <tbody>
+              {imagingRows.map((row, idx) => (
+                <tr key={row.id}>
+                  <td>{idx + 1}</td>
+                  <td>
+                    <Input
+                      disabled={!isEdit}
+                      value={row.name}
+                      onChange={(e) => {
+                        const next = [...imagingRows];
+                        next[idx].name = e.target.value;
+                        setImagingRows(next);
+                      }}
+                    />
+                  </td>
+                  <td style={{ textAlign: "center" }}>
+                    <Radio
+                      checked={row.status === "normal"}
+                      disabled={!isEdit}
+                      onChange={() => {
+                        const next = [...imagingRows];
+                        next[idx].status = "normal";
+                        setImagingRows(next);
+                      }}
+                    />
+                  </td>
+                  <td style={{ textAlign: "center" }}>
+                    <Radio
+                      checked={row.status === "abnormal"}
+                      disabled={!isEdit}
+                      onChange={() => {
+                        const next = [...imagingRows];
+                        next[idx].status = "abnormal";
+                        setImagingRows(next);
+                      }}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          <Button
+            type="link"
+            disabled={!isEdit}
+            onClick={() =>
+              setImagingRows((prev) => [
+                ...prev,
+                {
+                  id: Date.now(),
+                  name: "",
+                  status: "normal",
+                  description: "",
+                },
+              ])
+            }
+          >
+            + Thêm hàng
+          </Button>
+
+          {imagingRows.some((r) => r.status === "abnormal") && (
+            <>
+              <div style={{ marginTop: 24, fontWeight: 600 }}>
+                Mô tả chi tiết các bất thường
+              </div>
+
+              {imagingRows
+                .filter((r) => r.status === "abnormal")
+                .map((row, idx) => (
+                  <Row key={row.id} gutter={8} style={{ marginTop: 8 }}>
+                    <Col span={1}>{idx + 1}</Col>
+                    <Col span={5}>
+                      <strong>{row.name}</strong>
+                    </Col>
+                    <Col span={18}>
+                      <Input
+                        disabled={!isEdit}
+                        placeholder="Nhập mô tả bất thường..."
+                        value={row.description}
+                        onChange={(e) => {
+                          const next = imagingRows.map((r) =>
+                            r.id === row.id
+                              ? { ...r, description: e.target.value }
+                              : r
+                          );
+                          setImagingRows(next);
+                        }}
+                      />
+                    </Col>
+                  </Row>
+                ))}
+            </>
+          )}
 
           {/* Kết luận */}
           <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
@@ -390,7 +560,7 @@ export default function DFormVer3({ id_formVer3 }) {
                 pendingAction.current = key;
                 form.submit();
               }}
-              onPrint={onPrint}
+              onPrint={() => {}}
               onReset={restoreFromSnapshot}
               onPreview={() => setPreviewOpen(!previewOpen)}
               isEdit={isEdit}
@@ -406,38 +576,7 @@ export default function DFormVer3({ id_formVer3 }) {
                 }
               }}
               editId={editId}
-              onGenAi={async () => {
-                const handleGenAi = async () => {
-                  try {
-                    const v = form.getFieldsValue();
-                    const selectedExamPart = examParts?.find(
-                      (ex) => ex.id == form.getFieldValue("id_exam_part")
-                    );
-                    const selectedTemplateService = templateServices?.find(
-                      (ex) => ex.id == form.getFieldValue("id_template_service")
-                    );
-
-                    const prompt = buildPrompt({
-                      v,
-                      selectedExamPart,
-                      selectedTemplateService,
-                      currentFormVer3Name,
-                      imageDescHTML: imageDescEditor || "", // lấy từ state của bạn
-                    });
-
-                    const url = `https://api.home-care.vn/api/chatgpt/ask-gemini-recommendation?prompt=${encodeURIComponent(
-                      prompt
-                    )}`;
-                    const res = await API_CALL.get(url);
-                    form.setFieldsValue({ khuyenNghi: res.data.data });
-                  } catch (e) {
-                    console.error(e);
-                    toast.error("Gọi AI thất bại.");
-                  }
-                };
-
-                await handleGenAi();
-              }}
+              onGenAi={async () => {}}
             />
           )}
         </Form>

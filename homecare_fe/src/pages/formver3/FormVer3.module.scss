@@ -4,3 +4,104 @@
   height: 100%;
   margin-bottom: 0;
 }
+
+.imagingTable {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #2b2b2b;
+  color: #ffffff;
+  font-size: 14px;
+
+  thead {
+    background-color: #3a3a3a;
+  }
+
+  th,
+  td {
+    border-bottom: 1px solid #555;
+    padding: 8px 10px;
+    vertical-align: middle;
+  }
+
+  th {
+    font-weight: 600;
+    text-align: left;
+    color: #ffffff;
+  }
+
+  td {
+    color: #f0f0f0;
+  }
+
+  /* STT */
+  th:first-child,
+  td:first-child {
+    width: 60px;
+    text-align: center;
+  }
+
+  /* Bình thường / Bất thường */
+  th:nth-child(3),
+  th:nth-child(4),
+  td:nth-child(3),
+  td:nth-child(4) {
+    width: 120px;
+    text-align: center;
+  }
+
+  /* Hover row */
+  tbody tr:hover {
+    background-color: #3f3f3f;
+  }
+
+  /* Input trong bảng */
+  :global(.ant-input) {
+    background-color: #1f1f1f;
+    border: 1px solid #555;
+    color: #ffffff;
+  }
+
+  :global(.ant-input::placeholder) {
+    color: #999;
+  }
+
+  /* Radio style */
+  :global(.ant-radio-inner) {
+    background-color: #1f1f1f;
+    border-color: #aaa;
+  }
+
+  :global(.ant-radio-checked .ant-radio-inner) {
+    border-color: #4ea1ff;
+  }
+
+  :global(.ant-radio-inner::after) {
+    background-color: #4ea1ff;
+  }
+}
+
+.abnormalSection {
+  margin-top: 20px;
+  padding-top: 12px;
+  border-top: 1px solid #555;
+  color: #ffffff;
+
+  .title {
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 40px 200px 1fr;
+    gap: 8px;
+    margin-bottom: 6px;
+    align-items: center;
+  }
+
+  :global(.ant-input) {
+    background-color: #1f1f1f;
+    border: 1px solid #555;
+    color: #ffffff;
+  }
+}
