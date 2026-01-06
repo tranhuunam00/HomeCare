@@ -93,10 +93,7 @@ const LoginPage = () => {
             {/* Quên mật khẩu & Liên hệ kỹ thuật */}
             <Row justify="space-between" style={{ marginBottom: 16 }}>
               <Col>
-                <Link
-
-                // onClick={() => navigate("/forgot-password")}
-                >
+                <Link onClick={() => navigate("/forgot-password")}>
                   Quên mật khẩu?
                 </Link>
               </Col>

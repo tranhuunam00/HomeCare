@@ -73,6 +73,7 @@ import UltrasoundBungForm from "./pages/sono/details/bung/sono.bung";
 import SonoList from "./pages/sono/list/SonoList";
 import DFormVer3 from "./pages/formver3/FormVer3";
 import FormVer3List from "./pages/formver3/list/FormVer3List";
+import ForgotPasswordPage from "./pages/authentication/ForgotPasswordPage";
 
 function App() {
   useAuthInitializer();
@@ -158,6 +159,7 @@ function App() {
         <Route path="/register" element={<RegisterForm />} />
         <Route path="/contact" element={<ContactForm />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
         <Route
           path="/home"
