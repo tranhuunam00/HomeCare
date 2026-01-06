@@ -35,21 +35,20 @@ const LoginPage = () => {
         backgroundColor: "#f0f2f5",
         justifyContent: "center",
         width: "100vw",
+        height: "100vh",
       }}
     >
-      {/* Bên trái */}
-      <div
-        style={{
-          backgroundImage: "url('/banner.jpg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          width: 500,
-          height: 500,
-        }}
-      />
-
-      {/* Bên phải */}
+      {/* Bên trái */}\ {/* Bên phải */}
       <div style={{ display: "flex", alignItems: "center" }}>
+        <div
+          style={{
+            backgroundImage: "url('/banner.jpg')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            width: 500,
+            height: 500,
+          }}
+        />
         <Card
           style={{
             width: 500,

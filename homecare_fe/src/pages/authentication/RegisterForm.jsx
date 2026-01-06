@@ -6,6 +6,7 @@ import API_CALL from "../../services/axiosClient";
 import { USER_ROLE } from "../../constant/app";
 import { GoogleLogin } from "@react-oauth/google";
 import { useGlobalAuth } from "../../contexts/AuthContext";
+import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 
 const { Title } = Typography;
 
@@ -86,7 +87,7 @@ const RegisterPage = () => {
             name="register_form"
             onFinish={onFinish}
             layout="vertical"
-            requiredMark={false}
+            requiredMark={true}
           >
             <Form.Item
               label="Email"
@@ -117,9 +118,11 @@ const RegisterPage = () => {
               name="password"
               rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
             >
-              <Input
+              <Input.Password
                 placeholder="Mật khẩu"
-                type={showPassword ? "text" : "password"}
+                iconRender={(visible) =>
+                  visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
+                }
               />
             </Form.Item>
 
@@ -130,16 +133,12 @@ const RegisterPage = () => {
                 { required: true, message: "Vui lòng nhập lại mật khẩu!" },
               ]}
             >
-              <Input
+              <Input.Password
                 placeholder="Nhập lại mật khẩu"
-                type={showPassword ? "text" : "password"}
+                iconRender={(visible) =>
+                  visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
+                }
               />
-            </Form.Item>
-
-            <Form.Item style={{ marginTop: -10 }}>
-              <Checkbox onChange={(e) => setShowPassword(e.target.checked)}>
-                Hiện mật khẩu
-              </Checkbox>
             </Form.Item>
 
             {/* ✅ Checkbox chính sách */}
