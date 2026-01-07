@@ -41,6 +41,7 @@ import {
   buildDradv3FormValues,
   LANGUAGE_OPTIONS,
 } from "../../formver3.constant";
+import AdvancedSampleSection from "../../components/AdvancedSampleSection";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -456,6 +457,7 @@ export default function DoctorUseDFormVer3({
                   }
                   onChange={async (id_formver3_name) => {
                     try {
+                      setLoading(true);
                       const res = await API_CALL.get(
                         `/formVer3?id_formver3_name=${id_formver3_name}`
                       );
@@ -549,6 +551,8 @@ export default function DoctorUseDFormVer3({
               placeholder="VD: U máu gan"
             />
           </Form.Item>
+
+          <AdvancedSampleSection isEdit={isEdit} />
 
           <Form.Item
             label={

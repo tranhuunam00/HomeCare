@@ -37,6 +37,7 @@ import {
   DEFAULT_IMAGING_ROWS,
   IMAGE_QUALITY_OPTIONS,
 } from "./formver3.constant";
+import AdvancedSampleSection from "./components/AdvancedSampleSection";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -541,68 +542,7 @@ export default function DFormVer3({ id_formVer3 }) {
           </Row>
           {/* Đánh giá kỹ thuật chụp (checkbox đúng UI) */}
           {/* Đánh giá kỹ thuật chụp */}
-          <Row>
-            <Form.Item
-              label="MẪU NÂNG CAO"
-              name="advancedSample"
-              rules={[{ required: true, message: "Chọn thông tin tiêm thuốc" }]}
-            >
-              <Radio.Group disabled={!isEdit}>
-                <Radio value="no">Không</Radio>
-                <Radio value="yes">Có</Radio>
-              </Radio.Group>
-            </Form.Item>
-            <Col xs={24}>
-              {/* Tiêm thuốc đối quang */}
-              <Form.Item
-                label="Tiêm thuốc đối quang"
-                name="contrastInjection"
-                rules={[
-                  { required: true, message: "Chọn thông tin tiêm thuốc" },
-                ]}
-              >
-                <Radio.Group disabled={!isEdit}>
-                  {CONTRAST_INJECTION_OPTIONS.map((opt) => (
-                    <Radio key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </Radio>
-                  ))}
-                </Radio.Group>
-              </Form.Item>
-
-              {/* Chất lượng hình ảnh */}
-              <Form.Item
-                label="Chất lượng hình ảnh"
-                name="imageQuality"
-                rules={[
-                  { required: true, message: "Đánh giá chất lượng hình ảnh" },
-                ]}
-              >
-                <Radio.Group disabled={!isEdit}>
-                  {IMAGE_QUALITY_OPTIONS.map((opt) => (
-                    <Radio key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </Radio>
-                  ))}
-                </Radio.Group>
-              </Form.Item>
-
-              {/* Thực hiện bổ sung */}
-              <Form.Item
-                label="Thực hiện bổ sung"
-                name="additionalAction"
-                rules={[{ required: true, message: "Chọn thực hiện bổ sung" }]}
-              >
-                <Radio.Group disabled={!isEdit}>
-                  {ADDITIONAL_ACTION_OPTIONS.map((opt) => (
-                    <Radio key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </Radio>
-                  ))}
-                </Radio.Group>
-              </Form.Item>
-            </Col>
-          </Row>
+          <AdvancedSampleSection isEdit={isEdit} />
 
           {/* Ảnh minh hoạ */}
           <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
