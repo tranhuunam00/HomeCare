@@ -74,6 +74,7 @@ import SonoList from "./pages/sono/list/SonoList";
 import DFormVer3 from "./pages/formver3/FormVer3";
 import FormVer3List from "./pages/formver3/list/FormVer3List";
 import ForgotPasswordPage from "./pages/authentication/ForgotPasswordPage";
+import DoctorUseDFormVer3 from "./pages/formver3/doctor_use_formver3/use/DoctorIUseFormVer3";
 
 function App() {
   useAuthInitializer();
@@ -208,6 +209,12 @@ function App() {
             path="form-drad/use"
             element={<DoctorUseDFormVer2 isUse={true} />}
           />
+
+          <Route
+            path="form-drad-v3/use/patient-diagnose/:patient_diagnose_id"
+            element={<DoctorUseDFormVer3 isUse={true} />}
+          />
+
           <Route
             path="doctor-use-form-drad/detail/:id"
             element={<DoctorUseDFormVer2 isUse={true} />}

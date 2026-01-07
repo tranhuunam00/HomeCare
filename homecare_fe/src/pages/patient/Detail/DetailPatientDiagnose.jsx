@@ -34,6 +34,7 @@ import {
   ArrowLeftOutlined,
 } from "@ant-design/icons";
 import SignedFilesBox from "../../doctor_use_form_ver2/SmartCASignModal/SignedFilesBox";
+import FormVer3GroupProcessPatientDiagnoise from "../../formver3/FormVer3GroupProcessPatientDiagnoise";
 
 const { Title, Text } = Typography;
 
@@ -435,24 +436,6 @@ const PatientDiagnoiseDetailPage = ({ idFromList, onStatusChange }) => {
             </Col>
           </Row>
 
-          {/* <Row gutter={24} style={{ marginTop: 6 }}>
-          <Col span={12}>
-            <Title level={5}>Phường/Xã:</Title>
-            <Text>{getNameByCode(wards, displayData.ward_code)}</Text>
-          </Col>
-
-          <Col span={12}>
-            <Title level={5}>Tỉnh/Thành phố:</Title>
-            <Text>{getNameByCode(provinces, displayData.province_code)}</Text>
-          </Col>
-        </Row> */}
-
-          {/* <Row gutter={24} style={{ marginTop: 6 }}>
-          <Col span={24}>
-            <Title level={5}>Địa chỉ chi tiết:</Title>
-            <Text>{displayData.address}</Text>
-          </Col>
-        </Row> */}
           <Row gutter={24} style={{ marginTop: 6 }}>
             <Col span={12}>
               <Title level={5}>Ngày tạo:</Title>
@@ -466,13 +449,6 @@ const PatientDiagnoiseDetailPage = ({ idFromList, onStatusChange }) => {
             </Col>
           </Row>
 
-          {/* <Row gutter={24} style={{ marginTop: 40 }}>
-          <h2>Hành động</h2>
-        </Row>
-        <StatusButtonPatientDiagnose id={displayData.id} status={displayData.status} /> */}
-          {/* <Row gutter={24} style={{ marginTop: 40 }}>
-          <h2>Hành động</h2>
-        </Row> */}
           <Divider />
           <Row gutter={24} style={{ marginTop: 6 }}>
             <Col span={12}>
@@ -492,7 +468,14 @@ const PatientDiagnoiseDetailPage = ({ idFromList, onStatusChange }) => {
               </Text>
             </Col>
           </Row>
+
           <GroupProcessPatientDiagnoiseFormVer2
+            patientDiagnose={data}
+            setPatientDiagnose={setData}
+            onStatusChange={onStatusChange}
+          />
+
+          <FormVer3GroupProcessPatientDiagnoise
             patientDiagnose={data}
             setPatientDiagnose={setData}
             onStatusChange={onStatusChange}
