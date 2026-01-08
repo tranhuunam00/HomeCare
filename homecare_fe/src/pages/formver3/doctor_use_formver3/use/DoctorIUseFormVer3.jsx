@@ -361,6 +361,26 @@ export default function DoctorUseDFormVer3({
         const res = await API_CALL.postForm(`/doctorUseFormVer3`, formPayload, {
           headers: { "Content-Type": "multipart/form-data" },
         });
+
+        const newData = res?.data?.data || res?.data;
+
+        if (newData?.id) {
+          toast.success("Tạo mới form thành công");
+          setIdEdit(newData.id);
+
+          setStatus(APPROVAL_STATUS.DRAFT);
+          setIsEdit(false);
+          setInitialSnap({
+            formValues: form.getFieldsValue(),
+            apiData: newData,
+          });
+
+          navigate(`/home/doctor-use-formver3/detail/${newData.id}`, {
+            replace: true,
+          });
+        } else {
+          toast.warning("Tạo form thành công nhưng không nhận được ID");
+        }
       }
     } catch (error) {
       toast.error(error.message || error);
