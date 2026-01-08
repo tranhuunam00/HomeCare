@@ -258,7 +258,9 @@ const PatientFormPage = () => {
               <Form.Item
                 name="dob"
                 label="Ngày sinh"
-                rules={[{ required: false }]}
+                rules={[
+                  { required: true, message: "Vui lòng nhập không để trống" },
+                ]}
               >
                 <DatePicker
                   disabledDate={disabledDate}
