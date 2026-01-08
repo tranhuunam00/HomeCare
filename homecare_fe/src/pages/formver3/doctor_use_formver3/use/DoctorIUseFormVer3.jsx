@@ -39,9 +39,12 @@ import TranslateListRecords from "../../../doctor_use_form_ver2/use/items/Transl
 import SmartCASignModal from "../../../doctor_use_form_ver2/SmartCASignModal/SmartCASignModal";
 import {
   buildDradv3FormValues,
+  DEFAULT_IMAGING_ROWS,
   LANGUAGE_OPTIONS,
 } from "../../formver3.constant";
 import AdvancedSampleSection from "../../components/AdvancedSampleSection";
+import ImagingStructureTable from "../../components/ImagingStructureTable.JSX";
+import ImagingDiagnosisSection from "../../components/ImagingDiagnosisSection";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -93,6 +96,19 @@ export default function DoctorUseDFormVer3({
     id_exam_part: null,
     id_formver3_name: null,
   });
+
+  const [imagingRows, setImagingRows] = useState(DEFAULT_IMAGING_ROWS);
+
+  const abnormalFindings = useMemo(() => {
+    return imagingRows
+      .filter(
+        (r) =>
+          r.status === "abnormal" &&
+          r.description &&
+          r.description.trim() !== ""
+      )
+      .map((r) => r.description.trim());
+  }, [imagingRows]);
 
   useEffect(() => {
     const fetchTemplates = async () => {
@@ -509,20 +525,17 @@ export default function DoctorUseDFormVer3({
           </Form.Item>
 
           <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
-            {translateLabel(
-              languageTranslate,
-              "technicalProtocol",
-              false
-            ).toUpperCase()}
+            {"Kỹ thuật thực hiện".toUpperCase()}
           </Title>
 
-          <Form.Item name="quy_trinh_url" label="" tooltip="Short text">
+          <Form.Item name="implementMethod" label="" tooltip="Short text">
             <TextArea
               disabled={!isEdit}
               autoSize={{ minRows: 4, maxRows: 10 }}
               placeholder="Nhập mô tả quy trình kỹ thuật..."
             />
           </Form.Item>
+          <AdvancedSampleSection isEdit={isEdit} isAdvanceSample={false} />
 
           {/* Ảnh minh hoạ */}
           <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
@@ -533,92 +546,22 @@ export default function DoctorUseDFormVer3({
             ).toUpperCase()}
           </Title>
 
+          <ImagingStructureTable
+            rows={imagingRows}
+            setRows={setImagingRows}
+            isEdit={isEdit}
+          />
+
+          {/* <ImagingStructureTable /> */}
+
           {/* Kết luận */}
-          <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
-            {translateLabel(
-              languageTranslate,
-              "impression",
-              false
-            ).toUpperCase()}
-          </Title>
-          <Form.Item
-            name="ket_qua_chan_doan"
-            rules={[{ required: true, message: "Nhập kết luận" }]}
-          >
-            <TextArea
-              disabled={!isEdit}
-              style={{ height: 200, fontWeight: "bold" }}
-              placeholder="VD: U máu gan"
-            />
-          </Form.Item>
 
-          <AdvancedSampleSection isEdit={isEdit} />
-
-          <Form.Item
-            label={
-              <span>
-                {translateLabel(
-                  languageTranslate,
-                  "icd10Classification",
-                  false
-                )}
-                <Tooltip title="Tra cứu ICD-10">
-                  <a
-                    href="https://icd.kcb.vn/icd-10/icd10"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ marginLeft: 4 }}
-                  >
-                    <QuestionCircleOutlined />
-                  </a>
-                </Tooltip>
-              </span>
-            }
-            name="icd10"
-          >
-            <Input disabled={!isEdit} placeholder="Link/Code ICD-10" />
-          </Form.Item>
-
-          <Form.Item
-            label={translateLabel(
-              languageTranslate,
-              "gradingClassification",
-              false
-            )}
-            name="phan_do_loai"
-          >
-            <Input disabled={!isEdit} placeholder="Short text" />
-          </Form.Item>
-
-          <Form.Item
-            label={translateLabel(
-              languageTranslate,
-              "differentialDiagnosis",
-              false
-            )}
-            name="chan_doan_phan_biet"
-          >
-            <Input disabled={!isEdit} placeholder="Short text" />
-          </Form.Item>
-
-          <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
-            {translateLabel(
-              languageTranslate,
-              "recommendationsCounseling",
-              false
-            ).toUpperCase()}
-          </Title>
-          <Form.Item
-            disabled={!isEdit}
-            name="khuyen_nghi"
-            tooltip="Có thể tích hợp ChatGPT D-RADS"
-          >
-            <TextArea
-              disabled={!isEdit}
-              autoSize={{ minRows: 4, maxRows: 10 }}
-              placeholder="Nhập khuyến nghị & tư vấn..."
-            />
-          </Form.Item>
+          <ImagingDiagnosisSection
+            abnormalFindings={abnormalFindings}
+            isEdit={isEdit}
+            languageTranslate={languageTranslate}
+            translateLabel={translateLabel}
+          />
 
           <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
             {translateLabel(

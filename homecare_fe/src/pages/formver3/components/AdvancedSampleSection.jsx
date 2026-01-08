@@ -6,20 +6,22 @@ import {
   IMAGE_QUALITY_OPTIONS,
 } from "../formver3.constant";
 
-const AdvancedSampleSection = ({ isEdit = true }) => {
+const AdvancedSampleSection = ({ isEdit = true, isAdvanceSample = true }) => {
   return (
     <Row>
       {/* Mẫu nâng cao */}
-      <Form.Item
-        label="MẪU NÂNG CAO"
-        name="advancedSample"
-        rules={[{ required: true, message: "Chọn thông tin mẫu nâng cao" }]}
-      >
-        <Radio.Group disabled={!isEdit}>
-          <Radio value="no">Không</Radio>
-          <Radio value="yes">Có</Radio>
-        </Radio.Group>
-      </Form.Item>
+      {isAdvanceSample && (
+        <Form.Item
+          label="MẪU NÂNG CAO"
+          name="advancedSample"
+          rules={[{ required: true, message: "Chọn thông tin mẫu nâng cao" }]}
+        >
+          <Radio.Group disabled={!isEdit}>
+            <Radio value="no">Không</Radio>
+            <Radio value="yes">Có</Radio>
+          </Radio.Group>
+        </Form.Item>
+      )}
 
       <Col xs={24}>
         {/* Tiêm thuốc đối quang */}
@@ -58,6 +60,7 @@ const AdvancedSampleSection = ({ isEdit = true }) => {
         </Form.Item>
 
         {/* Thực hiện bổ sung */}
+
         <Form.Item
           label="Thực hiện bổ sung"
           name="additionalAction"

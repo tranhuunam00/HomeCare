@@ -38,6 +38,8 @@ import {
   IMAGE_QUALITY_OPTIONS,
 } from "./formver3.constant";
 import AdvancedSampleSection from "./components/AdvancedSampleSection";
+import ImagingStructureTable from "./components/ImagingStructureTable.JSX";
+import ImagingDiagnosisSection from "./components/ImagingDiagnosisSection";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -99,7 +101,7 @@ export default function DFormVer3({ id_formVer3 }) {
           imageQuality: data.imageQuatity,
           additionalAction: data.addtionalImpletement,
 
-          quy_trinh_url: data.implementMethod,
+          implementMethod: data.implementMethod,
 
           icd10: data.icd10_classification,
           phan_do_loai: data.classify,
@@ -178,7 +180,7 @@ export default function DFormVer3({ id_formVer3 }) {
         id_exam_part: values.id_exam_part,
         id_formver3_name: values.id_formver3_name,
 
-        implementMethod: values.quy_trinh_url,
+        implementMethod: values.implementMethod,
         contrastInjection: values.contrastInjection,
         imageQuatity: values.imageQuality,
         addtionalImpletement: values.additionalAction,
@@ -452,7 +454,6 @@ export default function DFormVer3({ id_formVer3 }) {
               </Form.Item>
             </Col>
           </Row>
-
           <Row gutter={16}>
             <Col xs={24} md={24}>
               <Form.Item
@@ -489,7 +490,6 @@ export default function DFormVer3({ id_formVer3 }) {
               </Form.Item>
             </Col>
           </Row>
-
           <Row gutter={16}>
             <Col xs={24} md={12}>
               <Form.Item
@@ -520,7 +520,6 @@ export default function DFormVer3({ id_formVer3 }) {
               </Form.Item>
             </Col>
           </Row>
-
           {/* Thông tin hệ thống */}
           <Row gutter={16}>
             <Col xs={24} md={12}>
@@ -543,20 +542,17 @@ export default function DFormVer3({ id_formVer3 }) {
           {/* Đánh giá kỹ thuật chụp (checkbox đúng UI) */}
           {/* Đánh giá kỹ thuật chụp */}
           <AdvancedSampleSection isEdit={isEdit} />
-
           {/* Ảnh minh hoạ */}
           <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
             {"Kỹ thuật thực hiện".toUpperCase()}
           </Title>
-
-          <Form.Item name="quy_trinh_url" label="" tooltip="Short text">
+          <Form.Item name="implementMethod" label="" tooltip="Short text">
             <TextArea
               disabled={!isEdit}
               autoSize={{ minRows: 4, maxRows: 10 }}
               placeholder="Nhập mô tả quy trình kỹ thuật..."
             />
           </Form.Item>
-
           {/* Bảng mô tả hình ảnh */}
           <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
             {translateLabel(
@@ -565,234 +561,20 @@ export default function DFormVer3({ id_formVer3 }) {
               false
             ).toUpperCase()}
           </Title>
-
-          <table className={styles.imagingTable}>
-            <thead>
-              <tr>
-                <th>STT</th>
-                <th>Cấu trúc</th>
-                <th>Bình thường</th>
-                <th>Bất thường</th>
-                <th>Xóa</th>
-              </tr>
-            </thead>
-            <tbody>
-              {imagingRows.map((row, idx) => (
-                <tr key={row.id}>
-                  <td>{idx + 1}</td>
-                  <td>
-                    <Input
-                      disabled={!isEdit}
-                      value={row.name}
-                      onChange={(e) => {
-                        const next = [...imagingRows];
-                        next[idx].name = e.target.value;
-                        setImagingRows(next);
-                      }}
-                    />
-                  </td>
-                  <td style={{ textAlign: "center" }}>
-                    <Radio
-                      checked={row.status === "normal"}
-                      disabled={!isEdit}
-                      onChange={() => {
-                        const next = [...imagingRows];
-                        next[idx].status = "normal";
-                        setImagingRows(next);
-                      }}
-                    />
-                  </td>
-                  <td style={{ textAlign: "center" }}>
-                    <Radio
-                      checked={row.status === "abnormal"}
-                      disabled={!isEdit}
-                      onChange={() => {
-                        const next = [...imagingRows];
-                        next[idx].status = "abnormal";
-                        setImagingRows(next);
-                      }}
-                    />
-                  </td>
-                  <td style={{ textAlign: "center" }}>
-                    <Button
-                      danger
-                      size="small"
-                      disabled={imagingRows.length === 1}
-                      onClick={() => {
-                        const ok = window.confirm(
-                          "Bạn có chắc muốn xóa hàng này không?"
-                        );
-                        if (!ok) return;
-
-                        setImagingRows((prev) =>
-                          prev.filter((r) => r.id !== row.id)
-                        );
-                      }}
-                    >
-                      Xóa
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          <Button
-            type="link"
-            disabled={!isEdit}
-            onClick={() =>
-              setImagingRows((prev) => [
-                ...prev,
-                {
-                  id: Date.now(),
-                  name: "",
-                  status: "normal",
-                  description: "",
-                },
-              ])
-            }
-          >
-            + Thêm hàng
-          </Button>
-
-          {imagingRows.some((r) => r.status === "abnormal") && (
-            <>
-              <div style={{ marginTop: 24, fontWeight: 600 }}>
-                Mô tả chi tiết các bất thường
-              </div>
-
-              {imagingRows
-                .filter((r) => r.status === "abnormal")
-                .map((row, idx) => (
-                  <Row key={row.id} gutter={8} style={{ marginTop: 8 }}>
-                    <Col span={1}>{idx + 1}</Col>
-                    <Col span={5}>
-                      <strong>{row.name}</strong>
-                    </Col>
-                    <Col span={18}>
-                      <Input
-                        disabled={!isEdit}
-                        placeholder="Nhập mô tả bất thường..."
-                        value={row.description}
-                        onChange={(e) => {
-                          const next = imagingRows.map((r) =>
-                            r.id === row.id
-                              ? { ...r, description: e.target.value }
-                              : r
-                          );
-                          setImagingRows(next);
-                        }}
-                      />
-                    </Col>
-                  </Row>
-                ))}
-            </>
-          )}
-
+          <ImagingStructureTable
+            rows={imagingRows}
+            setRows={setImagingRows}
+            isEdit={isEdit}
+          />
           {/* Kết luận */}
-          <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
-            {translateLabel(
-              languageTranslate,
-              "impression",
-              false
-            ).toUpperCase()}
-          </Title>
-          {/* <Form.Item
-            name="ket_qua_chan_doan"
-            rules={[{ required: true, message: "Nhập kết luận" }]}
-          >
-            <TextArea
-              disabled={!isEdit}
-              style={{ height: 200 }}
-              placeholder="VD: U máu gan"
-            />
-          </Form.Item> */}
 
-          <div style={{ fontWeight: 650, marginBottom: 8, fontSize: 15 }}>
-            Chẩn đoán hình ảnh
-          </div>
+          <ImagingDiagnosisSection
+            abnormalFindings={abnormalFindings}
+            isEdit={isEdit}
+            languageTranslate={languageTranslate}
+            translateLabel={translateLabel}
+          />
 
-          {abnormalFindings.length > 0 ? (
-            <ul style={{ paddingLeft: 24 }}>
-              {abnormalFindings.map((item, idx) => (
-                <li key={idx} style={{ marginBottom: 6 }}>
-                  {item}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <div style={{ fontStyle: "italic" }}>
-              Chưa ghi nhận bất thường hình ảnh.
-            </div>
-          )}
-
-          <Form.Item
-            label={
-              <span>
-                {translateLabel(
-                  languageTranslate,
-                  "icd10Classification",
-                  false
-                )}
-                <Tooltip title="Tra cứu ICD-10">
-                  <a
-                    href="https://icd.kcb.vn/icd-10/icd10"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ marginLeft: 4 }}
-                  >
-                    <QuestionCircleOutlined />
-                  </a>
-                </Tooltip>
-              </span>
-            }
-            name="icd10"
-          >
-            <Input disabled={!isEdit} placeholder="Link/Code ICD-10" />
-          </Form.Item>
-
-          <Form.Item
-            label={translateLabel(
-              languageTranslate,
-              "gradingClassification",
-              false
-            )}
-            name="phan_do_loai"
-          >
-            <Input disabled={!isEdit} placeholder="Short text" />
-          </Form.Item>
-
-          <Form.Item
-            label={translateLabel(
-              languageTranslate,
-              "differentialDiagnosis",
-              false
-            )}
-            name="chan_doan_phan_biet"
-          >
-            <Input disabled={!isEdit} placeholder="Short text" />
-          </Form.Item>
-
-          <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
-            {translateLabel(
-              languageTranslate,
-              "recommendationsCounseling",
-              false
-            ).toUpperCase()}
-          </Title>
-          <Form.Item
-            disabled={!isEdit}
-            name="khuyen_nghi"
-            tooltip="Có thể tích hợp ChatGPT D-RADS"
-          >
-            <TextArea
-              disabled={!isEdit}
-              autoSize={{ minRows: 4, maxRows: 10 }}
-              placeholder="Nhập khuyến nghị & tư vấn..."
-            />
-          </Form.Item>
-
-          {/* Action bar */}
           {(initialSnap.apiData?.id_doctor == doctor.id ||
             user.id_role == USER_ROLE.ADMIN ||
             !editId) && (
