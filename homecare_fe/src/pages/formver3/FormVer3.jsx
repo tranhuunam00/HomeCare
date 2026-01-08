@@ -33,6 +33,7 @@ import {
 } from "../../constant/app";
 import {
   ADDITIONAL_ACTION_OPTIONS,
+  buildFormVer3Values,
   CONTRAST_INJECTION_OPTIONS,
   DEFAULT_IMAGING_ROWS,
   IMAGE_QUALITY_OPTIONS,
@@ -87,27 +88,7 @@ export default function DFormVer3({ id_formVer3 }) {
         if (!data) return;
 
         /* ===== Map API → Form ===== */
-        form.setFieldsValue({
-          id_template_service: data.id_template_service,
-          id_exam_part: data.id_exam_part,
-          id_formver3_name: data.id_formver3_name,
-
-          language: data.language || "vi",
-          createdAt: dayjs(data.createdAt).format("YYYY-MM-DD"),
-          doctor_name: data.id_doctor_doctor?.full_name,
-
-          advancedSample: data.advanced_sample ? "yes" : "no",
-          contrastInjection: data.contrastInjection,
-          imageQuality: data.imageQuatity,
-          additionalAction: data.addtionalImpletement,
-
-          implementMethod: data.implementMethod,
-
-          icd10: data.icd10_classification,
-          phan_do_loai: data.classify,
-          chan_doan_phan_biet: data.DifferenceDiagnostic,
-          khuyen_nghi: data.recommendation,
-        });
+        form.setFieldsValue(buildFormVer3Values(data));
 
         /* ===== set state phụ thuộc ===== */
         setSelectedIds({

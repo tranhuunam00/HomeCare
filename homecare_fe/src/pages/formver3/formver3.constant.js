@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import { getAge } from "../../constant/app";
 
 export const IMAGE_QUALITY_OPTIONS = [
@@ -156,5 +157,35 @@ export const buildDradv3FormValues = ({ dradsDetail, patientDiagnose }) => {
     khuyen_nghi: dradsDetail?.khuyen_nghi ?? "",
     icd10: dradsDetail?.icd10 ?? "",
     ket_qua_chan_doan: dradsDetail?.ket_qua_chan_doan ?? "",
+  };
+};
+
+export const buildFormVer3Values = (data) => {
+  return {
+    // --- liên kết / cấu hình ---
+    id_template_service: data?.id_template_service,
+    id_exam_part: data?.id_exam_part,
+    id_formver3_name: data?.id_formver3_name,
+
+    // --- meta ---
+    language: data?.language || "vi",
+    createdAt: data?.createdAt
+      ? dayjs(data.createdAt).format("YYYY-MM-DD")
+      : undefined,
+    doctor_name: data?.id_doctor_doctor?.full_name,
+
+    // --- kỹ thuật ---
+    advancedSample: data?.advanced_sample ? "yes" : "no",
+    contrastInjection: data?.contrastInjection,
+    imageQuality: data?.imageQuatity,
+    additionalAction: data?.addtionalImpletement,
+
+    implementMethod: data?.implementMethod,
+
+    // --- chẩn đoán ---
+    icd10: data?.icd10_classification,
+    phan_do_loai: data?.classify,
+    chan_doan_phan_biet: data?.DifferenceDiagnostic,
+    khuyen_nghi: data?.recommendation,
   };
 };

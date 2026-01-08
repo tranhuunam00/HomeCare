@@ -39,6 +39,7 @@ import TranslateListRecords from "../../../doctor_use_form_ver2/use/items/Transl
 import SmartCASignModal from "../../../doctor_use_form_ver2/SmartCASignModal/SmartCASignModal";
 import {
   buildDradv3FormValues,
+  buildFormVer3Values,
   DEFAULT_IMAGING_ROWS,
   LANGUAGE_OPTIONS,
 } from "../../formver3.constant";
@@ -99,6 +100,30 @@ export default function DoctorUseDFormVer3({
 
   const [imagingRows, setImagingRows] = useState(DEFAULT_IMAGING_ROWS);
 
+  console.log("patientDiagnose", patientDiagnose);
+  console.log("formVer3", formVer3);
+  console.log("selectedIDS", selectedIDs);
+
+  useEffect(() => {
+    if (formVer3) {
+      form.setFieldsValue(buildFormVer3Values(formVer3));
+      try {
+        const rows = JSON.parse(formVer3.imageDescription || "[]");
+
+        setImagingRows(
+          Array.isArray(rows) && rows.length ? rows : DEFAULT_IMAGING_ROWS
+        );
+      } catch {
+        setImagingRows(DEFAULT_IMAGING_ROWS);
+      }
+
+      /* ===== snapshot ===== */
+      setInitialSnap({
+        formValues: form.getFieldsValue(),
+        apiData: formVer3,
+      });
+    }
+  }, [formVer3]);
   const abnormalFindings = useMemo(() => {
     return imagingRows
       .filter(
@@ -478,6 +503,10 @@ export default function DoctorUseDFormVer3({
                         `/formVer3?id_formver3_name=${id_formver3_name}`
                       );
                       setFormVer3(res.data.data.items[0]);
+                      setSelectedIDs((prev) => ({
+                        ...prev,
+                        id_formver3_name: id_formver3_name,
+                      }));
                     } catch (e) {
                       toast.error("Không tải được dữ liệu. Vui lòng thử lại.");
                     } finally {
@@ -640,44 +669,8 @@ export default function DoctorUseDFormVer3({
               editId={idEdit}
             />
           )}
-
-          <Title level={4} style={{ margin: "24px 0 16px" }}>
-            <a
-              style={{
-                fontStyle: "italic",
-                color: "#b17b16ff",
-                textDecoration: "underline",
-                cursor: "pointer",
-              }}
-              onClick={() => setHistoryOpen(true)}
-            >
-              LỊCH SỬ THAY ĐỔI
-            </a>
-          </Title>
-
-          <Title level={4} style={{ margin: "24px 0 16px" }}>
-            <a
-              style={{
-                fontStyle: "italic",
-                color: "#b17b16ff",
-                textDecoration: "underline",
-                cursor: "pointer",
-              }}
-              onClick={() => setTranslateOpen(true)}
-            >
-              CÁC BẢN DỊCH
-            </a>
-          </Title>
         </Form>
       )}
-
-      <HistoryModal
-        open={historyOpen}
-        onClose={() => setHistoryOpen(false)}
-        idRoot={initialSnap.apiData?.id_root || idEdit}
-        idCurrent={idEdit}
-        language={languageTranslate}
-      />
 
       <TranslateListRecords
         open={translateOpen}
