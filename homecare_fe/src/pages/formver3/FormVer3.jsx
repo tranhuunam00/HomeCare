@@ -39,7 +39,7 @@ import {
   IMAGE_QUALITY_OPTIONS,
 } from "./formver3.constant";
 import AdvancedSampleSection from "./components/AdvancedSampleSection";
-import ImagingStructureTable from "./components/ImagingStructureTable.JSX";
+import ImagingStructureTable from "./components/ImagingStructureTable3.jsx";
 import ImagingDiagnosisSection from "./components/ImagingDiagnosisSection";
 
 const { Title } = Typography;
