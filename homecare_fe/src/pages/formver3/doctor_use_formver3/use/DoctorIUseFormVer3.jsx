@@ -20,14 +20,12 @@ import { useGlobalAuth } from "../../../../contexts/AuthContext";
 import API_CALL from "../../../../services/axiosClient";
 import useVietnamAddress from "../../../../hooks/useVietnamAddress";
 import {
-  getAge,
   sortTemplateServices,
   TRANSLATE_LANGUAGE,
   translateLabel,
   USER_ROLE,
 } from "../../../../constant/app";
 import { APPROVAL_STATUS } from "../../../../components/ApprovalStatusTag";
-import { toISODate } from "../../../doctor_use_form_ver2/use/util";
 
 import FormActionBar, {
   KEY_ACTION_BUTTON,
@@ -63,7 +61,6 @@ export default function DoctorUseDFormVer3({
     templateServices,
     user,
     doctor,
-    setIsReadingForm,
     setExamParts,
     setTemplateServices,
   } = useGlobalAuth();
@@ -202,6 +199,40 @@ export default function DoctorUseDFormVer3({
     }
   };
 
+  const onApprove = async () => {
+    if (!idEdit) {
+      toast.warning("Chưa có form để phê duyệt");
+      return;
+    }
+
+    if (!window.confirm("Bạn có chắc chắn muốn phê duyệt kết quả này không?")) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const res = await API_CALL.patch(`/doctorUseFormVer3/${idEdit}/approve`);
+
+      toast.success("Phê duyệt kết quả thành công");
+
+      setStatus(APPROVAL_STATUS.APPROVED);
+      if (res?.data?.data) {
+        setInitialSnap((prev) => ({
+          ...prev,
+          apiData: res.data.data,
+        }));
+      }
+    } catch (error) {
+      console.error("[onApprove] error", error);
+      toast.error(
+        error?.response?.data?.message || "Không thể phê duyệt kết quả"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     const fetchDataFromServerWhenHaveIDs = async () => {
       try {
@@ -251,7 +282,6 @@ export default function DoctorUseDFormVer3({
                 file: undefined, // ảnh từ API thì chưa có file local
               })) || [];
 
-          console.log("descImages", descImages);
           setImageList(descImages);
           try {
             const rows = JSON.parse(
@@ -275,7 +305,6 @@ export default function DoctorUseDFormVer3({
             doctorUseFormVer3Server?.id_patient_diagnose_patient_diagnose
         );
 
-        console.log("formValues", formValues);
         form.setFieldsValue(formValues);
       } catch (error) {
         console.log(
@@ -695,7 +724,7 @@ export default function DoctorUseDFormVer3({
                 }
                 navigate(`/home/doctor-use-form-drad`);
               }}
-              onApprove={async () => {}}
+              onApprove={onApprove}
               onAction={(key) => {
                 if (
                   !window.confirm("Bạn có chắc muốn lưu lại dữ liệu không?")
