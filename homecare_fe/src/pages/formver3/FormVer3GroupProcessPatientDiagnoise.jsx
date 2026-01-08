@@ -53,9 +53,9 @@ const FormVer3GroupProcessPatientDiagnoise = ({
           },
         });
 
-        if (doctorUseDFormVer3.data.data.items?.length) {
+        if (doctorUseDFormVer3.data.data.data?.length) {
           navigate(
-            `/home/doctor-use-form-drad/detail/${doctorUseDFormVer3.data.data.items[0].id}`
+            `/home/doctor-use-formver3/detail/${doctorUseDFormVer3.data.data.data[0].id}`
           );
         } else {
           navigate(`/home/form-drad-v3/use/patient-diagnose/${id}`);

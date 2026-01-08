@@ -42,7 +42,7 @@ const AdvancedSampleSection = ({ isEdit = true, isAdvanceSample = true }) => {
         {/* Chất lượng hình ảnh */}
         <Form.Item
           label="Chất lượng hình ảnh"
-          name="imageQuality"
+          name="imageQuatity"
           rules={[
             {
               required: true,

@@ -216,6 +216,11 @@ function App() {
           />
 
           <Route
+            path="doctor-use-formver3/detail/:id_doctor_use_formver3"
+            element={<DoctorUseDFormVer3 isUse={true} />}
+          />
+
+          <Route
             path="doctor-use-form-drad/detail/:id"
             element={<DoctorUseDFormVer2 isUse={true} />}
           />

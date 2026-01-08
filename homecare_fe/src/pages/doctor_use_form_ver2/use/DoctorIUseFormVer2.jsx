@@ -564,7 +564,6 @@ export default function DoctorUseDFormVer2({
     try {
       setLoading(true);
 
-      // 🟢 Nếu không phải "Phê duyệt" → thực hiện lưu form
       const fd = buildFormDataDoctorUseFormVer2(values, {
         imageDescEditor,
         id_formver2: idFormVer2 || initialSnap.apiData?.id_formver2,

@@ -163,7 +163,7 @@ export default function DFormVer3({ id_formVer3 }) {
 
         implementMethod: values.implementMethod,
         contrastInjection: values.contrastInjection,
-        imageQuatity: values.imageQuality,
+        imageQuatity: values.imageQuatity,
         addtionalImpletement: values.additionalAction,
 
         advanced_sample: values.advancedSample === "yes",
@@ -373,7 +373,7 @@ export default function DFormVer3({ id_formVer3 }) {
             advancedSample: "no",
             additionalAction: ADDITIONAL_ACTION_OPTIONS[0].value,
             contrastInjection: CONTRAST_INJECTION_OPTIONS[0].value,
-            imageQuality: IMAGE_QUALITY_OPTIONS[0].value,
+            imageQuatity: IMAGE_QUALITY_OPTIONS[0].value,
           }}
         >
           {/* Hàng 1 */}

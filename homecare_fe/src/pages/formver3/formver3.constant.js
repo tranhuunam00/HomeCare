@@ -114,49 +114,63 @@ export const LANGUAGE_OPTIONS = [
   { label: "Welsh (Cymraeg)", value: "cy" },
 ];
 
-export const buildDradv3FormValues = ({ dradsDetail, patientDiagnose }) => {
+export const buildDradv3FormValues = ({
+  doctorUseFormVer3,
+  patientDiagnose,
+}) => {
   return {
-    benh_nhan_ho_ten: dradsDetail?.benh_nhan_ho_ten ?? patientDiagnose.name,
+    benh_nhan_ho_ten:
+      doctorUseFormVer3?.benh_nhan_ho_ten ?? patientDiagnose.name,
 
     benh_nhan_gioi_tinh:
-      dradsDetail?.benh_nhan_gioi_tinh ?? patientDiagnose.gender,
+      doctorUseFormVer3?.benh_nhan_gioi_tinh ?? patientDiagnose.gender,
 
-    benh_nhan_tuoi: dradsDetail?.benh_nhan_tuoi ?? getAge(patientDiagnose.dob),
+    benh_nhan_tuoi:
+      doctorUseFormVer3?.benh_nhan_tuoi ?? getAge(patientDiagnose.dob),
 
     benh_nhan_quoc_tich:
-      dradsDetail?.benh_nhan_quoc_tich ?? patientDiagnose.countryCode,
+      doctorUseFormVer3?.benh_nhan_quoc_tich ?? patientDiagnose.countryCode,
 
     benh_nhan_dien_thoai:
-      dradsDetail?.benh_nhan_dien_thoai ?? patientDiagnose.phoneNumber,
+      doctorUseFormVer3?.benh_nhan_dien_thoai ?? patientDiagnose.phoneNumber,
 
-    benh_nhan_email: dradsDetail?.benh_nhan_email ?? patientDiagnose.email,
+    benh_nhan_email:
+      doctorUseFormVer3?.benh_nhan_email ?? patientDiagnose.email,
 
-    benh_nhan_pid: dradsDetail?.benh_nhan_pid ?? patientDiagnose.PID,
+    benh_nhan_pid: doctorUseFormVer3?.benh_nhan_pid ?? patientDiagnose.PID,
 
-    benh_nhan_sid: dradsDetail?.benh_nhan_sid ?? patientDiagnose.SID,
+    benh_nhan_sid: doctorUseFormVer3?.benh_nhan_sid ?? patientDiagnose.SID,
 
     benh_nhan_lam_sang:
-      dradsDetail?.benh_nhan_lam_sang ?? patientDiagnose.Indication,
+      doctorUseFormVer3?.benh_nhan_lam_sang ?? patientDiagnose.Indication,
 
     benh_nhan_dia_chi_so_nha:
-      dradsDetail?.benh_nhan_dia_chi_so_nha ?? patientDiagnose.address,
+      doctorUseFormVer3?.benh_nhan_dia_chi_so_nha ?? patientDiagnose.address,
 
     benh_nhan_dia_chi_xa_phuong:
-      dradsDetail?.benh_nhan_dia_chi_xa_phuong ?? patientDiagnose.ward_code,
+      doctorUseFormVer3?.benh_nhan_dia_chi_xa_phuong ??
+      patientDiagnose.ward_code,
 
     benh_nhan_dia_chi_tinh_thanh_pho:
-      dradsDetail?.benh_nhan_dia_chi_tinh_thanh_pho ??
+      doctorUseFormVer3?.benh_nhan_dia_chi_tinh_thanh_pho ??
       patientDiagnose.province_code,
 
     id_template_service:
-      dradsDetail?.id_template_service ?? patientDiagnose.id_template_service,
+      doctorUseFormVer3?.id_template_service ??
+      patientDiagnose.id_template_service,
 
-    id_exam_part: dradsDetail?.id_exam_part ?? patientDiagnose.id_exam_part,
+    id_exam_part:
+      doctorUseFormVer3?.id_exam_part ?? patientDiagnose.id_exam_part,
 
-    ket_luan: dradsDetail?.ket_luan ?? "",
-    khuyen_nghi: dradsDetail?.khuyen_nghi ?? "",
-    icd10: dradsDetail?.icd10 ?? "",
-    ket_qua_chan_doan: dradsDetail?.ket_qua_chan_doan ?? "",
+    ket_luan: doctorUseFormVer3?.ket_luan ?? "",
+    khuyen_nghi: doctorUseFormVer3?.recommendation ?? "",
+    icd10: doctorUseFormVer3?.icd10_classification ?? "",
+    implementMethod: doctorUseFormVer3?.implementMethod ?? "",
+    contrastInjection: doctorUseFormVer3?.contrastInjection ?? "",
+    imageQuatity: doctorUseFormVer3?.imageQuatity ?? "",
+    additionalAction: doctorUseFormVer3?.addtionalImpletement ?? "",
+    phan_do_loai: doctorUseFormVer3?.classify,
+    chan_doan_phan_biet: doctorUseFormVer3?.DifferenceDiagnostic,
   };
 };
 
@@ -177,7 +191,7 @@ export const buildFormVer3Values = (data) => {
     // --- kỹ thuật ---
     advancedSample: data?.advanced_sample ? "yes" : "no",
     contrastInjection: data?.contrastInjection,
-    imageQuality: data?.imageQuatity,
+    imageQuatity: data?.imageQuatity,
     additionalAction: data?.addtionalImpletement,
 
     implementMethod: data?.implementMethod,
@@ -189,3 +203,77 @@ export const buildFormVer3Values = (data) => {
     khuyen_nghi: data?.recommendation,
   };
 };
+
+export function buildFormDataDoctorUseFormVer3(values, extra) {
+  const fd = new FormData();
+
+  if (extra.imageList?.length) {
+    const meta = extra.imageList.map((item, idx) => {
+      const hasFile = item.file;
+      return {
+        url: !hasFile ? item.url || item.rawUrl : "",
+        caption: item.caption || "",
+        isChange: hasFile,
+        fileField: hasFile ? `ImageDescFiles` : undefined,
+      };
+    });
+
+    fd.append("imageDescMeta", JSON.stringify(meta));
+
+    extra.imageList.forEach((item, idx) => {
+      if (item.file) {
+        fd.append(`ImageDescFiles`, item.file);
+      }
+    });
+  }
+  if (extra?.id_patient_diagnose)
+    fd.append("id_patient_diagnose", extra?.id_patient_diagnose);
+
+  if (extra?.formVer3)
+    fd.append("id_formver3", String(extra.formVer3.id ?? ""));
+
+  if (extra?.imagingRows)
+    fd.append("imageDescription", JSON.stringify(extra?.imagingRows));
+  if (extra?.abnormalFindings)
+    fd.append("unUsualDescription", extra.abnormalFindings.join("; "));
+
+  // ----------------------------------------
+
+  fd.append("id_template_service", String(values.id_template_service ?? ""));
+  fd.append("id_exam_part", String(values.id_exam_part ?? ""));
+  fd.append("id_print_template", String(values.id_print_template ?? ""));
+
+  fd.append("language", values.language);
+  fd.append("implementMethod", values.implementMethod);
+  fd.append("contrastInjection", values.contrastInjection);
+  fd.append("imageQuatity", values.imageQuatity);
+
+  fd.append("addtionalImpletement", values.additionalAction);
+  fd.append("DifferenceDiagnostic", values.chan_doan_phan_biet);
+  fd.append("classify", values.phan_do_loai);
+
+  fd.append("recommendation", values.khuyen_nghi ?? "");
+  fd.append("icd10_classification", values.icd10 ?? "");
+
+  // ---- Thông tin bệnh nhân
+  fd.append("benh_nhan_ho_ten", values.benh_nhan_ho_ten ?? "");
+  fd.append("benh_nhan_gioi_tinh", values.benh_nhan_gioi_tinh ?? "");
+  fd.append("benh_nhan_tuoi", String(values.benh_nhan_tuoi ?? ""));
+  fd.append("benh_nhan_dia_chi_so_nha", values.benh_nhan_dia_chi_so_nha ?? "");
+  fd.append(
+    "benh_nhan_dia_chi_xa_phuong",
+    values.benh_nhan_dia_chi_xa_phuong ?? ""
+  );
+  fd.append(
+    "benh_nhan_dia_chi_tinh_thanh_pho",
+    values.benh_nhan_dia_chi_tinh_thanh_pho ?? ""
+  );
+  fd.append("benh_nhan_quoc_tich", values.benh_nhan_quoc_tich ?? "");
+  fd.append("benh_nhan_dien_thoai", values.benh_nhan_dien_thoai ?? "");
+  fd.append("benh_nhan_email", values.benh_nhan_email ?? "");
+  fd.append("benh_nhan_pid", values.benh_nhan_pid ?? "");
+  fd.append("benh_nhan_sid", values.benh_nhan_sid ?? "");
+  fd.append("benh_nhan_lam_sang", values.benh_nhan_lam_sang ?? "");
+
+  return fd;
+}

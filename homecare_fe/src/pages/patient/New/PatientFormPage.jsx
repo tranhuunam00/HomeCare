@@ -530,19 +530,7 @@ const PatientFormPage = () => {
               </Select>
             </Form.Item>
           )}
-          {/* Quốc tịch */}
 
-          {/* Ngày sinh + tuổi */}
-
-          {/* Số điện thoại */}
-
-          {/* Tỉnh - Huyện - Xã */}
-
-          {/* Chi tiết địa chỉ */}
-
-          {/* PID - SID - CCCD */}
-
-          {/* Nút Submit */}
           <Row justify="end" gutter={8}>
             <Col>
               <Form.Item>
