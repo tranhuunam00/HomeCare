@@ -41,6 +41,8 @@ import {
 import AdvancedSampleSection from "./components/AdvancedSampleSection";
 import ImagingStructureTable from "./components/ImagingStructureTable3.jsx";
 import ImagingDiagnosisSection from "./components/ImagingDiagnosisSection";
+import PrintPreviewVer2NotDataDiagnose from "../formver2/PreviewVer2/PrintPreviewVer2NotDataDiagnose.jsx";
+import PrintPreviewVer3NotDataDiagnose from "./components/PrintPreviewVer3NotDataDiagnose.jsx";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -348,7 +350,7 @@ export default function DFormVer3({ id_formVer3 }) {
     <div style={{ maxWidth: 980, margin: "0 auto", padding: 0 }}>
       <Title level={3} style={{ textAlign: "center", marginBottom: 24 }}>
         {editId
-          ? "CẬP NHẬT BỘ MẪU KẾT QUẢ D-FORM"
+          ? "CẬP NHẬT BỘ MẪU KẾT QUẢ D-FORM V.3"
           : "TẠO MỚI BỘ MẪU KẾT QUẢ D-FORM V.3"}
       </Title>
 
@@ -595,6 +597,26 @@ export default function DFormVer3({ id_formVer3 }) {
           )}
         </Form>
       )}
+
+      <Modal
+        open={previewOpen}
+        onCancel={() => setPreviewOpen(false)}
+        footer={null}
+        width={1100}
+      >
+        <PrintPreviewVer3NotDataDiagnose
+          formSnapshot={form.getFieldsValue()}
+          selectedExamPart={examParts?.find(
+            (ex) => ex.id == form.getFieldValue("id_exam_part")
+          )}
+          selectedTemplateService={templateServices?.find(
+            (ex) => ex.id == form.getFieldValue("id_template_service")
+          )}
+          initialSnap={initialSnap}
+          editId={editId}
+          imagingRows={imagingRows}
+        />
+      </Modal>
     </div>
   );
 }
