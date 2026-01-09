@@ -816,7 +816,7 @@ export default function DoctorUseDFormVer3({
                 if (!window.confirm("Bạn có chắc muốn thoát không?")) {
                   return;
                 }
-                navigate(`/home/doctor-use-form-drad`);
+                navigate(`/home/patients-diagnose`);
               }}
               onApprove={onApprove}
               onAction={(key) => {
