@@ -36,6 +36,7 @@ import HistoryModal from "../../../doctor_use_form_ver2/use/items/HistoryModal";
 import TranslateListRecords from "../../../doctor_use_form_ver2/use/items/TranslateListRecords";
 import SmartCASignModal from "../../../doctor_use_form_ver2/SmartCASignModal/SmartCASignModal";
 import {
+  APPROVAL_FORMVER3_STATUS_NAME,
   buildDradv3FormValues,
   buildFormDataDoctorUseFormVer3,
   buildFormVer3Values,
@@ -45,6 +46,7 @@ import {
 import AdvancedSampleSection from "../../components/AdvancedSampleSection";
 import ImagingStructureTable from "../../components/ImagingStructureTable3.jsx";
 import ImagingDiagnosisSection from "../../components/ImagingDiagnosisSection";
+import PrintPreviewVer3NotDataDiagnose from "../../components/PrintPreviewVer3NotDataDiagnose.jsx";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -81,6 +83,7 @@ export default function DoctorUseDFormVer3({
   const [languageTranslate, setLanguageTransslate] = useState(
     TRANSLATE_LANGUAGE.VI
   );
+
   const [status, setStatus] = useState(APPROVAL_STATUS.DRAFT);
   const [initialSnap, setInitialSnap] = useState({
     formValues: null,
@@ -216,7 +219,7 @@ export default function DoctorUseDFormVer3({
 
       toast.success("Phê duyệt kết quả thành công");
 
-      setStatus(APPROVAL_STATUS.APPROVED);
+      setStatus(APPROVAL_FORMVER3_STATUS_NAME[2]);
       if (res?.data?.data) {
         setInitialSnap((prev) => ({
           ...prev,
@@ -283,6 +286,9 @@ export default function DoctorUseDFormVer3({
               })) || [];
 
           setImageList(descImages);
+          setStatus(
+            APPROVAL_FORMVER3_STATUS_NAME[doctorUseFormVer3Server.status]
+          );
           try {
             const rows = JSON.parse(
               doctorUseFormVer3Server.imageDescription || "[]"
@@ -368,7 +374,7 @@ export default function DoctorUseDFormVer3({
           toast.success("Tạo mới form thành công");
           setIdEdit(newData.id);
 
-          setStatus(APPROVAL_STATUS.DRAFT);
+          setStatus(APPROVAL_FORMVER3_STATUS_NAME[1]);
           setIsEdit(false);
           setInitialSnap({
             formValues: form.getFieldsValue(),
@@ -804,10 +810,10 @@ export default function DoctorUseDFormVer3({
                       KEY_ACTION_BUTTON.edit,
                       KEY_ACTION_BUTTON.approve,
                       KEY_ACTION_BUTTON.preview,
-                      KEY_ACTION_BUTTON.AI,
-                      KEY_ACTION_BUTTON.translate_multi,
-                      KEY_ACTION_BUTTON.translate_en,
-                      KEY_ACTION_BUTTON.sign,
+                      // KEY_ACTION_BUTTON.AI,
+                      // KEY_ACTION_BUTTON.translate_multi,
+                      // KEY_ACTION_BUTTON.translate_en,
+                      // KEY_ACTION_BUTTON.sign,
                       KEY_ACTION_BUTTON.exit,
                     ]
               }
@@ -862,6 +868,38 @@ export default function DoctorUseDFormVer3({
         onClose={() => setSignModalOpen(false)}
         id_doctor_use_form_ver3={idEdit}
       />
+
+      <Modal
+        open={previewOpen}
+        onCancel={() => setPreviewOpen(false)}
+        footer={null}
+        width={1100}
+      >
+        <PrintPreviewVer3NotDataDiagnose
+          approvalStatus={status}
+          imagingRows={imagingRows}
+          formSnapshot={{
+            ...form.getFieldsValue(),
+            createdAt: initialSnap?.apiData?.createdAt,
+          }}
+          selectedExamPart={examParts?.find(
+            (ex) => ex.id == form.getFieldValue("id_exam_part")
+          )}
+          selectedTemplateService={templateServices?.find(
+            (ex) => ex.id == form.getFieldValue("id_template_service")
+          )}
+          initialSnap={initialSnap}
+          editId={idEdit}
+          imageList={imageList}
+          isUse={isUse}
+          doctor={initialSnap?.apiData?.id_doctor_doctor || doctor}
+          printTemplate={
+            printTemplate ||
+            initialSnap.apiData?.id_print_template_print_template
+          }
+          languageTranslate={languageTranslate}
+        />
+      </Modal>
     </div>
   );
 }

@@ -7,6 +7,18 @@ export const IMAGE_QUALITY_OPTIONS = [
   { value: "bad", label: "Không đạt" },
 ];
 
+export const APPROVAL_FORMVER3_STATUS = {
+  DRAFT: 1,
+  APPROVED: 2,
+  REJECTED: 3,
+};
+
+export const APPROVAL_FORMVER3_STATUS_NAME = {
+  1: "draft",
+  2: "approved",
+  3: "rejected",
+};
+
 export const ADDITIONAL_ACTION_OPTIONS = [
   { value: "no", label: "Không" },
   { value: "extra", label: "Chụp thêm" },
@@ -16,6 +28,10 @@ export const CONTRAST_INJECTION_OPTIONS = [
   { value: "no", label: "Không" },
   { value: "yes", label: "Có" },
 ];
+
+export const getOptionLabel = (options = [], value) => {
+  return options.find((opt) => opt.value == value)?.label || "";
+};
 
 export const DEFAULT_IMAGING_ROWS = [
   { id: 1, name: "Phổi", status: "normal", description: "" },

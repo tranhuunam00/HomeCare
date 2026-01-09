@@ -80,7 +80,7 @@ export default function FormActionBar({
       icon: <ReloadOutlined />,
       onClick: onReset ?? emptyF,
       disabled:
-        approvalStatus === APPROVAL_STATUS.APPROVED || (!isEdit && !!editId),
+        approvalStatus == APPROVAL_STATUS.APPROVED || (!isEdit && !!editId),
     },
     {
       key: "save",
