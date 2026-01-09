@@ -150,7 +150,7 @@ export default function DoctorUseDFormVer3({
 
   useEffect(() => {
     try {
-      if (selectedIDs.id_template_service || selectedIDs.id_exam_part) {
+      if (!selectedIDs.id_template_service || !selectedIDs.id_exam_part) {
         setFilteredFormVer3Names([]);
       }
 
@@ -178,7 +178,7 @@ export default function DoctorUseDFormVer3({
       console.log("error", error);
       toast.error("Không thể tải danh sách tên mẫu FORM V3`");
     }
-  }, [selectedIDs]);
+  }, [selectedIDs.id_exam_part, selectedIDs.id_template_service]);
 
   const reloadTemplateAndExamPart = async () => {
     try {
@@ -389,8 +389,82 @@ export default function DoctorUseDFormVer3({
       pendingAction.current = null;
     }
   };
+  const restoreFromSnapshot = () => {
+    if (!idEdit) {
+      const ok = window.confirm(
+        "Toàn bộ dữ liệu đang nhập sẽ bị xóa. Bạn có chắc muốn reset?"
+      );
+      if (!ok) return;
 
-  const restoreFromSnapshot = () => {};
+      form.resetFields();
+
+      setImageList([{}, {}, {}]);
+      setImagingRows(DEFAULT_IMAGING_ROWS);
+      setFormVer3(null);
+
+      setSelectedIDs({
+        id_template_service: null,
+        id_exam_part: null,
+        id_formver3_name: null,
+      });
+
+      toast.success("Đã reset form tạo mới");
+      return;
+    }
+
+    if (idEdit && isEdit && initialSnap?.apiData) {
+      const ok = window.confirm(
+        "Form sẽ quay về trạng thái gốc từ hệ thống. Bạn có chắc muốn hoàn tác?"
+      );
+      if (!ok) return;
+
+      const apiData = initialSnap.apiData;
+
+      // 🔹 rebuild form values từ API
+      const formValues = buildDradv3FormValues({
+        doctorUseFormVer3: apiData,
+        patientDiagnose:
+          apiData.id_patient_diagnose_patient_diagnose || patientDiagnose,
+      });
+
+      formValues.id_formver3_name =
+        apiData.id_formver3_formver3?.id_formver3_name;
+
+      form.setFieldsValue(formValues);
+
+      try {
+        const rows = JSON.parse(apiData.imageDescription || "[]");
+        setImagingRows(
+          Array.isArray(rows) && rows.length ? rows : DEFAULT_IMAGING_ROWS
+        );
+      } catch {
+        setImagingRows(DEFAULT_IMAGING_ROWS);
+      }
+
+      const descImages =
+        apiData.image_doctor_use_form_ver3s
+          ?.filter((x) => x.kind === "hinh_anh_mo_ta" || x.kind === "desc")
+          ?.map((x) => ({
+            url: x.url,
+            caption: x.desc || "",
+            rawUrl: x.url,
+            file: undefined,
+          })) || [];
+
+      setImageList(descImages);
+      setFormVer3(apiData.id_formver3_formver3);
+
+      setSelectedIDs({
+        id_template_service:
+          apiData.id_patient_diagnose_patient_diagnose?.id_template_service,
+        id_exam_part:
+          apiData.id_patient_diagnose_patient_diagnose?.id_exam_part,
+        id_formver3_name: apiData.id_formver3_formver3?.id_formver3_name,
+      });
+
+      toast.success("Đã hoàn tác về dữ liệu gốc từ hệ thống");
+    }
+  };
 
   return (
     <div style={{ maxWidth: 980, margin: "0 auto", padding: 0 }}>
@@ -466,7 +540,7 @@ export default function DoctorUseDFormVer3({
                 labelCol={{ flex: "0 0 90px" }}
               >
                 <Select
-                  placeholder="Chọn kỹ thuật"
+                  placeholder="Chọn chỉ định"
                   disabled={!isEdit || patientDiagnose?.id}
                   allowClear
                   onChange={(value) => {

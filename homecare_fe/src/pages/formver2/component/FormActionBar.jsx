@@ -79,7 +79,8 @@ export default function FormActionBar({
       label: "RESET",
       icon: <ReloadOutlined />,
       onClick: onReset ?? emptyF,
-      disabled: approvalStatus == APPROVAL_STATUS.APPROVED,
+      disabled:
+        approvalStatus === APPROVAL_STATUS.APPROVED || (!isEdit && !!editId),
     },
     {
       key: "save",
