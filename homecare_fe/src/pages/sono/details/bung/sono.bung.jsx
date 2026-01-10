@@ -51,7 +51,7 @@ const FIELD1_OPTIONS = [
   "Tuyến vú và hố nách",
 ];
 
-const groupConclusionsByField = (list) => {
+const groupConclusionsByField = (list = []) => {
   const grouped = {};
 
   list.forEach((item) => {
@@ -121,6 +121,7 @@ const UltrasoundBungForm = () => {
   const [isApproved, setIsApproved] = useState(false);
   const [printTemplate, setPrintTemplate] = useState(null);
   const [initialSnap, setInitialSnap] = useState({});
+  const [patientDiagnoseInitial, setPatientDiagnoseInitial] = useState(null);
   const [idEdit, setIdEdit] = useState(id);
   const [openPreview, setOpenPreview] = useState(false);
   const [patientDiagnose, setPatientDiagnose] = useState(null);
@@ -155,7 +156,7 @@ const UltrasoundBungForm = () => {
     const f1 = parsed.field1 || FIELD1_OPTIONS[0];
     setField1(f1);
 
-    setList(parsed.list);
+    setList(Array.isArray(parsed.list) ? parsed.list : []);
     form.setFieldsValue({ field_1: f1 });
 
     // Parse full rowsByField
@@ -242,6 +243,8 @@ const UltrasoundBungForm = () => {
 
         setSelectedProvince(formValues.benh_nhan_dia_chi_tinh_thanh_pho);
         setPatientDiagnose(sonoDetail || patientDiagnose);
+        setPatientDiagnoseInitial(formValues);
+
         setIsApproved(
           sonoDetail?.status === SONO_STATUS.APPROVED ? true : false
         );
@@ -357,6 +360,72 @@ const UltrasoundBungForm = () => {
     }));
     setRowsByField((prev) => ({ ...prev, [f]: parents }));
     setRows(parents);
+  };
+
+  const handleReset = () => {
+    if (
+      !window.confirm(
+        "Bạn có chắc chắn muốn reset dữ liệu siêu âm về trạng thái ban đầu không?"
+      )
+    ) {
+      return;
+    }
+
+    // ===============================
+    // CASE 1: EDIT → reset về DB
+    // ===============================
+    if (idEdit && initialSnap?.ket_qua_chan_doan) {
+      mapSonoDataToForm(initialSnap);
+      setVoiceList([]);
+      return;
+    }
+
+    // ===============================
+    // CASE 2: CREATE nhưng CÓ patient_diagnose_id
+    // → giữ thông tin bệnh nhân
+    // ===============================
+    if (!idEdit && idPatientDiagnose) {
+      const defaultField = field1 || FIELD1_OPTIONS[0];
+      const STRUCT = getSTRUCT(defaultField);
+
+      const emptyRows = Object.keys(STRUCT).map((key) => ({
+        structure: key,
+        statuses: ["Không thấy bất thường"],
+        children: [
+          { status: "Không thấy bất thường", position: null, size: null },
+        ],
+      }));
+
+      form.setFieldsValue({
+        ...patientDiagnoseInitial,
+        field_1: defaultField,
+        id_template_service: "D-SONO",
+        language: "vi",
+      });
+
+      setList([]);
+      setRows(emptyRows);
+      setRowsByField((prev) => ({
+        ...prev,
+        [defaultField]: emptyRows,
+      }));
+      setVoiceList([]);
+
+      return;
+    }
+
+    // ===============================
+    // CASE 3: CREATE + KHÔNG patient
+    // ===============================
+    form.resetFields();
+    setList([]);
+    setRows([]);
+    setRowsByField({
+      [FIELD1_OPTIONS[0]]: [],
+      [FIELD1_OPTIONS[1]]: [],
+      [FIELD1_OPTIONS[2]]: [],
+    });
+    setVoiceList([]);
   };
 
   const handleField1Change = (val) => {
@@ -518,8 +587,6 @@ const UltrasoundBungForm = () => {
     commitRowsUpdate(updated);
   };
 
-  const grouped = groupConclusionsByField(list);
-
   // remove single list item from conclusion panel (also unselect status in parent)
   const removeListItem = (index) => {
     const item = list[index];
@@ -562,10 +629,6 @@ const UltrasoundBungForm = () => {
   // Save logic
   const handleSave = async (status = SONO_STATUS.PENDING) => {
     try {
-      if (list.length === 0) {
-        toast.warning("Bạn chưa thêm mô tả siêu âm nào!");
-        return;
-      }
       setLoadingAI(true);
       const values = await form.validateFields();
       const payload = {
@@ -596,7 +659,7 @@ const UltrasoundBungForm = () => {
       navigate(`/home/sono/bung/${newId}`);
     } catch (err) {
       console.error(err);
-      toast.error("Lưu thất bại!");
+      toast.error("Lưu thất bại! Vui lòng kiểm tra lại thông tin nhập");
     } finally {
       setLoadingAI(false);
     }
@@ -1138,9 +1201,7 @@ const UltrasoundBungForm = () => {
             navigate(`/home/`);
           }}
           isEdit={isEdit}
-          onReset={() => {
-            mapSonoDataToForm(initialSnap);
-          }}
+          onReset={handleReset}
           onEdit={() => {
             if (isEdit === true) setIsEdit(false);
             else setIsEdit(user.id_role == USER_ROLE.ADMIN || !idEdit);
