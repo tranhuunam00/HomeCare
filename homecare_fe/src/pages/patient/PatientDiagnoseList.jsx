@@ -41,6 +41,10 @@ import styles from "./PatientDiagnoseList.module.scss";
 import ColumnSettingModal from "./setting/ColumnSettingModal";
 import DragDropExample from "./setting/ColumnSettingModal";
 import PatientDiagnoiseDetailPage from "./Detail/DetailPatientDiagnose";
+import useVietnamAddress, {
+  getProvinceNameByCode,
+  getWardNameByCode,
+} from "../../hooks/useVietnamAddress";
 
 const { Option } = Select;
 
@@ -104,6 +108,13 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
   const [customColumns, setCustomColumns] = useState([]);
   const [chosenRecord, setChosenRecord] = useState();
   const [returnStatus, setReturnStatus] = useState(false);
+
+  const { provinces, wards, setSelectedProvince } = useVietnamAddress();
+  const getProvinceName = (code) =>
+    provinces?.find((p) => p.code === code)?.name || code || "-";
+
+  const getWardName = (code) =>
+    wards?.find((w) => w.code === code)?.name || code || "-";
 
   const [visibleKeys, setVisibleKeys] = useState([]);
   const {
@@ -205,7 +216,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         dataIndex: "dob",
         key: "dob",
         width: 80,
-        align: "right", // ✅ CĂN BÊN PHẢI
+        align: "center", // ✅ CĂN BÊN PHẢI
         render: (val, record) => {
           const ageUpdated =
             record.sono_results?.[0]?.benh_nhan_tuoi ||
@@ -221,6 +232,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         dataIndex: "gender",
         key: "gender",
         width: 80,
+        align: "center",
         render: (text, record) => {
           const genderUpdated =
             record.sono_results?.[0]?.benh_nhan_gioi_tinh ||
@@ -295,12 +307,15 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         title: "Tỉnh/TP",
         dataIndex: "province_code",
         key: "province_code",
+        render: (val) => getProvinceNameByCode(val),
+
         width: 140,
       },
       {
         title: "Phường/Xã",
         dataIndex: "ward_code",
         key: "ward_code",
+        render: (val) => getWardNameByCode(val),
         width: 140,
       },
 
@@ -318,10 +333,23 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
       },
 
       {
-        title: "Người tạo",
-        dataIndex: "createdBy",
-        key: "createdBy",
-        width: 120,
+        title: "Người đọc",
+        key: "processingDoctor",
+        width: 220,
+        render: (_, record) => {
+          const d = record?.id_doctor_in_processing_doctor;
+          if (!d) return <span style={{ color: "#999" }}>Chưa phân công</span>;
+
+          const title = [d.academic_title, d.degree].filter(Boolean).join(".");
+
+          return (
+            <span>
+              {title + ". "}
+
+              {d.full_name}
+            </span>
+          );
+        },
       },
       {
         title: "Hành động",
@@ -977,6 +1005,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
           <PatientDiagnoiseDetailPage
             idFromList={+chosenRecord?.id}
             onStatusChange={() => setReturnStatus((prev) => !prev)}
+            onClose={() => setChosenRecord(null)}
           />
         </div>
       )}

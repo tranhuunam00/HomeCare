@@ -38,3 +38,18 @@ export default function useVietnamAddress() {
     setSelectedProvince,
   };
 }
+
+const provinceMap = {};
+const wardMap = {};
+
+// build map 1 lần
+vietnamData.forEach((p) => {
+  provinceMap[p.Code] = p.Name;
+
+  p.Wards?.forEach((w) => {
+    wardMap[w.Code] = w.Name;
+  });
+});
+export const getProvinceNameByCode = (code) => provinceMap[code] || code || "-";
+
+export const getWardNameByCode = (code) => wardMap[code] || code || "-";

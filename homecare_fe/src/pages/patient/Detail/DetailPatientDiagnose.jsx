@@ -45,7 +45,11 @@ const calculateAge = (dob) => {
   return today.diff(birthDate, "year");
 };
 
-const PatientDiagnoiseDetailPage = ({ idFromList, onStatusChange }) => {
+const PatientDiagnoiseDetailPage = ({
+  idFromList,
+  onStatusChange,
+  onClose,
+}) => {
   const { id } = useParams();
   const location = useLocation();
   const chosenRecord = location.state?.record;
@@ -367,7 +371,20 @@ const PatientDiagnoiseDetailPage = ({ idFromList, onStatusChange }) => {
           },
         }}
       >
-        <Card title="WORK SPACE" bordered>
+        <Card
+          title="WORK SPACE"
+          bordered
+          extra={
+            <Button
+              size="small"
+              type="text"
+              style={{ color: "red" }}
+              onClick={onClose}
+            >
+              X
+            </Button>
+          }
+        >
           <Row gutter={24}>
             <Col span={8}>
               <Title level={5}>Họ và tên:</Title>
