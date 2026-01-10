@@ -36,6 +36,7 @@ import { USER_ROLE } from "../../../constant/app";
 import { toast } from "react-toastify";
 import { defaultVisibleKeys, STATUS_FORMVER3_MAP } from "../formver3.constant";
 import { languageTag } from "../../formver2/list/FormVer2List";
+import { FormVer3CloneModal } from "../components/FormVer3CloneModal";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -103,6 +104,8 @@ export default function FormVer3List() {
   const [uiFilters, setUiFilters] = useState(DEFAULT_FILTERS);
 
   const [visibleKeys, setVisibleKeys] = useState([]);
+  const [cloneOpen, setCloneOpen] = useState(false);
+  const [cloneRecord, setCloneRecord] = useState(null);
 
   useEffect(() => {
     // Lấy pageSize đã lưu
@@ -312,6 +315,8 @@ export default function FormVer3List() {
               type="link"
               onClick={(e) => {
                 e.stopPropagation();
+                setCloneRecord(record);
+                setCloneOpen(true);
               }}
             >
               Clone
@@ -721,6 +726,16 @@ export default function FormVer3List() {
             ),
           }}
         />
+        {cloneOpen && (
+          <FormVer3CloneModal
+            open={cloneOpen}
+            onCancel={() => setCloneOpen(false)}
+            cloneRecord={cloneRecord}
+            onSuccess={(id) => {
+              navigate("/home/form-drad/detail/" + id);
+            }} // ✅ reload list sau khi clone
+          />
+        )}
       </div>
     </Spin>
   );
