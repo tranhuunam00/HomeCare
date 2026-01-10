@@ -370,6 +370,10 @@ const CustomerList = () => {
         cancelText="Hủy"
       >
         <p>Chọn phòng khám được phép truy cập:</p>
+        <p style={{ color: "olive", fontStyle: "italic" }}>
+          Lưu ý: Chưa bao gồm phòng khám hiện tại đã được đăng ký
+        </p>
+
         <Select
           mode="multiple"
           labelInValue

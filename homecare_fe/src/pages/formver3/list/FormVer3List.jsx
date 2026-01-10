@@ -272,23 +272,14 @@ export default function FormVer3List() {
         align: "left",
         render: (_, record) => record.id_doctor_doctor?.full_name,
       },
-
-      {
-        title: "ICD-10",
-        dataIndex: "icd10",
-        key: "icd10",
-        align: "center",
-        width: 150,
-      },
-
-      {
-        title: "Ngôn ngữ",
-        dataIndex: "language",
-        key: "language",
-        width: 110,
-        align: "center",
-        render: (lang) => languageTag(lang),
-      },
+      // {
+      //   title: "Ngôn ngữ",
+      //   dataIndex: "language",
+      //   key: "language",
+      //   width: 110,
+      //   align: "center",
+      //   render: (lang) => languageTag(lang),
+      // },
       {
         title: "Ngày thực hiện",
         dataIndex: "createdAt",
@@ -321,7 +312,7 @@ export default function FormVer3List() {
             >
               Clone
             </Button>
-            {user.id_role == USER_ROLE.ADMIN && (
+            {/* {user.id_role == USER_ROLE.ADMIN && (
               <Button
                 type="link"
                 style={{ color: "#1890ff" }}
@@ -332,7 +323,7 @@ export default function FormVer3List() {
               >
                 Clone EN
               </Button>
-            )}
+            )} */}
           </Space>
         ),
       },
@@ -732,7 +723,7 @@ export default function FormVer3List() {
             onCancel={() => setCloneOpen(false)}
             cloneRecord={cloneRecord}
             onSuccess={(id) => {
-              navigate("/home/form-drad/detail/" + id);
+              navigate("/home/form-drad-v3/detail/" + id);
             }} // ✅ reload list sau khi clone
           />
         )}

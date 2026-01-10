@@ -5,6 +5,7 @@ import useToast from "../../hooks/useToast";
 import API_CALL from "../../services/axiosClient";
 import { useGlobalAuth } from "../../contexts/AuthContext";
 import { GoogleLogin } from "@react-oauth/google";
+import { passwordMinLengthRule } from "./auth.constant";
 
 const { Title, Text, Link } = Typography;
 
@@ -38,7 +39,6 @@ const LoginPage = () => {
         height: "100vh",
       }}
     >
-      {/* Bên trái */}\ {/* Bên phải */}
       <div style={{ display: "flex", alignItems: "center" }}>
         <div
           style={{
@@ -85,7 +85,10 @@ const LoginPage = () => {
             <Form.Item
               label="Mật khẩu"
               name="password"
-              rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
+              rules={[
+                { required: true, message: "Vui lòng nhập mật khẩu!" },
+                passwordMinLengthRule(6),
+              ]}
             >
               <Input.Password placeholder="Mật khẩu" />
             </Form.Item>

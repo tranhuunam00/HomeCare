@@ -397,6 +397,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
   };
 
   const fetchPatients = async (filters) => {
+    console.log("filters", filters);
     try {
       const res = await API_CALL.get("/patient-diagnose", {
         params: { ...cleanParams(filters), page, limit },

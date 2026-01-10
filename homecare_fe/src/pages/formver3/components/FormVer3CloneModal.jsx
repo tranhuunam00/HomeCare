@@ -34,8 +34,28 @@ export const FormVer3CloneModal = ({
     page: 1,
     limit: 1000,
   });
-  console.log("formVer3Names", formVer3Names);
-  console.log("filteredFormVer3Names", filteredFormVer3Names);
+
+  const handleOk = () => {
+    form.validateFields().then(async (values) => {
+      try {
+        const payload = {
+          id_clone: cloneRecord.id,
+          id_formver3_name: values.id_formver3_name,
+          id_template_service: values.id_template_service,
+          id_exam_part: values.id_exam_part,
+        };
+
+        const res = await API_CALL.post("/formVer3/clone", payload);
+
+        message.success("Clone FormVer3 thành công");
+        onSuccess?.(res.data?.id || res.data?.data?.id);
+        onCancel();
+      } catch (err) {
+        console.error(err);
+        message.error("Có lỗi xảy ra khi clone FormVer3");
+      }
+    });
+  };
 
   // 🔹 init form khi mở modal
   useEffect(() => {
@@ -54,24 +74,6 @@ export const FormVer3CloneModal = ({
   useEffect(() => {
     setFilteredFormVer3Names(formVer3Names.filter((n) => !n.isUsed));
   }, [formVer3Names]);
-
-  const handleOk = () => {
-    form.validateFields().then(async (values) => {
-      try {
-        const payload = {
-          ...values,
-          id_clone: cloneRecord?.id,
-        };
-
-        const res = await API_CALL.post("/form-ver3/clone", payload);
-        onSuccess(res.data.data.id);
-        onCancel();
-      } catch (err) {
-        console.error(err);
-        message.error("Có lỗi xảy ra khi clone");
-      }
-    });
-  };
 
   return (
     <Modal

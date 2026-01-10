@@ -7,6 +7,7 @@ import { USER_ROLE } from "../../constant/app";
 import { GoogleLogin } from "@react-oauth/google";
 import { useGlobalAuth } from "../../contexts/AuthContext";
 import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
+import { passwordMinLengthRule } from "./auth.constant";
 
 const { Title } = Typography;
 
@@ -116,7 +117,10 @@ const RegisterPage = () => {
             <Form.Item
               label="Mật khẩu"
               name="password"
-              rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
+              rules={[
+                { required: true, message: "Vui lòng nhập mật khẩu!" },
+                passwordMinLengthRule(6),
+              ]}
             >
               <Input.Password
                 placeholder="Mật khẩu"
@@ -131,6 +135,16 @@ const RegisterPage = () => {
               name="confirmPassword"
               rules={[
                 { required: true, message: "Vui lòng nhập lại mật khẩu!" },
+                ({ getFieldValue }) => ({
+                  validator(_, value) {
+                    if (!value || getFieldValue("password") === value) {
+                      return Promise.resolve();
+                    }
+                    return Promise.reject(
+                      new Error("Mật khẩu nhập lại không khớp!")
+                    );
+                  },
+                }),
               ]}
             >
               <Input.Password
