@@ -324,12 +324,16 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         dataIndex: "createdAt",
         key: "createdAt",
         width: 180,
+        render: (value) =>
+          value ? dayjs(value).format("DD/MM/YYYY HH:mm") : "--",
       },
       {
         title: "Ngày cập nhật",
         dataIndex: "updatedAt",
         key: "updatedAt",
         width: 180,
+        render: (value) =>
+          value ? dayjs(value).format("DD/MM/YYYY HH:mm") : "--",
       },
 
       {
