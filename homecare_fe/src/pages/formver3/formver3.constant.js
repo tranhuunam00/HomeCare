@@ -187,6 +187,7 @@ export const buildDradv3FormValues = ({
     additionalAction: doctorUseFormVer3?.addtionalImpletement ?? "",
     phan_do_loai: doctorUseFormVer3?.classify,
     chan_doan_phan_biet: doctorUseFormVer3?.DifferenceDiagnostic,
+    imagingDiagnosisSummary: doctorUseFormVer3?.imagingDiagnosisSummary || "",
   };
 };
 
@@ -217,6 +218,7 @@ export const buildFormVer3Values = (data) => {
     phan_do_loai: data?.classify,
     chan_doan_phan_biet: data?.DifferenceDiagnostic,
     khuyen_nghi: data?.recommendation,
+    imagingDiagnosisSummary: data.imagingDiagnosisSummary || "",
   };
 };
 
@@ -270,6 +272,7 @@ export function buildFormDataDoctorUseFormVer3(values, extra) {
 
   fd.append("recommendation", values.khuyen_nghi ?? "");
   fd.append("icd10_classification", values.icd10 ?? "");
+  fd.append("imagingDiagnosisSummary", values.imagingDiagnosisSummary ?? "");
 
   // ---- Thông tin bệnh nhân
   fd.append("benh_nhan_ho_ten", values.benh_nhan_ho_ten ?? "");

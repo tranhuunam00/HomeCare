@@ -9,21 +9,41 @@ import { useGlobalAuth } from "../../../contexts/AuthContext";
 import useVietnamAddress from "../../../hooks/useVietnamAddress";
 import FormActionBar from "../../formver2/component/FormActionBar";
 import { handlePrint } from "../../formver2/utils";
-import {
-  ADDITIONAL_ACTION_OPTIONS,
-  CONTRAST_INJECTION_OPTIONS,
-  getOptionLabel,
-  IMAGE_QUALITY_OPTIONS,
-} from "../formver3.constant";
 
-const PrintItem = ({ label, value, minWidth, valueStyle }) => (
-  <div
-    style={{
-      marginBottom: 6,
-      display: "flex",
-      alignItems: "flex-start",
-    }}
-  >
+const colSTT = { width: 60 };
+const colStructure = { width: 220 };
+const thStyle = {
+  border: "1px solid #000",
+  padding: "6px 8px",
+  textAlign: "center",
+  fontWeight: 600,
+};
+
+const tdCenter = {
+  border: "1px solid #000",
+  padding: "6px 8px",
+  textAlign: "center",
+};
+
+const tdLeft = {
+  border: "1px solid #000",
+  padding: "6px 8px",
+  textAlign: "left",
+};
+
+const Box = ({ checked }) => (
+  <span style={{ fontSize: 18 }}>{checked ? "☒" : "☐"}</span>
+);
+
+const PrintCheckbox = ({ checked, label }) => (
+  <span style={{ marginRight: 24 }}>
+    <span style={{ fontSize: 14, marginRight: 6 }}>{checked ? "☒" : "☐"}</span>
+    {label}
+  </span>
+);
+
+const TextLabel = ({ label, minWidth }) => {
+  return (
     <p
       style={{
         fontSize: 14,
@@ -36,11 +56,24 @@ const PrintItem = ({ label, value, minWidth, valueStyle }) => (
     >
       {label}:
     </p>
+  );
+};
+
+const PrintItem = ({ label, value, minWidth, valueStyle }) => (
+  <div
+    style={{
+      marginBottom: 6,
+      display: "flex",
+      alignItems: "flex-start",
+    }}
+  >
+    <TextLabel label={label} minWidth={minWidth} />
     <p
       style={{
         fontSize: 14,
         margin: 0,
         padding: 0,
+        whiteSpace: "pre-line",
         ...valueStyle,
       }}
     >
@@ -80,10 +113,6 @@ const PrintPreviewVer3NotDataDiagnose = ({
 
   console.log("formSnapshot", formSnapshot);
 
-  const isContrastUsed = formSnapshot?.contrastInjection === "yes";
-  const isBadImageQuality = formSnapshot?.imageQuatity === "bad";
-  const hasAdditionalAction =
-    formSnapshot?.additionalAction && formSnapshot?.additionalAction !== "no";
   return (
     <div>
       <div ref={printRef} className={styles.wrapper}>
@@ -318,51 +347,58 @@ const PrintPreviewVer3NotDataDiagnose = ({
               marginTop: 20,
             }}
           >
-            {"KỸ THUẬT THỰC HIỆN".toUpperCase()}
+            {"QUY TRÌNH KỸ THUẬT".toUpperCase()}
           </h3>
 
-          <p
-            className={styles.paragraph}
-            style={{
-              whiteSpace: "pre-line",
-            }}
-          >
-            {formSnapshot.implementMethod}
-          </p>
           <PrintItem
             minWidth={250}
-            label="Tiêm thuốc đối quang"
-            value={getOptionLabel(
-              CONTRAST_INJECTION_OPTIONS,
-              formSnapshot?.contrastInjection
-            )}
-            valueStyle={
-              isContrastUsed ? { color: "#d32f2f", fontWeight: 600 } : {}
-            }
+            label="Kỹ thuật thực hiện"
+            value={formSnapshot.implementMethod}
           />
-          <PrintItem
-            minWidth={250}
-            label="Chất lượng hình ảnh"
-            value={getOptionLabel(
-              IMAGE_QUALITY_OPTIONS,
-              formSnapshot?.imageQuatity
-            )}
-            valueStyle={
-              isBadImageQuality ? { color: "#d32f2f", fontWeight: 600 } : {}
-            }
-          />
-          <PrintItem
-            minWidth={250}
-            label="Thực hiện bổ sung"
-            value={getOptionLabel(
-              ADDITIONAL_ACTION_OPTIONS,
-              formSnapshot?.additionalAction
-            )}
-            valueStyle={
-              hasAdditionalAction ? { color: "#d32f2f", fontWeight: 600 } : {}
-            }
-          />
-          <Divider />
+          <div style={{ display: "flex", marginBottom: 4 }}>
+            <TextLabel label={"Tiêm thuốc đối quang"} minWidth={250} />
+
+            <PrintCheckbox
+              checked={formSnapshot?.contrastInjection === "no"}
+              label="Không"
+            />
+            <PrintCheckbox
+              checked={formSnapshot?.contrastInjection === "yes"}
+              label="Có"
+            />
+          </div>
+          <div style={{ display: "flex", marginBottom: 4 }}>
+            <TextLabel label={"Chất lượng hình ảnh"} minWidth={250} />
+
+            <PrintCheckbox
+              checked={formSnapshot?.imageQuatity === "good"}
+              label="Đạt yêu cầu"
+            />
+            <PrintCheckbox
+              checked={formSnapshot?.imageQuatity === "limited"}
+              label="Đạt yêu cầu, có hạn chế"
+            />
+            <PrintCheckbox
+              checked={formSnapshot?.imageQuatity === "bad"}
+              label="Không đạt"
+            />
+          </div>
+          <div style={{ display: "flex", marginBottom: 4 }}>
+            <TextLabel label={"Thực hiện bổ sung"} minWidth={250} />
+
+            <PrintCheckbox
+              checked={formSnapshot?.additionalAction === "no"}
+              label="Không"
+            />
+            <PrintCheckbox
+              checked={formSnapshot?.additionalAction === "extra"}
+              label="Chụp thêm"
+            />
+            <PrintCheckbox
+              checked={formSnapshot?.additionalAction === "redo"}
+              label="Chụp lại"
+            />
+          </div>
 
           <h3
             style={{
@@ -380,31 +416,86 @@ const PrintPreviewVer3NotDataDiagnose = ({
               false
             ).toUpperCase()}
           </h3>
-          {imagingRows && imagingRows.length > 0 ? (
-            imagingRows.map((row, idx) => (
-              <PrintItem
-                minWidth={250}
-                key={row.id || idx}
-                label={row.name}
-                value={
-                  row.status === "normal"
-                    ? "Không ghi nhận bất thường"
-                    : row.description || "Có bất thường"
-                }
-                valueStyle={
-                  row.status === "abnormal"
-                    ? { color: "#d32f2f", fontWeight: 600 }
-                    : {}
-                }
-              />
-            ))
-          ) : (
-            <PrintItem
-              minWidth={250}
-              label="Hình ảnh"
-              value="Chưa có dữ liệu mô tả hình ảnh"
-            />
-          )}
+
+          <table
+            style={{
+              width: "100%",
+              borderCollapse: "collapse",
+              marginTop: 12,
+              fontSize: 14,
+            }}
+          >
+            <thead>
+              <tr style={{ background: "#f0f0f0" }}>
+                <th style={{ ...thStyle, ...colSTT }}>STT</th>
+                <th style={{ ...thStyle, ...colStructure }}>Cấu trúc</th>
+                <th style={thStyle}>Bình thường</th>
+                <th style={thStyle}>Bất thường</th>
+              </tr>
+            </thead>
+            <tbody>
+              {imagingRows.map((row, index) => (
+                <tr key={row.id || index}>
+                  <td style={{ ...tdCenter, ...colSTT }}>{index + 1}</td>
+                  <td style={{ ...tdLeft, ...colStructure }}>{row.name}</td>
+                  <td style={tdCenter}>
+                    <Box checked={row.status === "normal"} />
+                  </td>
+                  <td style={tdCenter}>
+                    <Box checked={row.status === "abnormal"} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          <table
+            style={{
+              width: "100%",
+              borderCollapse: "collapse",
+              marginTop: 20,
+              fontSize: 14,
+            }}
+          >
+            <thead>
+              <tr style={{ background: "#f0f0f0" }}>
+                <th style={thStyle} colSpan={3}>
+                  Mô tả các chi tiết bất thường
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {imagingRows &&
+              imagingRows.filter((row) => row.status === "abnormal").length >
+                0 ? (
+                imagingRows
+                  .filter((row) => row.status === "abnormal")
+                  .map((row, idx) => (
+                    <tr key={row.id || idx}>
+                      <td style={{ ...tdCenter, ...colSTT }}>{idx + 1}</td>
+                      <td style={{ ...tdLeft, ...colStructure }}>
+                        {row.name}:
+                      </td>
+                      <td
+                        style={{
+                          ...tdLeft,
+                          whiteSpace: "pre-line",
+                        }}
+                      >
+                        {row.description || "Có bất thường"}
+                      </td>
+                    </tr>
+                  ))
+              ) : (
+                <tr>
+                  <td style={tdLeft} colSpan={3}>
+                    Chưa có dữ liệu mô tả bất thường
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+
           <h3
             style={{
               textAlign: "left",
@@ -433,12 +524,8 @@ const PrintPreviewVer3NotDataDiagnose = ({
           </p>
           <PrintItem
             minWidth={250}
-            label={translateLabel(
-              languageTranslate,
-              "icd10Classification",
-              false
-            )}
-            value={formSnapshot?.icd10}
+            label={"Chẩn đoán hình ảnh"}
+            value={formSnapshot?.imagingDiagnosisSummary}
           />
           <PrintItem
             minWidth={250}
@@ -645,7 +732,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
         onPrint={() => handlePrint(printRef)}
         actionKeys={["print"]}
         editId={editId}
-        approvalStatus={approvalStatus}
+        approvalStatus={"approved"}
       />
     </div>
   );

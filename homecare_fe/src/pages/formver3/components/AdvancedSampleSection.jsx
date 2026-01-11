@@ -1,5 +1,5 @@
 import React from "react";
-import { Row, Col, Form, Radio } from "antd";
+import { Row, Col, Form, Radio, Tooltip } from "antd";
 import {
   ADDITIONAL_ACTION_OPTIONS,
   CONTRAST_INJECTION_OPTIONS,
@@ -10,18 +10,6 @@ const AdvancedSampleSection = ({ isEdit = true, isAdvanceSample = true }) => {
   return (
     <Row>
       {/* Mẫu nâng cao */}
-      {isAdvanceSample && (
-        <Form.Item
-          label="MẪU NÂNG CAO"
-          name="advancedSample"
-          rules={[{ required: true, message: "Chọn thông tin mẫu nâng cao" }]}
-        >
-          <Radio.Group disabled={!isEdit}>
-            <Radio value="no">Không</Radio>
-            <Radio value="yes">Có</Radio>
-          </Radio.Group>
-        </Form.Item>
-      )}
 
       <Col xs={24}>
         {/* Tiêm thuốc đối quang */}

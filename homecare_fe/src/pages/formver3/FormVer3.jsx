@@ -43,6 +43,7 @@ import ImagingStructureTable from "./components/ImagingStructureTable3.jsx";
 import ImagingDiagnosisSection from "./components/ImagingDiagnosisSection";
 import PrintPreviewVer2NotDataDiagnose from "../formver2/PreviewVer2/PrintPreviewVer2NotDataDiagnose.jsx";
 import PrintPreviewVer3NotDataDiagnose from "./components/PrintPreviewVer3NotDataDiagnose.jsx";
+import ReloadTSAndExamPartsButton from "../../components/ReloadTSAndExamPartsButton.jsx";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -66,6 +67,9 @@ export default function DFormVer3({ id_formVer3 }) {
     id_template_service: null,
     id_exam_part: null,
   });
+  const [diagnosisSummary, setDiagnosisSummary] = useState(
+    form.getFieldValue("imagingDiagnosisSummary")
+  );
 
   const { examParts, templateServices, user, doctor, formVer3Names } =
     useGlobalAuth();
@@ -178,6 +182,7 @@ export default function DFormVer3({ id_formVer3 }) {
         DifferenceDiagnostic: values.chan_doan_phan_biet || "",
         classify: values.phan_do_loai || "",
         recommendation: values.khuyen_nghi || "",
+        imagingDiagnosisSummary: values.imagingDiagnosisSummary || "",
       };
 
       if (pendingAction.current === KEY_ACTION_BUTTON.save) {
@@ -379,8 +384,9 @@ export default function DFormVer3({ id_formVer3 }) {
           }}
         >
           {/* Hàng 1 */}
+
           <Row gutter={16}>
-            <Col xs={24} md={12}>
+            <Col span={12}>
               <Form.Item
                 label={translateLabel(languageTranslate, "department", false)}
                 name="id_template_service"
@@ -408,7 +414,10 @@ export default function DFormVer3({ id_formVer3 }) {
                 </Select>
               </Form.Item>
             </Col>
-            <Col xs={24} md={12}>
+            <Col span={1}>
+              <ReloadTSAndExamPartsButton />
+            </Col>
+            <Col span={11}>
               <Form.Item
                 label={translateLabel(languageTranslate, "bodyPart", false)}
                 name="id_exam_part"
@@ -437,6 +446,7 @@ export default function DFormVer3({ id_formVer3 }) {
               </Form.Item>
             </Col>
           </Row>
+
           <Row gutter={16}>
             <Col xs={24} md={24}>
               <Form.Item
@@ -522,20 +532,36 @@ export default function DFormVer3({ id_formVer3 }) {
               </Form.Item>
             </Col>
           </Row>
-          {/* Đánh giá kỹ thuật chụp (checkbox đúng UI) */}
-          {/* Đánh giá kỹ thuật chụp */}
-          <AdvancedSampleSection isEdit={isEdit} />
-          {/* Ảnh minh hoạ */}
+
+          <Form.Item
+            label="NHÓM KẾT QUẢ"
+            name="advancedSample"
+            tooltip="Dùng cho việc phân quyền trong các gói"
+            rules={[{ required: true, message: "Chọn thông tin mẫu nâng cao" }]}
+          >
+            <Radio.Group disabled={!isEdit}>
+              <Radio value="no">Bình thường</Radio>
+              <Radio value="yes">Bất thường</Radio>
+            </Radio.Group>
+          </Form.Item>
+
           <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
-            {"Kỹ thuật thực hiện".toUpperCase()}
+            {"Quy trình kỹ thuật".toUpperCase()}
           </Title>
-          <Form.Item name="implementMethod" label="" tooltip="Short text">
+
+          <Form.Item
+            name="implementMethod"
+            label="Kỹ thuật thực hiện"
+            labelCol={""}
+          >
             <TextArea
               disabled={!isEdit}
               autoSize={{ minRows: 4, maxRows: 10 }}
-              placeholder="Nhập mô tả quy trình kỹ thuật..."
+              placeholder="Nhập mô tả kỹ thuật thực hiện"
             />
           </Form.Item>
+          <AdvancedSampleSection isEdit={isEdit} />
+
           {/* Bảng mô tả hình ảnh */}
           <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
             {translateLabel(
@@ -548,14 +574,19 @@ export default function DFormVer3({ id_formVer3 }) {
             rows={imagingRows}
             setRows={setImagingRows}
             isEdit={isEdit}
+            setDiagnosisSummary={setDiagnosisSummary}
+            abnormalFindings={abnormalFindings}
+            form={form}
           />
           {/* Kết luận */}
 
           <ImagingDiagnosisSection
-            abnormalFindings={abnormalFindings}
             isEdit={isEdit}
+            form={form}
             languageTranslate={languageTranslate}
             translateLabel={translateLabel}
+            setDiagnosisSummary={setDiagnosisSummary}
+            diagnosisSummary={diagnosisSummary}
           />
 
           {(initialSnap.apiData?.id_doctor == doctor.id ||

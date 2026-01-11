@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Form, Input, Tooltip, Typography } from "antd";
 import { QuestionCircleOutlined } from "@ant-design/icons";
 
@@ -6,42 +6,53 @@ const { Title } = Typography;
 const { TextArea } = Input;
 
 const ImagingDiagnosisSection = ({
-  abnormalFindings,
   isEdit = true,
   languageTranslate,
   translateLabel,
+  form,
+  diagnosisSummary,
+  setDiagnosisSummary,
 }) => {
+  const debounceRef = useRef(null);
   return (
     <>
       <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
         {translateLabel(languageTranslate, "impression", false).toUpperCase()}
       </Title>
       {/* Chẩn đoán hình ảnh */}
-      <div
-        style={{
-          fontWeight: 650,
-          marginBottom: 8,
-          fontSize: 15,
-        }}
+
+      <Form.Item
+        label="Chẩn đoán hình ảnh"
+        name="imagingDiagnosisSummary"
+        tooltip="Có thể chỉnh sửa, tóm tắt từ các bất thường"
       >
-        Chẩn đoán hình ảnh
-      </div>
+        <TextArea
+          value={diagnosisSummary}
+          onChange={(e) => {
+            const value = e.target.value;
 
-      {abnormalFindings.length > 0 ? (
-        <ul style={{ paddingLeft: 24 }}>
-          {abnormalFindings.map((item, idx) => (
-            <li key={idx} style={{ marginBottom: 6 }}>
-              {item}
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <div style={{ fontStyle: "italic" }}>
-          Chưa ghi nhận bất thường hình ảnh.
-        </div>
-      )}
+            // update UI ngay
 
-      {/* ICD-10 */}
+            // debounce update form
+            if (debounceRef.current) {
+              clearTimeout(debounceRef.current);
+            }
+
+            debounceRef.current = setTimeout(() => {
+              setDiagnosisSummary(value);
+
+              form.setFieldsValue({
+                imagingDiagnosisSummary: value,
+              });
+            }, 500); // 300–500ms là đẹp
+          }}
+          disabled={!isEdit}
+          autoSize={{ minRows: 4, maxRows: 10 }}
+          placeholder="Tóm tắt chẩn đoán hình ảnh..."
+        />
+      </Form.Item>
+
+      {/* ICD-10
       <Form.Item
         label={
           <span>
@@ -61,7 +72,7 @@ const ImagingDiagnosisSection = ({
         name="icd10"
       >
         <Input disabled={!isEdit} placeholder="Link/Code ICD-10" />
-      </Form.Item>
+      </Form.Item> */}
 
       {/* Phân độ / phân loại */}
       <Form.Item

@@ -1,8 +1,16 @@
 import React from "react";
 import { Input, Radio, Button, Row, Col } from "antd";
 import styles from "./ImagingStructureTable.module.scss";
+import TextArea from "antd/es/input/TextArea";
 
-const ImagingStructureTable = ({ rows, setRows, isEdit = true }) => {
+const ImagingStructureTable = ({
+  rows,
+  setRows,
+  isEdit = true,
+  setDiagnosisSummary,
+  abnormalFindings,
+  form,
+}) => {
   const updateRow = (index, key, value) => {
     const next = [...rows];
     next[index] = {
@@ -108,9 +116,10 @@ const ImagingStructureTable = ({ rows, setRows, isEdit = true }) => {
                   <strong>{row.name}</strong>
                 </Col>
                 <Col span={18}>
-                  <Input
+                  <TextArea
                     disabled={!isEdit}
                     placeholder="Nhập mô tả bất thường..."
+                    autoSize={{ minRows: 2, maxRows: 6 }}
                     value={row.description}
                     onChange={(e) => {
                       const next = rows.map((r) =>
@@ -124,6 +133,25 @@ const ImagingStructureTable = ({ rows, setRows, isEdit = true }) => {
                 </Col>
               </Row>
             ))}
+
+          <Button
+            type="link"
+            disabled={!isEdit}
+            onClick={() => {
+              if (abnormalFindings.length > 0) {
+                const summary = abnormalFindings
+                  .map((item) => `• ${item}`)
+                  .join("\n");
+
+                setDiagnosisSummary(summary);
+                form.setFieldsValue({
+                  imagingDiagnosisSummary: summary,
+                });
+              }
+            }}
+          >
+            Đồng bộ xuống kết luận
+          </Button>
         </>
       )}
     </div>

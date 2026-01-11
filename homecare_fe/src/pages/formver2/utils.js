@@ -290,7 +290,10 @@ export const handlePrint = (printRef) => {
             padding: 20px; 
             margin: 0;
           }
-         
+          span {
+            font-size: 14px;
+
+          }
           table { 
             width: 100%; 
             border-collapse: collapse; 

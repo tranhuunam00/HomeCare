@@ -83,6 +83,9 @@ export default function DoctorUseDFormVer3({
   const [languageTranslate, setLanguageTransslate] = useState(
     TRANSLATE_LANGUAGE.VI
   );
+  const [diagnosisSummary, setDiagnosisSummary] = useState(
+    form.getFieldValue("imagingDiagnosisSummary")
+  );
 
   const [status, setStatus] = useState(APPROVAL_STATUS.DRAFT);
   const [initialSnap, setInitialSnap] = useState({
@@ -765,13 +768,18 @@ export default function DoctorUseDFormVer3({
             rows={imagingRows}
             setRows={setImagingRows}
             isEdit={isEdit}
+            setDiagnosisSummary={setDiagnosisSummary}
+            abnormalFindings={abnormalFindings}
+            form={form}
           />
 
           <ImagingDiagnosisSection
-            abnormalFindings={abnormalFindings}
             isEdit={isEdit}
+            form={form}
             languageTranslate={languageTranslate}
             translateLabel={translateLabel}
+            setDiagnosisSummary={setDiagnosisSummary}
+            diagnosisSummary={diagnosisSummary}
           />
 
           <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
