@@ -57,6 +57,7 @@ axiosInstance.interceptors.response.use(
           return axiosInstance(originalConfig);
         } else {
           STORAGE.clearAuth();
+          throw new Error("Refresh token failed");
         }
       } catch (refreshError) {
         STORAGE.clearAuth();
