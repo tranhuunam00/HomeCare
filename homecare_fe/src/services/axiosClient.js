@@ -49,14 +49,14 @@ axiosInstance.interceptors.response.use(
           userId: JSON.parse(localStorage.getItem("USER") || "{}")._id,
         });
 
-        STORAGE.clearAuth();
-
         if (rs.status === 200) {
           const { token, refreshToken } = rs.data.data;
           localStorage.setItem("TOKEN", token);
           localStorage.setItem("REFRESH_TOKEN", refreshToken);
           originalConfig.headers.Authorization = `Bearer ${token}`;
           return axiosInstance(originalConfig);
+        } else {
+          STORAGE.clearAuth();
         }
       } catch (refreshError) {
         STORAGE.clearAuth();
