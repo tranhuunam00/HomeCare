@@ -49,6 +49,8 @@ axiosInstance.interceptors.response.use(
           userId: JSON.parse(localStorage.getItem("USER") || "{}")._id,
         });
 
+        STORAGE.clearAuth();
+
         if (rs.status === 200) {
           const { token, refreshToken } = rs.data.data;
           localStorage.setItem("TOKEN", token);
@@ -57,7 +59,7 @@ axiosInstance.interceptors.response.use(
           return axiosInstance(originalConfig);
         }
       } catch (refreshError) {
-        STORAGE.clearAuth(); // ✅ Xóa hết token, user, doctor,...
+        STORAGE.clearAuth();
         window.location.href = "/login";
         return Promise.reject(refreshError);
       }
