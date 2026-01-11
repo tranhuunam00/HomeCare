@@ -4,8 +4,9 @@ import storage from "../services/storage";
 import { useGlobalAuth } from "../contexts/AuthContext";
 import API_CALL from "../services/axiosClient";
 import useToast from "./useToast";
+import useTemplateServicesAndExamParts from "./useTemplateServicesAndExamParts";
 
-const fetchWithRetry = async (fn, retries = 3, delay = 1000) => {
+export const fetchWithRetry = async (fn, retries = 3, delay = 1000) => {
   let lastError;
   for (let i = 0; i < retries; i++) {
     try {
@@ -26,16 +27,19 @@ const useAuthInitializer = () => {
     doctor,
     handleLoginContext,
     handleLogoutGlobal,
-    setExamParts,
-    setTemplateServices,
     setFormVer2Names,
     setUserPackages,
     setPrintTemplateGlobal,
-    doctors,
     setDoctors,
     setClinicsAll,
   } = useGlobalAuth();
   const { showWarning } = useToast();
+
+  const { fetchTSAndExamParts } = useTemplateServicesAndExamParts();
+
+  useEffect(() => {
+    fetchTSAndExamParts();
+  }, []);
 
   useEffect(() => {
     const token = storage.get("TOKEN");
@@ -54,26 +58,6 @@ const useAuthInitializer = () => {
         });
 
       // Template Services
-      fetchWithRetry(() =>
-        API_CALL.get(`/ts`, { params: { page: 1, limit: 1000 } })
-      )
-        .then((res) => {
-          setTemplateServices(res.data.data.data);
-        })
-        .catch(() => {
-          showWarning("Không thể tải danh sách phân hệ");
-        });
-
-      // Exam Parts
-      fetchWithRetry(() =>
-        API_CALL.get(`/ts/exam-parts`, { params: { page: 1, limit: 1000 } })
-      )
-        .then((res) => {
-          setExamParts(res.data.data.data);
-        })
-        .catch(() => {
-          showWarning("Không thể tải danh sách bộ phận thăm khám");
-        });
 
       // Form Ver2 Names
       fetchWithRetry(() =>

@@ -45,6 +45,8 @@ import useVietnamAddress, {
   getProvinceNameByCode,
   getWardNameByCode,
 } from "../../hooks/useVietnamAddress";
+import useTemplateServicesAndExamParts from "../../hooks/useTemplateServicesAndExamParts";
+import ReloadTSAndExamPartsButton from "../../components/ReloadTSAndExamPartsButton";
 
 const { Option } = Select;
 
@@ -109,13 +111,6 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
   const [chosenRecord, setChosenRecord] = useState();
   const [returnStatus, setReturnStatus] = useState(false);
 
-  const { provinces, wards, setSelectedProvince } = useVietnamAddress();
-  const getProvinceName = (code) =>
-    provinces?.find((p) => p.code === code)?.name || code || "-";
-
-  const getWardName = (code) =>
-    wards?.find((w) => w.code === code)?.name || code || "-";
-
   const [visibleKeys, setVisibleKeys] = useState([]);
   const {
     user,
@@ -123,14 +118,16 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
     examParts,
     templateServices,
     clinicsAll,
-    isOnWorkList,
     setIsOnWorkList,
     setCollapsed,
   } = useGlobalAuth();
 
+  const { fetchTSAndExamParts } = useTemplateServicesAndExamParts();
+
   useEffect(() => {
     setIsOnWorkList(true);
     setCollapsed(true);
+    fetchTSAndExamParts();
     return () => setIsOnWorkList(false);
   }, []);
 
@@ -710,6 +707,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
             </Select>
           </Col>
         </div>
+        <ReloadTSAndExamPartsButton />
 
         <Divider style={{ margin: 8 }} />
 

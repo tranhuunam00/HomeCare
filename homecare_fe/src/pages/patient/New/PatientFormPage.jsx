@@ -24,6 +24,7 @@ import {
 } from "../../../constant/app";
 import { toast } from "react-toastify";
 import { ThamKhaoLinkHomeCare } from "../../advance/component_common/Thamkhao";
+import ReloadTSAndExamPartsButton from "../../../components/ReloadTSAndExamPartsButton";
 
 const { Option } = Select;
 
@@ -454,7 +455,11 @@ const PatientFormPage = () => {
             </Col>
           </Row>
           <Divider />
-          <h3 style={{ color: "#1677ff" }}>THÔNG TIN CHỈ ĐỊNH</h3>
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <h3 style={{ color: "#1677ff" }}>THÔNG TIN CHỈ ĐỊNH</h3>
+
+            <ReloadTSAndExamPartsButton />
+          </div>
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item

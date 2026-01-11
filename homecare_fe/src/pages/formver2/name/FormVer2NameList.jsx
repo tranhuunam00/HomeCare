@@ -27,6 +27,7 @@ import { toast } from "react-toastify";
 import styles from "./FormVer2NameList.module.scss";
 import API_CALL from "../../../services/axiosClient";
 import { useGlobalAuth } from "../../../contexts/AuthContext";
+import ReloadTSAndExamPartsButton from "../../../components/ReloadTSAndExamPartsButton";
 
 const { Option } = Select;
 
@@ -415,6 +416,7 @@ const FormVer2NameList = ({ version = "v.2" }) => {
             }
             extra={
               <div className={styles.filterActions}>
+                <ReloadTSAndExamPartsButton />
                 <Button icon={<SearchOutlined />} onClick={onSearch}>
                   Tìm
                 </Button>
@@ -605,7 +607,9 @@ const FormVer2NameList = ({ version = "v.2" }) => {
               }}
             />
           </Form.Item>
-
+          <Col span={1}>
+            <ReloadTSAndExamPartsButton />
+          </Col>
           <Row gutter={12}>
             <Col span={12}>
               <Form.Item
@@ -630,6 +634,7 @@ const FormVer2NameList = ({ version = "v.2" }) => {
                 </Select>
               </Form.Item>
             </Col>
+
             <Col span={12}>
               <Form.Item shouldUpdate>
                 {({ getFieldValue }) => {

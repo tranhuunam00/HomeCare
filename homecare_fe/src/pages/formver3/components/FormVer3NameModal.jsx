@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { Modal, Form, Input, Select, Row, Col } from "antd";
+import ReloadTSAndExamPartsButton from "../../../components/ReloadTSAndExamPartsButton";
 
 const { Option } = Select;
 
@@ -31,7 +32,7 @@ export const FormVer3NameModal = ({
 
   return (
     <Modal
-      title={isEdit ? "Chỉnh sửa tên mẫu" : "Thêm tên mẫu mới"}
+      title={isEdit ? "Chỉnh sửa tên mẫu" : "Thêm tên mẫu mới v.3"}
       open={open}
       onCancel={onCancel}
       onOk={() => form.submit()}
@@ -78,6 +79,10 @@ export const FormVer3NameModal = ({
             }}
           />
         </Form.Item>
+
+        <Col span={1}>
+          <ReloadTSAndExamPartsButton />
+        </Col>
 
         <Row gutter={12}>
           <Col span={12}>
