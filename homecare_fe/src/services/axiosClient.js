@@ -34,12 +34,14 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalConfig = error.config;
+    const token = localStorage.getItem("TOKEN");
 
     if (
+      token &&
       error?.response?.status === 401 &&
       !originalConfig._retry &&
       originalConfig.url !== "/auth/login" &&
-      !originalConfig.url.includes("/users/refresh-token")
+      !originalConfig.url.includes("/refresh-token")
     ) {
       originalConfig._retry = true;
       try {
