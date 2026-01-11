@@ -58,7 +58,7 @@ axiosInstance.interceptors.response.use(
         }
       } catch (refreshError) {
         STORAGE.clearAuth(); // ✅ Xóa hết token, user, doctor,...
-        window.location.reload(); // ✅ Reload lại app
+        window.location.href = "/login";
         return Promise.reject(refreshError);
       }
     }
