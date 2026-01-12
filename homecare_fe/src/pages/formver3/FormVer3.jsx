@@ -66,6 +66,7 @@ export default function DFormVer3({ id_formVer3 }) {
   const [selectedIds, setSelectedIds] = useState({
     id_template_service: null,
     id_exam_part: null,
+    id_formver3_name: null,
   });
   const [diagnosisSummary, setDiagnosisSummary] = useState(
     form.getFieldValue("imagingDiagnosisSummary")
@@ -93,13 +94,13 @@ export default function DFormVer3({ id_formVer3 }) {
         const data = res?.data?.data.data;
         if (!data) return;
 
-        /* ===== Map API → Form ===== */
-        form.setFieldsValue(buildFormVer3Values(data));
-
+        const values = buildFormVer3Values(data);
+        form.setFieldsValue(values);
         /* ===== set state phụ thuộc ===== */
         setSelectedIds({
           id_template_service: data.id_template_service,
           id_exam_part: data.id_exam_part,
+          id_formver3_name: data.id_formver3_name,
         });
 
         /* ===== imaging rows ===== */
@@ -286,14 +287,12 @@ export default function DFormVer3({ id_formVer3 }) {
 
         const list = res?.data?.data?.items || [];
         // Optional: auto select nếu chỉ có 1 mẫu
-        if (list.length === 1) {
+        if (!editId && list.length == 1) {
           form.setFieldsValue({
             id_formver3_name: list[0].id,
           });
         }
         setFilteredFormVer3Names(list);
-
-        console.log("list", list);
       } catch (err) {
         console.error(err);
         toast.error("Không tải được danh sách tên mẫu");

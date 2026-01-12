@@ -34,7 +34,11 @@ import { useGlobalAuth } from "../../../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { USER_ROLE } from "../../../constant/app";
 import { toast } from "react-toastify";
-import { defaultVisibleKeys, STATUS_FORMVER3_MAP } from "../formver3.constant";
+import {
+  ADVANCED_SAMPLE_STATUS_MAP,
+  defaultVisibleKeys,
+  STATUS_FORMVER3_MAP,
+} from "../formver3.constant";
 import { languageTag } from "../../formver2/list/FormVer2List";
 import { FormVer3CloneModal } from "../components/FormVer3CloneModal";
 
@@ -44,6 +48,12 @@ const { RangePicker } = DatePicker;
 
 const STORAGE_KEY_PAGE_SIZE = "formVer3_pageSize";
 const FILTER_STORAGE_KEY = "formVer3_filters";
+
+const renderAdvancedSample = (value) => {
+  const s = ADVANCED_SAMPLE_STATUS_MAP[value];
+  if (!s) return <Tag>—</Tag>;
+  return <Tag color={s.color}>{s.text}</Tag>;
+};
 
 const buildParams = (f) => {
   const params = {
@@ -245,6 +255,15 @@ export default function FormVer3List() {
         width: 130,
         align: "center",
         render: (status) => renderStatus(status),
+      },
+
+      {
+        title: "Mẫu nâng cao",
+        dataIndex: "advanced_sample",
+        key: "advanced_sample",
+        width: 140,
+        align: "center",
+        render: (value) => renderAdvancedSample(value),
       },
       {
         title: "Bộ phận",

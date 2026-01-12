@@ -49,6 +49,8 @@ export const defaultVisibleKeys = [
   "code",
   "ten_mau",
   "id_exam_part",
+  "advanced_sample",
+  "status",
   "id_template_service",
   "language",
   "ngay_thuc_hien",
@@ -296,3 +298,13 @@ export function buildFormDataDoctorUseFormVer3(values, extra) {
 
   return fd;
 }
+
+export const ADVANCED_SAMPLE_STATUS_MAP = {
+  1: { text: "Nháp", color: "orange" },
+  2: { text: "Đã chính thức", color: "green" },
+};
+
+const ADVANCED_SAMPLE_MAP = {
+  yes: { text: "Có", color: "green" },
+  no: { text: "Không", color: "default" },
+};
