@@ -338,6 +338,15 @@ const FormVer2NameList = ({ version = "v.2" }) => {
       render: (val) =>
         val ? <Tag color="green">Đã dùng</Tag> : <Tag>Chưa dùng</Tag>,
     },
+
+    {
+      title: "Đã ban hành?",
+      dataIndex: "isApproved",
+      key: "isApproved",
+      width: 140,
+      render: (val) =>
+        val ? <Tag color="green">Đã ban hành</Tag> : <Tag>Chưa ban hành</Tag>,
+    },
     {
       title: "id_root",
       dataIndex: "id_root",

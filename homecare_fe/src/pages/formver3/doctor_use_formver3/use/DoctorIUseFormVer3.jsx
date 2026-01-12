@@ -173,7 +173,8 @@ export default function DoctorUseDFormVer3({
           return (
             item.id_template_service == selectedIDs.id_template_service &&
             item.id_exam_part == selectedIDs.id_exam_part &&
-            item.isUsed == true
+            item.isUsed == true &&
+            item.isApproved == true
           );
         });
 
