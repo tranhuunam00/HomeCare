@@ -123,6 +123,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
   languageTranslate,
   approvalStatus,
   imagingRows,
+  selectedExamPart,
 }) => {
   console.log("approvalStatus", approvalStatus);
   const { templateServices, user } = useGlobalAuth();
@@ -381,6 +382,17 @@ const PrintPreviewVer3NotDataDiagnose = ({
           >
             {"QUY TRÌNH KỸ THUẬT".toUpperCase()}
           </h3>
+
+          <PrintItem
+            minWidth={250}
+            label="Phân hệ"
+            value={selectedTemplateService?.name}
+          />
+          <PrintItem
+            minWidth={250}
+            label="Bộ phận"
+            value={selectedExamPart?.name}
+          />
 
           <PrintItem
             minWidth={250}

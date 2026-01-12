@@ -541,6 +541,10 @@ export default function DoctorUseDFormVer3({
           )}
           <Divider />
 
+          <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
+            {"Kỹ thuật thực hiện".toUpperCase()}
+          </Title>
+
           <Row gutter={16}>
             <Col xs={24} md={9}>
               <Form.Item
@@ -742,10 +746,6 @@ export default function DoctorUseDFormVer3({
               ))}
             </Select>
           </Form.Item>
-
-          <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
-            {"Kỹ thuật thực hiện".toUpperCase()}
-          </Title>
 
           <Form.Item name="implementMethod" label="" tooltip="Short text">
             <TextArea
