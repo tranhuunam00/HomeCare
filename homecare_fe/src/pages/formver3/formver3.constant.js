@@ -308,3 +308,12 @@ const ADVANCED_SAMPLE_MAP = {
   yes: { text: "Có", color: "green" },
   no: { text: "Không", color: "default" },
 };
+
+export const formatIndentedList = (items = []) =>
+  items
+    .map((item, index) => {
+      // thụt các dòng xuống trong cùng 1 item
+      const formatted = item?.replace(/\n/g, "\n   ");
+      return `${index + 1}. ${formatted}`;
+    })
+    .join("\n");

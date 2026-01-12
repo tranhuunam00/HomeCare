@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Input, Radio, Button, Row, Col } from "antd";
 import styles from "./ImagingStructureTable.module.scss";
 import TextArea from "antd/es/input/TextArea";
+import { formatIndentedList } from "../formver3.constant";
 
 const ImagingStructureTable = ({
   rows,
@@ -11,6 +12,34 @@ const ImagingStructureTable = ({
   abnormalFindings,
   form,
 }) => {
+  const [autoSync, setAutoSync] = useState(false);
+
+  const debounceRef = useRef(null);
+
+  useEffect(() => {
+    if (!autoSync) return;
+
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+
+    debounceRef.current = setTimeout(() => {
+      if (abnormalFindings.length > 0) {
+        const summary = formatIndentedList(abnormalFindings);
+        setDiagnosisSummary(summary);
+        form.setFieldsValue({
+          imagingDiagnosisSummary: summary,
+        });
+      }
+    }, 500);
+
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
+  }, [abnormalFindings, autoSync]);
+
   const updateRow = (index, key, value) => {
     const next = [...rows];
     next[index] = {
@@ -135,22 +164,12 @@ const ImagingStructureTable = ({
             ))}
 
           <Button
-            type="link"
+            type={autoSync ? "default" : "primary"}
+            size="small"
             disabled={!isEdit}
-            onClick={() => {
-              if (abnormalFindings.length > 0) {
-                const summary = abnormalFindings
-                  .map((item) => `• ${item}`)
-                  .join("\n");
-
-                setDiagnosisSummary(summary);
-                form.setFieldsValue({
-                  imagingDiagnosisSummary: summary,
-                });
-              }
-            }}
+            onClick={() => setAutoSync((prev) => !prev)}
           >
-            Đồng bộ xuống kết luận
+            {autoSync ? "Tắt tự động đồng bộ" : "Bật tự động đồng bộ"}
           </Button>
         </>
       )}

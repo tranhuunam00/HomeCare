@@ -35,9 +35,44 @@ const Box = ({ checked }) => (
   <span style={{ fontSize: 18 }}>{checked ? "☒" : "☐"}</span>
 );
 
+const Circle = ({ checked }) => (
+  <span
+    style={{
+      display: "inline-block",
+      width: 14,
+      height: 14,
+      borderRadius: "50%",
+      border: checked ? "2px solid #368df7ff" : "2px solid #368df7ff",
+      backgroundColor: checked ? "#368df7ff" : "transparent",
+    }}
+  />
+);
 const PrintCheckbox = ({ checked, label }) => (
   <span style={{ marginRight: 24 }}>
     <span style={{ fontSize: 14, marginRight: 6 }}>{checked ? "☒" : "☐"}</span>
+    {label}
+  </span>
+);
+
+const PrintRadio = ({ checked, label }) => (
+  <span
+    style={{
+      display: "inline-flex",
+      alignItems: "center",
+      marginRight: 24,
+      fontSize: 14,
+    }}
+  >
+    <span
+      style={{
+        width: 12,
+        height: 12,
+        borderRadius: "50%",
+        border: checked ? "2px solid #368df7ff" : "2px solid #368df7ff",
+        backgroundColor: checked ? "#368df7ff" : "transparent",
+        marginRight: 6,
+      }}
+    />
     {label}
   </span>
 );
@@ -60,20 +95,14 @@ const TextLabel = ({ label, minWidth }) => {
 };
 
 const PrintItem = ({ label, value, minWidth, valueStyle }) => (
-  <div
-    style={{
-      marginBottom: 6,
-      display: "flex",
-      alignItems: "flex-start",
-    }}
-  >
+  <div style={{ marginBottom: 6, display: "flex", alignItems: "flex-start" }}>
     <TextLabel label={label} minWidth={minWidth} />
     <p
       style={{
         fontSize: 14,
         margin: 0,
         padding: 0,
-        whiteSpace: "pre-line",
+        whiteSpace: "pre-wrap",
         ...valueStyle,
       }}
     >
@@ -111,7 +140,10 @@ const PrintPreviewVer3NotDataDiagnose = ({
     wards.find((w) => w.code == formSnapshot?.benh_nhan_dia_chi_xa_phuong)
       ?.name || formSnapshot?.benh_nhan_dia_chi_xa_phuong;
 
-  console.log("formSnapshot", formSnapshot);
+  console.log(
+    "formSnapshot?.imagingDiagnosisSummary",
+    formSnapshot?.imagingDiagnosisSummary
+  );
 
   return (
     <div>
@@ -358,11 +390,11 @@ const PrintPreviewVer3NotDataDiagnose = ({
           <div style={{ display: "flex", marginBottom: 4 }}>
             <TextLabel label={"Tiêm thuốc đối quang"} minWidth={250} />
 
-            <PrintCheckbox
+            <PrintRadio
               checked={formSnapshot?.contrastInjection === "no"}
               label="Không"
             />
-            <PrintCheckbox
+            <PrintRadio
               checked={formSnapshot?.contrastInjection === "yes"}
               label="Có"
             />
@@ -370,15 +402,15 @@ const PrintPreviewVer3NotDataDiagnose = ({
           <div style={{ display: "flex", marginBottom: 4 }}>
             <TextLabel label={"Chất lượng hình ảnh"} minWidth={250} />
 
-            <PrintCheckbox
+            <PrintRadio
               checked={formSnapshot?.imageQuatity === "good"}
               label="Đạt yêu cầu"
             />
-            <PrintCheckbox
+            <PrintRadio
               checked={formSnapshot?.imageQuatity === "limited"}
               label="Đạt yêu cầu, có hạn chế"
             />
-            <PrintCheckbox
+            <PrintRadio
               checked={formSnapshot?.imageQuatity === "bad"}
               label="Không đạt"
             />
@@ -386,15 +418,15 @@ const PrintPreviewVer3NotDataDiagnose = ({
           <div style={{ display: "flex", marginBottom: 4 }}>
             <TextLabel label={"Thực hiện bổ sung"} minWidth={250} />
 
-            <PrintCheckbox
+            <PrintRadio
               checked={formSnapshot?.additionalAction === "no"}
               label="Không"
             />
-            <PrintCheckbox
+            <PrintRadio
               checked={formSnapshot?.additionalAction === "extra"}
               label="Chụp thêm"
             />
-            <PrintCheckbox
+            <PrintRadio
               checked={formSnapshot?.additionalAction === "redo"}
               label="Chụp lại"
             />
@@ -439,10 +471,10 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   <td style={{ ...tdCenter, ...colSTT }}>{index + 1}</td>
                   <td style={{ ...tdLeft, ...colStructure }}>{row.name}</td>
                   <td style={tdCenter}>
-                    <Box checked={row.status === "normal"} />
+                    <Circle checked={row.status === "normal"} />
                   </td>
                   <td style={tdCenter}>
-                    <Box checked={row.status === "abnormal"} />
+                    <Circle checked={row.status === "abnormal"} />
                   </td>
                 </tr>
               ))}
@@ -526,6 +558,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
             minWidth={250}
             label={"Chẩn đoán hình ảnh"}
             value={formSnapshot?.imagingDiagnosisSummary}
+            valueStyle={{ fontWeight: "bold" }}
           />
           <PrintItem
             minWidth={250}
