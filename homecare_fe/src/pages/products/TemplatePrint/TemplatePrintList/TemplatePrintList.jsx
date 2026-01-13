@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Table, Input, Row, Col, Card, Spin, Button } from "antd";
+import { Table, Input, Row, Col, Card, Spin, Button, Select } from "antd";
 import {
   EditOutlined,
   FilterOutlined,
@@ -18,15 +18,17 @@ const TemplatePrintList = () => {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
 
+  const { clinicsAll } = useGlobalAuth();
+
   const [filter, setFilter] = useState({
     name: "",
-    // mai kia thêm clinicId, status...
+    id_clinic: undefined,
   });
 
   const [draft, setDraft] = useState({
     name: "",
+    id_clinic: undefined,
   });
-
   const { user } = useGlobalAuth();
   const navigate = useNavigate();
 
@@ -108,7 +110,6 @@ const TemplatePrintList = () => {
     {
       title: "Tên phòng khám",
       key: "id_clinic",
-      align: "center",
       render: (_, record) => record?.id_clinic_clinic?.name || "—",
     },
 
@@ -202,37 +203,61 @@ const TemplatePrintList = () => {
             }
           >
             <div>
-              <Input
-                placeholder="Tìm theo tên..."
-                value={draft.name}
-                onChange={(e) =>
-                  setDraft((prev) => ({ ...prev, name: e.target.value }))
-                }
-                allowClear
-                style={{ marginBottom: 8 }}
-              />
+              <Row gutter={8} align="middle" wrap={false}>
+                <Col span={12}>
+                  <Input
+                    placeholder="Tìm theo tên..."
+                    value={draft.name}
+                    onChange={(e) =>
+                      setDraft((prev) => ({ ...prev, name: e.target.value }))
+                    }
+                    allowClear
+                  />
+                </Col>
 
-              <div style={{ display: "flex", gap: 8 }}>
-                <Button
-                  type="primary"
-                  onClick={() => {
-                    setPage(1);
-                    setFilter(draft); // commit draft → filter
-                  }}
-                >
-                  Tìm kiếm
-                </Button>
-                <Button
-                  onClick={() => {
-                    const reset = { name: "" };
-                    setDraft(reset);
-                    setFilter(reset);
-                    setPage(1);
-                  }}
-                >
-                  Reset
-                </Button>
-              </div>
+                <Col span={12}>
+                  <Select
+                    allowClear
+                    placeholder="Chọn phòng khám..."
+                    value={draft.id_clinic}
+                    onChange={(v) =>
+                      setDraft((prev) => ({ ...prev, id_clinic: v }))
+                    }
+                    style={{ width: "100%" }}
+                  >
+                    {clinicsAll.map((c) => (
+                      <Select.Option key={c.id} value={c.id}>
+                        {c.name}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Col>
+
+                <Col>
+                  <Button
+                    type="primary"
+                    onClick={() => {
+                      setPage(1);
+                      setFilter(draft);
+                    }}
+                  >
+                    Tìm kiếm
+                  </Button>
+                </Col>
+
+                <Col>
+                  <Button
+                    onClick={() => {
+                      const reset = { name: "", id_clinic: undefined };
+                      setDraft(reset);
+                      setFilter(reset);
+                      setPage(1);
+                    }}
+                  >
+                    Reset
+                  </Button>
+                </Col>
+              </Row>
             </div>
           </Card>
         </Col>

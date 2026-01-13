@@ -317,3 +317,15 @@ export const formatIndentedList = (items = []) =>
       return `${index + 1}. ${formatted}`;
     })
     .join("\n");
+
+export const PATIENT_FIELDS = [
+  "benh_nhan_ho_ten",
+  "benh_nhan_ngay_sinh",
+  "benh_nhan_gioi_tinh",
+  "benh_nhan_dia_chi",
+  "benh_nhan_quoc_tich",
+  "benh_nhan_cccd",
+  "benh_nhan_phone",
+  "province_code",
+  "ward_code",
+];

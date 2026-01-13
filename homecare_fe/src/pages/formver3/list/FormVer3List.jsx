@@ -684,17 +684,6 @@ export default function FormVer3List() {
                 />
               </Form.Item>
             </Col>
-
-            <Col xs={12} md={6} lg={4}>
-              <Form.Item label="Đã xóa">
-                <Switch
-                  checked={uiFilters.includeDeleted}
-                  onChange={(v) =>
-                    setUiFilters((s) => ({ ...s, includeDeleted: v }))
-                  }
-                />
-              </Form.Item>
-            </Col>
           </Row>
         </Card>
 
@@ -705,12 +694,6 @@ export default function FormVer3List() {
           columns={columnsToRender}
           rowKey="id"
           rowSelection={rowSelection}
-          onRow={(record) => ({
-            onClick: () => {
-              setPreviewId(record.id);
-              setPreviewOpen(true);
-            },
-          })}
           pagination={{
             current: filters.page,
             pageSize: filters.limit,

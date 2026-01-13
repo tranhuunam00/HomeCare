@@ -637,32 +637,36 @@ const PrintPreviewVer3NotDataDiagnose = ({
               <div
                 style={{
                   display: "flex",
-                  flexWrap: "wrap", // Cho phép ảnh xuống dòng
+                  flexWrap: "wrap",
                   justifyContent: "space-between",
                 }}
               >
-                {imageList?.map((item, index) => (
-                  <section
-                    key={index}
-                    style={{
-                      width: "33%", // Chiếm 48% chiều rộng để hiển thị 2 ảnh trong 1 hàng
-                      marginBottom: "16px", // Khoảng cách giữa các ảnh
-                    }}
-                  >
-                    <img
-                      src={item.url || item.rawUrl}
-                      alt={`img-${index}`}
-                      width={300}
-                      height={220}
+                {imageList
+                  .filter((image) => image.url)
+                  ?.map((item, index) => (
+                    <section
+                      key={index}
                       style={{
-                        objectFit: "contain",
-                        backgroundColor: "#e4e4e4ff",
-                        width: "100%", // Đảm bảo ảnh đầy đủ chiều rộng của ô
+                        width: "33%",
+                        marginBottom: "16px",
                       }}
-                    />
-                    <p style={{ textAlign: "center" }}>{item.caption || ""}</p>
-                  </section>
-                ))}
+                    >
+                      <img
+                        src={item.url || item.rawUrl}
+                        alt={`img-${index}`}
+                        width={300}
+                        height={220}
+                        style={{
+                          objectFit: "contain",
+                          backgroundColor: "#e4e4e4ff",
+                          width: "100%",
+                        }}
+                      />
+                      <p style={{ textAlign: "center" }}>
+                        {item.caption || ""}
+                      </p>
+                    </section>
+                  ))}
               </div>
             </>
           )}

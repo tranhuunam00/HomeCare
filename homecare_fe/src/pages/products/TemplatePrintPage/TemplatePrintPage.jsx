@@ -183,17 +183,9 @@ const TemplatePrintPreview = () => {
             </Button>
             <Button
               style={{ marginLeft: 8 }}
-              onClick={() => navigate("/home/products")}
+              onClick={() => navigate("/home/templates-print")}
             >
               Hủy
-            </Button>
-            <Button
-              style={{ marginLeft: 8 }}
-              type="default"
-              onClick={handlePrint}
-              disabled={!idTemplate}
-            >
-              In
             </Button>
           </Form.Item>
         </Form>

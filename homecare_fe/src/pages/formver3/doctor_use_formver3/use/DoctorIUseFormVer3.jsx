@@ -42,6 +42,7 @@ import {
   buildFormVer3Values,
   DEFAULT_IMAGING_ROWS,
   LANGUAGE_OPTIONS,
+  PATIENT_FIELDS,
 } from "../../formver3.constant";
 import AdvancedSampleSection from "../../components/AdvancedSampleSection";
 import ImagingStructureTable from "../../components/ImagingStructureTable3.jsx";
@@ -91,6 +92,7 @@ export default function DoctorUseDFormVer3({
   const [initialSnap, setInitialSnap] = useState({
     formValues: null,
     apiData: null,
+    patientDiagnose: null,
   });
   const [formVer3, setFormVer3] = useState();
   const [printTemplateList, setPrintTemplateList] = useState([]);
@@ -275,6 +277,11 @@ export default function DoctorUseDFormVer3({
             doctorUseFormVer3Server?.id_formver3_formver3?.id_formver3_name,
         });
 
+        if (!idEdit) {
+          setInitialSnap({
+            patientDiagnose: patientDiagnoseData,
+          });
+        }
         if (idEdit) {
           formValues.id_formver3_name =
             doctorUseFormVer3Server?.id_formver3_formver3?.id_formver3_name;
@@ -306,6 +313,7 @@ export default function DoctorUseDFormVer3({
           setInitialSnap({
             formValues: form.getFieldsValue(),
             apiData: doctorUseFormVer3Server,
+            patientDiagnose: patientDiagnoseData,
           });
         }
 
@@ -399,18 +407,32 @@ export default function DoctorUseDFormVer3({
     }
   };
   const restoreFromSnapshot = () => {
+    const ok = window.confirm(
+      "Toàn bộ dữ liệu sẽ quay về trạng thái gốc từ hệ thống. Bạn có chắc muốn hoàn tác?"
+    );
+    if (!ok) return;
     if (!idEdit) {
-      const ok = window.confirm(
-        "Toàn bộ dữ liệu đang nhập sẽ bị xóa. Bạn có chắc muốn reset?"
-      );
-      if (!ok) return;
+      console.log("[restoreFromSnapshot] not editID");
+      const patientSnap = initialSnap.patientDiagnose;
+
+      console.log("patientSnap", patientSnap);
+
+      if (!patientSnap) {
+        toast.error("Không tìm thấy dữ liệu bệnh nhân gốc");
+        return;
+      }
+
+      // 🔹 rebuild form chỉ từ patient snapshot
+      const patientOnlyValues = buildDradv3FormValues({
+        patientDiagnose: patientSnap,
+        doctorUseFormVer3: null,
+      });
 
       form.resetFields();
-
+      form.setFieldsValue(patientOnlyValues);
       setImageList([{}, {}, {}]);
       setImagingRows(DEFAULT_IMAGING_ROWS);
       setFormVer3(null);
-
       setSelectedIDs({
         id_template_service: null,
         id_exam_part: null,
@@ -422,11 +444,6 @@ export default function DoctorUseDFormVer3({
     }
 
     if (idEdit && isEdit && initialSnap?.apiData) {
-      const ok = window.confirm(
-        "Form sẽ quay về trạng thái gốc từ hệ thống. Bạn có chắc muốn hoàn tác?"
-      );
-      if (!ok) return;
-
       const apiData = initialSnap.apiData;
 
       // 🔹 rebuild form values từ API
@@ -813,7 +830,7 @@ export default function DoctorUseDFormVer3({
           <Form.Item label="">
             <ImageWithCaptionInput
               disabled={!isEdit}
-              max={4}
+              max={6}
               value={imageList}
               onChange={setImageList}
               valueTrans={imageList}
