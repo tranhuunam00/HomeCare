@@ -219,6 +219,7 @@ const ExamPartList = () => {
             <Button
               onClick={() => {
                 setPage(1);
+                setLimit(10); // optional: nếu muốn reset luôn pageSize
                 setSearchDraft("");
                 setSelectedServiceDraft(undefined);
                 setSearchName("");
@@ -269,8 +270,12 @@ const ExamPartList = () => {
             total,
             showSizeChanger: true,
             onChange: (p, l) => {
-              setPage(p);
-              setLimit(l);
+              if (l !== limit) {
+                setPage(1); //
+                setLimit(l);
+              } else {
+                setPage(p);
+              }
             },
           }}
         />

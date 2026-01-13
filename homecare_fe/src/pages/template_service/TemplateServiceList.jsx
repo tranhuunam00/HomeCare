@@ -22,6 +22,7 @@ import styles from "./TemplateList.module.scss";
 import API_CALL from "../../services/axiosClient";
 import TemplateServiceModal from "./TemplateServiceModal";
 
+const PAGE_SIZE = 10;
 const TemplateServiceList = () => {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -70,7 +71,7 @@ const TemplateServiceList = () => {
         params: {
           name: searchName,
           page,
-          limit: 20,
+          limit: PAGE_SIZE,
         },
       });
 
@@ -139,7 +140,7 @@ const TemplateServiceList = () => {
           </Tooltip>
 
           <Popconfirm
-            title="Xoá mẫu dịch vụ?"
+            title="Xoá mẫu PHÂN HỆ?"
             description={`Bạn chắc chắn muốn xoá "${record.name}"?`}
             okText="Xoá"
             cancelText="Huỷ"
@@ -208,7 +209,7 @@ const TemplateServiceList = () => {
           columns={columns}
           pagination={{
             current: page,
-            pageSize: 10,
+            pageSize: PAGE_SIZE,
             total,
             showSizeChanger: false,
             onChange: (p) => setPage(p),

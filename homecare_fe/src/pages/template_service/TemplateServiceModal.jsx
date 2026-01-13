@@ -23,7 +23,7 @@ const TemplateServiceModal = ({
 
   return (
     <Modal
-      title={isEdit ? "Chỉnh sửa mẫu dịch vụ" : "Tạo mới mẫu dịch vụ"}
+      title={isEdit ? "Chỉnh sửa mẫu PHÂN HỆ" : "Tạo mới mẫu PHÂN HỆ"}
       open={open}
       onCancel={onCancel}
       onOk={handleOk}

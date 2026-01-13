@@ -154,32 +154,31 @@ export default function DoctorUseDFormVer3({
     fetchTemplates();
   }, []);
 
+  const fetchDataFormver3Names = async () => {
+    const data = await API_CALL.get("/formVer3_name", {
+      params: {
+        id_template_service: selectedIDs.id_template_service,
+        id_exam_part: selectedIDs.id_exam_part,
+        page: 1,
+        limit: 1000,
+      },
+    });
+    const filterDatas = data.data.data.items.filter((item) => {
+      return (
+        item.id_template_service == selectedIDs.id_template_service &&
+        item.id_exam_part == selectedIDs.id_exam_part &&
+        item.isUsed == true &&
+        item.isApproved == true
+      );
+    });
+
+    setFilteredFormVer3Names(filterDatas);
+  };
   useEffect(() => {
     try {
       if (!selectedIDs.id_template_service || !selectedIDs.id_exam_part) {
         setFilteredFormVer3Names([]);
       }
-
-      const fetchDataFormver3Names = async () => {
-        const data = await API_CALL.get("/formVer3_name", {
-          params: {
-            id_template_service: selectedIDs.id_template_service,
-            id_exam_part: selectedIDs.id_exam_part,
-            page: 1,
-            limit: 1000,
-          },
-        });
-        const filterDatas = data.data.data.items.filter((item) => {
-          return (
-            item.id_template_service == selectedIDs.id_template_service &&
-            item.id_exam_part == selectedIDs.id_exam_part &&
-            item.isUsed == true &&
-            item.isApproved == true
-          );
-        });
-
-        setFilteredFormVer3Names(filterDatas);
-      };
       fetchDataFormver3Names();
     } catch (error) {
       console.log("error", error);
@@ -580,16 +579,6 @@ export default function DoctorUseDFormVer3({
               </Form.Item>
             </Col>
 
-            <Col xs={2} md={1}>
-              <Tooltip title="Tải lại phân hệ & bộ phận">
-                <Button
-                  icon={<ReloadOutlined />}
-                  loading={reloading}
-                  onClick={reloadTemplateAndExamPart}
-                />
-              </Tooltip>
-            </Col>
-
             <Col xs={24} md={7}>
               <Form.Item
                 label={translateLabel(languageTranslate, "bodyPart", false)}
@@ -657,10 +646,19 @@ export default function DoctorUseDFormVer3({
                 </Select>
               </Form.Item>
             </Col>
+            <Col xs={2} md={1}>
+              <Tooltip title="Tải lại phân hệ & bộ phận">
+                <Button
+                  icon={<ReloadOutlined />}
+                  loading={reloading}
+                  onClick={reloadTemplateAndExamPart}
+                />
+              </Tooltip>
+            </Col>
           </Row>
 
           <Row gutter={16}>
-            <Col xs={24} md={24}>
+            <Col span={22}>
               <Form.Item
                 labelCol={{ flex: "0 0 270px" }}
                 label={translateLabel(
@@ -715,6 +713,27 @@ export default function DoctorUseDFormVer3({
                   ))}
                 </Select>
               </Form.Item>
+            </Col>
+            <Col span={2}>
+              <Tooltip title="Tải lại danh sách tên mẫu">
+                <Button
+                  icon={<ReloadOutlined />}
+                  disabled={
+                    !selectedIDs.id_template_service ||
+                    !selectedIDs.id_exam_part
+                  }
+                  onClick={() => {
+                    if (
+                      !selectedIDs.id_template_service ||
+                      !selectedIDs.id_exam_part
+                    ) {
+                      toast.warning("Vui lòng chọn đủ Phân hệ và Bộ phận");
+                      return;
+                    }
+                    fetchDataFormver3Names();
+                  }}
+                />
+              </Tooltip>
             </Col>
           </Row>
           <Form.Item

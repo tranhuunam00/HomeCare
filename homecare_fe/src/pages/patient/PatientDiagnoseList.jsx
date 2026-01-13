@@ -165,9 +165,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
       {
         title: "STT",
         key: "STT",
-
         align: "right", // ✅ CĂN BÊN PHẢI
-
         width: 70,
         render: (_, __, index) => (page - 1) * 10 + index + 1,
       },
@@ -199,13 +197,6 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         key: "name",
         width: 200,
         sorter: true,
-        render: (text, record) => {
-          const nameUpdated =
-            record.sono_results?.[0]?.benh_nhan_ho_ten ||
-            record.doctor_use_form_ver2s?.[0]?.benh_nhan_ho_ten;
-          const displayName = nameUpdated || text;
-          return displayName ? displayName.toUpperCase() : "-";
-        },
       },
 
       {
@@ -213,60 +204,21 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         dataIndex: "dob",
         key: "dob",
         width: 80,
-        align: "center", // ✅ CĂN BÊN PHẢI
-        render: (val, record) => {
-          const ageUpdated =
-            record.sono_results?.[0]?.benh_nhan_tuoi ||
-            record.doctor_use_form_ver2s?.[0]?.benh_nhan_tuoi;
-          if (ageUpdated !== undefined && ageUpdated !== null) {
-            return <span>{ageUpdated}</span>;
-          }
+        align: "center",
+        render: (val) => {
           return val ? getAge(val) : "-";
         },
       },
-      {
-        title: "Giới tính",
-        dataIndex: "gender",
-        key: "gender",
-        width: 80,
-        align: "center",
-        render: (text, record) => {
-          const genderUpdated =
-            record.sono_results?.[0]?.benh_nhan_gioi_tinh ||
-            record.doctor_use_form_ver2s?.[0]?.benh_nhan_gioi_tinh;
-          return genderUpdated || text || "-";
-        },
-      },
-      {
-        title: "Lâm sàng",
-        dataIndex: "Indication",
-        key: "Indication",
-        width: 120,
-        render: (text, record) => {
-          const clinicalUpdated =
-            record.sono_results?.[0]?.benh_nhan_lam_sang ||
-            record.doctor_use_form_ver2s?.[0]?.benh_nhan_lam_sang;
-          const displayValue = clinicalUpdated || text;
-
-          const limit = 20;
-          const isOverLimit = displayValue.length > limit;
-          const truncatedText = isOverLimit
-            ? `${displayValue.substring(0, limit)}...`
-            : displayValue;
-          return <div>{truncatedText || "-"}</div>;
-        },
-      },
+      { title: "CCCD", dataIndex: "CCCD", key: "CCCD", width: 160 },
 
       {
         width: 170,
-        title: "Chỉ định",
+        title: "Phân hệ",
         dataIndex: "id_template_service",
         key: "id_template_service",
         render: (val) => templateServices?.find((t) => t.id == val)?.name,
-        sorter: true,
       },
 
-      { title: "CCCD", dataIndex: "CCCD", key: "CCCD", width: 160 },
       { title: "PID", dataIndex: "PID", key: "PID", width: 120 },
       { title: "SID", dataIndex: "SID", key: "SID", width: 120 },
       {
@@ -275,7 +227,13 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         key: "phoneNumber",
         width: 140,
       },
-
+      {
+        title: "Giới tính",
+        dataIndex: "gender",
+        key: "gender",
+        width: 80,
+        align: "center",
+      },
       {
         width: 150,
         title: "Bộ phận",
@@ -429,7 +387,13 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
     console.log("filters", filters);
     try {
       const res = await API_CALL.get("/patient-diagnose", {
-        params: { ...cleanParams(filters), page, limit },
+        params: {
+          ...cleanParams(filters),
+          page,
+          limit,
+          sort_by: filters.sort_by,
+          sort_order: filters.sort_order,
+        },
       });
       const responseData = res.data.data;
       setData(responseData?.rows || []);
@@ -630,6 +594,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
                 className="smallSelect"
                 allowClear
                 showSearch
+                value={pendingFilters.id_clinic}
                 placeholder="Chọn phòng khám"
                 style={{ width: deviceIsMobile ? 250 : 175 }}
                 optionFilterProp="children"
@@ -664,7 +629,8 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
             <Select
               allowClear
               style={{ width: "100%", maxWidth: 175 }}
-              placeholder="Chỉ định"
+              value={pendingFilters.id_template_service}
+              placeholder="Phân hệ"
               onChange={(value) =>
                 setPendingFilters({
                   ...pendingFilters,
@@ -690,6 +656,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
               disabled={!pendingFilters.id_template_service}
               style={{ width: "100%" }}
               placeholder="Bộ phận"
+              value={pendingFilters.id_exam_part}
               onChange={(value) =>
                 setPendingFilters({ ...pendingFilters, id_exam_part: value })
               }
@@ -802,6 +769,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
                 setPendingFilters({ ...pendingFilters, name: e.target.value })
               }
               allowClear
+              value={pendingFilters?.name}
             />
           </Col>
 
@@ -815,6 +783,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
                 setPendingFilters({ ...pendingFilters, PID: e.target.value })
               }
               allowClear
+              value={pendingFilters?.PID}
             />
           </Col>
           <Col span={chosenRecord || deviceIsMobile ? 24 : 14}>
@@ -908,7 +877,6 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
                 },
               }}
               onChange={(pagination, _filters, sorter) => {
-                // ✅ 1. Pagination luôn xử lý
                 if (
                   pagination.current !== page ||
                   pagination.pageSize !== limit
@@ -917,33 +885,16 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
                   setLimit(pagination.pageSize);
                 }
 
-                // ✅ 2. Sort
                 if (sorter?.order) {
-                  setFilters((prev) => {
-                    const newSortBy = sorter.field;
-                    const newSortOrder =
-                      sorter.order === "ascend" ? "asc" : "desc";
-
-                    // ✅ CHỈ reset page khi sort thay đổi
-                    if (
-                      prev.sort_by !== newSortBy ||
-                      prev.sort_order !== newSortOrder
-                    ) {
-                      setPage(1);
-                    }
-
-                    return {
-                      ...prev,
-                      sort_by: newSortBy,
-                      sort_order: newSortOrder,
-                    };
-                  });
+                  setPage(1);
+                  setFilters((prev) => ({
+                    ...prev,
+                    sort_by: sorter.field,
+                    sort_order: sorter.order === "ascend" ? "asc" : "desc",
+                  }));
                 } else {
-                  // ✅ Khi clear sort
+                  setPage(1);
                   setFilters((prev) => {
-                    if (prev.sort_by || prev.sort_order) {
-                      setPage(1); // clear sort cũng reset page
-                    }
                     const { sort_by, sort_order, ...rest } = prev;
                     return rest;
                   });
