@@ -160,7 +160,9 @@ export const buildDradv3FormValues = ({
     benh_nhan_sid: doctorUseFormVer3?.benh_nhan_sid ?? patientDiagnose.SID,
 
     benh_nhan_lam_sang:
-      doctorUseFormVer3?.benh_nhan_lam_sang ?? patientDiagnose.Indication,
+      doctorUseFormVer3?.benh_nhan_lam_sang ||
+      patientDiagnose.Indication ||
+      patientDiagnose.clinical_information,
 
     benh_nhan_dia_chi_so_nha:
       doctorUseFormVer3?.benh_nhan_dia_chi_so_nha ?? patientDiagnose.address,

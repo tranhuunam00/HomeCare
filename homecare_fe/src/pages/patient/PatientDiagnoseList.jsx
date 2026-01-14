@@ -210,6 +210,12 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         },
       },
       { title: "CCCD", dataIndex: "CCCD", key: "CCCD", width: 160 },
+      {
+        title: "Lâm sàng",
+        dataIndex: "Indication",
+        key: "Indication",
+        width: 260,
+      },
 
       {
         width: 170,

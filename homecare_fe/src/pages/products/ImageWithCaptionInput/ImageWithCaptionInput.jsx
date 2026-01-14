@@ -91,7 +91,7 @@ const ImageWithCaptionInput = ({
                 placeholder="Chú thích ảnh"
                 value={item.caption}
                 onChange={(e) => handleCaptionChange(e, index)}
-                rows={3}
+                autoSize={{ minRows: 1, maxRows: 6 }}
                 style={{ marginTop: 8 }}
               />
 

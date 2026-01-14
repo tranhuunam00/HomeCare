@@ -264,6 +264,7 @@ export default function DoctorUseDFormVer3({
           doctorUseFormVer3Server?.id_patient_diagnose_patient_diagnose ||
           null;
 
+        console.log("patientDiagnoseData", patientDiagnoseData);
         const formValues = buildDradv3FormValues({
           doctorUseFormVer3: doctorUseFormVer3Server,
           patientDiagnose: patientDiagnoseData,
@@ -786,7 +787,7 @@ export default function DoctorUseDFormVer3({
           <Form.Item name="implementMethod" label="" tooltip="Short text">
             <TextArea
               disabled={!isEdit}
-              autoSize={{ minRows: 4, maxRows: 10 }}
+              autoSize={{ minRows: 1, maxRows: 10 }}
               placeholder="Nhập mô tả quy trình kỹ thuật..."
             />
           </Form.Item>

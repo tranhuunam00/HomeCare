@@ -87,7 +87,7 @@ const PatientFormPage = () => {
             cccd: data.CCCD,
             phone: data.phoneNumber,
             email: data.email,
-            detail: data.address,
+            address: data.address,
             country: data.countryCode,
             province: data.province_code || undefined,
             ward: data.ward_code || undefined,
@@ -131,12 +131,11 @@ const PatientFormPage = () => {
         name: values.name,
         PID: values.pid,
         SID: values.sid,
-        Indication: values.Indication ?? "-",
         gender: values.gender,
         CCCD: values.cccd,
         phoneNumber: values.phone,
         email: values.email,
-        address: values.detail,
+        address: values.address,
         countryCode: values.country,
         province_code: values.province + "",
         district_code: values.district + "",
@@ -147,6 +146,7 @@ const PatientFormPage = () => {
         dob: values.dob,
         id_template_service: values.id_template_service,
         id_exam_part: values.id_exam_part,
+        Indication: values.Indication,
       };
       if (id) {
         console.log("initialValues.status ", initialValues.status);
@@ -339,10 +339,10 @@ const PatientFormPage = () => {
 
           <Row>
             <Col span={24}>
-              <Form.Item name="detail" label="Chi tiết địa chỉ">
+              <Form.Item name="address" label="Chi tiết địa chỉ">
                 <Input.TextArea
                   placeholder="Nhập địa chỉ cụ thể (số nhà, ngõ...)"
-                  autoSize={{ minRows: 2, maxRows: 4 }}
+                  autoSize={{ minRows: 1, maxRows: 2 }}
                 />
               </Form.Item>
             </Col>
@@ -511,6 +511,17 @@ const PatientFormPage = () => {
                       </Option>
                     ))}
                 </Select>
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row>
+            <Col span={24}>
+              <Form.Item name="Indication" label="Thông tin lâm sàng">
+                <Input.TextArea
+                  placeholder="Nhập địa chỉ cụ thể (số nhà, ngõ...)"
+                  autoSize={{ minRows: 1, maxRows: 5 }}
+                />
               </Form.Item>
             </Col>
           </Row>

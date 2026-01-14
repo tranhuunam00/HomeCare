@@ -47,7 +47,7 @@ const ImagingDiagnosisSection = ({
             }, 500); // 300–500ms là đẹp
           }}
           disabled={!isEdit}
-          autoSize={{ minRows: 4, maxRows: 10 }}
+          autoSize={{ minRows: 1, maxRows: 10 }}
           placeholder="Tóm tắt chẩn đoán hình ảnh..."
         />
       </Form.Item>
@@ -116,7 +116,7 @@ const ImagingDiagnosisSection = ({
       <Form.Item name="khuyen_nghi" tooltip="Có thể tích hợp ChatGPT D-RADS">
         <TextArea
           disabled={!isEdit}
-          autoSize={{ minRows: 4, maxRows: 10 }}
+          autoSize={{ minRows: 1, maxRows: 10 }}
           placeholder="Nhập khuyến nghị & tư vấn..."
         />
       </Form.Item>

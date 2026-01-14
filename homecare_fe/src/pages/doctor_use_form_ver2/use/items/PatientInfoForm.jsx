@@ -255,7 +255,7 @@ export default function PatientInfoSection({
           >
             <TextArea
               disabled={!isEdit || isApproved}
-              autoSize={{ minRows: 3, maxRows: isMobile ? 3 : 6 }}
+              autoSize={{ minRows: 1, maxRows: isMobile ? 3 : 6 }}
               placeholder="Nhập triệu chứng lâm sàng..."
             />
           </Form.Item>
