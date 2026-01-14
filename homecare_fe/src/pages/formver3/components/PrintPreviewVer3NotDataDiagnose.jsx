@@ -44,14 +44,9 @@ const Circle = ({ checked }) => (
       borderRadius: "50%",
       border: checked ? "2px solid #368df7ff" : "2px solid #368df7ff",
       backgroundColor: checked ? "#368df7ff" : "transparent",
+      boxShadow: checked ? "inset 0 0 0 6px #368df7ff" : "none",
     }}
   />
-);
-const PrintCheckbox = ({ checked, label }) => (
-  <span style={{ marginRight: 24 }}>
-    <span style={{ fontSize: 14, marginRight: 6 }}>{checked ? "☒" : "☐"}</span>
-    {label}
-  </span>
 );
 
 const PrintRadio = ({ checked, label }) => (
@@ -70,6 +65,7 @@ const PrintRadio = ({ checked, label }) => (
         borderRadius: "50%",
         border: checked ? "2px solid #368df7ff" : "2px solid #368df7ff",
         backgroundColor: checked ? "#368df7ff" : "transparent",
+        boxShadow: checked ? "inset 0 0 0 6px #368df7ff" : "none",
         marginRight: 6,
       }}
     />
@@ -160,12 +156,19 @@ const PrintPreviewVer3NotDataDiagnose = ({
                 gap: 20,
               }}
             >
-              <div style={{ maxWidth: "350px", flex: 1, marginLeft: 60 }}>
+              <div
+                style={{
+                  maxWidth: "350px",
+                  flex: 2,
+                  // marginLeft: 60,
+                  justifyContent: "start",
+                }}
+              >
                 <img
                   style={{
                     marginTop: 10,
                     objectFit: "cover",
-                    alignContent: "center",
+                    alignContent: "start",
                   }}
                   src={
                     printTemplate?.logo_url ||
@@ -195,7 +198,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   {printTemplate?.address || "-"}
                 </p>
               </div>
-              <div style={{ maxWidth: "280px", flex: 8 }}>
+              <div style={{ maxWidth: "280px", flex: 4 }}>
                 <p style={{ fontSize: 13 }}>
                   <strong>Website: </strong>
                   {printTemplate?.website || "http://..."}
@@ -384,23 +387,23 @@ const PrintPreviewVer3NotDataDiagnose = ({
           </h3>
 
           <PrintItem
-            minWidth={250}
+            minWidth={160}
             label="Phân hệ"
             value={selectedTemplateService?.name}
           />
           <PrintItem
-            minWidth={250}
+            minWidth={160}
             label="Bộ phận"
             value={selectedExamPart?.name}
           />
 
           <PrintItem
-            minWidth={250}
+            minWidth={160}
             label="Kỹ thuật thực hiện"
             value={formSnapshot.implementMethod}
           />
           <div style={{ display: "flex", marginBottom: 4 }}>
-            <TextLabel label={"Tiêm thuốc đối quang"} minWidth={250} />
+            <TextLabel label={"Tiêm thuốc đối quang"} minWidth={160} />
 
             <PrintRadio
               checked={formSnapshot?.contrastInjection === "no"}
@@ -412,7 +415,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
             />
           </div>
           <div style={{ display: "flex", marginBottom: 4 }}>
-            <TextLabel label={"Chất lượng hình ảnh"} minWidth={250} />
+            <TextLabel label={"Chất lượng hình ảnh"} minWidth={160} />
 
             <PrintRadio
               checked={formSnapshot?.imageQuatity === "good"}
@@ -428,7 +431,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
             />
           </div>
           <div style={{ display: "flex", marginBottom: 4 }}>
-            <TextLabel label={"Thực hiện bổ sung"} minWidth={250} />
+            <TextLabel label={"Thực hiện bổ sung"} minWidth={160} />
 
             <PrintRadio
               checked={formSnapshot?.additionalAction === "no"}
@@ -524,6 +527,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                         style={{
                           ...tdLeft,
                           whiteSpace: "pre-line",
+                          fontSize: 14,
                         }}
                       >
                         {row.description || "Có bất thường"}
@@ -533,7 +537,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
               ) : (
                 <tr>
                   <td style={tdLeft} colSpan={3}>
-                    Chưa có dữ liệu mô tả bất thường
+                    ""
                   </td>
                 </tr>
               )}
@@ -561,19 +565,19 @@ const PrintPreviewVer3NotDataDiagnose = ({
             style={{
               whiteSpace: "pre-line",
               fontWeight: "bold",
-              fontSize: 18,
+              fontSize: 14,
             }}
           >
             {formSnapshot.ketQuaChanDoan || formSnapshot.ket_qua_chan_doan}
           </p>
           <PrintItem
-            minWidth={250}
+            minWidth={160}
             label={"Chẩn đoán hình ảnh"}
             value={formSnapshot?.imagingDiagnosisSummary}
-            valueStyle={{ fontWeight: "bold" }}
+            valueStyle={{ fontWeight: "bold", fontSize: 13 }}
           />
           <PrintItem
-            minWidth={250}
+            minWidth={160}
             label={translateLabel(
               languageTranslate,
               "gradingClassification",
@@ -582,7 +586,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
             value={formSnapshot?.phan_do_loai}
           />
           <PrintItem
-            minWidth={250}
+            minWidth={160}
             label={translateLabel(
               languageTranslate,
               "differentialDiagnosis",
