@@ -12,12 +12,19 @@ const ImagingStructureTable = ({
   abnormalFindings,
   form,
 }) => {
-  const [autoSync, setAutoSync] = useState(false);
+  const [autoSync, setAutoSync] = useState(true);
+  const isFirstSyncRef = useRef(true);
 
   const debounceRef = useRef(null);
 
   useEffect(() => {
     if (!autoSync) return;
+
+    // 🚫 bỏ qua lần chạy đầu (fetch data lần đầu)
+    if (isFirstSyncRef.current) {
+      isFirstSyncRef.current = false;
+      return;
+    }
 
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
@@ -164,7 +171,7 @@ const ImagingStructureTable = ({
             ))}
 
           <Button
-            type={autoSync ? "default" : "primary"}
+            type={autoSync ? "primary" : "default"}
             size="small"
             disabled={!isEdit}
             onClick={() => setAutoSync((prev) => !prev)}
