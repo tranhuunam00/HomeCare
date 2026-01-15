@@ -17,6 +17,12 @@ import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useGlobalAuth } from "../../../contexts/AuthContext";
 import { USER_ROLE } from "../../../constant/app";
+import { SettingOutlined } from "@ant-design/icons";
+import HeaderSettings from "../TemplatePrint/Setting/HeaderSettings";
+import {
+  DEFAULT_HEADER_BLOCKS,
+  mapHeaderInfoToBlocks,
+} from "../TemplatePrint/Setting/constant.setting.print";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -30,6 +36,11 @@ const TemplatePrintPreview = () => {
   const { id_print_template } = useParams();
   const [idTemplate, setIdTemplate] = useState();
   const [clinics, setClinics] = useState([]);
+
+  const [openSetting, setOpenSetting] = useState(false);
+  const [headerBlocks, setHeaderBlocks] = useState(DEFAULT_HEADER_BLOCKS);
+
+  console.log("openSetting", openSetting);
 
   const { user, doctor, templateServices } = useGlobalAuth();
 
@@ -142,7 +153,7 @@ const TemplatePrintPreview = () => {
 
   return (
     <Card style={{ maxWidth: 1240, margin: "auto" }}>
-      <Title level={3}>Mẫu in</Title>
+      <Title level={3}>Mẫu in phòng khám</Title>
 
       <Spin spinning={loading}>
         <Form layout="vertical" form={form} onFinish={onFinish}>
@@ -188,6 +199,23 @@ const TemplatePrintPreview = () => {
               Hủy
             </Button>
           </Form.Item>
+
+          <Button
+            icon={<SettingOutlined />}
+            onClick={() => {
+              const mapped = mapHeaderInfoToBlocks(headerInfo, headerBlocks);
+              setHeaderBlocks(mapped);
+              setOpenSetting(true);
+            }}
+          >
+            Cài đặt
+          </Button>
+          <HeaderSettings
+            open={openSetting}
+            onClose={() => setOpenSetting(false)}
+            headerBlocks={headerBlocks}
+            onChange={setHeaderBlocks}
+          />
         </Form>
       </Spin>
     </Card>
