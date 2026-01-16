@@ -1,11 +1,15 @@
+import React from "react";
 import { Rnd } from "react-rnd";
 import styles from "./HeaderCanvas.module.scss";
 
-const HeaderCanvas = ({ blocks, onChange }) => {
+const HeaderCanvas = ({ blocks = [], onChange }) => {
   const updateBlock = (id, data) => {
-    onChange(blocks.map((b) => (b.id === id ? { ...b, ...data } : b)));
+    const newBlocks = blocks.map((b) => (b.id === id ? { ...b, ...data } : b));
+    console.log("newBlocks", newBlocks);
+    onChange(newBlocks);
   };
 
+  console.log("blocks", blocks);
   return (
     <div className={styles.canvas}>
       {blocks.map(
@@ -14,8 +18,17 @@ const HeaderCanvas = ({ blocks, onChange }) => {
             <Rnd
               key={block.id}
               bounds="parent"
-              size={{ width: block.width, height: block.height }}
-              position={{ x: block.x, y: block.y }}
+              size={{
+                width: block.width,
+                height: block.height,
+              }}
+              position={{
+                x: block.x,
+                y: block.y,
+              }}
+              style={{
+                zIndex: block.zIndex ?? 1,
+              }}
               onDragStop={(e, d) =>
                 updateBlock(block.id, {
                   x: d.x,
@@ -40,24 +53,26 @@ const HeaderCanvas = ({ blocks, onChange }) => {
                 bottomLeft: true,
                 topLeft: true,
               }}
+              dragGrid={[1, 1]}
+              resizeGrid={[1, 1]}
             >
               <div className={styles.block}>
                 {block.type === "image" ? (
                   block.value ? (
                     <img
                       src={block.value}
-                      alt="logo"
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "contain",
-                      }}
+                      alt={block.label}
+                      className={styles.image}
                     />
                   ) : (
-                    <div className={styles.placeholder}>LOGO</div>
+                    <div className={styles.placeholder}>
+                      {block.label || "IMAGE"}
+                    </div>
                   )
                 ) : (
-                  <div className={styles.text}>{block.value}</div>
+                  <div className={styles.text} style={block.style}>
+                    {block.value}
+                  </div>
                 )}
               </div>
             </Rnd>

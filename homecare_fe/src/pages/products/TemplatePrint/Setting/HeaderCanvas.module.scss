@@ -2,10 +2,27 @@
 
 .canvas {
   position: relative;
-  width: 100%;
+
+  /* A4 dọc */
+  width: 794px;
   height: 180px;
-  border: 1px dashed #ccc;
+
+  margin: 0 auto;
   background: #fff;
+
+  border: 1px dashed #ccc;
+  box-sizing: border-box;
+
+  /* Rất quan trọng cho in */
+  overflow: hidden;
+
+  background-image: linear-gradient(
+      to right,
+      rgba(0, 0, 0, 0.06) 1px,
+      transparent 1px
+    ),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.06) 1px, transparent 1px);
+  background-size: 19px 19px; /* ~5mm */
 }
 
 .block {
@@ -27,9 +44,8 @@
 
 .text {
   width: 100%;
-  text-align: center;
-  font-weight: 700;
-  font-size: 18px;
+  text-align: left;
+  font-size: 12px;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;

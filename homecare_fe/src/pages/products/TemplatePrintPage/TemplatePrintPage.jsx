@@ -31,7 +31,6 @@ const TemplatePrintPreview = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [headerInfo, setHeaderInfo] = useState({});
 
   const { id_print_template } = useParams();
   const [idTemplate, setIdTemplate] = useState();
@@ -39,6 +38,7 @@ const TemplatePrintPreview = () => {
 
   const [openSetting, setOpenSetting] = useState(false);
   const [headerBlocks, setHeaderBlocks] = useState(DEFAULT_HEADER_BLOCKS);
+  const [headerInfo, setHeaderInfo] = useState({});
 
   console.log("openSetting", openSetting);
 
@@ -127,28 +127,6 @@ const TemplatePrintPreview = () => {
     } finally {
       setLoading(false);
     }
-  };
-  const handlePrint = () => {
-    const printContents = printRef.current.innerHTML;
-    const newWindow = window.open("", "_blank", "width=800,height=600");
-    newWindow.document.write(`
-      <html>
-        <head>
-          <title>HOMECARE</title>
-          <style>
-            body { font-family: Arial, sans-serif; padding: 20px; }
-            table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-            th, td { border: 1px solid #ccc; padding: 2px; text-align: left; }
-            h3 { margin-top: 24px; }
-          </style>
-        </head>
-        <body>${printContents}</body>
-      </html>
-    `);
-    newWindow.document.close();
-    newWindow.focus();
-    newWindow.print();
-    newWindow.close();
   };
 
   return (
