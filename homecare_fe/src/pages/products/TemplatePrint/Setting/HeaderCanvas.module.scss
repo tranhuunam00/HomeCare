@@ -1,5 +1,3 @@
-/* HeaderCanvas.module.scss */
-
 .canvas {
   position: relative;
 
@@ -13,8 +11,11 @@
   border: 1px dashed #ccc;
   box-sizing: border-box;
 
-  /* Rất quan trọng cho in */
   overflow: hidden;
+
+  /* 🔥 BẮT BUỘC */
+  transform: none !important;
+  zoom: 1 !important;
 
   background-image: linear-gradient(
       to right,
@@ -22,7 +23,7 @@
       transparent 1px
     ),
     linear-gradient(to bottom, rgba(0, 0, 0, 0.06) 1px, transparent 1px);
-  background-size: 19px 19px; /* ~5mm */
+  background-size: 19px 19px;
 }
 
 .block {
@@ -37,16 +38,9 @@
   justify-content: center;
 }
 
-.placeholder {
-  color: #999;
-  font-weight: 600;
-}
-
 .text {
   width: 100%;
-  text-align: left;
   font-size: 12px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  text-align: left;
+  white-space: pre-line;
 }

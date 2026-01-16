@@ -1,8 +1,7 @@
 import { Modal, Button } from "antd";
 import HeaderCanvas from "./HeaderCanvas";
 
-const HeaderSettings = ({ open, onClose, headerBlocks, onChange }) => {
-  console.log("headerBlocks", headerBlocks);
+const HeaderSettings = ({ open, onClose, headerBlocks, onSave }) => {
   return (
     <Modal
       open={open}
@@ -12,7 +11,7 @@ const HeaderSettings = ({ open, onClose, headerBlocks, onChange }) => {
       footer={null}
       destroyOnClose
     >
-      <HeaderCanvas blocks={headerBlocks} onChange={onChange} />
+      <HeaderCanvas blocks={headerBlocks} onChange={onSave} />
 
       <div style={{ textAlign: "right", marginTop: 16 }}>
         <Button type="primary" onClick={onClose}>

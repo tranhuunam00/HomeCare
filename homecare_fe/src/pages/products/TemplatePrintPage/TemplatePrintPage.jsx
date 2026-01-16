@@ -21,6 +21,7 @@ import { SettingOutlined } from "@ant-design/icons";
 import HeaderSettings from "../TemplatePrint/Setting/HeaderSettings";
 import {
   DEFAULT_HEADER_BLOCKS,
+  HEADER_BLOCKS_STORAGE_KEY,
   mapHeaderInfoToBlocks,
 } from "../TemplatePrint/Setting/constant.setting.print";
 
@@ -40,6 +41,16 @@ const TemplatePrintPreview = () => {
   const [headerBlocks, setHeaderBlocks] = useState(DEFAULT_HEADER_BLOCKS);
   const [headerInfo, setHeaderInfo] = useState({});
 
+  useEffect(() => {
+    const saved = localStorage.getItem(HEADER_BLOCKS_STORAGE_KEY);
+    if (saved) {
+      try {
+        setHeaderBlocks(JSON.parse(saved));
+      } catch (e) {
+        console.error("Invalid header blocks in storage");
+      }
+    }
+  }, []);
   console.log("openSetting", openSetting);
 
   const { user, doctor, templateServices } = useGlobalAuth();
@@ -181,8 +192,6 @@ const TemplatePrintPreview = () => {
           <Button
             icon={<SettingOutlined />}
             onClick={() => {
-              const mapped = mapHeaderInfoToBlocks(headerInfo, headerBlocks);
-              setHeaderBlocks(mapped);
               setOpenSetting(true);
             }}
           >
@@ -190,9 +199,15 @@ const TemplatePrintPreview = () => {
           </Button>
           <HeaderSettings
             open={openSetting}
-            onClose={() => setOpenSetting(false)}
+            onClose={() => {
+              localStorage.setItem(
+                HEADER_BLOCKS_STORAGE_KEY,
+                JSON.stringify(headerBlocks)
+              );
+              setOpenSetting(false);
+            }}
             headerBlocks={headerBlocks}
-            onChange={setHeaderBlocks}
+            onSave={setHeaderBlocks}
           />
         </Form>
       </Spin>

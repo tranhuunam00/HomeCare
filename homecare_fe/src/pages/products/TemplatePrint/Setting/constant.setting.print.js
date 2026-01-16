@@ -125,3 +125,5 @@ export const mapHeaderInfoToBlocks = (headerInfo, blocks) => {
     };
   });
 };
+
+export const HEADER_BLOCKS_STORAGE_KEY = "print_header_blocks_draft";
