@@ -5,9 +5,16 @@ import styles from "./HeaderCanvas.module.scss";
 import {
   DEFAULT_HEADER_BLOCKS,
   HEADER_BLOCKS_STORAGE_KEY,
+  mapHeaderInfoToBlocks,
 } from "./constant.setting.print";
 
-const HeaderCanvas = () => {
+const HeaderCanvas = ({ headerInfo }) => {
+  const [history, setHistory] = useState([]);
+
+  const pushHistory = (blocks) => {
+    setHistory((prev) => [...prev, JSON.stringify(blocks)]);
+  };
+
   const canvasRef = useRef(null);
   const [headerBlocks, setHeaderBlocks] = useState(DEFAULT_HEADER_BLOCKS);
 
@@ -23,15 +30,43 @@ const HeaderCanvas = () => {
     }
     setReady(true);
   }, []);
-
-  if (!ready) return null;
+  useEffect(() => {
+    if (headerInfo) {
+      const mapped = mapHeaderInfoToBlocks(headerInfo);
+      setHeaderBlocks(mapped);
+    }
+  }, [headerInfo]);
 
   /* ================= UPDATE ================= */
   const updateBlock = (id, data) => {
-    setHeaderBlocks((prev) =>
-      prev.map((b) => (b.id === id ? { ...b, ...data } : b))
-    );
+    setHeaderBlocks((prev) => {
+      pushHistory(prev); // lưu snapshot trước khi đổi
+      return prev.map((b) => (b.id === id ? { ...b, ...data } : b));
+    });
   };
+
+  const undo = () => {
+    setHistory((prev) => {
+      if (!prev.length) return prev;
+
+      const last = prev[prev.length - 1];
+      setHeaderBlocks(JSON.parse(last));
+
+      return prev.slice(0, -1);
+    });
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "z") {
+        e.preventDefault();
+        undo();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   /* ================= AUTO HEIGHT TEXT ================= */
   const handleTextInput = (id, el) => {
@@ -118,6 +153,15 @@ const HeaderCanvas = () => {
     win.document.close();
   };
 
+  const resetHeader = () => {
+    const initial = mapHeaderInfoToBlocks(headerInfo);
+    setHeaderBlocks(initial);
+    setHistory([]);
+    localStorage.removeItem(HEADER_BLOCKS_STORAGE_KEY);
+  };
+
+  if (!ready) return null;
+
   /* ================= RENDER ================= */
   return (
     <>
@@ -135,20 +179,25 @@ const HeaderCanvas = () => {
                 size={{ width: block.width, height: block.height }}
                 bounds="parent"
                 onDragStop={(e, d) => updateBlock(block.id, { x: d.x, y: d.y })}
-                // onResizeStop={(e, dir, ref, delta, pos) =>
-                //   updateBlock(block.id, {
-                //     width: ref.offsetWidth,
-                //     height: ref.offsetHeight,
-                //     x: pos.x,
-                //     y: pos.y,
-                //   })
-                // }
-                // enableResizing
+                onResizeStop={(e, dir, ref, delta, pos) =>
+                  updateBlock(block.id, {
+                    width: ref.offsetWidth,
+                    height: ref.offsetHeight,
+                    x: pos.x,
+                    y: pos.y,
+                  })
+                }
+                enableResizing
               >
                 <div className={styles.block}>
                   {block.type === "image" ? (
                     block.value ? (
-                      <img src={block.value} alt="" />
+                      <img
+                        src={block.value}
+                        alt=""
+                        width={block.width}
+                        height={block.height}
+                      />
                     ) : (
                       <div className={styles.placeholder}>{block.label}</div>
                     )
@@ -171,8 +220,17 @@ const HeaderCanvas = () => {
       </div>
 
       <div style={{ textAlign: "right", marginTop: 16 }}>
+        <Button onClick={undo} disabled={!history.length}>
+          ⬅ Lùi (Ctrl + Z)
+        </Button>
+
+        <Button danger style={{ marginLeft: 8 }} onClick={resetHeader}>
+          Reset
+        </Button>
+
         <Button
           type="primary"
+          style={{ marginLeft: 8 }}
           onClick={() =>
             localStorage.setItem(
               HEADER_BLOCKS_STORAGE_KEY,

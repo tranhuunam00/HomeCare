@@ -185,6 +185,7 @@ const TemplatePrintPreview = () => {
             Cài đặt
           </Button>
           <HeaderSettings
+            headerInfo={headerInfo}
             onClose={() => {
               setOpenSetting(false);
             }}

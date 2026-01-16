@@ -1,7 +1,7 @@
 import { Modal, Button } from "antd";
 import HeaderCanvas from "./HeaderCanvas";
 
-const HeaderSettings = ({ open, onClose }) => {
+const HeaderSettings = ({ open, onClose, headerInfo }) => {
   return (
     <Modal
       open={open}
@@ -10,8 +10,9 @@ const HeaderSettings = ({ open, onClose }) => {
       footer={null}
       onCancel={onClose}
       destroyOnClose
+      headerInfo={headerInfo}
     >
-      <HeaderCanvas />
+      <HeaderCanvas headerInfo={headerInfo} />
     </Modal>
   );
 };
