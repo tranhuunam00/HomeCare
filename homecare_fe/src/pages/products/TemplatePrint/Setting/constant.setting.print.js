@@ -118,24 +118,23 @@ export const DEFAULT_HEADER_BLOCKS = [
 ];
 
 export const HEADER_TEMPLATE_2 = [
-  /* ===== LEFT CONTENT (NO LOGO) ===== */
+  /* ===== LEFT CONTENT ===== */
   {
     id: "clinic_name",
     type: "text",
     label: "Tên bệnh viện",
-    value: "PHÒNG KHÁM BÁC SĨ GIA ĐÌNH HOMECARE",
-    x: 40,
-    y: 20,
-    width: 420,
-    height: 26,
+    value: "BỆNH VIỆN ĐA KHOA MEDLATEC MEDLATEC ",
+    x: 120,
+    y: 0,
+    width: 320,
+    height: 22,
     visible: true,
     zIndex: 2,
     style: {
-      fontSize: 16,
-      fontWeight: 600,
+      fontSize: 14,
       color: "#1e5bb8",
-      whiteSpace: "pre-line",
-      lineHeight: 1.3,
+      whiteSpace: "pre-line", // ⭐ xuống dòng như hình
+      lineHeight: 1.2,
     },
   },
 
@@ -143,16 +142,17 @@ export const HEADER_TEMPLATE_2 = [
     id: "specialty",
     type: "text",
     label: "Chuyên khoa",
-    value: "Chuyên khoa: Thần kinh",
-    x: 40,
-    y: 50,
-    width: 420,
+    value: "Chuyên khoa: CHẨN ĐOÁN HÌNH ẢNH",
+    x: 120,
+    y: 24,
+    width: 320,
     height: 22,
     visible: true,
     zIndex: 2,
     style: {
       fontSize: 14,
-      whiteSpace: "pre-line",
+      whiteSpace: "pre-line", // ⭐ wrap 2 dòng
+      lineHeight: 1.3,
     },
   },
 
@@ -160,10 +160,10 @@ export const HEADER_TEMPLATE_2 = [
     id: "address",
     type: "text",
     label: "Địa chỉ",
-    value: "Địa chỉ: số 23 Nguyễn Tuân",
-    x: 40,
-    y: 74,
-    width: 420,
+    value: "Địa chỉ: 42–44 Nghĩa Dũng, Ba Đình",
+    x: 120,
+    y: 48,
+    width: 320,
     height: 22,
     visible: true,
     zIndex: 2,
@@ -177,61 +177,64 @@ export const HEADER_TEMPLATE_2 = [
     id: "website",
     type: "text",
     label: "Website",
-    value: "Website: https://doctor.home-care.vn/",
-    x: 500,
-    y: 20,
+    value: "Website: www.medlatec.vn",
+    x: 450,
+    y: 0,
     width: 280,
     height: 22,
     visible: true,
     zIndex: 2,
-    style: { fontSize: 14 },
+    style: {
+      fontSize: 14,
+    },
   },
 
   {
     id: "hotline",
     type: "text",
     label: "Hotline",
-    value: "Hotline: 0339457609",
-    x: 500,
-    y: 44,
+    value: "Hotline: 09474612000",
+    x: 450,
+    y: 24,
     width: 280,
     height: 22,
     visible: true,
     zIndex: 2,
-    style: { fontSize: 14 },
+    style: {
+      fontSize: 14,
+    },
   },
 
   {
     id: "email",
     type: "text",
     label: "Email",
-    value: "Email: tranglt18@gmail.com",
-    x: 500,
-    y: 68,
+    value: "Email: vinh.daodanh@medlatec.com",
+    x: 450,
+    y: 48,
     width: 280,
     height: 22,
     visible: true,
     zIndex: 2,
-    style: { fontSize: 14 },
+    style: {
+      fontSize: 14,
+    },
   },
 ];
 
 export const HEADER_BLOCKS_STORAGE_KEY = "print_header_blocks_draft";
 
-export const mapHeaderInfoToBlocks = (headerInfo = {}) => {
-  return DEFAULT_HEADER_BLOCKS.map((block) => {
+export const mapHeaderInfoToBlocks = (
+  headerInfo = {},
+  templateBlocks = DEFAULT_HEADER_BLOCKS
+) => {
+  return templateBlocks.map((block) => {
     switch (block.id) {
       case "logo":
-        return {
-          ...block,
-          value: headerInfo.logo_url || null,
-        };
+        return { ...block, value: headerInfo.logo_url || null };
 
       case "clinic_name":
-        return {
-          ...block,
-          value: headerInfo.clinic_name || block.value,
-        };
+        return { ...block, value: headerInfo.clinic_name || block.value };
 
       case "specialty":
         return {
@@ -275,4 +278,13 @@ export const mapHeaderInfoToBlocks = (headerInfo = {}) => {
         return block;
     }
   });
+};
+
+export const HEADER_TEMPLATES = {
+  1: DEFAULT_HEADER_BLOCKS, // có logo
+  2: HEADER_TEMPLATE_2, // không logo
+};
+
+export const getHeaderTemplate = (templateCode = 1) => {
+  return HEADER_TEMPLATES[templateCode] || DEFAULT_HEADER_BLOCKS;
 };

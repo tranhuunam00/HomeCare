@@ -1,15 +1,19 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Rnd } from "react-rnd";
-import { Button } from "antd";
+import { Button, Select } from "antd";
 import styles from "./HeaderCanvas.module.scss";
 import {
   DEFAULT_HEADER_BLOCKS,
+  getHeaderTemplate,
   HEADER_BLOCKS_STORAGE_KEY,
   mapHeaderInfoToBlocks,
 } from "./constant.setting.print";
 
 const HeaderCanvas = ({ headerInfo }) => {
   const [history, setHistory] = useState([]);
+  const [templateCode, setTemplateCode] = useState(
+    headerInfo?.code_header || 1
+  );
 
   const pushHistory = (blocks) => {
     setHistory((prev) => [...prev, JSON.stringify(blocks)]);
@@ -32,7 +36,8 @@ const HeaderCanvas = ({ headerInfo }) => {
   }, []);
   useEffect(() => {
     if (headerInfo) {
-      const mapped = mapHeaderInfoToBlocks(headerInfo);
+      const template = getHeaderTemplate(templateCode);
+      const mapped = mapHeaderInfoToBlocks(headerInfo, template);
       setHeaderBlocks(mapped);
     }
   }, [headerInfo]);
@@ -54,6 +59,16 @@ const HeaderCanvas = ({ headerInfo }) => {
 
       return prev.slice(0, -1);
     });
+  };
+
+  const changeTemplate = (code) => {
+    const template = getHeaderTemplate(code);
+    const mapped = mapHeaderInfoToBlocks(headerInfo, template);
+
+    setTemplateCode(code);
+    setHeaderBlocks(mapped);
+    setHistory([]);
+    localStorage.removeItem(HEADER_BLOCKS_STORAGE_KEY);
   };
 
   useEffect(() => {
@@ -154,7 +169,9 @@ const HeaderCanvas = ({ headerInfo }) => {
   };
 
   const resetHeader = () => {
-    const initial = mapHeaderInfoToBlocks(headerInfo);
+    const template = getHeaderTemplate(templateCode);
+
+    const initial = mapHeaderInfoToBlocks(headerInfo, template);
     setHeaderBlocks(initial);
     setHistory([]);
     localStorage.removeItem(HEADER_BLOCKS_STORAGE_KEY);
@@ -227,6 +244,16 @@ const HeaderCanvas = ({ headerInfo }) => {
         <Button danger style={{ marginLeft: 8 }} onClick={resetHeader}>
           Reset
         </Button>
+
+        <Select
+          value={templateCode}
+          style={{ width: 220 }}
+          onChange={changeTemplate}
+          options={[
+            { label: "Mẫu 1 – Có logo", value: 1 },
+            { label: "Mẫu 2 – Không logo", value: 2 },
+          ]}
+        />
 
         <Button
           type="primary"
