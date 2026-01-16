@@ -38,20 +38,7 @@ const TemplatePrintPreview = () => {
   const [clinics, setClinics] = useState([]);
 
   const [openSetting, setOpenSetting] = useState(false);
-  const [headerBlocks, setHeaderBlocks] = useState(DEFAULT_HEADER_BLOCKS);
   const [headerInfo, setHeaderInfo] = useState({});
-
-  useEffect(() => {
-    const saved = localStorage.getItem(HEADER_BLOCKS_STORAGE_KEY);
-    if (saved) {
-      try {
-        setHeaderBlocks(JSON.parse(saved));
-      } catch (e) {
-        console.error("Invalid header blocks in storage");
-      }
-    }
-  }, []);
-  console.log("openSetting", openSetting);
 
   const { user, doctor, templateServices } = useGlobalAuth();
 
@@ -198,16 +185,10 @@ const TemplatePrintPreview = () => {
             Cài đặt
           </Button>
           <HeaderSettings
-            open={openSetting}
             onClose={() => {
-              localStorage.setItem(
-                HEADER_BLOCKS_STORAGE_KEY,
-                JSON.stringify(headerBlocks)
-              );
               setOpenSetting(false);
             }}
-            headerBlocks={headerBlocks}
-            onSave={setHeaderBlocks}
+            open={openSetting}
           />
         </Form>
       </Spin>

@@ -88,7 +88,6 @@ function App() {
   } = useGlobalAuth();
   const [wizardOpen, setWizardOpen] = useState(false);
 
-  console.log("userPackages", userPackages);
   const isProfileIncomplete = (doc) => {
     if (!doc) return true;
     return (

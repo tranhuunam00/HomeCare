@@ -7,8 +7,6 @@ const apiEndPoint = `${
   import.meta.env.VITE_API_ENDPOINT || "https://default-url.com"
 }/api`;
 
-console.log("apiEndPoint ", apiEndPoint);
-
 const axiosInstance = axios.create({
   baseURL: apiEndPoint,
   timeout: 10000,

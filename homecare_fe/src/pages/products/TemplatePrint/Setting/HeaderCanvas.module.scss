@@ -1,19 +1,13 @@
 .canvas {
   position: relative;
-
-  /* A4 dọc */
   width: 794px;
   height: 180px;
-
   margin: 0 auto;
   background: #fff;
-
   border: 1px dashed #ccc;
-  box-sizing: border-box;
-
   overflow: hidden;
 
-  /* 🔥 BẮT BUỘC */
+  /* ❌ KHÔNG transform / zoom */
   transform: none !important;
   zoom: 1 !important;
 
@@ -31,16 +25,19 @@
   height: 100%;
   border: 1px solid #1890ff;
   background: #fafafa;
-  cursor: move;
-  user-select: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  box-sizing: border-box;
 }
 
 .text {
   width: 100%;
   font-size: 12px;
-  text-align: left;
+  line-height: 1.4;
   white-space: pre-line;
+  word-break: break-word;
+  outline: none;
+}
+
+.placeholder {
+  font-size: 12px;
+  color: #999;
 }
