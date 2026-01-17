@@ -16,26 +16,59 @@ const { Option } = Select;
 
 const TemplateHeaderEditor = ({ value = {}, onChange, form }) => {
   const [logoPreview, setLogoPreview] = useState(value.logo_url || "");
-  form.setFieldsValue(value);
 
-  const handleLogoChange = (file) => {
-    const preview = URL.createObjectURL(file);
-    setLogoPreview(preview);
-    onChange?.({ ...form.getFieldsValue(), logo: file, logo_url: preview });
-    return false;
-  };
+  console.log("logoPreview", logoPreview);
   useEffect(() => {
+    if (!value || !value.id) return;
+    form.setFieldsValue(value);
     setLogoPreview(value?.logo_url);
   }, [value.id]);
 
-  const handleFormChange = (_, allValues) => {
-    onChange?.({ ...allValues, logo_url: logoPreview });
-  };
+  useEffect(() => {
+    return () => {
+      if (logoPreview?.startsWith("blob:")) {
+        URL.revokeObjectURL(logoPreview);
+      }
+    };
+  }, [logoPreview]);
+
+  useEffect(() => {
+    if (value?.logo_url && !logoPreview) {
+      setLogoPreview(value.logo_url);
+    }
+  }, [value?.logo_url]);
 
   return (
     <Row gutter={24} align="middle">
       <Col span={6}>
         <div className={styles.logoBlock}>
+          <Form.Item
+            name="code_header"
+            label="Kiểu header"
+            rules={[{ required: true, message: "Vui lòng chọn kiểu header" }]}
+          >
+            <Select
+              placeholder="Chọn kiểu header"
+              onChange={(val) => {
+                // cập nhật form + notify parent
+                const next = {
+                  ...form.getFieldsValue(),
+                  code_header: val,
+                };
+
+                onChange?.(next);
+
+                // 🔥 nếu sau này bạn muốn đổi layout block theo header
+                // onChange?.({
+                //   ...next,
+                //   blocks: HEADER_TEMPLATES[val],
+                // });
+              }}
+            >
+              <Option value={1}>Header 1 – Có logo</Option>
+              <Option value={2}>Header 2 – Không logo</Option>
+            </Select>
+          </Form.Item>
           <Form.Item
             label="Logo"
             name="logo"
@@ -51,7 +84,7 @@ const TemplateHeaderEditor = ({ value = {}, onChange, form }) => {
             }}
             rules={
               logoPreview
-                ? [] // đã có logo → không required
+                ? []
                 : [{ required: true, message: "Vui lòng tải logo" }]
             }
           >

@@ -8,9 +8,12 @@ import {
   HEADER_BLOCKS_STORAGE_KEY,
   mapHeaderInfoToBlocks,
 } from "./constant.setting.print";
+import API_CALL from "../../../../services/axiosClient";
+import { toast } from "react-toastify";
 
 const HeaderCanvas = ({ headerInfo }) => {
   const [history, setHistory] = useState([]);
+  const [isReset, setIsReset] = useState(false);
   const [templateCode, setTemplateCode] = useState(
     headerInfo?.code_header || 1
   );
@@ -26,21 +29,26 @@ const HeaderCanvas = ({ headerInfo }) => {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem(HEADER_BLOCKS_STORAGE_KEY);
-    if (saved) {
+    if (!headerInfo?.id) return;
+
+    if (headerInfo.custom) {
       try {
-        setHeaderBlocks(JSON.parse(saved));
+        setHeaderBlocks(JSON.parse(headerInfo.custom));
       } catch {}
     }
+
     setReady(true);
-  }, []);
+  }, [headerInfo?.id]);
+
   useEffect(() => {
-    if (headerInfo) {
-      const template = getHeaderTemplate(templateCode);
-      const mapped = mapHeaderInfoToBlocks(headerInfo, template);
-      setHeaderBlocks(mapped);
-    }
-  }, [headerInfo]);
+    if (!headerInfo) return;
+
+    if (headerInfo.custom) return;
+
+    const template = getHeaderTemplate(templateCode);
+    const mapped = mapHeaderInfoToBlocks(headerInfo, template);
+    setHeaderBlocks(mapped);
+  }, [headerInfo, templateCode]);
 
   /* ================= UPDATE ================= */
   const updateBlock = (id, data) => {
@@ -87,6 +95,7 @@ const HeaderCanvas = ({ headerInfo }) => {
   const handleTextInput = (id, el) => {
     const height = el.scrollHeight + 8;
     updateBlock(id, { height });
+    setIsReset(false);
   };
 
   /* ================= PREVIEW ================= */
@@ -105,10 +114,11 @@ const HeaderCanvas = ({ headerInfo }) => {
   body { margin:0; font-family: Arial, sans-serif; }
   .page { width:794px; margin:0 auto; }
   .canvas {
+  margin-top: 300px;
     position: relative;
     width:794px;
     height:180px;
-    background-color: red;
+    background-color: #6a83f150;
   }
   .block {
     position:absolute;
@@ -156,9 +166,9 @@ const HeaderCanvas = ({ headerInfo }) => {
     </div>
   </div>
 
-<script>
-  window.onload = () => setTimeout(() => window.print(), 300);
-</script>
+// <script>
+//   window.onload = () => setTimeout(() => window.print(), 300);
+// </script>
 </body>
 </html>
     `;
@@ -175,6 +185,27 @@ const HeaderCanvas = ({ headerInfo }) => {
     setHeaderBlocks(initial);
     setHistory([]);
     localStorage.removeItem(HEADER_BLOCKS_STORAGE_KEY);
+    setIsReset(true);
+  };
+
+  const saveHeaderToApi = async () => {
+    const ok = window.confirm("Bạn có muốn lưu cấu hình header không?");
+    if (!ok) return;
+
+    try {
+      const payload = {
+        custom: isReset ? null : JSON.stringify(headerBlocks),
+      };
+
+      await API_CALL.put(`/print-template/${headerInfo.id}`, payload);
+
+      toast.success("Lưu cấu hình header thành công!");
+
+      setIsReset(false);
+    } catch (err) {
+      console.error(err);
+      toast.error("Lưu cấu hình header thất bại");
+    }
   };
 
   if (!ready) return null;
@@ -258,16 +289,10 @@ const HeaderCanvas = ({ headerInfo }) => {
         <Button
           type="primary"
           style={{ marginLeft: 8 }}
-          onClick={() =>
-            localStorage.setItem(
-              HEADER_BLOCKS_STORAGE_KEY,
-              JSON.stringify(headerBlocks)
-            )
-          }
+          onClick={saveHeaderToApi}
         >
           Lưu
         </Button>
-
         <Button style={{ marginLeft: 8 }} onClick={openPreview}>
           Preview & In
         </Button>

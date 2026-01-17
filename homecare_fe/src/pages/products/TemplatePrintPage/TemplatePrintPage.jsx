@@ -68,7 +68,6 @@ const TemplatePrintPreview = () => {
       API_CALL.get(`/print-template/${id_print_template}`)
         .then((res) => {
           const data = res.data.data;
-          form.setFieldsValue(data);
           if (data) {
             setHeaderInfo(data);
             setIdTemplate(data.id_template);

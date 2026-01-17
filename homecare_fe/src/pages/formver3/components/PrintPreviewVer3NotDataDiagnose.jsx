@@ -9,6 +9,8 @@ import { useGlobalAuth } from "../../../contexts/AuthContext";
 import useVietnamAddress from "../../../hooks/useVietnamAddress";
 import FormActionBar from "../../formver2/component/FormActionBar";
 import { handlePrint } from "../../formver2/utils";
+import PrintHeaderFromCustom from "../../products/TemplatePrint/print/PrintHeaderFromCustom";
+import LegacyPrintHeader from "../../products/TemplatePrint/print/LegacyPrintHeader";
 
 const colSTT = { width: 60 };
 const colStructure = { width: 220 };
@@ -147,71 +149,15 @@ const PrintPreviewVer3NotDataDiagnose = ({
       <div ref={printRef} className={styles.wrapper}>
         <Card bordered={false} className={styles.a4Page} style={{ padding: 0 }}>
           {isUse && (
-            <header
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                marginBottom: 20,
-                alignItems: "flex-start",
-                gap: 20,
-              }}
-            >
-              <div
-                style={{
-                  maxWidth: "350px",
-                  flex: 2,
-                  // marginLeft: 60,
-                  justifyContent: "start",
-                }}
-              >
-                <img
-                  style={{
-                    marginTop: 10,
-                    objectFit: "cover",
-                    alignContent: "start",
-                  }}
-                  src={
-                    printTemplate?.logo_url ||
-                    "https://via.placeholder.com/150x100?text=Logo"
-                  }
-                  className="logoImg"
-                  alt="Logo"
-                  width={80}
-                  height={80}
+            <PrintHeaderFromCustom
+              printTemplate={printTemplate}
+              fallback={
+                <LegacyPrintHeader
+                  printTemplate={printTemplate}
+                  languageTranslate={languageTranslate}
                 />
-              </div>
-
-              <div style={{ maxWidth: "350px", flex: 6 }}>
-                <p style={{ fontWeight: 600, color: "#2f6db8", fontSize: 14 }}>
-                  {printTemplate?.clinic_name || ""}
-                </p>
-                <p style={{ fontSize: 13 }}>
-                  <strong>
-                    {translateLabel(languageTranslate, "division", false)}:
-                  </strong>
-                  {printTemplate?.department_name || "-"}
-                </p>
-                <p style={{ fontSize: 13 }}>
-                  <strong>
-                    {translateLabel(languageTranslate, "address", false)}:
-                  </strong>
-                  {printTemplate?.address || "-"}
-                </p>
-              </div>
-              <div style={{ maxWidth: "280px", flex: 4 }}>
-                <p style={{ fontSize: 13 }}>
-                  <strong>Website: </strong>
-                  {printTemplate?.website || "http://..."}
-                </p>
-                <p style={{ fontSize: 13 }}>
-                  <strong>Hotline: </strong> {printTemplate?.phone || "..."}
-                </p>
-                <p style={{ fontSize: 13 }}>
-                  <strong>Email: </strong>
-                  {printTemplate?.email || "example@email.com"}
-                </p>
-              </div>
-            </header>
+              }
+            />
           )}
 
           <h1
