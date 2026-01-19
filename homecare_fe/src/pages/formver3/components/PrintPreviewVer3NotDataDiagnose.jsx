@@ -92,22 +92,25 @@ const TextLabel = ({ label, minWidth }) => {
   );
 };
 
-const PrintItem = ({ label, value, minWidth, valueStyle }) => (
-  <div style={{ marginBottom: 6, display: "flex", alignItems: "flex-start" }}>
-    <TextLabel label={label} minWidth={minWidth} />
-    <p
-      style={{
-        fontSize: 14,
-        margin: 0,
-        padding: 0,
-        whiteSpace: "pre-wrap",
-        ...valueStyle,
-      }}
-    >
-      {value || ""}
-    </p>
-  </div>
-);
+const PrintItem = ({ label, value, minWidth, valueStyle }) => {
+  if (!value) return null;
+  return (
+    <div style={{ marginBottom: 6, display: "flex", alignItems: "flex-start" }}>
+      <TextLabel label={label} minWidth={minWidth} />
+      <p
+        style={{
+          fontSize: 14,
+          margin: 0,
+          padding: 0,
+          whiteSpace: "pre-wrap",
+          ...valueStyle,
+        }}
+      >
+        {value || ""}
+      </p>
+    </div>
+  );
+};
 
 /* ---------- Main ---------- */
 const PrintPreviewVer3NotDataDiagnose = ({
@@ -441,55 +444,57 @@ const PrintPreviewVer3NotDataDiagnose = ({
               ))}
             </tbody>
           </table>
-
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              marginTop: 20,
-              fontSize: 14,
-            }}
-          >
-            <thead>
-              <tr style={{ background: "#f0f0f0" }}>
-                <th style={thStyle} colSpan={3}>
-                  Mô tả các chi tiết bất thường
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {imagingRows &&
-              imagingRows.filter((row) => row.status === "abnormal").length >
-                0 ? (
-                imagingRows
-                  .filter((row) => row.status === "abnormal")
-                  .map((row, idx) => (
-                    <tr key={row.id || idx}>
-                      <td style={{ ...tdCenter, ...colSTT }}>{idx + 1}</td>
-                      <td style={{ ...tdLeft, ...colStructure }}>
-                        {row.name}:
-                      </td>
-                      <td
-                        style={{
-                          ...tdLeft,
-                          whiteSpace: "pre-line",
-                          fontSize: 14,
-                        }}
-                      >
-                        {row.description || "Có bất thường"}
-                      </td>
-                    </tr>
-                  ))
-              ) : (
-                <tr>
-                  <td style={tdLeft} colSpan={3}>
-                    ""
-                  </td>
+          {imagingRows?.filter((row) => row.status === "abnormal").length ? (
+            <table
+              style={{
+                width: "100%",
+                borderCollapse: "collapse",
+                marginTop: 20,
+                fontSize: 14,
+              }}
+            >
+              <thead>
+                <tr style={{ background: "#f0f0f0" }}>
+                  <th style={thStyle} colSpan={3}>
+                    Mô tả các chi tiết bất thường
+                  </th>
                 </tr>
-              )}
-            </tbody>
-          </table>
-
+              </thead>
+              <tbody>
+                {imagingRows &&
+                imagingRows.filter((row) => row.status === "abnormal").length >
+                  0 ? (
+                  imagingRows
+                    .filter((row) => row.status === "abnormal")
+                    .map((row, idx) => (
+                      <tr key={row.id || idx}>
+                        <td style={{ ...tdCenter, ...colSTT }}>{idx + 1}</td>
+                        <td style={{ ...tdLeft, ...colStructure }}>
+                          {row.name}:
+                        </td>
+                        <td
+                          style={{
+                            ...tdLeft,
+                            whiteSpace: "pre-line",
+                            fontSize: 14,
+                          }}
+                        >
+                          {row.description || "Có bất thường"}
+                        </td>
+                      </tr>
+                    ))
+                ) : (
+                  <tr>
+                    <td style={tdLeft} colSpan={3}>
+                      ""
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          ) : (
+            ""
+          )}
           <h3
             style={{
               textAlign: "left",
@@ -522,15 +527,17 @@ const PrintPreviewVer3NotDataDiagnose = ({
             value={formSnapshot?.imagingDiagnosisSummary}
             valueStyle={{ fontWeight: "bold", fontSize: 13 }}
           />
-          <PrintItem
-            minWidth={160}
-            label={translateLabel(
-              languageTranslate,
-              "gradingClassification",
-              false
-            )}
-            value={formSnapshot?.phan_do_loai}
-          />
+          {formSnapshot?.phan_do_loai && (
+            <PrintItem
+              minWidth={160}
+              label={translateLabel(
+                languageTranslate,
+                "gradingClassification",
+                false
+              )}
+              value={formSnapshot?.phan_do_loai}
+            />
+          )}
           <PrintItem
             minWidth={160}
             label={translateLabel(
@@ -541,29 +548,31 @@ const PrintPreviewVer3NotDataDiagnose = ({
             value={formSnapshot?.chan_doan_phan_biet}
           />
 
-          <h3
-            style={{
-              textAlign: "left",
-              color: "#2f6db8",
-              margin: 0,
-              padding: 0,
-              marginBottom: 0,
-              marginTop: 20,
-            }}
-          >
-            {translateLabel(
-              languageTranslate,
-              "recommendationsCounseling",
-              false
-            ).toUpperCase()}
-          </h3>
+          {formSnapshot.khuyen_nghi && (
+            <h3
+              style={{
+                textAlign: "left",
+                color: "#2f6db8",
+                margin: 0,
+                padding: 0,
+                marginBottom: 0,
+                marginTop: 20,
+              }}
+            >
+              {translateLabel(
+                languageTranslate,
+                "recommendationsCounseling",
+                false
+              ).toUpperCase()}
+            </h3>
+          )}
           <p
             className={styles.paragraph}
             style={{
               whiteSpace: "pre-line",
             }}
           >
-            {formSnapshot.khuyenNghi || formSnapshot.khuyen_nghi}
+            {formSnapshot.khuyen_nghi}
           </p>
 
           {isUse && (
@@ -578,11 +587,13 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   marginTop: 20,
                 }}
               >
-                {translateLabel(
-                  languageTranslate,
-                  "illustrativeImages",
-                  false
-                ).toUpperCase()}
+                {imageList.length
+                  ? translateLabel(
+                      languageTranslate,
+                      "illustrativeImages",
+                      false
+                    ).toUpperCase()
+                  : ""}
               </h3>
               <div
                 style={{
