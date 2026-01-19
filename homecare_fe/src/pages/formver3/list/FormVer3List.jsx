@@ -343,6 +343,16 @@ export default function FormVer3List() {
                 Clone EN
               </Button>
             )} */}
+            <Button
+              type="link"
+              danger={record.status === 2}
+              onClick={(e) => {
+                e.stopPropagation();
+                confirmToggleApprove(record);
+              }}
+            >
+              {record.status === 2 ? "Unapprove" : "Approve"}
+            </Button>
           </Space>
         ),
       },
@@ -481,6 +491,51 @@ export default function FormVer3List() {
     ],
     columnWidth: 48,
     preserveSelectedRowKeys: true,
+  };
+
+  const unapproveForm = async (record) => {
+    try {
+      setLoading(true);
+      await API_CALL.patch(`/formVer3/${record.id}/unapprove`);
+      toast.success("Unapprove form thành công");
+      await fetchList();
+    } catch (e) {
+      console.error(e);
+      toast.error(e?.response?.data?.message || "Lỗi khi unapprove FormVer3");
+    } finally {
+      setLoading(false);
+    }
+  };
+  const approveForm = async (record) => {
+    try {
+      setLoading(true);
+      await API_CALL.patch(`/formVer3/${record.id}/approve`);
+      toast.success("Approve form thành công");
+      await fetchList();
+    } catch (e) {
+      console.error(e);
+      toast.error(e?.response?.data?.message || "Lỗi khi approve FormVer3");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const confirmToggleApprove = (record) => {
+    const isApproved = record.status === 2;
+
+    const message = isApproved
+      ? "Bạn có chắc muốn HỦY DUYỆT form này?\nTrạng thái sẽ quay về Nháp (DRAFT)."
+      : "Bạn có chắc muốn DUYỆT form này?\nTrạng thái sẽ chuyển sang Hoàn thành.";
+
+    const confirmed = window.confirm(message);
+
+    if (!confirmed) return;
+
+    if (isApproved) {
+      unapproveForm(record);
+    } else {
+      approveForm(record);
+    }
   };
 
   /* ======= UI ======= */
