@@ -226,7 +226,7 @@ export const HEADER_BLOCKS_STORAGE_KEY = "print_header_blocks_draft";
 
 export const mapHeaderInfoToBlocks = (
   headerInfo = {},
-  templateBlocks = DEFAULT_HEADER_BLOCKS
+  templateBlocks = DEFAULT_HEADER_BLOCKS,
 ) => {
   return templateBlocks.map((block) => {
     switch (block.id) {
@@ -234,7 +234,11 @@ export const mapHeaderInfoToBlocks = (
         return { ...block, value: headerInfo.logo_url || null };
 
       case "clinic_name":
-        return { ...block, value: headerInfo.clinic_name || block.value };
+        return {
+          ...block,
+          value: headerInfo.clinic_name || block.value,
+          style: block.style,
+        };
 
       case "specialty":
         return {
@@ -242,6 +246,7 @@ export const mapHeaderInfoToBlocks = (
           value: headerInfo.department_name
             ? `Chuyên khoa: ${headerInfo.department_name}`
             : block.value,
+          style: block.style,
         };
 
       case "address":
@@ -250,6 +255,7 @@ export const mapHeaderInfoToBlocks = (
           value: headerInfo.address
             ? `Địa chỉ: ${headerInfo.address}`
             : block.value,
+          style: block.style,
         };
 
       case "website":
@@ -258,6 +264,7 @@ export const mapHeaderInfoToBlocks = (
           value: headerInfo.website
             ? `Website: ${headerInfo.website}`
             : block.value,
+          style: block.style,
         };
 
       case "hotline":
@@ -266,12 +273,14 @@ export const mapHeaderInfoToBlocks = (
           value: headerInfo.phone
             ? `Hotline: ${headerInfo.phone}`
             : block.value,
+          style: block.style,
         };
 
       case "email":
         return {
           ...block,
           value: headerInfo.email ? `Email: ${headerInfo.email}` : block.value,
+          style: block.style,
         };
 
       default:
