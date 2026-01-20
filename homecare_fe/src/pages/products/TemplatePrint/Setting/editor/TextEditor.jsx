@@ -27,10 +27,10 @@ const TextEditor = ({ block, onChange }) => {
 
       <div style={{ marginBottom: 12 }}>
         <div style={{ fontSize: 12, color: "#666", marginBottom: 4 }}>
-          Position (px)
+          Position & Size (px)
         </div>
 
-        <Space>
+        <Space style={{ marginBottom: 6 }}>
           <Input
             type="number"
             size="small"
@@ -40,7 +40,7 @@ const TextEditor = ({ block, onChange }) => {
                 x: Number(e.target.value),
               })
             }
-            style={{ width: 110 }}
+            style={{ width: 100 }}
             addonBefore="X"
           />
 
@@ -53,8 +53,38 @@ const TextEditor = ({ block, onChange }) => {
                 y: Number(e.target.value),
               })
             }
-            style={{ width: 110 }}
+            style={{ width: 100 }}
             addonBefore="Y"
+          />
+        </Space>
+
+        <Space>
+          <Input
+            type="number"
+            size="small"
+            min={1}
+            value={block.width}
+            onChange={(e) =>
+              onChange(block.id, {
+                width: Number(e.target.value),
+              })
+            }
+            style={{ width: 100 }}
+            addonBefore="W"
+          />
+
+          <Input
+            type="number"
+            size="small"
+            min={1}
+            value={block.height}
+            onChange={(e) =>
+              onChange(block.id, {
+                height: Number(e.target.value),
+              })
+            }
+            style={{ width: 100 }}
+            addonBefore="H"
           />
         </Space>
       </div>
