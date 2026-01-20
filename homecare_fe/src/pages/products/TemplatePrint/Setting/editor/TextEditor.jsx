@@ -25,6 +25,40 @@ const TextEditor = ({ block, onChange }) => {
     <>
       <h4 style={{ marginBottom: 12 }}>Text settings</h4>
 
+      <div style={{ marginBottom: 12 }}>
+        <div style={{ fontSize: 12, color: "#666", marginBottom: 4 }}>
+          Position (px)
+        </div>
+
+        <Space>
+          <Input
+            type="number"
+            size="small"
+            value={block.x}
+            onChange={(e) =>
+              onChange(block.id, {
+                x: Number(e.target.value),
+              })
+            }
+            style={{ width: 110 }}
+            addonBefore="X"
+          />
+
+          <Input
+            type="number"
+            size="small"
+            value={block.y}
+            onChange={(e) =>
+              onChange(block.id, {
+                y: Number(e.target.value),
+              })
+            }
+            style={{ width: 110 }}
+            addonBefore="Y"
+          />
+        </Space>
+      </div>
+
       {/* Font size + Line height */}
       <div style={{ marginBottom: 12 }}>
         <div style={{ fontSize: 12, color: "#666", marginBottom: 4 }}>
