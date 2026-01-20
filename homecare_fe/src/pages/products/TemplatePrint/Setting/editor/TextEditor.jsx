@@ -3,6 +3,7 @@ import { Button, Input, Space } from "antd";
 import {
   BoldOutlined,
   ItalicOutlined,
+  UnderlineOutlined,
   AlignLeftOutlined,
   AlignCenterOutlined,
   AlignRightOutlined,
@@ -13,7 +14,10 @@ const TextEditor = ({ block, onChange }) => {
 
   const updateStyle = (key, value) => {
     onChange(block.id, {
-      style: { ...style, [key]: value },
+      style: {
+        ...style,
+        [key]: value,
+      },
     });
   };
 
@@ -21,10 +25,10 @@ const TextEditor = ({ block, onChange }) => {
     <>
       <h4 style={{ marginBottom: 12 }}>Text settings</h4>
 
-      {/* Font size + Line height (1 dòng, nhập số) */}
+      {/* Font size + Line height */}
       <div style={{ marginBottom: 12 }}>
         <div style={{ fontSize: 12, color: "#666", marginBottom: 4 }}>
-          Font / Line height
+          Font size / Line height
         </div>
 
         <Space>
@@ -35,7 +39,7 @@ const TextEditor = ({ block, onChange }) => {
             max={60}
             value={style.fontSize || 12}
             onChange={(e) => updateStyle("fontSize", Number(e.target.value))}
-            style={{ width: 120 }}
+            style={{ width: 110 }}
             addonAfter="px"
           />
 
@@ -47,19 +51,20 @@ const TextEditor = ({ block, onChange }) => {
             step={0.1}
             value={style.lineHeight || 1.4}
             onChange={(e) => updateStyle("lineHeight", Number(e.target.value))}
-            style={{ width: 120 }}
+            style={{ width: 110 }}
             addonAfter="lh"
           />
         </Space>
       </div>
 
-      {/* Color + Style + Align (1 dòng) */}
-      <div>
+      {/* Color + Font style + Align */}
+      <div style={{ marginBottom: 12 }}>
         <div style={{ fontSize: 12, color: "#666", marginBottom: 4 }}>
-          Color & Style
+          Color / Style / Align
         </div>
 
-        <Space>
+        <Space wrap>
+          {/* Color */}
           <Input
             type="color"
             value={style.color || "#000000"}
@@ -67,9 +72,10 @@ const TextEditor = ({ block, onChange }) => {
             style={{ width: 36, padding: 0 }}
           />
 
+          {/* Bold */}
           <Button
-            icon={<BoldOutlined />}
             size="small"
+            icon={<BoldOutlined />}
             type={style.fontWeight === "bold" ? "primary" : "default"}
             onClick={() =>
               updateStyle(
@@ -78,9 +84,11 @@ const TextEditor = ({ block, onChange }) => {
               )
             }
           />
+
+          {/* Italic */}
           <Button
-            icon={<ItalicOutlined />}
             size="small"
+            icon={<ItalicOutlined />}
             type={style.fontStyle === "italic" ? "primary" : "default"}
             onClick={() =>
               updateStyle(
@@ -90,23 +98,70 @@ const TextEditor = ({ block, onChange }) => {
             }
           />
 
+          {/* Underline */}
           <Button
-            icon={<AlignLeftOutlined />}
             size="small"
+            icon={<UnderlineOutlined />}
+            type={style.textDecoration === "underline" ? "primary" : "default"}
+            onClick={() =>
+              updateStyle(
+                "textDecoration",
+                style.textDecoration === "underline" ? "none" : "underline",
+              )
+            }
+          />
+
+          {/* Align */}
+          <Button
+            size="small"
+            icon={<AlignLeftOutlined />}
             type={style.textAlign === "left" ? "primary" : "default"}
             onClick={() => updateStyle("textAlign", "left")}
           />
           <Button
-            icon={<AlignCenterOutlined />}
             size="small"
+            icon={<AlignCenterOutlined />}
             type={style.textAlign === "center" ? "primary" : "default"}
             onClick={() => updateStyle("textAlign", "center")}
           />
           <Button
-            icon={<AlignRightOutlined />}
             size="small"
+            icon={<AlignRightOutlined />}
             type={style.textAlign === "right" ? "primary" : "default"}
             onClick={() => updateStyle("textAlign", "right")}
+          />
+        </Space>
+      </div>
+
+      {/* Letter spacing + Opacity */}
+      <div>
+        <div style={{ fontSize: 12, color: "#666", marginBottom: 4 }}>
+          Spacing / Opacity
+        </div>
+
+        <Space>
+          <Input
+            type="number"
+            size="small"
+            step={0.5}
+            value={style.letterSpacing || 0}
+            onChange={(e) =>
+              updateStyle("letterSpacing", Number(e.target.value))
+            }
+            style={{ width: 110 }}
+            addonAfter="px"
+          />
+
+          <Input
+            type="number"
+            size="small"
+            min={0}
+            max={1}
+            step={0.1}
+            value={style.opacity ?? 1}
+            onChange={(e) => updateStyle("opacity", Number(e.target.value))}
+            style={{ width: 110 }}
+            addonAfter="α"
           />
         </Space>
       </div>
