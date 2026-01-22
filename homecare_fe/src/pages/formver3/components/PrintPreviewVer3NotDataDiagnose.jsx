@@ -381,7 +381,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
             <PrintRadio
               checked={formSnapshot?.contrastInjection === "no"}
               label="Không"
-              stylesCustom={{ width: 100 }}
+              stylesCustom={{ width: 120 }}
             />
             <PrintRadio
               checked={formSnapshot?.contrastInjection === "yes"}
@@ -394,7 +394,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
             <PrintRadio
               checked={formSnapshot?.imageQuatity === "good"}
               label="Đạt yêu cầu"
-              stylesCustom={{ width: 100 }}
+              stylesCustom={{ width: 120 }}
             />
             <PrintRadio
               checked={formSnapshot?.imageQuatity === "limited"}
@@ -412,7 +412,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
             <PrintRadio
               checked={formSnapshot?.additionalAction === "no"}
               label="Không"
-              stylesCustom={{ width: 100 }}
+              stylesCustom={{ width: 120 }}
             />
             <PrintRadio
               checked={formSnapshot?.additionalAction === "extra"}
