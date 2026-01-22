@@ -919,12 +919,12 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
             />
           </div>
         </ConfigProvider>
-        {sameCCCDData.length > 0 && (
+        {sameCCCDData.length > 0 && chosenRecord && (
           <>
             <Divider style={{ margin: "12px 0" }} />
 
             <Typography.Text strong style={{ color: "#cf1322" }}>
-              Các kết quả quả khác của {chosenRecord.name}: (
+              Các kết quả quả khác của {chosenRecord?.name}: (
               {sameCCCDData.length}) bản ghi
             </Typography.Text>
 
