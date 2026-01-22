@@ -33,6 +33,25 @@ const tdLeft = {
   textAlign: "left",
 };
 
+const thUnderline = {
+  borderBottom: "1px solid #000",
+  padding: "6px 8px",
+  textAlign: "center",
+  fontWeight: 600,
+};
+
+const tdUnderlineCenter = {
+  borderBottom: "1px solid #000",
+  padding: "6px 8px",
+  textAlign: "center",
+};
+
+const tdUnderlineLeft = {
+  borderBottom: "1px solid #000",
+  padding: "6px 8px",
+  textAlign: "left",
+};
+
 const Box = ({ checked }) => (
   <span style={{ fontSize: 18 }}>{checked ? "☒" : "☐"}</span>
 );
@@ -51,13 +70,14 @@ const Circle = ({ checked }) => (
   />
 );
 
-const PrintRadio = ({ checked, label }) => (
+const PrintRadio = ({ checked, label, stylesCustom }) => (
   <span
     style={{
       display: "inline-flex",
       alignItems: "center",
       marginRight: 24,
       fontSize: 14,
+      ...stylesCustom,
     }}
   >
     <span
@@ -135,7 +155,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
   }, [formSnapshot?.benh_nhan_dia_chi_tinh_thanh_pho]);
   const provinceName =
     provinces.find(
-      (p) => p.code == formSnapshot?.benh_nhan_dia_chi_tinh_thanh_pho
+      (p) => p.code == formSnapshot?.benh_nhan_dia_chi_tinh_thanh_pho,
     )?.name || formSnapshot?.benh_nhan_dia_chi_tinh_thanh_pho;
 
   const wardName =
@@ -144,13 +164,17 @@ const PrintPreviewVer3NotDataDiagnose = ({
 
   console.log(
     "formSnapshot?.imagingDiagnosisSummary",
-    formSnapshot?.imagingDiagnosisSummary
+    formSnapshot?.imagingDiagnosisSummary,
   );
 
   return (
     <div>
       <div ref={printRef} className={styles.wrapper}>
-        <Card bordered={false} className={styles.a4Page} style={{ padding: 0 }}>
+        <Card
+          bordered={false}
+          className={styles.a4Page}
+          style={{ padding: 48 }}
+        >
           {isUse && (
             <PrintHeaderFromCustom
               printTemplate={printTemplate}
@@ -174,7 +198,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
             {translateLabel(
               languageTranslate,
               "Result_Report",
-              false
+              false,
             ).toUpperCase()}
           </h1>
           <h2
@@ -206,7 +230,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                 {translateLabel(
                   languageTranslate,
                   "administrativeInfo",
-                  false
+                  false,
                 ).toUpperCase()}
               </h3>
 
@@ -215,7 +239,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   label={translateLabel(
                     languageTranslate,
                     "fullName",
-                    false
+                    false,
                   ).toUpperCase()}
                   value={formSnapshot?.benh_nhan_ho_ten}
                 />
@@ -223,7 +247,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   label={translateLabel(
                     languageTranslate,
                     "gender",
-                    false
+                    false,
                   ).toUpperCase()}
                   value={formSnapshot?.benh_nhan_gioi_tinh}
                 />
@@ -231,7 +255,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   label={translateLabel(
                     languageTranslate,
                     "age",
-                    false
+                    false,
                   ).toUpperCase()}
                   value={formSnapshot?.benh_nhan_tuoi}
                 />
@@ -241,7 +265,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   label={translateLabel(
                     languageTranslate,
                     "address",
-                    false
+                    false,
                   ).toUpperCase()}
                   value={formSnapshot?.benh_nhan_dia_chi_so_nha}
                 />
@@ -251,7 +275,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   label={translateLabel(
                     languageTranslate,
                     "district",
-                    false
+                    false,
                   ).toUpperCase()}
                   value={wardName}
                 />
@@ -260,7 +284,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   label={translateLabel(
                     languageTranslate,
                     "province",
-                    false
+                    false,
                   ).toUpperCase()}
                   value={provinceName}
                 />
@@ -268,7 +292,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   label={translateLabel(
                     languageTranslate,
                     "nationality",
-                    false
+                    false,
                   ).toUpperCase()}
                   value={formSnapshot?.benh_nhan_quoc_tich}
                 />
@@ -279,7 +303,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   label={translateLabel(
                     languageTranslate,
                     "phone",
-                    false
+                    false,
                   ).toUpperCase()}
                   value={formSnapshot?.benh_nhan_dien_thoai}
                 />
@@ -287,7 +311,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   label={translateLabel(
                     languageTranslate,
                     "email",
-                    false
+                    false,
                   ).toUpperCase()}
                   value={formSnapshot?.benh_nhan_email}
                 />
@@ -297,7 +321,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   label={translateLabel(
                     languageTranslate,
                     "patientId",
-                    false
+                    false,
                   ).toUpperCase()}
                   value={formSnapshot?.benh_nhan_pid}
                 />
@@ -305,7 +329,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   label={translateLabel(
                     languageTranslate,
                     "sid",
-                    false
+                    false,
                   ).toUpperCase()}
                   value={formSnapshot?.benh_nhan_sid}
                 />
@@ -315,7 +339,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   label={translateLabel(
                     languageTranslate,
                     "clinical",
-                    false
+                    false,
                   ).toUpperCase()}
                   value={formSnapshot?.benh_nhan_lam_sang}
                 />
@@ -357,6 +381,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
             <PrintRadio
               checked={formSnapshot?.contrastInjection === "no"}
               label="Không"
+              stylesCustom={{ width: 100 }}
             />
             <PrintRadio
               checked={formSnapshot?.contrastInjection === "yes"}
@@ -369,10 +394,12 @@ const PrintPreviewVer3NotDataDiagnose = ({
             <PrintRadio
               checked={formSnapshot?.imageQuatity === "good"}
               label="Đạt yêu cầu"
+              stylesCustom={{ width: 100 }}
             />
             <PrintRadio
               checked={formSnapshot?.imageQuatity === "limited"}
               label="Đạt yêu cầu, có hạn chế"
+              stylesCustom={{ width: 170 }}
             />
             <PrintRadio
               checked={formSnapshot?.imageQuatity === "bad"}
@@ -385,10 +412,12 @@ const PrintPreviewVer3NotDataDiagnose = ({
             <PrintRadio
               checked={formSnapshot?.additionalAction === "no"}
               label="Không"
+              stylesCustom={{ width: 100 }}
             />
             <PrintRadio
               checked={formSnapshot?.additionalAction === "extra"}
               label="Chụp thêm"
+              stylesCustom={{ width: 170 }}
             />
             <PrintRadio
               checked={formSnapshot?.additionalAction === "redo"}
@@ -409,7 +438,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
             {translateLabel(
               languageTranslate,
               "imagingFindings",
-              false
+              false,
             ).toUpperCase()}
           </h3>
 
@@ -422,28 +451,33 @@ const PrintPreviewVer3NotDataDiagnose = ({
             }}
           >
             <thead>
-              <tr style={{ background: "#f0f0f0" }}>
-                <th style={{ ...thStyle, ...colSTT }}>STT</th>
-                <th style={{ ...thStyle, ...colStructure }}>Cấu trúc</th>
-                <th style={thStyle}>Bình thường</th>
-                <th style={thStyle}>Bất thường</th>
+              <tr>
+                <th style={{ ...thUnderline, ...colSTT }}>STT</th>
+                <th style={{ ...thUnderline, ...colStructure }}>Cấu trúc</th>
+                <th style={thUnderline}>Bình thường</th>
+                <th style={thUnderline}>Bất thường</th>
               </tr>
             </thead>
             <tbody>
               {imagingRows.map((row, index) => (
                 <tr key={row.id || index}>
-                  <td style={{ ...tdCenter, ...colSTT }}>{index + 1}</td>
-                  <td style={{ ...tdLeft, ...colStructure }}>{row.name}</td>
-                  <td style={tdCenter}>
+                  <td style={{ ...tdUnderlineCenter, ...colSTT }}>
+                    {index + 1}
+                  </td>
+                  <td style={{ ...tdUnderlineLeft, ...colStructure }}>
+                    {row.name}
+                  </td>
+                  <td style={tdUnderlineCenter}>
                     <Circle checked={row.status === "normal"} />
                   </td>
-                  <td style={tdCenter}>
+                  <td style={tdUnderlineCenter}>
                     <Circle checked={row.status === "abnormal"} />
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+
           {imagingRows?.filter((row) => row.status === "abnormal").length ? (
             <table
               style={{
@@ -508,7 +542,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
             {translateLabel(
               languageTranslate,
               "impression",
-              false
+              false,
             ).toUpperCase()}
           </h3>
           <p
@@ -523,7 +557,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
           </p>
           <PrintItem
             minWidth={160}
-            label={"Chẩn đoán hình ảnh"}
+            label={"Kết luận, chẩn đoán"}
             value={formSnapshot?.imagingDiagnosisSummary}
             valueStyle={{ fontWeight: "bold", fontSize: 13 }}
           />
@@ -533,7 +567,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
               label={translateLabel(
                 languageTranslate,
                 "gradingClassification",
-                false
+                false,
               )}
               value={formSnapshot?.phan_do_loai}
             />
@@ -543,7 +577,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
             label={translateLabel(
               languageTranslate,
               "differentialDiagnosis",
-              false
+              false,
             )}
             value={formSnapshot?.chan_doan_phan_biet}
           />
@@ -562,7 +596,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
               {translateLabel(
                 languageTranslate,
                 "recommendationsCounseling",
-                false
+                false,
               ).toUpperCase()}
             </h3>
           )}
@@ -591,7 +625,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   ? translateLabel(
                       languageTranslate,
                       "illustrativeImages",
-                      false
+                      false,
                     ).toUpperCase()
                   : ""}
               </h3>
@@ -646,7 +680,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                 {translateLabel(
                   languageTranslate,
                   "doctor",
-                  false
+                  false,
                 ).toUpperCase()}
               </h3>
               <div
