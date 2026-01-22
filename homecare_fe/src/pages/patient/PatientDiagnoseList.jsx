@@ -163,10 +163,10 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
   const allColumns = useMemo(
     () => [
       {
-        title: "STT",
+        title: "",
         key: "STT",
-        align: "right", // ✅ CĂN BÊN PHẢI
-        width: 70,
+        align: "center", // ✅ CĂN BÊN PHẢI
+        width: 40,
         render: (_, __, index) => (page - 1) * 10 + index + 1,
       },
       {
@@ -174,7 +174,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         dataIndex: "id",
         key: "id",
         fixed: "left",
-        width: 80,
+        width: 60,
         align: "center",
         sorter: true,
       },
@@ -355,7 +355,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
           ),
       },
     ],
-    [user, clinicsAll, examParts, templateServices, page]
+    [user, clinicsAll, examParts, templateServices, page],
   );
 
   useEffect(() => {
@@ -474,7 +474,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
 
   const columnsToRender = useMemo(
     () => allColumns.filter((col) => visibleKeys.includes(col.key)),
-    [visibleKeys, allColumns]
+    [visibleKeys, allColumns],
   );
 
   const handleSaveColumnSettings = ({
@@ -486,7 +486,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(newVisibleKeys));
 
     const reOrderedColumns = orderedKeys.map((key) =>
-      allColumns.find((c) => c.key === key)
+      allColumns.find((c) => c.key === key),
     );
 
     const finalColumns = reOrderedColumns
@@ -670,7 +670,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
               {examParts
                 ?.filter(
                   (e) =>
-                    e.id_template_service == pendingFilters.id_template_service
+                    e.id_template_service == pendingFilters.id_template_service,
                 )
                 ?.map((e) => (
                   <Option key={e.id} value={e.id}>
@@ -740,7 +740,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
                       </span>
                     </div>
                   );
-                }
+                },
               )}
             </div>
           </div>
@@ -924,7 +924,8 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
             <Divider style={{ margin: "12px 0" }} />
 
             <Typography.Text strong style={{ color: "#cf1322" }}>
-              Các ca có cùng CCCD hoặc PID ({sameCCCDData.length})
+              Các kết quả quả khác của {chosenRecord.name}: (
+              {sameCCCDData.length}) bản ghi
             </Typography.Text>
 
             <ConfigProvider

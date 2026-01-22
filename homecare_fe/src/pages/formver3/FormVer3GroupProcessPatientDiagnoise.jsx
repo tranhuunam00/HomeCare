@@ -55,7 +55,7 @@ const FormVer3GroupProcessPatientDiagnoise = ({
 
         if (doctorUseDFormVer3.data.data.data?.length) {
           navigate(
-            `/home/doctor-use-formver3/detail/${doctorUseDFormVer3.data.data.data[0].id}`
+            `/home/doctor-use-formver3/detail/${doctorUseDFormVer3.data.data.data[0].id}`,
           );
         } else {
           navigate(`/home/form-drad-v3/use/patient-diagnose/${id}`);
@@ -124,7 +124,7 @@ const FormVer3GroupProcessPatientDiagnoise = ({
   ];
 
   const handleCancelReading = async (
-    changedStatus = PATIENT_DIAGNOSE_STATUS_NAME.NEW
+    changedStatus = PATIENT_DIAGNOSE_STATUS_NAME.NEW,
   ) => {
     try {
       await API_CALL.put(`/patient-diagnose/${id}`, {
@@ -143,7 +143,7 @@ const FormVer3GroupProcessPatientDiagnoise = ({
   };
   return (
     <div>
-      <h3 style={{ margin: 0, padding: 0 }}>Phiên bản 3</h3>
+      {/* <h3 style={{ margin: 0, padding: 0 }}>Phiên bản 3</h3> */}
       <CustomSteps steps={steps} current={status} />
       {(status === PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESS ||
         status === PATIENT_DIAGNOSE_STATUS_NAME.WAITING) &&
@@ -154,7 +154,7 @@ const FormVer3GroupProcessPatientDiagnoise = ({
               type="primary"
               onClick={() => {
                 const ok = window.confirm(
-                  "Bạn có chắc chắn muốn hủy đọc kết quả?\n\nNếu hủy, ca sẽ được trả về trạng thái MỚI."
+                  "Bạn có chắc chắn muốn hủy đọc kết quả?\n\nNếu hủy, ca sẽ được trả về trạng thái MỚI.",
                 );
 
                 if (ok) {
@@ -175,7 +175,7 @@ const FormVer3GroupProcessPatientDiagnoise = ({
               type="primary"
               onClick={() => {
                 const ok = window.confirm(
-                  "Bạn có chắc chắn muốn hủy kết quả đã duyệt\n\nNếu hủy, ca sẽ được trả về trạng thái CHỜ DUYỆT."
+                  "Bạn có chắc chắn muốn hủy kết quả đã duyệt\n\nNếu hủy, ca sẽ được trả về trạng thái CHỜ DUYỆT.",
                 );
 
                 if (ok) {

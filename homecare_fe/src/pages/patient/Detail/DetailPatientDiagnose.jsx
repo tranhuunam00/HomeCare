@@ -161,7 +161,7 @@ const PatientDiagnoiseDetailPage = ({
         },
       },
     ],
-    [user, clinicsAll, examParts, templateServices, page]
+    [user, clinicsAll, examParts, templateServices, page],
   );
 
   useEffect(() => {
@@ -473,7 +473,7 @@ const PatientDiagnoiseDetailPage = ({
               <Text>
                 {
                   templateServices?.find(
-                    (t) => t.id == displayData.id_template_service
+                    (t) => t.id == displayData.id_template_service,
                   )?.name
                 }
               </Text>
@@ -486,11 +486,11 @@ const PatientDiagnoiseDetailPage = ({
             </Col>
           </Row>
 
-          <GroupProcessPatientDiagnoiseFormVer2
+          {/* <GroupProcessPatientDiagnoiseFormVer2
             patientDiagnose={data}
             setPatientDiagnose={setData}
             onStatusChange={onStatusChange}
-          />
+          /> */}
 
           <FormVer3GroupProcessPatientDiagnoise
             patientDiagnose={data}
@@ -498,7 +498,7 @@ const PatientDiagnoiseDetailPage = ({
             onStatusChange={onStatusChange}
           />
 
-          <SignedFilesBox id_patient_diagnose={idEdit} />
+          {/* <SignedFilesBox id_patient_diagnose={idEdit} /> */}
 
           {/* <Row gutter={24} style={{ marginTop: 40 }}>
           <h2>Lịch sử</h2>

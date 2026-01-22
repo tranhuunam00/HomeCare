@@ -48,16 +48,14 @@ import AdvancedSampleSection from "../../components/AdvancedSampleSection";
 import ImagingStructureTable from "../../components/ImagingStructureTable3.jsx";
 import ImagingDiagnosisSection from "../../components/ImagingDiagnosisSection";
 import PrintPreviewVer3NotDataDiagnose from "../../components/PrintPreviewVer3NotDataDiagnose.jsx";
+import { handlePrint } from "../../../formver2/utils.js";
 
 const { Title } = Typography;
 const { TextArea } = Input;
 const { Option } = Select;
 
-export default function DoctorUseDFormVer3({
-  onFormChange,
-  onPrint,
-  isUse = false,
-}) {
+export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
+  const printRef = useRef(null);
   const [form] = Form.useForm();
   const {
     examParts,
@@ -82,10 +80,10 @@ export default function DoctorUseDFormVer3({
   const [imageList, setImageList] = useState([{}, {}, {}]);
   const [filteredFormVer3Names, setFilteredFormVer3Names] = useState([]);
   const [languageTranslate, setLanguageTransslate] = useState(
-    TRANSLATE_LANGUAGE.VI
+    TRANSLATE_LANGUAGE.VI,
   );
   const [diagnosisSummary, setDiagnosisSummary] = useState(
-    form.getFieldValue("imagingDiagnosisSummary")
+    form.getFieldValue("imagingDiagnosisSummary"),
   );
 
   const [status, setStatus] = useState(APPROVAL_STATUS.DRAFT);
@@ -113,7 +111,7 @@ export default function DoctorUseDFormVer3({
         const rows = JSON.parse(formVer3.imageDescription || "[]");
 
         setImagingRows(
-          Array.isArray(rows) && rows.length ? rows : DEFAULT_IMAGING_ROWS
+          Array.isArray(rows) && rows.length ? rows : DEFAULT_IMAGING_ROWS,
         );
       } catch {
         setImagingRows(DEFAULT_IMAGING_ROWS);
@@ -126,7 +124,7 @@ export default function DoctorUseDFormVer3({
         (r) =>
           r.status === "abnormal" &&
           r.description &&
-          r.description.trim() !== ""
+          r.description.trim() !== "",
       )
       .map((r) => r.description.trim());
   }, [imagingRows]);
@@ -234,7 +232,7 @@ export default function DoctorUseDFormVer3({
     } catch (error) {
       console.error("[onApprove] error", error);
       toast.error(
-        error?.response?.data?.message || "Không thể phê duyệt kết quả"
+        error?.response?.data?.message || "Không thể phê duyệt kết quả",
       );
     } finally {
       setLoading(false);
@@ -298,14 +296,14 @@ export default function DoctorUseDFormVer3({
 
           setImageList(descImages);
           setStatus(
-            APPROVAL_FORMVER3_STATUS_NAME[doctorUseFormVer3Server.status]
+            APPROVAL_FORMVER3_STATUS_NAME[doctorUseFormVer3Server.status],
           );
           try {
             const rows = JSON.parse(
-              doctorUseFormVer3Server.imageDescription || "[]"
+              doctorUseFormVer3Server.imageDescription || "[]",
             );
             setImagingRows(
-              Array.isArray(rows) && rows.length ? rows : DEFAULT_IMAGING_ROWS
+              Array.isArray(rows) && rows.length ? rows : DEFAULT_IMAGING_ROWS,
             );
           } catch {
             setImagingRows(DEFAULT_IMAGING_ROWS);
@@ -320,14 +318,14 @@ export default function DoctorUseDFormVer3({
 
         setPatientDiagnose(
           patientDiagnoseData ||
-            doctorUseFormVer3Server?.id_patient_diagnose_patient_diagnose
+            doctorUseFormVer3Server?.id_patient_diagnose_patient_diagnose,
         );
 
         form.setFieldsValue(formValues);
       } catch (error) {
         console.log(
           "[fetchDataFromServerWhenHaveIDs] error-------",
-          error.message || error
+          error.message || error,
         );
         toast.error("Không thể tải thông tin ca bệnh");
       } finally {
@@ -361,7 +359,7 @@ export default function DoctorUseDFormVer3({
     return (examParts || []).filter(
       (p) =>
         Number(p.id_template_service) ===
-        Number(selectedIDs.id_template_service)
+        Number(selectedIDs.id_template_service),
     );
   }, [examParts, selectedIDs]);
 
@@ -409,7 +407,7 @@ export default function DoctorUseDFormVer3({
   };
   const restoreFromSnapshot = () => {
     const ok = window.confirm(
-      "Toàn bộ dữ liệu sẽ quay về trạng thái gốc từ hệ thống. Bạn có chắc muốn hoàn tác?"
+      "Toàn bộ dữ liệu sẽ quay về trạng thái gốc từ hệ thống. Bạn có chắc muốn hoàn tác?",
     );
     if (!ok) return;
     if (!idEdit) {
@@ -462,7 +460,7 @@ export default function DoctorUseDFormVer3({
       try {
         const rows = JSON.parse(apiData.imageDescription || "[]");
         setImagingRows(
-          Array.isArray(rows) && rows.length ? rows : DEFAULT_IMAGING_ROWS
+          Array.isArray(rows) && rows.length ? rows : DEFAULT_IMAGING_ROWS,
         );
       } catch {
         setImagingRows(DEFAULT_IMAGING_ROWS);
@@ -682,7 +680,7 @@ export default function DoctorUseDFormVer3({
                 label={translateLabel(
                   languageTranslate,
                   "resultTemplate",
-                  false
+                  false,
                 )}
                 name="id_formver3_name"
                 rules={[{ required: true, message: "Chọn tên mẫu" }]}
@@ -710,7 +708,7 @@ export default function DoctorUseDFormVer3({
                     try {
                       setLoading(true);
                       const res = await API_CALL.get(
-                        `/formVer3?id_formver3_name=${id_formver3_name}`
+                        `/formVer3?id_formver3_name=${id_formver3_name}`,
                       );
                       setFormVer3(res.data.data.items[0]);
                       setSelectedIDs((prev) => ({
@@ -798,7 +796,7 @@ export default function DoctorUseDFormVer3({
             {translateLabel(
               languageTranslate,
               "imagingFindings",
-              false
+              false,
             ).toUpperCase()}
           </Title>
 
@@ -824,7 +822,7 @@ export default function DoctorUseDFormVer3({
             {translateLabel(
               languageTranslate,
               "illustrativeImages",
-              false
+              false,
             ).toUpperCase()}
           </Title>
 
@@ -849,7 +847,11 @@ export default function DoctorUseDFormVer3({
               actionKeys={
                 patientDiagnose?.id_doctor_in_processing &&
                 patientDiagnose?.id_doctor_in_processing != doctor.id
-                  ? [KEY_ACTION_BUTTON.preview, KEY_ACTION_BUTTON.sign]
+                  ? [
+                      KEY_ACTION_BUTTON.preview,
+                      KEY_ACTION_BUTTON.sign,
+                      KEY_ACTION_BUTTON.print,
+                    ]
                   : [
                       KEY_ACTION_BUTTON.reset,
                       KEY_ACTION_BUTTON.save,
@@ -861,9 +863,19 @@ export default function DoctorUseDFormVer3({
                       // KEY_ACTION_BUTTON.translate_en,
                       // KEY_ACTION_BUTTON.sign,
                       KEY_ACTION_BUTTON.exit,
+                      KEY_ACTION_BUTTON.print,
                     ]
               }
               onSign={() => setSignModalOpen(true)}
+              onPrint={() => {
+                setPreviewOpen(true);
+
+                setTimeout(() => {
+                  if (printRef.current) {
+                    handlePrint(printRef);
+                  }
+                }, 300);
+              }}
               onExit={() => {
                 if (!window.confirm("Bạn có chắc muốn thoát không?")) {
                   return;
@@ -880,7 +892,6 @@ export default function DoctorUseDFormVer3({
                 pendingAction.current = key;
                 form.submit();
               }}
-              onPrint={onPrint}
               onReset={restoreFromSnapshot}
               onPreview={() => setPreviewOpen(!previewOpen)}
               isEdit={isEdit}
@@ -891,7 +902,7 @@ export default function DoctorUseDFormVer3({
                   setIsEdit(
                     initialSnap.apiData?.id_doctor == doctor.id ||
                       user.id_role == USER_ROLE.ADMIN ||
-                      !idEdit
+                      !idEdit,
                   );
                 }
               }}
@@ -921,30 +932,32 @@ export default function DoctorUseDFormVer3({
         footer={null}
         width={1100}
       >
-        <PrintPreviewVer3NotDataDiagnose
-          approvalStatus={status}
-          imagingRows={imagingRows}
-          formSnapshot={{
-            ...form.getFieldsValue(),
-            createdAt: initialSnap?.apiData?.createdAt,
-          }}
-          selectedExamPart={examParts?.find(
-            (ex) => ex.id == form.getFieldValue("id_exam_part")
-          )}
-          selectedTemplateService={templateServices?.find(
-            (ex) => ex.id == form.getFieldValue("id_template_service")
-          )}
-          initialSnap={initialSnap}
-          editId={idEdit}
-          imageList={imageList}
-          isUse={isUse}
-          doctor={initialSnap?.apiData?.id_doctor_doctor || doctor}
-          printTemplate={
-            printTemplate ||
-            initialSnap.apiData?.id_print_template_print_template
-          }
-          languageTranslate={languageTranslate}
-        />
+        <div ref={printRef}>
+          <PrintPreviewVer3NotDataDiagnose
+            approvalStatus={status}
+            imagingRows={imagingRows}
+            formSnapshot={{
+              ...form.getFieldsValue(),
+              createdAt: initialSnap?.apiData?.createdAt,
+            }}
+            selectedExamPart={examParts?.find(
+              (ex) => ex.id == form.getFieldValue("id_exam_part"),
+            )}
+            selectedTemplateService={templateServices?.find(
+              (ex) => ex.id == form.getFieldValue("id_template_service"),
+            )}
+            initialSnap={initialSnap}
+            editId={idEdit}
+            imageList={imageList}
+            isUse={isUse}
+            doctor={initialSnap?.apiData?.id_doctor_doctor || doctor}
+            printTemplate={
+              printTemplate ||
+              initialSnap.apiData?.id_print_template_print_template
+            }
+            languageTranslate={languageTranslate}
+          />
+        </div>
       </Modal>
     </div>
   );
