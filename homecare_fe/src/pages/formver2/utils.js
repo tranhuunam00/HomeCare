@@ -207,7 +207,9 @@ export function buildFormData(values, extra) {
   fd.append("ImageRightDescLink", values.ImageRightDescLink ?? "");
   fd.append(
     "id_formver2_name",
-    values.id_formver2_name ?? values?.id_formver2_name_form_ver2_name?.id ?? ""
+    values.id_formver2_name ??
+      values?.id_formver2_name_form_ver2_name?.id ??
+      "",
   );
 
   // ---- Ảnh: FILE (đúng key BE: ImageFormLeft / ImageFormRight)
@@ -251,7 +253,7 @@ export function mapApiToForm(api) {
     id: "DFORM_" + (api.id ?? "tự động"),
     doctor_name: api?.id_doctor_doctor?.full_name,
     createdAt: dayjs(api?.updatedAt ?? api.createdAt ?? new Date()).format(
-      "DD-MM-YYYY"
+      "DD-MM-YYYY",
     ),
     id_formver2_name:
       api?.id_formver2_name || api?.id_formver2_name_form_ver2_name?.id,
@@ -269,7 +271,7 @@ export const handlePrint = (printRef) => {
   const newWindow = window.open(
     "/print-preview",
     "_blank",
-    "width=800,height=600"
+    "width=800,height=600",
   );
 
   newWindow.document.write(`
@@ -291,19 +293,19 @@ export const handlePrint = (printRef) => {
             margin: 0;
           }
           span {
-            font-size: 14px;
+            font-size: 15px;
 
           }
           table { 
             width: 100%; 
             border-collapse: collapse; 
-            margin-bottom: 16px; 
+            margin-bottom: 15px; 
           }
           th, td { 
             border: 0px solid #ccc; 
             padding: 4px; 
             text-align: left; 
-            font-size: 13px 
+            font-size: 14px 
           }
           h3 { margin-top: 24px; font-size: 16px !important }
 
@@ -382,7 +384,7 @@ export async function exportFormVer2({
   });
 
   const headerName = getFilenameFromDisposition(
-    res.headers?.["content-disposition"]
+    res.headers?.["content-disposition"],
   );
   const finalName =
     headerName ||
@@ -489,7 +491,7 @@ export function buildFormDataDoctorUseFormVer2(values, extra) {
   fd.append("khuyen_nghi", values.khuyen_nghi ?? "");
   fd.append(
     "ngay_thuc_hien",
-    extra?.ngayThucHienISO || new Date().toISOString().slice(0, 10)
+    extra?.ngayThucHienISO || new Date().toISOString().slice(0, 10),
   );
 
   // ---- Thông tin bệnh nhân
@@ -499,11 +501,11 @@ export function buildFormDataDoctorUseFormVer2(values, extra) {
   fd.append("benh_nhan_dia_chi_so_nha", values.benh_nhan_dia_chi_so_nha ?? "");
   fd.append(
     "benh_nhan_dia_chi_xa_phuong",
-    values.benh_nhan_dia_chi_xa_phuong ?? ""
+    values.benh_nhan_dia_chi_xa_phuong ?? "",
   );
   fd.append(
     "benh_nhan_dia_chi_tinh_thanh_pho",
-    values.benh_nhan_dia_chi_tinh_thanh_pho ?? ""
+    values.benh_nhan_dia_chi_tinh_thanh_pho ?? "",
   );
   fd.append("benh_nhan_quoc_tich", values.benh_nhan_quoc_tich ?? "");
   fd.append("benh_nhan_dien_thoai", values.benh_nhan_dien_thoai ?? "");
@@ -519,7 +521,9 @@ export function buildFormDataDoctorUseFormVer2(values, extra) {
   fd.append("ImageRightDescLink", values.ImageRightDescLink ?? "");
   fd.append(
     "id_formver2_name",
-    values.id_formver2_name ?? values?.id_formver2_name_form_ver2_name?.id ?? ""
+    values.id_formver2_name ??
+      values?.id_formver2_name_form_ver2_name?.id ??
+      "",
   );
 
   // ---- Ảnh: FILE (đúng key BE: ImageFormLeft / ImageFormRight)

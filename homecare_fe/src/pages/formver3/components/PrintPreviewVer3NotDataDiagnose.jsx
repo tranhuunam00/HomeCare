@@ -60,8 +60,8 @@ const Circle = ({ checked }) => (
   <span
     style={{
       display: "inline-block",
-      width: 14,
-      height: 14,
+      width: 15,
+      height: 15,
       borderRadius: "50%",
       border: checked ? "2px solid #368df7ff" : "2px solid #368df7ff",
       backgroundColor: checked ? "#368df7ff" : "transparent",
@@ -76,7 +76,7 @@ const PrintRadio = ({ checked, label, stylesCustom }) => (
       display: "inline-flex",
       alignItems: "center",
       marginRight: 24,
-      fontSize: 14,
+      fontSize: 15,
       ...stylesCustom,
     }}
   >
@@ -99,7 +99,7 @@ const TextLabel = ({ label, minWidth }) => {
   return (
     <p
       style={{
-        fontSize: 14,
+        fontSize: 15,
         fontWeight: 600,
         margin: 0,
         padding: 0,
@@ -119,7 +119,7 @@ const PrintItem = ({ label, value, minWidth, valueStyle }) => {
       <TextLabel label={label} minWidth={minWidth} />
       <p
         style={{
-          fontSize: 14,
+          fontSize: 15,
           margin: 0,
           padding: 0,
           whiteSpace: "pre-wrap",
@@ -399,7 +399,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
             <PrintRadio
               checked={formSnapshot?.imageQuatity === "limited"}
               label="Đạt yêu cầu, có hạn chế"
-              stylesCustom={{ width: 170 }}
+              stylesCustom={{ width: 200 }}
             />
             <PrintRadio
               checked={formSnapshot?.imageQuatity === "bad"}
@@ -417,7 +417,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
             <PrintRadio
               checked={formSnapshot?.additionalAction === "extra"}
               label="Chụp thêm"
-              stylesCustom={{ width: 170 }}
+              stylesCustom={{ width: 200 }}
             />
             <PrintRadio
               checked={formSnapshot?.additionalAction === "redo"}
@@ -447,7 +447,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
               width: "100%",
               borderCollapse: "collapse",
               marginTop: 12,
-              fontSize: 14,
+              fontSize: 15,
             }}
           >
             <thead>
@@ -484,7 +484,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                 width: "100%",
                 borderCollapse: "collapse",
                 marginTop: 20,
-                fontSize: 14,
+                fontSize: 15,
               }}
             >
               <thead>
@@ -510,7 +510,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                           style={{
                             ...tdLeft,
                             whiteSpace: "pre-line",
-                            fontSize: 14,
+                            fontSize: 15,
                           }}
                         >
                           {row.description || "Có bất thường"}
@@ -550,7 +550,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
             style={{
               whiteSpace: "pre-line",
               fontWeight: "bold",
-              fontSize: 14,
+              fontSize: 15,
             }}
           >
             {formSnapshot.ketQuaChanDoan || formSnapshot.ket_qua_chan_doan}
@@ -559,7 +559,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
             minWidth={160}
             label={"Kết luận, chẩn đoán"}
             value={formSnapshot?.imagingDiagnosisSummary}
-            valueStyle={{ fontWeight: "bold", fontSize: 13 }}
+            valueStyle={{ fontWeight: "bold", fontSize: 15 }}
           />
           {formSnapshot?.phan_do_loai && (
             <PrintItem
@@ -695,7 +695,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   }}
                 >
                   <div
-                    style={{ display: "flex", marginBottom: 6, fontSize: 14 }}
+                    style={{ display: "flex", marginBottom: 6, fontSize: 15 }}
                   >
                     <div style={{ width: 150 }}>
                       <strong>
@@ -713,7 +713,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                       .join(" ")}
                   </div>
                   <div
-                    style={{ display: "flex", marginBottom: 6, fontSize: 14 }}
+                    style={{ display: "flex", marginBottom: 6, fontSize: 15 }}
                   >
                     <div style={{ width: 150 }}>
                       <strong>
@@ -723,7 +723,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                     {doctor.phone_number}
                   </div>
                   <div
-                    style={{ display: "flex", marginBottom: 6, fontSize: 14 }}
+                    style={{ display: "flex", marginBottom: 6, fontSize: 15 }}
                   >
                     <div style={{ width: 150 }}>
                       <strong>
@@ -734,7 +734,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                     {doctor?.id_user_user?.email || user.email}
                   </div>
                   <div
-                    style={{ display: "flex", marginBottom: 6, fontSize: 14 }}
+                    style={{ display: "flex", marginBottom: 6, fontSize: 15 }}
                   >
                     <div style={{ width: 150 }}>
                       <strong>
