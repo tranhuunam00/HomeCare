@@ -35,6 +35,7 @@ import {
 } from "@ant-design/icons";
 import SignedFilesBox from "../../doctor_use_form_ver2/SmartCASignModal/SignedFilesBox";
 import FormVer3GroupProcessPatientDiagnoise from "../../formver3/FormVer3GroupProcessPatientDiagnoise";
+import DoctorUseFormVer3Viewer from "../../formver3/components/DoctorUseFormVer3Viewer";
 
 const { Title, Text } = Typography;
 
@@ -513,6 +514,8 @@ const PatientDiagnoiseDetailPage = ({
         </Row> */}
           {/* <PatientTablePage isNotCreate={true} PID={data.PID} /> */}
         </Card>
+
+        <DoctorUseFormVer3Viewer id_doctor_use_formver3={22} />
       </ConfigProvider>
     </div>
   );

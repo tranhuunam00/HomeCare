@@ -145,6 +145,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
   approvalStatus,
   imagingRows,
   selectedExamPart,
+  isOnLyContent = false,
 }) => {
   console.log("approvalStatus", approvalStatus);
   const { templateServices, user } = useGlobalAuth();
@@ -173,7 +174,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
         <Card
           bordered={false}
           className={styles.a4Page}
-          style={{ padding: 48 }}
+          style={{ padding: !isOnLyContent ? 48 : 0 }}
         >
           {isUse && (
             <PrintHeaderFromCustom
@@ -187,35 +188,39 @@ const PrintPreviewVer3NotDataDiagnose = ({
             />
           )}
 
-          <h1
-            style={{
-              textAlign: "center",
-              color: "#2f6db8",
-              margin: 0,
-              padding: 0,
-            }}
-          >
-            {translateLabel(
-              languageTranslate,
-              "Result_Report",
-              false,
-            ).toUpperCase()}
-          </h1>
-          <h2
-            style={{
-              textAlign: "center",
-              color: "#2f6db8",
-              margin: 0,
-              padding: 0,
-              fontSize: 25,
-            }}
-          >{`${
-            selectedTemplateService?.name?.toUpperCase() ||
-            templateServices
-              ?.find((t) => t.id == formSnapshot.id_template_service)
-              ?.name?.toUpperCase()
-          }`}</h2>
-          {isUse && (
+          {!isOnLyContent && (
+            <h1
+              style={{
+                textAlign: "center",
+                color: "#2f6db8",
+                margin: 0,
+                padding: 0,
+              }}
+            >
+              {translateLabel(
+                languageTranslate,
+                "Result_Report",
+                false,
+              ).toUpperCase()}
+            </h1>
+          )}
+          {!isOnLyContent && (
+            <h2
+              style={{
+                textAlign: "center",
+                color: "#2f6db8",
+                margin: 0,
+                padding: 0,
+                fontSize: 25,
+              }}
+            >{`${
+              selectedTemplateService?.name?.toUpperCase() ||
+              templateServices
+                ?.find((t) => t.id == formSnapshot.id_template_service)
+                ?.name?.toUpperCase()
+            }`}</h2>
+          )}
+          {!isOnLyContent && isUse && (
             <>
               <h3
                 style={{
@@ -346,29 +351,34 @@ const PrintPreviewVer3NotDataDiagnose = ({
               </div>
             </>
           )}
-          <h3
-            style={{
-              textAlign: "left",
-              color: "#2f6db8",
-              margin: 0,
-              padding: 0,
-              marginBottom: 0,
-              marginTop: 20,
-            }}
-          >
-            {"QUY TRÌNH KỸ THUẬT".toUpperCase()}
-          </h3>
-
-          <PrintItem
-            minWidth={160}
-            label="Phân hệ"
-            value={selectedTemplateService?.name}
-          />
-          <PrintItem
-            minWidth={160}
-            label="Bộ phận"
-            value={selectedExamPart?.name}
-          />
+          {!isOnLyContent && (
+            <h3
+              style={{
+                textAlign: "left",
+                color: "#2f6db8",
+                margin: 0,
+                padding: 0,
+                marginBottom: 0,
+                marginTop: 20,
+              }}
+            >
+              {"QUY TRÌNH KỸ THUẬT".toUpperCase()}
+            </h3>
+          )}
+          {!isOnLyContent && (
+            <PrintItem
+              minWidth={160}
+              label="Phân hệ"
+              value={selectedTemplateService?.name}
+            />
+          )}
+          {!isOnLyContent && (
+            <PrintItem
+              minWidth={160}
+              label="Bộ phận"
+              value={selectedExamPart?.name}
+            />
+          )}
 
           <PrintItem
             minWidth={160}
@@ -604,6 +614,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
             className={styles.paragraph}
             style={{
               whiteSpace: "pre-line",
+              fontSize: 15,
             }}
           >
             {formSnapshot.khuyen_nghi}
@@ -772,12 +783,14 @@ const PrintPreviewVer3NotDataDiagnose = ({
           )}
         </Card>
       </div>
-      <FormActionBar
-        onPrint={() => handlePrint(printRef)}
-        actionKeys={["print"]}
-        editId={editId}
-        approvalStatus={"approved"}
-      />
+      {!isOnLyContent && (
+        <FormActionBar
+          onPrint={() => handlePrint(printRef)}
+          actionKeys={["print"]}
+          editId={editId}
+          approvalStatus={"approved"}
+        />
+      )}
     </div>
   );
 };

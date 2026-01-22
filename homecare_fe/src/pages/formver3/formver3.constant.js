@@ -285,11 +285,11 @@ export function buildFormDataDoctorUseFormVer3(values, extra) {
   fd.append("benh_nhan_dia_chi_so_nha", values.benh_nhan_dia_chi_so_nha ?? "");
   fd.append(
     "benh_nhan_dia_chi_xa_phuong",
-    values.benh_nhan_dia_chi_xa_phuong ?? ""
+    values.benh_nhan_dia_chi_xa_phuong ?? "",
   );
   fd.append(
     "benh_nhan_dia_chi_tinh_thanh_pho",
-    values.benh_nhan_dia_chi_tinh_thanh_pho ?? ""
+    values.benh_nhan_dia_chi_tinh_thanh_pho ?? "",
   );
   fd.append("benh_nhan_quoc_tich", values.benh_nhan_quoc_tich ?? "");
   fd.append("benh_nhan_dien_thoai", values.benh_nhan_dien_thoai ?? "");

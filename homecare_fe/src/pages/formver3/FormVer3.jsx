@@ -69,7 +69,7 @@ export default function DFormVer3({ id_formVer3 }) {
     id_formver3_name: null,
   });
   const [diagnosisSummary, setDiagnosisSummary] = useState(
-    form.getFieldValue("imagingDiagnosisSummary")
+    form.getFieldValue("imagingDiagnosisSummary"),
   );
 
   const { examParts, templateServices, user, doctor, formVer3Names } =
@@ -108,7 +108,7 @@ export default function DFormVer3({ id_formVer3 }) {
           const rows = JSON.parse(data.imageDescription || "[]");
 
           setImagingRows(
-            Array.isArray(rows) && rows.length ? rows : DEFAULT_IMAGING_ROWS
+            Array.isArray(rows) && rows.length ? rows : DEFAULT_IMAGING_ROWS,
           );
         } catch {
           setImagingRows(DEFAULT_IMAGING_ROWS);
@@ -147,7 +147,7 @@ export default function DFormVer3({ id_formVer3 }) {
   const [previewOpen, setPreviewOpen] = useState(false);
 
   const [languageTranslate, setLanguageTransslate] = useState(
-    TRANSLATE_LANGUAGE.VI
+    TRANSLATE_LANGUAGE.VI,
   );
 
   const filteredExamParts = useMemo(() => {
@@ -155,7 +155,7 @@ export default function DFormVer3({ id_formVer3 }) {
     return (examParts || []).filter(
       (p) =>
         Number(p.id_template_service) ===
-        Number(selectedIds.id_template_service)
+        Number(selectedIds.id_template_service),
     );
   }, [selectedIds]);
 
@@ -215,7 +215,7 @@ export default function DFormVer3({ id_formVer3 }) {
     } catch (err) {
       console.error(err);
       toast.error(
-        err?.response?.data?.message || "Có lỗi xảy ra, vui lòng thử lại"
+        err?.response?.data?.message || "Có lỗi xảy ra, vui lòng thử lại",
       );
     } finally {
       setLoading(false);
@@ -323,7 +323,7 @@ export default function DFormVer3({ id_formVer3 }) {
       try {
         const rows = JSON.parse(initialSnap.apiData.imageDescription || "[]");
         setImagingRows(
-          Array.isArray(rows) && rows.length ? rows : DEFAULT_IMAGING_ROWS
+          Array.isArray(rows) && rows.length ? rows : DEFAULT_IMAGING_ROWS,
         );
       } catch {
         setImagingRows(DEFAULT_IMAGING_ROWS);
@@ -345,7 +345,7 @@ export default function DFormVer3({ id_formVer3 }) {
         (r) =>
           r.status === "abnormal" &&
           r.description &&
-          r.description.trim() !== ""
+          r.description.trim() !== "",
       )
       .map((r) => r.description.trim());
   }, [imagingRows]);
@@ -566,7 +566,7 @@ export default function DFormVer3({ id_formVer3 }) {
             {translateLabel(
               languageTranslate,
               "imagingFindings",
-              false
+              false,
             ).toUpperCase()}
           </Title>
           <ImagingStructureTable
@@ -617,7 +617,7 @@ export default function DFormVer3({ id_formVer3 }) {
                   setIsEdit(
                     initialSnap.apiData?.id_doctor == doctor.id ||
                       user.id_role == USER_ROLE.ADMIN ||
-                      !editId
+                      !editId,
                   );
                 }
               }}
@@ -637,10 +637,10 @@ export default function DFormVer3({ id_formVer3 }) {
         <PrintPreviewVer3NotDataDiagnose
           formSnapshot={form.getFieldsValue()}
           selectedExamPart={examParts?.find(
-            (ex) => ex.id == form.getFieldValue("id_exam_part")
+            (ex) => ex.id == form.getFieldValue("id_exam_part"),
           )}
           selectedTemplateService={templateServices?.find(
-            (ex) => ex.id == form.getFieldValue("id_template_service")
+            (ex) => ex.id == form.getFieldValue("id_template_service"),
           )}
           initialSnap={initialSnap}
           editId={editId}
