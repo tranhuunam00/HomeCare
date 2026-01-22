@@ -36,6 +36,7 @@ import {
 import SignedFilesBox from "../../doctor_use_form_ver2/SmartCASignModal/SignedFilesBox";
 import FormVer3GroupProcessPatientDiagnoise from "../../formver3/FormVer3GroupProcessPatientDiagnoise";
 import DoctorUseFormVer3Viewer from "../../formver3/components/DoctorUseFormVer3Viewer";
+import useLatestDoctorUseFormVer3 from "../../formver3/useLatestDoctorUseFormVer3";
 
 const { Title, Text } = Typography;
 
@@ -63,14 +64,15 @@ const PatientDiagnoiseDetailPage = ({
     useGlobalAuth();
   const [idEdit, setIdEdit] = useState();
 
-  const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
   const [sameCCCDData, setSameCCCDData] = useState([]);
 
   const { useBreakpoint } = Grid;
   const screens = useBreakpoint();
   const deviceIsMobile = !screens.md;
+
+  const { record: latestVer3, loading: loadingVer3 } =
+    useLatestDoctorUseFormVer3(data?.id);
 
   const allColumns = useMemo(
     () => [
@@ -498,24 +500,11 @@ const PatientDiagnoiseDetailPage = ({
             setPatientDiagnose={setData}
             onStatusChange={onStatusChange}
           />
-
-          {/* <SignedFilesBox id_patient_diagnose={idEdit} /> */}
-
-          {/* <Row gutter={24} style={{ marginTop: 40 }}>
-          <h2>Lịch sử</h2>
-        </Row>
-        <Row gutter={24} style={{ marginTop: 40 }}>
-          <h3>
-            Người tạo:
-            <p style={{ color: "cadetblue" }}>
-              {data?.createdBy_user?.doctors[0]?.full_name}
-            </p>
-          </h3>
-        </Row> */}
-          {/* <PatientTablePage isNotCreate={true} PID={data.PID} /> */}
         </Card>
 
-        <DoctorUseFormVer3Viewer id_doctor_use_formver3={22} />
+        {latestVer3 && (
+          <DoctorUseFormVer3Viewer id_doctor_use_formver3={latestVer3.id} />
+        )}
       </ConfigProvider>
     </div>
   );
