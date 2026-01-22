@@ -156,7 +156,7 @@ const PatientDiagnoiseDetailPage = ({
           const displayValue = clinicalUpdated || text;
 
           const limit = 20;
-          const isOverLimit = displayValue.length > limit;
+          const isOverLimit = displayValue?.length > limit;
           const truncatedText = isOverLimit
             ? `${displayValue.substring(0, limit)}...`
             : displayValue;
