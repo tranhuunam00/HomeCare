@@ -119,7 +119,7 @@ export default function DoctorUseFormVer3Viewer({ id_doctor_use_formver3 }) {
         },
       }}
     >
-      <Card bordered title="NỘI DUNG">
+      <Card>
         <PrintPreviewVer3NotDataDiagnose
           approvalStatus={approvalStatus}
           imagingRows={imagingRows}

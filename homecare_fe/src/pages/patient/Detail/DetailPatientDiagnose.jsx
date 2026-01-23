@@ -316,11 +316,12 @@ const PatientDiagnoiseDetailPage = ({
   };
 
   return (
-    <div
-      style={{
-        padding: deviceIsMobile ? 0 : "2rem",
-      }}
-    >
+    <div style={{}}>
+      <FormVer3GroupProcessPatientDiagnoise
+        patientDiagnose={data}
+        setPatientDiagnose={setData}
+        onStatusChange={onStatusChange}
+      />
       <div style={{ display: deviceIsMobile ? "block" : "none" }}>
         <Space align="center" style={{ marginBottom: 8 }}>
           <Button
@@ -494,12 +495,6 @@ const PatientDiagnoiseDetailPage = ({
             setPatientDiagnose={setData}
             onStatusChange={onStatusChange}
           /> */}
-
-          <FormVer3GroupProcessPatientDiagnoise
-            patientDiagnose={data}
-            setPatientDiagnose={setData}
-            onStatusChange={onStatusChange}
-          />
         </Card>
 
         {latestVer3 && (
