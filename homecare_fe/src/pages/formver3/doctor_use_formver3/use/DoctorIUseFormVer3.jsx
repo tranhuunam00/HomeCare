@@ -40,15 +40,18 @@ import {
   buildDradv3FormValues,
   buildFormDataDoctorUseFormVer3,
   buildFormVer3Values,
+  CAN_THIEP_GROUP_CODE,
   DEFAULT_IMAGING_ROWS,
   LANGUAGE_OPTIONS,
   PATIENT_FIELDS,
+  TEMPLATE_GROUP_RENDER_MAP,
 } from "../../formver3.constant";
 import AdvancedSampleSection from "../../components/AdvancedSampleSection";
 import ImagingStructureTable from "../../components/ImagingStructureTable3.jsx";
 import ImagingDiagnosisSection from "../../components/ImagingDiagnosisSection";
 import PrintPreviewVer3NotDataDiagnose from "../../components/PrintPreviewVer3NotDataDiagnose.jsx";
 import { handlePrint } from "../../../formver2/utils.js";
+import ImagingStructureTextTable from "../../components/ImagingStructureTextTable.jsx";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -74,7 +77,6 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
   const [idEdit, setIdEdit] = useState(id_doctor_use_formver3);
   const [idPatientDiagnose, setIdPatientDiagnose] =
     useState(patient_diagnose_id);
-  const [historyOpen, setHistoryOpen] = useState(false);
   const [translateOpen, setTranslateOpen] = useState(false);
   const [patientDiagnose, setPatientDiagnose] = useState(null);
   const [imageList, setImageList] = useState([{}, {}, {}]);
@@ -153,6 +155,19 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
 
     fetchTemplates();
   }, []);
+
+  const selectedTemplateService = useMemo(() => {
+    if (!selectedIDs?.id_template_service) return null;
+    return templateServices?.find(
+      (ts) => Number(ts.id) === Number(selectedIDs.id_template_service),
+    );
+  }, [selectedIDs.id_template_service, templateServices]);
+
+  const isCanThiepGroup = useMemo(() => {
+    return selectedTemplateService?.code
+      ? CAN_THIEP_GROUP_CODE.includes(selectedTemplateService.code)
+      : false;
+  }, [selectedTemplateService]);
 
   const fetchDataFormver3Names = async () => {
     const data = await API_CALL.get("/formVer3_name", {
@@ -800,15 +815,22 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
             ).toUpperCase()}
           </Title>
 
-          <ImagingStructureTable
-            rows={imagingRows}
-            setRows={setImagingRows}
-            isEdit={isEdit}
-            setDiagnosisSummary={setDiagnosisSummary}
-            abnormalFindings={abnormalFindings}
-            form={form}
-          />
-
+          {isCanThiepGroup ? (
+            <ImagingStructureTextTable
+              rows={imagingRows}
+              setRows={setImagingRows}
+              isEdit={isEdit}
+            />
+          ) : (
+            <ImagingStructureTable
+              rows={imagingRows}
+              setRows={setImagingRows}
+              isEdit={isEdit}
+              setDiagnosisSummary={setDiagnosisSummary}
+              abnormalFindings={abnormalFindings}
+              form={form}
+            />
+          )}
           <ImagingDiagnosisSection
             isEdit={isEdit}
             form={form}

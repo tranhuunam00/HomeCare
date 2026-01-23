@@ -73,7 +73,7 @@ const ImagingStructureTable = ({
             <th>Cấu trúc</th>
             <th>Bình thường</th>
             <th>Bất thường</th>
-            <th>Xóa</th>
+            <th></th>
           </tr>
         </thead>
 
@@ -161,7 +161,7 @@ const ImagingStructureTable = ({
                       const next = rows.map((r) =>
                         r.id === row.id
                           ? { ...r, description: e.target.value }
-                          : r
+                          : r,
                       );
                       setRows(next);
                     }}

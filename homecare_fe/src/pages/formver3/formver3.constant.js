@@ -331,3 +331,9 @@ export const PATIENT_FIELDS = [
   "province_code",
   "ward_code",
 ];
+
+export const CAN_THIEP_GROUP_CODE = ["CTSA", "CTCT", "	CTXA"];
+
+export const TEMPLATE_GROUP_RENDER_MAP = {
+  CAN_THIEP: CAN_THIEP_GROUP_CODE,
+};

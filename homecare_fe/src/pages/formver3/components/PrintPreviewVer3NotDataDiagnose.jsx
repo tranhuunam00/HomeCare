@@ -148,6 +148,9 @@ const PrintPreviewVer3NotDataDiagnose = ({
   isOnLyContent = false,
 }) => {
   console.log("approvalStatus", approvalStatus);
+
+  const isTextOnlyService = true;
+
   const { templateServices, user } = useGlobalAuth();
   const printRef = useRef();
   const { provinces, wards, setSelectedProvince } = useVietnamAddress();
@@ -464,8 +467,15 @@ const PrintPreviewVer3NotDataDiagnose = ({
               <tr>
                 <th style={{ ...thUnderline, ...colSTT }}>STT</th>
                 <th style={{ ...thUnderline, ...colStructure }}>Cấu trúc</th>
-                <th style={thUnderline}>Bình thường</th>
-                <th style={thUnderline}>Bất thường</th>
+
+                {isTextOnlyService ? (
+                  <th style={thUnderline}>Mô tả</th>
+                ) : (
+                  <>
+                    <th style={thUnderline}>Bình thường</th>
+                    <th style={thUnderline}>Bất thường</th>
+                  </>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -474,21 +484,38 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   <td style={{ ...tdUnderlineCenter, ...colSTT }}>
                     {index + 1}
                   </td>
+
                   <td style={{ ...tdUnderlineLeft, ...colStructure }}>
                     {row.name}
                   </td>
-                  <td style={tdUnderlineCenter}>
-                    <Circle checked={row.status === "normal"} />
-                  </td>
-                  <td style={tdUnderlineCenter}>
-                    <Circle checked={row.status === "abnormal"} />
-                  </td>
+
+                  {isTextOnlyService ? (
+                    <td
+                      style={{
+                        ...tdUnderlineLeft,
+                        whiteSpace: "pre-line",
+                        fontSize: 15,
+                      }}
+                    >
+                      {row.description || ""}
+                    </td>
+                  ) : (
+                    <>
+                      <td style={tdUnderlineCenter}>
+                        <Circle checked={row.status === "normal"} />
+                      </td>
+                      <td style={tdUnderlineCenter}>
+                        <Circle checked={row.status === "abnormal"} />
+                      </td>
+                    </>
+                  )}
                 </tr>
               ))}
             </tbody>
           </table>
 
-          {imagingRows?.filter((row) => row.status === "abnormal").length ? (
+          {!isTextOnlyService &&
+          imagingRows?.filter((row) => row.status === "abnormal").length ? (
             <table
               style={{
                 width: "100%",
@@ -536,9 +563,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                 )}
               </tbody>
             </table>
-          ) : (
-            ""
-          )}
+          ) : null}
           <h3
             style={{
               textAlign: "left",
