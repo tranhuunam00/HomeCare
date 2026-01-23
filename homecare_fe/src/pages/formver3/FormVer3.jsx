@@ -34,6 +34,7 @@ import {
 import {
   ADDITIONAL_ACTION_OPTIONS,
   buildFormVer3Values,
+  CAN_THIEP_GROUP_CODE,
   CONTRAST_INJECTION_OPTIONS,
   DEFAULT_IMAGING_ROWS,
   IMAGE_QUALITY_OPTIONS,
@@ -44,6 +45,7 @@ import ImagingDiagnosisSection from "./components/ImagingDiagnosisSection";
 import PrintPreviewVer2NotDataDiagnose from "../formver2/PreviewVer2/PrintPreviewVer2NotDataDiagnose.jsx";
 import PrintPreviewVer3NotDataDiagnose from "./components/PrintPreviewVer3NotDataDiagnose.jsx";
 import ReloadTSAndExamPartsButton from "../../components/ReloadTSAndExamPartsButton.jsx";
+import ImagingStructureTextTable from "./components/ImagingStructureTextTable.jsx";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -82,6 +84,19 @@ export default function DFormVer3({ id_formVer3 }) {
   });
 
   const [imagingRows, setImagingRows] = useState(DEFAULT_IMAGING_ROWS);
+
+  const selectedTemplateService = useMemo(() => {
+    if (!selectedIds.id_template_service) return null;
+    return templateServices?.find(
+      (ts) => Number(ts.id) === Number(selectedIds.id_template_service),
+    );
+  }, [selectedIds.id_template_service, templateServices]);
+
+  const isCanThiepGroup = useMemo(() => {
+    return selectedTemplateService?.code
+      ? CAN_THIEP_GROUP_CODE.includes(selectedTemplateService.code)
+      : false;
+  }, [selectedTemplateService]);
 
   useEffect(() => {
     if (!editId) return;
@@ -569,14 +584,22 @@ export default function DFormVer3({ id_formVer3 }) {
               false,
             ).toUpperCase()}
           </Title>
-          <ImagingStructureTable
-            rows={imagingRows}
-            setRows={setImagingRows}
-            isEdit={isEdit}
-            setDiagnosisSummary={setDiagnosisSummary}
-            abnormalFindings={abnormalFindings}
-            form={form}
-          />
+          {isCanThiepGroup ? (
+            <ImagingStructureTextTable
+              rows={imagingRows}
+              setRows={setImagingRows}
+              isEdit={isEdit}
+            />
+          ) : (
+            <ImagingStructureTable
+              rows={imagingRows}
+              setRows={setImagingRows}
+              isEdit={isEdit}
+              setDiagnosisSummary={setDiagnosisSummary}
+              abnormalFindings={abnormalFindings}
+              form={form}
+            />
+          )}
           {/* Kết luận */}
 
           <ImagingDiagnosisSection

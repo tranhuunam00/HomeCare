@@ -11,8 +11,9 @@ import FormActionBar from "../../formver2/component/FormActionBar";
 import { handlePrint } from "../../formver2/utils";
 import PrintHeaderFromCustom from "../../products/TemplatePrint/print/PrintHeaderFromCustom";
 import LegacyPrintHeader from "../../products/TemplatePrint/print/LegacyPrintHeader";
+import { CAN_THIEP_GROUP_CODE } from "../formver3.constant";
 
-const colSTT = { width: 60 };
+const colSTT = { width: 60, textAlign: "center" };
 const colStructure = { width: 220 };
 const thStyle = {
   border: "1px solid #000",
@@ -36,7 +37,7 @@ const tdLeft = {
 const thUnderline = {
   borderBottom: "1px solid #000",
   padding: "6px 8px",
-  textAlign: "center",
+  textAlign: "left",
   fontWeight: 600,
 };
 
@@ -149,7 +150,13 @@ const PrintPreviewVer3NotDataDiagnose = ({
 }) => {
   console.log("approvalStatus", approvalStatus);
 
-  const isTextOnlyService = true;
+  const resolvedTemplateService =
+    selectedTemplateService ||
+    templateServices?.find((t) => t.id == formSnapshot?.id_template_service);
+
+  const isTextOnlyService = resolvedTemplateService?.code
+    ? CAN_THIEP_GROUP_CODE.includes(resolvedTemplateService.code)
+    : false;
 
   const { templateServices, user } = useGlobalAuth();
   const printRef = useRef();
@@ -472,8 +479,12 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   <th style={thUnderline}>Mô tả</th>
                 ) : (
                   <>
-                    <th style={thUnderline}>Bình thường</th>
-                    <th style={thUnderline}>Bất thường</th>
+                    <th style={{ ...thUnderline, textAlign: "center" }}>
+                      Bình thường
+                    </th>
+                    <th style={{ ...thUnderline, textAlign: "center" }}>
+                      Bất thường
+                    </th>
                   </>
                 )}
               </tr>

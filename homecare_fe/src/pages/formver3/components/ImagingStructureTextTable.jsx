@@ -1,35 +1,69 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Input, Button } from "antd";
 import TextArea from "antd/es/input/TextArea";
+import debounce from "lodash/debounce";
 import styles from "./ImagingStructureTable.module.scss";
 
 const ImagingStructureTextTable = ({ rows, setRows, isEdit }) => {
+  const [localRows, setLocalRows] = useState(rows);
+
+  useEffect(() => {
+    setLocalRows(rows);
+  }, [rows]);
+
+  const debouncedUpdate = useRef(
+    debounce((nextRows) => {
+      setRows(nextRows);
+    }, 400),
+  ).current;
+
+  useEffect(() => {
+    return () => {
+      debouncedUpdate.cancel();
+    };
+  }, []);
+
   const updateRow = (id, key, value) => {
-    setRows((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, [key]: value } : r)),
+    const next = localRows.map((r) =>
+      r.id === id ? { ...r, [key]: value } : r,
     );
+
+    setLocalRows(next); // update UI ngay
+    debouncedUpdate(next); // update parent có debounce
   };
 
   const handleDelete = (id) => {
     if (!window.confirm("Bạn có chắc muốn xóa hàng này không?")) return;
-    setRows((prev) => prev.filter((r) => r.id !== id));
+
+    const next = localRows.filter((r) => r.id !== id);
+    setLocalRows(next);
+    setRows(next); // delete thì update ngay, không cần debounce
+  };
+
+  const handleAddRow = () => {
+    const next = [
+      ...localRows,
+      {
+        id: Date.now(),
+        name: "",
+        description: "",
+      },
+    ];
+    setLocalRows(next);
+    setRows(next);
   };
 
   return (
     <div>
       <table
         className={styles.imagingTable}
-        style={{
-          width: "100%",
-          borderCollapse: "collapse",
-        }}
+        style={{ width: "100%", borderCollapse: "collapse" }}
       >
-        {/* 🔹 CỐ ĐỊNH WIDTH CỘT */}
         <colgroup>
-          <col style={{ width: 44 }} /> {/* STT */}
-          <col style={{ width: 150 }} /> {/* Cấu trúc */}
-          <col /> {/* Mô tả */}
-          <col style={{ width: 48 }} /> {/* Xóa */}
+          <col style={{ width: 44 }} />
+          <col style={{ width: 150 }} />
+          <col />
+          <col style={{ width: 48 }} />
         </colgroup>
 
         <thead>
@@ -42,16 +76,11 @@ const ImagingStructureTextTable = ({ rows, setRows, isEdit }) => {
         </thead>
 
         <tbody>
-          {rows.map((row, idx) => (
-            <tr
-              key={row.id}
-              style={{
-                borderBottom: "1px solid #e5e7eb",
-              }}
-            >
+          {localRows.map((row, idx) => (
+            <tr key={row.id} style={{ borderBottom: "1px solid #e5e7eb" }}>
               <td style={tdStyle}>{idx + 1}</td>
 
-              <td style={{ width: 700 }}>
+              <td style={{ width: 300 }}>
                 <Input
                   disabled={!isEdit}
                   value={row.name}
@@ -60,15 +89,10 @@ const ImagingStructureTextTable = ({ rows, setRows, isEdit }) => {
                 />
               </td>
 
-              <td style={{ width: "99vw" }}>
+              <td>
                 <TextArea
-                  style={{
-                    width: "100%",
-                    resize: "none",
-                  }}
                   disabled={!isEdit}
                   value={row.description}
-                  placeholder=""
                   autoSize={{ minRows: 1, maxRows: 8 }}
                   onChange={(e) =>
                     updateRow(row.id, "description", e.target.value)
@@ -76,24 +100,12 @@ const ImagingStructureTextTable = ({ rows, setRows, isEdit }) => {
                 />
               </td>
 
-              <td
-                style={{
-                  textAlign: "right",
-                  padding: 0,
-                  whiteSpace: "nowrap",
-                }}
-              >
+              <td style={{ textAlign: "right", padding: 0 }}>
                 <Button
                   danger
                   type="text"
                   size="small"
-                  style={{
-                    padding: 0,
-                    minWidth: "auto",
-                    height: "auto",
-                    lineHeight: 1,
-                  }}
-                  disabled={!isEdit || rows.length === 1}
+                  disabled={!isEdit || localRows.length === 1}
                   onClick={() => handleDelete(row.id)}
                 >
                   Xóa
@@ -104,20 +116,7 @@ const ImagingStructureTextTable = ({ rows, setRows, isEdit }) => {
         </tbody>
       </table>
 
-      <Button
-        type="link"
-        disabled={!isEdit}
-        onClick={() =>
-          setRows((prev) => [
-            ...prev,
-            {
-              id: Date.now(),
-              name: "",
-              description: "",
-            },
-          ])
-        }
-      >
+      <Button type="link" disabled={!isEdit} onClick={handleAddRow}>
         + Thêm hàng
       </Button>
     </div>
@@ -125,7 +124,7 @@ const ImagingStructureTextTable = ({ rows, setRows, isEdit }) => {
 };
 
 const thStyle = {
-  padding: "6px 6px",
+  padding: "6px",
   textAlign: "left",
   fontWeight: 600,
   background: "#fafafa",
