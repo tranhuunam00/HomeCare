@@ -578,11 +578,13 @@ export default function DFormVer3({ id_formVer3 }) {
 
           {/* Bảng mô tả hình ảnh */}
           <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
-            {translateLabel(
-              languageTranslate,
-              "imagingFindings",
-              false,
-            ).toUpperCase()}
+            {isCanThiepGroup
+              ? "QUY TRÌNH THỦ THUẬT"
+              : translateLabel(
+                  languageTranslate,
+                  "imagingFindings",
+                  false,
+                ).toUpperCase()}
           </Title>
           {isCanThiepGroup ? (
             <ImagingStructureTextTable

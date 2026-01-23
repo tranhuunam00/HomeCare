@@ -154,7 +154,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
     selectedTemplateService ||
     templateServices?.find((t) => t.id == formSnapshot?.id_template_service);
 
-  const isTextOnlyService = resolvedTemplateService?.code
+  const isCanThiepGroup = resolvedTemplateService?.code
     ? CAN_THIEP_GROUP_CODE.includes(resolvedTemplateService.code)
     : false;
 
@@ -455,11 +455,13 @@ const PrintPreviewVer3NotDataDiagnose = ({
               marginTop: 20,
             }}
           >
-            {translateLabel(
-              languageTranslate,
-              "imagingFindings",
-              false,
-            ).toUpperCase()}
+            {isCanThiepGroup
+              ? "QUY TRÌNH THỦ THUẬT"
+              : translateLabel(
+                  languageTranslate,
+                  "imagingFindings",
+                  false,
+                ).toUpperCase()}
           </h3>
 
           <table
@@ -475,7 +477,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                 <th style={{ ...thUnderline, ...colSTT }}>STT</th>
                 <th style={{ ...thUnderline, ...colStructure }}>Cấu trúc</th>
 
-                {isTextOnlyService ? (
+                {isCanThiepGroup ? (
                   <th style={thUnderline}>Mô tả</th>
                 ) : (
                   <>
@@ -500,7 +502,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                     {row.name}
                   </td>
 
-                  {isTextOnlyService ? (
+                  {isCanThiepGroup ? (
                     <td
                       style={{
                         ...tdUnderlineLeft,
@@ -525,7 +527,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
             </tbody>
           </table>
 
-          {!isTextOnlyService &&
+          {!isCanThiepGroup &&
           imagingRows?.filter((row) => row.status === "abnormal").length ? (
             <table
               style={{
