@@ -271,7 +271,7 @@ export const handlePrint = (printRef) => {
   const newWindow = window.open(
     "/print-preview",
     "_blank",
-    "width=800,height=600",
+    "width=794,height=600",
   );
 
   newWindow.document.write(`
@@ -289,12 +289,10 @@ export const handlePrint = (printRef) => {
             font-family: 'Arial', sans-serif !important;
           }
           body { 
-            padding: 20px; 
-            margin: 0;
+            margin: 0px;
           }
           span {
             font-size: 15px;
-
           }
           table { 
             width: 100%; 

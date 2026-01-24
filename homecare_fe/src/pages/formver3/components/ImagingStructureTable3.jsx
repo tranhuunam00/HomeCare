@@ -69,8 +69,8 @@ const ImagingStructureTable = ({
       <table className={styles.imagingTable}>
         <thead>
           <tr>
-            <th>STT</th>
-            <th>Cấu trúc</th>
+            <th></th>
+            <th></th>
             <th>Bình thường</th>
             <th>Bất thường</th>
             <th></th>
@@ -139,9 +139,7 @@ const ImagingStructureTable = ({
       </Button>
       {rows.some((r) => r.status === "abnormal") && (
         <>
-          <div style={{ marginTop: 24, fontWeight: 600 }}>
-            Mô tả chi tiết các bất thường
-          </div>
+          <div style={{ marginTop: 24, fontWeight: 600 }}>Mô tả chi tiết</div>
 
           {rows
             .filter((r) => r.status === "abnormal")

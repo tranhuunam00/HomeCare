@@ -12,27 +12,10 @@ import { handlePrint } from "../../formver2/utils";
 import PrintHeaderFromCustom from "../../products/TemplatePrint/print/PrintHeaderFromCustom";
 import LegacyPrintHeader from "../../products/TemplatePrint/print/LegacyPrintHeader";
 import { CAN_THIEP_GROUP_CODE } from "../formver3.constant";
+import { PAGE_PADDING_RIGHT } from "../../products/TemplatePrint/Setting/constant.setting.print";
 
 const colSTT = { width: 60, textAlign: "center" };
 const colStructure = { width: 220 };
-const thStyle = {
-  border: "1px solid #000",
-  padding: "6px 8px",
-  textAlign: "center",
-  fontWeight: 600,
-};
-
-const tdCenter = {
-  border: "1px solid #000",
-  padding: "6px 8px",
-  textAlign: "center",
-};
-
-const tdLeft = {
-  border: "1px solid #000",
-  padding: "6px 8px",
-  textAlign: "left",
-};
 
 const thUnderline = {
   borderBottom: "1px solid #000",
@@ -178,13 +161,15 @@ const PrintPreviewVer3NotDataDiagnose = ({
     formSnapshot?.imagingDiagnosisSummary,
   );
 
+  const abnormalRows = imagingRows?.filter((row) => row.status === "abnormal");
+
   return (
     <div>
       <div ref={printRef} className={styles.wrapper}>
         <Card
           bordered={false}
           className={styles.a4Page}
-          style={{ padding: !isOnLyContent ? 48 : 0 }}
+          style={{ padding: !isOnLyContent ? PAGE_PADDING_RIGHT : 0 }}
         >
           {isUse && (
             <PrintHeaderFromCustom
@@ -378,15 +363,12 @@ const PrintPreviewVer3NotDataDiagnose = ({
           {!isOnLyContent && (
             <PrintItem
               minWidth={160}
-              label="Phân hệ"
-              value={selectedTemplateService?.name}
-            />
-          )}
-          {!isOnLyContent && (
-            <PrintItem
-              minWidth={160}
-              label="Bộ phận"
-              value={selectedExamPart?.name}
+              label="Chỉ định"
+              value={
+                selectedTemplateService?.name +
+                " - " +
+                selectedExamPart?.name?.toUpperCase()
+              }
             />
           )}
 
@@ -527,56 +509,48 @@ const PrintPreviewVer3NotDataDiagnose = ({
             </tbody>
           </table>
 
-          {!isCanThiepGroup &&
-          imagingRows?.filter((row) => row.status === "abnormal").length ? (
-            <table
-              style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                marginTop: 20,
-                fontSize: 15,
-              }}
-            >
-              <thead>
-                <tr style={{ background: "#f0f0f0" }}>
-                  <th style={thStyle} colSpan={3}>
-                    Mô tả các chi tiết bất thường
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {imagingRows &&
-                imagingRows.filter((row) => row.status === "abnormal").length >
-                  0 ? (
-                  imagingRows
-                    .filter((row) => row.status === "abnormal")
-                    .map((row, idx) => (
-                      <tr key={row.id || idx}>
-                        <td style={{ ...tdCenter, ...colSTT }}>{idx + 1}</td>
-                        <td style={{ ...tdLeft, ...colStructure }}>
-                          {row.name}:
-                        </td>
-                        <td
-                          style={{
-                            ...tdLeft,
-                            whiteSpace: "pre-line",
-                            fontSize: 15,
-                          }}
-                        >
-                          {row.description || "Có bất thường"}
-                        </td>
-                      </tr>
-                    ))
-                ) : (
-                  <tr>
-                    <td style={tdLeft} colSpan={3}>
-                      ""
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          ) : null}
+          {!isCanThiepGroup && abnormalRows?.length > 0 && (
+            <>
+              <h3
+                style={{
+                  textAlign: "left",
+                  marginTop: 20,
+                  marginBottom: 8,
+                  fontSize: 16,
+                }}
+              >
+                MÔ TẢ CHI TIẾT
+              </h3>
+
+              <ul
+                style={{
+                  paddingLeft: 24,
+                  margin: 0,
+                  fontSize: 15,
+                }}
+              >
+                {abnormalRows.map((row, idx) => (
+                  <li
+                    key={row.id || idx}
+                    style={{ marginBottom: 10, display: "flex" }}
+                  >
+                    <strong style={{ minWidth: 230 }}>{row.name}:</strong>
+                    {row.description && (
+                      <p
+                        style={{
+                          margin: "4px 0 0 0",
+                          whiteSpace: "pre-line",
+                        }}
+                      >
+                        {row.description}
+                      </p>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+
           <h3
             style={{
               textAlign: "left",
@@ -805,15 +779,11 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   />
                 </section>
                 <section>
-                  <h4 style={{ padding: 0, margin: 0, marginBottom: 10 }}>
-                    Ảnh đại diện
-                  </h4>
-
                   <img
                     src={doctor?.avatar_url}
                     alt=""
-                    width={100}
-                    height={100}
+                    width={120}
+                    height={120}
                   />
                 </section>
               </div>

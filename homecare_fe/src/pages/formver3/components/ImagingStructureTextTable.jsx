@@ -68,8 +68,8 @@ const ImagingStructureTextTable = ({ rows, setRows, isEdit }) => {
 
         <thead>
           <tr>
-            <th style={thStyle}>STT</th>
-            <th style={thStyle}>Cấu trúc</th>
+            <th style={thStyle}></th>
+            <th style={thStyle}></th>
             <th style={thStyle}>Mô tả</th>
             <th style={thStyle}></th>
           </tr>

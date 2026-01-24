@@ -485,15 +485,12 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
     setVisibleKeys(newVisibleKeys);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(newVisibleKeys));
 
-    const reOrderedColumns = orderedKeys.map((key) =>
-      allColumns.find((c) => c.key === key),
-    );
-
-    const finalColumns = reOrderedColumns
-      .filter((key) => newVisibleKeys.includes(key))
+    const finalColumns = orderedKeys
+      .map((key) => allColumns.find((c) => c.key === key))
+      .filter((col) => col && newVisibleKeys.includes(col.key))
       .map((col) => ({
         ...col,
-        width: widths[col.key] || col.width,
+        width: widths[col.key] ?? col.width,
       }));
 
     setCustomColumns(finalColumns);
