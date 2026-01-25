@@ -980,6 +980,7 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
               initialSnap.apiData?.id_print_template_print_template
             }
             languageTranslate={languageTranslate}
+            setPreviewOpen={setPreviewOpen}
           />
         </div>
       </Modal>

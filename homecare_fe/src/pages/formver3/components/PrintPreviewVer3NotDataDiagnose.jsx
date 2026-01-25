@@ -141,6 +141,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
   imagingRows,
   selectedExamPart,
   isOnLyContent = false,
+  setPreviewOpen,
 }) => {
   console.log("approvalStatus", approvalStatus);
 
@@ -805,7 +806,8 @@ const PrintPreviewVer3NotDataDiagnose = ({
       {!isOnLyContent && (
         <FormActionBar
           onPrint={() => handlePrint(printRef)}
-          actionKeys={["print"]}
+          onExit={() => setPreviewOpen(false)}
+          actionKeys={["print", "exit"]}
           editId={editId}
           approvalStatus={"approved"}
         />
