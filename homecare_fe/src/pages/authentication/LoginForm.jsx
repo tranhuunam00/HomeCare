@@ -6,6 +6,7 @@ import API_CALL from "../../services/axiosClient";
 import { useGlobalAuth } from "../../contexts/AuthContext";
 import { GoogleLogin } from "@react-oauth/google";
 import { passwordMinLengthRule } from "./auth.constant";
+import BackButton from "../../components/BackButton";
 
 const { Title, Text, Link } = Typography;
 
@@ -40,7 +41,7 @@ const LoginPage = () => {
       }}
     >
       <div style={{ display: "flex", alignItems: "center" }}>
-        <div
+        {/* <div
           style={{
             backgroundImage: "url('/banner.jpg')",
             backgroundSize: "cover",
@@ -48,16 +49,18 @@ const LoginPage = () => {
             width: 500,
             height: 500,
           }}
-        />
+        /> */}
         <Card
           style={{
             width: 500,
             padding: 24,
-            height: 500,
             borderRadius: 10,
             boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
           }}
         >
+          <div style={{ marginBottom: 12 }}>
+            <BackButton to="/home" label="Về trang chủ" />
+          </div>
           {/* Logo */}
           <div style={{ textAlign: "center", marginBottom: 20 }}>
             <img src={logo} alt="Logo" style={{ height: 60 }} />
@@ -136,7 +139,7 @@ const LoginPage = () => {
                 navigate("/");
               } catch (err) {
                 showError(
-                  err?.response?.data?.message || "Đăng nhập Google thất bại!"
+                  err?.response?.data?.message || "Đăng nhập Google thất bại!",
                 );
               }
             }}

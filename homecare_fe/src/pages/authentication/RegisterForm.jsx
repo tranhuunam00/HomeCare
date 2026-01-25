@@ -8,6 +8,7 @@ import { GoogleLogin } from "@react-oauth/google";
 import { useGlobalAuth } from "../../contexts/AuthContext";
 import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 import { passwordMinLengthRule } from "./auth.constant";
+import BackButton from "../../components/BackButton";
 
 const { Title } = Typography;
 
@@ -50,14 +51,14 @@ const RegisterPage = () => {
       }}
     >
       {/* Bên trái: Hình ảnh giới thiệu */}
-      <div
+      {/* <div
         style={{
           backgroundImage: "url('/banner.jpg')",
           backgroundSize: "cover",
           backgroundPosition: "center",
           width: 500,
         }}
-      ></div>
+      ></div> */}
 
       {/* Bên phải: Form đăng ký */}
       <div
@@ -76,6 +77,10 @@ const RegisterPage = () => {
           }}
         >
           {/* Logo */}
+
+          <div style={{ marginBottom: 12 }}>
+            <BackButton to="/home" label="Về trang chủ" />
+          </div>
           <div style={{ textAlign: "center", marginBottom: 20 }}>
             <img src={logo} alt="Logo" style={{ height: 60 }} />
           </div>
@@ -141,7 +146,7 @@ const RegisterPage = () => {
                       return Promise.resolve();
                     }
                     return Promise.reject(
-                      new Error("Mật khẩu nhập lại không khớp!")
+                      new Error("Mật khẩu nhập lại không khớp!"),
                     );
                   },
                 }),

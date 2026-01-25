@@ -3,6 +3,7 @@ import { Form, Input, Button, Typography, Card, Row, Col } from "antd";
 import { useNavigate } from "react-router-dom";
 import useToast from "../../hooks/useToast";
 import API_CALL from "../../services/axiosClient";
+import BackButton from "../../components/BackButton";
 
 const { Title, Text, Link } = Typography;
 
@@ -23,7 +24,7 @@ const ForgotPasswordPage = () => {
       navigate("/login");
     } catch (err) {
       showError(
-        err?.response?.data?.message || "Gửi yêu cầu đổi mật khẩu thất bại"
+        err?.response?.data?.message || "Gửi yêu cầu đổi mật khẩu thất bại",
       );
     } finally {
       setLoading(false);
@@ -43,7 +44,7 @@ const ForgotPasswordPage = () => {
     >
       <div style={{ display: "flex", alignItems: "center" }}>
         {/* Banner */}
-        <div
+        {/* <div
           style={{
             backgroundImage: "url('/banner.jpg')",
             backgroundSize: "cover",
@@ -51,19 +52,21 @@ const ForgotPasswordPage = () => {
             width: 500,
             height: 500,
           }}
-        />
+        /> */}
 
         {/* Form */}
         <Card
           style={{
             width: 500,
             padding: 24,
-            height: 500,
             borderRadius: 10,
             boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
           }}
         >
           {/* Logo */}
+          <div style={{ marginBottom: 12 }}>
+            <BackButton to="/home" label="Về trang chủ" />
+          </div>
           <div style={{ textAlign: "center", marginBottom: 20 }}>
             <img src={logo} alt="Logo" style={{ height: 60 }} />
           </div>
