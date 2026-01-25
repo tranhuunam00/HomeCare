@@ -4,6 +4,7 @@ import {
   ReadOutlined,
   CheckCircleOutlined,
   PrinterOutlined,
+  WarningOutlined,
 } from "@ant-design/icons";
 import { data, useNavigate } from "react-router-dom";
 
@@ -68,13 +69,11 @@ const FormVer3GroupProcessPatientDiagnoise = ({
 
   const steps = [
     {
-      title: "Tạo bản ghi",
-      icon: <PlusCircleOutlined />,
+      title: "Khởi tạo",
       onStepClick: () => {},
     },
     {
-      title: "Đọc kết quả",
-      icon: <FileSearchOutlined />,
+      title: "Chọn đọc",
       onStepClick: async () => {
         try {
           const updateStatus = await API_CALL.put(`/patient-diagnose/${id}`, {
@@ -90,7 +89,6 @@ const FormVer3GroupProcessPatientDiagnoise = ({
     },
     {
       title: "Đang đọc",
-      icon: <ReadOutlined />,
       onStepClick: async () => {
         try {
           await onCheckandCreate();
@@ -100,8 +98,7 @@ const FormVer3GroupProcessPatientDiagnoise = ({
       },
     },
     {
-      title: "Xác nhận kết quả",
-      icon: <CheckCircleOutlined />,
+      title: "Chờ xác nhận",
       onStepClick: async () => {
         try {
           await onCheckandCreate();
@@ -112,7 +109,6 @@ const FormVer3GroupProcessPatientDiagnoise = ({
     },
     {
       title: "In kết quả",
-      icon: <PrinterOutlined />,
       onStepClick: async () => {
         try {
           await onCheckandCreate();
@@ -144,49 +140,73 @@ const FormVer3GroupProcessPatientDiagnoise = ({
   return (
     <div>
       {/* <h3 style={{ margin: 0, padding: 0 }}>Phiên bản 3</h3> */}
-      <CustomSteps steps={steps} current={status} />
-      {(status === PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESS ||
-        status === PATIENT_DIAGNOSE_STATUS_NAME.WAITING) &&
-        id_doctor_in_processing === doctor.id && (
-          <div style={{ marginTop: 16 }}>
-            <Button
-              danger
-              type="primary"
-              onClick={() => {
-                const ok = window.confirm(
-                  "Bạn có chắc chắn muốn hủy đọc kết quả?\n\nNếu hủy, ca sẽ được trả về trạng thái MỚI.",
-                );
+      <div
+        style={{
+          position: "fixed",
+          zIndex: 3,
+          display: "flex",
+          justifyContent: "center",
+          bottom: 0,
+          flexDirection: "column",
+          background: "#dfe1e5",
+        }}
+      >
+        <CustomSteps steps={steps} current={status} />
+        {(status === PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESS ||
+          status === PATIENT_DIAGNOSE_STATUS_NAME.WAITING) &&
+          id_doctor_in_processing === doctor.id && (
+            <div style={{ marginTop: 16 }}>
+              <Button
+                style={{
+                  height: 45,
+                  padding: "16px 18px",
+                  borderRadius: 14,
+                  fontWeight: 800,
+                  letterSpacing: "0.06em",
+                  textTransform: "uppercase",
+                  color: "#c14728",
+                  background: "rgba(14,165,233,0.06)",
+                }}
+                onClick={() => {
+                  const ok = window.confirm(
+                    "Bạn có chắc chắn muốn hủy đọc kết quả?\n\nNếu hủy, ca sẽ được trả về trạng thái MỚI.",
+                  );
+                  if (ok) handleCancelReading();
+                }}
+              >
+                Hủy đọc kết quả
+              </Button>
+            </div>
+          )}
 
-                if (ok) {
-                  handleCancelReading();
-                }
-              }}
-            >
-              Hủy đọc kết quả
-            </Button>
-          </div>
-        )}
-
-      {status === PATIENT_DIAGNOSE_STATUS_NAME.VERIFY &&
-        id_doctor_in_processing === doctor.id && (
-          <div style={{ marginTop: 16 }}>
-            <Button
-              danger
-              type="primary"
-              onClick={() => {
-                const ok = window.confirm(
-                  "Bạn có chắc chắn muốn hủy kết quả đã duyệt\n\nNếu hủy, ca sẽ được trả về trạng thái CHỜ DUYỆT.",
-                );
-
-                if (ok) {
-                  handleCancelReading(PATIENT_DIAGNOSE_STATUS_NAME.WAITING);
-                }
-              }}
-            >
-              Hủy duyệt
-            </Button>
-          </div>
-        )}
+        {status === PATIENT_DIAGNOSE_STATUS_NAME.VERIFY &&
+          id_doctor_in_processing === doctor.id && (
+            <div style={{ marginTop: 16 }}>
+              <Button
+                style={{
+                  height: 45,
+                  padding: "16px 18px",
+                  borderRadius: 14,
+                  fontWeight: 800,
+                  letterSpacing: "0.06em",
+                  textTransform: "uppercase",
+                  color: "#b91c1c",
+                  border: "1px solid rgba(185,28,28,0.35)",
+                  background: "rgba(185,28,28,0.06)",
+                }}
+                onClick={() => {
+                  const ok = window.confirm(
+                    "Bạn có chắc chắn muốn hủy kết quả đã duyệt?\n\nNếu hủy, ca sẽ được trả về trạng thái CHỜ DUYỆT.",
+                  );
+                  if (ok)
+                    handleCancelReading(PATIENT_DIAGNOSE_STATUS_NAME.WAITING);
+                }}
+              >
+                Hủy duyệt
+              </Button>
+            </div>
+          )}
+      </div>
     </div>
   );
 };

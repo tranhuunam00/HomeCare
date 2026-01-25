@@ -132,6 +132,9 @@ export default function DoctorUseFormVer3Viewer({ id_doctor_use_formver3 }) {
           printTemplate={printTemplate}
           languageTranslate={formSnapshot?.language || "vi"}
           isOnLyContent={true}
+          styleCustomParent={{
+            fontSize: 12,
+          }}
         />
       </Card>
     </ConfigProvider>

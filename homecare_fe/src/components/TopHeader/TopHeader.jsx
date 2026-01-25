@@ -19,7 +19,6 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
   const { user, doctor, handleLogoutGlobal, isOnWorkList, setIsOnWorkList } =
     useGlobalAuth();
   const { showWarning } = useToast();
-  const [selectedMenu, setSelectedMenu] = useState("profile");
   const navigate = useNavigate();
 
   const showRightDrawer = () => setRightDrawerVisible(true);
@@ -72,11 +71,13 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
           alt="logo"
         />
         {!collapsed && <span className={styles.topHeader__title}>D-RADS</span>}
-        <MenuOutlined
-          style={{ marginLeft: 50 }}
-          onClick={toggleSidebar}
-          className={styles.topHeader__toggleIcon}
-        />
+        <Tooltip title={collapsed ? "Mở rộng menu" : "Thu nhỏ menu"}>
+          <MenuOutlined
+            style={{ marginLeft: 50, cursor: "pointer" }}
+            onClick={toggleSidebar}
+            className={styles.topHeader__toggleIcon}
+          />
+        </Tooltip>
       </div>
 
       {/* --- Right side --- */}

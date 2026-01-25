@@ -21,7 +21,7 @@ export const GlobalAuthProvider = ({ children }) => {
   const [doctors, setDoctors] = useState([]);
   const [clinicsAll, setClinicsAll] = useState([]);
   const [isOnWorkList, setIsOnWorkList] = useState(false);
-  const [collapsed, setCollapsed] = useState(true);
+  const [collapsed, setCollapsed] = useState(false);
 
   const handleLoginContext = ({ token, user, doctor }) => {
     storage.saveAuth({ token, user, doctor });

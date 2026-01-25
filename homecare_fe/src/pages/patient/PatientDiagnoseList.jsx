@@ -125,8 +125,8 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
   const { fetchTSAndExamParts } = useTemplateServicesAndExamParts();
 
   useEffect(() => {
-    setIsOnWorkList(true);
-    setCollapsed(true);
+    setIsOnWorkList(false);
+    setCollapsed(false);
     fetchTSAndExamParts();
     return () => setIsOnWorkList(false);
   }, []);
@@ -368,7 +368,12 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
   }, [filters, page, limit, returnStatus]);
 
   useEffect(() => {
-    if (chosenRecord) fetchPatientsByChosen();
+    if (chosenRecord) {
+      fetchPatientsByChosen();
+      setCollapsed(true);
+    } else {
+      setCollapsed(false);
+    }
   }, [chosenRecord, returnStatus]);
 
   const cleanParams = (obj) => {
@@ -397,8 +402,8 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
           ...cleanParams(filters),
           page,
           limit,
-          sort_by: filters.sort_by,
-          sort_order: filters.sort_order,
+          sort_by: filters?.sort_by,
+          sort_order: filters?.sort_order,
         },
       });
       const responseData = res.data.data;
@@ -880,27 +885,33 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
                 },
               }}
               onChange={(pagination, _filters, sorter) => {
-                if (
-                  pagination.current !== page ||
-                  pagination.pageSize !== limit
-                ) {
-                  setPage(pagination.current);
-                  setLimit(pagination.pageSize);
+                const nextPage = pagination.current;
+                const nextLimit = pagination.pageSize;
+
+                const nextSortBy = sorter?.field;
+                const nextSortOrder =
+                  sorter?.order === "ascend"
+                    ? "asc"
+                    : sorter?.order === "descend"
+                      ? "desc"
+                      : undefined;
+
+                const sortChanged =
+                  nextSortBy !== filters.sort_by ||
+                  nextSortOrder !== filters.sort_order;
+
+                if (nextPage !== page || nextLimit !== limit) {
+                  setPage(nextPage);
+                  setLimit(nextLimit);
                 }
 
-                if (sorter?.order) {
+                if (sortChanged) {
                   setPage(1);
                   setFilters((prev) => ({
                     ...prev,
-                    sort_by: sorter.field,
-                    sort_order: sorter.order === "ascend" ? "asc" : "desc",
+                    sort_by: nextSortBy,
+                    sort_order: nextSortOrder,
                   }));
-                } else {
-                  setPage(1);
-                  setFilters((prev) => {
-                    const { sort_by, sort_order, ...rest } = prev;
-                    return rest;
-                  });
                 }
               }}
               onRow={(record) => ({
@@ -958,7 +969,15 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         )}
       </div>
       {chosenRecord && (
-        <div style={{ padding: 0, flex: 1, width: 200 }}>
+        <div
+          style={{
+            padding: 0,
+            flex: 1,
+            width: 200,
+            maxHeight: "115vh",
+            overflowY: "scroll",
+          }}
+        >
           <PatientDiagnoiseDetailPage
             idFromList={+chosenRecord?.id}
             onStatusChange={() => setReturnStatus((prev) => !prev)}

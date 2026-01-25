@@ -316,7 +316,7 @@ const PatientDiagnoiseDetailPage = ({
   };
 
   return (
-    <div style={{}}>
+    <div style={{ height: "100%" }}>
       <FormVer3GroupProcessPatientDiagnoise
         patientDiagnose={data}
         setPatientDiagnose={setData}

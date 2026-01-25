@@ -1,4 +1,5 @@
 import React from "react";
+import { Tooltip } from "antd";
 import "./CustomSteps.scss";
 
 const CustomSteps = ({ steps = [], current = 0 }) => {
@@ -8,26 +9,33 @@ const CustomSteps = ({ steps = [], current = 0 }) => {
         const isActive = index === current;
         const isCompleted = index < current;
 
+        const stepContent = (
+          <div
+            className={`step-item 
+              ${isActive ? "active" : ""} 
+              ${isCompleted ? "completed" : ""}`}
+            onClick={() => (isActive ? step.onStepClick?.() : null)}
+          >
+            <span className="step-title">{step.title}</span>
+          </div>
+        );
+
         return (
           <div key={index} className="step-wrapper">
-            <div
-              className={`step-item 
-                ${isActive ? "active" : ""} 
-                ${isCompleted ? "completed" : ""}`}
-              onClick={() => (current == index ? step.onStepClick() : null)}
-            >
-              <div className="step-icon">{step.icon}</div>
-              <div className="step-title">{step.title}</div>
-            </div>
+            {isActive ? (
+              <Tooltip title="Ấn vào để thao tác" placement="top">
+                {stepContent}
+              </Tooltip>
+            ) : (
+              stepContent
+            )}
 
-            {/* Arrow except last step */}
             {index < steps.length - 1 && (
               <div
-                className={
-                  "arrow " +
-                  (isCompleted ? "completed" : isActive ? "active" : "disabled")
-                }
-              ></div>
+                className={`arrow ${
+                  isCompleted ? "completed" : isActive ? "active" : "disabled"
+                }`}
+              />
             )}
           </div>
         );

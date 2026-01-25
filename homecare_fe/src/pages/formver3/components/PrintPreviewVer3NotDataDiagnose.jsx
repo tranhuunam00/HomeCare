@@ -36,97 +36,6 @@ const tdUnderlineLeft = {
   textAlign: "left",
 };
 
-const Box = ({ checked }) => (
-  <span style={{ fontSize: 18 }}>{checked ? "☒" : "☐"}</span>
-);
-
-const Circle = ({ checked }) =>
-  !checked ? null : (
-    <span
-      style={{
-        width: 16,
-        height: 16,
-        borderRadius: "50%",
-        border: "2px solid #368df7ff",
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        fontSize: 12,
-        fontWeight: "bold",
-        color: "#368df7ff",
-      }}
-    >
-      {checked ? "✓" : ""}
-    </span>
-  );
-const PrintRadio = ({ checked, label, stylesCustom }) => (
-  <span
-    style={{
-      display: "inline-flex",
-      alignItems: "center",
-      marginRight: 24,
-      fontSize: 15,
-      ...stylesCustom,
-    }}
-  >
-    <span
-      style={{
-        width: 16,
-        height: 16,
-        borderRadius: "50%",
-        border: "2px solid #368df7ff",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        marginRight: 6,
-        fontSize: 12,
-        color: "#368df7ff",
-        fontWeight: "bold",
-      }}
-    >
-      {checked ? "✓" : ""}
-    </span>
-    {label}
-  </span>
-);
-
-const TextLabel = ({ label, minWidth }) => {
-  return (
-    <p
-      style={{
-        fontSize: 15,
-        fontWeight: 600,
-        margin: 0,
-        padding: 0,
-        marginRight: 10,
-        minWidth: minWidth,
-      }}
-    >
-      {label}:
-    </p>
-  );
-};
-
-const PrintItem = ({ label, value, minWidth, valueStyle }) => {
-  if (!value) return null;
-  return (
-    <div style={{ marginBottom: 6, display: "flex", alignItems: "flex-start" }}>
-      <TextLabel label={label} minWidth={minWidth} />
-      <p
-        style={{
-          fontSize: 15,
-          margin: 0,
-          padding: 0,
-          whiteSpace: "pre-wrap",
-          ...valueStyle,
-        }}
-      >
-        {value || ""}
-      </p>
-    </div>
-  );
-};
-
 /* ---------- Main ---------- */
 const PrintPreviewVer3NotDataDiagnose = ({
   formSnapshot,
@@ -142,8 +51,107 @@ const PrintPreviewVer3NotDataDiagnose = ({
   selectedExamPart,
   isOnLyContent = false,
   setPreviewOpen,
+  styleCustomParent = {},
 }) => {
   console.log("approvalStatus", approvalStatus);
+
+  const Circle = ({ checked }) =>
+    !checked ? null : (
+      <span
+        style={{
+          width: 16,
+          height: 16,
+          borderRadius: "50%",
+          border: "2px solid #368df7ff",
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 12,
+          fontWeight: "bold",
+          color: "#368df7ff",
+          ...styleCustomParent,
+        }}
+      >
+        {checked ? "✓" : ""}
+      </span>
+    );
+  const PrintRadio = ({ checked, label, stylesCustom }) => (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        marginRight: 24,
+        fontSize: 15,
+        ...stylesCustom,
+        ...styleCustomParent,
+      }}
+    >
+      <span
+        style={{
+          width: 16,
+          height: 16,
+          borderRadius: "50%",
+          border: "2px solid #368df7ff",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          marginRight: 6,
+          fontSize: 12,
+          color: "#368df7ff",
+          fontWeight: "bold",
+          ...styleCustomParent,
+        }}
+      >
+        {checked ? "✓" : ""}
+      </span>
+      {label}
+    </span>
+  );
+
+  const TextLabel = ({ label, minWidth }) => {
+    return (
+      <p
+        style={{
+          fontSize: 15,
+          fontWeight: 600,
+          margin: 0,
+          padding: 0,
+          marginRight: 10,
+          minWidth: minWidth,
+          ...styleCustomParent,
+        }}
+      >
+        {label}:
+      </p>
+    );
+  };
+
+  const PrintItem = ({ label, value, minWidth, valueStyle }) => {
+    if (!value) return null;
+    return (
+      <div
+        style={{
+          marginBottom: 6,
+          display: "flex",
+          alignItems: "flex-start",
+        }}
+      >
+        <TextLabel label={label} minWidth={minWidth} />
+        <p
+          style={{
+            fontSize: 15,
+            margin: 0,
+            padding: 0,
+            whiteSpace: "pre-wrap",
+            ...valueStyle,
+            ...styleCustomParent,
+          }}
+        >
+          {value || ""}
+        </p>
+      </div>
+    );
+  };
 
   const resolvedTemplateService =
     selectedTemplateService ||
@@ -392,51 +400,98 @@ const PrintPreviewVer3NotDataDiagnose = ({
           <div style={{ display: "flex", marginBottom: 4 }}>
             <TextLabel label={"Tiêm thuốc đối quang"} minWidth={160} />
 
-            <PrintRadio
-              checked={formSnapshot?.contrastInjection === "no"}
-              label="Không"
-              stylesCustom={{ width: 120 }}
-            />
-            <PrintRadio
-              checked={formSnapshot?.contrastInjection === "yes"}
-              label="Có"
-            />
+            {!isOnLyContent ? (
+              <>
+                <PrintRadio
+                  checked={formSnapshot?.contrastInjection === "no"}
+                  label="Không"
+                  stylesCustom={{ width: 120 }}
+                />
+                <PrintRadio
+                  checked={formSnapshot?.contrastInjection === "yes"}
+                  label="Có"
+                />
+              </>
+            ) : (
+              <>
+                {formSnapshot?.contrastInjection === "no" && (
+                  <PrintRadio checked label="Không" />
+                )}
+                {formSnapshot?.contrastInjection === "yes" && (
+                  <PrintRadio checked label="Có" />
+                )}
+              </>
+            )}
           </div>
+
           <div style={{ display: "flex", marginBottom: 4 }}>
             <TextLabel label={"Chất lượng hình ảnh"} minWidth={160} />
 
-            <PrintRadio
-              checked={formSnapshot?.imageQuatity === "good"}
-              label="Đạt yêu cầu"
-              stylesCustom={{ width: 120 }}
-            />
-            <PrintRadio
-              checked={formSnapshot?.imageQuatity === "limited"}
-              label="Đạt yêu cầu, có hạn chế"
-              stylesCustom={{ width: 200 }}
-            />
-            <PrintRadio
-              checked={formSnapshot?.imageQuatity === "bad"}
-              label="Không đạt"
-            />
+            {!isOnLyContent ? (
+              <>
+                <PrintRadio
+                  checked={formSnapshot?.imageQuatity === "good"}
+                  label="Đạt yêu cầu"
+                  stylesCustom={{ width: 120 }}
+                />
+                <PrintRadio
+                  checked={formSnapshot?.imageQuatity === "limited"}
+                  label="Đạt yêu cầu, có hạn chế"
+                  stylesCustom={{ width: 200 }}
+                />
+                <PrintRadio
+                  checked={formSnapshot?.imageQuatity === "bad"}
+                  label="Không đạt"
+                />
+              </>
+            ) : (
+              <>
+                {formSnapshot?.imageQuatity === "good" && (
+                  <PrintRadio checked label="Đạt yêu cầu" />
+                )}
+                {formSnapshot?.imageQuatity === "limited" && (
+                  <PrintRadio checked label="Đạt yêu cầu, có hạn chế" />
+                )}
+                {formSnapshot?.imageQuatity === "bad" && (
+                  <PrintRadio checked label="Không đạt" />
+                )}
+              </>
+            )}
           </div>
+
           <div style={{ display: "flex", marginBottom: 4 }}>
             <TextLabel label={"Thực hiện bổ sung"} minWidth={160} />
 
-            <PrintRadio
-              checked={formSnapshot?.additionalAction === "no"}
-              label="Không"
-              stylesCustom={{ width: 120 }}
-            />
-            <PrintRadio
-              checked={formSnapshot?.additionalAction === "extra"}
-              label="Chụp thêm"
-              stylesCustom={{ width: 200 }}
-            />
-            <PrintRadio
-              checked={formSnapshot?.additionalAction === "redo"}
-              label="Chụp lại"
-            />
+            {!isOnLyContent ? (
+              <>
+                <PrintRadio
+                  checked={formSnapshot?.additionalAction === "no"}
+                  label="Không"
+                  stylesCustom={{ width: 120 }}
+                />
+                <PrintRadio
+                  checked={formSnapshot?.additionalAction === "extra"}
+                  label="Chụp thêm"
+                  stylesCustom={{ width: 200 }}
+                />
+                <PrintRadio
+                  checked={formSnapshot?.additionalAction === "redo"}
+                  label="Chụp lại"
+                />
+              </>
+            ) : (
+              <>
+                {formSnapshot?.additionalAction === "no" && (
+                  <PrintRadio checked label="Không" />
+                )}
+                {formSnapshot?.additionalAction === "extra" && (
+                  <PrintRadio checked label="Chụp thêm" />
+                )}
+                {formSnapshot?.additionalAction === "redo" && (
+                  <PrintRadio checked label="Chụp lại" />
+                )}
+              </>
+            )}
           </div>
 
           <h3
@@ -464,21 +519,34 @@ const PrintPreviewVer3NotDataDiagnose = ({
               borderCollapse: "collapse",
               marginTop: 12,
               fontSize: 15,
+              ...styleCustomParent,
             }}
           >
             <thead>
               <tr>
-                <th style={{ ...thUnderline, ...colSTT }}>STT</th>
-                <th style={{ ...thUnderline, ...colStructure }}>Cấu trúc</th>
+                <th style={{ ...thUnderline, ...colSTT }}></th>
+                <th style={{ ...thUnderline, ...colStructure }}></th>
 
                 {isCanThiepGroup ? (
                   <th style={thUnderline}>Mô tả</th>
                 ) : (
                   <>
-                    <th style={{ ...thUnderline, textAlign: "center" }}>
+                    <th
+                      style={{
+                        ...thUnderline,
+                        textAlign: "center",
+                        ...styleCustomParent,
+                      }}
+                    >
                       Bình thường
                     </th>
-                    <th style={{ ...thUnderline, textAlign: "center" }}>
+                    <th
+                      style={{
+                        ...thUnderline,
+                        textAlign: "center",
+                        ...styleCustomParent,
+                      }}
+                    >
                       Bất thường
                     </th>
                   </>
@@ -502,6 +570,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                         ...tdUnderlineLeft,
                         whiteSpace: "pre-line",
                         fontSize: 15,
+                        ...styleCustomParent,
                       }}
                     >
                       {row.description || ""}

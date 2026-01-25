@@ -234,7 +234,7 @@ const Sidebar = ({ collapsed }) => {
   const currentPath = location.pathname;
 
   const parentKey = menuItems.find((item) =>
-    item?.children?.some((child) => child.key === currentPath)
+    item?.children?.some((child) => child.key === currentPath),
   )?.key;
 
   return (
@@ -254,7 +254,6 @@ const Sidebar = ({ collapsed }) => {
 const Home = () => {
   const { collapsed, setCollapsed } = useGlobalAuth();
   const [logo, setLogo] = useState("/logo_home_care.png");
-  const navigate = useNavigate();
   const screens = useBreakpoint();
   const deviceIsMobile = !screens.md;
   return (
