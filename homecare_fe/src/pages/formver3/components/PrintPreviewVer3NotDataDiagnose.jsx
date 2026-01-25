@@ -40,20 +40,25 @@ const Box = ({ checked }) => (
   <span style={{ fontSize: 18 }}>{checked ? "☒" : "☐"}</span>
 );
 
-const Circle = ({ checked }) => (
-  <span
-    style={{
-      display: "inline-block",
-      width: 15,
-      height: 15,
-      borderRadius: "50%",
-      border: checked ? "2px solid #368df7ff" : "2px solid #368df7ff",
-      backgroundColor: checked ? "#368df7ff" : "transparent",
-      boxShadow: checked ? "inset 0 0 0 6px #368df7ff" : "none",
-    }}
-  />
-);
-
+const Circle = ({ checked }) =>
+  !checked ? null : (
+    <span
+      style={{
+        width: 16,
+        height: 16,
+        borderRadius: "50%",
+        border: "2px solid #368df7ff",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: 12,
+        fontWeight: "bold",
+        color: "#368df7ff",
+      }}
+    >
+      {checked ? "✓" : ""}
+    </span>
+  );
 const PrintRadio = ({ checked, label, stylesCustom }) => (
   <span
     style={{
@@ -66,15 +71,21 @@ const PrintRadio = ({ checked, label, stylesCustom }) => (
   >
     <span
       style={{
-        width: 12,
-        height: 12,
+        width: 16,
+        height: 16,
         borderRadius: "50%",
-        border: checked ? "2px solid #368df7ff" : "2px solid #368df7ff",
-        backgroundColor: checked ? "#368df7ff" : "transparent",
-        boxShadow: checked ? "inset 0 0 0 6px #368df7ff" : "none",
+        border: "2px solid #368df7ff",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
         marginRight: 6,
+        fontSize: 12,
+        color: "#368df7ff",
+        fontWeight: "bold",
       }}
-    />
+    >
+      {checked ? "✓" : ""}
+    </span>
     {label}
   </span>
 );
