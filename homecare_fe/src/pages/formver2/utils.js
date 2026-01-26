@@ -267,47 +267,57 @@ export const calculateAge = (dob) => {
 };
 
 export const handlePrint = (printRef) => {
+  if (!printRef?.current) {
+    console.warn("Print skipped: ref not ready");
+    return;
+  }
+
   const printContents = printRef.current.innerHTML;
+
   const newWindow = window.open(
     "/print-preview",
     "_blank",
     "width=794,height=600",
   );
 
-  newWindow.document.write(`
+  if (!newWindow) {
+    alert("Trình duyệt đang chặn cửa sổ in. Vui lòng cho phép popup.");
+    return;
+  }
+
+  const doc = newWindow.document;
+
+  doc.open();
+  doc.write(`
     <html>
       <head>
         <title>www.home-care.vn</title>
         <style>
           @page {
-            margin-top: 70px;   /* cách header 20px cho mọi trang */
+            margin-top: 70px;
           }
           @page :first {
-            margin-top: 20px; /* chỉ trang đầu tiên giữ 20px */
+            margin-top: 20px;
           }
           * {
             font-family: 'Arial', sans-serif !important;
           }
-          body { 
-            margin: 0px;
+          body { margin: 0 }
+          span { font-size: 15px }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
           }
-          span {
-            font-size: 15px;
-          }
-          table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            margin-bottom: 15px; 
-          }
-          th, td { 
+          th, td {
             border: 0px solid #ccc; 
-            padding: 4px; 
+            padding: 4px;
             text-align: left; 
-            font-size: 14px 
+            font-size: 14px
           }
           h3 { margin-top: 24px; font-size: 16px !important }
 
-          
+
         </style>
       </head>
       <body>
@@ -315,7 +325,7 @@ export const handlePrint = (printRef) => {
       </body>
     </html>
   `);
-  newWindow.document.close();
+  doc.close();
   newWindow.onload = () => {
     newWindow.focus();
     newWindow.print();

@@ -56,7 +56,7 @@ const FormVer3GroupProcessPatientDiagnoise = ({
 
         if (doctorUseDFormVer3.data.data.data?.length) {
           navigate(
-            `/home/doctor-use-formver3/detail/${doctorUseDFormVer3.data.data.data[0].id}`,
+            `/home/doctor-use-formver3/detail/${doctorUseDFormVer3.data.data.data[0].id}/${patientDiagnose.status == PATIENT_DIAGNOSE_STATUS_NAME.VERIFY}`,
           );
         } else {
           navigate(`/home/form-drad-v3/use/patient-diagnose/${id}`);
@@ -148,7 +148,7 @@ const FormVer3GroupProcessPatientDiagnoise = ({
           justifyContent: "center",
           bottom: 0,
           flexDirection: "column",
-          background: "#dfe1e5",
+          background: "#ffffff",
         }}
       >
         <CustomSteps steps={steps} current={status} />

@@ -60,9 +60,7 @@ export default function FormActionBar({
   approvalStatus = APPROVAL_STATUS.DRAFT,
   languageTranslate,
   onSign,
-  onVerifySign,
 }) {
-  console.log("approvalStatus", approvalStatus);
   const navigate = useNavigate();
   const { userPackages, user } = useGlobalAuth();
 

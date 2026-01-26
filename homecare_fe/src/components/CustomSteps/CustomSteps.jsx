@@ -23,7 +23,7 @@ const CustomSteps = ({ steps = [], current = 0 }) => {
         return (
           <div key={index} className="step-wrapper">
             {isActive ? (
-              <Tooltip title="Ấn vào để thao tác" placement="top">
+              <Tooltip title="Ấn để thao tác chi tiết" placement="top">
                 {stepContent}
               </Tooltip>
             ) : (

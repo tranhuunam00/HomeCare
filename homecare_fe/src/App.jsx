@@ -111,7 +111,7 @@ function App() {
       import.meta.env.VITE_API_SOCKET_URL || "http://localhost:3001/socket",
       {
         auth: { token },
-      }
+      },
     );
 
     socket.on("connect", () => {
@@ -211,6 +211,11 @@ function App() {
 
           <Route
             path="form-drad-v3/use/patient-diagnose/:patient_diagnose_id"
+            element={<DoctorUseDFormVer3 isUse={true} />}
+          />
+
+          <Route
+            path="doctor-use-formver3/detail/:id_doctor_use_formver3/:is_print"
             element={<DoctorUseDFormVer3 isUse={true} />}
           />
 

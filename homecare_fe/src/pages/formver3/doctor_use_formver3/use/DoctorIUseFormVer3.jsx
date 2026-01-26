@@ -69,11 +69,14 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
     setTemplateServices,
   } = useGlobalAuth();
 
+  const printSourceRef = useRef(null);
+
   const [reloading, setReloading] = useState(false);
   const [signModalOpen, setSignModalOpen] = useState(false);
   const { provinces, wards, setSelectedProvince } = useVietnamAddress();
   const navigate = useNavigate();
-  const { patient_diagnose_id, id_doctor_use_formver3 } = useParams();
+  const { patient_diagnose_id, id_doctor_use_formver3, is_print } = useParams();
+
   const [idEdit, setIdEdit] = useState(id_doctor_use_formver3);
   const [idPatientDiagnose, setIdPatientDiagnose] =
     useState(patient_diagnose_id);
@@ -363,7 +366,7 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
   }, [printTemplateList]);
 
   const pendingAction = useRef(null);
-  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState();
 
   const [loading, setLoading] = useState();
 
@@ -506,8 +509,16 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
     }
   };
 
+  useEffect(() => {
+    setTimeout(() => {
+      setPreviewOpen(is_print == "true");
+    }, 500);
+  }, [is_print]);
+
   return (
-    <div style={{ maxWidth: 980, margin: "0 auto", padding: 0 }}>
+    <div
+      style={{ maxWidth: 980, margin: "0 auto", padding: 0, marginBottom: 200 }}
+    >
       <Title
         level={3}
         style={{
@@ -875,6 +886,7 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
                       KEY_ACTION_BUTTON.preview,
                       KEY_ACTION_BUTTON.sign,
                       KEY_ACTION_BUTTON.print,
+                      KEY_ACTION_BUTTON.exit,
                     ]
                   : [
                       KEY_ACTION_BUTTON.reset,
@@ -892,6 +904,8 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
               }
               onSign={() => setSignModalOpen(true)}
               onPrint={() => {
+                printSourceRef.current = "manual"; // 👈 ĐÁNH DẤU
+
                 setPreviewOpen(true);
 
                 setTimeout(() => {
@@ -955,6 +969,20 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
         onCancel={() => setPreviewOpen(false)}
         footer={null}
         width={1100}
+        destroyOnClose={false} // ⭐ BẮT BUỘC
+        afterOpenChange={(open) => {
+          if (
+            open &&
+            is_print === "true" &&
+            printSourceRef.current !== "manual" // 👈 CHẶN IN LẠI
+          ) {
+            setTimeout(() => {
+              if (printRef.current) {
+                handlePrint(printRef);
+              }
+            }, 300);
+          }
+        }}
       >
         <div ref={printRef}>
           <PrintPreviewVer3NotDataDiagnose
@@ -981,6 +1009,7 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
             }
             languageTranslate={languageTranslate}
             setPreviewOpen={setPreviewOpen}
+            is_print={is_print}
           />
         </div>
       </Modal>

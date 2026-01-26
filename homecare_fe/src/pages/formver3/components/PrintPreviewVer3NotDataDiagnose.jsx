@@ -52,6 +52,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
   isOnLyContent = false,
   setPreviewOpen,
   styleCustomParent = {},
+  is_print = false,
 }) => {
   console.log("approvalStatus", approvalStatus);
 
@@ -153,6 +154,10 @@ const PrintPreviewVer3NotDataDiagnose = ({
     );
   };
 
+  const { templateServices, user } = useGlobalAuth();
+  const printRef = useRef();
+  const { provinces, wards, setSelectedProvince } = useVietnamAddress();
+
   const resolvedTemplateService =
     selectedTemplateService ||
     templateServices?.find((t) => t.id == formSnapshot?.id_template_service);
@@ -160,10 +165,6 @@ const PrintPreviewVer3NotDataDiagnose = ({
   const isCanThiepGroup = resolvedTemplateService?.code
     ? CAN_THIEP_GROUP_CODE.includes(resolvedTemplateService.code)
     : false;
-
-  const { templateServices, user } = useGlobalAuth();
-  const printRef = useRef();
-  const { provinces, wards, setSelectedProvince } = useVietnamAddress();
   useEffect(() => {
     setSelectedProvince(formSnapshot?.benh_nhan_dia_chi_tinh_thanh_pho);
   }, [formSnapshot?.benh_nhan_dia_chi_tinh_thanh_pho]);
