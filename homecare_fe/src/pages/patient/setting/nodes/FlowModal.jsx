@@ -45,6 +45,8 @@ const FlowModal = ({ open, onClose }) => {
   const canEdit = user?.id_role == USER_ROLE.ADMIN;
   /* ================= ADD NODE ================= */
   const addNode = () => {
+    if (!canEdit || mode !== "edit") return;
+
     const option = NODE_OPTIONS.find((o) => o.value === selectedNodeType);
     const id = nanoid();
 
@@ -121,6 +123,7 @@ const FlowModal = ({ open, onClose }) => {
         const flow = res.data.data;
         console.log("flow", flow);
         if (!flow) return;
+        setFlowId(flow.id);
 
         setFlowName(flow.name || "FLOW-DRADS");
         setNodes(flow.nodes || []);
@@ -167,16 +170,20 @@ const FlowModal = ({ open, onClose }) => {
           value={selectedNodeType}
           onChange={setSelectedNodeType}
           options={NODE_OPTIONS}
-          disabled={mode !== "edit"}
+          disabled={mode !== "edit" || !canEdit}
         />
 
-        <Button type="primary" onClick={addNode} disabled={mode !== "edit"}>
+        <Button
+          type="primary"
+          onClick={addNode}
+          disabled={mode !== "edit" || !canEdit}
+        >
           ➕ Add Node
         </Button>
 
         <Button
           danger
-          disabled={!selectedNodeId || mode !== "edit"}
+          disabled={!selectedNodeId || mode !== "edit" || !canEdit}
           onClick={() => {
             setNodes((nds) => nds.filter((n) => n.id !== selectedNodeId));
             setEdges((eds) =>
@@ -202,27 +209,38 @@ const FlowModal = ({ open, onClose }) => {
           type="primary"
           disabled={!canEdit}
           onClick={async () => {
+            if (!canEdit) return;
+
+            const payload = {
+              name: flowName || "FLOW-DRADS",
+              description: "Quy trình điều hướng D-RADS",
+              nodes,
+              edges,
+              status: "draft",
+            };
+
             try {
-              const payload = {
-                name: flowName || "FLOW-DRADS",
-                description: "Quy trình điều hướng D-RADS",
-                nodes,
-                edges,
-                status: "draft",
-              };
+              let res;
 
-              const res = await API_CALL.post("/flows", payload);
+              if (flowId) {
+                // 🔁 UPDATE
+                res = await API_CALL.put(`/flows/${flowId}`, payload);
+                toast.success("Cập nhật workflow thành công");
+              } else {
+                // 🆕 CREATE
+                res = await API_CALL.post("/flows", payload);
+                setFlowId(res.data.data?.id); // ✅ lưu lại id sau khi tạo
+                toast.success("Tạo workflow thành công");
+              }
 
-              console.log("CREATE FLOW RES:", res.data);
-              toast.success("Lưu workflow thành công");
               onClose?.();
             } catch (error) {
-              console.error("CREATE FLOW ERROR:", error);
+              console.error("SAVE FLOW ERROR:", error);
               toast.error("Lưu workflow thất bại");
             }
           }}
         >
-          💾 Lưu
+          💾 {flowId ? "Cập nhật" : "Lưu"}
         </Button>
       </Space>
 
