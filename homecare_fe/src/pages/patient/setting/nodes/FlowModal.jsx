@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Modal, Button, Space, Select, Divider, Input } from "antd";
+import { Modal, Button, Space, Select, Divider, Input, Row } from "antd";
 import { nanoid } from "nanoid";
 import {
   ReactFlow,
@@ -13,11 +13,38 @@ import {
 import { useNavigate } from "react-router-dom";
 import "@xyflow/react/dist/style.css";
 
-import { nodeTypes, NODE_OPTIONS } from "./nodeTypes";
+import {
+  nodeTypes,
+  NODE_OPTIONS,
+  ACTION_OPTIONS,
+  ACTION_FACTORY,
+} from "./nodeTypes";
 import { useGlobalAuth } from "../../../../contexts/AuthContext";
 import { USER_ROLE } from "../../../../constant/app";
 import { toast } from "react-toastify";
 import API_CALL from "../../../../services/axiosClient";
+import Title from "antd/es/skeleton/Title";
+
+const DEFAULT_NODE_STYLE = {
+  background: "#ffffff",
+  border: "#1677ff",
+  text: "#000000",
+};
+
+/* ================= SMALL UI ================= */
+const ColorPreview = ({ color, onClick }) => (
+  <div
+    onClick={onClick}
+    style={{
+      width: 26,
+      height: 26,
+      borderRadius: "50%",
+      background: color,
+      border: "1px solid #d9d9d9",
+      cursor: "pointer",
+    }}
+  />
+);
 
 const FlowModal = ({ open, onClose }) => {
   const navigate = useNavigate();
@@ -31,14 +58,26 @@ const FlowModal = ({ open, onClose }) => {
   const [selectedNodeId, setSelectedNodeId] = useState(null);
   const [flowName, setFlowName] = useState("FLOW-DRADS");
   const [flowId, setFlowId] = useState(null);
+  const [openColor, setOpenColor] = useState(null); // background | border | null
+  const [selectedEdgeId, setSelectedEdgeId] = useState(null);
 
   const canEdit = user?.id_role === USER_ROLE.ADMIN;
 
-  const selectedNode = useMemo(
-    () => nodes.find((n) => n.id === selectedNodeId),
-    [nodes, selectedNodeId],
-  );
+  const selectedNode = useMemo(() => {
+    const node = nodes.find((n) => n.id === selectedNodeId);
+    if (!node) return null;
 
+    return {
+      ...node,
+      data: {
+        ...node.data,
+        style: {
+          ...DEFAULT_NODE_STYLE,
+          ...(node.data?.style || {}),
+        },
+      },
+    };
+  }, [nodes, selectedNodeId]);
   /* ================= CONNECTION ================= */
   const onConnect = useCallback((params) => {
     setEdges((eds) => addEdge({ ...params, animated: true }, eds));
@@ -55,21 +94,11 @@ const FlowModal = ({ open, onClose }) => {
       {
         id: nanoid(),
         type: selectedNodeType,
-        position: {
-          x: Math.random() * 300,
-          y: Math.random() * 200,
-        },
+        position: { x: Math.random() * 300, y: Math.random() * 200 },
         data: {
           label: option?.defaultLabel || "New Node",
-          style: {
-            background: "#ffffff",
-            border: "#1677ff",
-            text: "#000000",
-          },
-          action: {
-            type: "none", // none | navigate | notify
-            payload: {},
-          },
+          style: { ...DEFAULT_NODE_STYLE },
+          action: { type: "none", payload: {} },
         },
       },
     ]);
@@ -80,18 +109,9 @@ const FlowModal = ({ open, onClose }) => {
     const action = node?.data?.action;
     if (!action || action.type === "none") return;
 
-    switch (action.type) {
-      case "navigate":
-        navigate(action.payload.path);
-        break;
-
-      case "notify":
-        toast.info(action.payload.message || "Thông báo");
-        break;
-
-      default:
-        console.warn("Unknown action:", action);
-    }
+    if (action.type === "navigate") navigate(action.payload.path);
+    if (action.type === "notify")
+      toast.info(action.payload.message || "Thông báo");
   };
 
   /* ================= NODE CLICK ================= */
@@ -116,6 +136,12 @@ const FlowModal = ({ open, onClose }) => {
           : n,
       ),
     );
+  };
+
+  const handleEdgeClick = (_, edge) => {
+    if (mode === "edit" && canEdit) {
+      setSelectedEdgeId(edge.id);
+    }
   };
 
   /* ================= LOAD FLOW ================= */
@@ -201,6 +227,17 @@ const FlowModal = ({ open, onClose }) => {
           🗑 Delete Node
         </Button>
 
+        <Button
+          danger
+          disabled={!selectedEdgeId || !canEdit || mode !== "edit"}
+          onClick={() => {
+            setEdges((eds) => eds.filter((e) => e.id !== selectedEdgeId));
+            setSelectedEdgeId(null);
+          }}
+        >
+          ❌ Delete Edge
+        </Button>
+
         <Input
           style={{ width: 220 }}
           value={flowName}
@@ -241,102 +278,141 @@ const FlowModal = ({ open, onClose }) => {
 
       {/* ===== CONFIG PANEL ===== */}
       {mode === "edit" && canEdit && selectedNode && (
-        <div style={{ position: "fixed", zIndex: 10, background: "#eef3ff" }}>
-          <Space direction="vertical" style={{ width: 360, padding: 12 }}>
-            <b>Node ID: {selectedNode.id}</b>
+        <div
+          style={{
+            position: "fixed",
+            right: 24,
+            top: 110,
+            zIndex: 20,
+            width: 360,
+            background: "#fff",
+            borderRadius: 12,
+            boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+          }}
+        >
+          <div style={{ padding: 14, borderBottom: "1px solid #f0f0f0" }}>
+            <b>⚙️ Node Configuration</b>
+          </div>
 
-            <Input
-              value={selectedNode.data.label}
-              onChange={(e) =>
-                updateNodeData(() => ({ label: e.target.value }))
-              }
-              placeholder="Node name"
-            />
-
-            {/* Action */}
-            <Select
-              value={selectedNode.data.action.type}
-              onChange={(type) =>
-                updateNodeData(() => ({
-                  action:
-                    type === "none"
-                      ? { type: "none", payload: {} }
-                      : type === "navigate"
-                        ? { type: "navigate", payload: { path: "/" } }
-                        : { type: "notify", payload: { message: "" } },
-                }))
-              }
-              options={[
-                { label: "Không làm gì", value: "none" },
-                { label: "Navigate", value: "navigate" },
-                { label: "Notify", value: "notify" },
-              ]}
-            />
-
-            {selectedNode.data.action.type === "navigate" && (
-              <Select
-                value={selectedNode.data.action.payload.path}
-                onChange={(path) =>
-                  updateNodeData(() => ({
-                    action: {
-                      type: "navigate",
-                      payload: { path },
-                    },
-                  }))
-                }
-                options={[
-                  { label: "Home", value: "/" },
-                  {
-                    label: "Danh sách ca",
-                    value: "/home/patients-diagnose",
-                  },
-                ]}
-              />
-            )}
-
-            {selectedNode.data.action.type === "notify" && (
+          <div style={{ padding: 14 }}>
+            <Space direction="vertical" style={{ width: "100%" }} size="middle">
               <Input
-                value={selectedNode.data.action.payload.message}
+                value={selectedNode.data.label}
                 onChange={(e) =>
-                  updateNodeData(() => ({
-                    action: {
-                      type: "notify",
-                      payload: { message: e.target.value },
-                    },
-                  }))
+                  updateNodeData(() => ({ label: e.target.value }))
                 }
-                placeholder="Nội dung thông báo"
+                placeholder="Node title"
               />
-            )}
 
-            {/* Color */}
-            <Space>
-              <Input
-                type="color"
-                value={selectedNode.data.style?.background}
-                onChange={(e) =>
-                  updateNodeData(() => ({
-                    style: {
-                      ...selectedNode.data.style,
-                      background: e.target.value,
+              <div
+                style={{
+                  display: "flex",
+                  justifyItems: "center",
+                  gap: 30,
+                }}
+              >
+                <h4>Dạng hành động: </h4>
+                <Select
+                  value={selectedNode.data.action.type}
+                  options={ACTION_OPTIONS}
+                  onChange={(type) =>
+                    updateNodeData(() => ({
+                      action:
+                        ACTION_FACTORY[type]?.create() ||
+                        ACTION_FACTORY.none.create(),
+                    }))
+                  }
+                />
+              </div>
+
+              {selectedNode.data.action.type === "navigate" && (
+                <Select
+                  style={{ width: 200 }}
+                  value={selectedNode.data.action.payload.path}
+                  onChange={(path) =>
+                    updateNodeData(() => ({
+                      action: { type: "navigate", payload: { path } },
+                    }))
+                  }
+                  options={[
+                    { label: "Home", value: "/" },
+                    {
+                      label: "Danh sách ca",
+                      value: "/home/patients-diagnose",
                     },
-                  }))
-                }
-              />
-              <Input
-                type="color"
-                value={selectedNode.data.style?.border}
-                onChange={(e) =>
-                  updateNodeData(() => ({
-                    style: {
-                      ...selectedNode.data?.style,
-                      border: e.target.value,
-                    },
-                  }))
-                }
-              />
+                  ]}
+                />
+              )}
+
+              {selectedNode.data.action.type === "notify" && (
+                <Input
+                  value={selectedNode.data.action.payload.message}
+                  onChange={(e) =>
+                    updateNodeData(() => ({
+                      action: {
+                        type: "notify",
+                        payload: { message: e.target.value },
+                      },
+                    }))
+                  }
+                  placeholder="Nội dung thông báo"
+                />
+              )}
+
+              <Divider />
+
+              <div>
+                <div style={{ fontSize: 12, color: "#666", marginBottom: 6 }}>
+                  Colors
+                </div>
+
+                <Space>
+                  <div>
+                    <div style={{ fontSize: 11, marginBottom: 4 }}>Nền</div>
+                    <ColorPreview
+                      color={selectedNode.data.style?.background}
+                      onClick={() => setOpenColor("background")}
+                    />
+                  </div>
+
+                  <div>
+                    <div style={{ fontSize: 11, marginBottom: 4 }}>Viền</div>
+                    <ColorPreview
+                      color={selectedNode.data.style?.border}
+                      onClick={() => setOpenColor("border")}
+                    />
+                  </div>
+
+                  <div>
+                    <div style={{ fontSize: 11, marginBottom: 4 }}>Chữ</div>
+                    <ColorPreview
+                      color={selectedNode.data.style?.text}
+                      onClick={() => setOpenColor("text")}
+                    />
+                  </div>
+                </Space>
+
+                {openColor && (
+                  <Input
+                    type="color"
+                    style={{ marginTop: 8, width: 60 }}
+                    value={
+                      selectedNode.data.style &&
+                      selectedNode.data.style[openColor]
+                    }
+                    onChange={(e) =>
+                      updateNodeData(() => ({
+                        style: {
+                          ...selectedNode.data.style,
+                          [openColor]: e.target.value,
+                        },
+                      }))
+                    }
+                  />
+                )}
+              </div>
             </Space>
-          </Space>
+          </div>
         </div>
       )}
 
@@ -350,7 +426,11 @@ const FlowModal = ({ open, onClose }) => {
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           onNodeClick={handleNodeClick}
-          onPaneClick={handlePaneClick}
+          onEdgeClick={handleEdgeClick}
+          onPaneClick={() => {
+            handlePaneClick();
+            setSelectedEdgeId(null);
+          }}
           nodesDraggable={mode === "edit" && canEdit}
           nodesConnectable={mode === "edit" && canEdit}
           fitView

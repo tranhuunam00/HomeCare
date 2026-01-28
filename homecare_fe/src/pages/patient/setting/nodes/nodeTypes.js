@@ -21,3 +21,36 @@ export const NODE_OPTIONS = [
     defaultLabel: "Resizable Node",
   },
 ];
+
+export const ACTION_FACTORY = {
+  none: {
+    label: "Không làm gì",
+    create: () => ({
+      type: "none",
+      payload: {},
+    }),
+  },
+
+  navigate: {
+    label: "Chuyển màn",
+    create: () => ({
+      type: "navigate",
+      payload: { path: "/" },
+    }),
+  },
+
+  notify: {
+    label: "Thông báo",
+    create: () => ({
+      type: "notify",
+      payload: { message: "" },
+    }),
+  },
+};
+
+export const ACTION_OPTIONS = Object.entries(ACTION_FACTORY).map(
+  ([value, cfg]) => ({
+    value,
+    label: cfg.label,
+  }),
+);
