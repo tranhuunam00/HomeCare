@@ -30,8 +30,8 @@ const GroupProcessPatientDiagnoiseFormVer2 = ({
       if (
         templateServices
           .find((t) => t.id == patientDiagnose.id_template_service)
-          ?.name.toLowerCase()
-          .includes("d-sono")
+          ?.code.toUpperCase()
+          .includes("SASK")
       ) {
         const sonoResult = await API_CALL.get(`/sono`, {
           params: {
@@ -57,7 +57,7 @@ const GroupProcessPatientDiagnoiseFormVer2 = ({
 
         if (doctorUseDFormVer2.data.data.items?.length) {
           navigate(
-            `/home/doctor-use-form-drad/detail/${doctorUseDFormVer2.data.data.items[0].id}`
+            `/home/doctor-use-form-drad/detail/${doctorUseDFormVer2.data.data.items[0].id}`,
           );
         } else {
           navigate(`/home/form-drad/use/patient-diagnose/${id}`);
@@ -126,7 +126,7 @@ const GroupProcessPatientDiagnoiseFormVer2 = ({
   ];
 
   const handleCancelReading = async (
-    changedStatus = PATIENT_DIAGNOSE_STATUS_NAME.NEW
+    changedStatus = PATIENT_DIAGNOSE_STATUS_NAME.NEW,
   ) => {
     try {
       await API_CALL.put(`/patient-diagnose/${id}`, {
@@ -156,7 +156,7 @@ const GroupProcessPatientDiagnoiseFormVer2 = ({
               type="primary"
               onClick={() => {
                 const ok = window.confirm(
-                  "Bạn có chắc chắn muốn hủy đọc kết quả?\n\nNếu hủy, ca sẽ được trả về trạng thái MỚI."
+                  "Bạn có chắc chắn muốn hủy đọc kết quả?\n\nNếu hủy, ca sẽ được trả về trạng thái MỚI.",
                 );
 
                 if (ok) {
@@ -177,7 +177,7 @@ const GroupProcessPatientDiagnoiseFormVer2 = ({
               type="primary"
               onClick={() => {
                 const ok = window.confirm(
-                  "Bạn có chắc chắn muốn hủy kết quả đã duyệt\n\nNếu hủy, ca sẽ được trả về trạng thái CHỜ DUYỆT."
+                  "Bạn có chắc chắn muốn hủy kết quả đã duyệt\n\nNếu hủy, ca sẽ được trả về trạng thái CHỜ DUYỆT.",
                 );
 
                 if (ok) {

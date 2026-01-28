@@ -191,6 +191,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
           bordered={false}
           className={styles.a4Page}
           style={{ padding: !isOnLyContent ? PAGE_PADDING_RIGHT : 0 }}
+          bodyPadding={0}
         >
           {isUse && (
             <PrintHeaderFromCustom

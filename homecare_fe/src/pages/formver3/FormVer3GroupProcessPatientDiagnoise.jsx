@@ -29,8 +29,8 @@ const FormVer3GroupProcessPatientDiagnoise = ({
       if (
         templateServices
           .find((t) => t.id == patientDiagnose.id_template_service)
-          ?.name.toLowerCase()
-          .includes("d-sono")
+          ?.code.toUpperCase()
+          .includes("SASK")
       ) {
         const sonoResult = await API_CALL.get(`/sono`, {
           params: {

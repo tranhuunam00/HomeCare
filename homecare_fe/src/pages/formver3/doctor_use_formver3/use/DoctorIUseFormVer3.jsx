@@ -517,7 +517,12 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
 
   return (
     <div
-      style={{ maxWidth: 980, margin: "0 auto", padding: 0, marginBottom: 200 }}
+      style={{
+        maxWidth: 1100,
+        margin: "0 auto",
+        padding: 0,
+        marginBottom: 200,
+      }}
     >
       <Title
         level={3}
@@ -982,6 +987,11 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
               }
             }, 300);
           }
+        }}
+        styles={{
+          content: {
+            padding: 0,
+          },
         }}
       >
         <div ref={printRef}>

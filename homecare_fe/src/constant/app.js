@@ -105,7 +105,7 @@ export const getLabelFromValue = (options, value) => {
             (v) =>
               `<li style="margin-bottom: 6px;">${
                 options.find((o) => o.value === v)?.label || v
-              }</li>`
+              }</li>`,
           )
           .join("")}
       </ul>
@@ -240,12 +240,12 @@ export const getAge = (dobString) => {
 };
 
 export const getSonoTemplateService = (templateServices) => {
-  return templateServices.find((t) => t.name.toLowerCase().includes("d-sono"));
+  return templateServices.find((t) => t.code.toUpperCase().includes("SASK"));
 };
 
 export const getExamPartSono = (examParts, sonoTemplateService) => {
   return examParts.filter(
-    (e) => e.id_template_service === sonoTemplateService?.id
+    (e) => e.id_template_service === sonoTemplateService?.id,
   );
 };
 
