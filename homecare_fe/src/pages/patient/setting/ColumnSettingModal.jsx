@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Modal, Checkbox, InputNumber } from "antd";
+import { Modal, Checkbox, InputNumber, Button, Divider } from "antd";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import styles from "./ColumnSettingModal.module.scss";
 
@@ -15,6 +15,7 @@ const ColumnSettingModal = ({
   const [localVisibleKeys, setLocalVisibleKeys] = useState([]);
   const [widths, setWidths] = useState({});
 
+  /* ===== INIT ===== */
   useEffect(() => {
     const ordered = Array.isArray(columnSettings?.orderedKeys)
       ? columnSettings.orderedKeys
@@ -25,8 +26,8 @@ const ColumnSettingModal = ({
       : visibleKeys;
 
     const storedWidths = columnSettings?.widths || {};
-
     const initWidths = {};
+
     allColumns.forEach((c) => {
       initWidths[c.key] = storedWidths[c.key] ?? c.width ?? 120;
     });
@@ -36,6 +37,7 @@ const ColumnSettingModal = ({
     setWidths(initWidths);
   }, [allColumns, visibleKeys, columnSettings]);
 
+  /* ===== DRAG ===== */
   const onDragEnd = (result) => {
     if (!result.destination) return;
     const items = Array.from(orderedKeys);
@@ -44,6 +46,7 @@ const ColumnSettingModal = ({
     setOrderedKeys(items);
   };
 
+  /* ===== ACTIONS ===== */
   const toggleVisible = (key) => {
     setLocalVisibleKeys((prev) =>
       prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
@@ -52,6 +55,19 @@ const ColumnSettingModal = ({
 
   const handleWidthChange = (key, value) => {
     setWidths((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleReset = () => {
+    const defaultOrder = allColumns.map((c) => c.key);
+
+    const defaultWidths = {};
+    allColumns.forEach((c) => {
+      defaultWidths[c.key] = c.width ?? 120;
+    });
+
+    setOrderedKeys(defaultOrder);
+    setLocalVisibleKeys(visibleKeys);
+    setWidths(defaultWidths);
   };
 
   const handleSave = () => {
@@ -69,8 +85,21 @@ const ColumnSettingModal = ({
       open={open}
       onCancel={onClose}
       onOk={handleSave}
-      width={550}
+      width={600}
     >
+      {/* ===== HEADER ===== */}
+      <div className={styles.headerRow}>
+        <span>Cột</span>
+        <span>Hiển thị</span>
+        <span>Độ rộng (px)</span>
+      </div>
+
+      <Button size="primary" onClick={handleReset}>
+        Reset
+      </Button>
+      <Divider style={{ margin: "8px 0" }} />
+
+      {/* ===== BODY ===== */}
       <div className={styles.container}>
         <DragDropContext onDragEnd={onDragEnd}>
           <Droppable droppableId="columns">
@@ -88,26 +117,35 @@ const ColumnSettingModal = ({
                     >
                       {(provided, snapshot) => (
                         <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
                           className={`${styles.row} ${
                             snapshot.isDragging ? styles.dragging : ""
                           }`}
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps} // ⭐ CHO PHÉP KÉO CẢ ROW
                         >
-                          <Checkbox
-                            checked={localVisibleKeys.includes(col.key)}
-                            onChange={() => toggleVisible(col.key)}
-                          >
-                            {col.title}
-                          </Checkbox>
+                          {/* TÊN CỘT */}
+                          <div className={styles.colName}>{col.title}</div>
 
-                          <InputNumber
-                            min={60}
-                            value={widths[col.key]}
-                            onChange={(val) => handleWidthChange(col.key, val)}
-                            className={styles.widthInput}
-                          />
+                          {/* CHECKBOX */}
+                          <div className={styles.colVisible}>
+                            <Checkbox
+                              checked={localVisibleKeys.includes(col.key)}
+                              onChange={() => toggleVisible(col.key)}
+                            />
+                          </div>
+
+                          {/* WIDTH */}
+                          <div className={styles.colWidth}>
+                            <InputNumber
+                              min={40}
+                              value={widths[col.key]}
+                              onChange={(val) =>
+                                handleWidthChange(col.key, val)
+                              }
+                              size="small"
+                            />
+                          </div>
                         </div>
                       )}
                     </Draggable>

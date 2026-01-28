@@ -1,16 +1,36 @@
 .container {
+  max-height: 420px;
   overflow-y: auto;
 }
 
-.row {
-  display: flex;
+/* ===== HEADER ===== */
+.headerRow {
+  display: grid;
+  grid-template-columns: 1fr 90px 140px auto;
   align-items: center;
+  padding: 6px 8px;
+  font-weight: 600;
+}
+
+/* ===== ROW ===== */
+.row {
+  display: grid;
+  grid-template-columns: 1fr 90px 140px;
+  align-items: center;
+  gap: 8px;
+
   padding: 8px 10px;
+  margin-bottom: 6px;
+
   border: 1px solid #eee;
   border-radius: 6px;
-  margin-bottom: 6px;
-  background: white;
+  background: #fff;
+  cursor: grab;
   transition: 0.15s ease;
+
+  &:hover {
+    background: #fafafa;
+  }
 }
 
 .dragging {
@@ -18,14 +38,23 @@
   border-color: #91d5ff;
 }
 
-.dragHandle {
-  font-size: 18px;
-  cursor: grab;
-  margin-right: 12px;
-  opacity: 0.6;
+/* ===== COLUMNS ===== */
+.colName {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.widthInput {
-  margin-left: auto;
-  width: 80px;
+.colVisible {
+  display: flex;
+  justify-content: center;
+}
+
+.colWidth {
+  display: flex;
+  justify-content: flex-end;
+
+  .ant-input-number {
+    width: 80px;
+  }
 }
