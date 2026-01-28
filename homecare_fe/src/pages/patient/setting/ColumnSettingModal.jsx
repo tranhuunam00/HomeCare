@@ -8,6 +8,7 @@ const ColumnSettingModal = ({
   onClose,
   allColumns,
   visibleKeys,
+  columnSettings,
   onSave,
 }) => {
   const [orderedKeys, setOrderedKeys] = useState([]);
@@ -15,12 +16,25 @@ const ColumnSettingModal = ({
   const [widths, setWidths] = useState({});
 
   useEffect(() => {
-    setOrderedKeys(allColumns.map((c) => c.key));
-    setLocalVisibleKeys(visibleKeys);
+    const ordered = Array.isArray(columnSettings?.orderedKeys)
+      ? columnSettings.orderedKeys
+      : allColumns.map((c) => c.key);
+
+    const visible = Array.isArray(columnSettings?.visibleKeys)
+      ? columnSettings.visibleKeys
+      : visibleKeys;
+
+    const storedWidths = columnSettings?.widths || {};
+
     const initWidths = {};
-    allColumns.forEach((c) => (initWidths[c.key] = c.width || 120));
+    allColumns.forEach((c) => {
+      initWidths[c.key] = storedWidths[c.key] ?? c.width ?? 120;
+    });
+
+    setOrderedKeys(ordered);
+    setLocalVisibleKeys(visible);
     setWidths(initWidths);
-  }, [allColumns, visibleKeys]);
+  }, [allColumns, visibleKeys, columnSettings]);
 
   const onDragEnd = (result) => {
     if (!result.destination) return;
@@ -32,7 +46,7 @@ const ColumnSettingModal = ({
 
   const toggleVisible = (key) => {
     setLocalVisibleKeys((prev) =>
-      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
     );
   };
 

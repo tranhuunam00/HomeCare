@@ -47,8 +47,10 @@ import useVietnamAddress, {
 } from "../../hooks/useVietnamAddress";
 import useTemplateServicesAndExamParts from "../../hooks/useTemplateServicesAndExamParts";
 import ReloadTSAndExamPartsButton from "../../components/ReloadTSAndExamPartsButton";
+import ResizableTitle from "./setting/ResizableTitle";
 
 const { Option } = Select;
+const COLUMN_SETTING_STORAGE_KEY = "patientDiagnose_column_settings";
 
 const DATE_OPTIONS = [
   { label: "Tất cả", value: "all" },
@@ -462,23 +464,11 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
     }
   };
 
-  const toggleColumn = (key) => {
-    const updated = visibleKeys.includes(key)
-      ? visibleKeys.filter((k) => k !== key)
-      : [...visibleKeys, key];
-    setVisibleKeys(updated);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-  };
-
-  useEffect(() => {
-    const cols = allColumns
-      .filter((c) => visibleKeys.includes(c.key))
-      .map((c) => ({ ...c }));
-    setCustomColumns(cols);
-  }, [visibleKeys, allColumns]);
-
   const columnsToRender = useMemo(
-    () => allColumns.filter((col) => visibleKeys.includes(col.key)),
+    () =>
+      allColumns.filter(
+        (col) => Array.isArray(visibleKeys) && visibleKeys.includes(col.key),
+      ),
     [visibleKeys, allColumns],
   );
 
@@ -487,9 +477,15 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
     visibleKeys: newVisibleKeys,
     widths,
   }) => {
-    setVisibleKeys(newVisibleKeys);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(newVisibleKeys));
+    const payload = {
+      orderedKeys,
+      visibleKeys: newVisibleKeys,
+      widths,
+    };
 
+    localStorage.setItem(COLUMN_SETTING_STORAGE_KEY, JSON.stringify(payload));
+
+    // rebuild columns
     const finalColumns = orderedKeys
       .map((key) => allColumns.find((c) => c.key === key))
       .filter((col) => col && newVisibleKeys.includes(col.key))
@@ -498,11 +494,104 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         width: widths[col.key] ?? col.width,
       }));
 
+    setVisibleKeys(newVisibleKeys);
     setCustomColumns(finalColumns);
   };
 
   const tableColumns =
     customColumns.length > 0 ? customColumns : columnsToRender;
+
+  const [resizableColumns, setResizableColumns] = useState([]);
+  const components = {
+    header: {
+      cell: ResizableTitle,
+    },
+  };
+  const handleResize =
+    (index) =>
+    (e, { size }) => {
+      setCustomColumns((prev) => {
+        const next = [...prev];
+        next[index] = {
+          ...next[index],
+          width: size.width,
+        };
+
+        // lưu storage
+        const saved = JSON.parse(
+          localStorage.getItem(COLUMN_SETTING_STORAGE_KEY) || "{}",
+        );
+
+        const updated = {
+          ...saved,
+          widths: {
+            ...(saved.widths || {}),
+            [next[index].key]: size.width,
+          },
+        };
+
+        localStorage.setItem(
+          COLUMN_SETTING_STORAGE_KEY,
+          JSON.stringify(updated),
+        );
+
+        return next;
+      });
+    };
+
+  useEffect(() => {
+    const saved = localStorage.getItem(COLUMN_SETTING_STORAGE_KEY);
+
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+
+        const orderedKeys = Array.isArray(parsed.orderedKeys)
+          ? parsed.orderedKeys
+          : allColumns.map((c) => c.key);
+
+        const visibleKeys = Array.isArray(parsed.visibleKeys)
+          ? parsed.visibleKeys
+          : defaultVisibleKeys;
+
+        const widths = parsed.widths || {};
+
+        setVisibleKeys(visibleKeys);
+
+        const restored = orderedKeys
+          .map((key) => allColumns.find((c) => c.key === key))
+          .filter(Boolean)
+          .filter((c) => visibleKeys.includes(c.key))
+          .map((c) => ({
+            ...c,
+            width: widths?.[c.key] ?? c.width,
+          }));
+
+        setCustomColumns(restored);
+        return;
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // fallback lần đầu
+    const fallback = allColumns.filter((c) =>
+      defaultVisibleKeys.includes(c.key),
+    );
+    setCustomColumns(fallback);
+  }, [allColumns]);
+
+  useEffect(() => {
+    setResizableColumns(
+      tableColumns.map((col, index) => ({
+        ...col,
+        onHeaderCell: (column) => ({
+          width: column.width,
+          onResize: handleResize(index),
+        }),
+      })),
+    );
+  }, [tableColumns]);
 
   return (
     <div
@@ -867,9 +956,8 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
               rowKey="id"
               size="small"
               rootClassName={styles.patientTable}
-              columns={
-                customColumns.length > 0 ? customColumns : columnsToRender
-              }
+              components={components}
+              columns={resizableColumns}
               dataSource={data}
               bordered
               scroll={{ x: 1200, y: 800 }}
@@ -991,6 +1079,9 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         onClose={() => setOpenColumnModal(false)}
         allColumns={allColumns}
         visibleKeys={visibleKeys}
+        columnSettings={JSON.parse(
+          localStorage.getItem(COLUMN_SETTING_STORAGE_KEY) || "{}",
+        )}
         onSave={handleSaveColumnSettings}
       />
     </div>
