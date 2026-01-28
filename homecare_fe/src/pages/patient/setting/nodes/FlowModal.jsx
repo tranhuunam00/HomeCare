@@ -101,15 +101,13 @@ const FlowModal = ({ open, onClose }) => {
     }
   };
 
-  console.log("nodes", nodes);
-  console.log("se", selectedNode);
   return (
     <Modal
       open={open}
       onCancel={onClose}
       footer={null}
       width="92%"
-      title="Workflow Builder"
+      title="QUY TRÌNH D-RADS"
       destroyOnClose
     >
       {/* ===== TOOLBAR ===== */}
