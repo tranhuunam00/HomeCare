@@ -54,3 +54,19 @@ export const ACTION_OPTIONS = Object.entries(ACTION_FACTORY).map(
     label: cfg.label,
   }),
 );
+
+export const NAVIGATE_OPTIONS = [
+  {
+    label: "Home",
+    value: "/",
+  },
+  {
+    label: "Danh sách ca",
+    value: "/home/patients-diagnose",
+  },
+
+  {
+    label: "Tạo mới ca",
+    value: "/home/patients-diagnose/create",
+  },
+];

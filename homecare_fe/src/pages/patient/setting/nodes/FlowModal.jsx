@@ -18,12 +18,14 @@ import {
   NODE_OPTIONS,
   ACTION_OPTIONS,
   ACTION_FACTORY,
+  NAVIGATE_OPTIONS,
 } from "./nodeTypes";
 import { useGlobalAuth } from "../../../../contexts/AuthContext";
 import { USER_ROLE } from "../../../../constant/app";
 import { toast } from "react-toastify";
 import API_CALL from "../../../../services/axiosClient";
 import Title from "antd/es/skeleton/Title";
+import TextArea from "antd/es/input/TextArea";
 
 const DEFAULT_NODE_STYLE = {
   background: "#ffffff",
@@ -296,23 +298,27 @@ const FlowModal = ({ open, onClose }) => {
 
           <div style={{ padding: 14 }}>
             <Space direction="vertical" style={{ width: "100%" }} size="middle">
-              <Input
+              <TextArea
                 value={selectedNode.data.label}
                 onChange={(e) =>
                   updateNodeData(() => ({ label: e.target.value }))
                 }
                 placeholder="Node title"
+                autoSize={{ minRows: 1, maxRows: 3 }}
               />
 
               <div
                 style={{
                   display: "flex",
                   justifyItems: "center",
-                  gap: 30,
+                  gap: 10,
                 }}
               >
                 <h4>Dạng hành động: </h4>
                 <Select
+                  style={{
+                    width: 150,
+                  }}
                   value={selectedNode.data.action.type}
                   options={ACTION_OPTIONS}
                   onChange={(type) =>
@@ -334,18 +340,12 @@ const FlowModal = ({ open, onClose }) => {
                       action: { type: "navigate", payload: { path } },
                     }))
                   }
-                  options={[
-                    { label: "Home", value: "/" },
-                    {
-                      label: "Danh sách ca",
-                      value: "/home/patients-diagnose",
-                    },
-                  ]}
+                  options={NAVIGATE_OPTIONS}
                 />
               )}
 
               {selectedNode.data.action.type === "notify" && (
-                <Input
+                <TextArea
                   value={selectedNode.data.action.payload.message}
                   onChange={(e) =>
                     updateNodeData(() => ({
@@ -356,6 +356,7 @@ const FlowModal = ({ open, onClose }) => {
                     }))
                   }
                   placeholder="Nội dung thông báo"
+                  autoSize={{ minRows: 1, maxRows: 5 }}
                 />
               )}
 
