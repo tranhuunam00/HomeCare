@@ -7,7 +7,6 @@ import ResizableNodeSelected from "./ResizableNodeSelected";
 export const nodeTypes = {
   custom: CustomNode,
   resizable: ResizableNode,
-  resizableSelected: ResizableNodeSelected,
 };
 
 export const NODE_OPTIONS = [
@@ -20,10 +19,5 @@ export const NODE_OPTIONS = [
     label: "Resizable Node",
     value: "resizable",
     defaultLabel: "Resizable Node",
-  },
-  {
-    label: "Resizable (Selected)",
-    value: "resizableSelected",
-    defaultLabel: "Selected Resizable",
   },
 ];
