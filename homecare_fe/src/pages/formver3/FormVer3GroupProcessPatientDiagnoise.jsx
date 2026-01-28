@@ -145,13 +145,29 @@ const FormVer3GroupProcessPatientDiagnoise = ({
           position: "fixed",
           zIndex: 3,
           display: "flex",
-          justifyContent: "center",
-          bottom: 0,
           flexDirection: "column",
           background: "#ffffff",
+          width: "41vw",
+          borderBottom: "1px solid #3950d163",
+          boxShadow: "0 -2px 8px rgba(0,0,0,0.05)",
         }}
       >
         <CustomSteps steps={steps} current={status} />
+      </div>
+
+      <div
+        style={{
+          position: "fixed",
+          zIndex: 3,
+          display: "flex",
+          flexDirection: "column",
+          background: "#ffffff",
+          width: "41vw",
+          bottom: 0,
+          borderTop: "1px solid #474f946c",
+          boxShadow: "0 -2px 8px rgba(0,0,0,0.05)",
+        }}
+      >
         {(status === PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESS ||
           status === PATIENT_DIAGNOSE_STATUS_NAME.WAITING) &&
           id_doctor_in_processing === doctor.id && (

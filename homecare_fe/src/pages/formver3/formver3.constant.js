@@ -332,7 +332,7 @@ export const PATIENT_FIELDS = [
   "ward_code",
 ];
 
-export const CAN_THIEP_GROUP_CODE = ["CTSA", "CTCT", "	CTXA"];
+export const CAN_THIEP_GROUP_CODE = ["CTSA", "CTCT", "CTXA"];
 
 export const TEMPLATE_GROUP_RENDER_MAP = {
   CAN_THIEP: CAN_THIEP_GROUP_CODE,
