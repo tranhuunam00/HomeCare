@@ -501,7 +501,6 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
   const tableColumns =
     customColumns.length > 0 ? customColumns : columnsToRender;
 
-  const [resizableColumns, setResizableColumns] = useState([]);
   const components = {
     header: {
       cell: ResizableTitle,
@@ -517,22 +516,20 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
           width: size.width,
         };
 
-        // lưu storage
+        // lưu width vào localStorage
         const saved = JSON.parse(
           localStorage.getItem(COLUMN_SETTING_STORAGE_KEY) || "{}",
         );
 
-        const updated = {
-          ...saved,
-          widths: {
-            ...(saved.widths || {}),
-            [next[index].key]: size.width,
-          },
-        };
-
         localStorage.setItem(
           COLUMN_SETTING_STORAGE_KEY,
-          JSON.stringify(updated),
+          JSON.stringify({
+            ...saved,
+            widths: {
+              ...(saved.widths || {}),
+              [next[index].key]: size.width,
+            },
+          }),
         );
 
         return next;
@@ -581,17 +578,17 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
     setCustomColumns(fallback);
   }, [allColumns]);
 
-  useEffect(() => {
-    setResizableColumns(
-      tableColumns.map((col, index) => ({
+  const mergedColumns = useMemo(
+    () =>
+      customColumns.map((col, index) => ({
         ...col,
-        onHeaderCell: (column) => ({
-          width: column.width,
+        onHeaderCell: () => ({
+          width: col.width,
           onResize: handleResize(index),
         }),
       })),
-    );
-  }, [tableColumns]);
+    [customColumns],
+  );
 
   return (
     <div
@@ -946,10 +943,9 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         >
           <div
             style={{
-              padding: 0,
-              flex: 1,
-              overflowX: "hide",
-              maxWidth: "100%", //
+              position: "relative",
+              overflowX: "auto",
+              width: "100%",
             }}
           >
             <Table
@@ -957,7 +953,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
               size="small"
               rootClassName={styles.patientTable}
               components={components}
-              columns={resizableColumns}
+              columns={mergedColumns}
               dataSource={data}
               bordered
               scroll={{ x: 1200, y: 800 }}
