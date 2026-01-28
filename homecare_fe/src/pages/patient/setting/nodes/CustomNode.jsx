@@ -4,11 +4,16 @@ import styles from "./FlowModal.module.scss";
 
 const CustomNode = ({ data, selected }) => {
   return (
-    <div className={`${styles.customNode} ${selected ? styles.selected : ""}`}>
+    <div
+      className={`${styles.customNode} ${selected ? styles.selected : ""}`}
+      style={{
+        background: data.style?.background,
+        border: `2px solid ${data.style?.border}`,
+        color: data.style?.text,
+      }}
+    >
       <Handle type="target" position={Position.Left} />
-
       <div className={styles.label}>{data.label}</div>
-
       <Handle type="source" position={Position.Right} />
     </div>
   );

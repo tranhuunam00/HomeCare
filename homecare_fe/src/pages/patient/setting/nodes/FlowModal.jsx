@@ -11,8 +11,8 @@ import {
   Controls,
 } from "@xyflow/react";
 import { useNavigate } from "react-router-dom";
-
 import "@xyflow/react/dist/style.css";
+
 import { nodeTypes, NODE_OPTIONS } from "./nodeTypes";
 import { useGlobalAuth } from "../../../../contexts/AuthContext";
 import { USER_ROLE } from "../../../../constant/app";
@@ -32,6 +32,8 @@ const FlowModal = ({ open, onClose }) => {
   const [flowName, setFlowName] = useState("FLOW-DRADS");
   const [flowId, setFlowId] = useState(null);
 
+  const canEdit = user?.id_role === USER_ROLE.ADMIN;
+
   const selectedNode = useMemo(
     () => nodes.find((n) => n.id === selectedNodeId),
     [nodes, selectedNodeId],
@@ -42,28 +44,31 @@ const FlowModal = ({ open, onClose }) => {
     setEdges((eds) => addEdge({ ...params, animated: true }, eds));
   }, []);
 
-  const canEdit = user?.id_role == USER_ROLE.ADMIN;
   /* ================= ADD NODE ================= */
   const addNode = () => {
     if (!canEdit || mode !== "edit") return;
 
     const option = NODE_OPTIONS.find((o) => o.value === selectedNodeType);
-    const id = nanoid();
 
     setNodes((nds) => [
       ...nds,
       {
-        id,
+        id: nanoid(),
         type: selectedNodeType,
         position: {
-          x: Math.random() * 100,
-          y: Math.random() * 100,
+          x: Math.random() * 300,
+          y: Math.random() * 200,
         },
         data: {
           label: option?.defaultLabel || "New Node",
+          style: {
+            background: "#ffffff",
+            border: "#1677ff",
+            text: "#000000",
+          },
           action: {
-            type: "navigate",
-            payload: { path: "/" },
+            type: "none", // none | navigate | notify
+            payload: {},
           },
         },
       },
@@ -73,11 +78,15 @@ const FlowModal = ({ open, onClose }) => {
   /* ================= ACTION RUNNER ================= */
   const runNodeAction = (node) => {
     const action = node?.data?.action;
-    if (!action) return;
+    if (!action || action.type === "none") return;
 
     switch (action.type) {
       case "navigate":
         navigate(action.payload.path);
+        break;
+
+      case "notify":
+        toast.info(action.payload.message || "Thông báo");
         break;
 
       default:
@@ -94,6 +103,10 @@ const FlowModal = ({ open, onClose }) => {
     runNodeAction(node);
   };
 
+  const handlePaneClick = () => {
+    if (mode === "edit" && canEdit) setSelectedNodeId(null);
+  };
+
   /* ================= UPDATE NODE ================= */
   const updateNodeData = (updater) => {
     setNodes((nds) =>
@@ -105,37 +118,27 @@ const FlowModal = ({ open, onClose }) => {
     );
   };
 
-  const handlePaneClick = () => {
-    if (mode === "edit" && canEdit) {
-      setSelectedNodeId(null);
-    }
-  };
-
+  /* ================= LOAD FLOW ================= */
   useEffect(() => {
-    if (!open) return; // chỉ load khi modal mở
+    if (!open) return;
 
-    const fetchFlowByName = async () => {
+    const fetchFlow = async () => {
       try {
-        const res = await API_CALL.get(
-          `/flows/byName/${flowName || "FLOW-DRADS"}`,
-        );
-
+        const res = await API_CALL.get(`/flows/byName/${flowName}`);
         const flow = res.data.data;
-        console.log("flow", flow);
         if (!flow) return;
-        setFlowId(flow.id);
 
-        setFlowName(flow.name || "FLOW-DRADS");
+        setFlowId(flow.id);
+        setFlowName(flow.name);
         setNodes(flow.nodes || []);
         setEdges(flow.edges || []);
-      } catch (error) {
-        console.warn("Flow not found, start with empty flow");
+      } catch {
         setNodes([]);
         setEdges([]);
       }
     };
 
-    fetchFlowByName();
+    fetchFlow();
   }, [open]);
 
   return (
@@ -170,20 +173,20 @@ const FlowModal = ({ open, onClose }) => {
           value={selectedNodeType}
           onChange={setSelectedNodeType}
           options={NODE_OPTIONS}
-          disabled={mode !== "edit" || !canEdit}
+          disabled={!canEdit || mode !== "edit"}
         />
 
         <Button
           type="primary"
           onClick={addNode}
-          disabled={mode !== "edit" || !canEdit}
+          disabled={!canEdit || mode !== "edit"}
         >
           ➕ Add Node
         </Button>
 
         <Button
           danger
-          disabled={!selectedNodeId || mode !== "edit" || !canEdit}
+          disabled={!selectedNodeId || !canEdit || mode !== "edit"}
           onClick={() => {
             setNodes((nds) => nds.filter((n) => n.id !== selectedNodeId));
             setEdges((eds) =>
@@ -197,45 +200,37 @@ const FlowModal = ({ open, onClose }) => {
         >
           🗑 Delete Node
         </Button>
+
         <Input
           style={{ width: 220 }}
           value={flowName}
           onChange={(e) => setFlowName(e.target.value)}
           disabled={!canEdit}
-          placeholder="Flow name"
         />
 
         <Button
           type="primary"
-          disabled={!canEdit}
+          disabled={!canEdit || mode !== "edit"}
           onClick={async () => {
-            if (!canEdit) return;
-
             const payload = {
-              name: flowName || "FLOW-DRADS",
-              description: "Quy trình điều hướng D-RADS",
+              name: flowName,
+              description: "Workflow D-RADS",
               nodes,
               edges,
               status: "draft",
             };
 
             try {
-              let res;
-
               if (flowId) {
-                // 🔁 UPDATE
-                res = await API_CALL.put(`/flows/${flowId}`, payload);
+                await API_CALL.put(`/flows/${flowId}`, payload);
                 toast.success("Cập nhật workflow thành công");
               } else {
-                // 🆕 CREATE
-                res = await API_CALL.post("/flows", payload);
-                setFlowId(res.data.data?.id); // ✅ lưu lại id sau khi tạo
+                const res = await API_CALL.post("/flows", payload);
+                setFlowId(res.data.data.id);
                 toast.success("Tạo workflow thành công");
               }
-
               onClose?.();
-            } catch (error) {
-              console.error("SAVE FLOW ERROR:", error);
+            } catch {
               toast.error("Lưu workflow thất bại");
             }
           }}
@@ -246,34 +241,39 @@ const FlowModal = ({ open, onClose }) => {
 
       {/* ===== CONFIG PANEL ===== */}
       {mode === "edit" && canEdit && selectedNode && (
-        <div
-          style={{
-            position: "fixed",
-            backgroundColor: "#e6effc98",
-            zIndex: 10,
-          }}
-        >
-          <Space direction="vertical" style={{ width: 360 }}>
-            <h4>Node ID: {selectedNode.id}</h4>
-            {/* ===== EDIT NODE LABEL ===== */}
-            <div>
-              <div style={{ marginBottom: 4, fontWeight: 500 }}>Node Name</div>
-              <Input
-                value={selectedNode.data.label}
-                onChange={(e) =>
-                  updateNodeData(() => ({
-                    label: e.target.value,
-                  }))
-                }
-                placeholder="Enter node name"
-              />
-            </div>
+        <div style={{ position: "fixed", zIndex: 10, background: "#eef3ff" }}>
+          <Space direction="vertical" style={{ width: 360, padding: 12 }}>
+            <b>Node ID: {selectedNode.id}</b>
 
-            {/* ===== ACTION CONFIG ===== */}
-            <div>
-              <div style={{ marginBottom: 4, fontWeight: 500 }}>
-                Action → Navigate to
-              </div>
+            <Input
+              value={selectedNode.data.label}
+              onChange={(e) =>
+                updateNodeData(() => ({ label: e.target.value }))
+              }
+              placeholder="Node name"
+            />
+
+            {/* Action */}
+            <Select
+              value={selectedNode.data.action.type}
+              onChange={(type) =>
+                updateNodeData(() => ({
+                  action:
+                    type === "none"
+                      ? { type: "none", payload: {} }
+                      : type === "navigate"
+                        ? { type: "navigate", payload: { path: "/" } }
+                        : { type: "notify", payload: { message: "" } },
+                }))
+              }
+              options={[
+                { label: "Không làm gì", value: "none" },
+                { label: "Navigate", value: "navigate" },
+                { label: "Notify", value: "notify" },
+              ]}
+            />
+
+            {selectedNode.data.action.type === "navigate" && (
               <Select
                 value={selectedNode.data.action.payload.path}
                 onChange={(path) =>
@@ -284,13 +284,58 @@ const FlowModal = ({ open, onClose }) => {
                     },
                   }))
                 }
-                style={{ width: "100%" }}
                 options={[
                   { label: "Home", value: "/" },
-                  { label: "Danh sách ca", value: "/home/patients-diagnose" },
+                  {
+                    label: "Danh sách ca",
+                    value: "/home/patients-diagnose",
+                  },
                 ]}
               />
-            </div>
+            )}
+
+            {selectedNode.data.action.type === "notify" && (
+              <Input
+                value={selectedNode.data.action.payload.message}
+                onChange={(e) =>
+                  updateNodeData(() => ({
+                    action: {
+                      type: "notify",
+                      payload: { message: e.target.value },
+                    },
+                  }))
+                }
+                placeholder="Nội dung thông báo"
+              />
+            )}
+
+            {/* Color */}
+            <Space>
+              <Input
+                type="color"
+                value={selectedNode.data.style?.background}
+                onChange={(e) =>
+                  updateNodeData(() => ({
+                    style: {
+                      ...selectedNode.data.style,
+                      background: e.target.value,
+                    },
+                  }))
+                }
+              />
+              <Input
+                type="color"
+                value={selectedNode.data.style?.border}
+                onChange={(e) =>
+                  updateNodeData(() => ({
+                    style: {
+                      ...selectedNode.data?.style,
+                      border: e.target.value,
+                    },
+                  }))
+                }
+              />
+            </Space>
           </Space>
         </div>
       )}
