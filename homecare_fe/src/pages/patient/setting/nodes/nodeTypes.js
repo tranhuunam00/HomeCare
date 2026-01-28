@@ -69,4 +69,14 @@ export const NAVIGATE_OPTIONS = [
     label: "Tạo mới ca",
     value: "/home/patients-diagnose/create",
   },
+
+  {
+    label: "Cấu hình profile",
+    value: "/home/account",
+  },
+
+  {
+    label: "Cấu hình mẫu header in",
+    value: "/home/templates-print",
+  },
 ];
