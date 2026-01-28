@@ -16,6 +16,7 @@ import {
   DatePicker,
   ConfigProvider,
   Grid,
+  Tooltip,
 } from "antd";
 import {
   SettingOutlined,
@@ -23,6 +24,7 @@ import {
   DeleteOutlined,
   CopyOutlined,
   EditOutlined,
+  ApartmentOutlined,
 } from "@ant-design/icons";
 import debounce from "lodash.debounce";
 import { useNavigate } from "react-router-dom";
@@ -48,6 +50,7 @@ import useVietnamAddress, {
 import useTemplateServicesAndExamParts from "../../hooks/useTemplateServicesAndExamParts";
 import ReloadTSAndExamPartsButton from "../../components/ReloadTSAndExamPartsButton";
 import ResizableTitle from "./setting/ResizableTitle";
+import FlowModal from "./setting/nodes/FlowModal";
 
 const { Option } = Select;
 const COLUMN_SETTING_STORAGE_KEY = "patientDiagnose_column_settings";
@@ -104,6 +107,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
 
   const [data, setData] = useState([]);
   const [sameCCCDData, setSameCCCDData] = useState([]);
+  const [openWorkflow, setOpenWorkflow] = useState(false);
 
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -616,6 +620,28 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
             Số Ca = {total}
           </Typography.Title>
 
+          <Tooltip title="Quy trình">
+            <Button
+              icon={<ApartmentOutlined />}
+              style={{
+                background: "linear-gradient(135deg, #3526b9, #69b1ff)",
+                border: "none",
+                color: "#fff",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background =
+                  "linear-gradient(135deg, #24552f, #4096ff)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background =
+                  "linear-gradient(135deg, #3526b9, #69b1ff)";
+              }}
+              onClick={() => setOpenWorkflow(true)}
+            >
+              Quy trình
+            </Button>
+          </Tooltip>
+
           <Space style={{ justifyContent: "space-around", display: "flex" }}>
             {!isNotCreate && (
               <Button
@@ -626,10 +652,13 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
                 Thêm mới
               </Button>
             )}
-            <Button
-              onClick={() => setOpenColumnModal(true)}
-              icon={<SettingOutlined />}
-            ></Button>
+
+            <Tooltip title={"Cấu hình cột"}>
+              <Button
+                onClick={() => setOpenColumnModal(true)}
+                icon={<SettingOutlined />}
+              ></Button>
+            </Tooltip>
           </Space>
         </div>
 
@@ -1079,6 +1108,29 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
           localStorage.getItem(COLUMN_SETTING_STORAGE_KEY) || "{}",
         )}
         onSave={handleSaveColumnSettings}
+      />
+
+      <FlowModal
+        open={openWorkflow}
+        onClose={() => setOpenWorkflow(false)}
+        onAction={(step) => {
+          switch (step.action) {
+            case "LOCK_READ":
+              // call API lock
+              break;
+            case "CANCEL_READ":
+              // unlock
+              break;
+            case "APPROVE":
+              // duyệt
+              break;
+            case "CANCEL_APPROVE":
+              // hủy duyệt
+              break;
+            default:
+              console.log(step.action);
+          }
+        }}
       />
     </div>
   );
