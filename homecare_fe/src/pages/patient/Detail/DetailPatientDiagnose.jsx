@@ -321,6 +321,7 @@ const PatientDiagnoiseDetailPage = ({
         patientDiagnose={data}
         setPatientDiagnose={setData}
         onStatusChange={onStatusChange}
+        onClose={onClose}
       />
       <div style={{ display: deviceIsMobile ? "block" : "none" }}>
         <Space align="center" style={{ marginBottom: 8 }}>

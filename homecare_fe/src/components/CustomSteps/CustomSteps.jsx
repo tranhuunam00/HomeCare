@@ -1,10 +1,26 @@
 import React from "react";
 import { Tooltip } from "antd";
 import "./CustomSteps.scss";
+import { CloseOutlined } from "@ant-design/icons";
 
-const CustomSteps = ({ steps = [], current = 0 }) => {
+const CustomSteps = ({ steps = [], current = 0, onClose }) => {
   return (
     <div className="custom-steps">
+      {onClose && (
+        <Tooltip title="Đóng">
+          <div
+            style={{
+              cursor: "pointer",
+              marginRight: 20,
+              color: "red",
+            }}
+            className="close-icon"
+            onClick={onClose}
+          >
+            <CloseOutlined />
+          </div>
+        </Tooltip>
+      )}
       {steps.map((step, index) => {
         const isActive = index === current;
         const isCompleted = index < current;

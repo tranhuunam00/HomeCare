@@ -19,6 +19,7 @@ const FormVer3GroupProcessPatientDiagnoise = ({
   patientDiagnose,
   setPatientDiagnose,
   onStatusChange,
+  onClose,
 }) => {
   const { id, status, id_doctor_in_processing } = patientDiagnose;
   const { doctor, templateServices } = useGlobalAuth();
@@ -152,7 +153,7 @@ const FormVer3GroupProcessPatientDiagnoise = ({
           boxShadow: "0 -2px 8px rgba(0,0,0,0.05)",
         }}
       >
-        <CustomSteps steps={steps} current={status} />
+        <CustomSteps steps={steps} current={status} onClose={onClose} />
       </div>
 
       <div
@@ -160,8 +161,9 @@ const FormVer3GroupProcessPatientDiagnoise = ({
           position: "fixed",
           zIndex: 3,
           display: "flex",
-          flexDirection: "column",
+          flexDirection: "row",
           background: "#ffffff",
+          gap: 30,
           width: "41vw",
           bottom: 0,
           borderTop: "1px solid #474f946c",
@@ -194,6 +196,29 @@ const FormVer3GroupProcessPatientDiagnoise = ({
               </Button>
             </div>
           )}
+
+        <div style={{ marginTop: 16 }}>
+          <Button
+            danger
+            type="primary"
+            onClick={() => {
+              onClose();
+            }}
+            style={{
+              height: 45,
+              padding: "16px 18px",
+              borderRadius: 14,
+              fontWeight: 800,
+              letterSpacing: "0.06em",
+              textTransform: "uppercase",
+              color: "#0551df",
+              background: "rgba(14,165,233,0.06)",
+              width: 150,
+            }}
+          >
+            Exit
+          </Button>
+        </div>
 
         {status === PATIENT_DIAGNOSE_STATUS_NAME.VERIFY &&
           id_doctor_in_processing === doctor.id && (
