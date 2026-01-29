@@ -3,6 +3,7 @@ import { Input, Radio, Button, Row, Col } from "antd";
 import styles from "./ImagingStructureTable.module.scss";
 import TextArea from "antd/es/input/TextArea";
 import { formatIndentedList } from "../formver3.constant";
+import { translateLabel } from "../../../constant/app";
 
 const ImagingStructureTable = ({
   rows,
@@ -10,6 +11,7 @@ const ImagingStructureTable = ({
   isEdit = true,
   setDiagnosisSummary,
   abnormalFindings,
+  languageTranslate,
   form,
 }) => {
   const [autoSync, setAutoSync] = useState(true);
@@ -139,7 +141,9 @@ const ImagingStructureTable = ({
       </Button>
       {rows.some((r) => r.status === "abnormal") && (
         <>
-          <div style={{ marginTop: 24, fontWeight: 600 }}>Mô tả chi tiết</div>
+          <div style={{ marginTop: 24, fontWeight: 600 }}>
+            {translateLabel(languageTranslate, "Mô tả chi tiết", false)}
+          </div>
 
           {rows
             .filter((r) => r.status === "abnormal")

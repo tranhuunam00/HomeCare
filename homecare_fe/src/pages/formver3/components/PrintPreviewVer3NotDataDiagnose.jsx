@@ -379,13 +379,13 @@ const PrintPreviewVer3NotDataDiagnose = ({
                 marginTop: 20,
               }}
             >
-              {"QUY TRÌNH KỸ THUẬT".toUpperCase()}
+              {translateLabel(languageTranslate, "QUY TRÌNH KỸ THUẬT", true)}
             </h3>
           )}
           {!isOnLyContent && (
             <PrintItem
               minWidth={160}
-              label="Chỉ định"
+              label={translateLabel(languageTranslate, "Chỉ định", false)}
               value={
                 selectedTemplateService?.name +
                 " - " +
@@ -396,11 +396,22 @@ const PrintPreviewVer3NotDataDiagnose = ({
 
           <PrintItem
             minWidth={160}
-            label="Kỹ thuật thực hiện"
+            label={translateLabel(
+              languageTranslate,
+              "Kỹ thuật thực hiện",
+              false,
+            )}
             value={formSnapshot.implementMethod}
           />
           <div style={{ display: "flex", marginBottom: 4 }}>
-            <TextLabel label={"Tiêm thuốc đối quang"} minWidth={160} />
+            <TextLabel
+              label={translateLabel(
+                languageTranslate,
+                "Tiêm thuốc đối quang",
+                false,
+              )}
+              minWidth={160}
+            />
 
             {!isOnLyContent ? (
               <>
@@ -427,7 +438,14 @@ const PrintPreviewVer3NotDataDiagnose = ({
           </div>
 
           <div style={{ display: "flex", marginBottom: 4 }}>
-            <TextLabel label={"Chất lượng hình ảnh"} minWidth={160} />
+            <TextLabel
+              label={translateLabel(
+                languageTranslate,
+                "Chất lượng hình ảnh",
+                false,
+              )}
+              minWidth={160}
+            />
 
             {!isOnLyContent ? (
               <>
@@ -462,7 +480,14 @@ const PrintPreviewVer3NotDataDiagnose = ({
           </div>
 
           <div style={{ display: "flex", marginBottom: 4 }}>
-            <TextLabel label={"Thực hiện bổ sung"} minWidth={160} />
+            <TextLabel
+              label={translateLabel(
+                languageTranslate,
+                "Thực hiện bổ sung",
+                false,
+              )}
+              minWidth={160}
+            />
 
             {!isOnLyContent ? (
               <>
@@ -602,7 +627,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   fontSize: 16,
                 }}
               >
-                MÔ TẢ CHI TIẾT
+                {translateLabel(languageTranslate, "Mô tả chi tiết", true)}
               </h3>
 
               <ul
@@ -662,7 +687,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
           </p>
           <PrintItem
             minWidth={160}
-            label={"Kết luận, chẩn đoán"}
+            label={translateLabel(languageTranslate, "Conclusion", false)}
             value={formSnapshot?.imagingDiagnosisSummary}
             valueStyle={{ fontWeight: "bold", fontSize: 15 }}
           />

@@ -192,6 +192,7 @@ export const buildDradv3FormValues = ({
     phan_do_loai: doctorUseFormVer3?.classify,
     chan_doan_phan_biet: doctorUseFormVer3?.DifferenceDiagnostic,
     imagingDiagnosisSummary: doctorUseFormVer3?.imagingDiagnosisSummary || "",
+    language: doctorUseFormVer3?.language || "vi",
   };
 };
 

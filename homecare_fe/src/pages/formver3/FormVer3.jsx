@@ -574,7 +574,10 @@ export default function DFormVer3({ id_formVer3 }) {
               placeholder="Nhập mô tả kỹ thuật thực hiện"
             />
           </Form.Item>
-          <AdvancedSampleSection isEdit={isEdit} />
+          <AdvancedSampleSection
+            isEdit={isEdit}
+            languageTranslate={languageTranslate}
+          />
 
           {/* Bảng mô tả hình ảnh */}
           <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
@@ -600,6 +603,7 @@ export default function DFormVer3({ id_formVer3 }) {
               setDiagnosisSummary={setDiagnosisSummary}
               abnormalFindings={abnormalFindings}
               form={form}
+              languageTranslate={languageTranslate}
             />
           )}
           {/* Kết luận */}

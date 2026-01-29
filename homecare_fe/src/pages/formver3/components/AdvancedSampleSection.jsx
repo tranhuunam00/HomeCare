@@ -5,8 +5,14 @@ import {
   CONTRAST_INJECTION_OPTIONS,
   IMAGE_QUALITY_OPTIONS,
 } from "../formver3.constant";
+import { translateLabel } from "../../../constant/app";
 
-const AdvancedSampleSection = ({ isEdit = true, isAdvanceSample = true }) => {
+const AdvancedSampleSection = ({
+  isEdit = true,
+  isAdvanceSample = true,
+  languageTranslate,
+}) => {
+  console.log("languageTranslate", languageTranslate);
   return (
     <Row>
       {/* Mẫu nâng cao */}
@@ -14,7 +20,11 @@ const AdvancedSampleSection = ({ isEdit = true, isAdvanceSample = true }) => {
       <Col xs={24}>
         {/* Tiêm thuốc đối quang */}
         <Form.Item
-          label="Tiêm thuốc đối quang"
+          label={translateLabel(
+            languageTranslate,
+            "Tiêm thuốc đối quang",
+            false,
+          )}
           name="contrastInjection"
           rules={[{ required: true, message: "Chọn thông tin tiêm thuốc" }]}
         >
@@ -29,7 +39,11 @@ const AdvancedSampleSection = ({ isEdit = true, isAdvanceSample = true }) => {
 
         {/* Chất lượng hình ảnh */}
         <Form.Item
-          label="Chất lượng hình ảnh"
+          label={translateLabel(
+            languageTranslate,
+            "Chất lượng hình ảnh",
+            false,
+          )}
           name="imageQuatity"
           rules={[
             {
@@ -50,7 +64,7 @@ const AdvancedSampleSection = ({ isEdit = true, isAdvanceSample = true }) => {
         {/* Thực hiện bổ sung */}
 
         <Form.Item
-          label="Thực hiện bổ sung"
+          label={translateLabel(languageTranslate, "Thực hiện bổ sung", false)}
           name="additionalAction"
           rules={[
             {

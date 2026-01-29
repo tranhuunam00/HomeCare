@@ -52,6 +52,7 @@ import ImagingDiagnosisSection from "../../components/ImagingDiagnosisSection";
 import PrintPreviewVer3NotDataDiagnose from "../../components/PrintPreviewVer3NotDataDiagnose.jsx";
 import { handlePrint } from "../../../formver2/utils.js";
 import ImagingStructureTextTable from "../../components/ImagingStructureTextTable.jsx";
+import TranslateListRecordsVer3 from "../../components/TranslateListRecordsVer3.jsx";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -78,8 +79,17 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
   const { patient_diagnose_id, id_doctor_use_formver3, is_print } = useParams();
 
   const [idEdit, setIdEdit] = useState(id_doctor_use_formver3);
+
   const [idPatientDiagnose, setIdPatientDiagnose] =
     useState(patient_diagnose_id);
+
+  useEffect(() => {
+    setIdEdit(id_doctor_use_formver3);
+  }, [id_doctor_use_formver3]);
+  useEffect(() => {
+    setIdPatientDiagnose(patient_diagnose_id);
+  }, [patient_diagnose_id]);
+
   const [translateOpen, setTranslateOpen] = useState(false);
   const [patientDiagnose, setPatientDiagnose] = useState(null);
   const [imageList, setImageList] = useState([{}, {}, {}]);
@@ -158,6 +168,19 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
 
     fetchTemplates();
   }, []);
+
+  const checkEnglishVersion = async () => {
+    const res = await API_CALL.get("/doctorUseFormVer3", {
+      params: {
+        id_patient_diagnose: idPatientDiagnose,
+        language: "en",
+        page: 1,
+        limit: 1,
+      },
+    });
+
+    return res?.data?.data?.data || [];
+  };
 
   const selectedTemplateService = useMemo(() => {
     if (!selectedIDs?.id_template_service) return null;
@@ -332,6 +355,8 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
             apiData: doctorUseFormVer3Server,
             patientDiagnose: patientDiagnoseData,
           });
+
+          setLanguageTransslate(doctorUseFormVer3Server.language);
         }
 
         setPatientDiagnose(
@@ -588,7 +613,7 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
           <Divider />
 
           <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
-            {"Kỹ thuật thực hiện".toUpperCase()}
+            {translateLabel(languageTranslate, "Kỹ thuật thực hiện", true)}
           </Title>
 
           <Row gutter={16}>
@@ -820,7 +845,11 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
               placeholder="Nhập mô tả quy trình kỹ thuật..."
             />
           </Form.Item>
-          <AdvancedSampleSection isEdit={isEdit} isAdvanceSample={false} />
+          <AdvancedSampleSection
+            isEdit={isEdit}
+            isAdvanceSample={false}
+            languageTranslate={languageTranslate}
+          />
 
           {/* Ảnh minh hoạ */}
           <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
@@ -847,6 +876,7 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
               setDiagnosisSummary={setDiagnosisSummary}
               abnormalFindings={abnormalFindings}
               form={form}
+              languageTranslate={languageTranslate}
             />
           )}
           <ImagingDiagnosisSection
@@ -901,12 +931,75 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
                       KEY_ACTION_BUTTON.preview,
                       // KEY_ACTION_BUTTON.AI,
                       // KEY_ACTION_BUTTON.translate_multi,
-                      // KEY_ACTION_BUTTON.translate_en,
+                      KEY_ACTION_BUTTON.translate_en,
                       // KEY_ACTION_BUTTON.sign,
                       KEY_ACTION_BUTTON.exit,
                       KEY_ACTION_BUTTON.print,
                     ]
               }
+              onTranslate={async () => {
+                if (!idEdit) {
+                  toast.warning("Chưa có form để dịch");
+                  return;
+                }
+
+                try {
+                  setLoading(true);
+
+                  // 1️⃣ Check đã có bản EN chưa
+                  const enRecords = await checkEnglishVersion();
+
+                  const ok2 = window.confirm(
+                    "Bạn có chắc chắn muốn tạo bản dịch tiếng Anh cho kết quả này không?",
+                  );
+                  if (!ok2) {
+                    return;
+                  }
+
+                  if (enRecords.length > 0) {
+                    const ok = window.confirm(
+                      "Đã tồn tại bản dịch tiếng Anh.\n\n" +
+                        "👉 Bạn có thể xem trong mục 'CÁC BẢN DỊCH'.\n\n" +
+                        "❓ Bạn có muốn tạo thêm một bản dịch mới không?",
+                    );
+
+                    if (!ok) {
+                      toast.info(
+                        "Bạn có thể xem bản dịch trong mục CÁC BẢN DỊCH",
+                      );
+                      return;
+                    }
+                    // nếu OK → tiếp tục tạo
+                  }
+
+                  // 2️⃣ Gọi API translate
+                  const res = await API_CALL.post(
+                    `/doctorUseFormVer3/${idEdit}/translate`,
+                  );
+
+                  const newRecord = res?.data?.data || res?.data;
+
+                  toast.success("Tạo bản dịch tiếng Anh thành công");
+
+                  // 3️⃣ Chuyển sang bản EN mới
+                  if (newRecord?.id) {
+                    navigate(
+                      `/home/doctor-use-formver3/detail/${newRecord.id}`,
+                      {
+                        replace: true,
+                      },
+                    );
+                  }
+                } catch (error) {
+                  console.error("[translate] error", error);
+                  toast.error(
+                    error?.response?.data?.message ||
+                      "Không thể tạo bản dịch tiếng Anh",
+                  );
+                } finally {
+                  setLoading(false);
+                }
+              }}
               onSign={() => setSignModalOpen(true)}
               onPrint={() => {
                 printSourceRef.current = "manual"; // 👈 ĐÁNH DẤU
@@ -955,10 +1048,24 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
         </Form>
       )}
 
-      <TranslateListRecords
+      <Title level={4} style={{ margin: "24px 0 16px" }}>
+        <a
+          style={{
+            fontStyle: "italic",
+            color: "#b17b16ff",
+            textDecoration: "underline",
+            cursor: "pointer",
+          }}
+          onClick={() => setTranslateOpen(true)}
+        >
+          CÁC BẢN DỊCH
+        </a>
+      </Title>
+
+      <TranslateListRecordsVer3
         open={translateOpen}
         onClose={() => setTranslateOpen(false)}
-        idRoot={initialSnap.apiData?.id_root || idEdit}
+        id_patient_diagnose={initialSnap.apiData?.id_patient_diagnose || idEdit}
         idCurrent={idEdit}
         language={languageTranslate}
       />
