@@ -25,10 +25,10 @@ export const USER_ROLE_ID = {
 };
 
 export const PATIENT_DIAGNOSE_STATUS = {
-  1: "Mới",
+  1: "Khởi tạo",
   2: "Đang đọc",
-  3: "Chờ xác nhận",
-  4: "Đã xác nhận",
+  3: "Chờ duyệt",
+  4: "Đã duyệt",
 };
 
 export const PATIENT_DIAGNOSE_STATUS_NAME = {
@@ -48,8 +48,8 @@ export const PATIENT_DIAGNOSE_STATUS_CODE = {
 
 export const PATIENT_DIAGNOSE_COLOR = {
   1: "Blue",
-  2: "#808000",
-  3: "Orange",
+  2: "#d7921a",
+  3: "#a51ad7",
   4: "Green",
   5: "#11111",
 };

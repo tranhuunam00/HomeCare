@@ -30,8 +30,8 @@ export const FEATURE_KEYS_PACKAGE = {
     description: "Mẫu form kết quả phân hệ Nội soi tiêu hóa",
   },
   GIAI_PHAU_BENH: {
-    label: "Giải phẫu bệnh",
-    description: "Mẫu form kết quả phân hệ Giải phẫu bệnh",
+    label: "Y học hạt nhân",
+    description: "Mẫu form kết quả phân hệ Y học hạt nhân",
   },
   REPORT_NORMAL_500: {
     label: "Mẫu kết quả bình thường",
@@ -170,7 +170,7 @@ export const getUsablePackageCodes = (packages = []) => {
       (pkg) =>
         pkg?.status === "active" &&
         pkg?.end_date &&
-        dayjs(pkg.end_date).isAfter(dayjs())
+        dayjs(pkg.end_date).isAfter(dayjs()),
     )
     .map((p) => p.package_code);
 };
@@ -179,5 +179,5 @@ export const hasProOrBusiness = (userPackages) =>
   userPackages?.some(
     (pkg) =>
       pkg.status === "active" &&
-      (pkg.package_code === "PRO" || pkg.package_code === "HOSPITAL")
+      (pkg.package_code === "PRO" || pkg.package_code === "HOSPITAL"),
   );

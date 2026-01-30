@@ -75,10 +75,10 @@ const DEFAULT_FILTERS = {
 };
 
 const STATUS = {
-  1: { text: "Mới", color: "blue" },
+  1: { text: "Khởi tạo", color: "blue" },
   2: { text: "Đang đọc", color: "gold" },
-  3: { text: "Chờ xác nhận", color: "orange" },
-  4: { text: "Đã xác nhận", color: "green" },
+  3: { text: "Chờ duyệt", color: "orange" },
+  4: { text: "Đã duyệt", color: "green" },
 };
 
 const STORAGE_KEY_PAGE_SIZE = "doctorUseFormVer2_pageSize";
@@ -103,7 +103,7 @@ export default function DoctorUseFormVer2List() {
   useEffect(() => {
     const savedColumns = localStorage.getItem(STORAGE_KEY);
     setVisibleKeys(
-      savedColumns ? JSON.parse(savedColumns) : defaultVisibleKeys
+      savedColumns ? JSON.parse(savedColumns) : defaultVisibleKeys,
     );
 
     const savedPageSize = localStorage.getItem(STORAGE_KEY_PAGE_SIZE);
@@ -270,12 +270,12 @@ export default function DoctorUseFormVer2List() {
         ),
       },
     ],
-    [filters.page, filters.limit]
+    [filters.page, filters.limit],
   );
 
   const columnsToRender = useMemo(
     () => allColumns.filter((c) => visibleKeys.includes(c.key)),
-    [visibleKeys, allColumns]
+    [visibleKeys, allColumns],
   );
 
   const toggleColumn = (key) => {
@@ -432,7 +432,7 @@ export default function DoctorUseFormVer2List() {
               {examParts
                 .filter(
                   (p) =>
-                    p.id_template_service === filtersDraft.id_template_service
+                    p.id_template_service === filtersDraft.id_template_service,
                 )
                 .map((p) => (
                   <Option key={p.id} value={p.id}>

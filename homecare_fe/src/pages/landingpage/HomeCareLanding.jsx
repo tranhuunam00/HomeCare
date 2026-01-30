@@ -321,7 +321,7 @@ const HomeCareLanding = () => {
           <div className={styles["homecare__agency-right"]}>
             <ul className={styles["homecare__agency-services"]}>
               {[
-                "Ngân hàng mẫu kết quả gồm hơn 3.000 mẫu Template bình thường và bệnh lý được chuẩn hóa theo các phân loại quốc tế, dành cho Siêu âm, X quang, Cắt lớp vi tính MSCT, Cộng hưởng từ MRI, Điện quang can thiệp, Nội soi tiêu hóa, Thăm dò chức năng và Giải phẫu bệnh.",
+                "Ngân hàng mẫu kết quả gồm hơn 3.000 mẫu Template bình thường và bệnh lý được chuẩn hóa theo các phân loại quốc tế, dành cho Siêu âm, X quang, Cắt lớp vi tính MSCT, Cộng hưởng từ MRI, Điện quang can thiệp, Nội soi tiêu hóa, Thăm dò chức năng và Y học hạt nhân.",
                 "Tích hợp công cụ AI dịch kết quả từ tiếng Việt sang tiếng Anh và hơn 30 ngôn ngữ khác với độ chính xác theo ngôn ngữ y khoa đạt hơn 90%. ",
                 "Tích hợp bộ công cụ phổ biến hỗ trợ Bác sĩ đọc kết quả: TI-RADS, BI-RADS, Lung-RADS, LI-RADS, PI-RADS, O-RADS, C-RADS, Bone-RADS, Bone-Age, CTSI, AAST 1994, RECIST...",
                 "Tích hợp với danh mục phân loại mã bệnh quốc tế ICD-10",

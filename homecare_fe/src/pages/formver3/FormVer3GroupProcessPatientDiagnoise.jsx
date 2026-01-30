@@ -12,7 +12,10 @@ import { toast } from "react-toastify";
 import { Button } from "antd";
 import CustomSteps from "../../components/CustomSteps/CustomSteps";
 import API_CALL from "../../services/axiosClient";
-import { PATIENT_DIAGNOSE_STATUS_NAME } from "../../constant/app";
+import {
+  PATIENT_DIAGNOSE_COLOR,
+  PATIENT_DIAGNOSE_STATUS_NAME,
+} from "../../constant/app";
 import { useGlobalAuth } from "../../contexts/AuthContext";
 
 const FormVer3GroupProcessPatientDiagnoise = ({
@@ -70,7 +73,7 @@ const FormVer3GroupProcessPatientDiagnoise = ({
 
   const steps = [
     {
-      title: "Khởi tạo",
+      title: "Khởi tạo - Chưa đọc",
       onStepClick: () => {},
     },
     {
@@ -87,6 +90,7 @@ const FormVer3GroupProcessPatientDiagnoise = ({
           toast.error("Không cập nhật được trạng thái đọc ca bệnh");
         }
       },
+      color: PATIENT_DIAGNOSE_COLOR[1],
     },
     {
       title: "Đang đọc",
@@ -97,9 +101,10 @@ const FormVer3GroupProcessPatientDiagnoise = ({
           toast.error("Không cập nhật được trạng thái đọc ca bệnh");
         }
       },
+      color: PATIENT_DIAGNOSE_COLOR[2],
     },
     {
-      title: "Chờ xác nhận",
+      title: "Chờ duyệt",
       onStepClick: async () => {
         try {
           await onCheckandCreate();
@@ -107,9 +112,10 @@ const FormVer3GroupProcessPatientDiagnoise = ({
           toast.error("Không cập nhật được trạng thái đọc ca bệnh");
         }
       },
+      color: PATIENT_DIAGNOSE_COLOR[3],
     },
     {
-      title: "In kết quả",
+      title: "Đã duyệt",
       onStepClick: async () => {
         try {
           await onCheckandCreate();
@@ -117,6 +123,7 @@ const FormVer3GroupProcessPatientDiagnoise = ({
           toast.error("Lỗi lấy thông tin");
         }
       },
+      color: PATIENT_DIAGNOSE_COLOR[4],
     },
   ];
 
@@ -218,6 +225,31 @@ const FormVer3GroupProcessPatientDiagnoise = ({
           >
             Exit
           </Button>
+        </div>
+
+        <div style={{ marginTop: 16 }}>
+          {status === PATIENT_DIAGNOSE_STATUS_NAME.VERIFY && (
+            <Button
+              danger
+              type="primary"
+              onClick={async () => {
+                await onCheckandCreate();
+              }}
+              style={{
+                height: 45,
+                padding: "16px 18px",
+                borderRadius: 14,
+                fontWeight: 800,
+                letterSpacing: "0.06em",
+                textTransform: "uppercase",
+                color: "#3c7e06",
+                background: "rgba(14,165,233,0.06)",
+                width: 150,
+              }}
+            >
+              In
+            </Button>
+          )}
         </div>
 
         {status === PATIENT_DIAGNOSE_STATUS_NAME.VERIFY &&
