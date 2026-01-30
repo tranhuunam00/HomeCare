@@ -32,13 +32,15 @@ export const ACTION_FACTORY = {
   },
 
   navigate: {
-    label: "Chuyển màn",
     create: () => ({
       type: "navigate",
-      payload: { path: "/" },
+      payload: {
+        mode: "preset",
+        path: "/",
+        url: "",
+      },
     }),
   },
-
   notify: {
     label: "Thông báo",
     create: () => ({

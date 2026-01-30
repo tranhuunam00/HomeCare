@@ -110,8 +110,20 @@ const FlowModal = ({ open, onClose }) => {
   const runNodeAction = (node) => {
     const action = node?.data?.action;
     if (!action || action.type === "none") return;
+    const { mode, path, url } = action.payload;
 
-    if (action.type === "navigate") navigate(action.payload.path);
+    if (mode === "preset" && path) {
+      navigate(path);
+      return;
+    }
+
+    if (mode === "custom" && url) {
+      if (url.startsWith("http")) {
+        window.open(url, "_blank");
+      } else {
+        navigate(url);
+      }
+    }
     if (action.type === "notify")
       toast.info(action.payload.message || "Thông báo");
   };
@@ -334,15 +346,63 @@ const FlowModal = ({ open, onClose }) => {
               {selectedNode.data.action.type === "navigate" && (
                 <Select
                   style={{ width: 200 }}
-                  value={selectedNode.data.action.payload.path}
-                  onChange={(path) =>
+                  value={selectedNode.data.action.payload.mode}
+                  options={[
+                    { label: "Route có sẵn", value: "preset" },
+                    { label: "Link bất kỳ", value: "custom" },
+                  ]}
+                  onChange={(mode) =>
                     updateNodeData(() => ({
-                      action: { type: "navigate", payload: { path } },
+                      action: {
+                        type: "navigate",
+                        payload: { mode, path: "", url: "" }, // reset cái còn lại
+                      },
                     }))
                   }
-                  options={NAVIGATE_OPTIONS}
                 />
               )}
+
+              {selectedNode.data.action.type === "navigate" &&
+                selectedNode.data.action.payload.mode === "preset" && (
+                  <Select
+                    style={{ width: 200 }}
+                    placeholder="Chọn route"
+                    options={NAVIGATE_OPTIONS}
+                    value={selectedNode.data.action.payload.path}
+                    onChange={(path) =>
+                      updateNodeData(() => ({
+                        action: {
+                          type: "navigate",
+                          payload: {
+                            mode: "preset",
+                            path,
+                            url: "",
+                          },
+                        },
+                      }))
+                    }
+                  />
+                )}
+
+              {selectedNode.data.action.type === "navigate" &&
+                selectedNode.data.action.payload.mode === "custom" && (
+                  <Input
+                    placeholder="Nhập link bất kỳ"
+                    value={selectedNode.data.action.payload.url}
+                    onChange={(e) =>
+                      updateNodeData(() => ({
+                        action: {
+                          type: "navigate",
+                          payload: {
+                            mode: "custom",
+                            url: e.target.value,
+                            path: "",
+                          },
+                        },
+                      }))
+                    }
+                  />
+                )}
 
               {selectedNode.data.action.type === "notify" && (
                 <TextArea
