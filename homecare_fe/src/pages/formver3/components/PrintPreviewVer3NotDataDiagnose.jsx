@@ -687,7 +687,11 @@ const PrintPreviewVer3NotDataDiagnose = ({
           </p>
           <PrintItem
             minWidth={160}
-            label={translateLabel(languageTranslate, "Conclusion", false)}
+            label={translateLabel(
+              languageTranslate,
+              "Chẩn đoán hình ảnh",
+              false,
+            )}
             value={formSnapshot?.imagingDiagnosisSummary}
             valueStyle={{ fontWeight: "bold", fontSize: 15 }}
           />

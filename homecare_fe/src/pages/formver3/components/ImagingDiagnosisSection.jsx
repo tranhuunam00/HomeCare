@@ -22,7 +22,7 @@ const ImagingDiagnosisSection = ({
       {/* Chẩn đoán hình ảnh */}
 
       <Form.Item
-        label="Chẩn đoán hình ảnh"
+        label={translateLabel(languageTranslate, "Chẩn đoán hình ảnh", false)}
         name="imagingDiagnosisSummary"
         tooltip="Có thể chỉnh sửa, tóm tắt từ các bất thường"
       >
@@ -79,7 +79,7 @@ const ImagingDiagnosisSection = ({
         label={translateLabel(
           languageTranslate,
           "gradingClassification",
-          false
+          false,
         )}
         name="phan_do_loai"
       >
@@ -91,7 +91,7 @@ const ImagingDiagnosisSection = ({
         label={translateLabel(
           languageTranslate,
           "differentialDiagnosis",
-          false
+          false,
         )}
         name="chan_doan_phan_biet"
       >
@@ -109,7 +109,7 @@ const ImagingDiagnosisSection = ({
         {translateLabel(
           languageTranslate,
           "recommendationsCounseling",
-          false
+          false,
         ).toUpperCase()}
       </Title>
 
