@@ -126,6 +126,13 @@ const ExamPartList = () => {
     { title: "ID", dataIndex: "id", key: "id", align: "center" },
     { title: "Tên", dataIndex: "name", key: "name", width: 150 },
     {
+      title: "Tên (EN)",
+      dataIndex: "name_en",
+      key: "name_en",
+      width: 180,
+      render: (v, record) => v || record.name,
+    },
+    {
       title: "Phân hệ",
       key: "service",
       dataIndex: "id_template_service",

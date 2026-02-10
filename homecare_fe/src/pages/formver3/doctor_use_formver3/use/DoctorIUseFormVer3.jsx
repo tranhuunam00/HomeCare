@@ -42,6 +42,7 @@ import {
   buildFormVer3Values,
   CAN_THIEP_GROUP_CODE,
   DEFAULT_IMAGING_ROWS,
+  getServiceLabel,
   LANGUAGE_OPTIONS,
   PATIENT_FIELDS,
   TEMPLATE_GROUP_RENDER_MAP,
@@ -619,7 +620,7 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
           <Row gutter={16}>
             <Col xs={24} md={9}>
               <Form.Item
-                label={translateLabel(languageTranslate, "department", false)}
+                label={translateLabel(languageTranslate, "Chỉ định", false)}
                 name="id_template_service"
                 rules={[{ required: true, message: "Chọn kỹ thuật" }]}
                 labelCol={{ flex: "0 0 90px" }}
@@ -644,7 +645,7 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
                 >
                   {sortTemplateServices(templateServices).map((s) => (
                     <Option key={s.id} value={s.id}>
-                      {s.name}
+                      {getServiceLabel(s, languageTranslate)}
                     </Option>
                   ))}
                 </Select>
@@ -685,7 +686,7 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
                     .sort((a, b) => (a.name > b.name ? 1 : -1))
                     .map((s) => (
                       <Option key={s.id} value={s.id}>
-                        {s.name}
+                        {getServiceLabel(s, languageTranslate)}
                       </Option>
                     ))}
                 </Select>

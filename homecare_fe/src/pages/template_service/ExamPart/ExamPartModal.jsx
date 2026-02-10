@@ -86,6 +86,10 @@ const ExamPartModal = ({ open, onCancel, onSubmit, initialValues, isEdit }) => {
           </Select>
         </Form.Item>
 
+        <Form.Item label="Tên bộ phận (English)" name="name_en">
+          <Input placeholder="Enter exam part name in English" />
+        </Form.Item>
+
         <Form.Item label="Trạng thái" name="status" valuePropName="checked">
           <Switch
             checkedChildren="Hoạt động"

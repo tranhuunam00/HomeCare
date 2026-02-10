@@ -121,8 +121,15 @@ const TemplateServiceList = () => {
       key: "name",
       sorter: (a, b) => a.name.localeCompare(b.name),
     },
-    { title: "Tên rút gọn", dataIndex: "short_name", key: "short_name" },
+    {
+      title: "Tên (EN)",
+      dataIndex: "name_en",
+      key: "name_en",
+      sorter: (a, b) => (a.name_en || "").localeCompare(b.name_en || ""),
+    },
     { title: "Mã code", dataIndex: "code", key: "code" },
+    { title: "Tên rút gọn", dataIndex: "short_name", key: "short_name" },
+
     {
       title: "Thao tác",
       key: "action",

@@ -11,7 +11,7 @@ import FormActionBar from "../../formver2/component/FormActionBar";
 import { handlePrint } from "../../formver2/utils";
 import PrintHeaderFromCustom from "../../products/TemplatePrint/print/PrintHeaderFromCustom";
 import LegacyPrintHeader from "../../products/TemplatePrint/print/LegacyPrintHeader";
-import { CAN_THIEP_GROUP_CODE } from "../formver3.constant";
+import { CAN_THIEP_GROUP_CODE, examPartName } from "../formver3.constant";
 import { PAGE_PADDING_RIGHT } from "../../products/TemplatePrint/Setting/constant.setting.print";
 
 const colSTT = { width: 60, textAlign: "center" };
@@ -231,10 +231,16 @@ const PrintPreviewVer3NotDataDiagnose = ({
                 fontSize: 25,
               }}
             >{`${
-              selectedTemplateService?.name?.toUpperCase() ||
-              templateServices
-                ?.find((t) => t.id == formSnapshot.id_template_service)
-                ?.name?.toUpperCase()
+              examPartName(
+                selectedTemplateService,
+                languageTranslate,
+              ).toUpperCase() ||
+              examPartName(
+                templateServices?.find(
+                  (t) => t.id == formSnapshot.id_template_service,
+                ),
+                languageTranslate,
+              ).toUpperCase()
             }`}</h2>
           )}
           {!isOnLyContent && isUse && (
@@ -245,7 +251,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   color: "#2f6db8",
                   margin: 0,
                   padding: 0,
-                  marginBottom: 20,
+                  marginBottom: 10,
                   marginTop: 20,
                 }}
               >
@@ -375,7 +381,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                 color: "#2f6db8",
                 margin: 0,
                 padding: 0,
-                marginBottom: 0,
+                marginBottom: 10,
                 marginTop: 20,
               }}
             >
@@ -387,9 +393,12 @@ const PrintPreviewVer3NotDataDiagnose = ({
               minWidth={160}
               label={translateLabel(languageTranslate, "Chỉ định", false)}
               value={
-                selectedTemplateService?.name +
+                examPartName(
+                  selectedTemplateService,
+                  languageTranslate,
+                ).toUpperCase() +
                 " - " +
-                selectedExamPart?.name?.toUpperCase()
+                examPartName(selectedExamPart, languageTranslate).toUpperCase()
               }
             />
           )}
@@ -806,7 +815,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   color: "#2f6db8",
                   margin: 0,
                   padding: 0,
-                  marginBottom: 20,
+                  marginBottom: 10,
                   marginTop: 20,
                 }}
               >

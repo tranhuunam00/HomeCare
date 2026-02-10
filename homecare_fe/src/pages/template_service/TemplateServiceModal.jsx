@@ -46,6 +46,10 @@ const TemplateServiceModal = ({
           <Input placeholder="Nhập tên rút gọn" />
         </Form.Item>
 
+        <Form.Item label="Tên phân hệ (English)" name="name_en">
+          <Input placeholder="Enter English name" />
+        </Form.Item>
+
         <Form.Item
           name="code"
           label="Mã code"

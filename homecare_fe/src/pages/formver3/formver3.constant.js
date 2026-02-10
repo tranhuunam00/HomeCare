@@ -338,3 +338,12 @@ export const CAN_THIEP_GROUP_CODE = ["CTSA", "CTCT", "CTXA"];
 export const TEMPLATE_GROUP_RENDER_MAP = {
   CAN_THIEP: CAN_THIEP_GROUP_CODE,
 };
+
+export const getServiceLabel = (s, languageTranslate) =>
+  languageTranslate === "vi" ? s.name : s.name_en || s.name;
+
+export const examPartName = (selectedExamPart, languageTranslate) => {
+  return languageTranslate === "vi"
+    ? selectedExamPart?.name
+    : selectedExamPart?.name_en || selectedExamPart?.name;
+};
