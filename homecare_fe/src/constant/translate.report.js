@@ -45,6 +45,8 @@ export const TRANSLATE_MULTI_REPORT = {
     "QUY TRÌNH KỸ THUẬT": "QUY TRÌNH KỸ THUẬT",
     "Chỉ định": "Chỉ định",
     Conslusion: "Kết luận",
+    "Bình thường": "Bình thường",
+    "Bất thường": "Bất thường",
   },
   en: {
     administrativeInfo: "ADMINISTRATIVE INFORMATION",
@@ -91,6 +93,8 @@ export const TRANSLATE_MULTI_REPORT = {
     "QUY TRÌNH KỸ THUẬT": "Technical procedure",
     "Chỉ định": "Indication",
     Conslusion: "Conslusion",
+    "Bình thường": "Normal",
+    "Bất thường": "Abnormal",
   },
   zh: {
     administrativeInfo: "行政信息",

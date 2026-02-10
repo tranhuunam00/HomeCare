@@ -299,8 +299,8 @@ export const handlePrint = (printRef) => {
           @page :first {
             margin-top: 20px;
           }
-          * {
-            font-family: 'Arial', sans-serif !important;
+          html, body, * {
+            font-family: Arial, sans-serif !important;
           }
           body { margin: 0 }
           span { font-size: 15px }
@@ -316,7 +316,9 @@ export const handlePrint = (printRef) => {
             font-size: 14px
           }
           h3 { margin-top: 24px; font-size: 16px !important }
-
+          .no-print {
+            display: none;
+          }
 
         </style>
       </head>

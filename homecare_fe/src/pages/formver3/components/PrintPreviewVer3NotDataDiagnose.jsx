@@ -15,7 +15,7 @@ import { CAN_THIEP_GROUP_CODE } from "../formver3.constant";
 import { PAGE_PADDING_RIGHT } from "../../products/TemplatePrint/Setting/constant.setting.print";
 
 const colSTT = { width: 60, textAlign: "center" };
-const colStructure = { width: 220 };
+const colStructure = { width: 420 };
 
 const thUnderline = {
   borderBottom: "1px solid #000",
@@ -565,7 +565,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                         ...styleCustomParent,
                       }}
                     >
-                      Bình thường
+                      {translateLabel(languageTranslate, "Bình thường", false)}
                     </th>
                     <th
                       style={{
@@ -574,7 +574,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                         ...styleCustomParent,
                       }}
                     >
-                      Bất thường
+                      {translateLabel(languageTranslate, "Bất thường", false)}
                     </th>
                   </>
                 )}

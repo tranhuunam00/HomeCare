@@ -184,6 +184,9 @@ const HeaderCanvas = ({ headerInfo }) => {
             top:${b.y}px;
             width:${b.width}px;
             height:${b.height}px;
+            object-fit:${b.style?.objectFit || "cover"};
+            opacity:${b.style?.opacity ?? 1};
+            border-radius:${b.style?.borderRadius || 0}px;
           "
         >
           ${

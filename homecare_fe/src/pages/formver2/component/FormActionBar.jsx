@@ -224,9 +224,10 @@ export default function FormActionBar({
   };
 
   return (
-    <>
+    <div className="no-print">
       {/* 🔹 Modal chọn ngôn ngữ dịch */}
       <Modal
+        className="no-print"
         title="Chọn ngôn ngữ cần dịch"
         open={langModalOpen}
         onCancel={() => setLangModalOpen(false)}
@@ -274,6 +275,6 @@ export default function FormActionBar({
                 .map((it) => genButtonC(it))}
         </div>
       </div>
-    </>
+    </div>
   );
 }

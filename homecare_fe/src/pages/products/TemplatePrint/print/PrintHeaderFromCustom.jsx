@@ -66,7 +66,9 @@ const PrintHeaderFromCustom = ({ printTemplate }) => {
                     style={{
                       width: "100%",
                       height: "100%",
-                      objectFit: "contain",
+                      objectFit: b.style?.objectFit || "cover",
+                      opacity: b.style?.opacity ?? 1,
+                      borderRadius: b.style?.borderRadius || 0,
                     }}
                   />
                 ) : null
