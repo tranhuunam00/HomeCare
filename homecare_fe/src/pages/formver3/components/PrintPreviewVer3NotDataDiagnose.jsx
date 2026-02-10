@@ -16,6 +16,7 @@ import { PAGE_PADDING_RIGHT } from "../../products/TemplatePrint/Setting/constan
 
 const colSTT = { width: 60, textAlign: "center" };
 const colStructure = { width: 420 };
+const colStructure2 = { width: 350 };
 
 const thUnderline = {
   borderBottom: "1px solid #000",
@@ -613,7 +614,9 @@ const PrintPreviewVer3NotDataDiagnose = ({
             <thead>
               <tr>
                 <th style={{ ...thUnderline, ...colSTT }}></th>
-                <th style={{ ...thUnderline, ...colStructure }}></th>
+                <th
+                  style={{ ...thUnderline, width: isCanThiepGroup ? 350 : 420 }}
+                ></th>
 
                 {isCanThiepGroup ? (
                   <th style={thUnderline}>
@@ -650,7 +653,12 @@ const PrintPreviewVer3NotDataDiagnose = ({
                     {index + 1}
                   </td>
 
-                  <td style={{ ...tdUnderlineLeft, ...colStructure }}>
+                  <td
+                    style={{
+                      ...tdUnderlineLeft,
+                      width: isCanThiepGroup ? 350 : 420,
+                    }}
+                  >
                     {row.name}
                   </td>
 
