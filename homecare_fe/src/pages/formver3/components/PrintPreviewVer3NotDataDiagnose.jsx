@@ -417,21 +417,27 @@ const PrintPreviewVer3NotDataDiagnose = ({
               <>
                 <PrintRadio
                   checked={formSnapshot?.contrastInjection === "no"}
-                  label="Không"
+                  label={translateLabel(languageTranslate, "no", false)}
                   stylesCustom={{ width: 120 }}
                 />
                 <PrintRadio
                   checked={formSnapshot?.contrastInjection === "yes"}
-                  label="Có"
+                  label={translateLabel(languageTranslate, "yes", false)}
                 />
               </>
             ) : (
               <>
                 {formSnapshot?.contrastInjection === "no" && (
-                  <PrintRadio checked label="Không" />
+                  <PrintRadio
+                    checked
+                    label={translateLabel(languageTranslate, "no", false)}
+                  />
                 )}
                 {formSnapshot?.contrastInjection === "yes" && (
-                  <PrintRadio checked label="Có" />
+                  <PrintRadio
+                    checked
+                    label={translateLabel(languageTranslate, "yes", false)}
+                  />
                 )}
               </>
             )}
@@ -451,29 +457,58 @@ const PrintPreviewVer3NotDataDiagnose = ({
               <>
                 <PrintRadio
                   checked={formSnapshot?.imageQuatity === "good"}
-                  label="Đạt yêu cầu"
+                  label={translateLabel(
+                    languageTranslate,
+                    "Đạt yêu cầu",
+                    false,
+                  )}
                   stylesCustom={{ width: 120 }}
                 />
                 <PrintRadio
                   checked={formSnapshot?.imageQuatity === "limited"}
-                  label="Đạt yêu cầu, có hạn chế"
+                  label={translateLabel(
+                    languageTranslate,
+                    "Đạt yêu cầu, có hạn chế",
+                    false,
+                  )}
                   stylesCustom={{ width: 200 }}
                 />
                 <PrintRadio
                   checked={formSnapshot?.imageQuatity === "bad"}
-                  label="Không đạt"
+                  label={translateLabel(languageTranslate, "Không đạt", false)}
                 />
               </>
             ) : (
               <>
                 {formSnapshot?.imageQuatity === "good" && (
-                  <PrintRadio checked label="Đạt yêu cầu" />
+                  <PrintRadio
+                    checked
+                    label={translateLabel(
+                      languageTranslate,
+                      "Đạt yêu cầu",
+                      false,
+                    )}
+                  />
                 )}
                 {formSnapshot?.imageQuatity === "limited" && (
-                  <PrintRadio checked label="Đạt yêu cầu, có hạn chế" />
+                  <PrintRadio
+                    checked
+                    label={translateLabel(
+                      languageTranslate,
+                      "Đạt yêu cầu, có hạn chế",
+                      false,
+                    )}
+                  />
                 )}
                 {formSnapshot?.imageQuatity === "bad" && (
-                  <PrintRadio checked label="Không đạt" />
+                  <PrintRadio
+                    checked
+                    label={translateLabel(
+                      languageTranslate,
+                      "Không đạt",
+                      false,
+                    )}
+                  />
                 )}
               </>
             )}
@@ -493,29 +528,42 @@ const PrintPreviewVer3NotDataDiagnose = ({
               <>
                 <PrintRadio
                   checked={formSnapshot?.additionalAction === "no"}
-                  label="Không"
+                  label={translateLabel(languageTranslate, "no", false)}
                   stylesCustom={{ width: 120 }}
                 />
                 <PrintRadio
                   checked={formSnapshot?.additionalAction === "extra"}
-                  label="Chụp thêm"
+                  label={translateLabel(languageTranslate, "Chụp thêm", false)}
                   stylesCustom={{ width: 200 }}
                 />
                 <PrintRadio
                   checked={formSnapshot?.additionalAction === "redo"}
-                  label="Chụp lại"
+                  label={translateLabel(languageTranslate, "Chụp lại", false)}
                 />
               </>
             ) : (
               <>
                 {formSnapshot?.additionalAction === "no" && (
-                  <PrintRadio checked label="Không" />
+                  <PrintRadio
+                    checked
+                    label={translateLabel(languageTranslate, "no", false)}
+                  />
                 )}
                 {formSnapshot?.additionalAction === "extra" && (
-                  <PrintRadio checked label="Chụp thêm" />
+                  <PrintRadio
+                    checked
+                    label={translateLabel(
+                      languageTranslate,
+                      "Chụp thêm",
+                      false,
+                    )}
+                  />
                 )}
                 {formSnapshot?.additionalAction === "redo" && (
-                  <PrintRadio checked label="Chụp lại" />
+                  <PrintRadio
+                    checked
+                    label={translateLabel(languageTranslate, "Chụp lại", false)}
+                  />
                 )}
               </>
             )}
@@ -532,7 +580,11 @@ const PrintPreviewVer3NotDataDiagnose = ({
             }}
           >
             {isCanThiepGroup
-              ? "QUY TRÌNH THỦ THUẬT"
+              ? translateLabel(
+                  languageTranslate,
+                  "QUY TRÌNH THỦ THUẬT",
+                  false,
+                ).toUpperCase()
               : translateLabel(
                   languageTranslate,
                   "imagingFindings",
@@ -555,7 +607,9 @@ const PrintPreviewVer3NotDataDiagnose = ({
                 <th style={{ ...thUnderline, ...colStructure }}></th>
 
                 {isCanThiepGroup ? (
-                  <th style={thUnderline}>Mô tả</th>
+                  <th style={thUnderline}>
+                    {translateLabel(languageTranslate, "Mô tả", false)}
+                  </th>
                 ) : (
                   <>
                     <th
@@ -881,7 +935,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                 </section>
                 <section>
                   <h4 style={{ padding: 0, margin: 0, marginBottom: 10 }}>
-                    Chữ ký
+                    {translateLabel(languageTranslate, "Chữ ký", false)}
                   </h4>
                   <img
                     src={doctor?.signature_url}

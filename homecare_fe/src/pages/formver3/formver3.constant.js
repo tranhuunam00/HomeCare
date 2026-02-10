@@ -20,13 +20,13 @@ export const APPROVAL_FORMVER3_STATUS_NAME = {
 };
 
 export const ADDITIONAL_ACTION_OPTIONS = [
-  { value: "no", label: "Không" },
+  { value: "no", label: "no" },
   { value: "extra", label: "Chụp thêm" },
   { value: "redo", label: "Chụp lại" },
 ];
 export const CONTRAST_INJECTION_OPTIONS = [
-  { value: "no", label: "Không" },
-  { value: "yes", label: "Có" },
+  { value: "no", label: "no" },
+  { value: "yes", label: "yes" },
 ];
 
 export const getOptionLabel = (options = [], value) => {

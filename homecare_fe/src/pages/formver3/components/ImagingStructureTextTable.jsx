@@ -3,8 +3,14 @@ import { Input, Button } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import debounce from "lodash/debounce";
 import styles from "./ImagingStructureTable.module.scss";
+import { translateLabel } from "../../../constant/app";
 
-const ImagingStructureTextTable = ({ rows, setRows, isEdit }) => {
+const ImagingStructureTextTable = ({
+  rows,
+  setRows,
+  isEdit,
+  languageTranslate,
+}) => {
   const [localRows, setLocalRows] = useState(rows);
 
   useEffect(() => {
@@ -70,7 +76,9 @@ const ImagingStructureTextTable = ({ rows, setRows, isEdit }) => {
           <tr>
             <th style={thStyle}></th>
             <th style={thStyle}></th>
-            <th style={thStyle}>Mô tả</th>
+            <th style={thStyle}>
+              {translateLabel(languageTranslate, "Mô tả", false)}
+            </th>
             <th style={thStyle}></th>
           </tr>
         </thead>

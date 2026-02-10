@@ -854,7 +854,11 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
           {/* Ảnh minh hoạ */}
           <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
             {isCanThiepGroup
-              ? "QUY TRÌNH THỦ THUẬT"
+              ? translateLabel(
+                  languageTranslate,
+                  "QUY TRÌNH THỦ THUẬT",
+                  false,
+                ).toUpperCase()
               : translateLabel(
                   languageTranslate,
                   "imagingFindings",
@@ -867,6 +871,7 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
               rows={imagingRows}
               setRows={setImagingRows}
               isEdit={isEdit}
+              languageTranslate={languageTranslate}
             />
           ) : (
             <ImagingStructureTable

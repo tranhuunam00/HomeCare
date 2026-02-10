@@ -31,7 +31,7 @@ const AdvancedSampleSection = ({
           <Radio.Group disabled={!isEdit}>
             {CONTRAST_INJECTION_OPTIONS.map((opt) => (
               <Radio key={opt.value} value={opt.value}>
-                {opt.label}
+                {translateLabel(languageTranslate, opt.label, false)}
               </Radio>
             ))}
           </Radio.Group>
@@ -55,7 +55,7 @@ const AdvancedSampleSection = ({
           <Radio.Group disabled={!isEdit}>
             {IMAGE_QUALITY_OPTIONS.map((opt) => (
               <Radio key={opt.value} value={opt.value}>
-                {opt.label}
+                {translateLabel(languageTranslate, opt.label, false)}
               </Radio>
             ))}
           </Radio.Group>
@@ -76,7 +76,7 @@ const AdvancedSampleSection = ({
           <Radio.Group disabled={!isEdit}>
             {ADDITIONAL_ACTION_OPTIONS.map((opt) => (
               <Radio key={opt.value} value={opt.value}>
-                {opt.label}
+                {translateLabel(languageTranslate, opt.label, false)}
               </Radio>
             ))}
           </Radio.Group>
