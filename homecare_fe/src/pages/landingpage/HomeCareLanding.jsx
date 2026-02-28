@@ -108,6 +108,9 @@ const HomeCareLanding = () => {
                 <Menu.Item key="contact" onClick={() => navigate("/contact")}>
                   HỖ TRỢ KỸ THUẬT
                 </Menu.Item>
+                <Menu.Item key="guild" onClick={() => navigate("/guild")}>
+                  HƯỚNG DẪN
+                </Menu.Item>
               </Menu>
             </div>
           </div>

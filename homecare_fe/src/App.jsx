@@ -75,6 +75,9 @@ import DFormVer3 from "./pages/formver3/FormVer3";
 import FormVer3List from "./pages/formver3/list/FormVer3List";
 import ForgotPasswordPage from "./pages/authentication/ForgotPasswordPage";
 import DoctorUseDFormVer3 from "./pages/formver3/doctor_use_formver3/use/DoctorIUseFormVer3";
+import UserGuidePage from "./pages/landingpage/guild/UserGuidePage";
+import GuideMenuWorkListPage from "./pages/landingpage/guild/worklist/GuideMenuWorkListPage";
+import GuideMenuAppPage from "./pages/landingpage/guild/app/GuideMenuAppPage";
 
 function App() {
   useAuthInitializer();
@@ -160,6 +163,9 @@ function App() {
         <Route path="/contact" element={<ContactForm />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/guild" element={<UserGuidePage />} />
+        <Route path="/guild/worklist" element={<GuideMenuWorkListPage />} />
+        <Route path="/guild/app" element={<GuideMenuAppPage />} />
 
         <Route
           path="/home"

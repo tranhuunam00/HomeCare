@@ -50,6 +50,13 @@ const ContactForm = () => {
           boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
         }}
       >
+        <Button
+          type="link"
+          onClick={() => navigate(-1)}
+          style={{ padding: 0, marginBottom: 8 }}
+        >
+          ← Quay lại
+        </Button>
         <div
           style={{
             display: "flex",

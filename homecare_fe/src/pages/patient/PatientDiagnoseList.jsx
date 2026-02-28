@@ -997,6 +997,19 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
                   setLimit(l);
                 },
               }}
+              rowClassName={(record) =>
+                chosenRecord?.id === record.id ? styles.selectedRow : ""
+              }
+              onRow={(record) => ({
+                onClick: () => {
+                  !deviceIsMobile
+                    ? setChosenRecord(record)
+                    : navigate(`/home/patients-diagnose/${record.id}`, {
+                        state: { record },
+                      });
+                },
+                style: { cursor: "pointer" },
+              })}
               onChange={(pagination, _filters, sorter) => {
                 const nextPage = pagination.current;
                 const nextLimit = pagination.pageSize;

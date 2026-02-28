@@ -18,3 +18,12 @@
     }
   }
 }
+
+.selectedRow {
+  background-color: #b8daf3 !important; // xanh nhạt chuẩn AntD
+  transition: background 0.2s ease;
+
+  &:hover {
+    background-color: #bae0ff !important;
+  }
+}
