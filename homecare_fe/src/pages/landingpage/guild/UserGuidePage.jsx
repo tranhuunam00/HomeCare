@@ -20,7 +20,7 @@ const UserGuidePage = () => {
     { title: "Menu WORKLIST", onClick: () => navigate("/guild/worklist") },
     { title: "Menu Ứng Dụng", onClick: () => navigate("/guild/app") },
     { title: "Menu Gói Đăng Ký" },
-    { title: "Menu Quản Lý" },
+    { title: "Menu Quản Lý", onClick: () => navigate("/guild/manage") },
   ];
 
   return (

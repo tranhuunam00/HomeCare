@@ -78,6 +78,8 @@ import DoctorUseDFormVer3 from "./pages/formver3/doctor_use_formver3/use/DoctorI
 import UserGuidePage from "./pages/landingpage/guild/UserGuidePage";
 import GuideMenuWorkListPage from "./pages/landingpage/guild/worklist/GuideMenuWorkListPage";
 import GuideMenuAppPage from "./pages/landingpage/guild/app/GuideMenuAppPage";
+import GuideMenuManagePage from "./pages/landingpage/guild/manage/GuideMenuManagePage";
+import GuideMenuManagePrintPage from "./pages/landingpage/guild/manage/GuideMenuManagePrintPage";
 
 function App() {
   useAuthInitializer();
@@ -166,6 +168,11 @@ function App() {
         <Route path="/guild" element={<UserGuidePage />} />
         <Route path="/guild/worklist" element={<GuideMenuWorkListPage />} />
         <Route path="/guild/app" element={<GuideMenuAppPage />} />
+        <Route path="/guild/manage" element={<GuideMenuManagePage />} />
+        <Route
+          path="/guild/manage/print-template"
+          element={<GuideMenuManagePrintPage />}
+        />
 
         <Route
           path="/home"
