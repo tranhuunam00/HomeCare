@@ -1040,16 +1040,6 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
                   }));
                 }
               }}
-              onRow={(record) => ({
-                onClick: () => {
-                  !deviceIsMobile
-                    ? setChosenRecord(record)
-                    : navigate(`/home/patients-diagnose/${record.id}`, {
-                        state: { record },
-                      });
-                },
-                style: { cursor: "pointer" },
-              })}
             />
           </div>
         </ConfigProvider>

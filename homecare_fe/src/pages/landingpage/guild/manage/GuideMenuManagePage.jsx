@@ -2,6 +2,7 @@ import React from "react";
 import { Card, Row, Col, Typography, Divider, Button } from "antd";
 import styles from "../UserGuidePage.module.scss";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const { Title, Paragraph } = Typography;
 
@@ -23,11 +24,7 @@ const GuideMenuManagePage = () => {
     },
     {
       title: "Bác sĩ",
-      onClick: () => navigate("/guild/manage/doctor"),
-    },
-    {
-      title: "Tích hợp",
-      onClick: () => navigate("/guild/manage/integration"),
+      onClick: () => toast.warn("Chỉ admin mới có quyền"),
     },
   ];
 
