@@ -48,7 +48,7 @@ const TemplatePrintPreview = () => {
     setLoading(true);
     try {
       const res = await API_CALL.get("/clinics", {
-        params: { page: 1, limit: 100 },
+        params: { page: 1, limit: 1000 },
       });
       setClinics(res.data.data.data);
     } catch (err) {
@@ -96,7 +96,7 @@ const TemplatePrintPreview = () => {
           formData.append(
             "logo",
             value.originFileObj,
-            value.originFileObj.name
+            value.originFileObj.name,
           );
         }
       } else {

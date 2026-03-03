@@ -91,7 +91,7 @@ const OnboardingWizard = ({ open, onClose, doctorId, is_use_onboard }) => {
     setLoadingPackage(true);
     try {
       const hasPackage = userPackages.some(
-        (pkg) => pkg.package_code === selectedPackage
+        (pkg) => pkg.package_code === selectedPackage,
       );
 
       const payload = {
@@ -121,7 +121,7 @@ const OnboardingWizard = ({ open, onClose, doctorId, is_use_onboard }) => {
     } catch (err) {
       toast.error(
         err?.response?.data?.message ||
-          "Đăng ký gói thất bại, vui lòng thử lại."
+          "Đăng ký gói thất bại, vui lòng thử lại.",
       );
     } finally {
       setLoadingPackage(false);
@@ -152,7 +152,7 @@ const OnboardingWizard = ({ open, onClose, doctorId, is_use_onboard }) => {
     const fetchClinics = async () => {
       try {
         const res = await API_CALL.get("/clinics", {
-          params: { page: 1, limit: 100 },
+          params: { page: 1, limit: 1000 },
         });
         setClinics(res.data.data.data);
       } catch (err) {
@@ -595,7 +595,7 @@ const OnboardingWizard = ({ open, onClose, doctorId, is_use_onboard }) => {
                     Number(
                       fees
                         ?.find((f) => f.value === 1)
-                        ?.label?.replace(/\./g, "")
+                        ?.label?.replace(/\./g, ""),
                     ) || 0;
 
                   const originalPrice = oneMonthFee * d.value;
@@ -667,7 +667,7 @@ const OnboardingWizard = ({ open, onClose, doctorId, is_use_onboard }) => {
           toast.success("Tạo mới phòng khám thành công!");
 
           const res = await API_CALL.get("/clinics", {
-            params: { page: 1, limit: 100 },
+            params: { page: 1, limit: 1000 },
           });
           setClinics(res.data.data.data || []);
 
@@ -736,7 +736,7 @@ const OnboardingWizard = ({ open, onClose, doctorId, is_use_onboard }) => {
 
       if (current === 4 && usableCount === 0) {
         toast.warning(
-          "Vui lòng đăng ký và được duyệt ít nhất 1 gói hoạt động."
+          "Vui lòng đăng ký và được duyệt ít nhất 1 gói hoạt động.",
         );
         return;
       }
@@ -755,7 +755,7 @@ const OnboardingWizard = ({ open, onClose, doctorId, is_use_onboard }) => {
         append("degree", values.degree);
         append(
           "dob",
-          values.dob ? dayjs(values.dob).format("YYYY-MM-DD") : null
+          values.dob ? dayjs(values.dob).format("YYYY-MM-DD") : null,
         );
 
         if (avatarFile) formData.append("avatar", avatarFile);

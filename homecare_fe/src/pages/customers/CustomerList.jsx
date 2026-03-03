@@ -85,7 +85,7 @@ const CustomerList = () => {
   const fetchClinics = async () => {
     try {
       const res = await API_CALL.get("/clinics", {
-        params: { page: 1, limit: 100 },
+        params: { page: 1, limit: 1000 },
       });
       setClinics(res.data.data.data);
     } catch (err) {
@@ -151,7 +151,7 @@ const CustomerList = () => {
         is_advisor: newStatus,
       });
       toast.success(
-        newStatus ? "Đã đặt làm cố vấn" : "Đã hủy trạng thái cố vấn"
+        newStatus ? "Đã đặt làm cố vấn" : "Đã hủy trạng thái cố vấn",
       );
       fetchDoctors();
     } catch (err) {

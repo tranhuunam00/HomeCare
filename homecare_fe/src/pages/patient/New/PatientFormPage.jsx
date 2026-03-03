@@ -42,7 +42,7 @@ const PatientFormPage = () => {
   const fetchClinics = async () => {
     try {
       const res = await API_CALL.get("/clinics", {
-        params: { page: 1, limit: 100 },
+        params: { page: 1, limit: 1000 },
       });
       setClinics(res.data.data.data);
     } catch (error) {
@@ -60,7 +60,7 @@ const PatientFormPage = () => {
     const fetchCountries = async () => {
       try {
         const res = await axios.get(
-          "https://countriesnow.space/api/v0.1/countries/positions"
+          "https://countriesnow.space/api/v0.1/countries/positions",
         );
         const names = res.data.data.map((c) => c.name).sort();
         setCountries(names);
@@ -433,7 +433,7 @@ const PatientFormPage = () => {
                   onChange={(e) => {
                     form.setFieldValue(
                       "sid",
-                      `${e.target.value}-${dayjs().format("DDMMYY-HHmmss")}`
+                      `${e.target.value}-${dayjs().format("DDMMYY-HHmmss")}`,
                     );
                   }}
                 />

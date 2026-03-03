@@ -123,7 +123,7 @@ const Profile = () => {
   const fetchClinics = async () => {
     try {
       const res = await API_CALL.get("/clinics", {
-        params: { page: 1, limit: 100 },
+        params: { page: 1, limit: 1000 },
       });
       setClinics(res.data.data.data);
     } catch (error) {
@@ -267,7 +267,7 @@ const Profile = () => {
       formData.append("degree", values.degree || "");
       formData.append(
         "dob",
-        values.dob ? dayjs(values.dob).format("YYYY-MM-DD") : null
+        values.dob ? dayjs(values.dob).format("YYYY-MM-DD") : null,
       );
 
       if (avatarFile) formData.append("avatar", avatarFile);
@@ -370,7 +370,7 @@ const Profile = () => {
                       <Text>
                         {form.getFieldValue("dob")
                           ? dayjs(form.getFieldValue("dob")).format(
-                              "DD-MM-YYYY"
+                              "DD-MM-YYYY",
                             )
                           : "-"}
                       </Text>
@@ -453,7 +453,7 @@ const Profile = () => {
                       <Text>
                         {ACADEMIC_TITLES.find(
                           (item) =>
-                            item.value === form.getFieldValue("academic_title")
+                            item.value === form.getFieldValue("academic_title"),
                         )?.label || "-"}
                       </Text>
                     )}
@@ -473,7 +473,7 @@ const Profile = () => {
                     ) : (
                       <Text>
                         {DEGREES.find(
-                          (item) => item.value === form.getFieldValue("degree")
+                          (item) => item.value === form.getFieldValue("degree"),
                         )?.label || "-"}
                       </Text>
                     )}
@@ -591,7 +591,8 @@ const Profile = () => {
             ) : (
               <Text>
                 {E_SIGNATURE_OPTIONS.find(
-                  (item) => item.value === form.getFieldValue("e_signature_url")
+                  (item) =>
+                    item.value === form.getFieldValue("e_signature_url"),
                 )?.label || "Không set"}
               </Text>
             )}

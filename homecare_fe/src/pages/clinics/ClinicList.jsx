@@ -46,8 +46,8 @@ const ClinicList = () => {
       const res = await API_CALL.get("/clinics", {
         params:
           user.id_role != USER_ROLE.ADMIN
-            ? { page: 1, limit: 100, id_user: user.id }
-            : { page: 1, limit: 100 },
+            ? { page: 1, limit: 1000, id_user: user.id }
+            : { page: 1, limit: 1000 },
       });
       setClinicList(res.data.data.data);
     } catch (err) {
@@ -126,10 +126,10 @@ const ClinicList = () => {
 
   const filteredClinics = clinicList
     .filter((item) =>
-      item.name?.toLowerCase().includes(searchName.toLowerCase())
+      item.name?.toLowerCase().includes(searchName.toLowerCase()),
     )
     .filter((item) =>
-      item.phone_number?.toLowerCase().includes(searchPhone.toLowerCase())
+      item.phone_number?.toLowerCase().includes(searchPhone.toLowerCase()),
     )
     .filter((item) => (statusFilter ? item.status === statusFilter : true));
 

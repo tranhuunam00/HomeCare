@@ -40,7 +40,7 @@ const TemplateList = () => {
   const fetchClinics = async () => {
     try {
       const res = await API_CALL.get("/clinics", {
-        params: { page: 1, limit: 100 },
+        params: { page: 1, limit: 1000 },
       });
       const map = {};
       res.data.data.data.forEach((clinic) => {
