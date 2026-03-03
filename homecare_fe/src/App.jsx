@@ -80,6 +80,10 @@ import GuideMenuWorkListPage from "./pages/landingpage/guild/worklist/GuideMenuW
 import GuideMenuAppPage from "./pages/landingpage/guild/app/GuideMenuAppPage";
 import GuideMenuManagePage from "./pages/landingpage/guild/manage/GuideMenuManagePage";
 import GuideMenuManagePrintPage from "./pages/landingpage/guild/manage/GuideMenuManagePrintPage";
+import GuideMenuSubscriptionPage from "./pages/landingpage/guild/subcription/GuideMenuSubscriptionPage";
+import GuideMenuManagerClinicPage from "./pages/landingpage/guild/manage/GuideMenuManageClinicPage";
+import GuideMenuManagerServicePage from "./pages/landingpage/guild/manage/GuideMenuManageServicePage";
+import GuideMenuReadResultPage from "./pages/landingpage/guild/worklist/GuideMenuReadResultPage";
 
 function App() {
   useAuthInitializer();
@@ -169,9 +173,25 @@ function App() {
         <Route path="/guild/worklist" element={<GuideMenuWorkListPage />} />
         <Route path="/guild/app" element={<GuideMenuAppPage />} />
         <Route path="/guild/manage" element={<GuideMenuManagePage />} />
+        <Route path="/guild/report" element={<GuideMenuReadResultPage />} />
+
+        <Route
+          path="/guild/manage/clinic"
+          element={<GuideMenuManagerClinicPage />}
+        />
+
+        <Route
+          path="/guild/manage/service"
+          element={<GuideMenuManagerServicePage />}
+        />
+
         <Route
           path="/guild/manage/print-template"
           element={<GuideMenuManagePrintPage />}
+        />
+        <Route
+          path="/guild/subscription"
+          element={<GuideMenuSubscriptionPage />}
         />
 
         <Route
