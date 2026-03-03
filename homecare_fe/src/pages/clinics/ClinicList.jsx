@@ -44,7 +44,7 @@ const ClinicList = () => {
     setLoading(true);
     try {
       const params =
-        user.id_role !== USER_ROLE.ADMIN
+        user.id_role != USER_ROLE.ADMIN
           ? { page: 1, limit: 1000, id_user: user.id }
           : { page: 1, limit: 1000 };
 
@@ -76,15 +76,17 @@ const ClinicList = () => {
 
   // ================= FILTER =================
   useEffect(() => {
-    const filtered = clinicList
+    const filteredClinics = clinicList
       .filter((item) =>
-        item.name?.toLowerCase().includes(searchName.toLowerCase()),
+        (item.name || "").toLowerCase().includes(searchName.toLowerCase()),
       )
       .filter((item) =>
-        item.phone_number?.toLowerCase().includes(searchPhone.toLowerCase()),
+        (item.phone_number || "")
+          .toLowerCase()
+          .includes(searchPhone.toLowerCase()),
       );
 
-    setFilteredClinics(filtered);
+    setFilteredClinics(filteredClinics);
   }, [searchName, searchPhone, clinicList]);
 
   // ================= SUBMIT =================
