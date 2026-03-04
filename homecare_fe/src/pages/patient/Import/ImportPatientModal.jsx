@@ -4,6 +4,7 @@ import { InboxOutlined, DownloadOutlined } from "@ant-design/icons";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { useGlobalAuth } from "../../../contexts/AuthContext";
+import provinces from "../../../dataJson/full_json_generated_data_vn_units.json";
 
 const { Dragger } = Upload;
 
@@ -12,7 +13,31 @@ const ImportPatientModal = ({ open, onClose }) => {
 
   const { templateServices = [], examParts = [] } = useGlobalAuth();
 
+  /* -------------------- PROVINCE LIST -------------------- */
+
+  const provinceNames = provinces.map((p) => p.Name);
+
+  /* -------------------- WARD LIST -------------------- */
+
+  const wardList = [];
+
+  provinces.forEach((p) => {
+    p.Wards.forEach((w) => {
+      wardList.push(`(${p.Name}) ${w.Name}`);
+    });
+  });
+
+  /* -------------------- TEMPLATE SERVICE LIST -------------------- */
+
   const templateNames = templateServices.map((t) => t.name);
+
+  /* -------------------- EXAM PART LIST -------------------- */
+
+  const examPartList = examParts
+    .map((e) => `(${e.template_service?.name || ""}) ${e.name}`)
+    .sort();
+
+  /* -------------------- DOWNLOAD TEMPLATE -------------------- */
 
   const downloadTemplate = async () => {
     const workbook = new ExcelJS.Workbook();
@@ -22,7 +47,7 @@ const ImportPatientModal = ({ open, onClose }) => {
 
     /* TITLE */
 
-    sheet.mergeCells("A1:L1");
+    sheet.mergeCells("A1:N1");
 
     const title = sheet.getCell("A1");
 
@@ -55,16 +80,18 @@ const ImportPatientModal = ({ open, onClose }) => {
     const headers = [
       "PID *",
       "SID *",
-      "name *",
-      "gender *",
-      "dob",
-      "phoneNumber",
+      "Họ và tên *",
+      "Giới tính *",
+      "Ngày sinh",
+      "SDT",
       "CCCD",
-      "email",
-      "address",
-      "Indication",
-      "id_template_service",
-      "id_exam_part",
+      "Email",
+      "Triệu chứng",
+      "Địa chỉ",
+      "Tỉnh/Thành phố",
+      "Phường/Xã",
+      "Phân hệ",
+      "Bộ phận khám",
     ];
 
     const headerRowIndex = 7;
@@ -73,8 +100,11 @@ const ImportPatientModal = ({ open, onClose }) => {
 
     headers.forEach((h, i) => {
       const cell = headerRow.getCell(i + 1);
+
       cell.value = h;
+
       cell.font = { bold: true };
+
       cell.alignment = { horizontal: "center" };
     });
 
@@ -95,59 +125,90 @@ const ImportPatientModal = ({ open, onClose }) => {
       { width: 22 },
       { width: 20 },
       { width: 18 },
+      { width: 20 },
+      { width: 28 },
     ];
 
-    /* DATA SHEET */
+    /* -------------------- DATA SHEET -------------------- */
 
-    dataSheet.getCell("A1").value = "Gender";
-    dataSheet.getCell("A2").value = "Nam";
-    dataSheet.getCell("A3").value = "Nữ";
+    /* GENDER */
 
-    const templateStart = 1;
+    dataSheet.getCell("A1").value = "Nam";
+    dataSheet.getCell("A2").value = "Nữ";
 
-    templateServices.forEach((t, i) => {
-      dataSheet.getCell(`B${i + 1}`).value = t.id;
+    /* TEMPLATE SERVICE */
+
+    templateNames.forEach((t, i) => {
+      dataSheet.getCell(`B${i + 1}`).value = t;
     });
 
-    examParts.forEach((e, i) => {
-      dataSheet.getCell(`C${i + 1}`).value = e.id;
+    /* EXAM PART */
+
+    examPartList.forEach((e, i) => {
+      dataSheet.getCell(`C${i + 1}`).value = e;
     });
 
-    /* VALIDATION */
+    /* PROVINCE */
+
+    provinceNames.forEach((p, i) => {
+      dataSheet.getCell(`D${i + 1}`).value = p;
+    });
+
+    /* WARD */
+
+    wardList.forEach((w, i) => {
+      dataSheet.getCell(`E${i + 1}`).value = w;
+    });
+
+    /* -------------------- VALIDATION -------------------- */
 
     const startRow = headerRowIndex + 1;
+
     const endRow = 500;
 
     for (let r = startRow; r <= endRow; r++) {
-      /* gender */
+      /* GENDER */
 
       sheet.getCell(`D${r}`).dataValidation = {
         type: "list",
         allowBlank: true,
-        formulae: ["DATA!$A$2:$A$3"],
+        formulae: ["DATA!$A$1:$A$2"],
       };
 
-      /* template service */
+      /* PROVINCE */
 
-      for (let r = startRow; r <= endRow; r++) {
-        sheet.getCell(`K${r}`).dataValidation = {
-          type: "list",
-          allowBlank: false,
-          formulae: [`"${templateNames.join(",")}"`],
-        };
-      }
-      /* exam part */
+      sheet.getCell(`K${r}`).dataValidation = {
+        type: "list",
+        allowBlank: true,
+        formulae: [`DATA!$D$1:$D$${provinceNames.length}`],
+      };
 
-      for (let r = startRow; r <= endRow; r++) {
-        sheet.getCell(`L${r}`).dataValidation = {
-          type: "list",
-          allowBlank: false,
-          formulae: [`INDIRECT(SUBSTITUTE($K${r}," ","_"))`],
-        };
-      }
+      /* WARD */
+
+      sheet.getCell(`L${r}`).dataValidation = {
+        type: "list",
+        allowBlank: true,
+        formulae: [`DATA!$E$1:$E$${wardList.length}`],
+      };
+
+      /* TEMPLATE SERVICE */
+
+      sheet.getCell(`M${r}`).dataValidation = {
+        type: "list",
+        allowBlank: true,
+        formulae: [`DATA!$B$1:$B$${templateNames.length}`],
+      };
+
+      /* EXAM PART */
+
+      sheet.getCell(`N${r}`).dataValidation = {
+        type: "list",
+        allowBlank: true,
+        formulae: [`DATA!$C$1:$C$${examPartList.length}`],
+      };
     }
 
-    /* EXAMPLE */
+    /* -------------------- EXAMPLE -------------------- */
 
     const exampleRow = sheet.getRow(startRow);
 
@@ -157,14 +218,16 @@ const ImportPatientModal = ({ open, onClose }) => {
     exampleRow.getCell(4).value = "Nam";
     exampleRow.getCell(5).value = "1990-01-01";
     exampleRow.getCell(6).value = "0912345678";
-    exampleRow.getCell(9).value = "Hà Nội";
-    exampleRow.getCell(10).value = "Đau bụng";
-    exampleRow.getCell(11).value = templateServices?.[0]?.name || "";
-    exampleRow.getCell(12).value = examParts?.[0]?.name || "";
+    exampleRow.getCell(9).value = "Đau bụng";
+    exampleRow.getCell(10).value = "Hà Nội";
+    exampleRow.getCell(11).value = "Hà Nội";
+    exampleRow.getCell(12).value = "(Hà Nội) Ba Đình";
+    exampleRow.getCell(13).value = templateNames?.[0] || "";
+    exampleRow.getCell(14).value = examPartList?.[0] || "";
 
     exampleRow.commit();
 
-    /* EXPORT */
+    /* -------------------- EXPORT -------------------- */
 
     const buffer = await workbook.xlsx.writeBuffer();
 
@@ -175,6 +238,8 @@ const ImportPatientModal = ({ open, onClose }) => {
     saveAs(blob, "drad-import-template.xlsx");
   };
 
+  /* -------------------- CHECK IMPORT -------------------- */
+
   const handleCheck = () => {
     if (!importFile) {
       message.warning("Vui lòng chọn file Excel");
@@ -183,6 +248,8 @@ const ImportPatientModal = ({ open, onClose }) => {
 
     console.log(importFile);
   };
+
+  /* -------------------- UI -------------------- */
 
   return (
     <Modal
