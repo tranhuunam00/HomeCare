@@ -13,12 +13,15 @@ import { useGlobalAuth } from "../../../../contexts/AuthContext";
 import { USER_ROLE } from "../../../../constant/app";
 
 const TemplatePrintList = () => {
+  const navigate = useNavigate();
+  const { clinicsAll, user } = useGlobalAuth();
+
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
 
-  const { clinicsAll } = useGlobalAuth();
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [total, setTotal] = useState(0);
 
   const [filter, setFilter] = useState({
     name: "",
@@ -29,21 +32,21 @@ const TemplatePrintList = () => {
     name: "",
     id_clinic: undefined,
   });
-  const { user } = useGlobalAuth();
-  const navigate = useNavigate();
 
   const fetchTemplates = async () => {
-    setLoading(true);
     try {
+      setLoading(true);
+
       const res = await API_CALL.get("/print-template", {
         params: {
           ...filter,
           page,
-          limit: 10,
+          limit: pageSize,
         },
       });
 
       const responseData = res.data.data;
+
       setTemplates(responseData?.data || []);
       setTotal(responseData?.total || 0);
     } catch (err) {
@@ -56,11 +59,11 @@ const TemplatePrintList = () => {
 
   useEffect(() => {
     fetchTemplates();
-  }, [page, filter]);
+  }, [page, pageSize, filter]);
 
   const handleDelete = async (id) => {
     const confirm = window.confirm(
-      "Bạn có chắc chắn muốn xóa mẫu in này? Thao tác này không thể hoàn tác."
+      "Bạn có chắc chắn muốn xóa mẫu in này? Thao tác này không thể hoàn tác.",
     );
     if (!confirm) return;
 
@@ -69,8 +72,8 @@ const TemplatePrintList = () => {
       toast.success("Đã xóa thành công");
       fetchTemplates();
     } catch (err) {
-      toast.error("Xóa thất bại, vui lòng thử lại");
-      console.error("Lỗi xóa template:", err);
+      console.error("Lỗi xóa:", err);
+      toast.error("Xóa thất bại");
     }
   };
 
@@ -80,20 +83,22 @@ const TemplatePrintList = () => {
 
     try {
       const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+
       const payload = {
         ...record,
         id: undefined,
         name: `${record.name} - Copy ${timestamp}`,
         createdAt: Date.now(),
-        updated_at: Date.now(),
+        updatedAt: Date.now(),
       };
 
       await API_CALL.post("/print-template", payload);
-      toast.success("Đã clone mẫu in thành công");
+
+      toast.success("Clone thành công");
       fetchTemplates();
     } catch (err) {
+      console.error(err);
       toast.error("Clone thất bại");
-      console.error("Lỗi clone:", err);
     }
   };
 
@@ -103,16 +108,25 @@ const TemplatePrintList = () => {
       key: "stt",
       align: "center",
       width: 70,
-      render: (_, __, index) => (page - 1) * 10 + index + 1,
+      render: (_, __, index) => (page - 1) * pageSize + index + 1,
     },
-    { title: "ID", dataIndex: "id", key: "id", align: "center" },
-    { title: "Tên", dataIndex: "name", key: "name" },
+    {
+      title: "ID",
+      dataIndex: "id",
+      key: "id",
+      align: "center",
+      width: 80,
+    },
+    {
+      title: "Tên mẫu",
+      dataIndex: "name",
+      key: "name",
+    },
     {
       title: "Tên phòng khám",
-      key: "id_clinic",
+      key: "clinic",
       render: (_, record) => record?.id_clinic_clinic?.name || "—",
     },
-
     {
       title: "Phòng khám hiển thị",
       dataIndex: "clinic_name",
@@ -123,23 +137,10 @@ const TemplatePrintList = () => {
       dataIndex: "department_name",
       key: "department_name",
     },
-    // { title: "Mã header", dataIndex: "code_header", key: "code_header" },
-    // {
-    //   title: "Logo",
-    //   dataIndex: "logo_url",
-    //   key: "logo_url",
-    //   render: (url) =>
-    //     url ? <img src={url} alt="logo" style={{ width: 40 }} /> : "—",
-    // },
-    // {
-    //   title: "Kích hoạt",
-    //   dataIndex: "is_active",
-    //   key: "is_active",
-    //   render: (active) => (active ? "✔️" : "❌"),
-    // },
     {
       title: "Thao tác",
       key: "action",
+      width: 260,
       render: (_, record) => {
         const isAdmin = user?.id_role == USER_ROLE.ADMIN;
         const isOwner = record.id_user == user?.id;
@@ -181,6 +182,7 @@ const TemplatePrintList = () => {
         <Col>
           <h2 className={styles.title}>Danh sách mẫu in kết quả</h2>
         </Col>
+
         <Col>
           <Button
             type="primary"
@@ -192,8 +194,8 @@ const TemplatePrintList = () => {
         </Col>
       </Row>
 
-      <Row gutter={16} className={styles.filterGroup}>
-        <Col span={6}>
+      <Row gutter={16} style={{ marginBottom: 16 }}>
+        <Col span={8}>
           <Card
             size="small"
             title={
@@ -202,63 +204,61 @@ const TemplatePrintList = () => {
               </>
             }
           >
-            <div>
-              <Row gutter={8} align="middle" wrap={false}>
-                <Col span={12}>
-                  <Input
-                    placeholder="Tìm theo tên..."
-                    value={draft.name}
-                    onChange={(e) =>
-                      setDraft((prev) => ({ ...prev, name: e.target.value }))
-                    }
-                    allowClear
-                  />
-                </Col>
+            <Row gutter={8}>
+              <Col span={12}>
+                <Input
+                  placeholder="Tìm theo tên..."
+                  value={draft.name}
+                  allowClear
+                  onChange={(e) =>
+                    setDraft((prev) => ({ ...prev, name: e.target.value }))
+                  }
+                />
+              </Col>
 
-                <Col span={12}>
-                  <Select
-                    allowClear
-                    placeholder="Chọn phòng khám..."
-                    value={draft.id_clinic}
-                    onChange={(v) =>
-                      setDraft((prev) => ({ ...prev, id_clinic: v }))
-                    }
-                    style={{ width: "100%" }}
-                  >
-                    {clinicsAll.map((c) => (
-                      <Select.Option key={c.id} value={c.id}>
-                        {c.name}
-                      </Select.Option>
-                    ))}
-                  </Select>
-                </Col>
+              <Col span={12}>
+                <Select
+                  allowClear
+                  placeholder="Chọn phòng khám"
+                  value={draft.id_clinic}
+                  style={{ width: "100%" }}
+                  onChange={(v) =>
+                    setDraft((prev) => ({ ...prev, id_clinic: v }))
+                  }
+                >
+                  {clinicsAll.map((c) => (
+                    <Select.Option key={c.id} value={c.id}>
+                      {c.name}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Col>
 
-                <Col>
-                  <Button
-                    type="primary"
-                    onClick={() => {
-                      setPage(1);
-                      setFilter(draft);
-                    }}
-                  >
-                    Tìm kiếm
-                  </Button>
-                </Col>
+              <Col>
+                <Button
+                  type="primary"
+                  onClick={() => {
+                    setPage(1);
+                    setFilter(draft);
+                  }}
+                >
+                  Tìm kiếm
+                </Button>
+              </Col>
 
-                <Col>
-                  <Button
-                    onClick={() => {
-                      const reset = { name: "", id_clinic: undefined };
-                      setDraft(reset);
-                      setFilter(reset);
-                      setPage(1);
-                    }}
-                  >
-                    Reset
-                  </Button>
-                </Col>
-              </Row>
-            </div>
+              <Col>
+                <Button
+                  onClick={() => {
+                    const reset = { name: "", id_clinic: undefined };
+                    setDraft(reset);
+                    setFilter(reset);
+                    setPage(1);
+                  }}
+                >
+                  Reset
+                </Button>
+              </Col>
+            </Row>
           </Card>
         </Col>
       </Row>
@@ -270,10 +270,15 @@ const TemplatePrintList = () => {
           columns={columns}
           pagination={{
             current: page,
-            pageSize: 10,
-            total,
-            showSizeChanger: false,
-            onChange: (p) => setPage(p),
+            pageSize: pageSize,
+            total: total,
+            showSizeChanger: true,
+            pageSizeOptions: ["10", "20", "50", "100"],
+            showTotal: (total) => `Tổng ${total} mẫu`,
+            onChange: (p, size) => {
+              setPage(p);
+              setPageSize(size);
+            },
           }}
         />
       </Spin>
