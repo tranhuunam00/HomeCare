@@ -66,27 +66,27 @@ const Sidebar = ({ collapsed }) => {
       icon: <Avatar src="/icons/formver2.png" size={40} />,
       label: "Quản lý",
       children: [
-        user?.id_role === USER_ROLE.ADMIN && {
-          key: "form-drad-list",
-          icon: <Avatar src={"/icons/formver2.png"} size={40} />,
-          label: "Mẫu kết quả v.2",
-          children: [
-            user?.id_role === USER_ROLE.ADMIN && {
-              key: "/home/form-drad",
-              label: "Tạo mẫu mới",
-            },
-            user?.id_role === USER_ROLE.ADMIN && {
-              key: "/home/form-drad-list",
-              label: "Danh sách mẫu",
-            },
+        // user?.id_role === USER_ROLE.ADMIN && {
+        //   key: "form-drad-list",
+        //   icon: <Avatar src={"/icons/formver2.png"} size={40} />,
+        //   label: "Mẫu kết quả v.2",
+        //   children: [
+        //     user?.id_role === USER_ROLE.ADMIN && {
+        //       key: "/home/form-drad",
+        //       label: "Tạo mẫu mới",
+        //     },
+        //     user?.id_role === USER_ROLE.ADMIN && {
+        //       key: "/home/form-drad-list",
+        //       label: "Danh sách mẫu",
+        //     },
 
-            user?.id_role === USER_ROLE.ADMIN && {
-              key: "/home/form-ver2-names",
+        //     user?.id_role === USER_ROLE.ADMIN && {
+        //       key: "/home/form-ver2-names",
 
-              label: "Danh sách tên mẫu",
-            },
-          ],
-        },
+        //       label: "Danh sách tên mẫu",
+        //     },
+        //   ],
+        // },
 
         user?.id_role === USER_ROLE.ADMIN && {
           key: "form-drad-list v.3",

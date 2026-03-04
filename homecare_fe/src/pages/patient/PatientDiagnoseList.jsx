@@ -25,6 +25,7 @@ import {
   CopyOutlined,
   EditOutlined,
   ApartmentOutlined,
+  UploadOutlined,
 } from "@ant-design/icons";
 import debounce from "lodash.debounce";
 import { useNavigate } from "react-router-dom";
@@ -51,6 +52,7 @@ import useTemplateServicesAndExamParts from "../../hooks/useTemplateServicesAndE
 import ReloadTSAndExamPartsButton from "../../components/ReloadTSAndExamPartsButton";
 import ResizableTitle from "./setting/ResizableTitle";
 import FlowModal from "./setting/nodes/FlowModal";
+import ImportPatientModal from "./Import/ImportPatientModal";
 
 const { Option } = Select;
 const COLUMN_SETTING_STORAGE_KEY = "patientDiagnose_column_settings";
@@ -116,6 +118,8 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
   const [customColumns, setCustomColumns] = useState([]);
   const [chosenRecord, setChosenRecord] = useState();
   const [returnStatus, setReturnStatus] = useState(false);
+  const [openImportModal, setOpenImportModal] = useState(false);
+  const [importFile, setImportFile] = useState(null);
 
   const [visibleKeys, setVisibleKeys] = useState([]);
   const {
@@ -661,6 +665,12 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
             </Tooltip>
           </Space>
         </div>
+        <Button
+          icon={<UploadOutlined />}
+          onClick={() => setOpenImportModal(true)}
+        >
+          Import
+        </Button>
 
         <Divider
           style={{ margin: 16, display: deviceIsMobile ? "none" : "block" }}
@@ -1111,6 +1121,11 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
           localStorage.getItem(COLUMN_SETTING_STORAGE_KEY) || "{}",
         )}
         onSave={handleSaveColumnSettings}
+      />
+
+      <ImportPatientModal
+        open={openImportModal}
+        onClose={() => setOpenImportModal(false)}
       />
 
       <FlowModal
