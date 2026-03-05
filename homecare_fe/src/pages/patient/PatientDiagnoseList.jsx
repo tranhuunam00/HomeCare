@@ -1126,6 +1126,9 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
       <ImportPatientModal
         open={openImportModal}
         onClose={() => setOpenImportModal(false)}
+        onImportSuccess={() => {
+          fetchPatients(filters);
+        }}
       />
 
       <FlowModal

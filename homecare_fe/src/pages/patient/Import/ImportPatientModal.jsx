@@ -5,12 +5,97 @@ import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { useGlobalAuth } from "../../../contexts/AuthContext";
 import provinces from "../../../dataJson/full_json_generated_data_vn_units.json";
+import API_CALL from "../../../services/axiosClient";
+import { toast } from "react-toastify";
+import ImportResult from "./ImportResult";
 
 const { Dragger } = Upload;
 
-const ImportPatientModal = ({ open, onClose }) => {
+const ImportPatientModal = ({ open, onClose, onImportSuccess }) => {
   const [importFile, setImportFile] = useState(null);
+  const [checkResult, setCheckResult] = useState(null);
+  const [loading, setLoading] = useState(false);
 
+  const importPatients = (rows) => {
+    return API_CALL.post("/patient-diagnose/import", {
+      rows,
+    });
+  };
+  const handleCheck = async () => {
+    if (!importFile) {
+      message.warning("Vui lòng chọn file Excel");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", importFile);
+
+      const res = await API_CALL.post(
+        "/patient-diagnose/check-import",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        },
+      );
+
+      const data = res.data.data;
+
+      if (data.invalidCount > 0) {
+        toast.error(`Có ${data.invalidCount} dòng lỗi`);
+      } else {
+        toast.success(`Tất cả ${data.validCount} dòng hợp lệ`);
+      }
+
+      setCheckResult(data); //
+
+      if (data.invalidCount > 0) {
+        message.error(`Có ${data.invalidCount} dòng lỗi`);
+        console.log("Invalid rows:", data.invalidRows);
+      } else {
+        message.success(`Tất cả ${data.validCount} dòng hợp lệ`);
+      }
+    } catch (err) {
+      console.error(err);
+      message.error("Không thể kiểm tra dữ liệu");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleImport = async () => {
+    if (!checkResult?.validRows?.length) {
+      message.warning("Không có dữ liệu hợp lệ để import");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const res = await importPatients(checkResult.validRows);
+
+      message.success(`Đã tạo ${checkResult.validCount} ca bệnh`);
+
+      const inserted = res.data?.data?.inserted || 0;
+
+      toast.success(`Tạo thành công ${inserted} ca bệnh`);
+      setCheckResult(null);
+      setImportFile(null);
+      if (onImportSuccess) {
+        onImportSuccess();
+      }
+      onClose();
+    } catch (err) {
+      console.error(err);
+      message.error("Import thất bại");
+    } finally {
+      setLoading(false);
+    }
+  };
   const { templateServices = [], examParts = [] } = useGlobalAuth();
 
   /* -------------------- PROVINCE LIST -------------------- */
@@ -189,8 +274,8 @@ const ImportPatientModal = ({ open, onClose }) => {
       { width: 26 },
       { width: 20 },
       { width: 32 },
-      { width: 20 },
       { width: 40 },
+      { width: 50 },
     ];
 
     /* ---------------- FREEZE HEADER ---------------- */
@@ -293,26 +378,13 @@ const ImportPatientModal = ({ open, onClose }) => {
     saveAs(blob, "drad-import-template.xlsx");
   };
 
-  /* -------------------- CHECK IMPORT -------------------- */
-
-  const handleCheck = () => {
-    if (!importFile) {
-      message.warning("Vui lòng chọn file Excel");
-      return;
-    }
-
-    console.log(importFile);
-  };
-
-  /* -------------------- UI -------------------- */
-
   return (
     <Modal
       title="Import ca bệnh"
       open={open}
       onCancel={onClose}
       footer={null}
-      width={520}
+      width={820}
       destroyOnClose
     >
       <Space direction="vertical" style={{ width: "100%" }} size={16}>
@@ -347,8 +419,20 @@ const ImportPatientModal = ({ open, onClose }) => {
           disabled={!importFile}
           onClick={handleCheck}
         >
-          Check dữ liệu
+          Kiểm tra dữ liệu
         </Button>
+        <ImportResult data={checkResult} />
+        {checkResult && (
+          <Button
+            type="primary"
+            block
+            style={{ marginTop: 10 }}
+            disabled={checkResult.validRows <= 0}
+            onClick={handleImport}
+          >
+            Xác nhận tạo mới ({checkResult.validCount})
+          </Button>
+        )}
       </Space>
     </Modal>
   );
