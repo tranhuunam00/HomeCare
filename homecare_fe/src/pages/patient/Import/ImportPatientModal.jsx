@@ -8,6 +8,23 @@ import provinces from "../../../dataJson/full_json_generated_data_vn_units.json"
 
 const { Dragger } = Upload;
 
+const generateSID = (pid) => {
+  const now = new Date();
+
+  const pad = (n) => String(n).padStart(2, "0");
+
+  const time =
+    pad(now.getDate()) +
+    pad(now.getMonth() + 1) +
+    String(now.getFullYear()).slice(-2) +
+    "-" +
+    pad(now.getHours()) +
+    pad(now.getMinutes()) +
+    pad(now.getSeconds());
+
+  return `${pid}-${time}`;
+};
+
 const ImportPatientModal = ({ open, onClose }) => {
   const [importFile, setImportFile] = useState(null);
 
@@ -34,7 +51,13 @@ const ImportPatientModal = ({ open, onClose }) => {
   /* -------------------- EXAM PART LIST -------------------- */
 
   const examPartList = examParts
-    .map((e) => `(${e.template_service?.name || ""}) ${e.name}`)
+    .map((e) => {
+      const template = templateServices.find(
+        (t) => t.id == e.id_template_service,
+      );
+
+      return `(${template?.name || ""}) ${e.name}`;
+    })
     .sort();
 
   /* -------------------- DOWNLOAD TEMPLATE -------------------- */
@@ -124,9 +147,9 @@ const ImportPatientModal = ({ open, onClose }) => {
       { width: 24 },
       { width: 22 },
       { width: 20 },
-      { width: 18 },
+      { width: 30 },
       { width: 20 },
-      { width: 28 },
+      { width: 50 },
     ];
 
     /* -------------------- DATA SHEET -------------------- */
@@ -205,6 +228,10 @@ const ImportPatientModal = ({ open, onClose }) => {
         type: "list",
         allowBlank: true,
         formulae: [`DATA!$C$1:$C$${examPartList.length}`],
+      };
+
+      sheet.getCell(`B${r}`).value = {
+        formula: `IF(A${r}="","",A${r}&"-"&TEXT(NOW(),"ddmmyy-hhmmss"))`,
       };
     }
 
