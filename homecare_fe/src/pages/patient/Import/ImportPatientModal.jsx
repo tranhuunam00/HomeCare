@@ -8,23 +8,6 @@ import provinces from "../../../dataJson/full_json_generated_data_vn_units.json"
 
 const { Dragger } = Upload;
 
-const generateSID = (pid) => {
-  const now = new Date();
-
-  const pad = (n) => String(n).padStart(2, "0");
-
-  const time =
-    pad(now.getDate()) +
-    pad(now.getMonth() + 1) +
-    String(now.getFullYear()).slice(-2) +
-    "-" +
-    pad(now.getHours()) +
-    pad(now.getMinutes()) +
-    pad(now.getSeconds());
-
-  return `${pid}-${time}`;
-};
-
 const ImportPatientModal = ({ open, onClose }) => {
   const [importFile, setImportFile] = useState(null);
 
@@ -68,18 +51,17 @@ const ImportPatientModal = ({ open, onClose }) => {
     const sheet = workbook.addWorksheet("IMPORT");
     const dataSheet = workbook.addWorksheet("DATA");
 
-    /* TITLE */
+    /* ---------------- TITLE ---------------- */
 
     sheet.mergeCells("A1:N1");
 
     const title = sheet.getCell("A1");
 
-    title.value = "D-RAD IMPORT CA BỆNH";
+    title.value = "FILE MẪU IMPORT CA BỆNH VÀO HỆ THỐNG D-RAD";
 
     title.font = {
       bold: true,
-      size: 24,
-      color: { argb: "FF0070C0" },
+      size: 20,
     };
 
     title.alignment = {
@@ -87,24 +69,52 @@ const ImportPatientModal = ({ open, onClose }) => {
       vertical: "middle",
     };
 
-    /* INTRO */
+    title.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FFFCE4D6" },
+    };
 
-    sheet.getCell("A3").value = "Giới thiệu";
-    sheet.getCell("A3").font = { bold: true };
+    /* ---------------- GUIDE BOX ---------------- */
 
-    sheet.getCell("A4").value =
-      "File Excel này dùng để import ca bệnh vào hệ thống D-RAD.";
+    sheet.mergeCells("A3:N6");
 
-    sheet.getCell("A5").value =
-      "Không thay đổi tên cột và chỉ nhập giá trị hợp lệ.";
+    const guide = sheet.getCell("A3");
 
-    /* HEADER */
+    guide.value =
+      "Hướng dẫn:\n" +
+      "- Điền dữ liệu vào các cột tương ứng.\n" +
+      "- Các cột có dấu (*) là bắt buộc.\n" +
+      "- Không thay đổi tên cột.\n" +
+      "- Chỉ nhập dữ liệu hợp lệ theo danh sách dropdown.";
+
+    guide.alignment = {
+      wrapText: true,
+      vertical: "top",
+    };
+
+    guide.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FFF4B183" },
+    };
+
+    guide.border = {
+      top: { style: "thin" },
+      left: { style: "thin" },
+      bottom: { style: "thin" },
+      right: { style: "thin" },
+    };
+
+    guide.font = { size: 12 };
+
+    /* ---------------- HEADER ---------------- */
 
     const headers = [
-      "PID *",
-      "SID *",
-      "Họ và tên *",
-      "Giới tính *",
+      "PID (*)",
+      "SID (*)",
+      "Họ và tên (*)",
+      "Giới tính (*)",
       "Ngày sinh",
       "SDT",
       "CCCD",
@@ -117,121 +127,134 @@ const ImportPatientModal = ({ open, onClose }) => {
       "Bộ phận khám",
     ];
 
-    const headerRowIndex = 7;
+    const headerRowIndex = 8;
 
-    const headerRow = sheet.getRow(headerRowIndex);
+    const row = sheet.getRow(headerRowIndex);
 
     headers.forEach((h, i) => {
-      const cell = headerRow.getCell(i + 1);
+      const cell = row.getCell(i + 1);
 
       cell.value = h;
 
-      cell.font = { bold: true };
+      cell.font = {
+        bold: true,
+        size: 12,
+      };
 
-      cell.alignment = { horizontal: "center" };
+      cell.alignment = {
+        horizontal: "center",
+        vertical: "middle",
+        wrapText: true,
+      };
+
+      let color = "FFD9E1F2"; // default xanh nhạt
+
+      // nhóm địa chỉ
+      if (i >= 9 && i <= 11) {
+        color = "FFE2F0D9"; // xanh lá nhạt
+      }
+
+      // nhóm phân hệ
+      if (i >= 12 && i <= 13) {
+        color = "FFFFF2CC"; // vàng nhạt
+      }
+
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: color },
+      };
+
+      cell.border = {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      };
     });
+    row.commit();
 
-    headerRow.commit();
-
-    /* COLUMN WIDTH */
+    /* ---------------- COLUMN WIDTH ---------------- */
 
     sheet.columns = [
       { width: 12 },
-      { width: 12 },
-      { width: 22 },
+      { width: 16 },
+      { width: 26 },
       { width: 12 },
       { width: 14 },
       { width: 16 },
-      { width: 16 },
+      { width: 18 },
+      { width: 26 },
       { width: 24 },
-      { width: 24 },
-      { width: 22 },
+      { width: 26 },
       { width: 20 },
-      { width: 30 },
+      { width: 32 },
       { width: 20 },
-      { width: 50 },
+      { width: 40 },
     ];
 
-    /* -------------------- DATA SHEET -------------------- */
+    /* ---------------- FREEZE HEADER ---------------- */
 
-    /* GENDER */
+    sheet.views = [
+      {
+        state: "frozen",
+        ySplit: headerRowIndex,
+      },
+    ];
+
+    /* ---------------- DATA SHEET ---------------- */
 
     dataSheet.getCell("A1").value = "Nam";
     dataSheet.getCell("A2").value = "Nữ";
-
-    /* TEMPLATE SERVICE */
 
     templateNames.forEach((t, i) => {
       dataSheet.getCell(`B${i + 1}`).value = t;
     });
 
-    /* EXAM PART */
-
     examPartList.forEach((e, i) => {
       dataSheet.getCell(`C${i + 1}`).value = e;
     });
-
-    /* PROVINCE */
 
     provinceNames.forEach((p, i) => {
       dataSheet.getCell(`D${i + 1}`).value = p;
     });
 
-    /* WARD */
-
     wardList.forEach((w, i) => {
       dataSheet.getCell(`E${i + 1}`).value = w;
     });
 
-    /* -------------------- VALIDATION -------------------- */
+    /* ---------------- VALIDATION ---------------- */
 
     const startRow = headerRowIndex + 1;
-
     const endRow = 500;
 
     for (let r = startRow; r <= endRow; r++) {
-      /* GENDER */
-
+      sheet.getCell(`B${r}`).value = {
+        formula: `IF(A${r}="","",A${r}&"-"&TEXT(NOW(),"ddmmyy-hhmmss"))`,
+      };
       sheet.getCell(`D${r}`).dataValidation = {
         type: "list",
-        allowBlank: true,
         formulae: ["DATA!$A$1:$A$2"],
       };
 
-      /* PROVINCE */
-
       sheet.getCell(`K${r}`).dataValidation = {
         type: "list",
-        allowBlank: true,
         formulae: [`DATA!$D$1:$D$${provinceNames.length}`],
       };
 
-      /* WARD */
-
       sheet.getCell(`L${r}`).dataValidation = {
         type: "list",
-        allowBlank: true,
         formulae: [`DATA!$E$1:$E$${wardList.length}`],
       };
 
-      /* TEMPLATE SERVICE */
-
       sheet.getCell(`M${r}`).dataValidation = {
         type: "list",
-        allowBlank: true,
         formulae: [`DATA!$B$1:$B$${templateNames.length}`],
       };
 
-      /* EXAM PART */
-
       sheet.getCell(`N${r}`).dataValidation = {
         type: "list",
-        allowBlank: true,
         formulae: [`DATA!$C$1:$C$${examPartList.length}`],
-      };
-
-      sheet.getCell(`B${r}`).value = {
-        formula: `IF(A${r}="","",A${r}&"-"&TEXT(NOW(),"ddmmyy-hhmmss"))`,
       };
     }
 
@@ -239,22 +262,27 @@ const ImportPatientModal = ({ open, onClose }) => {
 
     const exampleRow = sheet.getRow(startRow);
 
-    exampleRow.getCell(1).value = "BN001";
-    exampleRow.getCell(2).value = "SID001";
+    exampleRow.getCell(1).value = "BN001"; // PID
+    // SID không cần set vì đã có formula ở cột B
+
     exampleRow.getCell(3).value = "Nguyễn Văn A";
     exampleRow.getCell(4).value = "Nam";
     exampleRow.getCell(5).value = "1990-01-01";
     exampleRow.getCell(6).value = "0912345678";
+    exampleRow.getCell(7).value = "012345678901";
+    exampleRow.getCell(8).value = "nguyenvana@gmail.com";
     exampleRow.getCell(9).value = "Đau bụng";
-    exampleRow.getCell(10).value = "Hà Nội";
-    exampleRow.getCell(11).value = "Hà Nội";
-    exampleRow.getCell(12).value = "(Hà Nội) Ba Đình";
+    exampleRow.getCell(10).value = "Số 1 Hoàng Hoa Thám";
+
+    exampleRow.getCell(11).value = provinceNames?.[0] || "";
+    exampleRow.getCell(12).value = wardList?.[0] || "";
+
     exampleRow.getCell(13).value = templateNames?.[0] || "";
     exampleRow.getCell(14).value = examPartList?.[0] || "";
 
     exampleRow.commit();
 
-    /* -------------------- EXPORT -------------------- */
+    /* ---------------- EXPORT ---------------- */
 
     const buffer = await workbook.xlsx.writeBuffer();
 
