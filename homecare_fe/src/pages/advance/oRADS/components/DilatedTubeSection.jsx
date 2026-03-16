@@ -21,14 +21,14 @@ export default function DilatedTubeSection({
     <>
       {/* Q1: walls/endosalpingeal folds thickness */}
       <Form.Item
-        label="How are the walls (or endosalpingeal folds*) of the fallopian tube?"
+        label="Thành (hoặc các nếp niêm mạc) của vòi trứng có đặc điểm như thế nào?"
         required
         colon={false}
         style={{ marginBottom: 12 }}
       >
         <Paragraph style={{ color: "#9aa3af", marginTop: 0 }}>
-          * are incomplete septations or short round projections, orthogonal to
-          the length of the tube
+          (*) là các vách ngăn không hoàn toàn hoặc các chồi tròn ngắn, vuông
+          góc với chiều dài của ống.
         </Paragraph>
         <Radio.Group
           value={tubeWall}
@@ -51,7 +51,7 @@ export default function DilatedTubeSection({
       {/* Q2: contents (chỉ hiển thị khi thin) */}
       {tubeWall === "thin" && (
         <Form.Item
-          label="What are the contents of the fallopian tube?"
+          label="Nội dung bên trong vòi trứng là gì?"
           required
           colon={false}
           style={{ marginTop: 16, marginBottom: 0 }}

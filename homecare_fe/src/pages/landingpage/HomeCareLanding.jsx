@@ -1,6 +1,15 @@
 // HomeCareLanding.jsx
 import React, { useRef, useState } from "react";
-import { Avatar, Button, Dropdown, Form, Input, Menu, Modal } from "antd";
+import {
+  Avatar,
+  Button,
+  Dropdown,
+  Form,
+  Input,
+  Menu,
+  Modal,
+  Tooltip,
+} from "antd";
 import { DownOutlined, SearchOutlined, UserOutlined } from "@ant-design/icons";
 import { FaPhoneAlt, FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
 import { SiZalo } from "react-icons/si";
@@ -62,13 +71,15 @@ const HomeCareLanding = () => {
             alignItems: "center",
           }}
         >
-          <img
-            onClick={() => (window.location.href = "https://home-care.vn/")}
-            src="/logo_home_care.png"
-            alt=""
-            style={{ cursor: "pointer" }}
-            className={styles["homecare__logo_head"]}
-          />
+          <Tooltip title="Truy cập trang chủ HomeCare" placement="bottom">
+            <img
+              onClick={() => (window.location.href = "https://home-care.vn/")}
+              src="/logo_home_care.png"
+              alt=""
+              style={{ cursor: "pointer" }}
+              className={styles["homecare__logo_head"]}
+            />
+          </Tooltip>
         </div>
 
         <header className={styles["homecare__header"]}>
@@ -87,66 +98,48 @@ const HomeCareLanding = () => {
                 mode="horizontal"
                 selectable={false}
                 className={styles["homecare__menu"]}
-                style={{ width: "100%", justifyContent: "center", gap: 40 }}
+                style={{ width: "100%", justifyContent: "center", gap: 10 }}
               >
                 <Menu.Item
                   key="home"
                   onClick={() =>
-                    (window.location.href = "https://home-care.vn/")
+                    isLoggedIn
+                      ? navigate("home/subscription")
+                      : navigate("/login")
                   }
                 >
-                  TRANG CHỦ
+                  CÁC GÓI DỊCH VỤ
                 </Menu.Item>
 
                 <Menu.Item
-                  key="contact"
+                  key="recist_nn"
+                  onClick={() =>
+                    isLoggedIn
+                      ? navigate("/home/recist_nn")
+                      : navigate("/login")
+                  }
+                >
+                  ỨNG DỤNG HỖ TRỢ
+                </Menu.Item>
+
+                <Menu.Item
+                  key="worklist"
                   onClick={() => navigate("/home")}
                   style={{ fontSize: 24 }}
                 >
-                  PHẦN MỀM D-RADS
+                  ĐỌC KẾT QUẢ
                 </Menu.Item>
                 <Menu.Item key="contact" onClick={() => navigate("/contact")}>
                   HỖ TRỢ KỸ THUẬT
                 </Menu.Item>
                 <Menu.Item key="guild" onClick={() => navigate("/guild")}>
-                  HƯỚNG DẪN
+                  HƯỚNG DẪN SỬ DỤNG
                 </Menu.Item>
               </Menu>
             </div>
           </div>
-          <div className={styles["homecare__container_2"]}>
-            {isLoggedIn ? (
-              <div
-                style={{
-                  display: "flex",
-                  gap: 30,
-                }}
-              >
-                <Button
-                  type="primary"
-                  className={styles["homecare__contact"]}
-                  onClick={() => {
-                    toast.info("✨ Tính năng sắp ra mắt!");
-                  }} // hoặc route bạn muốn
-                >
-                  PACS
-                </Button>
-                <Button
-                  type="primary"
-                  className={styles["homecare__contact"]}
-                  onClick={() => navigate("/home")} // hoặc route bạn muốn
-                >
-                  ĐỌC CA MỚI
-                </Button>
-                <Button
-                  type="primary"
-                  className={styles["homecare__contact"]}
-                  onClick={() => navigate("/home/tirad")} // hoặc route bạn muốn
-                >
-                  ỨNG DỤNG
-                </Button>
-              </div>
-            ) : (
+          {!isLoggedIn && (
+            <div className={styles["homecare__container_2"]}>
               <>
                 <Button
                   type="primary"
@@ -163,8 +156,8 @@ const HomeCareLanding = () => {
                   Đăng ký
                 </Button>
               </>
-            )}
-          </div>
+            </div>
+          )}
         </header>
         <div
           style={{
@@ -233,10 +226,8 @@ const HomeCareLanding = () => {
             mode="vertical"
             selectable={false}
             onClick={({ key }) => {
-              // 1️⃣ đóng drawer trước
               setMobileMenuOpen(false);
 
-              // 2️⃣ delay navigate để tránh unmount
               setTimeout(() => {
                 switch (key) {
                   case "root":
@@ -348,7 +339,7 @@ const HomeCareLanding = () => {
         </div>
       </section>
 
-      <PackageList />
+      {/* <PackageList /> */}
 
       <div
         style={{

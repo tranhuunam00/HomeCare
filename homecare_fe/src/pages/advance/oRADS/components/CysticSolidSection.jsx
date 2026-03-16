@@ -36,7 +36,7 @@ export default function CysticSolidSection({
     <>
       {/* Q1: Dark T2 & Dark DWI */}
       <Form.Item
-        label="Is the solid tissue homogeneously hypointense on T2 and DWI (i.e. Dark T2 and Dark DWI)?"
+        label="Mô đặc có giảm tín hiệu đồng nhất trên T2 và DWI không (tức là T2 tối và DWI tối)?Is the solid tissue homogeneously hypointense on T2 and DWI (i.e. Dark T2 and Dark DWI)?"
         required
         colon={false}
         style={{ marginBottom: 12 }}
@@ -66,7 +66,7 @@ export default function CysticSolidSection({
         <>
           {/* Q2: DCE curve */}
           <Form.Item
-            label="How does the lesion’s risk curve on DCE MRI?"
+            label="Đường cong tăng quang của tổn thương trên DCE-MRI như thế nào?"
             required
             colon={false}
             style={{ marginTop: 20, marginBottom: 8 }}
@@ -103,7 +103,7 @@ export default function CysticSolidSection({
           {/* Nếu chọn Low risk → hỏi ảnh 2 (lipid, large volume?) */}
           {dceCurve === "low" && (
             <Form.Item
-              label="Is the solid tissue large-volume enhancing with lipid content?"
+              label="Mô đặc có tăng quang với thể tích lớn và có chứa thành phần lipid (mỡ) không?"
               required
               colon={false}
               style={{ marginTop: 20, marginBottom: 0 }}
@@ -131,7 +131,7 @@ export default function CysticSolidSection({
           {/* Nếu DCE not available → hỏi ảnh 3 (non-DCE 30–40s) */}
           {dceCurve === "not_available" && (
             <Form.Item
-              label="How is the lesion’s enhancement on non-DCE MRI at 30–40 seconds post-injection?"
+              label="Mức độ tăng quang của tổn thương trên MRI (không theo chuỗi DCE) tại thời điểm 30–40 giây sau khi tiêm thuốc cản quang như thế nào?"
               required
               colon={false}
               style={{ marginTop: 20, marginBottom: 0 }}

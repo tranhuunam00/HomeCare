@@ -23,10 +23,10 @@ const { Text } = Typography;
 
 // 1) Nhóm tổn thương chính
 const INJURY_OPTIONS = [
-  { label: "Subcapsular hematoma", value: "subcapsular" },
-  { label: "Intraparenchymal hematoma", value: "intraparenchymal" },
-  { label: "Parenchymal laceration", value: "laceration" },
-  { label: "Vascular injury", value: "vascular" },
+  { label: "Tụ máu dưới bao", value: "subcapsular" },
+  { label: "Tụ máu trong nhu mô", value: "intraparenchymal" },
+  { label: "Rách nhu mô", value: "laceration" },
+  { label: "Tổn thương mạch máu", value: "vascular" },
 ];
 
 // 2) Sub-options + điểm (theo yêu cầu của bạn)
@@ -36,7 +36,7 @@ const SUBCAPSULAR_OPTIONS = [
   { label: "<10%", value: "<10%", score: 1 },
   { label: "10-50%", value: "10-50%", score: 2 },
   { label: ">50%", value: ">50%", score: 3 },
-  { label: "Subcapsular hematoma is ruptured", value: "ruptured", score: 3 },
+  { label: "Tụ máu dưới bao đã vỡ", value: "ruptured", score: 3 },
 ];
 
 // Intraparenchymal hematoma – diameter (2,3,3)
@@ -44,7 +44,7 @@ const INTRAPARENCHYMAL_OPTIONS = [
   { label: "<10 cm", value: "<10cm", score: 2 },
   { label: ">10 cm", value: ">10cm", score: 3 },
   {
-    label: "Intraparenchymal hematoma is ruptured",
+    label: "Tụ máu trong nhu mô đã vỡ",
     value: "ruptured",
     score: 3,
   },
@@ -52,24 +52,24 @@ const INTRAPARENCHYMAL_OPTIONS = [
 
 // Parenchymal laceration – size/disruption (1,2,3,4,5)
 const LACERATION_OPTIONS = [
-  { label: "<1 cm in depth", value: "<1cmDepth", score: 1 },
+  { label: "Độ sâu < 1 cm", value: "<1cmDepth", score: 1 },
   {
-    label: "1-3 cm in depth and ≤10 cm in length",
+    label: "Độ sâu 1–3 cm và chiều dài ≤ 10 cm",
     value: "1-3cmDepth_<=10cmLen",
     score: 2,
   },
   {
-    label: ">3 cm in depth and/or >10 cm in length",
+    label: "Độ sâu > 3 cm và/hoặc chiều dài > 10 cm",
     value: ">3cmDepth_or_>10cmLen",
     score: 3,
   },
   {
-    label: "Parenchymal disruption involving 25-75% of a hepatic lobe",
+    label: "Phá hủy nhu mô liên quan 25–75% một thùy gan",
     value: "disruption_25-75%",
     score: 4,
   },
   {
-    label: "Parenchymal disruption >75% of hepatic lobe",
+    label: "Phá hủy nhu mô >75% một thùy gan",
     value: "disruption_>75%",
     score: 5,
   },
@@ -78,19 +78,18 @@ const LACERATION_OPTIONS = [
 // Vascular injury – type (3,4,5)
 const VASCULAR_OPTIONS = [
   {
-    label: "Active bleeding contained within liver parenchyma",
+    label: "Chảy máu đang hoạt động nhưng còn khu trú trong nhu mô gan",
     value: "contained_bleeding",
     score: 3,
   },
   {
-    label:
-      "Active bleeding extending beyond the liver parenchyma into the peritoneum",
+    label: "Chảy máu đang hoạt động lan ra ngoài nhu mô gan vào ổ phúc mạc",
     value: "beyond_parenchyma",
     score: 4,
   },
   {
     label:
-      "Juxtahepatic venous injury to include retrohepatic vena cava and central major hepatic veins",
+      "Tổn thương tĩnh mạch quanh gan, bao gồm tĩnh mạch chủ dưới đoạn sau gan và các tĩnh mạch gan lớn trung tâm",
     value: "juxtahepatic_venous_injury",
     score: 5,
   },
@@ -168,7 +167,7 @@ const AASTLiverForm = () => {
           data.data
             ?.replace(/\*\*(.*?)\*\*/g, "$1")
             .replace(/^\* /gm, "• ")
-            .replace(/\n{2,}/g, "\n\n")
+            .replace(/\n{2,}/g, "\n\n"),
         );
       } catch (error) {}
 
@@ -200,7 +199,7 @@ const AASTLiverForm = () => {
             <td>Subcapsular hematoma – surface area</td>
             <td>${getLabelFromValue(
               SUBCAPSULAR_OPTIONS,
-              subcapsularChoice
+              subcapsularChoice,
             )}</td>
           </tr>`
             : ""
@@ -253,7 +252,7 @@ const AASTLiverForm = () => {
     return isCopy
       ? html +
           `<div style="margin-top:16px;">${genAITextToHtml(
-            geminiResponse
+            geminiResponse,
           )}</div>`
       : html;
   };

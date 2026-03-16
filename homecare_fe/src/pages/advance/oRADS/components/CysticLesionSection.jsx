@@ -35,7 +35,7 @@ export default function CysticLesionSection({
       {/* Q1: Cấu trúc nang */}
       <Form.Item
         name="cyst_structure"
-        label="How is the cyst's structure?"
+        label="Cấu trúc của nang như thế nào?"
         rules={[{ required: true, message: "Please choose one." }]}
         colon={false}
         style={{ marginBottom: 12 }}
@@ -63,7 +63,7 @@ export default function CysticLesionSection({
       {/* Q2: Thành phần dịch (chỉ cho unilocular) */}
       {(cystStruct === "uni_no_enh" || cystStruct === "uni_smooth_enh") && (
         <Form.Item
-          label="What are the contents of the cyst?"
+          label="Thành phần của nang là gì?"
           required
           colon={false}
           style={{ marginTop: 8, marginBottom: 0 }}
@@ -97,7 +97,7 @@ export default function CysticLesionSection({
       {cystStruct === "uni_no_enh" &&
         ["simple", "hemorrhagic"].includes(cystContent || "") && (
           <Form.Item
-            label="Is this a cyst ≤ 3 cm in a premenopausal patient?"
+            label="Nang này có đường kính ≤ 3 cm ở bệnh nhân tiền mãn kinh không?"
             required
             colon={false}
             style={{ marginTop: 18, marginBottom: 0 }}
@@ -108,11 +108,11 @@ export default function CysticLesionSection({
             >
               <Row gutter={[12, 12]}>
                 <Col span={24}>
-                  <Radio value={true}>Yes</Radio>
+                  <Radio value={true}>Có</Radio>
                 </Col>
                 <Col span={24}>
                   <Radio value={false}>
-                    No (cyst is &gt;3cm and/or patient is post-menopausal)
+                    Không (nang có đường kính > 3 cm và/hoặc bệnh nhân đã mãn kinh)
                   </Radio>
                 </Col>
               </Row>
@@ -123,7 +123,7 @@ export default function CysticLesionSection({
       {/* Q3: Multilocular có mỡ? */}
       {cystStruct === "multilocular" && (
         <Form.Item
-          label="Does the lesion contain fat?"
+          label="Nang này có chứa mỡ không?"
           required
           colon={false}
           style={{ marginTop: 8, marginBottom: 0 }}
@@ -138,10 +138,10 @@ export default function CysticLesionSection({
           >
             <Row gutter={[12, 12]}>
               <Col span={24}>
-                <Radio value={true}>Yes</Radio>
+                <Radio value={true}>Có</Radio>
               </Col>
               <Col span={24}>
-                <Radio value={false}>No</Radio>
+                <Radio value={false}>Không</Radio>
               </Col>
             </Row>
           </Radio.Group>

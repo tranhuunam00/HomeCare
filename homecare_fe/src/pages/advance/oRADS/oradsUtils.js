@@ -59,7 +59,7 @@ export function computeORADS(input = {}) {
         5,
         RISK_LABEL[5],
         "~90%",
-        "Nghi ngờ cao ác tính. Hội chẩn phụ khoa/ung bướu, đánh giá giai đoạn và lập kế hoạch điều trị."
+        "Nghi ngờ cao ác tính. Hội chẩn phụ khoa/ung bướu, đánh giá giai đoạn và lập kế hoạch điều trị.",
       );
     }
     if (peritoneal !== false) return empty();
@@ -74,7 +74,7 @@ export function computeORADS(input = {}) {
               1,
               RISK_LABEL[1],
               "Not-applicable",
-              "Bình thường. Theo dõi lâm sàng."
+              "Bình thường. Theo dõi lâm sàng.",
             );
           }
           if (cyst_small_premenop === false) {
@@ -82,7 +82,7 @@ export function computeORADS(input = {}) {
               2,
               RISK_LABEL[2],
               "<0.5%",
-              "Gần như chắc chắn lành tính. Theo dõi định kỳ theo triệu chứng/kích thước."
+              "Gần như chắc chắn lành tính. Theo dõi định kỳ theo triệu chứng/kích thước.",
             );
           }
           return empty();
@@ -92,7 +92,7 @@ export function computeORADS(input = {}) {
             2,
             RISK_LABEL[2],
             "<0.5%",
-            "Gần như chắc chắn lành tính. Theo dõi định kỳ."
+            "Gần như chắc chắn lành tính. Theo dõi định kỳ.",
           );
         }
         return empty();
@@ -115,7 +115,7 @@ export function computeORADS(input = {}) {
           m.ppv,
           m.orads === 2
             ? "Gần như chắc chắn lành tính. Theo dõi định kỳ."
-            : "Nguy cơ thấp. Theo dõi sát hoặc cân nhắc can thiệp tùy triệu chứng/kích thước."
+            : "Nguy cơ thấp. Theo dõi sát hoặc cân nhắc can thiệp tùy triệu chứng/kích thước.",
         );
       }
 
@@ -126,7 +126,7 @@ export function computeORADS(input = {}) {
             2,
             RISK_LABEL[2],
             "<0.5%",
-            "Có mỡ → nhiều khả năng lành tính. Theo dõi định kỳ."
+            "Có mỡ → nhiều khả năng lành tính. Theo dõi định kỳ.",
           );
         }
         if (multiloc_has_fat === false) {
@@ -134,7 +134,7 @@ export function computeORADS(input = {}) {
             3,
             RISK_LABEL[3],
             "~5%",
-            "Nguy cơ thấp. Theo dõi sát/đánh giá thêm tuỳ lâm sàng."
+            "Nguy cơ thấp. Theo dõi sát/đánh giá thêm tuỳ lâm sàng.",
           );
         }
         return empty();
@@ -148,7 +148,7 @@ export function computeORADS(input = {}) {
           2,
           RISK_LABEL[2],
           "<0.5%",
-          "Almost certainly benign (Dark T2 & Dark DWI). Theo dõi định kỳ."
+          "Gần như chắc chắn là lành tính (T2 tối và DWI tối). Theo dõi định kỳ.",
         );
       }
       if (solid_dark_t2dwi === false) {
@@ -160,7 +160,7 @@ export function computeORADS(input = {}) {
               4,
               RISK_LABEL[4],
               "~50%",
-              "Nguy cơ trung gian. Tham vấn chuyên khoa; xem xét phẫu thuật/đánh giá thêm."
+              "Nguy cơ trung gian. Tham vấn chuyên khoa; xem xét phẫu thuật/đánh giá thêm.",
             );
           }
           if (solid_large_lipid === false) {
@@ -168,7 +168,7 @@ export function computeORADS(input = {}) {
               3,
               RISK_LABEL[3],
               "~5%",
-              "Nguy cơ thấp. Theo dõi sát hoặc đánh giá thêm tuỳ lâm sàng."
+              "Nguy cơ thấp. Theo dõi sát hoặc đánh giá thêm tuỳ lâm sàng.",
             );
           }
           return empty();
@@ -179,7 +179,7 @@ export function computeORADS(input = {}) {
             4,
             RISK_LABEL[4],
             "~50%",
-            "Nguy cơ trung gian. Tham vấn chuyên khoa; xem xét can thiệp."
+            "Nguy cơ trung gian. Tham vấn chuyên khoa; xem xét can thiệp.",
           );
         }
 
@@ -188,7 +188,7 @@ export function computeORADS(input = {}) {
             5,
             RISK_LABEL[5],
             "~90%",
-            "Nguy cơ cao. Xử trí theo hướng ác tính; hội chẩn đa chuyên khoa."
+            "Nguy cơ cao. Xử trí theo hướng ác tính; hội chẩn đa chuyên khoa.",
           );
         }
 
@@ -198,7 +198,7 @@ export function computeORADS(input = {}) {
               4,
               RISK_LABEL[4],
               "~50%",
-              "Nguy cơ trung gian. Tham vấn chuyên khoa; xem xét can thiệp."
+              "Nguy cơ trung gian. Tham vấn chuyên khoa; xem xét can thiệp.",
             );
           }
           if (non_dce_30s_enh === "gt_myometrium") {
@@ -206,7 +206,7 @@ export function computeORADS(input = {}) {
               5,
               RISK_LABEL[5],
               "~90%",
-              "Nguy cơ cao. Xử trí theo hướng ác tính; hội chẩn đa chuyên khoa."
+              "Nguy cơ cao. Xử trí theo hướng ác tính; hội chẩn đa chuyên khoa.",
             );
           }
           return empty();
@@ -222,7 +222,7 @@ export function computeORADS(input = {}) {
           3,
           RISK_LABEL[3],
           "~5%",
-          "Low risk. Theo dõi sát/đánh giá thêm theo lâm sàng."
+          "Low risk. Theo dõi sát/đánh giá thêm theo lâm sàng.",
         );
       }
       if (tube_wall_thickness === "thin") {
@@ -232,7 +232,7 @@ export function computeORADS(input = {}) {
             2,
             RISK_LABEL[2],
             "<0.5%",
-            "Almost certainly benign. Theo dõi định kỳ."
+            "Gần như chắc chắn là lành tính. Theo dõi định kỳ.",
           );
         }
         if (tube_contents === "non_simple_fluid") {
@@ -240,7 +240,7 @@ export function computeORADS(input = {}) {
             3,
             RISK_LABEL[3],
             "~5%",
-            "Low risk. Theo dõi sát hoặc đánh giá thêm."
+            "Rủi ro thấp. Theo dõi sát hoặc đánh giá thêm.",
           );
         }
       }
@@ -252,7 +252,7 @@ export function computeORADS(input = {}) {
         2,
         RISK_LABEL[2],
         "<0.5%",
-        "Almost certainly benign. Theo dõi theo triệu chứng."
+        "Gần như chắc chắn là lành tính. Theo dõi theo triệu chứng.",
       );
     }
     if (abnormality === "solid") {
@@ -260,11 +260,11 @@ export function computeORADS(input = {}) {
         5,
         RISK_LABEL[5],
         "~90%",
-        "Nghi ngờ cao ác tính. Hội chẩn chuyên khoa."
+        "Nghi ngờ cao ác tính. Hội chẩn chuyên khoa.",
       );
     }
     if (abnormality === "none") {
-      return pack(1, RISK_LABEL[1], "Not-applicable", "Bình thường.");
+      return pack(1, RISK_LABEL[1], "Không áp dụng", "Bình thường.");
     }
 
     return empty();
@@ -276,21 +276,26 @@ export function computeORADS(input = {}) {
   if (modality === "us") {
     // Adequacy
     if (usAdequate === false) {
-      return pack(0, "Incomplete Evaluation", "", "Repeat US study or MRI");
+      return pack(
+        0,
+        "Đánh giá không đầy đủ",
+        "",
+        "Lặp lại nghiên cứu siêu âm hoặc MRI",
+      );
     }
     if (usAdequate !== true) return empty();
 
     // Loại tổn thương
     if (usType === "no_lesions" || usType === "physiologic_cyst") {
-      return pack(1, "Normal Ovary", "Not-applicable", "None");
+      return pack(1, "Bình thường", "Không áp dụng", "Không có");
     }
 
     if (usType === "typical_extraovarian") {
       return pack(
         2,
-        "Almost certainly benign (<1% risk of malignancy)",
+        "Gần như chắc chắn là lành tính (<1% rủi ro ác tính)",
         "<1%",
-        "Recommendation:\nImaging:\nNo further imaging\nClinical:\nGynecologist referral as needed for Hydrosalpinx and Peritoneal Inclusion Cyst"
+        "Đề xuất:\nChụp ảnh:\nKhông cần chụp thêm\nLâm sàng:\nChuyển viện cho bác sĩ phụ khoa khi cần thiết cho Hydrosalpinx và Nang bao quy đầu",
       );
     }
 
@@ -298,40 +303,45 @@ export function computeORADS(input = {}) {
       if (!usBenignType || usMaxDiameter == null) return empty();
       const size = Number(usMaxDiameter);
       const ATT =
-        "Attention:\n\nAscites ± peritoneal nodules not due to other malignant or non-malignant etiologies upgrades O-RADS 3 and 4 lesions to O-RADS 5. Must consider other etiologies of ascites in O-RADS categories 1 and 2.";
+        "Lưu ý:\n\nCổ trướng ± các nốt phúc mạc, nếu không do các nguyên nhân ác tính hoặc lành tính khác, sẽ nâng phân loại các tổn thương O-RADS 3 và O-RADS 4 lên O-RADS 5.";
 
       const OR2 = (rec) =>
-        pack(2, "Almost certainly benign (<1% risk of malignancy)", "<1%", rec);
+        pack(
+          2,
+          "Gần như chắc chắn là lành tính (<1% rủi ro ác tính)",
+          "<1%",
+          rec,
+        );
       const OR3 = (rec) =>
-        pack(3, "Low risk of malignancy (1–10%)", "1–10%", `${ATT}\n\n${rec}`);
+        pack(3, "Rủi ro thấp (1–10%)", "1–10%", `${ATT}\n\n${rec}`);
 
       if (usBenignType === "hemorrhagic") {
         return size < 10
           ? OR2(
-              "Recommendation:\nImaging:\n• Premenopausal:\n  • ≤5 cm: None\n  • >5 cm but <10 cm: Follow-up US in 2–3 months\n• Early postmenopausal (<5 years):\n  • <10 cm, options: Follow-up US in 2–3 months / US specialist / MRI (with O-RADS MRI score)\n• Late postmenopausal (≥5 years): Should not occur; recategorize using other lexicon descriptors.\nClinical:\nGynecologist referral as needed"
+              "Khuyến nghị:\n\nChẩn đoán hình ảnh:\n• Tiền mãn kinh:\n  • ≤5 cm: Không cần theo dõi\n  • >5 cm nhưng <10 cm: Siêu âm theo dõi sau 2–3 tháng\n• Hậu mãn kinh sớm (<5 năm):\n  • <10 cm, các lựa chọn: Siêu âm theo dõi sau 2–3 tháng / Siêu âm bởi bác sĩ chuyên khoa / MRI (kèm điểm O-RADS MRI)\n• Hậu mãn kinh muộn (≥5 năm): Không nên xảy ra; cần phân loại lại bằng các mô tả khác trong hệ thống thuật ngữ.\nLâm sàng:\nChuyển khám bác sĩ phụ khoa khi cần",
             )
           : OR3(
-              "Recommendation:\nImaging:\n• If not surgically excised, consider follow-up US within 6 months*\n• If solid, may consider US specialist (if available) or MRI (with O-RADS MRI score)**\nClinical:\nGynecologist referral as needed"
+              "Khuyến nghị:\nChẩn đoán hình ảnh:\n• Nếu không được phẫu thuật cắt bỏ, cân nhắc siêu âm theo dõi trong vòng 6 tháng*\n• Nếu là tổn thương đặc, có thể cân nhắc siêu âm bởi chuyên gia (nếu có) hoặc MRI (kèm điểm O-RADS MRI)**\nLâm sàng:\nChuyển khám bác sĩ phụ khoa khi cần",
             );
       }
 
       if (usBenignType === "dermoid") {
         return size < 10
           ? OR2(
-              "Recommendation:\nImaging:\n• ≤3 cm: May consider follow-up US in 12 months*\n• >3 cm but <10 cm: If not surgically excised, follow-up US in 12 months*\nClinical:\nGynecologist referral as needed\n* There is a paucity of evidence for defining the need, optimal duration or interval for surveillance. If stable, consider US follow-up at 24 months from initial exam, then as clinically indicated."
+              "Khuyến nghị:\nChẩn đoán hình ảnh:\n• ≤3 cm: Có thể cân nhắc siêu âm theo dõi sau 12 tháng*\n• >3 cm nhưng <10 cm: Nếu không được phẫu thuật cắt bỏ, siêu âm theo dõi sau 12 tháng*\nLâm sàng:\nChuyển khám bác sĩ phụ khoa khi cần\n* Hiện có ít bằng chứng để xác định nhu cầu, thời gian tối ưu hoặc khoảng cách theo dõi. Nếu ổn định, cân nhắc siêu âm theo dõi sau 24 tháng kể từ lần khám ban đầu, sau đó theo chỉ định lâm sàng.",
             )
           : OR3(
-              "Recommendation:\nImaging:\n• If not surgically excised, consider follow-up US within 6 months*\n• If solid, may consider US specialist (if available) or MRI (with O-RADS MRI score)**\nClinical:\nGynecologist referral as needed\n** MRI with contrast has a higher specificity for solid lesions, and cystic lesions with solid component(s)."
+              "Khuyến nghị:\nChẩn đoán hình ảnh:\n• Nếu không được phẫu thuật cắt bỏ, cân nhắc siêu âm theo dõi trong vòng 6 tháng*\n• Nếu là tổn thương đặc, có thể cân nhắc siêu âm bởi chuyên gia (nếu có) hoặc MRI (kèm điểm O-RADS MRI)**\nLâm sàng:\nChuyển khám bác sĩ phụ khoa khi cần\n** MRI có tiêm thuốc tương phản có độ đặc hiệu cao hơn đối với các tổn thương đặc và các tổn thương dạng nang có thành phần đặc.",
             );
       }
 
       if (usBenignType === "endometrioma") {
         return size < 10
           ? OR2(
-              "Recommendation:\nImaging:\n• Premenopausal: <10 cm → If not surgically excised, follow-up US in 12 months*\n• Postmenopausal: <10 cm và lần khám đầu, options: Follow-up US 2–3 tháng / US specialist / MRI (with O-RADS MRI score). Sau đó nếu không phẫu thuật, follow-up US 12 tháng*\nClinical:\nGynecologist referral as needed\n* Increased risk sau mãn kinh hoặc tồn tại >10 năm."
+              "Khuyến nghị:\nChẩn đoán hình ảnh:\n• Tiền mãn kinh: <10 cm → Nếu không được phẫu thuật cắt bỏ, siêu âm theo dõi sau 12 tháng*\n• Hậu mãn kinh: <10 cm và là lần khám đầu, các lựa chọn: Siêu âm theo dõi sau 2–3 tháng / Siêu âm bởi chuyên gia / MRI (kèm điểm O-RADS MRI). Sau đó nếu không phẫu thuật, siêu âm theo dõi sau 12 tháng*\nLâm sàng:\nChuyển khám bác sĩ phụ khoa khi cần\n* Nguy cơ tăng ở phụ nữ sau mãn kinh hoặc khi tổn thương tồn tại >10 năm.",
             )
           : OR3(
-              "Recommendation:\nImaging:\n• If not surgically excised, consider follow-up US within 6 months*\n• If solid, may consider US specialist (if available) or MRI (with O-RADS MRI score)**\nClinical:\nGynecologist referral as needed"
+              "Khuyến nghị:\nChẩn đoán hình ảnh:\n• Nếu không được phẫu thuật cắt bỏ, cân nhắc siêu âm theo dõi trong vòng 6 tháng*\n• Nếu là tổn thương đặc, có thể cân nhắc siêu âm bởi chuyên gia (nếu có) hoặc MRI (kèm điểm O-RADS MRI score)**\nLâm sàng:\nChuyển khám bác sĩ phụ khoa khi cần",
             );
       }
 
@@ -344,39 +354,39 @@ export function computeORADS(input = {}) {
       if (!usOtherComposition || usMaxDiameter == null) return empty();
       const size = Number(usMaxDiameter);
       const ATT =
-        "Attention:\n\nAscites ± peritoneal nodules not due to other malignant or non-malignant etiologies upgrades O-RADS 3 and 4 lesions to O-RADS 5. Must consider other etiologies of ascites in O-RADS categories 1 and 2.";
+        "Lưu ý:\n\nCổ trướng ± các nốt phúc mạc, nếu không do các nguyên nhân ác tính hoặc không ác tính khác, sẽ nâng các tổn thương O-RADS 3 và 4 lên O-RADS 5. Cần xem xét các nguyên nhân khác gây cổ trướng trong các phân loại O-RADS 1 và 2.";
 
       const OR2_6M = pack(
         2,
-        "Almost certainly benign (<1% risk of malignancy)",
+        "Hầu như chắc chắn lành tính (<1% rủi ro ác tính)",
         "<1%",
-        "Recommendation: Follow-up with US in 6 months*. Clinical management with gynecologist as needed."
+        "Khuyến nghị: Siêu âm theo dõi sau 6 tháng*. Xử trí lâm sàng với bác sĩ phụ khoa khi cần.",
       );
       const OR2_12M = pack(
         2,
-        "Almost certainly benign (<1% risk of malignancy)",
+        "Hầu như chắc chắn lành tính (<1% rủi ro ác tính)",
         "<1%",
-        "Recommendation: Follow-up with US in 12 months*. Clinical management with gynecologist as needed."
+        "Khuyến nghị: Siêu âm theo dõi sau 12 tháng*. Xử trí lâm sàng với bác sĩ phụ khoa khi cần.",
       );
       const OR3 = pack(
         3,
-        "Low risk of malignancy (1–10%)",
+        "Nguy cơ ác tính thấp (1–10%)",
         "1–10%",
         ATT +
-          "\n\nRecommendation:\nImaging:\n• If not surgically excised, consider follow-up US within 6 months*\n• If solid, may consider US specialist or MRI (with O-RADS MRI score)**\nClinical:\nGynecologist referral as needed"
+          "\n\nKhuyến nghị:\nChẩn đoán hình ảnh:\n• Nếu không được phẫu thuật cắt bỏ, cân nhắc siêu âm theo dõi trong vòng 6 tháng*\n• Nếu là tổn thương đặc, có thể cân nhắc siêu âm bởi chuyên gia hoặc MRI (kèm điểm O-RADS MRI)**\nLâm sàng:\nChuyển khám bác sĩ phụ khoa khi cần",
       );
       const OR4 = pack(
         4,
-        "Intermediate risk of malignancy (10–50%)",
+        "Nguy cơ ác tính trung bình (10–50%)",
         "10–50%",
         ATT +
-          "\n\nRecommendation:\nImaging:\n• US specialist (if available) or\n• MRI (with O–RADS MRI score)* or\n• Per gyn–oncologist protocol\nClinical:\nGynecologist with gyn–oncologist consultation or solely by gyn–oncologist"
+          "\n\nKhuyến nghị:\nChẩn đoán hình ảnh:\n• Siêu âm bởi chuyên gia (nếu có) hoặc\n• MRI (kèm điểm O–RADS MRI)* hoặc\n• Theo phác đồ của bác sĩ ung thư phụ khoa\nLâm sàng:\nBác sĩ phụ khoa phối hợp tư vấn với bác sĩ ung thư phụ khoa hoặc do bác sĩ ung thư phụ khoa trực tiếp quản lý",
       );
       const OR5 = pack(
         5,
-        "High risk of malignancy (≥50%)",
+        "Nguy cơ ác tính cao (≥50%)",
         "≥50%",
-        "Recommendation:\nImaging:\nPer gyn-oncologist protocol\nClinical:\nGyn-oncologist"
+        "Khuyến nghị:\nChẩn đoán hình ảnh:\nTheo phác đồ của bác sĩ ung thư phụ khoa\nLâm sàng:\nBác sĩ ung thư phụ khoa",
       );
 
       // --- A) Cystic WITHOUT solid (đã có + sửa nhỏ unilocular/irregular <10cm -> ORADS 3) ---
@@ -403,7 +413,7 @@ export function computeORADS(input = {}) {
           if (!usOtherEchoSept) return empty();
           if (
             ["internal_echoes", "incomplete_septations", "both"].includes(
-              usOtherEchoSept
+              usOtherEchoSept,
             )
           ) {
             return OR2_6M;

@@ -54,7 +54,7 @@ export default function UltrasoundSection({
     <>
       {/* Q1: Adequacy */}
       <Form.Item
-        label="O-RADS: US — Is this a technically adequate exam?"
+        label="O-RADS: Siêu âm — Đây có phải là một khảo sát siêu âm đạt yêu cầu kỹ thuật không?"
         required
         colon={false}
         style={{ marginBottom: 12 }}
@@ -80,12 +80,12 @@ export default function UltrasoundSection({
         >
           <Row gutter={[12, 12]}>
             <Col span={24}>
-              <Radio value={true}>Yes</Radio>
+              <Radio value={true}>Có</Radio>
             </Col>
             <Col span={24}>
               <Radio value={false}>
-                No, lesion features relevant for risk stratification cannot be
-                accurately characterized due to technical factors
+                Không, các đặc điểm của tổn thương liên quan đến phân tầng nguy
+                cơ không thể được đánh giá chính xác do các yếu tố kỹ thuật.
               </Radio>
             </Col>
           </Row>
@@ -95,7 +95,7 @@ export default function UltrasoundSection({
       {/* Q2: Type (Radio thường) */}
       {usAdequate === true && (
         <Form.Item
-          label="What type of lesion have you identified?"
+          label="Loại tổn thương nào đã được xác định?"
           required
           colon={false}
         >
@@ -131,7 +131,7 @@ export default function UltrasoundSection({
       {usAdequate === true && usType === "typical_benign_ovarian" && (
         <>
           <Form.Item
-            label="Which option best describes the benign ovarian lesion?"
+            label="Lựa chọn nào mô tả chính xác nhất tổn thương buồng trứng lành tính?"
             required
             colon={false}
             style={{ marginTop: 12, marginBottom: 8 }}
@@ -154,19 +154,20 @@ export default function UltrasoundSection({
               ))}
             </div>
             <Paragraph style={{ color: "#9aa3af", marginTop: 12 }}>
-              * Hemorrhagic cyst: Unilocular cyst without internal vascularity
-              with reticular/retractile clot.
+              * Nang xuất huyết: Nang một ngăn, không có mạch máu bên trong,
+              chứa cục máu đông dạng lưới hoặc co rút.
               <br />
-              ** Dermoid cyst: ≤3 locules, no internal vascularity, hyperechoic
-              component with shadowing/lines/dots/spherical structures.
-              <br />§ Endometrioma: ≤3 locules, no internal vascularity,
-              homogeneous low-level echoes, smooth walls/septation ± peripheral
-              punctate echogenic foci.
+              ** Nang bì (u quái trưởng thành): ≤3 ngăn, không có mạch máu bên
+              trong, có thành phần tăng âm kèm bóng cản hoặc các đường, chấm,
+              hoặc cấu trúc hình cầu.
+              <br />§ Nang lạc nội mạc tử cung: ≤3 ngăn, không có mạch máu bên
+              trong, các hồi âm mức thấp đồng nhất, thành hoặc vách ngăn trơn
+              láng, có thể kèm các chấm tăng âm nhỏ ở ngoại vi.
             </Paragraph>
           </Form.Item>
 
           <Form.Item
-            label="What is the maximum diameter of the lesion*? (cm)"
+            label="Đường kính lớn nhất của tổn thương*? (cm)"
             required
             colon={false}
           >
@@ -179,7 +180,7 @@ export default function UltrasoundSection({
               placeholder="e.g. 4.5"
             />
             <Paragraph style={{ color: "#9aa3af", marginTop: 6 }}>
-              * In any plane
+              * Trong bất kỳ mặt phẳng nào
             </Paragraph>
           </Form.Item>
         </>
@@ -190,7 +191,7 @@ export default function UltrasoundSection({
         <>
           {/* Composition */}
           <Form.Item
-            label="How is the lesion’s composition?"
+            label="Thành phần của tổn thương là gì?"
             required
             colon={false}
           >
@@ -227,7 +228,7 @@ export default function UltrasoundSection({
           {/* Size (dùng chung) */}
           {usOtherComposition && (
             <Form.Item
-              label="What is the maximum diameter of the lesion*? (cm)"
+              label="Đường kính lớn nhất của tổn thương là bao nhiêu*? (cm)"
               required
               colon={false}
             >
@@ -240,7 +241,7 @@ export default function UltrasoundSection({
                 placeholder="e.g. 7.2"
               />
               <Paragraph style={{ color: "#9aa3af", marginTop: 6 }}>
-                * In any plane
+                * Trong bất kỳ mặt phẳng nào
               </Paragraph>
             </Form.Item>
           )}
@@ -249,7 +250,7 @@ export default function UltrasoundSection({
           {usOtherComposition === "cystic_no_solid" && isSizeKnown && (
             <>
               <Form.Item
-                label="How many chambers does the cyst have?"
+                label="Nang này có bao nhiêu ngăn?"
                 required
                 colon={false}
               >
@@ -275,7 +276,7 @@ export default function UltrasoundSection({
 
               {!!usOtherChambers && (
                 <Form.Item
-                  label="How are the septations (if applicable) and internal contour of the lesion?"
+                  label="Các vách ngăn (nếu có) và bờ trong của tổn thương như thế nào"
                   required
                   colon={false}
                 >
@@ -310,7 +311,7 @@ export default function UltrasoundSection({
                 usOtherContour === "smooth" && (
                   <>
                     <Form.Item
-                      label="Are there internal echoes (i.e., acoustic shadowing) and/or incomplete septations?"
+                      label="Có các hồi âm bên trong (ví dụ: bóng cản âm) và/hoặc các vách ngăn không hoàn toàn không?"
                       required
                       colon={false}
                     >
@@ -325,18 +326,21 @@ export default function UltrasoundSection({
                           {[
                             {
                               value: "internal_echoes",
-                              label: "Internal echoes",
+                              label: "Các hồi âm bên trong",
                             },
                             {
                               value: "incomplete_septations",
-                              label: "Incomplete septations",
+                              label: "Vách ngăn không hoàn toàn",
                             },
                             {
                               value: "both",
                               label:
-                                "Both internal echoes and incomplete septations",
+                                "Cả hồi âm bên trong và vách ngăn không hoàn toàn",
                             },
-                            { value: "neither", label: "Neither" },
+                            {
+                              value: "neither",
+                              label: "Không có cái nào",
+                            },
                           ].map((o) => (
                             <Col key={o.value} span={24}>
                               <Radio value={o.value}>{o.label}</Radio>
@@ -348,7 +352,7 @@ export default function UltrasoundSection({
 
                     {usOtherEchoSept === "neither" && (
                       <Form.Item
-                        label="Is the patient pre-menopausal or post-menopausal?"
+                        label="Bệnh nhân có phải là tiền mãn kinh hay đã mãn kinh không?"
                         required
                         colon={false}
                       >
@@ -358,10 +362,10 @@ export default function UltrasoundSection({
                         >
                           <Row gutter={[12, 8]}>
                             <Col span={24}>
-                              <Radio value="pre">Pre-menopausal</Radio>
+                              <Radio value="pre">Tiền mãn kinh</Radio>
                             </Col>
                             <Col span={24}>
-                              <Radio value="post">Post-menopausal</Radio>
+                              <Radio value="post">Đã mãn kinh</Radio>
                             </Col>
                           </Row>
                         </Radio.Group>
@@ -373,7 +377,7 @@ export default function UltrasoundSection({
               {/* multilocular + smooth -> color score */}
               {usOtherChambers === "multi" && usOtherContour === "smooth" && (
                 <Form.Item
-                  label="What is the lesion's color score?"
+                  label="Mức độ tín hiệu màu Doppler của tổn thương là bao nhiêu?"
                   required
                   colon={false}
                 >
@@ -402,11 +406,7 @@ export default function UltrasoundSection({
           {/* ===== B) Cystic WITH solid component(s) ===== */}
           {usOtherComposition === "cystic_with_solid" && (
             <>
-              <Form.Item
-                label="How many chambers does the cyst have?"
-                required
-                colon={false}
-              >
+              <Form.Item label="Nang có bao nhiêu ngăn?" required colon={false}>
                 <Radio.Group
                   value={usOtherChambers}
                   onChange={(e) => {
@@ -427,7 +427,7 @@ export default function UltrasoundSection({
 
               {usOtherChambers === "uni" && (
                 <Form.Item
-                  label="How many papillary projections* can you identify?"
+                  label="Bạn xác định được bao nhiêu nhú (papillary projections)?"
                   required
                   colon={false}
                 >
@@ -444,14 +444,15 @@ export default function UltrasoundSection({
                     </Row>
                   </Radio.Group>
                   <Paragraph style={{ color: "#9aa3af", marginTop: 6 }}>
-                    * Subtype of solid component surrounded by fluid on 3 sides
+                    * Phân nhóm của thành phần mô đặc được bao quanh bởi dịch ở
+                    ba phía.
                   </Paragraph>
                 </Form.Item>
               )}
 
               {(usOtherChambers === "bi" || usOtherChambers === "multi") && (
                 <Form.Item
-                  label="What is the lesion’s color score?"
+                  label="Mức độ tín hiệu màu Doppler của tổn thương là bao nhiêu?"
                   required
                   colon={false}
                 >
@@ -481,7 +482,7 @@ export default function UltrasoundSection({
           {usOtherComposition === "solid_or_solid_appearing" && (
             <>
               <Form.Item
-                label="How is the external contour of the lesion?"
+                label="Thành ngoài của tổn thương như thế nào?"
                 required
                 colon={false}
               >
@@ -511,7 +512,7 @@ export default function UltrasoundSection({
               {usOtherContour === "smooth" && (
                 <>
                   <Form.Item
-                    label="Does the lesion show acoustic shadowing?"
+                    label="Tổn thương có xuất hiện bóng cản âm không?"
                     required
                     colon={false}
                   >
@@ -530,7 +531,7 @@ export default function UltrasoundSection({
                   </Form.Item>
 
                   <Form.Item
-                    label="What is the lesion’s color score?"
+                    label="Mức độ tín hiệu màu Doppler của tổn thương là bao nhiêu?"
                     required
                     colon={false}
                   >

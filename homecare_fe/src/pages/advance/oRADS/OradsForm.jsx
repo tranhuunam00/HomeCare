@@ -264,15 +264,15 @@ export default function OradsForm() {
             cystSmallPrem === true
               ? "Yes"
               : cystSmallPrem === false
-              ? "No"
-              : "--"
+                ? "No"
+                : "--"
           }</td></tr>
           <tr><td>Multilocular có mỡ?</td><td>${
             multilocHasFat === true
               ? "Yes"
               : multilocHasFat === false
-              ? "No"
-              : "--"
+                ? "No"
+                : "--"
           }</td></tr>
         `
             : ""
@@ -298,16 +298,16 @@ export default function OradsForm() {
             tubeWall === "thin"
               ? "Thin (<3mm)"
               : tubeWall === "thick"
-              ? "Thick (>3mm)"
-              : "--"
+                ? "Thick (>3mm)"
+                : "--"
           }</td></tr>
           <tr><td>Tube contents</td><td>${
             tubeWall === "thin"
               ? tubeContents === "simple_fluid"
                 ? "Simple fluid*"
                 : tubeContents === "non_simple_fluid"
-                ? "Non-simple fluid"
-                : "--"
+                  ? "Non-simple fluid"
+                  : "--"
               : "--"
           }</td></tr>
         `
@@ -409,7 +409,7 @@ export default function OradsForm() {
         data?.data
           ?.replace(/\*\*(.*?)\*\*/g, "$1")
           .replace(/^\* /gm, "• ")
-          .replace(/\n{2,}/g, "\n\n") || ""
+          .replace(/\n{2,}/g, "\n\n") || "",
       );
     } catch {}
   };
@@ -451,7 +451,7 @@ export default function OradsForm() {
           {/* Modality */}
           <Form.Item
             name="modality"
-            label="Imaging modality"
+            label="Phương thức chẩn đoán hình ảnh"
             rules={[{ required: true }]}
             colon={false}
           >
@@ -472,7 +472,7 @@ export default function OradsForm() {
             <>
               {/* Peritoneal nodularity */}
               <Form.Item
-                label="Is there peritoneal, mesenteric or omental nodularity or irregular thickening (+/− ascites)?"
+                label="Có xuất hiện các nốt hoặc dày bất thường ở phúc mạc, mạc treo ruột hoặc mạc nối không?"
                 required
                 colon={false}
               >
@@ -488,7 +488,7 @@ export default function OradsForm() {
                     image={
                       "/product/orads/radaide-orads-peritoneal-nodularity.jpg"
                     }
-                    label="Yes"
+                    label="Có"
                     onClick={() => {
                       setPeritoneal(true);
                       setAbn(null);
@@ -507,7 +507,7 @@ export default function OradsForm() {
                   <ImageRadioCard
                     selected={peritoneal === false}
                     image={"/product/orads/cancel-no-center-256.webp"}
-                    label="No"
+                    label="Không"
                     onClick={() => setPeritoneal(false)}
                   />
                 </div>
@@ -517,7 +517,7 @@ export default function OradsForm() {
               {peritoneal === false && (
                 <>
                   <Form.Item
-                    label="Which abnormality have you identified?"
+                    label="Bất thường nào đã được phát hiện?"
                     required
                     colon={false}
                     style={{ marginTop: 8 }}
