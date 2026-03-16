@@ -1,6 +1,16 @@
 // components/ChildPughForm.jsx
 import React, { useState } from "react";
-import { Form, Select, Button, Typography, Divider, Row, Col } from "antd";
+import {
+  Form,
+  Select,
+  Button,
+  Typography,
+  Divider,
+  Row,
+  Col,
+  Radio,
+  Space,
+} from "antd";
 import { ReloadOutlined, CopyOutlined } from "@ant-design/icons";
 
 import styles from "./ChildPughForm.module.scss";
@@ -69,7 +79,7 @@ const ChildPughForm = () => {
     const values = await form.validateFields();
     const total = Object.values(values).reduce(
       (sum, v) => sum + Number(v || 0),
-      0
+      0,
     );
     let level = "";
     for (const l of CHILD_PUGH_LEVELS) {
@@ -100,7 +110,7 @@ const ChildPughForm = () => {
     return isCopy
       ? html +
           `<div style="margin-top:16px;">${genAITextToHtml(
-            geminiResponse
+            geminiResponse,
           )}</div>`
       : html;
   };
@@ -128,7 +138,7 @@ const ChildPughForm = () => {
   const onFinish = async (values) => {
     const total = Object.values(values).reduce(
       (sum, v) => sum + Number(v || 0),
-      0
+      0,
     );
     let level = "";
     for (const l of CHILD_PUGH_LEVELS) {
@@ -149,7 +159,7 @@ const ChildPughForm = () => {
         data.data
           ?.replace(/\*\*(.*?)\*\*/g, "$1") // bỏ **bôi đậm**
           .replace(/^\* /gm, "• ") // dòng bắt đầu bằng "* " → "• "
-          .replace(/\n{2,}/g, "\n\n")
+          .replace(/\n{2,}/g, "\n\n"),
       );
     } catch (error) {}
 
@@ -174,13 +184,21 @@ const ChildPughForm = () => {
               label={q.label}
               rules={[{ required: true, message: "Vui lòng chọn một đáp án" }]}
             >
-              <Select
-                options={CHILD_PUGH_OPTIONS[q.key]}
-                placeholder="Chọn một đáp án"
-              />
+              <Radio.Group direction="horizontal">
+                <div>
+                  {CHILD_PUGH_OPTIONS[q.key].map((opt) => (
+                    <Radio
+                      style={{ minWidth: 150 }}
+                      key={opt.value}
+                      value={opt.value}
+                    >
+                      {opt.label}
+                    </Radio>
+                  ))}
+                </div>
+              </Radio.Group>
             </Form.Item>
           ))}
-
           <Divider />
           <Row gutter={24} className={styles.summaryRow}>
             <Col span={12}>

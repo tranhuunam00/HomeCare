@@ -8,6 +8,7 @@ import {
   Row,
   Col,
   message,
+  Radio,
 } from "antd";
 import { ReloadOutlined, CopyOutlined } from "@ant-design/icons";
 import styles from "./CtsiForm.module.scss";
@@ -112,7 +113,7 @@ const BalthazarForm = () => {
         data?.data
           ?.replace(/\*\*(.*?)\*\*/g, "$1")
           .replace(/^\* /gm, "• ")
-          .replace(/\n{2,}/g, "\n\n") || ""
+          .replace(/\n{2,}/g, "\n\n") || "",
       );
     } catch (error) {}
 
@@ -132,7 +133,7 @@ const BalthazarForm = () => {
           <td>Tổn thương tụy/quanh tụy</td>
           <td>${getLabelFromValue(
             INFLAMMATION_OPTIONS,
-            values.inflammation
+            values.inflammation,
           )}</td>
           <td>${values.inflammation ?? ""}</td>
         </tr>
@@ -150,7 +151,7 @@ const BalthazarForm = () => {
     return isCopy
       ? html +
           `<div style="margin-top:16px;">${genAITextToHtml(
-            geminiResponse
+            geminiResponse,
           )}</div>`
       : html;
   };
@@ -186,7 +187,17 @@ const BalthazarForm = () => {
             label="Tổn thương tụy/quanh tụy"
             rules={[{ required: true, message: "Vui lòng chọn" }]}
           >
-            <Select options={INFLAMMATION_OPTIONS} placeholder="Chọn" />
+            <Radio.Group>
+              {INFLAMMATION_OPTIONS.map((item) => (
+                <Radio
+                  key={item.value}
+                  value={item.value}
+                  style={{ display: "block", marginBottom: 6 }}
+                >
+                  {item.label}
+                </Radio>
+              ))}
+            </Radio.Group>
           </Form.Item>
 
           <Form.Item
@@ -194,7 +205,17 @@ const BalthazarForm = () => {
             label="Mức độ hoại tử tụy"
             rules={[{ required: true, message: "Vui lòng chọn" }]}
           >
-            <Select options={NECROSIS_OPTIONS} placeholder="Chọn" />
+            <Radio.Group>
+              {NECROSIS_OPTIONS.map((item) => (
+                <Radio
+                  key={item.value}
+                  value={item.value}
+                  style={{ display: "block", marginBottom: 6 }}
+                >
+                  {item.label}
+                </Radio>
+              ))}
+            </Radio.Group>
           </Form.Item>
 
           <Divider />
