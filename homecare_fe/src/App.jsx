@@ -85,6 +85,7 @@ import GuideMenuManagerClinicPage from "./pages/landingpage/guild/manage/GuideMe
 import GuideMenuManagerServicePage from "./pages/landingpage/guild/manage/GuideMenuManageServicePage";
 import GuideMenuReadResultPage from "./pages/landingpage/guild/worklist/GuideMenuReadResultPage";
 import DSpleenForm from "./pages/advance/DSpleenForm/DSpleenForm";
+import DPancreasForm from "./pages/advance/DPancreasForm/DPancreasForm";
 
 function App() {
   useAuthInitializer();
@@ -217,6 +218,7 @@ function App() {
           <Route path="D-VOGAN" element={<AASTLiverForm />} />
           <Route path="D-BOSNIAK" element={<BosniakForm />} />
           <Route path="D-LIRADS" element={<LIRADSForm />} />
+          <Route path="D-Pan" element={<DPancreasForm />} />
           <Route path="D-ORADS" element={<ORADSModalityOnly />} />
           <Route path="tirads_nn" element={<TiradPage />} />
           <Route path="recist_nn" element={<Recist />} />
