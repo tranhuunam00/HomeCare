@@ -178,6 +178,7 @@ const Sidebar = ({ collapsed }) => {
         { key: "/home/D-ORADS", label: "Ứng dụng D-ORADS" },
         { key: "/home/D-Spleen", label: "Ứng dụng D-Spleen" },
         { key: "/home/D-Pan", label: "Ứng dụng D-Pan" },
+        { key: "/home/D-Pirads", label: "Ứng dụng D-Pirads" },
       ],
     },
 

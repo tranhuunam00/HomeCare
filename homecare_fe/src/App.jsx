@@ -86,6 +86,7 @@ import GuideMenuManagerServicePage from "./pages/landingpage/guild/manage/GuideM
 import GuideMenuReadResultPage from "./pages/landingpage/guild/worklist/GuideMenuReadResultPage";
 import DSpleenForm from "./pages/advance/DSpleenForm/DSpleenForm";
 import DPancreasForm from "./pages/advance/DPancreasForm/DPancreasForm";
+import PiradsForm from "./pages/advance/PIRADS/PiradsForm";
 
 function App() {
   useAuthInitializer();
@@ -220,6 +221,7 @@ function App() {
           <Route path="D-LIRADS" element={<LIRADSForm />} />
           <Route path="D-Pan" element={<DPancreasForm />} />
           <Route path="D-ORADS" element={<ORADSModalityOnly />} />
+          <Route path="D-Pirads" element={<PiradsForm />} />
           <Route path="tirads_nn" element={<TiradPage />} />
           <Route path="recist_nn" element={<Recist />} />
           <Route path="products" element={<ProductList />} />
