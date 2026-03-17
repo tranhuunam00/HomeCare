@@ -84,6 +84,7 @@ import GuideMenuSubscriptionPage from "./pages/landingpage/guild/subcription/Gui
 import GuideMenuManagerClinicPage from "./pages/landingpage/guild/manage/GuideMenuManageClinicPage";
 import GuideMenuManagerServicePage from "./pages/landingpage/guild/manage/GuideMenuManageServicePage";
 import GuideMenuReadResultPage from "./pages/landingpage/guild/worklist/GuideMenuReadResultPage";
+import DSpleenForm from "./pages/advance/DSpleenForm/DSpleenForm";
 
 function App() {
   useAuthInitializer();
@@ -208,6 +209,7 @@ function App() {
           <Route path="birad" element={<BiradsForm />} />
           <Route path="boneage" element={<BoneAgeForm />} />
           <Route path="dipss" element={<DipssForm />} />
+          <Route path="D-Spleen" element={<DSpleenForm />} />
           <Route path="D-COR" element={<FraminghamForm />} />
           <Route path="D-CPS" element={<ChildPughForm />} />
           <Route path="D-BALTHAZA" element={<ModifiedCTSIForm />} />

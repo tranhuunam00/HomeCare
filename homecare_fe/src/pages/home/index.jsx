@@ -176,6 +176,7 @@ const Sidebar = ({ collapsed }) => {
         { key: "/home/D-BOSNIAK", label: "Ứng dụng D-Bosniak" },
         { key: "/home/D-LIRADS", label: "Ứng dụng D-LIRADS" },
         { key: "/home/D-ORADS", label: "Ứng dụng D-ORADS" },
+        { key: "/home/D-Spleen", label: "Ứng dụng D-Spleen" },
       ],
     },
 
