@@ -1,8 +1,9 @@
 // HomeCareLanding.jsx
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Avatar,
   Button,
+  Drawer,
   Dropdown,
   Form,
   Input,
@@ -10,22 +11,19 @@ import {
   Modal,
   Tooltip,
 } from "antd";
-import { DownOutlined, SearchOutlined, UserOutlined } from "@ant-design/icons";
+import {
+  DownOutlined,
+  MenuOutlined,
+  SearchOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import { FaPhoneAlt, FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
-import { SiZalo } from "react-icons/si";
 import styles from "./HomeCareLanding.module.scss";
 import { useNavigate } from "react-router-dom";
-import ProductCard from "../products/productCard/ProductCard";
-import FurnitureCarousel from "../../components/slick/FurnitureCarousel";
 import { motion } from "framer-motion";
 import { useGlobalAuth } from "../../contexts/AuthContext";
-import DropdownNav from "../../components/DropdownNav";
-import { toast } from "react-toastify";
-import API_CALL from "../../services/axiosClient";
 import DoctorAdvisorsSlider from "./DoctorAdvisorsSlider";
-import { Drawer } from "antd";
-import { MenuOutlined } from "@ant-design/icons";
-import PackageList from "../packages/list/PackageList";
+import API_CALL from "../../services/axiosClient";
 
 const textVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -45,13 +43,25 @@ const HomeCareLanding = () => {
   const { isLoggedIn, user, doctor, handleLogoutGlobal, doctors } =
     useGlobalAuth();
 
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
   const [isContactOpen, setIsContactOpen] = useState(false);
-
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const handleContactCancel = () => setIsContactOpen(false);
+  const [advisorDoctors, setAdvisorDoctors] = useState([]);
 
   const topRef = useRef(null);
+
+  useEffect(() => {
+    if (!doctors || doctors.length == 0) {
+      API_CALL.get("/doctor")
+        .then((data) => {
+          const advisors = data.data.data.data.filter((d) => d.is_advisor);
+          setAdvisorDoctors(advisors);
+        })
+        .catch((err) => console.error(err));
+    } else {
+      setAdvisorDoctors(doctors.filter((d) => d.is_advisor));
+    }
+  }, [doctors]);
 
   return (
     <div className={styles["homecare"]}>
@@ -60,17 +70,9 @@ const HomeCareLanding = () => {
           display: "flex",
           justifyContent: "space-around",
           alignItems: "center",
-          // gap: 200,
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
+        <div>
           <Tooltip title="Truy cập trang chủ HomeCare" placement="bottom">
             <img
               onClick={() => (window.location.href = "https://home-care.vn/")}
@@ -80,84 +82,55 @@ const HomeCareLanding = () => {
               className={styles["homecare__logo_head"]}
             />
           </Tooltip>
+          <div className={styles.mobileMenuButton}>
+            <Button
+              type="text"
+              icon={<MenuOutlined />}
+              onClick={() => setMobileMenuOpen(true)}
+            />
+          </div>
         </div>
 
         <header className={styles["homecare__header"]}>
-          <div className={styles["homecare__container"]}>
-            <div
-              className={styles["homecare__nav-left"]}
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                justifyContent: "center",
-                width: "100%",
-                gap: 50,
-              }}
+          <Menu mode="horizontal" className={styles["homecare__menu"]}>
+            <Menu.Item
+              key="home"
+              onClick={() => (window.location.href = "https://home-care.vn/")}
             >
-              <Menu
-                mode="horizontal"
-                selectable={false}
-                className={styles["homecare__menu"]}
-                style={{ width: "100%", justifyContent: "center", gap: 10 }}
-              >
-                <Menu.Item
-                  key="home"
-                  onClick={() =>
-                    isLoggedIn
-                      ? navigate("home/subscription")
-                      : navigate("/login")
-                  }
-                >
-                  CÁC GÓI DỊCH VỤ
-                </Menu.Item>
+              Home
+            </Menu.Item>
+            <Menu.Item
+              key="worklist"
+              onClick={() =>
+                isLoggedIn ? navigate("/home") : navigate("/login")
+              }
+            >
+              Đọc kết quả
+            </Menu.Item>
+            <Menu.Item
+              key="recist_nn"
+              onClick={() =>
+                isLoggedIn ? navigate("/home/recist_nn") : navigate("/login")
+              }
+            >
+              Ứng dụng y khoa
+            </Menu.Item>
 
-                <Menu.Item
-                  key="recist_nn"
-                  onClick={() =>
-                    isLoggedIn
-                      ? navigate("/home/recist_nn")
-                      : navigate("/login")
-                  }
-                >
-                  ỨNG DỤNG HỖ TRỢ
-                </Menu.Item>
-
-                <Menu.Item
-                  key="worklist"
-                  onClick={() => navigate("/home")}
-                  style={{ fontSize: 24 }}
-                >
-                  ĐỌC KẾT QUẢ
-                </Menu.Item>
-                <Menu.Item key="contact" onClick={() => navigate("/contact")}>
-                  HỖ TRỢ KỸ THUẬT
-                </Menu.Item>
-                <Menu.Item key="guild" onClick={() => navigate("/guild")}>
-                  HƯỚNG DẪN SỬ DỤNG
-                </Menu.Item>
-              </Menu>
-            </div>
-          </div>
-          {!isLoggedIn && (
-            <div className={styles["homecare__container_2"]}>
-              <>
-                <Button
-                  type="primary"
-                  className={styles["homecare__contact"]}
-                  onClick={() => navigate("login")}
-                >
-                  Đăng nhập
-                </Button>
-                <Button
-                  type="primary"
-                  className={styles["homecare__contact"]}
-                  onClick={() => navigate("register")}
-                >
-                  Đăng ký
-                </Button>
-              </>
-            </div>
-          )}
+            <Menu.Item key="contact" onClick={() => navigate("/contact")}>
+              Hỗ trợ kỹ thuật
+            </Menu.Item>
+            <Menu.Item key="guild" onClick={() => navigate("/guild")}>
+              Hướng dẫn sử dụng
+            </Menu.Item>
+            <Menu.Item
+              key="packages"
+              onClick={() =>
+                isLoggedIn ? navigate("home/subscription") : navigate("/login")
+              }
+            >
+              Các gói dịch vụ
+            </Menu.Item>
+          </Menu>
         </header>
         <div
           style={{
@@ -210,76 +183,68 @@ const HomeCareLanding = () => {
               </div>
             </Dropdown>
           ) : (
-            <></>
+            <div className={styles["homecare_auth_buttons"]}>
+              <Button
+                type="primary"
+                className={styles["homecare__contact"]}
+                onClick={() => navigate("login")}
+              >
+                Đăng nhập
+              </Button>
+              <Button
+                type="primary"
+                className={styles["homecare__contact"]}
+                onClick={() => navigate("register")}
+              >
+                Đăng ký
+              </Button>
+            </div>
           )}
         </div>
-        <div className={styles["homecare__mobile-menu"]}>
-          <MenuOutlined onClick={() => setMobileMenuOpen(true)} />
-        </div>
-        <Drawer
-          placement="right"
-          open={mobileMenuOpen}
-          onClose={() => setMobileMenuOpen(false)}
-          width={260}
-        >
-          <Menu
-            mode="vertical"
-            selectable={false}
-            onClick={({ key }) => {
-              setMobileMenuOpen(false);
-
-              setTimeout(() => {
-                switch (key) {
-                  case "root":
-                    window.location.href = "https://home-care.vn/";
-                    break;
-
-                  case "home":
-                    navigate("/home");
-                    break;
-
-                  case "contact":
-                    navigate("/contact");
-                    break;
-
-                  case "profile":
-                    navigate("/home/profile");
-                    break;
-
-                  case "login":
-                    navigate("/login");
-                    break;
-
-                  case "register":
-                    navigate("/register");
-                    break;
-
-                  case "logout":
-                    handleLogoutGlobal();
-                    break;
-
-                  default:
-                    break;
-                }
-              }, 150); // ⬅️ QUAN TRỌNG
-            }}
-            items={[
-              { key: "root", label: "Trang chủ" },
-              { key: "home", label: "Phần mềm D-RADS" },
-              { key: "contact", label: "Hỗ trợ kỹ thuật" },
-              ...(isLoggedIn
-                ? [
-                    { key: "profile", label: "Trang cá nhân" },
-                    { key: "logout", label: "Đăng xuất" },
-                  ]
-                : [
-                    { key: "login", label: "Đăng nhập" },
-                    { key: "register", label: "Đăng ký" },
-                  ]),
-            ]}
-          />
-        </Drawer>
       </div>
+      <Drawer
+        title="Menu"
+        placement="right"
+        onClose={() => setMobileMenuOpen(false)}
+        open={mobileMenuOpen}
+      >
+        <Menu mode="vertical">
+          <Menu.Item
+            key="home"
+            onClick={() =>
+              isLoggedIn ? navigate("home/subscription") : navigate("/login")
+            }
+          >
+            CÁC GÓI DỊCH VỤ
+          </Menu.Item>
+
+          <Menu.Item
+            key="recist_nn"
+            onClick={() =>
+              isLoggedIn ? navigate("/home/recist_nn") : navigate("/login")
+            }
+          >
+            ỨNG DỤNG HỖ TRỢ
+          </Menu.Item>
+
+          <Menu.Item
+            key="worklist"
+            onClick={() =>
+              isLoggedIn ? navigate("/home") : navigate("/login")
+            }
+          >
+            ĐỌC KẾT QUẢ
+          </Menu.Item>
+
+          <Menu.Item key="contact" onClick={() => navigate("/contact")}>
+            HỖ TRỢ KỸ THUẬT
+          </Menu.Item>
+
+          <Menu.Item key="guild" onClick={() => navigate("/guild")}>
+            HƯỚNG DẪN SỬ DỤNG
+          </Menu.Item>
+        </Menu>
+      </Drawer>
 
       <section ref={topRef} className={styles["homecare__hero"]}></section>
 
@@ -291,12 +256,19 @@ const HomeCareLanding = () => {
           marginBottom: 80,
         }}
       >
-        <h2 style={{ color: "#04580f", fontWeight: "bold", marginBottom: 40 }}>
+        <h2
+          style={{
+            color: "#04580f",
+            fontWeight: "bold",
+            marginBottom: 40,
+            fontSize: 30,
+          }}
+        >
           CỐ VẤN CHUYÊN MÔN
         </h2>
 
-        {doctors?.length > 0 ? (
-          <DoctorAdvisorsSlider doctors={doctors.filter((d) => d.is_advisor)} />
+        {advisorDoctors?.length > 0 ? (
+          <DoctorAdvisorsSlider doctors={advisorDoctors} />
         ) : (
           <p>Đang cập nhật danh sách cố vấn...</p>
         )}
