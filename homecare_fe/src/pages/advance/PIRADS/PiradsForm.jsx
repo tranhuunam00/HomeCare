@@ -226,7 +226,7 @@ export default function PiradsForm() {
             <Col span={12}>
               <Form.Item
                 name="dwiAdequate"
-                label="Is the DWI adequate?"
+                label="Chuỗi DWI có đạt chất lượng/đủ tiêu chuẩn không?"
                 rules={[{ required: true }]}
               >
                 <Radio.Group>
@@ -242,7 +242,7 @@ export default function PiradsForm() {
             <Col span={12}>
               <Form.Item
                 name="dceAdequate"
-                label="Is the DCE adequate?"
+                label="Chuỗi DCE có đạt chất lượng/đủ tiêu chuẩn không?"
                 rules={[{ required: true }]}
               >
                 <Radio.Group>
@@ -259,12 +259,12 @@ export default function PiradsForm() {
           {(dwiAdequate === true || dceAdequate === true) && (
             <Form.Item
               name="zone"
-              label="Where is the lesion located?"
+              label="Tổn thương nằm ở đâu?"
               rules={[{ required: true }]}
             >
               <Radio.Group>
-                <Radio value="pz">Peripheral zone</Radio>
-                <Radio value="tz">Transitional zone</Radio>
+                <Radio value="pz">Vùng ngoại vi</Radio>
+                <Radio value="tz">Vùng chuyển tiếp</Radio>
               </Radio.Group>
             </Form.Item>
           )}
@@ -274,7 +274,7 @@ export default function PiradsForm() {
               {dwiAdequate === true && dceAdequate === true && (
                 <Form.Item
                   name="dceScore"
-                  label="How does the lesion look on DCE? *"
+                  label="Tổn thương biểu hiện như thế nào trên DCE?"
                   rules={[{ required: true }]}
                 >
                   <ImageSelectCard
@@ -286,7 +286,7 @@ export default function PiradsForm() {
               )}
               <Form.Item
                 name="dwiScore"
-                label="How does the lesion look on DWI and ADC?"
+                label="Tổn thương biểu hiện như thế nào trên DWI và ADC?"
                 rules={[{ required: true }]}
               >
                 <ImageSelectCard
@@ -298,7 +298,7 @@ export default function PiradsForm() {
 
               <Form.Item
                 name="t2Score_pz"
-                label="How does the lesion look on T2w imaging?"
+                label="Tổn thương biểu hiện như thế nào trên ảnh T2W?"
                 rules={[{ required: true }]}
               >
                 <ImageSelectCard
@@ -315,7 +315,7 @@ export default function PiradsForm() {
               {dwiAdequate === true && dceAdequate === true && (
                 <Form.Item
                   name="dceScore"
-                  label="How does the lesion look on DCE? *"
+                  label="Tổn thương biểu hiện như thế nào trên DCE? *"
                   rules={[{ required: true }]}
                 >
                   <ImageSelectCard
@@ -327,7 +327,7 @@ export default function PiradsForm() {
               )}
               <Form.Item
                 name="dwiScore"
-                label="How does the lesion look on DWI and ADC?"
+                label="Tổn thương biểu hiện như thế nào trên DWI và ADC?"
                 rules={[{ required: true }]}
               >
                 <ImageSelectCard
@@ -339,7 +339,7 @@ export default function PiradsForm() {
 
               <Form.Item
                 name="t2Score_tz"
-                label="How does the lesion look on T2w imaging?"
+                label="Tổn thương biểu hiện như thế nào trên ảnh T2W?"
                 rules={[{ required: true }]}
               >
                 <ImageSelectCard
@@ -355,7 +355,7 @@ export default function PiradsForm() {
             <>
               <Form.Item
                 name="dceScore"
-                label="How does the lesion look on DCE? *"
+                label="Tổn thương biểu hiện như thế nào trên DCE? *"
                 rules={[{ required: true }]}
               >
                 <ImageSelectCard
@@ -367,7 +367,7 @@ export default function PiradsForm() {
 
               <Form.Item
                 name="t2Score_pz"
-                label="How does the lesion look on T2w imaging?"
+                label="Tổn thương biểu hiện như thế nào trên ảnh T2W?"
                 rules={[{ required: true }]}
               >
                 <ImageSelectCard
@@ -383,7 +383,7 @@ export default function PiradsForm() {
             <>
               <Form.Item
                 name="dceScore"
-                label="How does the lesion look on DCE? *"
+                label="Tổn thương biểu hiện như thế nào trên DCE?"
                 rules={[{ required: true }]}
               >
                 <ImageSelectCard
@@ -395,7 +395,7 @@ export default function PiradsForm() {
 
               <Form.Item
                 name="t2Score_tz"
-                label="How does the lesion look on T2w imaging?"
+                label="Tổn thương biểu hiện như thế nào trên ảnh T2W?"
                 rules={[{ required: true }]}
               >
                 <ImageSelectCard
@@ -409,13 +409,13 @@ export default function PiradsForm() {
 
           {cannotCalculate && (
             <div className={styles.warningBox}>
-              <Text strong>Cannot calculate the PI-RADS score:</Text>
+              <Text strong>Không thể tính/đánh giá điểm PI-RADS:</Text>
               <br />
 
               <Text type="secondary">
-                If both DWI and DCE are inadequate or absent, assessment should
-                be limited to staging for determination of extraprostatic
-                extension.
+                Nếu cả DWI và DCE đều không đạt chất lượng hoặc không có, thì
+                việc đánh giá nên chỉ giới hạn ở giai đoạn bệnh để xác định sự
+                lan ra ngoài tuyến tiền liệt (xâm lấn ngoài bao).
               </Text>
             </div>
           )}
