@@ -8,10 +8,12 @@ import { ThamKhaoLinkHomeCare } from "../component_common/Thamkhao";
 import { STYLE_COPY } from "../../../constant/app";
 import ImageSelectCard from "./components/ImageSelectCard";
 import {
+  DCE_OPTIONS,
   DWI_ADC_OPTIONS,
   getPiradsScore,
   PIRADS_RESULT,
-  T2w_OPTIONS,
+  T2w_OPTIONS_WITH_PZ,
+  T2w_OPTIONS_WITH_TZ,
   YES_NO_OPTIONS,
 } from "./piradsConstants";
 
@@ -24,6 +26,9 @@ export default function PiradsForm() {
   const dceAdequate = Form.useWatch("dceAdequate", form);
   const zone = Form.useWatch("zone", form);
   const dwiScore = Form.useWatch("dwiScore", form);
+  const t2Score_tz = Form.useWatch("t2Score_tz", form);
+  const t2Score_pz = Form.useWatch("t2Score_pz", form);
+  const dceScore = Form.useWatch("dceScore", form);
 
   const [summary, setSummary] = useState({
     score: null,
@@ -34,7 +39,8 @@ export default function PiradsForm() {
   useEffect(() => {
     const values = form.getFieldsValue();
 
-    if (!values.zone || !values.dwiScore) return;
+    if (!values.zone) return;
+    console.log("values", values);
 
     const score = getPiradsScore(values);
 
@@ -47,7 +53,15 @@ export default function PiradsForm() {
         desc: result.desc,
       });
     }
-  }, [zone, dwiScore]);
+  }, [
+    zone,
+    dwiScore,
+    t2Score_tz,
+    t2Score_pz,
+    dwiAdequate,
+    dceScore,
+    dceAdequate,
+  ]);
 
   const [cannotCalculate, setCannotCalculate] = useState(false);
 
@@ -71,37 +85,112 @@ export default function PiradsForm() {
   const genHtml = async () => {
     const values = await form.validateFields();
 
+    const score = getPiradsScore(values);
+    const result = PIRADS_RESULT[score];
+
+    const getLabel = (options, value) => {
+      return options.find((o) => o.value === value)?.label || "";
+    };
+
+    const getYesNo = (value) => (value ? "Có" : "Không");
+
+    const zoneText =
+      values.zone === "pz"
+        ? "Vùng ngoại vi (Peripheral zone)"
+        : values.zone === "tz"
+          ? "Vùng chuyển tiếp (Transitional zone)"
+          : "";
+
     const html = `
-      <table>
-        <caption>Đánh giá PI-RADS</caption>
-        <tr><th>Thông tin</th><th>Kết quả</th></tr>
+  <div style="font-family: Times New Roman; font-size: 14px; line-height: 1.6">
+    
+    <h3 style="text-align:center; margin-bottom:10px">
+      BÁO CÁO ĐÁNH GIÁ PI-RADS (MRI TUYẾN TIỀN LIỆT)
+    </h3>
 
-        <tr>
-          <td>DWI adequate</td>
-          <td>${values.dwiAdequate ? "Yes" : "No"}</td>
-        </tr>
+    <table border="1" cellspacing="0" cellpadding="6" style="width:100%; border-collapse:collapse">
+      <tr>
+        <th style="width:40%">Thông tin</th>
+        <th>Kết quả</th>
+      </tr>
 
-        <tr>
-          <td>DCE adequate</td>
-          <td>${values.dceAdequate ? "Yes" : "No"}</td>
-        </tr>
+      <tr>
+        <td>DWI đạt yêu cầu</td>
+        <td>${getYesNo(values.dwiAdequate)}</td>
+      </tr>
 
-        <tr>
-          <td>Khả năng tính PI-RADS</td>
-          <td>
-          ${
-            values.dwiAdequate === false && values.dceAdequate === false
-              ? "Không thể tính PI-RADS"
-              : "Có thể tiếp tục đánh giá"
-          }
-          </td>
-        </tr>
-      </table>
-    `;
+      <tr>
+        <td>DCE đạt yêu cầu</td>
+        <td>${getYesNo(values.dceAdequate)}</td>
+      </tr>
+
+      <tr>
+        <td>Vị trí tổn thương</td>
+        <td>${zoneText}</td>
+      </tr>
+
+      ${
+        values.dwiScore
+          ? `
+      <tr>
+        <td>DWI / ADC</td>
+        <td>${getLabel(DWI_ADC_OPTIONS, values.dwiScore)}</td>
+      </tr>`
+          : ""
+      }
+
+      ${
+        values.t2Score_pz
+          ? `
+      <tr>
+        <td>T2W (vùng ngoại vi)</td>
+        <td>${getLabel(T2w_OPTIONS_WITH_PZ, values.t2Score_pz)}</td>
+      </tr>`
+          : ""
+      }
+
+      ${
+        values.t2Score_tz
+          ? `
+      <tr>
+        <td>T2W (vùng chuyển tiếp)</td>
+        <td>${getLabel(T2w_OPTIONS_WITH_TZ, values.t2Score_tz)}</td>
+      </tr>`
+          : ""
+      }
+
+      ${
+        values.dceScore
+          ? `
+      <tr>
+        <td>DCE</td>
+        <td>${getLabel(DCE_OPTIONS, values.dceScore)}</td>
+      </tr>`
+          : ""
+      }
+    </table>
+
+    <br/>
+
+    <div>
+      <b>KẾT LUẬN:</b><br/>
+      ${
+        result
+          ? `
+        <span style="color:red; font-weight:bold">${result.title}</span><br/>
+        ${result.desc}<br/><br/>
+        <b>Nguy cơ:</b> ${result.risk || ""}<br/>
+        <b>Khuyến nghị:</b> ${result.recommendation || ""}
+      `
+          : "Không đủ dữ liệu để tính PI-RADS"
+      }
+    </div>
+
+  </div>
+  `;
 
     return html;
   };
-
   const onCopy = async () => {
     const html = `
       ${STYLE_COPY}
@@ -167,7 +256,7 @@ export default function PiradsForm() {
             </Col>
           </Row>
 
-          {dwiAdequate === true && dceAdequate === false && (
+          {(dwiAdequate === true || dceAdequate === true) && (
             <Form.Item
               name="zone"
               label="Where is the lesion located?"
@@ -180,8 +269,21 @@ export default function PiradsForm() {
             </Form.Item>
           )}
 
-          {zone === "pz" && (
+          {dwiAdequate === true && zone === "pz" && (
             <>
+              {dwiAdequate === true && dceAdequate === true && (
+                <Form.Item
+                  name="dceScore"
+                  label="How does the lesion look on DCE? *"
+                  rules={[{ required: true }]}
+                >
+                  <ImageSelectCard
+                    options={DCE_OPTIONS}
+                    value={form.getFieldValue("dceScore")}
+                    onChange={(v) => form.setFieldsValue({ dceScore: v })}
+                  />
+                </Form.Item>
+              )}
               <Form.Item
                 name="dwiScore"
                 label="How does the lesion look on DWI and ADC?"
@@ -195,14 +297,111 @@ export default function PiradsForm() {
               </Form.Item>
 
               <Form.Item
-                name="t2Score"
+                name="t2Score_pz"
                 label="How does the lesion look on T2w imaging?"
                 rules={[{ required: true }]}
               >
                 <ImageSelectCard
-                  options={T2w_OPTIONS}
-                  value={form.getFieldValue("t2Score")}
-                  onChange={(v) => form.setFieldsValue({ t2Score: v })}
+                  options={T2w_OPTIONS_WITH_PZ}
+                  value={form.getFieldValue("t2Score_pz")}
+                  onChange={(v) => form.setFieldsValue({ t2Score_pz: v })}
+                />
+              </Form.Item>
+            </>
+          )}
+
+          {dwiAdequate === true && zone === "tz" && (
+            <>
+              {dwiAdequate === true && dceAdequate === true && (
+                <Form.Item
+                  name="dceScore"
+                  label="How does the lesion look on DCE? *"
+                  rules={[{ required: true }]}
+                >
+                  <ImageSelectCard
+                    options={DCE_OPTIONS}
+                    value={form.getFieldValue("dceScore")}
+                    onChange={(v) => form.setFieldsValue({ dceScore: v })}
+                  />
+                </Form.Item>
+              )}
+              <Form.Item
+                name="dwiScore"
+                label="How does the lesion look on DWI and ADC?"
+                rules={[{ required: true }]}
+              >
+                <ImageSelectCard
+                  options={DWI_ADC_OPTIONS}
+                  value={form.getFieldValue("dwiScore")}
+                  onChange={(v) => form.setFieldsValue({ dwiScore: v })}
+                />
+              </Form.Item>
+
+              <Form.Item
+                name="t2Score_tz"
+                label="How does the lesion look on T2w imaging?"
+                rules={[{ required: true }]}
+              >
+                <ImageSelectCard
+                  options={T2w_OPTIONS_WITH_TZ}
+                  value={form.getFieldValue("t2Score_tz")}
+                  onChange={(v) => form.setFieldsValue({ t2Score_tz: v })}
+                />
+              </Form.Item>
+            </>
+          )}
+
+          {dwiAdequate === false && zone === "pz" && (
+            <>
+              <Form.Item
+                name="dceScore"
+                label="How does the lesion look on DCE? *"
+                rules={[{ required: true }]}
+              >
+                <ImageSelectCard
+                  options={DCE_OPTIONS}
+                  value={form.getFieldValue("dceScore")}
+                  onChange={(v) => form.setFieldsValue({ dceScore: v })}
+                />
+              </Form.Item>
+
+              <Form.Item
+                name="t2Score_pz"
+                label="How does the lesion look on T2w imaging?"
+                rules={[{ required: true }]}
+              >
+                <ImageSelectCard
+                  options={T2w_OPTIONS_WITH_PZ}
+                  value={form.getFieldValue("t2Score_pz")}
+                  onChange={(v) => form.setFieldsValue({ t2Score_pz: v })}
+                />
+              </Form.Item>
+            </>
+          )}
+
+          {dwiAdequate === false && zone === "tz" && (
+            <>
+              <Form.Item
+                name="dceScore"
+                label="How does the lesion look on DCE? *"
+                rules={[{ required: true }]}
+              >
+                <ImageSelectCard
+                  options={DCE_OPTIONS}
+                  value={form.getFieldValue("dceScore")}
+                  onChange={(v) => form.setFieldsValue({ dceScore: v })}
+                />
+              </Form.Item>
+
+              <Form.Item
+                name="t2Score_tz"
+                label="How does the lesion look on T2w imaging?"
+                rules={[{ required: true }]}
+              >
+                <ImageSelectCard
+                  options={T2w_OPTIONS_WITH_TZ}
+                  value={form.getFieldValue("t2Score_tz")}
+                  onChange={(v) => form.setFieldsValue({ t2Score_tz: v })}
                 />
               </Form.Item>
             </>
@@ -224,7 +423,7 @@ export default function PiradsForm() {
           {summary.score && (
             <Row className={styles.summaryRow}>
               <Col span={24}>
-                <Text strong>Calculated Score:</Text>{" "}
+                <Text strong>Kết quả:</Text>{" "}
                 <Text type="danger">{summary.title}</Text>
               </Col>
 

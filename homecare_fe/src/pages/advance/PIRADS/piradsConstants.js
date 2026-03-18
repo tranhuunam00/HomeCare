@@ -1,114 +1,348 @@
 export const YES_NO_OPTIONS = [
-  { label: "Yes", value: true },
-  { label: "No", value: false },
+  { label: "Có", value: true },
+  { label: "Không", value: false },
 ];
 
 export const DWI_ADC_OPTIONS = [
   {
     value: 1,
-    label: "Normal on ADC and high b-value DWI",
+    label: "Bình thường trên ADC và DWI b cao",
     image: "/product/pirads/DWI_ADC_OPTIONS/1.png",
   },
   {
     value: 2,
     label:
-      "Linear/wedge shaped hypointense on ADC and/or linear/wedge shaped hyperintense on high b-value DWI",
+      "Giảm tín hiệu dạng đường thẳng/hình nêm trên ADC và/hoặc tăng tín hiệu dạng đường thẳng/hình nêm trên DWI b cao",
     image: "/product/pirads/DWI_ADC_OPTIONS/2.png",
   },
   {
     value: 3,
     label:
-      "Focal (discrete and different from the background) hypointense on ADC and/or focal hyperintense on high b-value DWI (may be markedly hypointense on ADC or markedly hyperintense on high b-value DWI, but not both)",
+      "Tổn thương khu trú (rõ ràng, khác biệt mô nền) giảm tín hiệu trên ADC và/hoặc tăng tín hiệu khu trú trên DWI b cao (có thể giảm mạnh trên ADC hoặc tăng mạnh trên DWI b cao, nhưng không đồng thời cả hai)",
     image: "/product/pirads/DWI_ADC_OPTIONS/3.png",
   },
   {
     value: 4,
     label:
-      "Focal markedly hypontense on ADC AND markedly hyperintense on high b-value DWI AND <1.5cm in greatest dimension",
+      "Tổn thương khu trú giảm tín hiệu rõ trên ADC VÀ tăng tín hiệu rõ trên DWI b cao VÀ kích thước lớn nhất < 1,5 cm",
     image: "/product/pirads/DWI_ADC_OPTIONS/4.png",
   },
   {
     value: 5,
     label:
-      "Focal markedly hypontense on ADC AND markedly hyperintense on high b-value DWI AND ≥1.5cm in greatest dimension or definite extraprostatic extension/invasive behavior",
+      "Tổn thương khu trú giảm tín hiệu rõ trên ADC VÀ tăng tín hiệu rõ trên DWI b cao VÀ kích thước lớn nhất ≥ 1,5 cm hoặc có xâm lấn ngoài tuyến tiền liệt rõ ràng",
     image: "/product/pirads/DWI_ADC_OPTIONS/5.png",
   },
 ];
-
-export const T2w_OPTIONS = [
+export const T2w_OPTIONS_WITH_PZ = [
   {
     value: 1,
-    label: "Uniform hyperintense signal intensity (i.e. normal)",
-    image: "/product/pirads/T2w_OPTIONS/1.png",
+    label: "Tín hiệu tăng đồng nhất (bình thường)",
+    image: "/product/pirads/T2w_OPTIONS_WITH_PZ/1.png",
   },
   {
     value: 2,
-    label: "Linear or wedge-shaped hypointensity",
-    image: "/product/pirads/T2w_OPTIONS/2.png",
+    label: "Giảm tín hiệu dạng đường thẳng hoặc hình nêm",
+    image: "/product/pirads/T2w_OPTIONS_WITH_PZ/2.png",
   },
   {
     value: 3,
-    label: "Diffuse mild hypointensity",
-    image: "/product/pirads/T2w_OPTIONS/3.png",
+    label: "Giảm tín hiệu lan tỏa mức độ nhẹ",
+    image: "/product/pirads/T2w_OPTIONS_WITH_PZ/3.png",
   },
   {
     value: 4,
-    label: "Heterogeneous signal intensity",
-    image: "/product/pirads/T2w_OPTIONS/4.png",
+    label: "Tín hiệu không đồng nhất",
+    image: "/product/pirads/T2w_OPTIONS_WITH_PZ/4.png",
   },
   {
     value: 5,
-    label: "Non-circumscribed, rounded, moderate hypointensity",
-    image: "/product/pirads/T2w_OPTIONS/5.png",
+    label: "Giảm tín hiệu mức độ trung bình, dạng tròn, không có ranh giới rõ",
+    image: "/product/pirads/T2w_OPTIONS_WITH_PZ/5.png",
   },
   {
     value: 6,
     label:
-      "Circumscribed, homogenous moderate hypointensity confined to prostate AND <1.5 cm in greatest dimension",
-    image: "/product/pirads/T2w_OPTIONS/6.png",
+      "Tổn thương giảm tín hiệu mức độ trung bình, đồng nhất, có ranh giới rõ, khu trú trong tuyến tiền liệt VÀ kích thước < 1,5 cm",
+    image: "/product/pirads/T2w_OPTIONS_WITH_PZ/6.png",
   },
   {
     value: 7,
     label:
-      "Circumscribed, homogenous moderate hypointensity confined to prostate AND ≥1.5cm in greatest dimension or definite extraprostatic extension/invasive behavior",
-    image: "/product/pirads/T2w_OPTIONS/7.png",
+      "Tổn thương giảm tín hiệu mức độ trung bình, đồng nhất, có ranh giới rõ, khu trú trong tuyến tiền liệt VÀ kích thước ≥ 1,5 cm hoặc có xâm lấn ngoài tuyến rõ ràng",
+    image: "/product/pirads/T2w_OPTIONS_WITH_PZ/7.png",
   },
   {
     value: 8,
-    label: "None of the above",
+    label: "Không thuộc các trường hợp trên",
+    image: "/product/pirads/none.png",
+  },
+];
+
+export const DCE_OPTIONS = [
+  {
+    value: 1,
+    label: "Không có ngấm thuốc sớm hoặc ngấm thuốc đồng thời",
+    image: "/product/pirads/DCE_OPTIONS/1.png",
+  },
+  {
+    value: 2,
+    label:
+      "Ngấm thuốc lan tỏa đa ổ KHÔNG tương ứng với tổn thương khu trú trên T2W và/hoặc DWI",
+    image: "/product/pirads/DCE_OPTIONS/2.png",
+  },
+  {
+    value: 3,
+    label:
+      "Ngấm thuốc khu trú tương ứng với tổn thương có đặc điểm của tăng sản lành tính tuyến tiền liệt (BPH) trên T2WI (bao gồm cả BPH lồi vào vùng ngoại vi)",
+    image: "/product/pirads/DCE_OPTIONS/3.png",
+  },
+  {
+    value: 4,
+    label:
+      "Ngấm thuốc khu trú, sớm hơn hoặc đồng thời với mô tuyến tiền liệt bình thường xung quanh VÀ tương ứng với tổn thương nghi ngờ trên T2W và/hoặc DWI",
+    image: "/product/pirads/DCE_OPTIONS/4.png",
+  },
+];
+
+export const T2w_OPTIONS_WITH_TZ = [
+  {
+    value: 1,
+    label: "Vùng chuyển tiếp bình thường",
+    image: "/product/pirads/T2w_OPTIONS_WITH_TZ/1.png",
+  },
+  {
+    value: 2,
+    label: "Nhân điển hình (tròn, bao rõ hoàn toàn)",
+    image: "/product/pirads/T2w_OPTIONS_WITH_TZ/2.png",
+  },
+  {
+    value: 3,
+    label:
+      "Nhân không điển hình (đồng nhất, có ranh giới rõ nhưng không có bao)",
+    image: "/product/pirads/T2w_OPTIONS_WITH_TZ/3.png",
+  },
+  {
+    value: 4,
+    label: "Nhân có bao một phần",
+    image: "/product/pirads/T2w_OPTIONS_WITH_TZ/4.png",
+  },
+  {
+    value: 5,
+    label: "Vùng giảm tín hiệu nhẹ, đồng nhất nằm giữa các nhân",
+    image: "/product/pirads/T2w_OPTIONS_WITH_TZ/5.png",
+  },
+  {
+    value: 6,
+    label: "Tín hiệu không đồng nhất, bờ không rõ",
+    image: "/product/pirads/T2w_OPTIONS_WITH_TZ/6.png",
+  },
+  {
+    value: 7,
+    label:
+      "Tổn thương dạng thấu kính hoặc không có ranh giới rõ, đồng nhất, giảm tín hiệu mức độ trung bình VÀ kích thước < 1,5 cm",
+    image: "/product/pirads/T2w_OPTIONS_WITH_TZ/7.png",
+  },
+  {
+    value: 8,
+    label:
+      "Như trên nhưng kích thước ≥ 1,5 cm hoặc có xâm lấn ngoài tuyến rõ ràng",
+    image: "/product/pirads/T2w_OPTIONS_WITH_TZ/8.png",
+  },
+  {
+    value: 9,
+    label: "Không thuộc các trường hợp trên",
     image: "/product/pirads/none.png",
   },
 ];
 
 export const getPiradsScore = (values) => {
-  const { zone, dwiScore } = values;
+  console.log("values", values);
 
-  if (zone === "pz") {
+  const { zone, dwiScore, t2Score_pz, t2Score_tz, dwiAdequate, dceScore } =
+    values;
+
+  if (dwiAdequate == true && zone === "pz") {
     return dwiScore;
   }
-
+  if (dwiAdequate == true && zone === "tz") {
+    if (dwiScore == 1 || dwiScore == 2 || dwiScore == 3) {
+      switch (t2Score_tz) {
+        case 1:
+          return 1;
+        case 2:
+          return 1;
+        case 3:
+          return 2;
+        case 4:
+          return 2;
+        case 5:
+          return 2;
+        case 6:
+          return 3;
+        case 7:
+          return 4;
+        case 8:
+          return 5;
+        case 9:
+          return 3;
+      }
+    }
+    if (dwiScore == 4) {
+      switch (t2Score_tz) {
+        case 1:
+          return 1;
+        case 2:
+          return 1;
+        case 3:
+          return 3;
+        case 4:
+          return 3;
+        case 5:
+          return 3;
+        case 6:
+          return 3;
+        case 7:
+          return 4;
+        case 8:
+          return 5;
+        case 9:
+          return 3;
+      }
+    }
+    if (dwiScore == 5) {
+      switch (t2Score_tz) {
+        case 1:
+          return 1;
+        case 2:
+          return 1;
+        case 3:
+          return 3;
+        case 4:
+          return 3;
+        case 5:
+          return 3;
+        case 6:
+          return 4;
+        case 7:
+          return 4;
+        case 8:
+          return 5;
+        case 9:
+          return 4;
+      }
+    }
+  }
+  if (dwiAdequate == false && zone === "pz") {
+    if (dceScore == 1 || dceScore == 2 || dceScore == 3) {
+      switch (t2Score_pz) {
+        case 1:
+          return 1;
+        case 2:
+          return 2;
+        case 3:
+          return 2;
+        case 4:
+          return 3;
+        case 5:
+          return 3;
+        case 6:
+          return 4;
+        case 7:
+          return 5;
+        case 8:
+          return 3;
+      }
+    }
+    if (dceScore == 4) {
+      switch (t2Score_pz) {
+        case 1:
+          return 1;
+        case 2:
+          return 2;
+        case 3:
+          return 2;
+        case 4:
+          return 4;
+        case 5:
+          return 4;
+        case 6:
+          return 4;
+        case 7:
+          return 5;
+        case 8:
+          return 4;
+      }
+    }
+  }
+  if (dwiAdequate == false && zone === "tz") {
+    if (dceScore == 1 || dceScore == 2 || dceScore == 3) {
+      switch (t2Score_tz) {
+        case 1:
+          return 1;
+        case 2:
+          return 1;
+        case 3:
+          return 2;
+        case 4:
+          return 2;
+        case 5:
+          return 2;
+        case 6:
+          return 3;
+        case 7:
+          return 4;
+        case 8:
+          return 5;
+        case 9:
+          return 3;
+      }
+    }
+    if (dceScore == 4) {
+      switch (t2Score_tz) {
+        case 1:
+          return 1;
+        case 2:
+          return 1;
+        case 3:
+          return 2;
+        case 4:
+          return 2;
+        case 5:
+          return 2;
+        case 6:
+          return 4;
+        case 7:
+          return 4;
+        case 8:
+          return 5;
+        case 9:
+          return 3;
+      }
+    }
+  }
   return null;
 };
 
 export const PIRADS_RESULT = {
   1: {
     title: "PI-RADS 1",
-    desc: "Clinically significant cancer is highly unlikely to be present.",
+    desc: "Rất ít khả năng có ung thư tuyến tiền liệt có ý nghĩa lâm sàng.",
   },
   2: {
     title: "PI-RADS 2",
-    desc: "Clinically significant cancer is unlikely to be present.",
+    desc: "Ít khả năng có ung thư tuyến tiền liệt có ý nghĩa lâm sàng.",
   },
   3: {
     title: "PI-RADS 3",
-    desc: "The presence of clinically significant cancer is equivocal.",
+    desc: "Chưa xác định (không rõ ràng) khả năng có ung thư tuyến tiền liệt có ý nghĩa lâm sàng.",
   },
   4: {
     title: "PI-RADS 4",
-    desc: "Clinically significant cancer is likely to be present.",
+    desc: "Có khả năng có ung thư tuyến tiền liệt có ý nghĩa lâm sàng.",
   },
   5: {
     title: "PI-RADS 5",
-    desc: "Clinically significant cancer is highly likely to be present.",
+    desc: "Rất có khả năng có ung thư tuyến tiền liệt có ý nghĩa lâm sàng.",
   },
 };
