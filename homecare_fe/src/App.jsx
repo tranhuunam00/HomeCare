@@ -87,6 +87,8 @@ import GuideMenuReadResultPage from "./pages/landingpage/guild/worklist/GuideMen
 import DSpleenForm from "./pages/advance/DSpleenForm/DSpleenForm";
 import DPancreasForm from "./pages/advance/DPancreasForm/DPancreasForm";
 import PiradsForm from "./pages/advance/PIRADS/PiradsForm";
+import ApplicationsPage from "./pages/landingpage/questinary/ApplicationsPage";
+import PricingPage from "./pages/landingpage/guild/package/PricingPage";
 
 function App() {
   useAuthInitializer();
@@ -177,6 +179,8 @@ function App() {
         <Route path="/guild/app" element={<GuideMenuAppPage />} />
         <Route path="/guild/manage" element={<GuideMenuManagePage />} />
         <Route path="/guild/report" element={<GuideMenuReadResultPage />} />
+        <Route path="/applications" element={<ApplicationsPage />} />
+        <Route path="/pricing" element={<PricingPage />} />
 
         <Route
           path="/guild/manage/clinic"

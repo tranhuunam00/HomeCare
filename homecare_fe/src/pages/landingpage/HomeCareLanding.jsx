@@ -24,7 +24,6 @@ import { motion } from "framer-motion";
 import { useGlobalAuth } from "../../contexts/AuthContext";
 import DoctorAdvisorsSlider from "./DoctorAdvisorsSlider";
 import API_CALL from "../../services/axiosClient";
-import { medicalApps } from "./products";
 
 const textVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -108,18 +107,12 @@ const HomeCareLanding = () => {
             >
               Đọc kết quả
             </Menu.Item>
-            <Menu.SubMenu key="medical" title="Ứng dụng y khoa">
-              {medicalApps.map((item) => (
-                <Menu.Item
-                  key={item.key}
-                  onClick={() =>
-                    isLoggedIn ? navigate(item.path) : navigate("/login")
-                  }
-                >
-                  {item.label}
-                </Menu.Item>
-              ))}
-            </Menu.SubMenu>
+            <Menu.Item
+              key="medical_mobile"
+              onClick={() => navigate("/applications")}
+            >
+              Ứng dụng y khoa
+            </Menu.Item>
             <Menu.Item key="contact" onClick={() => navigate("/contact")}>
               Hỗ trợ kỹ thuật
             </Menu.Item>
@@ -129,7 +122,9 @@ const HomeCareLanding = () => {
             <Menu.Item
               key="packages"
               onClick={() =>
-                isLoggedIn ? navigate("home/subscription") : navigate("/login")
+                isLoggedIn
+                  ? navigate("home/subscription")
+                  : navigate("/pricing")
               }
             >
               Các gói dịch vụ
@@ -216,24 +211,17 @@ const HomeCareLanding = () => {
           <Menu.Item
             key="home"
             onClick={() =>
-              isLoggedIn ? navigate("home/subscription") : navigate("/login")
+              isLoggedIn ? navigate("home/subscription") : navigate("/pricing")
             }
           >
             CÁC GÓI DỊCH VỤ
           </Menu.Item>
-
-          <Menu.SubMenu key="medical_mobile" title="ỨNG DỤNG HỖ TRỢ">
-            {medicalApps.map((item) => (
-              <Menu.Item
-                key={item.key}
-                onClick={() =>
-                  isLoggedIn ? navigate(item.path) : navigate("/login")
-                }
-              >
-                {item.label}
-              </Menu.Item>
-            ))}
-          </Menu.SubMenu>
+          <Menu.Item
+            key="medical_mobile"
+            onClick={() => navigate("/applications")}
+          >
+            ỨNG DỤNG Y KHOA
+          </Menu.Item>
 
           <Menu.Item
             key="worklist"

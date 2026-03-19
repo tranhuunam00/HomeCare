@@ -164,10 +164,13 @@ const Sidebar = ({ collapsed }) => {
         // { key: "/tirads_nn", label: "Phần mềm D-TIRADS" },
         { key: "/home/birad", label: "Ứng dụng D-BIRADS" },
         { key: "/home/tirad", label: "Ứng dụng D-TIRADS" },
+
         { key: "/home/lungrad", label: "Ứng dụng D-LUNG" },
         { key: "/home/D-LIRADS", label: "Ứng dụng D-LIRADS" },
         { key: "/home/D-Pirads", label: "Ứng dụng D-Pirads" },
+
         { key: "/home/D-ORADS", label: "Ứng dụng D-ORADS" },
+
         { key: "/home/D-BOSNIAK", label: "Ứng dụng D-Bosniak" },
         { key: "/home/recist_nn", label: "Ứng dụng D-RECIST" },
         { key: "/home/D-BALTHAZA", label: "Ứng dụng D-CTSI" },

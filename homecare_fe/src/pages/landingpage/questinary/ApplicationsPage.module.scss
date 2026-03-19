@@ -1,0 +1,77 @@
+.container {
+  padding: 32px 40px;
+  background: #f6f8fb; // 🔥 đổi nền
+  min-height: 100vh;
+}
+
+.categorySection {
+  margin-bottom: 32px;
+  background: #fff;
+  padding: 20px 24px;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+/* HEADER */
+.categoryHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.categoryIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  padding: 6px;
+  background: #eef3ff;
+  margin-right: 12px;
+}
+
+.categoryTitle {
+  font-size: 18px;
+  font-weight: 700;
+  background: linear-gradient(90deg, #2563eb, #06b6d4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.categoryCount {
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+/* CARD */
+.appCard {
+  border-radius: 14px !important;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  border: 1px solid #f1f5f9;
+
+  &:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+    border-color: #dbeafe;
+  }
+}
+
+.appContent {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.appIcon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  padding: 6px;
+  background: #f1f5ff;
+}
+
+.appLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+  line-height: 1.4;
+}
