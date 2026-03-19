@@ -24,6 +24,7 @@ import { motion } from "framer-motion";
 import { useGlobalAuth } from "../../contexts/AuthContext";
 import DoctorAdvisorsSlider from "./DoctorAdvisorsSlider";
 import API_CALL from "../../services/axiosClient";
+import { medicalApps } from "./products";
 
 const textVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -107,15 +108,18 @@ const HomeCareLanding = () => {
             >
               Đọc kết quả
             </Menu.Item>
-            <Menu.Item
-              key="recist_nn"
-              onClick={() =>
-                isLoggedIn ? navigate("/home/recist_nn") : navigate("/login")
-              }
-            >
-              Ứng dụng y khoa
-            </Menu.Item>
-
+            <Menu.SubMenu key="medical" title="Ứng dụng y khoa">
+              {medicalApps.map((item) => (
+                <Menu.Item
+                  key={item.key}
+                  onClick={() =>
+                    isLoggedIn ? navigate(item.path) : navigate("/login")
+                  }
+                >
+                  {item.label}
+                </Menu.Item>
+              ))}
+            </Menu.SubMenu>
             <Menu.Item key="contact" onClick={() => navigate("/contact")}>
               Hỗ trợ kỹ thuật
             </Menu.Item>
@@ -218,14 +222,18 @@ const HomeCareLanding = () => {
             CÁC GÓI DỊCH VỤ
           </Menu.Item>
 
-          <Menu.Item
-            key="recist_nn"
-            onClick={() =>
-              isLoggedIn ? navigate("/home/recist_nn") : navigate("/login")
-            }
-          >
-            ỨNG DỤNG HỖ TRỢ
-          </Menu.Item>
+          <Menu.SubMenu key="medical_mobile" title="ỨNG DỤNG HỖ TRỢ">
+            {medicalApps.map((item) => (
+              <Menu.Item
+                key={item.key}
+                onClick={() =>
+                  isLoggedIn ? navigate(item.path) : navigate("/login")
+                }
+              >
+                {item.label}
+              </Menu.Item>
+            ))}
+          </Menu.SubMenu>
 
           <Menu.Item
             key="worklist"

@@ -95,3 +95,91 @@ export const products = [
     status: "Coming soon",
   },
 ];
+
+export const medicalApps = [
+  {
+    key: "birad",
+    label: "D-BIRADS - Đánh giá sàng lọc các khối u vú",
+    path: "/home/birad",
+  },
+  {
+    key: "tirad",
+    label: "D-TIRADS - Đánh giá sàng lọc khối u tuyến giáp",
+    path: "/home/tirad",
+  },
+  {
+    key: "lungrad",
+    label: "D-LungRADS - Đánh giá sàng lọc u phổi",
+    path: "/home/lungrad",
+  },
+  {
+    key: "lirads",
+    label: "D-LIRADS - Đánh giá sàng lọc các khối u gan",
+    path: "/home/D-LIRADS",
+  },
+  {
+    key: "pirads",
+    label: "D-PIRADS - Đánh giá sàng lọc ung thư tuyến tiền liệt",
+    path: "/home/D-Pirads",
+  },
+  {
+    key: "orads",
+    label: "D-ORADS - Đánh giá sàng lọc các khối u buồng trứng",
+    path: "/home/D-ORADS",
+  },
+  {
+    key: "bosniak",
+    label: "D-Bosniak - Đánh giá sàng lọc u nang thận",
+    path: "/home/D-BOSNIAK",
+  },
+  {
+    key: "recist",
+    label: "D-RECIST - Đánh giá đáp ứng sau điều trị của khối u",
+    path: "/home/recist_nn",
+  },
+  {
+    key: "ctsi",
+    label: "D-CTSI - Đánh giá mức độ viêm tụy cấp",
+    path: "/home/D-BALTHAZA",
+  },
+  {
+    key: "boneage",
+    label: "D-Bone - Đánh giá tuổi xương bàn tay trái",
+    path: "/home/boneage",
+  },
+  {
+    key: "dipss",
+    label: "D-IPSS - Đánh giá rối loạn phì đại tuyến tiền liệt",
+    path: "/home/dipss",
+  },
+  {
+    key: "cor",
+    label: "D-COR - Đánh giá nguy cơ nhồi máu cơ tim",
+    path: "/home/D-COR",
+  },
+  {
+    key: "cps",
+    label: "D-CPS - Đánh giá chức năng gan theo Child Pugh",
+    path: "/home/D-CPS",
+  },
+  {
+    key: "liver",
+    label: "D-Liver - Đánh giá phân độ chấn thương gan",
+    path: "/home/D-VOGAN",
+  },
+  {
+    key: "spleen",
+    label: "D-Spleen - Đánh giá phân độ chấn thương lách",
+    path: "/home/D-Spleen",
+  },
+  {
+    key: "kidney",
+    label: "D-Kidney - Đánh giá phân độ chấn thương thận",
+    path: "/home/D-VOTHAN",
+  },
+  {
+    key: "pancreas",
+    label: "D-Pancreas - Đánh giá phân độ chấn thương tụy",
+    path: "/home/D-Pan",
+  },
+];
