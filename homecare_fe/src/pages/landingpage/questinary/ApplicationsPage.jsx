@@ -21,16 +21,17 @@ const ApplicationsPage = () => {
         ← Quay lại
       </Button>
       <Title level={3}>ỨNG DỤNG Y KHOA</Title>
-
+      <Button
+        type="link"
+        onClick={() => navigate("/login")}
+        style={{ padding: 0, marginBottom: 8, marginLeft: 10 }}
+      >
+        Đăng nhập để sử dụng đầy đủ tính năng
+      </Button>
       {medicalCategories.map((cat) => (
         <div key={cat.key} className={styles.categorySection}>
           {/* ===== CATEGORY HEADER ===== */}
           <div className={styles.categoryHeader}>
-            <img
-              src={cat.image}
-              alt={cat.title}
-              className={styles.categoryIcon}
-            />
             <div>
               <div className={styles.categoryTitle}>{cat.title}</div>
               <div className={styles.categoryCount}>

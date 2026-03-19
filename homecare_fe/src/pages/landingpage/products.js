@@ -133,12 +133,7 @@ export const medicalCategories = [
         image:
           "https://home-care.vn/wp-content/uploads/2025/09/Balthaza-ACR.png",
       },
-      {
-        key: "cps",
-        label: "D-CPS - Đánh giá chức năng gan theo Child Pugh",
-        path: "/home/D-CPS",
-        image: "https://home-care.vn/wp-content/uploads/2025/08/LiRADS.png",
-      },
+
       {
         key: "liver",
         label: "D-Liver - Đánh giá phân độ chấn thương gan",
@@ -244,6 +239,12 @@ export const medicalCategories = [
         label: "D-COR - Đánh giá nguy cơ nhồi máu cơ tim",
         path: "/home/D-COR",
         image: "https://home-care.vn/wp-content/uploads/2025/08/DCOR.png",
+      },
+      {
+        key: "cps",
+        label: "D-CPS - Đánh giá chức năng gan theo Child Pugh",
+        path: "/home/D-CPS",
+        image: "https://home-care.vn/wp-content/uploads/2025/08/LiRADS.png",
       },
     ],
   },
