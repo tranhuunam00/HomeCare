@@ -8,9 +8,14 @@ import {
   InputNumber,
   Button,
   Typography,
-  message,
 } from "antd";
 import styles from "./Lirads2Form.module.scss";
+import {
+  calculateScore,
+  LIRADS_APPLICABILITY_RULES,
+} from "./Lirads2Form.constant";
+import TextArea from "antd/es/input/TextArea";
+import API_CALL from "../../../services/axiosClient";
 
 const { Text, Title } = Typography;
 
@@ -22,18 +27,26 @@ const CIRRHOSIS_CAUSES = [
 
 const Lirads2Form = () => {
   const [applicable, setApplicable] = useState(null);
+  const [matchedRule, setMatchedRule] = useState(null);
+
+  const [summary, setSummary] = useState({
+    lirads: "",
+    description: "",
+  });
+
+  const [geminiResponse, setGeminiResponse] = useState("");
 
   const [form, setForm] = useState({
     age: false,
     cirrhosis: false,
     hepatitisB: false,
     priorHCC: false,
-    cirrhosisCause: "vascular",
+    cirrhosisCause: "other",
 
-    aphe: false,
+    aphe: true,
     washout: false,
     capsule: false,
-    size: 10,
+    size: 1,
     growth: false,
   });
 
@@ -44,35 +57,89 @@ const Lirads2Form = () => {
   };
 
   const checkApplicability = () => {
-    if (form.age && (form.cirrhosis || form.hepatitisB) && !form.priorHCC) {
+    const rule = LIRADS_APPLICABILITY_RULES.find((r) => r.condition(form));
+
+    if (rule) {
       setApplicable(true);
+      setMatchedRule(rule);
     } else {
       setApplicable(false);
+      setMatchedRule(null);
     }
   };
 
   const calculateLIRADS = () => {
-    if (!applicable) {
-      message.error("LI-RADS không áp dụng");
-      return;
-    }
-
-    let score = 0;
-
-    if (form.aphe) score += 2;
-    if (form.washout) score += 2;
-    if (form.capsule) score += 1;
-    if (form.growth) score += 1;
-
-    if (form.size >= 20) score += 2;
-    else if (form.size >= 10) score += 1;
-
-    if (score >= 5) setResult("LR-5 (Chắc chắn HCC)");
-    else if (score >= 3) setResult("LR-4 (Nghi ngờ cao)");
-    else if (score >= 2) setResult("LR-3 (Trung gian)");
-    else setResult("LR-2 (Có thể lành tính)");
+    const result = calculateScore(form);
+    setResult(result);
   };
 
+  const genHtml = (result, isCopy = false) => {
+    const html = `
+    <table border="1" cellpadding="6" style="border-collapse: collapse;">
+      <caption><strong>Đánh giá LI-RADS</strong></caption>
+
+      <tr><td><strong>APHE</strong></td><td>${form.aphe ? "Có" : "Không"}</td></tr>
+      <tr><td><strong>Washout</strong></td><td>${form.washout ? "Có" : "Không"}</td></tr>
+      <tr><td><strong>Capsule</strong></td><td>${form.capsule ? "Có" : "Không"}</td></tr>
+      <tr><td><strong>Kích thước</strong></td><td>${form.size} mm</td></tr>
+      <tr><td><strong>Growth</strong></td><td>${form.growth}</td></tr>
+
+      <tr><td><strong>Kết luận</strong></td><td>${result.lirads}</td></tr>
+      <tr><td><strong>Ý nghĩa</strong></td><td>${result.description}</td></tr>
+    </table>
+  `;
+
+    return isCopy
+      ? html + `<div style="margin-top:16px;">${geminiResponse}</div>`
+      : html;
+  };
+
+  const handleCopy = async () => {
+    const html = genHtml(summary, true);
+
+    await navigator.clipboard.write([
+      new ClipboardItem({
+        "text/html": new Blob([html], { type: "text/html" }),
+      }),
+    ]);
+  };
+  const handleSubmit = async () => {
+    const result = calculateScore(form);
+    setSummary(result);
+
+    const html = genHtml(result);
+
+    // gọi AI giống DIPSS
+    try {
+      const res = await API_CALL.get(`/chatgpt/ask-gemini-recommendation`, {
+        params: {
+          prompt: encodeURIComponent(html),
+        },
+      });
+
+      setGeminiResponse(
+        res.data.data?.replace(/\*\*(.*?)\*\*/g, "$1").replace(/^\* /gm, "• "),
+      );
+    } catch (e) {}
+  };
+
+  const handleReset = () => {
+    setForm({
+      age: false,
+      cirrhosis: false,
+      hepatitisB: false,
+      priorHCC: false,
+      cirrhosisCause: "other",
+      aphe: true,
+      washout: false,
+      capsule: false,
+      size: 1,
+      growth: "no",
+    });
+
+    setSummary({ lirads: "", description: "" });
+    setGeminiResponse("");
+  };
   return (
     <div className={styles.pageWrapper}>
       <div className={styles.container}>
@@ -81,22 +148,28 @@ const Lirads2Form = () => {
           <Col span={12}>
             <Card title="Khả năng áp dụng LI-RADS" className={styles.card}>
               <div className={styles.formGroup}>
-                <p>Bệnh nhân ≥18 tuổi?</p>
+                <p>
+                  Bệnh nhân ≥18 tuổi?
+                  <span className={styles.required}>*</span>
+                </p>
                 <Radio.Group
                   onChange={(e) => handleChange("age", e.target.value)}
                 >
-                  <Radio value={true}>Yes</Radio>
-                  <Radio value={false}>No</Radio>
+                  <Radio value={true}>Có</Radio>
+                  <Radio value={false}>Không</Radio>
                 </Radio.Group>
               </div>
 
               <div className={styles.formGroup}>
-                <p>Bệnh nhân có xơ gan?</p>
+                <p>
+                  Bệnh nhân có xơ gan?
+                  <span className={styles.required}>*</span>
+                </p>
                 <Radio.Group
                   onChange={(e) => handleChange("cirrhosis", e.target.value)}
                 >
-                  <Radio value={true}>Yes</Radio>
-                  <Radio value={false}>No</Radio>
+                  <Radio value={true}>Có</Radio>
+                  <Radio value={false}>Không</Radio>
                 </Radio.Group>
               </div>
 
@@ -113,22 +186,28 @@ const Lirads2Form = () => {
               )}
 
               <div className={styles.formGroup}>
-                <p>Có viêm gan B?</p>
+                <p>
+                  Có viêm gan B?
+                  <span className={styles.required}>*</span>
+                </p>
                 <Radio.Group
                   onChange={(e) => handleChange("hepatitisB", e.target.value)}
                 >
-                  <Radio value={true}>Yes</Radio>
-                  <Radio value={false}>No</Radio>
+                  <Radio value={true}>Có</Radio>
+                  <Radio value={false}>Không</Radio>
                 </Radio.Group>
               </div>
 
               <div className={styles.formGroup}>
-                <p>Có tiền sử HCC?</p>
+                <p>
+                  Có tiền sử HCC?
+                  <span className={styles.required}>*</span>
+                </p>
                 <Radio.Group
                   onChange={(e) => handleChange("priorHCC", e.target.value)}
                 >
-                  <Radio value={true}>Yes</Radio>
-                  <Radio value={false}>No</Radio>
+                  <Radio value={true}>Có</Radio>
+                  <Radio value={false}>Không</Radio>
                 </Radio.Group>
               </div>
 
@@ -137,7 +216,7 @@ const Lirads2Form = () => {
                 onClick={checkApplicability}
                 className={styles.buttonCheck}
               >
-                Check LI-RADS
+                Kiểm tra LI-RADS
               </Button>
 
               {applicable === false && (
@@ -146,9 +225,11 @@ const Lirads2Form = () => {
                 </Text>
               )}
               {applicable === true && (
-                <Text className={styles.statusSuccess}>
-                  Có thể áp dụng LI-RADS
-                </Text>
+                <div className={styles.statusSuccess}>
+                  <Text style={{ color: "green", fontSize: 20 }}>
+                    Có thể áp dụng LI-RADS
+                  </Text>
+                </div>
               )}
             </Card>
           </Col>
@@ -157,37 +238,49 @@ const Lirads2Form = () => {
           <Col span={12}>
             <Card title="Thanh điểm LI-RADS" className={styles.card}>
               <div className={styles.formGroup}>
-                <p>Non-rim APHE</p>
+                <p>
+                  Tăng quang thì động mạch (không dạng viền)
+                  <span className={styles.required}>*</span>
+                </p>
                 <Radio.Group
                   onChange={(e) => handleChange("aphe", e.target.value)}
                 >
-                  <Radio value={true}>Yes</Radio>
-                  <Radio value={false}>No</Radio>
+                  <Radio value={true}>Có</Radio>
+                  <Radio value={false}>Không</Radio>
                 </Radio.Group>
               </div>
 
               <div className={styles.formGroup}>
-                <p>Washout</p>
+                <p>
+                  Rửa thuốc không ở ngoại vi
+                  <span className={styles.required}>*</span>
+                </p>
                 <Radio.Group
                   onChange={(e) => handleChange("washout", e.target.value)}
                 >
-                  <Radio value={true}>Yes</Radio>
-                  <Radio value={false}>No</Radio>
+                  <Radio value={true}>Có</Radio>
+                  <Radio value={false}>Không</Radio>
                 </Radio.Group>
               </div>
 
               <div className={styles.formGroup}>
-                <p>Capsule</p>
+                <p>
+                  Bao giả tăng quang
+                  <span className={styles.required}>*</span>
+                </p>
                 <Radio.Group
                   onChange={(e) => handleChange("capsule", e.target.value)}
                 >
-                  <Radio value={true}>Yes</Radio>
-                  <Radio value={false}>No</Radio>
+                  <Radio value={true}>Có</Radio>
+                  <Radio value={false}>Không</Radio>
                 </Radio.Group>
               </div>
 
               <div className={styles.formGroup}>
-                <p>Size (mm)</p>
+                <p>
+                  Kích thước (mm)
+                  <span className={styles.required}>*</span>
+                </p>
                 <InputNumber
                   min={1}
                   value={form.size}
@@ -197,23 +290,33 @@ const Lirads2Form = () => {
               </div>
 
               <div className={styles.formGroup}>
-                <p>Threshold Growth</p>
+                <p>
+                  Tăng trưởng ngưỡng (≥ 50% trong 6 tháng){" "}
+                  <span className={styles.required}>*</span>
+                </p>
                 <Select
                   style={{ width: "100%" }}
                   onChange={(val) => handleChange("growth", val)}
                   value={form.growth}
                 >
-                  <Select.Option value={true}>Yes</Select.Option>
-                  <Select.Option value={false}>No</Select.Option>
+                  <Select.Option value={"no"}>Không</Select.Option>
+                  <Select.Option value={"yes"}>Có</Select.Option>
+                  <Select.Option value={"na"}>
+                    Không xác định được
+                  </Select.Option>
                 </Select>
               </div>
 
+              <div className={styles.formGroup}>
+                <p>Các dấu hiệu phụ</p>
+                <TextArea placeholder="Ví dụ: hạn chế khuếch tán, tăng tín hiệu T2, có mỡ trong tổn thương" />
+              </div>
               <Button
                 type="primary"
                 onClick={calculateLIRADS}
                 className={styles.buttonPrimary}
               >
-                Calculate LI-RADS
+                Tính LI-RADS
               </Button>
 
               {result && (
@@ -224,6 +327,26 @@ const Lirads2Form = () => {
             </Card>
           </Col>
         </Row>
+        {summary.lirads && (
+          <div className={styles.resultBox}>
+            <Row gutter={16}>
+              <Col span={8}>
+                <Text strong>LI-RADS:</Text>{" "}
+                <Text type="danger">{summary.lirads}</Text>
+              </Col>
+              <Col span={16}>
+                <Text strong>Ý nghĩa:</Text> {summary.description}
+              </Col>
+            </Row>
+
+            <div style={{ marginTop: 16 }}>
+              <AIRecommendationEditor
+                value={geminiResponse}
+                onChange={setGeminiResponse}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
