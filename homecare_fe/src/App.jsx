@@ -89,6 +89,7 @@ import DPancreasForm from "./pages/advance/DPancreasForm/DPancreasForm";
 import PiradsForm from "./pages/advance/PIRADS/PiradsForm";
 import ApplicationsPage from "./pages/landingpage/questinary/ApplicationsPage";
 import PricingPage from "./pages/landingpage/guild/package/PricingPage";
+import Lirads2Form from "./pages/advance/Lirads2Form/Lirads2Form";
 
 function App() {
   useAuthInitializer();
@@ -211,6 +212,7 @@ function App() {
         >
           <Route index element={<PatientTablePage />} />
           <Route path="tirad" element={<TiradsForm />} />
+          <Route path="Lirads2" element={<Lirads2Form />} />
           <Route path="lungrad" element={<LungRADSForm />} />
           <Route path="birad" element={<BiradsForm />} />
           <Route path="boneage" element={<BoneAgeForm />} />

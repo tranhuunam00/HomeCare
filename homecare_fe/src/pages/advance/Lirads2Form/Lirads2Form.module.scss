@@ -1,0 +1,167 @@
+.pageWrapper {
+  min-height: 100vh;
+  padding: 32px;
+
+  display: flex;
+  justify-content: center;
+}
+
+.container {
+  width: 100%;
+  max-width: 1100px;
+}
+
+/* CARD */
+.card {
+  border-radius: 12px;
+  border: 1px solid #1f2937;
+  color: #e5e7eb;
+
+  .ant-card-head {
+    padding: 14px 18px;
+    border-bottom: 1px solid #1f2937;
+
+    .ant-card-head-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #f9fafb;
+    }
+  }
+
+  .ant-card-body {
+    padding: 18px;
+  }
+}
+
+/* FORM GROUP */
+.formGroup {
+  margin-bottom: 16px;
+
+  p {
+    font-size: 13px;
+    color: #000000;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+}
+
+/* RADIO */
+.ant-radio-wrapper {
+  color: #e5e7eb;
+  font-size: 13px;
+  margin-right: 16px;
+}
+
+.ant-radio-inner {
+  background: transparent;
+  border-color: #6b7280;
+}
+
+.ant-radio-checked .ant-radio-inner {
+  background: #3b82f6;
+  border-color: #3b82f6;
+}
+
+/* INPUT + SELECT */
+.ant-input-number,
+.ant-select-selector {
+  height: 36px !important;
+  background: #1f2937 !important;
+  border: 1px solid #374151 !important;
+  border-radius: 8px !important;
+  color: #f9fafb !important;
+}
+
+.ant-input-number input {
+  color: #f9fafb;
+  font-size: 13px;
+}
+
+.ant-select-selection-item {
+  color: #f9fafb;
+  font-size: 13px;
+}
+
+/* BUTTON */
+.buttonPrimary {
+  width: 100%;
+  height: 38px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: 14px;
+
+  background: #2563eb;
+  border: none;
+
+  &:hover {
+    background: #1d4ed8;
+  }
+}
+
+.buttonCheck {
+  width: 100%;
+  height: 36px;
+  margin-top: 10px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+/* RESULT */
+.resultBox {
+  margin-top: 16px;
+  padding: 12px;
+  border-radius: 8px;
+
+  background: #1e3a8a20;
+  border: 1px solid #3b82f6;
+
+  h4 {
+    margin: 0;
+    font-size: 16px;
+    color: #60a5fa;
+    font-weight: 600;
+    text-align: center;
+  }
+}
+
+/* STATUS */
+.statusSuccess {
+  display: block;
+  margin-top: 8px;
+  font-size: 13px;
+  color: #22c55e;
+}
+
+.statusError {
+  display: block;
+  margin-top: 8px;
+  font-size: 13px;
+  color: #ef4444;
+}
+
+/* GRID FIX */
+.ant-row {
+  gap: 0 !important;
+}
+
+.ant-col {
+  padding: 0 8px !important;
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+  .pageWrapper {
+    padding: 16px;
+  }
+
+  .ant-row {
+    flex-direction: column;
+  }
+
+  .ant-col {
+    width: 100% !important;
+    padding: 0 !important;
+    margin-bottom: 16px;
+  }
+}

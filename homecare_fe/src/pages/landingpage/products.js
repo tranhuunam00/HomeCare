@@ -108,6 +108,12 @@ export const medicalCategories = [
         image: "https://home-care.vn/wp-content/uploads/2025/08/LiRADS.png",
       },
       {
+        key: "Lirads2",
+        label: "D-LIRADS - Đánh giá sàng lọc các khối u gan phiên bản 2",
+        path: "/home/Lirads2",
+        image: "https://home-care.vn/wp-content/uploads/2025/08/LiRADS.png",
+      },
+      {
         key: "pirads",
         label: "D-PIRADS - Đánh giá sàng lọc ung thư tuyến tiền liệt",
         path: "/home/D-Pirads",
