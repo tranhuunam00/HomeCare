@@ -254,4 +254,18 @@ export const medicalCategories = [
       },
     ],
   },
+
+  {
+    key: "ung thư",
+    title: "UNG THƯ",
+    image: "https://home-care.vn/wp-content/uploads/2025/08/BONERADS.png",
+    apps: [
+      {
+        key: "boneage",
+        label: "D-Lung - Đánh giá ung thư phổi",
+        path: "/home/Lungcancerfc",
+        image: "/product/cancer/lung.png",
+      },
+    ],
+  },
 ];

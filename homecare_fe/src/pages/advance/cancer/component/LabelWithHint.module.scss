@@ -1,0 +1,27 @@
+.wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* icon text */
+.icon {
+  color: #999;
+  cursor: pointer;
+  font-size: 14px;
+
+  &:hover {
+    color: #1677ff;
+  }
+}
+
+/* icon image */
+.iconImage {
+  color: #1677ff;
+  cursor: pointer;
+  font-size: 15px;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
