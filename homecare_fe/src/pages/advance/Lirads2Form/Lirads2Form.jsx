@@ -16,6 +16,13 @@ import {
 } from "./Lirads2Form.constant";
 import TextArea from "antd/es/input/TextArea";
 import API_CALL from "../../../services/axiosClient";
+import AIRecommendationEditor from "../../../components/AIRecommendationEditor";
+import {
+  CalculatorOutlined,
+  CopyOutlined,
+  ReloadOutlined,
+} from "@ant-design/icons";
+import { toast } from "react-toastify";
 
 const { Text, Title } = Typography;
 
@@ -47,7 +54,9 @@ const Lirads2Form = () => {
     washout: false,
     capsule: false,
     size: 1,
-    growth: false,
+    growth: "no",
+
+    ancillary: "",
   });
 
   const [result, setResult] = useState("");
@@ -68,13 +77,19 @@ const Lirads2Form = () => {
     }
   };
 
-  const calculateLIRADS = () => {
-    const result = calculateScore(form);
-    setResult(result);
-  };
-
   const genHtml = (result, isCopy = false) => {
-    const html = `
+    const bulletHtml = `
+    <ul style="margin-top:8px; padding-left:20px;">
+      ${geminiResponse
+        .split("\n")
+        .map((line) => line.trim())
+        .filter((line) => line)
+        .map((line) => `<li>${line.replace(/^[-•*]\s*/, "")}</li>`)
+        .join("")}
+    </ul>
+  `;
+
+    const body = `
     <table border="1" cellpadding="6" style="border-collapse: collapse;">
       <caption><strong>Đánh giá LI-RADS</strong></caption>
 
@@ -86,15 +101,29 @@ const Lirads2Form = () => {
 
       <tr><td><strong>Kết luận</strong></td><td>${result.lirads}</td></tr>
       <tr><td><strong>Ý nghĩa</strong></td><td>${result.description}</td></tr>
+      <tr>
+        <td><strong>Dấu hiệu phụ</strong></td>
+        <td>${form.ancillary || "Không có"}</td>
+      </tr>
     </table>
+
+    ${isCopy ? `<div style="margin-top:16px;">${bulletHtml}</div>` : ""}
   `;
 
-    return isCopy
-      ? html + `<div style="margin-top:16px;">${geminiResponse}</div>`
-      : html;
+    return `
+    <html>
+      <head>
+        <meta charset="utf-8" />
+      </head>
+      <body>
+        ${body}
+      </body>
+    </html>
+  `;
   };
 
   const handleCopy = async () => {
+    toast.success("Đã copy");
     const html = genHtml(summary, true);
 
     await navigator.clipboard.write([
@@ -105,22 +134,38 @@ const Lirads2Form = () => {
   };
   const handleSubmit = async () => {
     const result = calculateScore(form);
+    if (!result) return;
+
     setSummary(result);
 
     const html = genHtml(result);
 
-    // gọi AI giống DIPSS
+    const prompt = `
+Bạn là bác sĩ chẩn đoán hình ảnh.
+
+Dưới đây là bảng đánh giá LI-RADS:
+${html}
+
+Hãy đưa ra:
+- Nhận định chuyên môn
+- Gợi ý xử trí tiếp theo (nếu cần)
+- Viết ngắn gọn, rõ ràng, dùng bullet point
+`;
+
     try {
       const res = await API_CALL.get(`/chatgpt/ask-gemini-recommendation`, {
-        params: {
-          prompt: encodeURIComponent(html),
-        },
+        params: { prompt },
       });
 
-      setGeminiResponse(
-        res.data.data?.replace(/\*\*(.*?)\*\*/g, "$1").replace(/^\* /gm, "• "),
-      );
-    } catch (e) {}
+      const cleaned =
+        res.data.data
+          ?.replace(/\*\*(.*?)\*\*/g, "$1")
+          .replace(/^\* /gm, "• ") || "";
+
+      setGeminiResponse(cleaned);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const handleReset = () => {
@@ -153,6 +198,7 @@ const Lirads2Form = () => {
                   <span className={styles.required}>*</span>
                 </p>
                 <Radio.Group
+                  value={form.age}
                   onChange={(e) => handleChange("age", e.target.value)}
                 >
                   <Radio value={true}>Có</Radio>
@@ -166,6 +212,7 @@ const Lirads2Form = () => {
                   <span className={styles.required}>*</span>
                 </p>
                 <Radio.Group
+                  value={form.cirrhosis}
                   onChange={(e) => handleChange("cirrhosis", e.target.value)}
                 >
                   <Radio value={true}>Có</Radio>
@@ -191,6 +238,7 @@ const Lirads2Form = () => {
                   <span className={styles.required}>*</span>
                 </p>
                 <Radio.Group
+                  value={form.hepatitisB}
                   onChange={(e) => handleChange("hepatitisB", e.target.value)}
                 >
                   <Radio value={true}>Có</Radio>
@@ -204,6 +252,7 @@ const Lirads2Form = () => {
                   <span className={styles.required}>*</span>
                 </p>
                 <Radio.Group
+                  value={form.priorHCC}
                   onChange={(e) => handleChange("priorHCC", e.target.value)}
                 >
                   <Radio value={true}>Có</Radio>
@@ -243,6 +292,7 @@ const Lirads2Form = () => {
                   <span className={styles.required}>*</span>
                 </p>
                 <Radio.Group
+                  value={form.aphe}
                   onChange={(e) => handleChange("aphe", e.target.value)}
                 >
                   <Radio value={true}>Có</Radio>
@@ -256,6 +306,7 @@ const Lirads2Form = () => {
                   <span className={styles.required}>*</span>
                 </p>
                 <Radio.Group
+                  value={form.washout}
                   onChange={(e) => handleChange("washout", e.target.value)}
                 >
                   <Radio value={true}>Có</Radio>
@@ -269,6 +320,7 @@ const Lirads2Form = () => {
                   <span className={styles.required}>*</span>
                 </p>
                 <Radio.Group
+                  value={form.capsule}
                   onChange={(e) => handleChange("capsule", e.target.value)}
                 >
                   <Radio value={true}>Có</Radio>
@@ -295,9 +347,9 @@ const Lirads2Form = () => {
                   <span className={styles.required}>*</span>
                 </p>
                 <Select
+                  value={form.growth}
                   style={{ width: "100%" }}
                   onChange={(val) => handleChange("growth", val)}
-                  value={form.growth}
                 >
                   <Select.Option value={"no"}>Không</Select.Option>
                   <Select.Option value={"yes"}>Có</Select.Option>
@@ -309,24 +361,41 @@ const Lirads2Form = () => {
 
               <div className={styles.formGroup}>
                 <p>Các dấu hiệu phụ</p>
-                <TextArea placeholder="Ví dụ: hạn chế khuếch tán, tăng tín hiệu T2, có mỡ trong tổn thương" />
+                <TextArea
+                  value={form.ancillary}
+                  onChange={(e) => handleChange("ancillary", e.target.value)}
+                  placeholder="Ví dụ: hạn chế khuếch tán, tăng tín hiệu T2, có mỡ trong tổn thương"
+                />
               </div>
-              <Button
-                type="primary"
-                onClick={calculateLIRADS}
-                className={styles.buttonPrimary}
-              >
-                Tính LI-RADS
-              </Button>
 
               {result && (
                 <div className={styles.resultBox}>
                   <Title level={4}>{result}</Title>
                 </div>
               )}
+              <div
+                style={{ display: "flex", gap: 20, justifyContent: "flex-end" }}
+              >
+                <Button icon={<ReloadOutlined />} onClick={handleReset}>
+                  Làm lại
+                </Button>
+
+                <Button
+                  type="primary"
+                  icon={<CalculatorOutlined />}
+                  onClick={handleSubmit}
+                >
+                  Tính kết quả
+                </Button>
+
+                <Button icon={<CopyOutlined />} onClick={handleCopy}>
+                  Copy kết quả
+                </Button>
+              </div>
             </Card>
           </Col>
         </Row>
+
         {summary.lirads && (
           <div className={styles.resultBox}>
             <Row gutter={16}>

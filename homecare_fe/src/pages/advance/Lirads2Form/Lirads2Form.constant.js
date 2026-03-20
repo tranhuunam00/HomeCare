@@ -61,139 +61,195 @@ export const MAJOR_FEATURES = [
   },
 ];
 
-// lirads.logic.js
-
 export const calculateScore = (form) => {
   const { aphe, washout, capsule, growth, size } = form;
+
+  const build = (lirads, description) => ({
+    lirads,
+    description,
+  });
+
   if (!aphe) {
     if (!washout) {
       if (!capsule) {
-        if (growth == "no") {
+        if (growth === "no") {
           if (size < 10) {
-            return "LI-RADS Category: LR-2 LR-2: Probably benign (16% HCC; 18% malignant).";
+            return build(
+              "LR-2",
+              "Có khả năng lành tính (16% là HCC; 18% là ác tính)",
+            );
           }
           if (size >= 10) {
-            return "LI-RADS Category: LR-3 LR-3: Intermediate probability of HCC (37% HCC; 39% malignant)";
+            return build(
+              "LR-3",
+              "Nguy cơ trung bình đối với HCC (37% nguy cơ HCC; 39% nguy cơ ác tính)",
+            );
           }
         }
 
-        if (growth == "yes") {
+        if (growth === "yes") {
           if (size < 10) {
-            return "LI-RADS Category: LR-NC LR-NC: Not categorizable";
+            return build("LR-NC", "Không thể phân loại");
           }
           if (size >= 10) {
-            return "LI-RADS Category: LR-5 LR-5: Definitely HCC";
+            return build("LR-5", "Chẩn đoán xác định HCC");
           }
         }
-        if (growth == "na") {
-          return "LI-RADS Category: LR-NC LR-NC: Not categorizable";
+
+        if (growth === "na") {
+          return build("LR-NC", "Không thể phân loại");
         }
       } else {
-        if (growth == "no") {
+        if (growth === "no") {
           if (size < 10) {
-            return "LI-RADS Category: LR-NC LR-NC: Not categorizable";
+            return build("LR-NC", "Không thể phân loại");
           }
           if (size >= 10) {
-            return "LI-RADS Category: LR-5 LR-5: Definitely HCC";
+            return build("LR-5", "Chẩn đoán xác định HCC");
           }
         }
 
-        if (growth == "yes") {
+        if (growth === "yes") {
           if (size < 10) {
-            return "LI-RADS Category: LR-4 LR-4: Probable HCC (74% HCC; 81% malignant)";
+            return build(
+              "LR-4",
+              "Nguy cơ cao đối với HCC (74% nguy cơ HCC; 81% nguy cơ ác tính)",
+            );
           }
           if (size >= 10) {
-            return "LI-RADS Category: LR-5 LR-5: Definitely HCC";
+            return build("LR-5", "Chẩn đoán xác định HCC");
           }
         }
-        if (growth == "na") {
+
+        if (growth === "na") {
           if (size < 10) {
-            return "LI-RADS Category: LR-NC LR-NC: Not categorizable";
+            return build("LR-NC", "Không thể phân loại");
           }
           if (size >= 10) {
-            return "LI-RADS Category: LR-5 LR-5: Definitely HCC";
+            return build("LR-5", "Chẩn đoán xác định HCC");
           }
         }
       }
     } else {
       if (!capsule) {
-        if (growth == "no") {
+        if (growth === "no") {
           if (size < 10) {
-            return "LI-RADS Category: LR-NC LR-NC: Not categorizable";
+            return build("LR-NC", "Không thể phân loại");
           }
           if (size >= 10) {
-            return "LI-RADS Category: LR-5 LR-5: Definitely HCC";
+            return build("LR-5", "Chẩn đoán xác định HCC");
           }
         }
 
-        if (growth == "yes") {
+        if (growth === "yes") {
           if (size < 10) {
-            return "LI-RADS Category: LR-4 LR-4: Probable HCC (74% HCC; 81% malignant)";
+            return build(
+              "LR-4",
+              "Nguy cơ cao đối với HCC (74% nguy cơ HCC; 81% nguy cơ ác tính)",
+            );
           }
           if (size >= 10) {
-            return "LI-RADS Category: LR-5 LR-5: Definitely HCC";
+            return build("LR-5", "Chẩn đoán xác định HCC");
           }
         }
-        if (growth == "na") {
+
+        if (growth === "na") {
           if (size < 10) {
-            return "LI-RADS Category: LR-NC LR-NC: Not categorizable";
+            return build("LR-NC", "Không thể phân loại");
           }
           if (size >= 10) {
-            return "LI-RADS Category: LR-5 LR-5: Definitely HCC";
+            return build("LR-5", "Chẩn đoán xác định HCC");
           }
         }
       } else {
         if (size < 10) {
-          return "LI-RADS Category: LR-4 LR-4: Probable HCC (74% HCC; 81% malignant)";
+          return build(
+            "LR-4",
+            "Nguy cơ cao đối với HCC (74% nguy cơ HCC; 81% nguy cơ ác tính)",
+          );
         }
         if (size >= 10) {
-          return "LI-RADS Category: LR-5 LR-5: Definitely HCC";
+          return build("LR-5", "Chẩn đoán xác định HCC");
         }
       }
     }
   } else {
     if (!washout) {
       if (!capsule) {
-        if (growth == "no") {
+        if (growth === "no") {
           if (size < 10) {
-            return "LI-RADS Category: LR-3 LR-3: Intermediate probability of HCC (37% HCC; 39% malignant)";
+            return build(
+              "LR-3",
+              "Nguy cơ trung bình đối với HCC (37% nguy cơ HCC; 39% nguy cơ ác tính)",
+            );
           }
           if (size >= 10) {
-            return "LI-RADS Category: LR-4 LR-4: Probable HCC (74% HCC; 81% malignant)";
+            return build(
+              "LR-4",
+              "Nguy cơ cao đối với HCC (74% nguy cơ HCC; 81% nguy cơ ác tính)",
+            );
           }
         }
 
-        if (growth == "yes") {
+        if (growth === "yes") {
           if (size < 10) {
-            return "LI-RADS Category: LR-4 LR-4: Probable HCC (74% HCC; 81% malignant)";
+            return build(
+              "LR-4",
+              "Nguy cơ cao đối với HCC (74% nguy cơ HCC; 81% nguy cơ ác tính)",
+            );
           }
           if (size >= 10) {
-            return "LI-RADS Category: LR-5 LR-5: Definitely HCC";
+            return build("LR-5", "Chẩn đoán xác định HCC");
           }
         }
-        if (growth == "na") {
+
+        if (growth === "na") {
           if (size < 10) {
-            return "LI-RADS Category: LR-NC LR-NC: Not categorizable";
+            return build("LR-NC", "Không thể phân loại");
           }
           if (size >= 10) {
-            return "LI-RADS Category: LR-4 LR-4: Probable HCC (74% HCC; 81% malignant)";
+            return build(
+              "LR-4",
+              "Nguy cơ cao đối với HCC (74% nguy cơ HCC; 81% nguy cơ ác tính)",
+            );
           }
         }
       } else {
         if (size < 10) {
-          return "LI-RADS Category: LR-4 LR-4: Probable HCC (74% HCC; 81% malignant)";
+          return build(
+            "LR-4",
+            "Nguy cơ cao đối với HCC (74% nguy cơ HCC; 81% nguy cơ ác tính)",
+          );
         }
         if (size >= 10) {
-          return "LI-RADS Category: LR-5 LR-5: Definitely HCC";
+          return build("LR-5", "Chẩn đoán xác định HCC");
         }
       }
     } else {
       if (size < 10) {
-        return "LI-RADS Category: LR-4 LR-4: Probable HCC (74% HCC; 81% malignant)";
+        return build(
+          "LR-4",
+          "Nguy cơ cao đối với HCC (74% nguy cơ HCC; 81% nguy cơ ác tính)",
+        );
       }
       if (size >= 10) {
-        return "LI-RADS Category: LR-5 LR-5: Definitely HCC";
+        return build("LR-5", "Chẩn đoán xác định HCC");
       }
     }
   }
+
+  return build("LR-NC", "Không thể phân loại");
+};
+
+export const formatToList = (text) => {
+  const items = text
+    .replace(/\*\*(.*?)\*\*/g, "$1")
+    .split("\n")
+    .filter((line) => line.trim() !== "");
+
+  return `
+    <ul style="padding-left:20px; margin:0;">
+      ${items.map((item) => `<li>${item.replace(/^[-•*]\s*/, "")}</li>`).join("")}
+    </ul>
+  `;
 };
