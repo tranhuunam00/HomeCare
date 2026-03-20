@@ -23,6 +23,7 @@ import {
   ReloadOutlined,
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
+import { ThamKhaoLinkHomeCare } from "../component_common/Thamkhao";
 
 const { Text, Title } = Typography;
 
@@ -163,8 +164,12 @@ Hãy đưa ra:
           .replace(/^\* /gm, "• ") || "";
 
       setGeminiResponse(cleaned);
+      toast.success("Hệ thống AI đã đề xuất");
     } catch (e) {
       console.error(e);
+      toast.success(
+        "Lỗi hệ thống Đề xuất AI. Vui lòng liên hệ bộ phận kĩ thuật",
+      );
     }
   };
 
@@ -187,6 +192,13 @@ Hãy đưa ra:
   };
   return (
     <div className={styles.pageWrapper}>
+      <ThamKhaoLinkHomeCare
+        link={"https://home-care.vn/product/phan-mem-d-lirads/"}
+        name={"D-LIRADS"}
+        desc={
+          "Đánh giá và phân loại tổn thương gan theo hệ thống LI-RADS (Liver Imaging Reporting and Data System) nhằm phát hiện và phân tầng nguy cơ ung thư biểu mô tế bào gan (HCC)."
+        }
+      />
       <div className={styles.container}>
         <Row gutter={16}>
           {/* LEFT */}
