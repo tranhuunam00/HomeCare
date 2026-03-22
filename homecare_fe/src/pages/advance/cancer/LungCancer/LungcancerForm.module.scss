@@ -135,3 +135,116 @@
     color: #1677ff;
   }
 }
+
+.sectionBlockT,
+.sectionBlockN,
+.sectionBlockM {
+  margin-bottom: 24px;
+  padding: 18px;
+  border-radius: 18px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+}
+
+/* ===== T (BLUE) ===== */
+.sectionBlockT {
+  background: linear-gradient(135deg, #e0f2fe, #f0f9ff);
+}
+
+.sectionHeaderT {
+  font-size: 20px;
+  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #2563eb, #06b6d4);
+  color: white;
+  display: inline-block;
+  margin-bottom: 12px;
+}
+
+.resultBoxT {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  background: linear-gradient(90deg, #dbeafe, #bfdbfe);
+}
+
+/* ===== N (PURPLE) ===== */
+.sectionBlockN {
+  background: linear-gradient(135deg, #f3e8ff, #faf5ff);
+}
+
+.sectionHeaderN {
+  font-size: 20px;
+  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #9333ea, #c084fc);
+  color: white;
+  display: inline-block;
+  margin-bottom: 12px;
+}
+
+.resultBoxN {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  background: linear-gradient(90deg, #ede9fe, #ddd6fe);
+}
+
+/* ===== M (RED) ===== */
+.sectionBlockM {
+  background: linear-gradient(135deg, #fee2e2, #fff1f2);
+}
+
+.sectionHeaderM {
+  font-size: 20px;
+  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #dc2626, #f43f5e);
+  color: white;
+  display: inline-block;
+  margin-bottom: 12px;
+}
+
+.resultBoxM {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  background: linear-gradient(90deg, #fecaca, #fda4af);
+}
+
+/* ===== TEXT LEVEL COLOR ===== */
+.T1,
+.N0,
+.M0 {
+  color: #16a34a; // xanh lá
+}
+
+.T2,
+.N1,
+.M1a {
+  color: #ca8a04; // vàng
+}
+
+.T3,
+.N2,
+.M1b {
+  color: #ea580c; // cam
+}
+
+.T4,
+.N3,
+.M1c {
+  color: #dc2626; // đỏ
+}
+
+strong {
+  font-size: 18px;
+}

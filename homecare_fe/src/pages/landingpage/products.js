@@ -263,7 +263,7 @@ export const medicalCategories = [
       {
         key: "boneage",
         label: "D-Lung - Đánh giá ung thư phổi",
-        path: "/home/Lungcancerfc",
+        path: "/home/Lungcancer",
         image: "/product/cancer/lung.png",
       },
     ],
