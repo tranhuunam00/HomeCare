@@ -23,6 +23,8 @@ import {
 } from "./Lungcancer.Constants";
 import LabelWithHint from "../component/LabelWithHint";
 import { ThamKhaoLinkHomeCare } from "../../component_common/Thamkhao";
+import AIRecommendationEditor from "../../../../components/AIRecommendationEditor";
+import API_CALL from "../../../../services/axiosClient";
 
 const { Text } = Typography;
 
@@ -37,6 +39,7 @@ const LungcancerForm = () => {
     range: "",
     TNM: "",
   });
+  const [ai, setAI] = useState("");
 
   const onReset = () => {
     form.resetFields();
@@ -56,22 +59,110 @@ const LungcancerForm = () => {
     }
   };
 
-  const genHtml = () => {
-    return `
-      <table>
-        <caption>Phân loại TNM Phổi</caption>
-        <tr><th>Thành phần</th><th>Giá trị</th></tr>
-        <tr><td>T (Tumor)</td><td>${summary.T}</td></tr>
-        <tr><td>N (Node)</td><td>${summary.N}</td></tr>
-        <tr><td>M (Metastasis)</td><td>${summary.M}</td></tr>
-        <tr><td><strong>Stage</strong></td><td><strong>${summary.stage}</strong></td></tr>
-      </table>
-    `;
-  };
+  const genHtml = (isCopy = false) => {
+    const values = form.getFieldsValue();
 
+    const yesNo = (val) => {
+      if (val === 1) return "Có";
+      if (val === 0) return "Không";
+      return "Không rõ";
+    };
+
+    const bronchialMap = {
+      0: "Không xâm lấn phế quản chính",
+      1: "Xâm lấn phế quản chính",
+      2: "Xâm lấn carina / khí quản",
+    };
+
+    const bulletHtml = `
+    <ul style="margin-top:8px; padding-left:20px;">
+      ${(summary.ai || "")
+        .split("\n")
+        .map((line) => line.trim())
+        .filter((line) => line)
+        .map((line) => `<li>${line.replace(/^[-•*]\s*/, "")}</li>`)
+        .join("")}
+    </ul>
+  `;
+
+    const body = `
+    <h2 style="text-align:center;">BÁO CÁO PHÂN LOẠI UNG THƯ PHỔI (TNM)</h2>
+
+    <!-- THÔNG TIN KHỐI U -->
+    <table border="1" cellpadding="6" style="border-collapse: collapse; width:100%; margin-top:10px;">
+      <caption><strong>1. Đặc điểm khối u nguyên phát (T)</strong></caption>
+
+      <tr><td><strong>MIA</strong></td><td>${yesNo(values.mia)}</td></tr>
+      <tr><td><strong>Kích thước u xâm lấn</strong></td><td>${values.tumor_size || ""} cm</td></tr>
+      <tr><td><strong>Xâm lấn phế quản</strong></td><td>${bronchialMap[values.bronchial_inv] || "Không rõ"}</td></tr>
+      <tr><td><strong>Xâm lấn màng phổi tạng</strong></td><td>${yesNo(values.pleura_visceral)}</td></tr>
+      <tr><td><strong>Xẹp phổi / viêm phổi tắc nghẽn</strong></td><td>${yesNo(values.atelectasis)}</td></tr>
+      <tr><td><strong>Xâm lấn thành ngực / cơ hoành</strong></td><td>${yesNo(values.chest_wall_inv)}</td></tr>
+      <tr><td><strong>Nốt cùng thùy</strong></td><td>${yesNo(values.same_lobe_nodules)}</td></tr>
+      <tr><td><strong>Nốt khác thùy cùng bên</strong></td><td>${yesNo(values.diff_lobe_nodules)}</td></tr>
+      <tr><td><strong>Xâm lấn cấu trúc quan trọng</strong></td><td>${yesNo(values.critical_struct_inv)}</td></tr>
+
+      <tr>
+        <td><strong>Kết luận T</strong></td>
+        <td><strong style="color:red;">${summary.T || ""}</strong></td>
+      </tr>
+    </table>
+
+    <!-- HẠCH -->
+    <table border="1" cellpadding="6" style="border-collapse: collapse; width:100%; margin-top:16px;">
+      <caption><strong>2. Hạch bạch huyết vùng (N)</strong></caption>
+
+      <tr>
+        <td><strong>Phân loại N</strong></td>
+        <td>${summary.N || ""}</td>
+      </tr>
+    </table>
+
+    <!-- DI CĂN -->
+    <table border="1" cellpadding="6" style="border-collapse: collapse; width:100%; margin-top:16px;">
+      <caption><strong>3. Di căn xa (M)</strong></caption>
+
+      <tr>
+        <td><strong>Phân loại M</strong></td>
+        <td>${summary.M || ""}</td>
+      </tr>
+    </table>
+
+    <!-- KẾT LUẬN -->
+    <table border="1" cellpadding="6" style="border-collapse: collapse; width:100%; margin-top:16px;">
+      <caption><strong>4. Kết luận TNM</strong></caption>
+
+      <tr><td><strong>Stage Group (SG)</strong></td><td>${summary.SG || ""}</td></tr>
+      <tr><td><strong>Phân loại đơn giản</strong></td><td>${summary.SimpG || ""}</td></tr>
+      <tr><td><strong>Stage Range</strong></td><td>${summary.range || ""}</td></tr>
+      <tr><td><strong>TNM đầy đủ</strong></td><td>${summary.TNM || ""}</td></tr>
+    </table>
+
+
+    ${
+      isCopy && summary.ai
+        ? `<div style="margin-top:20px;">
+            <strong>5. Khuyến nghị:</strong>
+            ${bulletHtml}
+          </div>`
+        : ""
+    }
+  `;
+
+    return `
+    <html>
+      <head>
+        <meta charset="utf-8" />
+      </head>
+      <body style="font-family: Arial, sans-serif; font-size:14px;">
+        ${body}
+      </body>
+    </html>
+  `;
+  };
   const onCopy = async () => {
     try {
-      const html = genHtml();
+      const html = genHtml(true);
 
       await navigator.clipboard.write([
         new ClipboardItem({
@@ -95,6 +186,45 @@ const LungcancerForm = () => {
       ...stage,
     }));
   }, [summary.T, summary.N, summary.M]);
+
+  const handleAI = async () => {
+    try {
+      const html = genHtml(false);
+
+      const prompt = `
+Bạn là bác sĩ chẩn đoán hình ảnh.
+
+Dưới đây là kết quả phân loại ung thư phổi theo TNM:
+${html}
+
+Hãy đưa ra:
+- Nhận định chuyên môn
+- Gợi ý hướng xử trí
+- Viết ngắn gọn, rõ ràng, dùng bullet point
+`;
+
+      const res = await API_CALL.get(`/chatgpt/ask-gemini-recommendation`, {
+        params: { prompt },
+      });
+
+      const cleaned =
+        res.data.data
+          ?.replace(/\*\*(.*?)\*\*/g, "$1")
+          .replace(/^\* /gm, "• ") || "";
+
+      setAI(cleaned);
+
+      setSummary((prev) => ({
+        ...prev,
+        ai: cleaned,
+      }));
+
+      toast.success("AI đã đề xuất");
+    } catch (e) {
+      console.error(e);
+      toast.error("Lỗi AI");
+    }
+  };
 
   return (
     <div className={styles.pageWrapper}>
@@ -400,11 +530,13 @@ Khối u đơn độc ≤ 3 cm, kiểu phát triển lepidic chiếm ưu thế, 
             </p>
           </div>
 
+          <AIRecommendationEditor value={ai} onChange={setAI} />
+
           <div className={styles.buttonRow}>
             <Button icon={<ReloadOutlined />} onClick={onReset}>
               Reset
             </Button>
-            <Button onClick={onCalculate}>Kết quả</Button>
+            <Button onClick={handleAI}>Đề xuất AI</Button>
             <Button icon={<CopyOutlined />} type="primary" onClick={onCopy}>
               Copy
             </Button>
