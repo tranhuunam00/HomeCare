@@ -231,10 +231,8 @@ Hãy đưa ra:
       <div className={styles.formContainer}>
         <ThamKhaoLinkHomeCare
           link={"https://home-care.vn/product/phan-mem-d-lungrads/"}
-          name={"D-LungRADS"}
-          desc={
-            "Đánh giá nguy cơ ung thư phổi dựa trên đặc điểm nốt phổi theo hệ thống Lung-RADS"
-          }
+          name={"TNM-Lung"}
+          desc={"Hệ thống phân loại giai đoạn ung thư phổi theo TNM"}
         />
 
         <Form

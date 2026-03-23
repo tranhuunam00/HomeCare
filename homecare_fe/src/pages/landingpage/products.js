@@ -207,6 +207,12 @@ export const medicalCategories = [
         path: "/home/lungrad",
         image: "https://home-care.vn/wp-content/uploads/2025/08/Lung-RADS.png",
       },
+      {
+        key: "boneage",
+        label: "D-Lung - Đánh giá giai đoạn ung thư phổi",
+        path: "/home/Lungcancer",
+        image: "/product/cancer/lung.png",
+      },
     ],
   },
   {
@@ -251,20 +257,6 @@ export const medicalCategories = [
         label: "D-CPS - Đánh giá chức năng gan theo Child Pugh",
         path: "/home/D-CPS",
         image: "https://home-care.vn/wp-content/uploads/2025/08/LiRADS.png",
-      },
-    ],
-  },
-
-  {
-    key: "ung thư",
-    title: "UNG THƯ",
-    image: "https://home-care.vn/wp-content/uploads/2025/08/BONERADS.png",
-    apps: [
-      {
-        key: "boneage",
-        label: "D-Lung - Đánh giá ung thư phổi",
-        path: "/home/Lungcancer",
-        image: "/product/cancer/lung.png",
       },
     ],
   },

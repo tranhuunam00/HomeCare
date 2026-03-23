@@ -1,0 +1,53 @@
+.footer {
+  background-color: #02664f;
+  color: #fff;
+  padding: 60px 20px 30px;
+}
+
+/* GRID */
+.content {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 32px;
+}
+
+/* COLUMN */
+.col {
+  p {
+    margin-bottom: 12px;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+}
+
+/* POLICY LINK */
+.policy {
+  margin-top: 10px;
+
+  a {
+    color: #fff;
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+}
+
+/* COPYRIGHT */
+.copyright {
+  text-align: center;
+  font-size: 13px;
+  padding: 16px;
+  color: #ddd;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  background-color: #014e3e;
+}

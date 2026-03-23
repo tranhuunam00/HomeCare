@@ -297,10 +297,10 @@ Hãy đưa ra:
 
           {/* RIGHT */}
           <Col span={12}>
-            <Card title="Thanh điểm LI-RADS" className={styles.card}>
+            <Card title="Thang điểm LI-RADS" className={styles.card}>
               <div className={styles.formGroup}>
                 <p>
-                  Tăng quang thì động mạch (không dạng viền)
+                  Dấu hiệu ngấm thuốc thì động mạch
                   <span className={styles.required}>*</span>
                 </p>
                 <Radio.Group
@@ -314,7 +314,7 @@ Hãy đưa ra:
 
               <div className={styles.formGroup}>
                 <p>
-                  Rửa thuốc không ở ngoại vi
+                  Dấu hiệu rửa thuốc
                   <span className={styles.required}>*</span>
                 </p>
                 <Radio.Group
@@ -328,7 +328,7 @@ Hãy đưa ra:
 
               <div className={styles.formGroup}>
                 <p>
-                  Bao giả tăng quang
+                  Ngấm thuốc dạng vỏ
                   <span className={styles.required}>*</span>
                 </p>
                 <Radio.Group
@@ -355,7 +355,7 @@ Hãy đưa ra:
 
               <div className={styles.formGroup}>
                 <p>
-                  Tăng trưởng ngưỡng (≥ 50% trong 6 tháng){" "}
+                  Tiến triển nhanh (tăng kích thước > 50% trong 6 tháng)
                   <span className={styles.required}>*</span>
                 </p>
                 <Select

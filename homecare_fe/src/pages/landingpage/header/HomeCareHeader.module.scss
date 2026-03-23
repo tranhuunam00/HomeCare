@@ -1,0 +1,116 @@
+.homecareHeader {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background-color: #fff;
+  position: fixed;
+  width: calc(100vw - 15px);
+  left: 0;
+  z-index: 100;
+}
+
+/* LOGO */
+.logo {
+  width: 100px;
+  cursor: pointer;
+}
+
+/* MENU */
+.header {
+  flex: 1;
+  background-color: #fff;
+}
+
+.menu {
+  background: none;
+  border-bottom: none;
+  font-size: 20px;
+  font-weight: 600;
+  justify-content: center;
+
+  :global(.ant-menu-item) {
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: all 0.25s ease;
+  }
+
+  /* HOVER */
+  :global(.ant-menu-item:hover .ant-menu-title-content) {
+    color: #0b6b4f !important;
+  }
+
+  :global(.ant-menu-item:hover) {
+    background: rgba(11, 107, 79, 0.1) !important;
+  }
+
+  /* SELECTED */
+  :global(.ant-menu-item-selected) {
+    background: transparent !important;
+  }
+
+  :global(.ant-menu-item-selected .ant-menu-title-content) {
+    color: rgb(9, 77, 35) !important;
+    font-weight: 600;
+  }
+}
+/* RIGHT SIDE */
+.authWrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+  gap: 30px;
+  min-width: 200px;
+}
+
+/* BUTTON LOGIN */
+.authButtons {
+  display: flex;
+  gap: 16px;
+
+  button {
+    background: #0b6b4f;
+    border-color: #0b6b4f;
+    color: white;
+  }
+
+  button:hover {
+    background: #095a42;
+    border-color: #095a42;
+  }
+}
+
+/* USER */
+.userBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+}
+
+.avatar {
+  width: 50px;
+  height: 50px;
+  margin-top: 20px;
+  border: 1px solid #000;
+}
+
+.avatarName {
+  margin-top: 8px;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+/* MOBILE */
+.mobileMenuButton {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .menu {
+    display: none;
+  }
+
+  .mobileMenuButton {
+    display: block;
+  }
+}
