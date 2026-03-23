@@ -42,7 +42,7 @@ const ContactForm = () => {
           flexDirection: "column",
           alignItems: "center",
           width: "100vw",
-          paddingTop: 100,
+          paddingTop: 120,
         }}
       >
         <Card

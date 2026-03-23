@@ -3,6 +3,7 @@ import { Card, Row, Col, Typography, Divider, Button } from "antd";
 import styles from "../UserGuidePage.module.scss";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import HomeCareHeader from "../../header/HomeCareHeader";
 
 const { Title, Paragraph } = Typography;
 
@@ -29,35 +30,38 @@ const GuideMenuManagePage = () => {
   ];
 
   return (
-    <div className={styles.container}>
-      <Button
-        type="link"
-        onClick={() => navigate(-1)}
-        style={{ padding: 0, marginBottom: 8 }}
-      >
-        ← Quay lại
-      </Button>
+    <>
+      <HomeCareHeader />
+      <div className={styles.container}>
+        <Button
+          type="link"
+          onClick={() => navigate(-1)}
+          style={{ padding: 0, marginBottom: 8 }}
+        >
+          ← Quay lại
+        </Button>
 
-      <Title level={3}>MENU QUẢN LÝ</Title>
+        <Title level={3}>MENU QUẢN LÝ</Title>
 
-      <Divider />
+        <Divider />
 
-      <Paragraph>
-        Menu <strong>Quản lý</strong> cho phép cấu hình và quản trị hệ thống,
-        bao gồm các chức năng quản lý phòng khám, mẫu in, bác sĩ và tích hợp.
-      </Paragraph>
+        <Paragraph>
+          Menu <strong>Quản lý</strong> cho phép cấu hình và quản trị hệ thống,
+          bao gồm các chức năng quản lý phòng khám, mẫu in, bác sĩ và tích hợp.
+        </Paragraph>
 
-      {/* Grid submenu */}
-      <Row gutter={[24, 24]} style={{ marginTop: 24 }}>
-        {subMenus.map((item, index) => (
-          <Col xs={24} md={12} key={index}>
-            <Card onClick={item.onClick} className={styles.menuCard}>
-              {item.title}
-            </Card>
-          </Col>
-        ))}
-      </Row>
-    </div>
+        {/* Grid submenu */}
+        <Row gutter={[24, 24]} style={{ marginTop: 24 }}>
+          {subMenus.map((item, index) => (
+            <Col xs={24} md={12} key={index}>
+              <Card onClick={item.onClick} className={styles.menuCard}>
+                {item.title}
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      </div>
+    </>
   );
 };
 
