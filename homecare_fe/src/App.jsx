@@ -91,6 +91,7 @@ import ApplicationsPage from "./pages/landingpage/questinary/ApplicationsPage";
 import PricingPage from "./pages/landingpage/guild/package/PricingPage";
 import Lirads2Form from "./pages/advance/Lirads2Form/Lirads2Form";
 import LungcancerForm from "./pages/advance/cancer/LungCancer/LungcancerForm";
+import LivercancerForm from "./pages/advance/cancer/LiverCancer/LivercancerForm";
 
 function App() {
   useAuthInitializer();
@@ -236,6 +237,7 @@ function App() {
           <Route path="partners" element={<PartnerList />} />
 
           <Route path="Lungcancer" element={<LungcancerForm />} />
+          <Route path="Livercancer" element={<LivercancerForm />} />
 
           <Route
             path="sono/use/patient-diagnose/:patient_diagnose_id"

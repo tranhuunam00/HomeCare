@@ -11,16 +11,17 @@ import {
   InputNumber,
 } from "antd";
 import { CopyOutlined, ReloadOutlined } from "@ant-design/icons";
-import styles from "./LungcancerForm.module.scss";
+import styles from "./LivercancerForm.module.scss";
 import { toast } from "react-toastify";
 
 import {
+  getN,
   getStage,
   getT,
   M_OPTIONS,
   N_OPTIONS,
   T_OPTIONS,
-} from "./Lungcancer.Constants";
+} from "./Livercancer.Constants";
 import LabelWithHint from "../component/LabelWithHint";
 import { ThamKhaoLinkHomeCare } from "../../component_common/Thamkhao";
 import AIRecommendationEditor from "../../../../components/AIRecommendationEditor";
@@ -28,7 +29,7 @@ import API_CALL from "../../../../services/axiosClient";
 
 const { Text } = Typography;
 
-const LungcancerForm = () => {
+const LivercancerForm = () => {
   const [form] = Form.useForm();
   const [summary, setSummary] = useState({
     T: "",
@@ -46,19 +47,6 @@ const LungcancerForm = () => {
     setSummary({ T: "TX", N: "NX", M: "M0", stage: "" });
   };
 
-  const onCalculate = async () => {
-    try {
-      const stage = getStage(summary.T, summary.N, summary.M);
-
-      setSummary({
-        ...summary,
-        ...stage,
-      });
-    } catch (err) {
-      toast.error("Vui lòng nhập đầy đủ!");
-    }
-  };
-
   const genHtml = (isCopy = false) => {
     const values = form.getFieldsValue();
 
@@ -68,10 +56,15 @@ const LungcancerForm = () => {
       return "Không rõ";
     };
 
-    const bronchialMap = {
-      0: "Không xâm lấn phế quản chính",
-      1: "Xâm lấn phế quản chính",
-      2: "Xâm lấn carina / khí quản",
+    const tumourMap = {
+      single: "Khối u đơn độc",
+      multiple: "Nhiều khối u",
+    };
+
+    const vascularMap = {
+      none: "Không xâm lấn mạch máu",
+      minor: "Có xâm lấn mạch máu",
+      major: "Xâm lấn nhánh lớn của tĩnh mạch cửa hoặc tĩnh mạch gan",
     };
 
     const bulletHtml = `
@@ -86,21 +79,17 @@ const LungcancerForm = () => {
   `;
 
     const body = `
-    <h2 style="text-align:center;">BÁO CÁO PHÂN LOẠI UNG THƯ PHỔI (TNM)</h2>
+    <h2 style="text-align:center;">BÁO CÁO PHÂN LOẠI UNG THƯ GAN (TNM)</h2>
 
-    <!-- THÔNG TIN KHỐI U -->
+    <!-- T -->
     <table border="1" cellpadding="6" style="border-collapse: collapse; width:100%; margin-top:10px;">
       <caption><strong>1. Đặc điểm khối u nguyên phát (T)</strong></caption>
 
-      <tr><td><strong>MIA</strong></td><td>${yesNo(values.mia)}</td></tr>
-      <tr><td><strong>Kích thước u xâm lấn</strong></td><td>${values.tumor_size || ""} cm</td></tr>
-      <tr><td><strong>Xâm lấn phế quản</strong></td><td>${bronchialMap[values.bronchial_inv] || "Không rõ"}</td></tr>
-      <tr><td><strong>Xâm lấn màng phổi tạng</strong></td><td>${yesNo(values.pleura_visceral)}</td></tr>
-      <tr><td><strong>Xẹp phổi / viêm phổi tắc nghẽn</strong></td><td>${yesNo(values.atelectasis)}</td></tr>
-      <tr><td><strong>Xâm lấn thành ngực / cơ hoành</strong></td><td>${yesNo(values.chest_wall_inv)}</td></tr>
-      <tr><td><strong>Nốt cùng thùy</strong></td><td>${yesNo(values.same_lobe_nodules)}</td></tr>
-      <tr><td><strong>Nốt khác thùy cùng bên</strong></td><td>${yesNo(values.diff_lobe_nodules)}</td></tr>
-      <tr><td><strong>Xâm lấn cấu trúc quan trọng</strong></td><td>${yesNo(values.critical_struct_inv)}</td></tr>
+      <tr><td><strong>Số lượng khối u</strong></td><td>${tumourMap[values.tumour_count] || "Không rõ"}</td></tr>
+      <tr><td><strong>Kích thước lớn nhất</strong></td><td>${values.tumor_size || ""} cm</td></tr>
+      <tr><td><strong>Xâm lấn mạch máu</strong></td><td>${vascularMap[values.vascular_invasion] || "Không rõ"}</td></tr>
+      <tr><td><strong>Xâm lấn cơ quan lân cận</strong></td><td>${yesNo(values.adjacent_organs_invasion)}</td></tr>
+      <tr><td><strong>Xuyên thủng phúc mạc tạng</strong></td><td>${yesNo(values.peritoneum_perforation)}</td></tr>
 
       <tr>
         <td><strong>Kết luận T</strong></td>
@@ -108,9 +97,14 @@ const LungcancerForm = () => {
       </tr>
     </table>
 
-    <!-- HẠCH -->
+    <!-- N -->
     <table border="1" cellpadding="6" style="border-collapse: collapse; width:100%; margin-top:16px;">
       <caption><strong>2. Hạch bạch huyết vùng (N)</strong></caption>
+
+      <tr>
+        <td><strong>Số hạch dương tính</strong></td>
+        <td>${values.pos_num ?? "Không rõ"}</td>
+      </tr>
 
       <tr>
         <td><strong>Phân loại N</strong></td>
@@ -118,9 +112,18 @@ const LungcancerForm = () => {
       </tr>
     </table>
 
-    <!-- DI CĂN -->
+    <!-- M -->
     <table border="1" cellpadding="6" style="border-collapse: collapse; width:100%; margin-top:16px;">
       <caption><strong>3. Di căn xa (M)</strong></caption>
+
+      <tr>
+        <td><strong>Di căn xa</strong></td>
+        <td>${
+          values.distant_metastases === "M1"
+            ? "Có di căn xa"
+            : "Không có di căn xa"
+        }</td>
+      </tr>
 
       <tr>
         <td><strong>Phân loại M</strong></td>
@@ -137,7 +140,6 @@ const LungcancerForm = () => {
       <tr><td><strong>Stage Range</strong></td><td>${summary.range || ""}</td></tr>
       <tr><td><strong>TNM đầy đủ</strong></td><td>${summary.TNM || ""}</td></tr>
     </table>
-
 
     ${
       isCopy && summary.ai
@@ -194,7 +196,7 @@ const LungcancerForm = () => {
       const prompt = `
 Bạn là bác sĩ chẩn đoán hình ảnh.
 
-Dưới đây là kết quả phân loại ung thư phổi theo TNM:
+Dưới đây là kết quả phân loại ung thư gan theo TNM:
 ${html}
 
 Hãy đưa ra:
@@ -231,8 +233,8 @@ Hãy đưa ra:
       <div className={styles.formContainer}>
         <ThamKhaoLinkHomeCare
           link={"https://home-care.vn/product/phan-mem-d-lungrads/"}
-          name={"TNM-Lung"}
-          desc={"Hệ thống phân loại giai đoạn ung thư phổi theo TNM"}
+          name={"TNM-Liver"}
+          desc={"Hệ thống phân loại giai đoạn ung thư gan theo TNM"}
         />
 
         <Form
@@ -245,7 +247,7 @@ Hãy đưa ra:
           onValuesChange={(changed, all) => {
             setSummary((prev) => ({
               ...prev,
-              N: all.regional_lymph_nodes || "NX",
+              N: getN(form.getFieldsValue()) || "NX",
               M: all.distant_metastases || "M0",
               T: getT(form.getFieldsValue()),
             }));
@@ -256,45 +258,25 @@ Hãy đưa ra:
               <div className={styles.sectionHeaderT}>
                 T – Khối u nguyên phát (Tumor)
               </div>
-              <Form.Item
-                name="mia"
-                label={
-                  <LabelWithHint
-                    text="Ung thư biểu mô tuyến xâm lấn tối thiểu"
-                    note="Ung thư biểu mô tuyến xâm lấn tối thiểu:
-Khối u đơn độc ≤ 3 cm, kiểu phát triển lepidic chiếm ưu thế, với phần xâm lấn ≤ 5 mm."
-                  />
-                }
-              >
-                <Radio.Group>
-                  <Radio value={1}>Có</Radio>
-                  <Radio value={0}>Không</Radio>
-                  <Radio value={-1}>Không rõ</Radio>
-                </Radio.Group>
-              </Form.Item>
-
-              <Form.Item
-                name="tumor_size"
-                label={
-                  <LabelWithHint
-                    text="Kích thước phần u xâm lấn (cm)"
-                    image="/product/cancer/T_size.png"
-                  />
-                }
-              >
-                <InputNumber style={{ width: "100%" }} />
-              </Form.Item>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <Form.Item name="bronchial_inv" label="Xâm lấn phế quản">
+                <Form.Item
+                  name="tumour_count"
+                  label={
+                    <LabelWithHint
+                      text="Khối u đơn độc hoặc nhiều khối u"
+                      image="/product/cancer/liver/T_solitary.png"
+                    />
+                  }
+                >
                   <Radio.Group>
-                    <Radio value={0}>Không xâm lấn phế quản chính</Radio>
-                    <Radio value={1}>Xâm lấn phế quản chính</Radio>
-                    <Radio value={2}>Xâm lấn carina hoặc khí quản</Radio>
+                    <Radio value="single">Khối u đơn độc</Radio>
+                    <Radio value="multiple">Nhiều khối u</Radio>
                   </Radio.Group>
                 </Form.Item>
+
                 <Button
                   onClick={() => {
-                    form.setFieldsValue({ bronchial_inv: null });
+                    form.setFieldsValue({ tumour_count: null });
                     setSummary((prev) => ({
                       ...prev,
                       T: getT(form.getFieldsValue()),
@@ -304,63 +286,54 @@ Khối u đơn độc ≤ 3 cm, kiểu phát triển lepidic chiếm ưu thế, 
                   Reset
                 </Button>
               </div>
-              <Form.Item name="pleura_visceral" label="Xâm lấn màng phổi tạng">
-                <Radio.Group>
-                  <Radio value={1}>Có</Radio>
-                  <Radio value={0}>Không</Radio>
-                  <Radio value={-1}>Không rõ</Radio>
-                </Radio.Group>
-              </Form.Item>
 
               <Form.Item
-                name="atelectasis"
+                name="tumor_size"
                 label={
                   <LabelWithHint
-                    text="Xẹp phổi hoặc viêm phổi tắc nghẽn"
-                    image="/product/cancer/T_atelectasis.png"
+                    text="Kích thước lớn nhất của khối u (cm)"
+                    image="/product/cancer/liver/T_size.png"
                   />
                 }
               >
-                <Radio.Group>
-                  <Radio value={1}>Có (một phần hoặc toàn bộ phổi)</Radio>
-                  <Radio value={0}>Không</Radio>
-                  <Radio value={-1}>Không rõ</Radio>
-                </Radio.Group>
+                <InputNumber style={{ width: "100%" }} />
               </Form.Item>
-
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <Form.Item
+                  name="vascular_invasion"
+                  label={
+                    <LabelWithHint
+                      text="Xâm lấn mạch máu"
+                      image="/product/cancer/liver/T_vascular.png"
+                    />
+                  }
+                >
+                  <Radio.Group>
+                    <Radio value="none">Không xâm lấn mạch máu</Radio>
+                    <Radio value="minor">Có xâm lấn mạch máu</Radio>
+                    <Radio value="major">
+                      Xâm lấn nhánh lớn của tĩnh mạch cửa hoặc tĩnh mạch gan
+                    </Radio>
+                  </Radio.Group>
+                </Form.Item>
+                <Button
+                  onClick={() => {
+                    form.setFieldsValue({ vascular_invasion: null });
+                    setSummary((prev) => ({
+                      ...prev,
+                      T: getT(form.getFieldsValue()),
+                    }));
+                  }}
+                >
+                  Reset
+                </Button>
+              </div>
               <Form.Item
-                name="chest_wall_inv"
-                label="Xâm lấn thành ngực / thần kinh hoành / màng phổi thành / màng ngoài tim"
-              >
-                <Radio.Group>
-                  <Radio value={1}>Có</Radio>
-                  <Radio value={0}>Không</Radio>
-                  <Radio value={-1}>Không rõ</Radio>
-                </Radio.Group>
-              </Form.Item>
-
-              <Form.Item
-                name="same_lobe_nodules"
+                name="adjacent_organs_invasion"
                 label={
                   <LabelWithHint
-                    text="Nốt u riêng biệt cùng thùy"
-                    image="/product/cancer/T_nodulest3.png"
-                  />
-                }
-              >
-                <Radio.Group>
-                  <Radio value={1}>Có</Radio>
-                  <Radio value={0}>Không</Radio>
-                  <Radio value={-1}>Không rõ</Radio>
-                </Radio.Group>
-              </Form.Item>
-
-              <Form.Item
-                name="diff_lobe_nodules"
-                label={
-                  <LabelWithHint
-                    text="Nốt u ở thùy khác cùng bên"
-                    image="/product/cancer/T_nodulest4.png"
+                    text="Khối u xâm lấn trực tiếp các cơ quan lân cận (không bao gồm túi mật)"
+                    image="/product/cancer/liver/T_vascular.png"
                   />
                 }
               >
@@ -372,16 +345,15 @@ Khối u đơn độc ≤ 3 cm, kiểu phát triển lepidic chiếm ưu thế, 
               </Form.Item>
 
               <Form.Item
-                name="critical_struct_inv"
+                name="peritoneum_perforation"
                 label={
                   <LabelWithHint
-                    text="Xâm lấn cơ hoành / trung thất / tim / mạch lớn / TK quặt ngược / cột sống / thực quản"
-                    image="/product/cancer/T_t4invasion.png"
+                    text="Khối u xuyên thủng phúc mạc tạng"
+                    image="/product/cancer/liver/T_visceral.png"
                   />
                 }
-                style={{ marginBottom: 0 }}
               >
-                <Radio.Group style={{ marginBottom: 0 }}>
+                <Radio.Group>
                   <Radio value={1}>Có</Radio>
                   <Radio value={0}>Không</Radio>
                   <Radio value={-1}>Không rõ</Radio>
@@ -402,45 +374,16 @@ Khối u đơn độc ≤ 3 cm, kiểu phát triển lepidic chiếm ưu thế, 
                 </div>
 
                 <Form.Item
-                  name="regional_lymph_nodes"
+                  name="pos_num"
                   label={
                     <LabelWithHint
-                      text="Hạch bạch huyết vùng (Regional lymph nodes)"
-                      image="/product/cancer/N_nregion.png"
+                      text="Số lượng hạch bạch huyết vùng dương tính"
+                      image="/product/cancer/liver/N_positiven.png"
                     />
                   }
                 >
-                  <Radio.Group
-                    style={{ display: "flex", flexDirection: "column" }}
-                  >
-                    <Radio value="NX">Không đánh giá được (NX)</Radio>
-                    <Radio value="N0">Không có di căn hạch vùng</Radio>
-
-                    <Radio value="N1">
-                      Di căn hạch quanh phế quản cùng bên và/hoặc hạch rốn phổi
-                      cùng bên và hạch trong phổi
-                    </Radio>
-
-                    <Radio value="N2">
-                      Di căn hạch trung thất cùng bên và/hoặc hạch dưới carina
-                    </Radio>
-
-                    <Radio value="N3">
-                      Di căn hạch trung thất đối bên, hạch rốn phổi đối bên,
-                      hạch cơ thang (scalene) cùng hoặc đối bên, hoặc hạch
-                      thượng đòn
-                    </Radio>
-                  </Radio.Group>
+                  <InputNumber style={{ width: "100%" }} />
                 </Form.Item>
-
-                <Button
-                  onClick={() => {
-                    form.setFieldsValue({ regional_lymph_nodes: "NX" });
-                    setSummary({ ...summary, N: "NX" });
-                  }}
-                >
-                  Reset
-                </Button>
 
                 <div className={styles.resultBoxN}>
                   <span>Kết quả N:</span>
@@ -458,10 +401,7 @@ Khối u đơn độc ≤ 3 cm, kiểu phát triển lepidic chiếm ưu thế, 
                 <Form.Item
                   name="distant_metastases"
                   label={
-                    <LabelWithHint
-                      text="Di căn xa (Distant metastases)"
-                      image="/product/cancer/M_m.png"
-                    />
+                    <LabelWithHint text="Di căn xa (Distant metastases)" />
                   }
                 >
                   <Radio.Group
@@ -469,18 +409,7 @@ Khối u đơn độc ≤ 3 cm, kiểu phát triển lepidic chiếm ưu thế, 
                   >
                     <Radio value="M0">Không có di căn xa</Radio>
 
-                    <Radio value="M1a">
-                      Có nốt u riêng biệt ở thùy đối bên hoặc có nốt màng phổi /
-                      tràn dịch màng phổi (hoặc màng tim) ác tính
-                    </Radio>
-
-                    <Radio value="M1b">
-                      Di căn ngoài lồng ngực đơn độc ở một cơ quan
-                    </Radio>
-
-                    <Radio value="M1c">
-                      Di căn ngoài lồng ngực nhiều ổ ở một hoặc nhiều cơ quan
-                    </Radio>
+                    <Radio value="M1">Có di căn xa</Radio>
                   </Radio.Group>
                 </Form.Item>
 
@@ -545,4 +474,4 @@ Khối u đơn độc ≤ 3 cm, kiểu phát triển lepidic chiếm ưu thế, 
   );
 };
 
-export default LungcancerForm;
+export default LivercancerForm;

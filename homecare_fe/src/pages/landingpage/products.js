@@ -208,10 +208,16 @@ export const medicalCategories = [
         image: "https://home-care.vn/wp-content/uploads/2025/08/Lung-RADS.png",
       },
       {
-        key: "boneage",
-        label: "D-Lung - Đánh giá giai đoạn ung thư phổi",
+        key: "Lungcancer",
+        label: "D-TNM-Lung - Đánh giá giai đoạn ung thư phổi",
         path: "/home/Lungcancer",
         image: "/product/cancer/lung.png",
+      },
+      {
+        key: "Livercancer",
+        label: "D-TNM-Liver - Đánh giá giai đoạn ung thư gan",
+        path: "/home/Livercancer",
+        image: "/product/cancer/liver/liver.png",
       },
     ],
   },
