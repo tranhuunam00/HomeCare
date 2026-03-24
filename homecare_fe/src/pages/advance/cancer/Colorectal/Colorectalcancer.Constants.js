@@ -154,7 +154,7 @@ export const getStage = (T, N, M) => {
 };
 
 export const getT = ({ level_inv }) => {
-  return level_inv;
+  return level_inv || "TX";
 };
 
 export const getN = ({ pos_num, tumour_deposits }) => {

@@ -1,0 +1,250 @@
+.pageWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 40px;
+  background-color: #f0f2f5;
+  width: 100%;
+
+  @media (max-width: 575px) {
+    padding: 16px;
+  }
+}
+
+.formContainer {
+  :global(.ant-form-item) {
+    margin-bottom: 12px !important;
+  }
+}
+
+.formContainer {
+  background: #fff;
+  padding: 32px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  font-size: 15px;
+  width: 100%;
+  max-width: 1100px;
+  min-width: 700px;
+
+  @media (max-width: 768px) {
+    min-width: 100%;
+    padding: 24px;
+  }
+
+  @media (max-width: 575px) {
+    padding: 16px;
+  }
+}
+
+/* Label form */
+.ant-form-item-label > label {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+/* Section block (T / N / M) */
+.sectionCard {
+  background: #f9fbfd;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 1px solid #eef1f5;
+
+  .sectionTitle {
+    font-weight: 600;
+    margin-bottom: 12px;
+    font-size: 15px;
+    color: #1677ff;
+  }
+}
+
+/* Row kết quả */
+.summaryRow {
+  margin-top: 24px;
+  background: #f6f9fc;
+  padding: 16px;
+  border-radius: 10px;
+  font-size: 15px;
+  line-height: 1.7;
+
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  span {
+    flex: 1 1 100%;
+    font-weight: 500;
+
+    @media (min-width: 576px) {
+      flex: 1 1 25%;
+    }
+  }
+}
+
+/* Highlight Stage */
+.stageHighlight {
+  font-size: 16px;
+  font-weight: 600;
+  color: #ff4d4f;
+}
+
+/* Button row */
+.buttonRow {
+  margin-top: 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+
+  button {
+    flex: 1 1 100%;
+
+    @media (min-width: 576px) {
+      flex: none;
+    }
+  }
+}
+
+/* Input group spacing */
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Option highlight (ví dụ khi chọn Yes) */
+.activeOption {
+  border: 1px solid #1677ff !important;
+  background: #e6f4ff;
+}
+
+/* Divider custom */
+.divider {
+  margin: 24px 0;
+}
+
+/* Tooltip icon (nếu dùng) */
+.infoIcon {
+  margin-left: 6px;
+  color: #999;
+  cursor: pointer;
+
+  &:hover {
+    color: #1677ff;
+  }
+}
+
+.sectionBlockT,
+.sectionBlockN,
+.sectionBlockM {
+  margin-bottom: 24px;
+  padding: 18px;
+  border-radius: 18px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+}
+
+/* ===== T (BLUE) ===== */
+.sectionBlockT {
+  background: linear-gradient(135deg, #e0f2fe, #f0f9ff);
+}
+
+.sectionHeaderT {
+  font-size: 20px;
+  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #2563eb, #06b6d4);
+  color: white;
+  display: inline-block;
+  margin-bottom: 12px;
+}
+
+.resultBoxT {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  background: linear-gradient(90deg, #dbeafe, #bfdbfe);
+}
+
+/* ===== N (PURPLE) ===== */
+.sectionBlockN {
+  background: linear-gradient(135deg, #f3e8ff, #faf5ff);
+}
+
+.sectionHeaderN {
+  font-size: 20px;
+  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #9333ea, #c084fc);
+  color: white;
+  display: inline-block;
+  margin-bottom: 12px;
+}
+
+.resultBoxN {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  background: linear-gradient(90deg, #ede9fe, #ddd6fe);
+}
+
+/* ===== M (RED) ===== */
+.sectionBlockM {
+  background: linear-gradient(135deg, #fee2e2, #fff1f2);
+}
+
+.sectionHeaderM {
+  font-size: 20px;
+  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #dc2626, #f43f5e);
+  color: white;
+  display: inline-block;
+  margin-bottom: 12px;
+}
+
+.resultBoxM {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  background: linear-gradient(90deg, #fecaca, #fda4af);
+}
+
+/* ===== TEXT LEVEL COLOR ===== */
+.T1,
+.N0,
+.M0 {
+  color: #16a34a; // xanh lá
+}
+
+.T2,
+.N1,
+.M1a {
+  color: #ca8a04; // vàng
+}
+
+.T3,
+.N2,
+.M1b {
+  color: #ea580c; // cam
+}
+
+.T4,
+.N3,
+.M1c {
+  color: #dc2626; // đỏ
+}
+
+strong {
+  font-size: 18px;
+}

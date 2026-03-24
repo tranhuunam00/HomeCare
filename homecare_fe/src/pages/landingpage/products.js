@@ -225,6 +225,12 @@ export const medicalCategories = [
         path: "/home/Colorectalcancer",
         image: "/product/cancer/colorectal/colorectal.png",
       },
+      {
+        key: "Oesophaguscancer",
+        label: "D-TNM-Oesophagus - Đánh giá giai đoạn ung thư thực quản",
+        path: "/home/Oesophaguscancer",
+        image: "/product/cancer/oesophagus/oesophagus.png",
+      },
     ],
   },
   {

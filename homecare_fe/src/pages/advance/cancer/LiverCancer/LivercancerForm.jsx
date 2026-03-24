@@ -32,7 +32,7 @@ const { Text } = Typography;
 const LivercancerForm = () => {
   const [form] = Form.useForm();
   const [summary, setSummary] = useState({
-    T: "",
+    T: "TX",
     N: "NX",
     M: "M0",
     SG: "",
