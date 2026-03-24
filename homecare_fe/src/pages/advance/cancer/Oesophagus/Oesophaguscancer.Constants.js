@@ -35,15 +35,15 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (!assessment_type || assessment_type == "clinical")
           return {
             SG: "",
-            SimpG: "Localised",
-            range: "I - Not Known",
+            SimpG: "Khu trú",
+            range: "I - Không xác định",
             TNM: `${T}${N}${M}`,
           };
         if (assessment_type == "pathological") {
           return {
             SG: "",
-            SimpG: "Localised",
-            range: "IIB - Not Known",
+            SimpG: "Khu trú",
+            range: "IIB - Không xác định",
             TNM: `${T}${N}${M}`,
           };
         }
@@ -52,15 +52,15 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "pathological") {
           return {
             SG: "",
-            SimpG: "Localised",
-            range: "IIB - Not Known",
+            SimpG: "Khu trú",
+            range: "IIB - Không xác định",
             TNM: `${T}${N}${M}`,
           };
         }
         return {
           SG: "",
-          SimpG: "Localised",
-          range: "IIA - Not Known",
+          SimpG: "Khu trú",
+          range: "IIA - Không xác định",
           TNM: `${T}${N}${M}`,
         };
       }
@@ -68,15 +68,15 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "pathological") {
           return {
             SG: "",
-            SimpG: "Localised",
-            range: "IIB - Not Known",
+            SimpG: "Khu trú",
+            range: "IIB - Không xác định",
             TNM: `${T}${N}${M}`,
           };
         }
         return {
           SG: "",
-          SimpG: "Localised",
-          range: "I - Not Known",
+          SimpG: "Khu trú",
+          range: "I - Không xác định",
           TNM: `${T}${N}${M}`,
         };
       }
@@ -86,15 +86,15 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "pathological") {
           return {
             SG: "",
-            SimpG: "Localised",
-            range: "IIIA - Not Known",
+            SimpG: "Khu trú",
+            range: "IIIA - Không xác định",
             TNM: `${T}${N}${M}`,
           };
         }
         return {
           SG: "",
-          SimpG: "Localised",
-          range: "III - Not Known",
+          SimpG: "Khu trú",
+          range: "III - Không xác định",
           TNM: `${T}${N}${M}`,
         };
       }
@@ -102,15 +102,15 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "clinical") {
           return {
             SG: "",
-            SimpG: "Localised",
-            range: "IVA - Not Known",
+            SimpG: "Khu trú",
+            range: "IVA - Không xác định",
             TNM: `${T}${N}${M}`,
           };
         }
         return {
           SG: "",
-          SimpG: "Localised",
-          range: "IIIA - Not Known",
+          SimpG: "Khu trú",
+          range: "IIIA - Không xác định",
           TNM: `${T}${N}${M}`,
         };
       }
@@ -118,8 +118,8 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
     if (N == "N3") {
       return {
         SG: "",
-        SimpG: "Localised",
-        range: "IVA - Not Known",
+        SimpG: "Khu trú",
+        range: "IVA - Không xác định",
         TNM: `${T}${N}${M}`,
       };
     }
@@ -129,22 +129,22 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
       if (assessment_type == "pathological") {
         return {
           SG: "",
-          SimpG: "Localised",
-          range: "IVA - Not Known",
+          SimpG: "Khu trú",
+          range: "IVA - Không xác định",
           TNM: `${T}${N}${M}`,
         };
       }
       return {
         SG: "",
-        SimpG: "Localised",
-        range: "0 - Not Known",
+        SimpG: "Khu trú",
+        range: "0 - Không xác định",
         TNM: `${T}${N}${M}`,
       };
     }
     if (N == "N3") {
       return {
         SG: "IVA",
-        SimpG: "Localised",
+        SimpG: "Khu trú",
         range: "IVA ",
         TNM: `${T}${N}${M}`,
       };
@@ -155,15 +155,15 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
       if (assessment_type == "pathological") {
         return {
           SG: "",
-          SimpG: "Localised",
-          range: "IA - Not Known",
+          SimpG: "Khu trú",
+          range: "IA - Không xác định",
           TNM: `${T}${N}${M}`,
         };
       }
       return {
         SG: "",
-        SimpG: "Localised",
-        range: "I - Not Known",
+        SimpG: "Khu trú",
+        range: "I - Không xác định",
         TNM: `${T}${N}${M}`,
       };
     }
@@ -172,7 +172,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (!assessment_type) {
           return {
             SG: "",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "I - IIB",
             TNM: `${T}${N}${M}`,
           };
@@ -180,7 +180,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "pathological") {
           return {
             SG: "IIB",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IIB",
             TNM: `${T}${N}${M}`,
           };
@@ -188,7 +188,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "clinical") {
           return {
             SG: "",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "I - IIA",
             TNM: `${T}${N}${M}`,
           };
@@ -198,7 +198,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (!assessment_type) {
           return {
             SG: "",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IIA - IIB",
             TNM: `${T}${N}${M}`,
           };
@@ -206,7 +206,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "pathological") {
           return {
             SG: "IIB",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IIB",
             TNM: `${T}${N}${M}`,
           };
@@ -214,7 +214,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "clinical") {
           return {
             SG: "IIA",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IIA",
             TNM: `${T}${N}${M}`,
           };
@@ -224,7 +224,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (!assessment_type) {
           return {
             SG: "",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "I - IIB",
             TNM: `${T}${N}${M}`,
           };
@@ -232,7 +232,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "pathological") {
           return {
             SG: "IIB",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IIB",
             TNM: `${T}${N}${M}`,
           };
@@ -240,7 +240,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "clinical") {
           return {
             SG: "I",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "I",
             TNM: `${T}${N}${M}`,
           };
@@ -252,7 +252,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (!assessment_type) {
           return {
             SG: "",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "III - IVA",
             TNM: `${T}${N}${M}`,
           };
@@ -260,7 +260,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "pathological") {
           return {
             SG: "IIIA",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IIIA",
             TNM: `${T}${N}${M}`,
           };
@@ -268,7 +268,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "clinical") {
           return {
             SG: "",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "III - IVA",
             TNM: `${T}${N}${M}`,
           };
@@ -278,7 +278,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (!assessment_type) {
           return {
             SG: "",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IIIA - IVA",
             TNM: `${T}${N}${M}`,
           };
@@ -286,7 +286,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "pathological") {
           return {
             SG: "IIIA",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IIIA",
             TNM: `${T}${N}${M}`,
           };
@@ -294,7 +294,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "clinical") {
           return {
             SG: "IVA",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IVA",
             TNM: `${T}${N}${M}`,
           };
@@ -304,7 +304,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (!assessment_type) {
           return {
             SG: "",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "III - IIIA",
             TNM: `${T}${N}${M}`,
           };
@@ -312,7 +312,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "pathological") {
           return {
             SG: "IIIA",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IIIA",
             TNM: `${T}${N}${M}`,
           };
@@ -320,7 +320,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "clinical") {
           return {
             SG: "III",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "III",
             TNM: `${T}${N}${M}`,
           };
@@ -330,7 +330,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
     if (N == "N3") {
       return {
         SG: "IVA",
-        SimpG: "Localised",
+        SimpG: "Khu trú",
         range: "IVA",
         TNM: `${T}${N}${M}`,
       };
@@ -341,15 +341,15 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
       if (assessment_type == "pathological") {
         return {
           SG: "",
-          SimpG: "Localised",
-          range: "IB - Not Known",
+          SimpG: "Khu trú",
+          range: "IB - Không xác định",
           TNM: `${T}${N}${M}`,
         };
       }
       return {
         SG: "",
-        SimpG: "Localised",
-        range: "I - Not Known",
+        SimpG: "Khu trú",
+        range: "I - Không xác định",
         TNM: `${T}${N}${M}`,
       };
     }
@@ -358,7 +358,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (!assessment_type) {
           return {
             SG: "",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "I - IIB",
             TNM: `${T}${N}${M}`,
           };
@@ -366,7 +366,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "pathological") {
           return {
             SG: "IIB",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IIB",
             TNM: `${T}${N}${M}`,
           };
@@ -374,7 +374,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "clinical") {
           return {
             SG: "",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "I - IIA",
             TNM: `${T}${N}${M}`,
           };
@@ -384,7 +384,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (!assessment_type) {
           return {
             SG: "",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IIA - IIB",
             TNM: `${T}${N}${M}`,
           };
@@ -392,7 +392,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "pathological") {
           return {
             SG: "IIB",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IIB",
             TNM: `${T}${N}${M}`,
           };
@@ -400,7 +400,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "clinical") {
           return {
             SG: "IIA",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IIA",
             TNM: `${T}${N}${M}`,
           };
@@ -410,7 +410,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (!assessment_type) {
           return {
             SG: "",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "I - IIB",
             TNM: `${T}${N}${M}`,
           };
@@ -418,7 +418,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "pathological") {
           return {
             SG: "IIB",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IIB",
             TNM: `${T}${N}${M}`,
           };
@@ -426,7 +426,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "clinical") {
           return {
             SG: "I",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "I",
             TNM: `${T}${N}${M}`,
           };
@@ -438,7 +438,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (!assessment_type) {
           return {
             SG: "",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "III - IVA",
             TNM: `${T}${N}${M}`,
           };
@@ -446,7 +446,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "pathological") {
           return {
             SG: "IIIA",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IIIA",
             TNM: `${T}${N}${M}`,
           };
@@ -454,7 +454,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "clinical") {
           return {
             SG: "III",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "III",
             TNM: `${T}${N}${M}`,
           };
@@ -464,7 +464,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (!assessment_type) {
           return {
             SG: "IIIA",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IIIA",
             TNM: `${T}${N}${M}`,
           };
@@ -472,7 +472,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "pathological") {
           return {
             SG: "IIIA",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IIIA",
             TNM: `${T}${N}${M}`,
           };
@@ -490,7 +490,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (!assessment_type) {
           return {
             SG: "",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "III - IIIA",
             TNM: `${T}${N}${M}`,
           };
@@ -498,7 +498,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "pathological") {
           return {
             SG: "IIIA",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IIIA",
             TNM: `${T}${N}${M}`,
           };
@@ -506,7 +506,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "clinical") {
           return {
             SG: "III",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "III",
             TNM: `${T}${N}${M}`,
           };
@@ -516,7 +516,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
     if (N == "N3") {
       return {
         SG: "IVA",
-        SimpG: "Localised",
+        SimpG: "Khu trú",
         range: "IVA",
         TNM: `${T}${N}${M}`,
       };
@@ -528,24 +528,24 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (!assessment_type) {
           return {
             SG: "",
-            SimpG: "Localised",
-            range: "II - Not Known",
+            SimpG: "Khu trú",
+            range: "II - Không xác định",
             TNM: `${T}${N}${M}`,
           };
         }
         if (assessment_type == "pathological") {
           return {
             SG: "",
-            SimpG: "Localised",
-            range: "IIA - Not Known",
+            SimpG: "Khu trú",
+            range: "IIA - Không xác định",
             TNM: `${T}${N}${M}`,
           };
         }
         if (assessment_type == "clinical") {
           return {
             SG: "",
-            SimpG: "Localised",
-            range: "II - Not Known",
+            SimpG: "Khu trú",
+            range: "II - Không xác định",
             TNM: `${T}${N}${M}`,
           };
         }
@@ -554,24 +554,24 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (!assessment_type) {
           return {
             SG: "",
-            SimpG: "Localised",
-            range: "IIA - Not Known",
+            SimpG: "Khu trú",
+            range: "IIA - Không xác định",
             TNM: `${T}${N}${M}`,
           };
         }
         if (assessment_type == "pathological") {
           return {
             SG: "",
-            SimpG: "Localised",
-            range: "IIA - Not Known",
+            SimpG: "Khu trú",
+            range: "IIA - Không xác định",
             TNM: `${T}${N}${M}`,
           };
         }
         if (assessment_type == "clinical") {
           return {
             SG: "",
-            SimpG: "Localised",
-            range: "IIB - Not Known",
+            SimpG: "Khu trú",
+            range: "IIB - Không xác định",
             TNM: `${T}${N}${M}`,
           };
         }
@@ -580,24 +580,24 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (!assessment_type) {
           return {
             SG: "",
-            SimpG: "Localised",
-            range: "II - Not Known",
+            SimpG: "Khu trú",
+            range: "II - Không xác định",
             TNM: `${T}${N}${M}`,
           };
         }
         if (assessment_type == "pathological") {
           return {
             SG: "",
-            SimpG: "Localised",
-            range: "IIA - Not Known",
+            SimpG: "Khu trú",
+            range: "IIA - Không xác định",
             TNM: `${T}${N}${M}`,
           };
         }
         if (assessment_type == "clinical") {
           return {
             SG: "",
-            SimpG: "Localised",
-            range: "II - Not Known",
+            SimpG: "Khu trú",
+            range: "II - Không xác định",
             TNM: `${T}${N}${M}`,
           };
         }
@@ -608,7 +608,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (!assessment_type) {
           return {
             SG: "",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "II - IIIA",
             TNM: `${T}${N}${M}`,
           };
@@ -616,7 +616,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "pathological") {
           return {
             SG: "IIIA",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IIIA",
             TNM: `${T}${N}${M}`,
           };
@@ -624,7 +624,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "clinical") {
           return {
             SG: "",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "II - III",
             TNM: `${T}${N}${M}`,
           };
@@ -634,7 +634,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (!assessment_type) {
           return {
             SG: "",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "III - IIIA",
             TNM: `${T}${N}${M}`,
           };
@@ -642,7 +642,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "pathological") {
           return {
             SG: "IIIA",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IIIA",
             TNM: `${T}${N}${M}`,
           };
@@ -650,7 +650,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "clinical") {
           return {
             SG: "III",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "III",
             TNM: `${T}${N}${M}`,
           };
@@ -660,7 +660,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (!assessment_type) {
           return {
             SG: "",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "II - IIIA",
             TNM: `${T}${N}${M}`,
           };
@@ -668,7 +668,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "pathological") {
           return {
             SG: "IIIA",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IIIA",
             TNM: `${T}${N}${M}`,
           };
@@ -676,7 +676,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "clinical") {
           return {
             SG: "II",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "II",
             TNM: `${T}${N}${M}`,
           };
@@ -688,7 +688,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (!assessment_type) {
           return {
             SG: "",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "III - IVA",
             TNM: `${T}${N}${M}`,
           };
@@ -696,7 +696,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "pathological") {
           return {
             SG: "IIIB",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IIIB",
             TNM: `${T}${N}${M}`,
           };
@@ -704,7 +704,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "clinical") {
           return {
             SG: "III - IVA",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "III - IVA",
             TNM: `${T}${N}${M}`,
           };
@@ -714,7 +714,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (!assessment_type) {
           return {
             SG: "",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IIIB - IVA",
             TNM: `${T}${N}${M}`,
           };
@@ -722,7 +722,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "pathological") {
           return {
             SG: "IIIB",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IIIB",
             TNM: `${T}${N}${M}`,
           };
@@ -730,7 +730,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "clinical") {
           return {
             SG: "IVA",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IVA",
             TNM: `${T}${N}${M}`,
           };
@@ -740,7 +740,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (!assessment_type) {
           return {
             SG: "",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "III - IIIB",
             TNM: `${T}${N}${M}`,
           };
@@ -748,7 +748,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "pathological") {
           return {
             SG: "IIIB",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IIIB",
             TNM: `${T}${N}${M}`,
           };
@@ -756,7 +756,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "clinical") {
           return {
             SG: "III",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "III",
             TNM: `${T}${N}${M}`,
           };
@@ -766,7 +766,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
     if (N == "N3") {
       return {
         SG: "IVA",
-        SimpG: "Localised",
+        SimpG: "Khu trú",
         range: "IVA",
         TNM: `${T}${N}${M}`,
       };
@@ -778,24 +778,24 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (!assessment_type) {
           return {
             SG: "",
-            SimpG: "Localised",
-            range: "II - Not Known",
+            SimpG: "Khu trú",
+            range: "II - Không xác định",
             TNM: `${T}${N}${M}`,
           };
         }
         if (assessment_type == "pathological") {
           return {
             SG: "",
-            SimpG: "Localised",
-            range: "IIB - Not Known",
+            SimpG: "Khu trú",
+            range: "IIB - Không xác định",
             TNM: `${T}${N}${M}`,
           };
         }
         if (assessment_type == "clinical") {
           return {
             SG: "",
-            SimpG: "Localised",
-            range: "II - Not Known",
+            SimpG: "Khu trú",
+            range: "II - Không xác định",
             TNM: `${T}${N}${M}`,
           };
         }
@@ -804,24 +804,24 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (!assessment_type) {
           return {
             SG: "",
-            SimpG: "Localised",
-            range: "IIB - Not Known",
+            SimpG: "Khu trú",
+            range: "IIB - Không xác định",
             TNM: `${T}${N}${M}`,
           };
         }
         if (assessment_type == "pathological") {
           return {
             SG: "",
-            SimpG: "Localised",
-            range: "IIB - Not Known",
+            SimpG: "Khu trú",
+            range: "IIB - Không xác định",
             TNM: `${T}${N}${M}`,
           };
         }
         if (assessment_type == "clinical") {
           return {
             SG: "",
-            SimpG: "Localised",
-            range: "III - Not Known",
+            SimpG: "Khu trú",
+            range: "III - Không xác định",
             TNM: `${T}${N}${M}`,
           };
         }
@@ -830,24 +830,24 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (!assessment_type) {
           return {
             SG: "",
-            SimpG: "Localised",
-            range: "II - Not Known",
+            SimpG: "Khu trú",
+            range: "II - Không xác định",
             TNM: `${T}${N}${M}`,
           };
         }
         if (assessment_type == "pathological") {
           return {
             SG: "",
-            SimpG: "Localised",
-            range: "IIB - Not Known",
+            SimpG: "Khu trú",
+            range: "IIB - Không xác định",
             TNM: `${T}${N}${M}`,
           };
         }
         if (assessment_type == "clinical") {
           return {
             SG: "",
-            SimpG: "Localised",
-            range: "II - Not Known",
+            SimpG: "Khu trú",
+            range: "II - Không xác định",
             TNM: `${T}${N}${M}`,
           };
         }
@@ -858,7 +858,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (!assessment_type) {
           return {
             SG: "",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "II - IIIB",
             TNM: `${T}${N}${M}`,
           };
@@ -866,7 +866,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "pathological") {
           return {
             SG: "IIIB",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IIIB",
             TNM: `${T}${N}${M}`,
           };
@@ -874,7 +874,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "clinical") {
           return {
             SG: "III",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "III",
             TNM: `${T}${N}${M}`,
           };
@@ -884,7 +884,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (!assessment_type) {
           return {
             SG: "",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "III - IIIB",
             TNM: `${T}${N}${M}`,
           };
@@ -892,7 +892,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "pathological") {
           return {
             SG: "IIIB",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IIIB",
             TNM: `${T}${N}${M}`,
           };
@@ -900,7 +900,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "clinical") {
           return {
             SG: "III",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "III",
             TNM: `${T}${N}${M}`,
           };
@@ -910,7 +910,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (!assessment_type) {
           return {
             SG: "IIIB",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IIIB",
             TNM: `${T}${N}${M}`,
           };
@@ -918,7 +918,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "pathological") {
           return {
             SG: "IIIB",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IIIB",
             TNM: `${T}${N}${M}`,
           };
@@ -938,7 +938,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (!assessment_type) {
           return {
             SG: "",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IIIB - IVA",
             TNM: `${T}${N}${M}`,
           };
@@ -946,7 +946,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "pathological") {
           return {
             SG: "IIIB",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IIIB",
             TNM: `${T}${N}${M}`,
           };
@@ -954,7 +954,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "clinical") {
           return {
             SG: "IVA",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IVA",
             TNM: `${T}${N}${M}`,
           };
@@ -964,7 +964,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (!assessment_type) {
           return {
             SG: "",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IIIB - IVA",
             TNM: `${T}${N}${M}`,
           };
@@ -972,7 +972,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "pathological") {
           return {
             SG: "IIIB",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IIIB",
             TNM: `${T}${N}${M}`,
           };
@@ -980,7 +980,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "clinical") {
           return {
             SG: "IVA",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IVA",
             TNM: `${T}${N}${M}`,
           };
@@ -990,7 +990,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (!assessment_type) {
           return {
             SG: "IIIB",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IIIB",
             TNM: `${T}${N}${M}`,
           };
@@ -998,7 +998,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "pathological") {
           return {
             SG: "IIIB",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IIIB",
             TNM: `${T}${N}${M}`,
           };
@@ -1016,7 +1016,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
     if (N == "N3") {
       return {
         SG: "IVA",
-        SimpG: "Localised",
+        SimpG: "Khu trú",
         range: "IVA",
         TNM: `${T}${N}${M}`,
       };
@@ -1028,24 +1028,24 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (!assessment_type) {
           return {
             SG: "",
-            SimpG: "Localised",
-            range: "III - Not Known",
+            SimpG: "Khu trú",
+            range: "III - Không xác định",
             TNM: `${T}${N}${M}`,
           };
         }
         if (assessment_type == "pathological") {
           return {
             SG: "",
-            SimpG: "Localised",
-            range: "IIIB - Not Known",
+            SimpG: "Khu trú",
+            range: "IIIB - Không xác định",
             TNM: `${T}${N}${M}`,
           };
         }
         if (assessment_type == "clinical") {
           return {
             SG: "",
-            SimpG: "Localised",
-            range: "III - Not Known",
+            SimpG: "Khu trú",
+            range: "III - Không xác định",
             TNM: `${T}${N}${M}`,
           };
         }
@@ -1054,24 +1054,24 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (!assessment_type) {
           return {
             SG: "",
-            SimpG: "Localised",
-            range: "III - Not Known",
+            SimpG: "Khu trú",
+            range: "III - Không xác định",
             TNM: `${T}${N}${M}`,
           };
         }
         if (assessment_type == "pathological") {
           return {
             SG: "",
-            SimpG: "Localised",
-            range: "IIIB - Not Known",
+            SimpG: "Khu trú",
+            range: "IIIB - Không xác định",
             TNM: `${T}${N}${M}`,
           };
         }
         if (assessment_type == "clinical") {
           return {
             SG: "",
-            SimpG: "Localised",
-            range: "III - Not Known",
+            SimpG: "Khu trú",
+            range: "III - Không xác định",
             TNM: `${T}${N}${M}`,
           };
         }
@@ -1080,24 +1080,24 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (!assessment_type) {
           return {
             SG: "",
-            SimpG: "Localised",
-            range: "IIIB - Not Known",
+            SimpG: "Khu trú",
+            range: "IIIB - Không xác định",
             TNM: `${T}${N}${M}`,
           };
         }
         if (assessment_type == "pathological") {
           return {
             SG: "",
-            SimpG: "Localised",
-            range: "IIIB - Not Known",
+            SimpG: "Khu trú",
+            range: "IIIB - Không xác định",
             TNM: `${T}${N}${M}`,
           };
         }
         if (assessment_type == "clinical") {
           return {
             SG: "",
-            SimpG: "Localised",
-            range: "IVA - Not Known",
+            SimpG: "Khu trú",
+            range: "IVA - Không xác định",
             TNM: `${T}${N}${M}`,
           };
         }
@@ -1108,7 +1108,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (!assessment_type) {
           return {
             SG: "",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "III - IVA",
             TNM: `${T}${N}${M}`,
           };
@@ -1116,7 +1116,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "pathological") {
           return {
             SG: "IIIB",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IIIB",
             TNM: `${T}${N}${M}`,
           };
@@ -1124,7 +1124,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "clinical") {
           return {
             SG: "",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "III - IVA",
             TNM: `${T}${N}${M}`,
           };
@@ -1134,7 +1134,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (!assessment_type) {
           return {
             SG: "",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "III - IIIB",
             TNM: `${T}${N}${M}`,
           };
@@ -1142,7 +1142,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "pathological") {
           return {
             SG: "IIIB",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IIIB",
             TNM: `${T}${N}${M}`,
           };
@@ -1150,7 +1150,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "clinical") {
           return {
             SG: "III",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "III",
             TNM: `${T}${N}${M}`,
           };
@@ -1160,7 +1160,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (!assessment_type) {
           return {
             SG: "",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IIIB - IVA",
             TNM: `${T}${N}${M}`,
           };
@@ -1168,7 +1168,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "pathological") {
           return {
             SG: "IIIB",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IIIB",
             TNM: `${T}${N}${M}`,
           };
@@ -1176,7 +1176,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
         if (assessment_type == "clinical") {
           return {
             SG: "IVA",
-            SimpG: "Localised",
+            SimpG: "Khu trú",
             range: "IVA",
             TNM: `${T}${N}${M}`,
           };
@@ -1186,7 +1186,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
     if (N == "N2") {
       return {
         SG: "IVA",
-        SimpG: "Localised",
+        SimpG: "Khu trú",
         range: "IVA",
         TNM: `${T}${N}${M}`,
       };
@@ -1194,7 +1194,7 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
     if (N == "N3") {
       return {
         SG: "IVA",
-        SimpG: "Localised",
+        SimpG: "Khu trú",
         range: "IVA",
         TNM: `${T}${N}${M}`,
       };
@@ -1204,15 +1204,15 @@ export const getStage = (T, N, M, morphology, assessment_type) => {
     if (N == "NX") {
       return {
         SG: "",
-        SimpG: "Localised",
-        range: "IVA - Not Known",
+        SimpG: "Khu trú",
+        range: "IVA - Không xác định",
         TNM: `${T}${N}${M}`,
       };
     }
 
     return {
       SG: "IVA",
-      SimpG: "Localised",
+      SimpG: "Khu trú",
       range: "IVA",
       TNM: `${T}${N}${M}`,
     };

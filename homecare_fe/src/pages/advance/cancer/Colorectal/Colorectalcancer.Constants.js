@@ -49,15 +49,15 @@ export const getStage = (T, N, M) => {
       if (N == "N2b") {
         return {
           SG: "",
-          SimpG: "Regional - Not Known",
-          range: "IIIB - Not Known",
+          SimpG: "Vùng lân cận - Chưa xác định",
+          range: "IIIB - Chưa xác định",
           TNM: `${T}${N}${M}`,
         };
       }
       return {
         SG: "",
-        SimpG: "Regional - Not Known",
-        range: "IIIA - Not Known",
+        SimpG: "Vùng lân cận - Chưa xác định",
+        range: "IIIA - Chưa xác định",
         TNM: `${T}${N}${M}`,
       };
     }
@@ -67,14 +67,14 @@ export const getStage = (T, N, M) => {
       if (N == "N2b") {
         return {
           SG: "IIIB",
-          SimpG: "Regional",
+          SimpG: "Vùng lân cận",
           range: "IIIB",
           TNM: `${T}${N}${M}`,
         };
       }
       return {
         SG: "IIIA",
-        SimpG: "Regional",
+        SimpG: "Vùng lân cận",
         range: "IIIA",
         TNM: `${T}${N}${M}`,
       };
@@ -86,14 +86,14 @@ export const getStage = (T, N, M) => {
       if (N == "N2b" || N == "N2a") {
         return {
           SG: "IIIB",
-          SimpG: "Regional",
+          SimpG: "Vùng lân cận",
           range: "IIIB",
           TNM: `${T}${N}${M}`,
         };
       }
       return {
         SG: "IIIA",
-        SimpG: "Regional",
+        SimpG: "Vùng lân cận",
         range: "IIIA",
         TNM: `${T}${N}${M}`,
       };
@@ -104,14 +104,14 @@ export const getStage = (T, N, M) => {
       if (N == "N2b") {
         return {
           SG: "IIIC",
-          SimpG: "Regional",
+          SimpG: "Vùng lân cận",
           range: "IIIC",
           TNM: `${T}${N}${M}`,
         };
       }
       return {
         SG: "IIIB",
-        SimpG: "Regional",
+        SimpG: "Vùng lân cận",
         range: "IIIB",
         TNM: `${T}${N}${M}`,
       };
@@ -122,14 +122,14 @@ export const getStage = (T, N, M) => {
       if (N == "N2b" || N == "N2a") {
         return {
           SG: "IIIC",
-          SimpG: "Regional",
+          SimpG: "Vùng lân cận",
           range: "IIIC",
           TNM: `${T}${N}${M}`,
         };
       }
       return {
         SG: "IIIB",
-        SimpG: "Regional",
+        SimpG: "Vùng lân cận",
         range: "IIIB",
         TNM: `${T}${N}${M}`,
       };
@@ -139,7 +139,7 @@ export const getStage = (T, N, M) => {
     if (M == "M0") {
       return {
         SG: "IIIC",
-        SimpG: "Regional",
+        SimpG: "Vùng lân cận",
         range: "IIIC",
         TNM: `${T}${N}${M}`,
       };
