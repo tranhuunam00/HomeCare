@@ -92,6 +92,7 @@ import PricingPage from "./pages/landingpage/guild/package/PricingPage";
 import Lirads2Form from "./pages/advance/Lirads2Form/Lirads2Form";
 import LungcancerForm from "./pages/advance/cancer/LungCancer/LungcancerForm";
 import LivercancerForm from "./pages/advance/cancer/LiverCancer/LivercancerForm";
+import ColorectalcancerForm from "./pages/advance/cancer/Colorectal/ColorectalcancerForm";
 
 function App() {
   useAuthInitializer();
@@ -238,6 +239,7 @@ function App() {
 
           <Route path="Lungcancer" element={<LungcancerForm />} />
           <Route path="Livercancer" element={<LivercancerForm />} />
+          <Route path="Colorectalcancer" element={<ColorectalcancerForm />} />
 
           <Route
             path="sono/use/patient-diagnose/:patient_diagnose_id"

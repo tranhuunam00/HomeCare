@@ -219,6 +219,12 @@ export const medicalCategories = [
         path: "/home/Livercancer",
         image: "/product/cancer/liver/liver.png",
       },
+      {
+        key: "Colorectalcancer",
+        label: "D-TNM-Colorectal - Đánh giá giai đoạn ung thư đại trực tràng",
+        path: "/home/Colorectalcancer",
+        image: "/product/cancer/colorectal/colorectal.png",
+      },
     ],
   },
   {
