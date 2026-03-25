@@ -94,6 +94,7 @@ import LungcancerForm from "./pages/advance/cancer/LungCancer/LungcancerForm";
 import LivercancerForm from "./pages/advance/cancer/LiverCancer/LivercancerForm";
 import ColorectalcancerForm from "./pages/advance/cancer/Colorectal/ColorectalcancerForm";
 import OesophaguscancerForm from "./pages/advance/cancer/Oesophagus/OesophaguscancerForm";
+import PancreascancerForm from "./pages/advance/cancer/Pancreas/PancreascancerForm";
 
 function App() {
   useAuthInitializer();
@@ -242,6 +243,7 @@ function App() {
           <Route path="Livercancer" element={<LivercancerForm />} />
           <Route path="Colorectalcancer" element={<ColorectalcancerForm />} />
           <Route path="Oesophaguscancer" element={<OesophaguscancerForm />} />
+          <Route path="Pancreascancer" element={<PancreascancerForm />} />
 
           <Route
             path="sono/use/patient-diagnose/:patient_diagnose_id"

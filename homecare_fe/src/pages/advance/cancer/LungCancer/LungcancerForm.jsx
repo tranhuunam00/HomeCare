@@ -232,7 +232,9 @@ Hãy đưa ra:
         <ThamKhaoLinkHomeCare
           link={"https://home-care.vn/product/phan-mem-d-lungrads/"}
           name={"TNM-Lung"}
-          desc={"Hệ thống phân loại giai đoạn ung thư phổi theo TNM"}
+          desc={
+            "Hệ thống phân loại giai đoạn ung thư phổi theo phiên bản TNM Edition 8"
+          }
         />
 
         <Form

@@ -254,7 +254,9 @@ Hãy đưa ra:
         <ThamKhaoLinkHomeCare
           link={"https://home-care.vn/product/phan-mem-d-lungrads/"}
           name={"TNM-Colorectal"}
-          desc={"Hệ thống phân loại giai đoạn ung thư đại trực tràng theo TNM"}
+          desc={
+            "Hệ thống phân loại giai đoạn ung thư đại trực tràng theo phiên bản TNM Edition 8"
+          }
         />
 
         <Form

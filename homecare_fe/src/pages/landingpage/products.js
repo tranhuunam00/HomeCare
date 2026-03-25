@@ -209,27 +209,38 @@ export const medicalCategories = [
       },
       {
         key: "Lungcancer",
-        label: "D-TNM-Lung - Đánh giá giai đoạn ung thư phổi",
+        label:
+          "D-TNM-Lung - Đánh giá giai đoạn ung thư phổi theo phiên bản TNM Edition 8",
         path: "/home/Lungcancer",
         image: "/product/cancer/lung.png",
       },
       {
         key: "Livercancer",
-        label: "D-TNM-Liver - Đánh giá giai đoạn ung thư gan",
+        label:
+          "D-TNM-Liver - Đánh giá giai đoạn ung thư gan theo phiên bản TNM Edition 8",
         path: "/home/Livercancer",
         image: "/product/cancer/liver/liver.png",
       },
       {
         key: "Colorectalcancer",
-        label: "D-TNM-Colorectal - Đánh giá giai đoạn ung thư đại trực tràng",
+        label:
+          "D-TNM-Colorectal - Đánh giá giai đoạn ung thư đại trực tràng theo phiên bản TNM Edition 8",
         path: "/home/Colorectalcancer",
         image: "/product/cancer/colorectal/colorectal.png",
       },
       {
         key: "Oesophaguscancer",
-        label: "D-TNM-Oesophagus - Đánh giá giai đoạn ung thư thực quản",
+        label:
+          "D-TNM-Oesophagus - Đánh giá giai đoạn ung thư thực quản theo phiên bản TNM Edition 8",
         path: "/home/Oesophaguscancer",
         image: "/product/cancer/oesophagus/oesophagus.png",
+      },
+      {
+        key: "Pancreas",
+        label:
+          "D-TNM-Pancreas - Đánh giá giai đoạn ung tuyến tụy theo phiên bản TNM Edition 8",
+        path: "/home/Pancreascancer",
+        image: "/product/cancer/pancreas/pancreas.png",
       },
     ],
   },

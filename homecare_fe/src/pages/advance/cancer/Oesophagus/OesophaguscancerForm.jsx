@@ -58,20 +58,34 @@ const OesophaguscancerForm = () => {
       return "Không rõ";
     };
 
+    // ===== MAP =====
     const levelMap = {
-      T1: "Xâm lấn lớp dưới niêm mạc",
+      T0: "Ung thư tại chỗ (không xâm lấn)",
+      T1a: "Xâm lấn lớp niêm mạc",
+      T1b: "Xâm lấn lớp dưới niêm mạc",
       T2: "Xâm lấn lớp cơ",
-      T3: "Xâm lấn dưới thanh mạc / mô quanh đại trực tràng",
-      T4a: "Xuyên phúc mạc tạng",
-      T4b: "Xâm lấn cơ quan khác",
+      T3: "Xâm lấn lớp áo ngoài (adventitia)",
+      T4a: "Xâm lấn cấu trúc lân cận có thể phẫu thuật",
+      T4b: "Xâm lấn cấu trúc quan trọng không phẫu thuật được",
       TX: "Không đánh giá được",
     };
 
     const mMap = {
       M0: "Không có di căn xa",
-      M1a: "Di căn 1 cơ quan",
-      M1b: "Di căn nhiều cơ quan",
-      M1c: "Di căn phúc mạc",
+      M1: "Có di căn xa",
+    };
+
+    const morphologyMap = {
+      adenocarcinoma: "Ung thư biểu mô tuyến",
+      squamous: "Ung thư biểu mô tế bào vảy",
+    };
+
+    const arteryMap = {
+      none: "Không xâm lấn động mạch lớn",
+      coeliac: "Xâm lấn thân tạng (coeliac axis)",
+      sma: "Xâm lấn động mạch mạc treo tràng trên (SMA)",
+      cha: "Xâm lấn động mạch gan chung (CHA)",
+      multiple: "Xâm lấn nhiều động mạch (coeliac axis/SMA/CHA)",
     };
 
     const bulletHtml = `
@@ -85,103 +99,139 @@ const OesophaguscancerForm = () => {
     </ul>
   `;
 
+    // ===== BODY =====
     const body = `
-    <h2 style="text-align:center;">BÁO CÁO PHÂN LOẠI UNG THƯ ĐẠI TRỰC TRÀNG (TNM)</h2>
+  <h2 style="text-align:center;">BÁO CÁO PHÂN LOẠI UNG THƯ THỰC QUẢN (TNM)</h2>
 
-    <!-- T -->
-    <table border="1" cellpadding="6" style="border-collapse: collapse; width:100%; margin-top:10px;">
-      <caption><strong>1. Khối u nguyên phát (T)</strong></caption>
+  <!-- THÔNG TIN CHUNG -->
+  <table border="1" cellpadding="6" style="border-collapse: collapse; width:100%; margin-top:10px;">
+    <caption><strong>1. Thông tin chung</strong></caption>
 
-      <tr>
-        <td><strong>Mức độ xâm lấn</strong></td>
-        <td>${levelMap[values.level_inv] || "Không rõ"}</td>
-      </tr>
+    <tr>
+      <td><strong>Hình thái mô bệnh học</strong></td>
+      <td>${morphologyMap[values.morphology] || "Không rõ"}</td>
+    </tr>
 
-      <tr>
-        <td><strong>Kết luận T</strong></td>
-        <td><strong style="color:red;">${summary.T || ""}</strong></td>
-      </tr>
-    </table>
+    <tr>
+      <td><strong>Loại đánh giá</strong></td>
+      <td>
+        ${
+          values.assessment_type === "pathological"
+            ? "Giải phẫu bệnh (pTNM)"
+            : values.assessment_type === "clinical"
+              ? "Lâm sàng (cTNM)"
+              : "Không rõ"
+        }
+      </td>
+    </tr>
+  </table>
 
-    <!-- N -->
-    <table border="1" cellpadding="6" style="border-collapse: collapse; width:100%; margin-top:16px;">
-      <caption><strong>2. Hạch vùng (N)</strong></caption>
+  <!-- T -->
+  <table border="1" cellpadding="6" style="border-collapse: collapse; width:100%; margin-top:16px;">
+    <caption><strong>2. Khối u nguyên phát (T)</strong></caption>
 
-      <tr>
-        <td><strong>Số hạch dương tính</strong></td>
-        <td>${values.pos_num ?? "Không rõ"}</td>
-      </tr>
+    <tr>
+      <td><strong>Mức độ xâm lấn</strong></td>
+      <td>${levelMap[values.level_inv] || "Không rõ"}</td>
+    </tr>
 
-      <tr>
-        <td><strong>Ổ lắng đọng u (tumour deposits)</strong></td>
-        <td>${yesNo(values.tumour_deposits)}</td>
-      </tr>
+    <tr>
+      <td><strong>Kết luận T</strong></td>
+      <td><strong style="color:red;">${summary.T || ""}</strong></td>
+    </tr>
+  </table>
 
-      <tr>
-        <td><strong>Kết luận N</strong></td>
-        <td><strong style="color:red;">${summary.N || ""}</strong></td>
-      </tr>
-    </table>
+  <!-- XÂM LẤN MẠCH -->
+  <table border="1" cellpadding="6" style="border-collapse: collapse; width:100%; margin-top:16px;">
+    <caption><strong>3. Xâm lấn mạch máu lớn</strong></caption>
 
-    <!-- M -->
-    <table border="1" cellpadding="6" style="border-collapse: collapse; width:100%; margin-top:16px;">
-      <caption><strong>3. Di căn xa (M)</strong></caption>
+    <tr>
+      <td><strong>Tình trạng</strong></td>
+      <td>${arteryMap[values.arterial_involvement] || "Không rõ"}</td>
+    </tr>
+  </table>
 
-      <tr>
-        <td><strong>Di căn</strong></td>
-        <td>${mMap[values.distant_metastases] || "Không rõ"}</td>
-      </tr>
+  <!-- N -->
+  <table border="1" cellpadding="6" style="border-collapse: collapse; width:100%; margin-top:16px;">
+    <caption><strong>4. Hạch vùng (N)</strong></caption>
 
-      <tr>
-        <td><strong>Kết luận M</strong></td>
-        <td><strong style="color:red;">${summary.M || ""}</strong></td>
-      </tr>
-    </table>
+    <tr>
+      <td><strong>Số hạch dương tính</strong></td>
+      <td>${values.pos_num ?? "Không rõ"}</td>
+    </tr>
 
-    <!-- KẾT LUẬN -->
-    <table border="1" cellpadding="6" style="border-collapse: collapse; width:100%; margin-top:16px;">
-      <caption><strong>4. Kết luận TNM</strong></caption>
+    <tr>
+      <td><strong>Ổ lắng đọng u (tumour deposits)</strong></td>
+      <td>${yesNo(values.tumour_deposits)}</td>
+    </tr>
 
-      <tr>
-        <td><strong>Stage Group (SG)</strong></td>
-        <td>${summary.SG || ""}</td>
-      </tr>
+    <tr>
+      <td><strong>Kết luận N</strong></td>
+      <td><strong style="color:red;">${summary.N || ""}</strong></td>
+    </tr>
+  </table>
 
-      <tr>
-        <td><strong>Phân loại đơn giản</strong></td>
-        <td>${summary.SimpG || ""}</td>
-      </tr>
+  <!-- M -->
+  <table border="1" cellpadding="6" style="border-collapse: collapse; width:100%; margin-top:16px;">
+    <caption><strong>5. Di căn xa (M)</strong></caption>
 
-      <tr>
-        <td><strong>Stage Range</strong></td>
-        <td>${summary.range || ""}</td>
-      </tr>
+    <tr>
+      <td><strong>Tình trạng di căn</strong></td>
+      <td>${mMap[values.distant_metastases] || "Không rõ"}</td>
+    </tr>
 
-      <tr>
-        <td><strong>TNM đầy đủ</strong></td>
-        <td>${summary.TNM || ""}</td>
-      </tr>
-    </table>
+    <tr>
+      <td><strong>Kết luận M</strong></td>
+      <td><strong style="color:red;">${summary.M || ""}</strong></td>
+    </tr>
+  </table>
 
-    ${
-      isCopy && summary.ai
-        ? `<div style="margin-top:20px;">
-            <strong>5. Khuyến nghị:</strong>
-            ${bulletHtml}
-          </div>`
-        : ""
-    }
-  `;
+  <!-- KẾT LUẬN -->
+  <table border="1" cellpadding="6" style="border-collapse: collapse; width:100%; margin-top:16px;">
+    <caption><strong>6. Kết luận TNM</strong></caption>
+
+    <tr>
+      <td><strong>Stage Group (SG)</strong></td>
+      <td>${summary.SG || ""}</td>
+    </tr>
+
+    <tr>
+      <td><strong>Phân loại đơn giản</strong></td>
+      <td>${summary.SimpG || ""}</td>
+    </tr>
+
+    <tr>
+      <td><strong>Stage Range</strong></td>
+      <td>${summary.range || ""}</td>
+    </tr>
+
+    <tr>
+      <td><strong>TNM đầy đủ</strong></td>
+      <td><strong>${summary.TNM || ""}</strong></td>
+    </tr>
+  </table>
+
+  ${
+    isCopy && summary.ai
+      ? `
+      <div style="margin-top:20px;">
+        <strong>7. Khuyến nghị:</strong>
+        ${bulletHtml}
+      </div>
+    `
+      : ""
+  }
+`;
 
     return `
-    <html>
-      <head>
-        <meta charset="utf-8" />
-      </head>
-      <body style="font-family: Arial, sans-serif; font-size:14px;">
-        ${body}
-      </body>
-    </html>
+  <html>
+    <head>
+      <meta charset="utf-8" />
+    </head>
+    <body style="font-family: Arial, sans-serif; font-size:14px; line-height:1.6;">
+      ${body}
+    </body>
+  </html>
   `;
   };
   const onCopy = async () => {
@@ -268,7 +318,9 @@ Hãy đưa ra:
         <ThamKhaoLinkHomeCare
           link={"https://home-care.vn/product/phan-mem-d-lungrads/"}
           name={"TNM-Oesophagus"}
-          desc={"Hệ thống phân loại giai đoạn ung thư đại trực tràng theo TNM"}
+          desc={
+            "Hệ thống phân loại giai đoạn ung thư đại trực tràng theo phiên bản TNM Edition 8"
+          }
         />
 
         <Form
