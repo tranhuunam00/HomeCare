@@ -242,6 +242,13 @@ export const medicalCategories = [
         path: "/home/Pancreascancer",
         image: "/product/cancer/pancreas/pancreas.png",
       },
+      {
+        key: "Kidney",
+        label:
+          "D-TNM-Kidney - Đánh giá giai đoạn ung tuyến thận theo phiên bản TNM Edition 8",
+        path: "/home/Kidneycancer",
+        image: "/product/cancer/kidney/kidney.png",
+      },
     ],
   },
   {

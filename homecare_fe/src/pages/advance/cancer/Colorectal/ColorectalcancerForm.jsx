@@ -216,7 +216,7 @@ const ColorectalcancerForm = () => {
       const prompt = `
 Bạn là bác sĩ chẩn đoán hình ảnh.
 
-Dưới đây là kết quả phân loại ung thư gan theo TNM:
+Dưới đây là kết quả phân loại ung thư đại trực tràng theo TNM:
 ${html}
 
 Hãy đưa ra:

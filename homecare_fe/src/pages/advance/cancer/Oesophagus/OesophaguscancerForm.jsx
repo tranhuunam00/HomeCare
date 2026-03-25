@@ -280,7 +280,8 @@ const OesophaguscancerForm = () => {
       const prompt = `
 Bạn là bác sĩ chẩn đoán hình ảnh.
 
-Dưới đây là kết quả phân loại ung thư gan theo TNM:
+Dưới đây là kết quả phân loại ung thư thực quản
+ theo TNM:
 ${html}
 
 Hãy đưa ra:
@@ -319,7 +320,7 @@ Hãy đưa ra:
           link={"https://home-care.vn/product/phan-mem-d-lungrads/"}
           name={"TNM-Oesophagus"}
           desc={
-            "Hệ thống phân loại giai đoạn ung thư đại trực tràng theo phiên bản TNM Edition 8"
+            "Hệ thống phân loại giai đoạn ung thư thực quản theo phiên bản TNM Edition 8"
           }
         />
 
