@@ -252,9 +252,16 @@ export const medicalCategories = [
       {
         key: "Ovary",
         label:
-          "D-TNM-Ovary - Đánh giá giai đoạn ung tuyến thận theo phiên bản TNM Edition 8",
+          "D-TNM-Ovary - Đánh giá giai đoạn ung thư buồng trứng theo phiên bản TNM Edition 8",
         path: "/home/Ovarycancer",
         image: "/product/cancer/ovary/ovary.png",
+      },
+      {
+        key: "Cervix",
+        label:
+          "D-TNM-Cervix - Đánh giá giai đoạn ung thư cổ tử cung theo phiên bản TNM Edition 8",
+        path: "/home/Cervixcancer",
+        image: "/product/cancer/cervix/cervix.png",
       },
     ],
   },
