@@ -249,6 +249,13 @@ export const medicalCategories = [
         path: "/home/Kidneycancer",
         image: "/product/cancer/kidney/kidney.png",
       },
+      {
+        key: "Ovary",
+        label:
+          "D-TNM-Ovary - Đánh giá giai đoạn ung tuyến thận theo phiên bản TNM Edition 8",
+        path: "/home/Ovarycancer",
+        image: "/product/cancer/ovary/ovary.png",
+      },
     ],
   },
   {
