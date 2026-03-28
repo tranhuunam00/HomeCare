@@ -289,187 +289,194 @@ Hãy đưa ra:
           }}
         >
           <div style={{ display: "flex" }}>
-            <div className={styles.sectionBlockT}>
-              <div className={styles.sectionHeaderT}>
-                T – Khối u nguyên phát (Tumor)
-              </div>
-              <Form.Item
-                name="micro_only"
-                label={<LabelWithHint text="Chỉ có tổn thương vi mô" />}
-              >
-                <Radio.Group>
-                  <Radio value="yes">Có</Radio>
-                  <Radio value="no">Không</Radio>
-                  <Radio value="unknown">Chưa xác định</Radio>
-                </Radio.Group>
-              </Form.Item>
-
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <div style={{ flex: 2 }}>
+              <div className={styles.sectionBlockT}>
+                <div className={styles.sectionHeaderT}>
+                  T – Khối u nguyên phát (Tumor)
+                </div>
                 <Form.Item
-                  name="stromal"
+                  name="micro_only"
+                  label={<LabelWithHint text="Chỉ có tổn thương vi mô" />}
+                >
+                  <Radio.Group>
+                    <Radio value="yes">Có</Radio>
+                    <Radio value="no">Không</Radio>
+                    <Radio value="unknown">Chưa xác định</Radio>
+                  </Radio.Group>
+                </Form.Item>
+
+                <div
+                  style={{ display: "flex", justifyContent: "space-between" }}
+                >
+                  <Form.Item
+                    name="stromal"
+                    label={
+                      <LabelWithHint
+                        text="Mức độ xâm lấn mô đệm"
+                        image="/product/cancer/cervix/T_stromal.png"
+                      />
+                    }
+                  >
+                    <Radio.Group
+                      style={{ display: "flex", flexDirection: "column" }}
+                    >
+                      <Radio value="micro_1">
+                        {`≤ 3 mm chiều sâu và ≤ 7 mm chiều ngang`}
+                      </Radio>
+
+                      <Radio value="micro_2">
+                        {`> 3 mm đến ≤ 5 mm chiều sâu và ≤ 7 mm chiều ngang`}
+                      </Radio>
+
+                      <Radio value="macro">
+                        {`> 5 mm chiều sâu hoặc > 7 mm chiều ngang`}
+                      </Radio>
+                    </Radio.Group>
+                  </Form.Item>
+                  <Button
+                    onClick={() => {
+                      form.setFieldsValue({ stromal: null });
+                      setSummary((prev) => ({
+                        ...prev,
+                        T: getT(form.getFieldsValue()),
+                      }));
+                    }}
+                  >
+                    Reset
+                  </Button>
+                </div>
+
+                <div
+                  style={{ display: "flex", justifyContent: "space-between" }}
+                >
+                  <Form.Item
+                    name="clinically_visible_lesion"
+                    label={
+                      <LabelWithHint
+                        text="Tổn thương quan sát được trên lâm sàng"
+                        image="/product/cancer/cervix/T_extendedvisible.png"
+                      />
+                    }
+                  >
+                    <Radio.Group
+                      style={{ display: "flex", flexDirection: "column" }}
+                    >
+                      <Radio value="no">Không có tổn thương nhìn thấy</Radio>
+
+                      <Radio value="le_4cm">Có, kích thước ≤ 4 cm</Radio>
+
+                      <Radio value="gt_4cm">{`Có, kích thước > 4 cm`}</Radio>
+                    </Radio.Group>
+                  </Form.Item>
+                  <Button
+                    onClick={() => {
+                      form.setFieldsValue({ clinically_visible_lesion: null });
+                      setSummary((prev) => ({
+                        ...prev,
+                        T: getT(form.getFieldsValue()),
+                      }));
+                    }}
+                  >
+                    Reset
+                  </Button>
+                </div>
+                <Form.Item
+                  name="beyond_uterus"
                   label={
                     <LabelWithHint
-                      text="Mức độ xâm lấn mô đệm"
-                      image="/product/cancer/cervix/T_stromal.png"
+                      text="Khối u lan ra ngoài tử cung"
+                      image="/product/cancer/cervix/T_beyonduterus.png"
                     />
                   }
                 >
-                  <Radio.Group
-                    style={{ display: "flex", flexDirection: "column" }}
-                  >
-                    <Radio value="micro_1">
-                      {`≤ 3 mm chiều sâu và ≤ 7 mm chiều ngang`}
-                    </Radio>
-
-                    <Radio value="micro_2">
-                      {`> 3 mm đến ≤ 5 mm chiều sâu và ≤ 7 mm chiều ngang`}
-                    </Radio>
-
-                    <Radio value="macro">
-                      {`> 5 mm chiều sâu hoặc > 7 mm chiều ngang`}
-                    </Radio>
+                  <Radio.Group>
+                    <Radio value="yes">Có</Radio>
+                    <Radio value="no">Không</Radio>
+                    <Radio value="unknown">Không rõ</Radio>
                   </Radio.Group>
                 </Form.Item>
-                <Button
-                  onClick={() => {
-                    form.setFieldsValue({ stromal: null });
-                    setSummary((prev) => ({
-                      ...prev,
-                      T: getT(form.getFieldsValue()),
-                    }));
-                  }}
-                >
-                  Reset
-                </Button>
-              </div>
-
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <Form.Item
-                  name="clinically_visible_lesion"
+                  name="parametrial_involvement"
                   label={
                     <LabelWithHint
-                      text="Tổn thương quan sát được trên lâm sàng"
-                      image="/product/cancer/cervix/T_extendedvisible.png"
+                      text="Xâm lấn mô cạnh tử cung (parametrium)"
+                      image="/product/cancer/cervix/T_parametrium.png"
                     />
                   }
                 >
-                  <Radio.Group
-                    style={{ display: "flex", flexDirection: "column" }}
-                  >
-                    <Radio value="no">Không có tổn thương nhìn thấy</Radio>
-
-                    <Radio value="le_4cm">Có, kích thước ≤ 4 cm</Radio>
-
-                    <Radio value="gt_4cm">{`Có, kích thước > 4 cm`}</Radio>
+                  <Radio.Group>
+                    <Radio value="yes">Có</Radio>
+                    <Radio value="no">Không</Radio>
+                    <Radio value="unknown">Không rõ</Radio>
                   </Radio.Group>
                 </Form.Item>
-                <Button
-                  onClick={() => {
-                    form.setFieldsValue({ clinically_visible_lesion: null });
-                    setSummary((prev) => ({
-                      ...prev,
-                      T: getT(form.getFieldsValue()),
-                    }));
-                  }}
+                <Form.Item
+                  name="lower_vagina"
+                  label={
+                    <LabelWithHint
+                      text="Ung thư xâm lấn 1/3 dưới âm đạo"
+                      image="/product/cancer/cervix/T_vagina.png"
+                    />
+                  }
                 >
-                  Reset
-                </Button>
-              </div>
-              <Form.Item
-                name="beyond_uterus"
-                label={
-                  <LabelWithHint
-                    text="Khối u lan ra ngoài tử cung"
-                    image="/product/cancer/cervix/T_beyonduterus.png"
-                  />
-                }
-              >
-                <Radio.Group>
-                  <Radio value="yes">Có</Radio>
-                  <Radio value="no">Không</Radio>
-                  <Radio value="unknown">Không rõ</Radio>
-                </Radio.Group>
-              </Form.Item>
-              <Form.Item
-                name="parametrial_involvement"
-                label={
-                  <LabelWithHint
-                    text="Xâm lấn mô cạnh tử cung (parametrium)"
-                    image="/product/cancer/cervix/T_parametrium.png"
-                  />
-                }
-              >
-                <Radio.Group>
-                  <Radio value="yes">Có</Radio>
-                  <Radio value="no">Không</Radio>
-                  <Radio value="unknown">Không rõ</Radio>
-                </Radio.Group>
-              </Form.Item>
-              <Form.Item
-                name="lower_vagina"
-                label={
-                  <LabelWithHint
-                    text="Ung thư xâm lấn 1/3 dưới âm đạo"
-                    image="/product/cancer/cervix/T_vagina.png"
-                  />
-                }
-              >
-                <Radio.Group>
-                  <Radio value="yes">Có</Radio>
-                  <Radio value="no">Không</Radio>
-                  <Radio value="unknown">Không rõ</Radio>
-                </Radio.Group>
-              </Form.Item>
-              <Form.Item
-                name="pelvic_wall"
-                label={
-                  <LabelWithHint
-                    text="Lan đến thành chậu"
-                    image="/product/cancer/cervix/T_pelvis.png"
-                  />
-                }
-              >
-                <Radio.Group>
-                  <Radio value="yes">Có</Radio>
-                  <Radio value="no">Không</Radio>
-                  <Radio value="unknown">Không rõ</Radio>
-                </Radio.Group>
-              </Form.Item>
-              <Form.Item
-                name="beyond_uterus"
-                label={<LabelWithHint text="Khối u lan ra ngoài tử cung" />}
-              >
-                <Radio.Group>
-                  <Radio value="yes">Có</Radio>
-                  <Radio value="no">Không</Radio>
-                  <Radio value="unknown">Không rõ</Radio>
-                </Radio.Group>
-              </Form.Item>
-              <Form.Item
-                name="bladder_rectum"
-                label={
-                  <LabelWithHint
-                    text="Xâm lấn bàng quang, trực tràng hoặc vượt ra ngoài tiểu khung"
-                    image="/product/cancer/cervix/T_mucosa.png"
-                  />
-                }
-              >
-                <Radio.Group>
-                  <Radio value="yes">Có</Radio>
-                  <Radio value="no">Không</Radio>
-                  <Radio value="unknown">Không rõ</Radio>
-                </Radio.Group>
-              </Form.Item>
+                  <Radio.Group>
+                    <Radio value="yes">Có</Radio>
+                    <Radio value="no">Không</Radio>
+                    <Radio value="unknown">Không rõ</Radio>
+                  </Radio.Group>
+                </Form.Item>
+                <Form.Item
+                  name="pelvic_wall"
+                  label={
+                    <LabelWithHint
+                      text="Lan đến thành chậu"
+                      image="/product/cancer/cervix/T_pelvis.png"
+                    />
+                  }
+                >
+                  <Radio.Group>
+                    <Radio value="yes">Có</Radio>
+                    <Radio value="no">Không</Radio>
+                    <Radio value="unknown">Không rõ</Radio>
+                  </Radio.Group>
+                </Form.Item>
+                <Form.Item
+                  name="hydronephrosis"
+                  label={
+                    <LabelWithHint text="Ứ nước thận hoặc thận không hoạt động" />
+                  }
+                >
+                  <Radio.Group>
+                    <Radio value="yes">Có</Radio>
+                    <Radio value="no">Không</Radio>
+                    <Radio value="unknown">Không rõ</Radio>
+                  </Radio.Group>
+                </Form.Item>
+                <Form.Item
+                  name="bladder_rectum"
+                  label={
+                    <LabelWithHint
+                      text="Khối u xâm lấn niêm mạc bàng quang hoặc trực tràng và/hoặc lan ra ngoài tiểu khung"
+                      image="/product/cancer/cervix/T_mucosa.png"
+                    />
+                  }
+                >
+                  <Radio.Group>
+                    <Radio value="yes">Có</Radio>
+                    <Radio value="no">Không</Radio>
+                    <Radio value="unknown">Không rõ</Radio>
+                  </Radio.Group>
+                </Form.Item>
 
-              <div className={styles.resultBoxT}>
-                <span>Kết quả T:</span>
-                <strong className={styles[summary.T]}>
-                  {summary.T || "Chưa có"}
-                </strong>
+                <div className={styles.resultBoxT}>
+                  <span>Kết quả T:</span>
+                  <strong className={styles[summary.T]}>
+                    {summary.T || "Chưa có"}
+                  </strong>
+                </div>
               </div>
             </div>
-
-            <div>
+            <div style={{ flex: 1 }}>
               <div className={styles.sectionBlockN}>
                 <div className={styles.sectionHeaderN}>
                   N – Hạch vùng (Node)

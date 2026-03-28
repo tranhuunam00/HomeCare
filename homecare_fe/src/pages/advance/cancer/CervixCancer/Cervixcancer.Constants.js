@@ -294,90 +294,15 @@ export const getStage = (T, N, M) => {
 };
 
 export const getT = ({
-  affected_ovary,
-  tumour_status,
-  ascites_malignant_cells,
-  extrapelvic_involvement,
+  stromal,
+  clinically_visible_lesion,
+  beyond_uterus,
+  parametrial_involvement,
+  lower_vagina,
+  pelvic_wall,
+  hydronephrosis,
+  bladder_rectum,
 }) => {
-  if (extrapelvic_involvement == "none") {
-    if (!ascites_malignant_cells) {
-      if (tumour_status == "pelvic_implants") {
-        return "T2a";
-      }
-      if (tumour_status == "pelvic_extension") {
-        return "T2b";
-      }
-      if (tumour_status == "primary_peritoneal") {
-        return "T2";
-      }
-    }
-    if (ascites_malignant_cells == "no") {
-      if (tumour_status == "intact") {
-        if (tumour_status == "intact") {
-          if (!affected_ovary) return "TX";
-          if (affected_ovary == "one") return "T1a";
-          if (affected_ovary == "both") return "T1b";
-        }
-      }
-      if (tumour_status == "ruptured_surgery") {
-        return "T1c1";
-      }
-      if (tumour_status == "ruptured_before") {
-        return "T1c2";
-      }
-      if (tumour_status == "pelvic_implants") {
-        return "T2a";
-      }
-      if (tumour_status == "pelvic_extension") {
-        return "T2b";
-      }
-      if (tumour_status == "primary_peritoneal") {
-        return "T2";
-      }
-    }
-    if (ascites_malignant_cells == "yes") {
-      if (tumour_status == "intact") {
-        return "T1c3";
-      }
-      if (tumour_status == "ruptured_surgery") {
-        return "T1c3";
-      }
-      if (tumour_status == "ruptured_before") {
-        return "T1c3";
-      }
-      if (tumour_status == "pelvic_implants") {
-        return "T2a";
-      }
-      if (tumour_status == "pelvic_extension") {
-        return "T2b";
-      }
-      if (tumour_status == "primary_peritoneal") {
-        return "T2";
-      }
-    }
-  }
-
-  if (extrapelvic_involvement == "microscopic") {
-    if (!ascites_malignant_cells) {
-      return "T3a";
-    }
-    if (ascites_malignant_cells == "no") {
-      return "T3a";
-    }
-    if (ascites_malignant_cells == "yes") {
-      return "T3a";
-    }
-  }
-  if (extrapelvic_involvement == "macro_small") {
-    return "T3b";
-  }
-  if (extrapelvic_involvement == "macro_large") {
-    return "T3c";
-  }
-  if (extrapelvic_involvement == "retroperitoneal_nodes") {
-    return "T3a";
-  }
-
   return "TX";
 };
 
