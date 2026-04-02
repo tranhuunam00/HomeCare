@@ -263,6 +263,13 @@ export const medicalCategories = [
         path: "/home/Cervixcancer",
         image: "/product/cancer/cervix/cervix.png",
       },
+      {
+        key: "Prostate",
+        label:
+          "D-TNM-Prostate - Đánh giá giai đoạn ung thư tuyến tiền liệt theo phiên bản TNM Edition 8",
+        path: "/home/Prostatecancer",
+        image: "/product/cancer/prostate/prostate.png",
+      },
     ],
   },
   {
