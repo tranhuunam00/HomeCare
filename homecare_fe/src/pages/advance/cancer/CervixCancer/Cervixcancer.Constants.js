@@ -310,7 +310,7 @@ export const getT = ({
     }
     return "T4";
   }
-  if (bladder_rectum == "no") {
+  if (bladder_rectum == "no" || bladder_rectum == "unknown") {
     if (hydronephrosis == "yes") {
       if (beyond_uterus == "no") {
         return "Invalid combination";
@@ -613,6 +613,268 @@ export const getT = ({
               }
             }
             if (beyond_uterus == "no") {
+              return "Invalid combination";
+            }
+            if (beyond_uterus == "unknown") {
+            }
+          }
+        }
+      }
+      if (pelvic_wall == "unknown") {
+        if (lower_vagina == "yes") {
+          if (beyond_uterus == "no") {
+            return "Invalid combination";
+          }
+        }
+        if (lower_vagina == "no") {
+          if (parametrial_involvement == "yes") {
+            if (beyond_uterus == "no") {
+              return "Invalid combination";
+            }
+          }
+          if (parametrial_involvement == "no") {
+            if (beyond_uterus == "yes") {
+              if (clinically_visible_lesion == "no") {
+                return "T3b";
+              }
+            }
+            if (beyond_uterus == "no") {
+              if (clinically_visible_lesion == null) {
+                if (stromal == null) {
+                }
+                if (stromal == "micro_1") {
+                  if (micro_only == "yes") {
+                    return "T1a1";
+                  }
+                }
+                if (stromal == "micro_2") {
+                  if (micro_only == "yes") {
+                    return "T1a2";
+                  }
+                }
+                if (stromal == "macro") {
+                  if (micro_only == "yes") {
+                    return "T1b";
+                  }
+                }
+              }
+              if (clinically_visible_lesion == "no") {
+                if (micro_only == "no") {
+                  return "Invalid combination";
+                }
+                if (stromal == null) {
+                }
+                if (stromal == "micro_1") {
+                  return "T1a1";
+                }
+                if (stromal == "micro_2") {
+                  return "T1a2";
+                }
+                if (stromal == "macro") {
+                  return "T1b";
+                }
+              }
+              if (clinically_visible_lesion == "le_4cm") {
+                if (micro_only == "yes") {
+                  return "Invalid combination";
+                }
+                return "T1b1";
+              }
+              if (clinically_visible_lesion == "gt_4cm") {
+                if (micro_only == "yes") {
+                  return "Invalid combination";
+                }
+                return "T1b2";
+              }
+            }
+            if (beyond_uterus == "unknown") {
+              if (clinically_visible_lesion == "no" && micro_only == "no") {
+                return "T3b";
+              }
+            }
+          }
+          if (parametrial_involvement == "unknown") {
+            if (beyond_uterus == "yes") {
+            }
+            if (beyond_uterus == "no") {
+              if (clinically_visible_lesion == null) {
+                if (stromal == null) {
+                }
+                if (stromal == "micro_1") {
+                  if (micro_only == "yes") {
+                    return "T1a1";
+                  }
+                }
+                if (stromal == "micro_2") {
+                  if (micro_only == "yes") {
+                    return "T1a2";
+                  }
+                }
+                if (stromal == "macro") {
+                  if (micro_only == "yes") {
+                    return "T1b2";
+                  }
+                }
+              }
+              if (clinically_visible_lesion == "no") {
+                if (micro_only == "no") {
+                  return "Invalid combination";
+                }
+                if (stromal == null) {
+                }
+                if (stromal == "micro_1") {
+                  return "T1a1";
+                }
+                if (stromal == "micro_2") {
+                  return "T1a2";
+                }
+                if (stromal == "macro") {
+                  return "T1b";
+                }
+              }
+              if (clinically_visible_lesion == "le_4cm") {
+                if (micro_only == "yes") {
+                  return "Invalid combination";
+                }
+
+                return "T1b1";
+              }
+              if (clinically_visible_lesion == "gt_4cm") {
+                if (micro_only == "yes") {
+                  return "Invalid combination";
+                }
+
+                return "T1b2";
+              }
+            }
+            if (beyond_uterus == "yes") {
+            }
+          }
+        }
+        if (lower_vagina == "unknown") {
+          if (parametrial_involvement == "yes") {
+            if (beyond_uterus == "no") {
+              return "Invalid combination";
+            }
+          }
+          if (parametrial_involvement == "no") {
+            if (beyond_uterus == "yes") {
+            }
+            if (beyond_uterus == "no") {
+              if (clinically_visible_lesion == null) {
+                if (stromal == null) {
+                }
+                if (stromal == "micro_1") {
+                  if (micro_only == "yes") {
+                    return "T1a1";
+                  }
+                }
+                if (stromal == "micro_2") {
+                  if (micro_only == "yes") {
+                    return "T1a2";
+                  }
+                }
+                if (stromal == "macro") {
+                  if (micro_only == "yes") {
+                    return "T1b";
+                  }
+                }
+              }
+              if (clinically_visible_lesion == "no") {
+                if (micro_only == "no") {
+                  return "Invalid combination";
+                }
+                if (stromal == null) {
+                }
+                if (stromal == "micro_1") {
+                  if (micro_only == "yes") {
+                    return "T1a1";
+                  }
+                }
+                if (stromal == "micro_2") {
+                  if (micro_only == "yes") {
+                    return "T1a2";
+                  }
+                }
+                if (stromal == "macro") {
+                  if (micro_only == "yes") {
+                    return "T1b";
+                  }
+                }
+              }
+              if (clinically_visible_lesion == "le_4cm") {
+                if (micro_only == "yes") {
+                  return "Invalid combination";
+                }
+                return "T1b1";
+              }
+              if (clinically_visible_lesion == "gt_4cm") {
+                if (micro_only == "yes") {
+                  return "Invalid combination";
+                }
+                return "T1b2";
+              }
+            }
+            if (beyond_uterus == "unknown") {
+            }
+          }
+          if (parametrial_involvement == "unknown") {
+            if (beyond_uterus == "yes") {
+            }
+            if (beyond_uterus == "no") {
+              if (clinically_visible_lesion == null) {
+                if (stromal == null) {
+                }
+                if (stromal == "micro_1") {
+                  if (micro_only == "yes") {
+                    return "T1a1";
+                  }
+                }
+                if (stromal == "micro_2") {
+                  if (micro_only == "yes") {
+                    return "T1a2";
+                  }
+                }
+                if (stromal == "macro") {
+                  if (micro_only == "yes") {
+                    return "T1b";
+                  }
+                }
+              }
+              if (clinically_visible_lesion == "no") {
+                if (micro_only == "no") {
+                  return "Invalid combination";
+                }
+                if (stromal == null) {
+                }
+                if (stromal == "micro_1") {
+                  if (micro_only == "yes") {
+                    return "T1a1";
+                  }
+                }
+                if (stromal == "micro_2") {
+                  if (micro_only == "yes") {
+                    return "T1a2";
+                  }
+                }
+                if (stromal == "macro") {
+                  if (micro_only == "yes") {
+                    return "T1b";
+                  }
+                }
+              }
+              if (clinically_visible_lesion == "le_4cm") {
+                if (micro_only == "yes") {
+                  return "Invalid combination";
+                }
+                return "T1b1";
+              }
+              if (clinically_visible_lesion == "gt_4cm") {
+                if (micro_only == "yes") {
+                  return "Invalid combination";
+                }
+                return "T1b2";
+              }
             }
             if (beyond_uterus == "unknown") {
             }
@@ -621,7 +883,394 @@ export const getT = ({
       }
     }
     if (hydronephrosis == "unknown") {
+      if (pelvic_wall == "yes") {
+        if (beyond_uterus == "no") {
+          return "Invalid combination";
+        }
+        return "T3b";
+      }
+      if (pelvic_wall == "no") {
+        if (lower_vagina == "yes") {
+          if (beyond_uterus == "no") {
+            return "Invalid combination";
+          }
+          return "TX";
+        }
+        if (lower_vagina == "no") {
+          if (parametrial_involvement == "yes") {
+            if (beyond_uterus == "no") {
+              return "Invalid combination";
+            }
+          }
+          if (parametrial_involvement == "no") {
+            if (beyond_uterus == "yes") {
+            }
+            if (beyond_uterus == "no") {
+              if (clinically_visible_lesion == null) {
+                if (stromal == null) {
+                }
+                if (stromal == "micro_1") {
+                  if (micro_only == "yes") {
+                    return "T1a1";
+                  }
+                }
+                if (stromal == "micro_2") {
+                  if (micro_only == "yes") {
+                    return "T1a2";
+                  }
+                }
+                if (stromal == "macro") {
+                  if (micro_only == "yes") {
+                    return "T1b";
+                  }
+                }
+              }
+              if (clinically_visible_lesion == "no") {
+                if (micro_only == "no") {
+                  return "Invalid combination";
+                }
+                if (stromal == null) {
+                }
+                if (stromal == "micro_1") {
+                  return "T1a1";
+                }
+                if (stromal == "micro_2") {
+                  return "T1a2";
+                }
+                if (stromal == "macro") {
+                  return "T1b";
+                }
+              }
+              if (clinically_visible_lesion == "le_4cm") {
+                if (micro_only == "yes") {
+                  return "Invalid combination";
+                }
+                return "T1b1";
+              }
+              if (clinically_visible_lesion == "gt_4cm") {
+                if (micro_only == "yes") {
+                  return "Invalid combination";
+                }
+                return "T1b2";
+              }
+            }
+            if (beyond_uterus == "unknown") {
+              if (clinically_visible_lesion == "no" && micro_only == "no") {
+                return "T3b";
+              }
+            }
+          }
+
+          if (parametrial_involvement == "unknown") {
+            if (beyond_uterus == "yes") {
+            }
+            if (beyond_uterus == "no") {
+              if (clinically_visible_lesion == null) {
+                if (stromal == null) {
+                }
+                if (stromal == "micro_1") {
+                  if (micro_only == "yes") {
+                    return "T1a1";
+                  }
+                }
+                if (stromal == "micro_2") {
+                  if (micro_only == "yes") {
+                    return "T1a2";
+                  }
+                }
+                if (stromal == "macro") {
+                  if (micro_only == "yes") {
+                    return "T1b";
+                  }
+                }
+              }
+              if (clinically_visible_lesion == "no") {
+                if (micro_only == "no") {
+                  return "Invalid combination";
+                }
+                if (stromal == null) {
+                }
+                if (stromal == "micro_1") {
+                  return "T1a1";
+                }
+                if (stromal == "micro_2") {
+                  return "T1a2";
+                }
+                if (stromal == "macro") {
+                  return "T1b";
+                }
+              }
+              if (clinically_visible_lesion == "le_4cm") {
+                if (micro_only == "yes") {
+                  return "Invalid combination";
+                }
+                return "T1b1";
+              }
+              if (clinically_visible_lesion == "gt_4cm") {
+                if (micro_only == "yes") {
+                  return "Invalid combination";
+                }
+                return "T1b2";
+              }
+            }
+            if (beyond_uterus == "unknown") {
+            }
+          }
+        }
+        if (lower_vagina == "unknown") {
+          if (parametrial_involvement == "yes") {
+            if (beyond_uterus == "no") {
+              return "Invalid combination";
+            }
+          }
+          if (
+            parametrial_involvement == "no" ||
+            parametrial_involvement == "unknown"
+          ) {
+            if (beyond_uterus == "no") {
+              if (clinically_visible_lesion == null) {
+                if (stromal == null) {
+                }
+                if (stromal == "micro_1") {
+                  if (micro_only == "yes") {
+                    return "T1a1";
+                  }
+                }
+                if (stromal == "micro_2") {
+                  if (micro_only == "yes") {
+                    return "T1a2";
+                  }
+                }
+                if (stromal == "macro") {
+                  if (micro_only == "yes") {
+                    return "T1b";
+                  }
+                }
+              }
+              if (clinically_visible_lesion == "no") {
+                if (micro_only == "no") {
+                  return "Invalid combination";
+                }
+                if (stromal == null) {
+                }
+                if (stromal == "micro_1") {
+                  return "T1a1";
+                }
+                if (stromal == "micro_2") {
+                  return "T1a2";
+                }
+                if (stromal == "macro") {
+                  return "T1b";
+                }
+              }
+              if (clinically_visible_lesion == "le_4cm") {
+                if (micro_only == "yes") {
+                  return "Invalid combination";
+                }
+                return "T1b1";
+              }
+              if (clinically_visible_lesion == "gt_4cm") {
+                if (micro_only == "yes") {
+                  return "Invalid combination";
+                }
+                return "T1b2";
+              }
+            }
+          }
+        }
+      }
+      if (pelvic_wall == "unknown") {
+        if (lower_vagina == "yes") {
+          if (beyond_uterus == "no") {
+            return "Invalid combination";
+          }
+        }
+        if (lower_vagina == "no") {
+          if (parametrial_involvement == "yes") {
+            if (beyond_uterus == "no") {
+              return "Invalid combination";
+            }
+          }
+          if (parametrial_involvement == "no") {
+            if (beyond_uterus == "yes") {
+            }
+            if (beyond_uterus == "no") {
+              if (clinically_visible_lesion == null) {
+                if (stromal == null) {
+                }
+                if (stromal == "micro_1") {
+                  if (micro_only == "yes") {
+                    return "T1a1";
+                  }
+                }
+                if (stromal == "micro_2") {
+                  if (micro_only == "yes") {
+                    return "T1a2";
+                  }
+                }
+                if (stromal == "macro") {
+                  if (micro_only == "yes") {
+                    return "T1b";
+                  }
+                }
+              }
+              if (clinically_visible_lesion == "no") {
+                if (micro_only == "no") {
+                  return "Invalid combination";
+                }
+                if (stromal == null) {
+                }
+                if (stromal == "micro_1") {
+                  return "T1a1";
+                }
+                if (stromal == "micro_2") {
+                  return "T1a2";
+                }
+                if (stromal == "macro") {
+                  return "T1b";
+                }
+              }
+              if (clinically_visible_lesion == "le_4cm") {
+                if (micro_only == "yes") {
+                  return "Invalid combination";
+                }
+                return "T1b1";
+              }
+              if (clinically_visible_lesion == "gt_4cm") {
+                if (micro_only == "yes") {
+                  return "Invalid combination";
+                }
+                return "T1b2";
+              }
+            }
+            if (beyond_uterus == "unknown") {
+              if (clinically_visible_lesion == "no" && micro_only == "no") {
+                return "T3b";
+              }
+            }
+          }
+
+          if (parametrial_involvement == "unknown") {
+            if (beyond_uterus == "yes") {
+            }
+            if (beyond_uterus == "no") {
+              if (clinically_visible_lesion == null) {
+                if (stromal == null) {
+                }
+                if (stromal == "micro_1") {
+                  if (micro_only == "yes") {
+                    return "T1a1";
+                  }
+                }
+                if (stromal == "micro_2") {
+                  if (micro_only == "yes") {
+                    return "T1a2";
+                  }
+                }
+                if (stromal == "macro") {
+                  if (micro_only == "yes") {
+                    return "T1b";
+                  }
+                }
+              }
+              if (clinically_visible_lesion == "no") {
+                if (micro_only == "no") {
+                  return "Invalid combination";
+                }
+                if (stromal == null) {
+                }
+                if (stromal == "micro_1") {
+                  return "T1a1";
+                }
+                if (stromal == "micro_2") {
+                  return "T1a2";
+                }
+                if (stromal == "macro") {
+                  return "T1b";
+                }
+              }
+              if (clinically_visible_lesion == "le_4cm") {
+                if (micro_only == "yes") {
+                  return "Invalid combination";
+                }
+                return "T1b1";
+              }
+              if (clinically_visible_lesion == "gt_4cm") {
+                if (micro_only == "yes") {
+                  return "Invalid combination";
+                }
+                return "T1b2";
+              }
+            }
+            if (beyond_uterus == "unknown") {
+            }
+          }
+        }
+        if (lower_vagina == "unknown") {
+          if (parametrial_involvement == "yes") {
+            if (beyond_uterus == "no") {
+              return "Invalid combination";
+            }
+          }
+          if (
+            parametrial_involvement == "no" ||
+            parametrial_involvement == "unknown"
+          ) {
+            if (beyond_uterus == "no") {
+              if (clinically_visible_lesion == null) {
+                if (stromal == null) {
+                }
+                if (stromal == "micro_1") {
+                  if (micro_only == "yes") {
+                    return "T1a1";
+                  }
+                }
+                if (stromal == "micro_2") {
+                  if (micro_only == "yes") {
+                    return "T1a2";
+                  }
+                }
+                if (stromal == "macro") {
+                  if (micro_only == "yes") {
+                    return "T1b";
+                  }
+                }
+              }
+              if (clinically_visible_lesion == "no") {
+                if (micro_only == "no") {
+                  return "Invalid combination";
+                }
+                if (stromal == null) {
+                }
+                if (stromal == "micro_1") {
+                  return "T1a1";
+                }
+                if (stromal == "micro_2") {
+                  return "T1a2";
+                }
+                if (stromal == "macro") {
+                  return "T1b";
+                }
+              }
+              if (clinically_visible_lesion == "le_4cm") {
+                if (micro_only == "yes") {
+                  return "Invalid combination";
+                }
+                return "T1b1";
+              }
+              if (clinically_visible_lesion == "gt_4cm") {
+                if (micro_only == "yes") {
+                  return "Invalid combination";
+                }
+                return "T1b2";
+              }
+            }
+          }
+        }
+      }
     }
+  }
+  if (bladder_rectum == "unknown") {
   }
 
   return "TX";
