@@ -29,6 +29,17 @@ export const getStage = (T, N, M) => {
       TNM: `${T}${N}${M}`,
     };
   }
+  if (T == "TX") {
+    if (N == "N1") {
+      return {
+        SG: "",
+        FIGO: "",
+        SimpG: "Regional",
+        range: "IIIB - IVA",
+        TNM: `${T}${N}${M}`,
+      };
+    }
+  }
 
   if (T == "T4") {
     return {

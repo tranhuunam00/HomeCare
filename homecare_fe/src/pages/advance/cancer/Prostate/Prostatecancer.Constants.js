@@ -20,165 +20,35 @@ export const M_OPTIONS = [
 ];
 
 export const getStage = (T, N, M) => {
-  if (T == "T1a") {
-    if (M == "M0")
-      return { SG: "IVA", SimpG: "Distant", range: "IVA", TNM: `${T}${N}${M}` };
-    if (M == "M1") {
-      return { SG: "IVB", SimpG: "Distant", range: "IVB", TNM: `${T}${N}${M}` };
-    }
+  if (M == "M1c" || M == "M1b" || M == "M1a") {
+    return {
+      SG: "IV",
+      SimpG: "Distant",
+      range: "IV",
+      TNM: `${T}${N}${M}`,
+    };
   }
-  if (T == "T1b") {
-    if (M == "M0")
-      if (N == "NX")
-        return {
-          SG: "",
-          SimpG: "Distant",
-          range: "IB - IVA",
-          TNM: `${T}${N}${M}`,
-        };
-    if (N == "N1")
-      return {
-        SG: "IVA",
-        SimpG: "Distant",
-        range: "IVA",
-        TNM: `${T}${N}${M}`,
-      };
-    if (M == "M1") {
-      return { SG: "IVB", SimpG: "Distant", range: "IVB", TNM: `${T}${N}${M}` };
-    }
+  if (N == "N1") {
+    return {
+      SG: "IV",
+      SimpG: "Regional",
+      range: "IV",
+      TNM: `${T}${N}${M}`,
+    };
   }
+
   if (T == "TX") {
-    if (M == "M0") {
-      if (N == "N1") {
-        return {
-          SG: "IVA",
-          SimpG: "Distant",
-          range: "IVA",
-          TNM: `${T}${N}${M}`,
-        };
-      }
-    }
-    if (M == "M0") {
+    if (N == "N1") {
       return {
-        SG: "IVB",
-        SimpG: "Distant",
-        range: "IVB",
+        SG: "IV",
+        SimpG: "Regional",
+        range: "IV",
         TNM: `${T}${N}${M}`,
       };
     }
   }
-  if (T == "T2") {
-    if (M == "M0") {
-      if (N == "NX") {
-        return {
-          SG: "",
-          SimpG: "Distant",
-          range: "II - IVA",
-          TNM: `${T}${N}${M}`,
-        };
-      }
-      if (N == "N1") {
-        return {
-          SG: "IVB",
-          SimpG: "Distant",
-          range: "IVB",
-          TNM: `${T}${N}${M}`,
-        };
-      }
-    }
-    if (M == "M1") {
-      if (N == "NX") {
-        return {
-          SG: "IVA",
-          SimpG: "Distant",
-          range: "IVA",
-          TNM: `${T}${N}${M}`,
-        };
-      }
-      if (N == "N1") {
-        return {
-          SG: "IVB",
-          SimpG: "Distant",
-          range: "IVB",
-          TNM: `${T}${N}${M}`,
-        };
-      }
-    }
-  }
-  if (T == "T3") {
-    if (M == "M0") {
-      if (N == "NX") {
-        return {
-          SG: "",
-          SimpG: "Distant",
-          range: "IIIA - IVA",
-          TNM: `${T}${N}${M}`,
-        };
-      }
-      if (N == "N1") {
-        return {
-          SG: "IVA",
-          SimpG: "Distant",
-          range: "IVA",
-          TNM: `${T}${N}${M}`,
-        };
-      }
-    }
-    if (M == "M1") {
-      if (N == "NX") {
-        return {
-          SG: "IVA",
-          SimpG: "Distant",
-          range: "IVA",
-          TNM: `${T}${N}${M}`,
-        };
-      }
-      if (N == "N1") {
-        return {
-          SG: "IVB",
-          SimpG: "Distant",
-          range: "IVB",
-          TNM: `${T}${N}${M}`,
-        };
-      }
-    }
-  }
-  if (T == "T4") {
-    if (M == "M0") {
-      if (N == "NX") {
-        return {
-          SG: "",
-          SimpG: "Distant",
-          range: "IIIB - IVA",
-          TNM: `${T}${N}${M}`,
-        };
-      }
-      if (N == "N1") {
-        return {
-          SG: "IVB",
-          SimpG: "Distant",
-          range: "IVB",
-          TNM: `${T}${N}${M}`,
-        };
-      }
-    }
-    if (M == "M1") {
-      if (N == "NX") {
-        return {
-          SG: "IVA",
-          SimpG: "Distant",
-          range: "IVA",
-          TNM: `${T}${N}${M}`,
-        };
-      }
-      if (N == "N1") {
-        return {
-          SG: "IVB",
-          SimpG: "Distant",
-          range: "IVB",
-          TNM: `${T}${N}${M}`,
-        };
-      }
+  if (T == "T1a") {
+    if (N == "NX") {
     }
   }
   return {
