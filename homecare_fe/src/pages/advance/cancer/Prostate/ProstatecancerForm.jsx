@@ -15,6 +15,7 @@ import styles from "./ProstatecancerForm.module.scss";
 import { toast } from "react-toastify";
 
 import {
+  getM,
   getN,
   getStage,
   getT,
@@ -245,12 +246,22 @@ Hãy đưa ra:
           initialValues={{
             regional_lymph_nodes: "NX",
             distant_metastases: "M0",
+            capsule_extension: "unknown",
+            bladder_neck_invasion: "unknown",
+            seminal_vesicles_invasion: "unknown",
+            bladder_invasion: "unknown",
+            external_sphincter_invasion: "unknown",
+            rectum_or_levator_invasion: "unknown",
+            pelvic_wall_invasion: "unknown",
+            non_regional_nodes_metastases: "unknown",
+            bone_metastases: "unknown",
+            other_sites_metastases: "unknown",
           }}
           onValuesChange={(changed, all) => {
             setSummary((prev) => ({
               ...prev,
               N: getN(form.getFieldsValue()) || "NX",
-              M: all.distant_metastases || "M0",
+              M: getM(form.getFieldsValue()) || "M0",
               T: getT(form.getFieldsValue()),
             }));
           }}

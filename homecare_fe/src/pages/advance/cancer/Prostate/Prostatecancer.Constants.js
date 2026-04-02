@@ -450,6 +450,89 @@ export const getN = ({ pos_num }) => {
   return "NX";
 };
 
+export const getM = ({
+  non_regional_nodes_metastases,
+  bone_metastases,
+  other_sites_metastases,
+}) => {
+  if (non_regional_nodes_metastases == "yes") {
+    if (bone_metastases == "yes") {
+      if (other_sites_metastases == "yes") {
+        return "Invalid combination";
+      }
+      if (other_sites_metastases == "no") {
+        return "M1c";
+      }
+      if (other_sites_metastases == "unknown") {
+        return "M1c";
+      }
+    }
+    if (bone_metastases == "no") {
+      if (other_sites_metastases == "yes") {
+        return "M1c";
+      }
+      if (other_sites_metastases == "no") {
+        return "M1a";
+      }
+      if (other_sites_metastases == "unknown") {
+        return "M0";
+      }
+    }
+    if (bone_metastases == "unknown") {
+      if (other_sites_metastases == "yes") {
+        return "M1c";
+      }
+      if (other_sites_metastases == "no") {
+        return "M0";
+      }
+      if (other_sites_metastases == "unknown") {
+        return "M0";
+      }
+    }
+  }
+  if (non_regional_nodes_metastases == "no") {
+    if (bone_metastases == "yes") {
+      if (other_sites_metastases == "yes") {
+        return "M1c";
+      }
+      if (other_sites_metastases == "no") {
+        return "M1b";
+      }
+      if (other_sites_metastases == "unknown") {
+        return "M0";
+      }
+    }
+    if (bone_metastases == "no") {
+      if (other_sites_metastases == "yes") {
+        return "M1c";
+      }
+      if (other_sites_metastases == "no") {
+        return "M0";
+      }
+      if (other_sites_metastases == "unknown") {
+        return "M0";
+      }
+    }
+    if (bone_metastases == "unknown") {
+      if (other_sites_metastases == "yes") {
+        return "M1c";
+      }
+      if (other_sites_metastases == "no") {
+        return "M0";
+      }
+      if (other_sites_metastases == "unknown") {
+        return "M0";
+      }
+    }
+  }
+  if (non_regional_nodes_metastases == "unknown") {
+    if (other_sites_metastases == "yes") {
+      return "M1c";
+    }
+  }
+  return "M0";
+};
+
 export const getStageFromTNM = ({ T, N, M }) => {
   // Ưu tiên M trước (di căn xa)
   if (M === "M1a" || M === "M1b" || M === "M1c") {
