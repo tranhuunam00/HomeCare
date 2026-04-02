@@ -50,47 +50,15 @@ const CervixcancerForm = () => {
   const genHtml = (isCopy = false) => {
     const values = form.getFieldsValue();
 
-    const mapCervix = {
-      one: "Chỉ một buồng trứng",
-      both: "Cả hai buồng trứng",
-    };
-
-    const tumourStatusMap = {
-      intact:
-        "Vỏ bao còn nguyên, không có u trên bề mặt buồng trứng hoặc ống dẫn trứng",
-      ruptured_surgery: "Vỡ vỏ bao trong phẫu thuật (tràn tế bào u)",
-      ruptured_before:
-        "Vỡ vỏ bao trước phẫu thuật hoặc có u trên bề mặt buồng trứng/ống dẫn trứng",
-      pelvic_implants:
-        "Lan trong tiểu khung và/hoặc có cấy ghép trên tử cung, ống dẫn trứng hoặc buồng trứng",
-      pelvic_extension:
-        "Lan đến các mô khác trong tiểu khung (bao gồm ruột trong tiểu khung)",
-      primary_peritoneal: "Ung thư phúc mạc nguyên phát",
-    };
-
     const yesNo = (val) => {
       if (val === "yes") return "Có";
       if (val === "no") return "Không";
       return "Không rõ";
     };
 
-    const ascitesMap = {
-      yes: "Có tế bào ác tính",
-      no: "Không có tế bào ác tính",
-    };
-
-    const extrapelvicMap = {
-      none: "Không có tổn thương ngoài tiểu khung",
-      microscopic: "Tổn thương phúc mạc ngoài tiểu khung vi thể",
-      macro_small: "Di căn phúc mạc ngoài tiểu khung ≤ 2 cm",
-      macro_large: "Di căn phúc mạc ngoài tiểu khung > 2 cm",
-      retroperitoneal_nodes: "Chỉ có hạch sau phúc mạc",
-    };
-
     const MMap = {
       M0: "Không có di căn xa",
-      M1a: "Tràn dịch màng phổi có tế bào ác tính",
-      M1b: "Di căn nhu mô hoặc cơ quan ngoài ổ bụng",
+      M1: "Có di căn xa",
     };
 
     const bulletHtml = `
@@ -105,27 +73,31 @@ const CervixcancerForm = () => {
   `;
 
     const body = `
-    <h2 style="text-align:center;">BÁO CÁO PHÂN LOẠI UNG THƯ BUỒNG TRỨNG (TNM/FIGO)</h2>
+    <h2 style="text-align:center;">
+      BÁO CÁO PHÂN LOẠI UNG THƯ CỔ TỬ CUNG (TNM/FIGO)
+    </h2>
 
     <!-- T -->
     <table border="1" cellpadding="6" style="border-collapse: collapse; width:100%; margin-top:10px;">
       <caption><strong>1. Khối u nguyên phát (T)</strong></caption>
 
-      <tr><td><strong>Buồng trứng bị ảnh hưởng</strong></td><td>${
-        mapCervix[values.affected_Cervix] || "Không rõ"
-      }</td></tr>
+      <tr><td><strong>Tổn thương vi mô</strong></td><td>${yesNo(values.micro_only)}</td></tr>
 
-      <tr><td><strong>Tình trạng khối u</strong></td><td>${
-        tumourStatusMap[values.tumour_status] || "Không rõ"
-      }</td></tr>
+      <tr><td><strong>Xâm lấn mô đệm</strong></td><td>${values.stromal || "Không rõ"}</td></tr>
 
-      <tr><td><strong>Dịch cổ trướng / rửa phúc mạc</strong></td><td>${
-        ascitesMap[values.ascites_malignant_cells] || "Không rõ"
-      }</td></tr>
+      <tr><td><strong>Tổn thương thấy trên lâm sàng</strong></td><td>${values.clinically_visible_lesion || "Không rõ"}</td></tr>
 
-      <tr><td><strong>Tổn thương ngoài tiểu khung</strong></td><td>${
-        extrapelvicMap[values.extrapelvic_involvement] || "Không rõ"
-      }</td></tr>
+      <tr><td><strong>Lan ra ngoài tử cung</strong></td><td>${yesNo(values.beyond_uterus)}</td></tr>
+
+      <tr><td><strong>Xâm lấn parametrium</strong></td><td>${yesNo(values.parametrial_involvement)}</td></tr>
+
+      <tr><td><strong>Xâm lấn 1/3 dưới âm đạo</strong></td><td>${yesNo(values.lower_vagina)}</td></tr>
+
+      <tr><td><strong>Lan đến thành chậu</strong></td><td>${yesNo(values.pelvic_wall)}</td></tr>
+
+      <tr><td><strong>Ứ nước thận</strong></td><td>${yesNo(values.hydronephrosis)}</td></tr>
+
+      <tr><td><strong>Xâm lấn bàng quang/trực tràng</strong></td><td>${yesNo(values.bladder_rectum)}</td></tr>
 
       <tr>
         <td><strong>Kết luận T</strong></td>
@@ -137,13 +109,7 @@ const CervixcancerForm = () => {
     <table border="1" cellpadding="6" style="border-collapse: collapse; width:100%; margin-top:16px;">
       <caption><strong>2. Hạch vùng (N)</strong></caption>
 
-      <tr><td><strong>Hạch vùng</strong></td><td>${yesNo(
-        values.regional_nodes,
-      )}</td></tr>
-
-      <tr><td><strong>Kích thước di căn (mm)</strong></td><td>${
-        values.meta_size ?? "Không rõ"
-      }</td></tr>
+      <tr><td><strong>Số lượng hạch dương tính</strong></td><td>${values.pos_num ?? "Không rõ"}</td></tr>
 
       <tr>
         <td><strong>Kết luận N</strong></td>
@@ -155,9 +121,7 @@ const CervixcancerForm = () => {
     <table border="1" cellpadding="6" style="border-collapse: collapse; width:100%; margin-top:16px;">
       <caption><strong>3. Di căn xa (M)</strong></caption>
 
-      <tr><td><strong>Di căn xa</strong></td><td>${
-        MMap[values.distant_metastases] || "Không rõ"
-      }</td></tr>
+      <tr><td><strong>Di căn xa</strong></td><td>${MMap[values.distant_metastases] || "Không rõ"}</td></tr>
 
       <tr>
         <td><strong>Kết luận M</strong></td>
@@ -229,7 +193,7 @@ const CervixcancerForm = () => {
       const prompt = `
 Bạn là bác sĩ chẩn đoán hình ảnh.
 
-Dưới đây là kết quả phân loại ung thư buồng trứng theo TNM:
+Dưới đây là kết quả phân loại ung thư cổ tử cung theo TNM:
 ${html}
 
 Hãy đưa ra:
@@ -537,6 +501,13 @@ Hãy đưa ra:
                 Nhóm giai đoạn - SG:
               </strong>
               {summary.SG || ""}
+            </p>
+
+            <p style={{ fontSize: 18 }}>
+              <strong style={{ minWidth: 500, display: "inline-block" }}>
+                FIGO:
+              </strong>
+              {summary.FIGO || ""}
             </p>
             <p style={{ fontSize: 18 }}>
               <strong style={{ minWidth: 500, display: "inline-block" }}>
