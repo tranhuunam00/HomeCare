@@ -201,7 +201,6 @@ Hãy đưa ra:
       />
       <div className={styles.container}>
         <Row gutter={16}>
-          {/* LEFT */}
           <Col span={12}>
             <Card title="Khả năng áp dụng LI-RADS" className={styles.card}>
               <div className={styles.formGroup}>
@@ -295,7 +294,6 @@ Hãy đưa ra:
             </Card>
           </Col>
 
-          {/* RIGHT */}
           <Col span={12}>
             <Card title="Thang điểm LI-RADS" className={styles.card}>
               <div className={styles.formGroup}>
