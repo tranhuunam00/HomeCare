@@ -1,5 +1,3 @@
-// BosniakForm.jsx – Máy tính phân loại Bosniak (Khối dạng nang thận) – CT + MRI (tiếng Việt)
-
 import React, { useState } from "react";
 import { Form, Button, Radio, Row, Col, Divider, Typography } from "antd";
 import { CopyOutlined, ReloadOutlined } from "@ant-design/icons";
@@ -15,8 +13,6 @@ import { ThamKhaoLinkHomeCare } from "../component_common/Thamkhao";
 import API_CALL from "../../../services/axiosClient";
 
 const { Text } = Typography;
-
-/* ====================== HẰNG SỐ (tiếng Việt) ====================== */
 
 // Modality
 const MODALITY_OPTIONS = [
@@ -158,11 +154,8 @@ const YES_NO_OPTIONS = [
   { label: "Không", value: "no" },
 ];
 
-// Thông điệp “không áp dụng”
 const NOT_APPLY_CT = "Phân loại Bosniak không áp dụng cho tổn thương này.";
 const NOT_APPLY_MRI = "Phân loại Bosniak không áp dụng cho khối u thận đặc.";
-
-/* ====================== COMPONENT ====================== */
 
 const BosniakForm = () => {
   const [form] = Form.useForm();
@@ -235,7 +228,7 @@ const BosniakForm = () => {
 
       if (ctProtocol === "noncontrast") {
         const found = NONCONTRAST_LESION_OPTIONS.find(
-          (o) => o.value === ncLesion
+          (o) => o.value === ncLesion,
         );
         if (!found)
           throw new Error("Vui lòng chọn mô tả tổn thương (CT không tiêm).");
@@ -246,7 +239,7 @@ const BosniakForm = () => {
         const found = PORTAL_LESION_OPTIONS.find((o) => o.value === pvLesion);
         if (!found)
           throw new Error(
-            "Vui lòng chọn mô tả tổn thương (CT pha tĩnh mạch cửa)."
+            "Vui lòng chọn mô tả tổn thương (CT pha tĩnh mạch cửa).",
           );
         return found.score === "N/A_CT" ? NOT_APPLY_CT : found.score;
       }
@@ -315,7 +308,7 @@ const BosniakForm = () => {
 
       if (mriProtocol === "unenhanced") {
         const found = MRI_UNENHANCED_LESION_OPTIONS.find(
-          (o) => o.value === mriUnenhancedLesion
+          (o) => o.value === mriUnenhancedLesion,
         );
         if (!found)
           throw new Error("Vui lòng chọn mô tả tổn thương (MRI không tiêm).");
@@ -327,7 +320,7 @@ const BosniakForm = () => {
         if (!mriSolidFeature)
           throw new Error("Vui lòng chọn đặc điểm ban đầu (MRI khối u thận).");
         const sf = MRI_SOLID_FEATURE_OPTIONS.find(
-          (o) => o.value === mriSolidFeature
+          (o) => o.value === mriSolidFeature,
         );
         if (sf?.score === "N/A_MRI") return NOT_APPLY_MRI;
 
@@ -355,7 +348,7 @@ const BosniakForm = () => {
           if (mriSeptaKind === "septa_1_3_le2") {
             if (!mriT1fsHetero)
               throw new Error(
-                "Vui lòng trả lời câu: Tổn thương KHÔNG tăng quang và tăng tín hiệu KHÔNG đồng nhất trên T1w fat-sat?"
+                "Vui lòng trả lời câu: Tổn thương KHÔNG tăng quang và tăng tín hiệu KHÔNG đồng nhất trên T1w fat-sat?",
               );
             return mriT1fsHetero === "yes" ? "Bosniak IIF" : "Bosniak II";
           }
@@ -368,7 +361,7 @@ const BosniakForm = () => {
           if (mriSeptaKind === "septa_none") {
             if (!mriT2CsfLike)
               throw new Error(
-                "Vui lòng trả lời: Tín hiệu T2w có đồng nhất và tương tự CSF không?"
+                "Vui lòng trả lời: Tín hiệu T2w có đồng nhất và tương tự CSF không?",
               );
             if (mriT2CsfLike === "no") return "Bosniak II";
             if (!mriCalcifications)
@@ -383,8 +376,6 @@ const BosniakForm = () => {
 
     return "";
   };
-
-  /* ====================== HTML & ACTIONS ====================== */
 
   const genHtml = async ({ isCopy }) => {
     const rows = [];
@@ -465,7 +456,7 @@ const BosniakForm = () => {
           "Mô tả tổn thương (MRI không tiêm)",
           getLabelFromValue(
             MRI_UNENHANCED_LESION_OPTIONS,
-            mriUnenhancedLesion
+            mriUnenhancedLesion,
           ) || "--",
         ]);
       }
@@ -533,8 +524,8 @@ const BosniakForm = () => {
       .map(
         ([k, v]) =>
           `<tr><td>${k}</td><td>${
-            typeof v === "string" ? v : v ?? "--"
-          }</td></tr>`
+            typeof v === "string" ? v : (v ?? "--")
+          }</td></tr>`,
       )
       .join("");
 
@@ -542,8 +533,8 @@ const BosniakForm = () => {
       modality === "ct"
         ? "Phân loại Bosniak – Khối dạng nang thận (CT)"
         : modality === "mri"
-        ? "Phân loại Bosniak – Khối dạng nang thận (MRI)"
-        : "Phân loại Bosniak – Khối dạng nang thận";
+          ? "Phân loại Bosniak – Khối dạng nang thận (MRI)"
+          : "Phân loại Bosniak – Khối dạng nang thận";
 
     const html = `
       <table border="1" cellpadding="6" style="border-collapse: collapse; width: 100%;">
@@ -561,7 +552,7 @@ const BosniakForm = () => {
     return isCopy
       ? html +
           `<div style="margin-top:16px;">${genAITextToHtml(
-            geminiResponse
+            geminiResponse,
           )}</div>`
       : html;
   };
@@ -583,7 +574,7 @@ const BosniakForm = () => {
           data.data
             ?.replace(/\*\*(.*?)\*\*/g, "$1")
             .replace(/^\* /gm, "• ")
-            .replace(/\n{2,}/g, "\n\n")
+            .replace(/\n{2,}/g, "\n\n"),
         );
       } catch (error) {}
 
@@ -610,8 +601,6 @@ const BosniakForm = () => {
       toast.error("Không thể copy. Vui lòng thử lại!");
     }
   };
-
-  /* ====================== UI ====================== */
 
   return (
     <div className={styles.pageWrapper}>
