@@ -313,7 +313,6 @@ export const OTHER_SUSPICIOUS_SIGNS = [
     printName: "Không thấy",
   },
 ];
-// src/pages/dbirads/BiradsForm.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Form,
@@ -333,21 +332,6 @@ import { genAITextToHtml, STYLE_COPY } from "../../../constant/app";
 import AIRecommendationEditor from "../../../components/AIRecommendationEditor";
 import { ThamKhaoLinkHomeCare } from "../component_common/Thamkhao";
 import API_CALL from "../../../services/axiosClient";
-
-// ⬇️ Giả định các constants đã được export từ cùng file constants hoặc ở trên scope hiện tại
-// import {
-//   BREAST_SIDE_OPTIONS,
-//   DENSITY_OPTIONS,
-//   LOCATION_OPTIONS,
-//   TYPE_OF_LESION_OPTIONS,
-//   SHAPE_OPTIONS,
-//   MARGIN_OPTIONS,
-//   ECHOGENICITY_OPTIONS,
-//   BENIGN_CALCIFICATION_OPTIONS,
-//   SUSPICIOUS_CALCIFICATION_OPTIONS,
-//   CALC_DISTRIBUTION_OPTIONS,
-//   OTHER_SUSPICIOUS_SIGNS,
-// } from "./dbiradsConstants";
 
 const { Text } = Typography;
 
@@ -379,8 +363,8 @@ const BiradsForm = () => {
     Math.max(
       0,
       ...((selectedValues || []).map(
-        (v) => options.find((o) => o.value === v)?.score || 0
-      ) || [0])
+        (v) => options.find((o) => o.value === v)?.score || 0,
+      ) || [0]),
     );
 
   const getLabelFromValue = (options, value) => {
@@ -394,7 +378,7 @@ const BiradsForm = () => {
                   options.find((o) => o.value === v)?.printName ||
                   options.find((o) => o.value === v)?.label ||
                   v
-                }</li>`
+                }</li>`,
             )
             .join("")}
         </ul>
@@ -410,7 +394,6 @@ const BiradsForm = () => {
     return "";
   };
 
-  // ====== Recalc every change ======
   const recalcAll = (all) => {
     // --- Tính D3 ---
     const v = ((Number(all.D1) || 0) + (Number(all.D2) || 0)) * 0.5;
@@ -422,11 +405,11 @@ const BiradsForm = () => {
     const echoScore = getScore(ECHOGENICITY_OPTIONS, all.echogenicity);
     const suspiciousCalcScore = getScore(
       SUSPICIOUS_CALCIFICATION_OPTIONS,
-      all.suspiciousCalc
+      all.suspiciousCalc,
     );
     const otherSignsScore = getMaxScoreFromCheckbox(
       OTHER_SUSPICIOUS_SIGNS,
-      all.suspiciousSigns
+      all.suspiciousSigns,
     );
 
     const maxScore = Math.max(
@@ -435,7 +418,7 @@ const BiradsForm = () => {
       marginScore,
       echoScore,
       suspiciousCalcScore,
-      otherSignsScore
+      otherSignsScore,
     );
 
     if (maxScore >= 1 && maxScore <= 5) {
@@ -446,17 +429,13 @@ const BiradsForm = () => {
     }
   };
 
-  // Khuyến nghị = derive từ birads hiện tại -> không cần state, dùng useWatch + useMemo
-  const allValues = Form.useWatch([], form); // watch toàn form
+  const allValues = Form.useWatch([], form);
   const recommendation = useMemo(
     () => getRecommendationFromBirads(allValues?.birads || ""),
-    [allValues?.birads]
+    [allValues?.birads],
   );
 
-  // ====== Phụ thuộc theo type_of_lesion ======
   useEffect(() => {
-    // Reset các field phụ thuộc khi loại tổn thương thay đổi
-    // (setFieldValue là async — gọi recalc sau một nhịp)
     if (!typeOfLesion?.includes("benign-calcification")) {
       form.setFieldValue("benignCalc", "none");
     } else {
@@ -477,13 +456,10 @@ const BiradsForm = () => {
     }
 
     setTimeout(() => recalcAll(form.getFieldsValue()), 0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [typeOfLesion]);
 
-  // Khởi tạo
   useEffect(() => {
     recalcAll(form.getFieldsValue());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ====== HTML xuất kết quả ======
@@ -496,19 +472,19 @@ const BiradsForm = () => {
         <tr><th>Thông tin</th><th>Giá trị</th></tr>
         <tr><td>Tuyến vú khảo sát</td><td>${getLabelFromValue(
           BREAST_SIDE_OPTIONS,
-          values.breastSide
+          values.breastSide,
         )}</td></tr>
         <tr><td>Mật độ tuyến vú</td><td>${getLabelFromValue(
           DENSITY_OPTIONS,
-          values.density
+          values.density,
         )}</td></tr>
         <tr><td>Vị trí tổn thương</td><td>${getLabelFromValue(
           LOCATION_OPTIONS,
-          values.location
+          values.location,
         )}</td></tr>
         <tr><td>Loại tổn thương</td><td>${getLabelFromValue(
           TYPE_OF_LESION_OPTIONS,
-          values.type_of_lesion
+          values.type_of_lesion,
         )}</td></tr>
 
         ${
@@ -538,15 +514,15 @@ const BiradsForm = () => {
               </tr>
               <tr><td>Hình dạng</td><td>${getLabelFromValue(
                 SHAPE_OPTIONS,
-                values.shape
+                values.shape,
               )}</td></tr>
               <tr><td>Bờ viền</td><td>${getLabelFromValue(
                 MARGIN_OPTIONS,
-                values.margin
+                values.margin,
               )}</td></tr>
               <tr><td>Đậm độ</td><td>${getLabelFromValue(
                 ECHOGENICITY_OPTIONS,
-                values.echogenicity
+                values.echogenicity,
               )}</td></tr>
             `
             : ""
@@ -554,29 +530,29 @@ const BiradsForm = () => {
 
         <tr><td>Vôi hóa lành tính</td><td>${getLabelFromValue(
           BENIGN_CALCIFICATION_OPTIONS,
-          values.benignCalc
+          values.benignCalc,
         )}</td></tr>
 
         <tr><td>Vi vôi hóa nghi ngờ</td><td>${getLabelFromValue(
           SUSPICIOUS_CALCIFICATION_OPTIONS,
-          values.suspiciousCalc
+          values.suspiciousCalc,
         )}</td></tr>
 
         <tr><td>Phân bố vôi hóa</td><td>${getLabelFromValue(
           CALC_DISTRIBUTION_OPTIONS,
-          values.calcDistribution
+          values.calcDistribution,
         )}</td></tr>
 
         <tr><td>Dấu hiệu nghi ngờ khác</td><td>${getLabelFromValue(
           OTHER_SUSPICIOUS_SIGNS,
-          values.suspiciousSigns || []
+          values.suspiciousSigns || [],
         )}</td></tr>
 
         <tr><td><strong>Phân loại BIRADS</strong></td><td><strong>${
           values.birads || ""
         }</strong></td></tr>
         <tr><td>Khuyến nghị</td><td>${getRecommendationFromBirads(
-          values.birads || ""
+          values.birads || "",
         )}</td></tr>
 
       </table>
@@ -584,7 +560,7 @@ const BiradsForm = () => {
     return isCopy
       ? html +
           `<div style="margin-top:16px;">${genAITextToHtml(
-            geminiResponse
+            geminiResponse,
           )}</div>`
       : html;
   };
@@ -613,13 +589,11 @@ const BiradsForm = () => {
     setTypeOfLesion([]);
     setVolume(0);
     setGeminiResponse("");
-    // Sau reset, recalc trạng thái trống
     setTimeout(() => recalcAll(form.getFieldsValue()), 0);
   };
 
   const onCalculate = async () => {
     try {
-      // Chỉ gọi AI; tính điểm/khuyến nghị đã tự động rồi
       const tableHtml = await genHtml({ isCopy: false });
       try {
         const res = await API_CALL.get(`/chatgpt/ask-gemini-recommendation`, {
@@ -632,7 +606,7 @@ const BiradsForm = () => {
           data?.data
             ?.replace(/\*\*(.*?)\*\*/g, "$1")
             .replace(/^\* /gm, "• ")
-            .replace(/\n{2,}/g, "\n\n") || ""
+            .replace(/\n{2,}/g, "\n\n") || "",
         );
       } catch (error) {}
     } catch (e) {
@@ -655,7 +629,7 @@ const BiradsForm = () => {
           form={form}
           layout="vertical"
           onValuesChange={(_, all) => {
-            recalcAll(all); // ⬅️ mọi thay đổi đều tính lại
+            recalcAll(all);
           }}
         >
           <Row gutter={[16, 16]}>
@@ -788,7 +762,7 @@ const BiradsForm = () => {
                 {BENIGN_CALCIFICATION_OPTIONS.filter(
                   (s) =>
                     !!s.isOther !==
-                    !!typeOfLesion?.includes("benign-calcification")
+                    !!typeOfLesion?.includes("benign-calcification"),
                 ).map((option) =>
                   option.value !== "none" ? (
                     <Col key={option.value} span={12}>
@@ -798,7 +772,7 @@ const BiradsForm = () => {
                     <Radio key={option.value} value={option.value}>
                       {option.label}
                     </Radio>
-                  )
+                  ),
                 )}
               </Row>
             </Radio.Group>
@@ -814,7 +788,7 @@ const BiradsForm = () => {
                 {SUSPICIOUS_CALCIFICATION_OPTIONS.filter(
                   (s) =>
                     !!s.isOther !==
-                    !!typeOfLesion?.includes("microcalcification")
+                    !!typeOfLesion?.includes("microcalcification"),
                 ).map((option) =>
                   option.value !== "none" ? (
                     <Col key={option.value} span={12}>
@@ -824,7 +798,7 @@ const BiradsForm = () => {
                     <Radio key={option.value} value={option.value}>
                       {option.label}
                     </Radio>
-                  )
+                  ),
                 )}
               </Row>
             </Radio.Group>
@@ -857,7 +831,7 @@ const BiradsForm = () => {
             <Checkbox.Group>
               <Row gutter={[12, 12]}>
                 {OTHER_SUSPICIOUS_SIGNS.filter(
-                  (s) => !!s.isOther !== !!typeOfLesion?.includes("other")
+                  (s) => !!s.isOther !== !!typeOfLesion?.includes("other"),
                 ).map((option) =>
                   option.value !== "none" ? (
                     <Col key={option.value} span={12}>
@@ -867,7 +841,7 @@ const BiradsForm = () => {
                     <Checkbox key={option.value} value={option.value}>
                       {option.label}
                     </Checkbox>
-                  )
+                  ),
                 )}
               </Row>
             </Checkbox.Group>
