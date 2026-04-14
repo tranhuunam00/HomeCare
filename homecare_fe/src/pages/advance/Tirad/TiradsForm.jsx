@@ -1,4 +1,3 @@
-// tiradsConstants.js
 export const COMPOSITION_OPTIONS = [
   { label: "Nang dịch (0 điểm)", value: 0 },
   { label: "Bọt biển (1 điểm)", value: 1 },
@@ -32,7 +31,6 @@ export const CALCIFICATION_OPTIONS = [
   { label: "Vi vôi hóa (3 điểm)", value: 3 },
 ];
 
-// TiradsForm.jsx
 import React, { useState } from "react";
 import {
   Form,
@@ -127,7 +125,7 @@ const TiradsForm = () => {
     const tirads = getTirads(score);
     const recommendation = getRecommendation(
       tirads,
-      Math.max(values.D1 || 0, values.D2 || 0, values.D3 || 0)
+      Math.max(values.D1 || 0, values.D2 || 0, values.D3 || 0),
     );
 
     const html = `
@@ -153,23 +151,23 @@ const TiradsForm = () => {
         <tr><td>Thể tích</td><td style="text-align: center;">V = ${volume} mm3 </td></tr>
         <tr><td>Đặc điểm thành phần</td><td>${getLabelFromValue(
           COMPOSITION_OPTIONS,
-          values.composition
+          values.composition,
         )}</td></tr>
         <tr><td>Đặc điểm cấu trúc âm</td><td>${getLabelFromValue(
           STRUCTURE_OPTIONS,
-          values.structure
+          values.structure,
         )}</td></tr>
         <tr><td>Đặc điểm hình dạng</td><td>${getLabelFromValue(
           SHAPE_OPTIONS,
-          values.shape
+          values.shape,
         )}</td></tr>
         <tr><td>Đặc điểm bờ viền</td><td>${getLabelFromValue(
           MARGIN_OPTIONS,
-          values.margin
+          values.margin,
         )}</td></tr>
         <tr><td>Đặc điểm vôi hóa</td><td>${getLabelFromValue(
           CALCIFICATION_OPTIONS,
-          values.calcification
+          values.calcification,
         )}</td></tr>
         <tr><td><strong>Tổng điểm</strong></td><td style="text-align: center;">${score}</td></tr>
         <tr><td>Phân loại (ACR-TIRADS)</td><td><strong style="text-align: center;">${tirads}</strong></td></tr>
@@ -180,7 +178,7 @@ const TiradsForm = () => {
     return isCopy
       ? html +
           `<div style="margin-top:16px;">${genAITextToHtml(
-            geminiResponse
+            geminiResponse,
           )}</div>`
       : html;
   };
@@ -192,7 +190,7 @@ const TiradsForm = () => {
       const tirads = getTirads(score);
       const recommendation = getRecommendation(
         tirads,
-        Math.max(values.D1 || 0, values.D2 || 0, values.D3 || 0)
+        Math.max(values.D1 || 0, values.D2 || 0, values.D3 || 0),
       );
       const tableHtml = await genHtml({ isCopy: false });
       try {
@@ -206,7 +204,7 @@ const TiradsForm = () => {
           data.data
             ?.replace(/\*\*(.*?)\*\*/g, "$1") // bỏ **bôi đậm**
             .replace(/^\* /gm, "• ") // dòng bắt đầu bằng "* " → "• "
-            .replace(/\n{2,}/g, "\n\n")
+            .replace(/\n{2,}/g, "\n\n"),
         );
       } catch (error) {
         console.log("error", error);
@@ -280,7 +278,7 @@ const TiradsForm = () => {
                       const { D1, D2, D3 } = form.getFieldsValue();
                       const v = (D1 || 0) * (D2 || 0) * (D3 || 0) * 0.52;
                       setVolume(
-                        Number.isNaN(v) ? 0 : Math.round(v * 100) / 100
+                        Number.isNaN(v) ? 0 : Math.round(v * 100) / 100,
                       );
                     }}
                   />

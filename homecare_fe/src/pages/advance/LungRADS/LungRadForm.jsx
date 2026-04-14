@@ -143,7 +143,7 @@ const LungRADSForm = () => {
     } else if (compare === "no-lesion") {
       form.setFieldValue("progression", "new");
     } else if (compare === "has-lesion") {
-      form.setFieldValue("progression", undefined); // bắt người dùng chọn
+      form.setFieldValue("progression", undefined);
     }
   }, [compare]);
 
@@ -192,12 +192,11 @@ const LungRADSForm = () => {
     const hasRisk = Array.isArray(riskSigns) && riskSigns.length > 0;
 
     if (!structure || !progression || !d1 || !d2 || !d3) {
-      return "0"; // Không đủ thông tin, cần hình ảnh bổ sung
+      return "0";
     }
 
     const rules = [];
 
-    // ===== Lung-RADS 1: Không có nốt hoặc có đặc điểm lành tính rõ ràng
     if (
       benign === "calc" || // Vôi hóa toàn bộ/trung tâm
       benign === "fat" // Có mỡ
@@ -373,7 +372,7 @@ const LungRADSForm = () => {
       <tr><th>Thông tin</th><th>Giá trị</th></tr>
       <tr><td>Đối chiếu kết quả cũ</td><td>${getLabelFromOptions(
         COMPARE_OPTIONS,
-        compare
+        compare,
       )}</td></tr>
      ${
        compare !== "no-info"
@@ -383,7 +382,7 @@ const LungRADSForm = () => {
              ${
                form.getFieldValue("old_result_date")
                  ? dayjs(form.getFieldValue("old_result_date")).format(
-                     "DD-MM-YYYY"
+                     "DD-MM-YYYY",
                    )
                  : "--"
              }
@@ -399,7 +398,7 @@ const LungRADSForm = () => {
               ${
                 form.getFieldValue("current_result_date")
                   ? dayjs(form.getFieldValue("current_result_date")).format(
-                      "DD-MM-YYYY"
+                      "DD-MM-YYYY",
                     )
                   : "--"
               }
@@ -417,11 +416,11 @@ const LungRADSForm = () => {
      }
       <tr><td>Vị trí tổn thương</td><td>${getLabelFromOptions(
         LOCATION_OPTIONS,
-        location
+        location,
       )}</td></tr>
       <tr><td>Cấu trúc tổn thương</td><td>${getLabelFromOptions(
         STRUCTURE_OPTIONS,
-        structure
+        structure,
       )}</td></tr>
      <tr>
           <td>Kích thước</td>
@@ -453,7 +452,7 @@ const LungRADSForm = () => {
         structure === "solid"
           ? `<tr><td>Dấu hiệu lành tính</td><td>${getLabelFromOptions(
               BENIGN_OPTIONS,
-              benign
+              benign,
             )}</td></tr>
              <tr><td>Dấu hiệu nguy cơ</td><td>${
                riskSigns
@@ -490,7 +489,7 @@ const LungRADSForm = () => {
              value: "growing",
            },
          ],
-         progression
+         progression,
        )}</td></tr>
       <tr><td><strong>Phân loại ACR</strong></td><td><strong> LungRADS ${group}</strong></td></tr>
       <tr><td>Khuyến nghị</td><td>${recommendation}</td></tr>
@@ -500,7 +499,7 @@ const LungRADSForm = () => {
     return isCopy
       ? html +
           `<div style="margin-top:16px;">${genAITextToHtml(
-            geminiResponse
+            geminiResponse,
           )}</div>`
       : html;
   };
@@ -547,9 +546,9 @@ const LungRADSForm = () => {
       const data = res.data;
       setGeminiResponse(
         data.data
-          ?.replace(/\*\*(.*?)\*\*/g, "$1") // bỏ **bôi đậm**
-          .replace(/^\* /gm, "• ") // dòng bắt đầu bằng "* " → "• "
-          .replace(/\n{2,}/g, "\n\n")
+          ?.replace(/\*\*(.*?)\*\*/g, "$1")
+          .replace(/^\* /gm, "• ")
+          .replace(/\n{2,}/g, "\n\n"),
       );
     } catch (error) {}
 
