@@ -1,8 +1,3 @@
-// CEUSForm.jsx — Standalone CEUS (Untreated & Treated & None)
-// - Quản lý toàn bộ state + logic CEUS LI-RADS
-// - AntD + toast + module SCSS
-// - Không phụ thuộc file khác
-
 import React, { useState } from "react";
 import { Form, Button, Radio, Row, Col, Divider, Typography } from "antd";
 import { CopyOutlined, ReloadOutlined } from "@ant-design/icons";
@@ -11,14 +6,12 @@ import { toast } from "react-toastify";
 
 const { Text, Title } = Typography;
 
-/* ====================== HẰNG SỐ ====================== */
 const OBSERVATION_KIND_OPTIONS = [
   { label: "Chưa điều trị (Untreated)", value: "untreated" },
   { label: "Đã điều trị (Treated)", value: "treated" },
   { label: "Không phát hiện tổn thương", value: "none" },
 ];
 
-/* ===== CEUS – Untreated ===== */
 const CEUS_UNTREATED_APPLIES = [
   { label: "Chất lượng kém/thiếu thì ảnh", value: "compromised" },
   { label: "Tổn thương chắc chắn lành tính", value: "definitely_benign" },
@@ -64,7 +57,6 @@ const CEUS_WASHOUT = [
   { label: "Mất thuốc rõ (Marked)", value: "marked" },
 ];
 
-/* ===== CEUS – Treated ===== */
 const CEUS_TREATED_TYPE = [
   { label: "Có bức xạ (Radiation) *", value: "radiation" },
   { label: "Không bức xạ (Non-Radiation) **", value: "non_radiation" },
@@ -95,7 +87,6 @@ const YES_NO_OPTIONS = [
   { label: "Không", value: "no" },
 ];
 
-/* ===== Khuyến nghị CEUS ===== */
 const REC = {
   // chung
   CEUS_COMMON_NOTE:
@@ -120,10 +111,8 @@ const REC = {
   TR_MDD_RETREAT: "MDD thống nhất xử trí – thường cần điều trị lại",
 };
 
-/* ====================== TIỆN ÍCH ====================== */
 const getLabel = (arr, v) => arr.find((x) => x.value === v)?.label || v || "--";
 
-/* ====================== LOGIC LI-RADS – CEUS ====================== */
 // Untreated → None
 const computeCEUSUntreatedNone = ({
   arterial,
@@ -135,7 +124,6 @@ const computeCEUSUntreatedNone = ({
 }) => {
   if (!arterial) return { lr: "", rec: "" };
 
-  // Peripheral globular APHE → LR-1 (hemangioma thường gặp)
   if (arterial === "peripheral_globular_aphe") {
     return {
       lr: "CEUS LR-1 (khả năng hemangioma)",
@@ -143,12 +131,10 @@ const computeCEUSUntreatedNone = ({
     };
   }
 
-  // Rim APHE → LR-M
   if (arterial === "rim_aphe") {
     return { lr: "CEUS LR-M", rec: `Khuyến nghị: ${REC.CEUS_LRM_REC}` };
   }
 
-  // No APHE
   if (arterial === "no_aphe") {
     if (!size20 || !washout) return { lr: "", rec: "" };
     if (washout === "early" || washout === "marked") {
@@ -175,7 +161,6 @@ const computeCEUSUntreatedNone = ({
     };
   }
 
-  // Other APHE
   if (arterial === "other_aphe") {
     if (!size10 || !washout) return { lr: "", rec: "" };
     if (washout === "early" || washout === "marked") {
@@ -203,7 +188,6 @@ const computeCEUSUntreatedNone = ({
         rec: `Khuyến nghị: ${REC.CEUS_LR3_REC}\n${REC.CEUS_COMMON_NOTE}`,
       };
     } else {
-      // ≥10 mm
       if (ancillaryOtherAphe === "malig") {
         return {
           lr: "CEUS LR-4",
@@ -233,7 +217,7 @@ const computeCEUSUntreatedNone = ({
 const computeCEUSUntreated = (
   applies,
   ancillary,
-  { arterial, washout, size20, size10, ancillaryNoAphe, ancillaryOtherAphe }
+  { arterial, washout, size20, size10, ancillaryNoAphe, ancillaryOtherAphe },
 ) => {
   if (!applies) return { lr: "", rec: "" };
 
@@ -313,7 +297,6 @@ const computeCEUSUntreated = (
   return { lr: "", rec: "" };
 };
 
-// Treated (CEUS TRA — chỉ áp dụng Non-Radiation)
 const computeCEUSTreated = (
   tType,
   adequate,
@@ -321,7 +304,7 @@ const computeCEUSTreated = (
   peri,
   newAfterNonviable,
   trend,
-  sinceTx
+  sinceTx,
 ) => {
   if (!tType) return { lr: "", rec: "" };
 
@@ -332,7 +315,6 @@ const computeCEUSTreated = (
     };
   }
 
-  // Non-Radiation
   if (!adequate) return { lr: "", rec: "" };
   if (adequate === "no") {
     return {
@@ -343,7 +325,6 @@ const computeCEUSTreated = (
 
   if (!intra || !peri) return { lr: "", rec: "" };
 
-  // Quy tắc chắc chắn
   if (peri === "peri_hyper_wash") {
     return { lr: "LR-TR Viable", rec: REC.TR_MDD_RETREAT };
   }
@@ -361,7 +342,6 @@ const computeCEUSTreated = (
         rec: "Khuyến nghị: MDD – thường cần CT/MRI",
       };
     }
-    // no → xét trend/time
     if (!trend) return { lr: "", rec: "" };
     if (trend === "decreasing") {
       return {
@@ -390,7 +370,6 @@ const computeCEUSTreated = (
     }
   }
 
-  // Các tổ hợp còn lại → Equivocal
   if (
     peri === "peri_hyper_nowash" ||
     peri === "peri_hypo" ||
@@ -410,7 +389,6 @@ const computeCEUSTreated = (
   };
 };
 
-/* ====================== COMPONENT ====================== */
 export default function CEUSForm() {
   const [form] = Form.useForm();
 
@@ -494,7 +472,7 @@ export default function CEUSForm() {
         ceusPeri,
         ceusNewAfterNonviable,
         ceusSizeTrend,
-        ceusSinceTx
+        ceusSinceTx,
       );
     }
 
@@ -505,7 +483,6 @@ export default function CEUSForm() {
     return { lr: "", rec: "" };
   };
 
-  /* ===== gen HTML kết quả (CEUS only) ===== */
   const genHtml = async () => {
     const rows = [];
     rows.push([
@@ -609,7 +586,7 @@ export default function CEUSForm() {
                     { label: "Ổn định", value: "stable" },
                     { label: "Tăng", value: "increasing" },
                   ],
-                  ceusSizeTrend
+                  ceusSizeTrend,
                 ),
               ]);
               if (ceusSizeTrend === "stable") {
@@ -620,7 +597,7 @@ export default function CEUSForm() {
                       { label: "< 6 tháng", value: "<6" },
                       { label: "≥ 6 tháng", value: ">=6" },
                     ],
-                    ceusSinceTx
+                    ceusSinceTx,
                   ),
                 ]);
               }
@@ -641,8 +618,8 @@ export default function CEUSForm() {
       .map(
         ([k, v]) =>
           `<tr><td style="width:32%">${k}</td><td>${
-            typeof v === "string" ? v : v ?? "--"
-          }</td></tr>`
+            typeof v === "string" ? v : (v ?? "--")
+          }</td></tr>`,
       )
       .join("");
 
@@ -718,12 +695,10 @@ export default function CEUSForm() {
     }
   };
 
-  /* ====================== UI ====================== */
   return (
     <div>
       <div className={styles.formContainer}>
         <Form form={form} layout="vertical" onFinish={onFinish}>
-          {/* Observation kind */}
           <Form.Item label="Bạn muốn đánh giá loại quan sát nào? *" required>
             <Radio.Group
               value={observationKind}
@@ -1245,7 +1220,6 @@ export default function CEUSForm() {
             </>
           )}
 
-          {/* ===== None ===== */}
           {observationKind === "none" && (
             <>
               <Divider />
@@ -1257,7 +1231,6 @@ export default function CEUSForm() {
 
           <Divider />
 
-          {/* Kết quả realtime */}
           <Row gutter={16}>
             <Col span={12}>
               <Text strong>Kết luận: </Text>

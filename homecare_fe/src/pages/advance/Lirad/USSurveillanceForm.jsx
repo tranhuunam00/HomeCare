@@ -1,6 +1,3 @@
-// USSurveillanceForm.jsx — Standalone Ultrasound (Surveillance)
-// AntD + toast + module SCSS. Tự quản lý toàn bộ state/logic US LI-RADS.
-
 import React, { useState } from "react";
 import { Form, Button, Radio, Row, Col, Divider, Typography } from "antd";
 import { CopyOutlined, ReloadOutlined } from "@ant-design/icons";
@@ -9,7 +6,6 @@ import { toast } from "react-toastify";
 
 const { Text, Title } = Typography;
 
-/* ====================== HẰNG SỐ ====================== */
 const US_HIGH_RISK_OPTIONS = [
   { label: "Có (Yes)", value: "yes" },
   { label: "Không (No)", value: "no" },
@@ -70,10 +66,8 @@ const US_VIS_OPTIONS = [
   { label: "VIS-C***: Hạn chế nặng", value: "C" },
 ];
 
-/* ====================== TIỆN ÍCH ====================== */
 const getLabel = (arr, v) => arr.find((x) => x.value === v)?.label || v || "--";
 
-/* ====================== LOGIC LI-RADS — US Surveillance ====================== */
 const computeUSSurveillance = (highRisk, findings, obsKind, afp, vis) => {
   if (!highRisk) return { lr: "", rec: "" };
 
@@ -174,18 +168,15 @@ const computeUSSurveillance = (highRisk, findings, obsKind, afp, vis) => {
   return { lr: "", rec: "" };
 };
 
-/* ====================== COMPONENT ====================== */
 export default function USSurveillanceForm() {
   const [form] = Form.useForm();
 
-  // State
   const [usHighRisk, setUsHighRisk] = useState(null);
   const [usFindings, setUsFindings] = useState(null);
   const [usObsKind, setUsObsKind] = useState(null);
   const [usAFP, setUsAFP] = useState(null);
   const [usVIS, setUsVIS] = useState(null);
 
-  // Kết quả
   const [lrCategory, setLrCategory] = useState("");
   const [lrRecommendation, setLrRecommendation] = useState("");
 
@@ -261,8 +252,8 @@ export default function USSurveillanceForm() {
       .map(
         ([k, v]) =>
           `<tr><td style="width:36%">${k}</td><td>${
-            typeof v === "string" ? v : v ?? "--"
-          }</td></tr>`
+            typeof v === "string" ? v : (v ?? "--")
+          }</td></tr>`,
       )
       .join("");
 
@@ -337,7 +328,6 @@ export default function USSurveillanceForm() {
     }
   };
 
-  /* ====================== UI ====================== */
   return (
     <div>
       <div className={styles.formContainer}>
@@ -653,7 +643,6 @@ export default function USSurveillanceForm() {
 
           <Divider />
 
-          {/* Kết quả realtime */}
           <Row gutter={16}>
             <Col span={12}>
               <Text strong>Kết luận: </Text>

@@ -1,9 +1,3 @@
-// CTMRIForm.jsx — Standalone CT/MRI (Untreated & Treated)
-// - Tự quản lý toàn bộ state + logic tính LI-RADS cho CT/MRI
-// - UI AntD + module SCSS
-// - Không phụ thuộc file/logic khác
-// - Có copy bảng HTML kết quả, tính realtime, reset, tính thủ công
-
 import React, { useState } from "react";
 import {
   Form,
@@ -21,7 +15,6 @@ import { toast } from "react-toastify";
 
 const { Text, Title } = Typography;
 
-/* ====================== HẰNG SỐ ====================== */
 const OBSERVATION_KIND_OPTIONS = [
   { label: "Chưa điều trị (Untreated)", value: "untreated" },
   { label: "Đã điều trị (Treated)", value: "treated" },
@@ -98,7 +91,6 @@ const YES_NO_OPTIONS = [
   { label: "Không", value: "no" },
 ];
 
-/* ===== Khuyến nghị tiêu chuẩn (phần dùng cho CT/MRI) ===== */
 const REC = {
   SURV_6M:
     "Tiếp tục theo dõi US sau 6 tháng – Có thể cân nhắc chẩn đoán lặp lại trong ≤ 6 tháng",
@@ -109,7 +101,6 @@ const REC = {
   CONS_MGMT: "Hội chẩn đa chuyên khoa để thống nhất phương án điều trị",
   RPT_ALT_3M: "Chụp lại hoặc dùng phương án chẩn đoán thay thế trong ≤ 3 tháng",
 
-  // Treated CT/MRI
   TR_RPT_3M: "Chụp lại trong ≤ 3 tháng *",
   TR_RPT_3M_TILDE: "Chụp lại trong ~ 3 tháng *",
   TR_MDD_USUAL:
@@ -117,7 +108,6 @@ const REC = {
   TR_MDD_RETREAT: "MDD thống nhất xử trí – thường cần điều trị lại",
 };
 
-/* ====================== TIỆN ÍCH ====================== */
 const getLabel = (arr, v) => arr.find((x) => x.value === v)?.label || v || "--";
 
 const getRecByLR = (lr) => {
@@ -144,7 +134,6 @@ const bumpOne = (lr) => {
   return order[Math.min(idx + 1, order.length - 1)];
 };
 
-/* ====================== LOGIC LI-RADS – CT/MRI ====================== */
 /* ----- CT/MRI – Untreated (phần 1) ----- */
 const computeUntreatedPart1 = (applies, ancillary) => {
   if (!applies) return { lr: "", rec: "" };
@@ -175,7 +164,6 @@ const computeUntreatedPart2 = ({ features, apheVal, sizeVal, ancillary }) => {
   if (!ancillary || !apheVal || !sizeVal) return { lr: "", rec: "" };
   const featCount = Array.isArray(features) ? features.length : 0;
 
-  // Ưu tiên các mapping chắc chắn
   if (
     ancillary === "malig" &&
     apheVal === "yes" &&
@@ -209,7 +197,6 @@ const computeUntreatedPart2 = ({ features, apheVal, sizeVal, ancillary }) => {
     return { lr: "LR-5", rec: REC.CONS_MGMT };
   }
 
-  // Cơ sở
   let baseLR = "";
   if (ancillary === "malig") {
     baseLR = "LR-4";
@@ -221,7 +208,6 @@ const computeUntreatedPart2 = ({ features, apheVal, sizeVal, ancillary }) => {
     if (apheVal === "yes" && sizeVal === ">=20") baseLR = "LR-4";
   }
 
-  // Nâng 1 bậc nếu đủ features (trừ khi đã chọn 'malig')
   let finalLR = baseLR;
   if (ancillary !== "malig") {
     const shouldBump =
@@ -234,7 +220,6 @@ const computeUntreatedPart2 = ({ features, apheVal, sizeVal, ancillary }) => {
   return { lr: finalLR, rec: finalRec };
 };
 
-/* ----- CT/MRI – Treated ----- */
 const computeTreatedRadiation = (masslike, examType, mriT2, mriDiff) => {
   if (!masslike) return { lr: "", rec: "" };
   if (masslike === "rad_nonevaluable")
@@ -265,7 +250,6 @@ const computeTreatedRadiation = (masslike, examType, mriT2, mriDiff) => {
       };
     }
   }
-  // Fallback
   return {
     lr: "LR-TR Equivocal",
     rec: `${REC.TR_RPT_3M}\n${REC.TR_MDD_USUAL}`,
@@ -299,14 +283,12 @@ const computeTreatedNonRadiation = (masslike, examType, mriT2, mriDiff) => {
       };
     }
   }
-  // Fallback
   return {
     lr: "LR-TR Equivocal",
     rec: `${REC.TR_RPT_3M}\n${REC.TR_MDD_USUAL}`,
   };
 };
 
-/* ====================== COMPONENT ====================== */
 export default function CTMRIForm() {
   const [form] = Form.useForm();
 
@@ -367,7 +349,6 @@ export default function CTMRIForm() {
     setLrRecommendation("");
   };
 
-  /* ===== Tổng hợp tính LI-RADS từ state của CT/MRI ===== */
   const computeCTMRI = () => {
     if (!observationKind) return { lr: "", rec: "" };
 
@@ -393,7 +374,7 @@ export default function CTMRIForm() {
           radMasslike,
           radExamType,
           radMriT2,
-          radMriDiff
+          radMriDiff,
         );
       }
       if (treatedType === "non_radiation") {
@@ -401,7 +382,7 @@ export default function CTMRIForm() {
           nonRadMasslike,
           nonRadExamType,
           nonRadMriT2,
-          nonRadMriDiff
+          nonRadMriDiff,
         );
       }
       return { lr: "", rec: "" };
@@ -470,7 +451,7 @@ export default function CTMRIForm() {
             { label: "Xạ trị / có bức xạ", value: "radiation" },
             { label: "Không xạ trị", value: "non_radiation" },
           ],
-          treatedType
+          treatedType,
         ),
       ]);
 
@@ -490,7 +471,7 @@ export default function CTMRIForm() {
                 value: "rad_new_increased",
               },
             ],
-            radMasslike
+            radMasslike,
           ),
         ]);
         if (radMasslike === "rad_stable_decreased") {
@@ -521,7 +502,7 @@ export default function CTMRIForm() {
               { label: "Không chắc chắn", value: "nonrad_uncertainty" },
               { label: "Có (bất kỳ mức/thì)", value: "nonrad_present" },
             ],
-            nonRadMasslike
+            nonRadMasslike,
           ),
         ]);
         if (nonRadMasslike === "nonrad_uncertainty") {
@@ -554,8 +535,8 @@ export default function CTMRIForm() {
       .map(
         ([k, v]) =>
           `<tr><td style="width:32%">${k}</td><td>${
-            typeof v === "string" ? v : v ?? "--"
-          }</td></tr>`
+            typeof v === "string" ? v : (v ?? "--")
+          }</td></tr>`,
       )
       .join("");
 
@@ -580,7 +561,6 @@ export default function CTMRIForm() {
     return html;
   };
 
-  /* ===== Actions ===== */
   const onFinish = async () => {
     try {
       await genHtml();
@@ -631,7 +611,6 @@ export default function CTMRIForm() {
     }
   };
 
-  /* ====================== UI ====================== */
   return (
     <div>
       <div className={styles.formContainer}>
@@ -660,7 +639,6 @@ export default function CTMRIForm() {
             </Radio.Group>
           </Form.Item>
 
-          {/* ===== Untreated ===== */}
           {observationKind === "untreated" && (
             <>
               <Divider />
