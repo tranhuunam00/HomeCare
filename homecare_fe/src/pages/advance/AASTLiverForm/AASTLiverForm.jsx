@@ -1,5 +1,3 @@
-// AASTLiverForm.jsx – Biểu mẫu AAST Liver Trauma Grading & Score Calculator
-
 import React, { useState } from "react";
 import {
   Form,
@@ -28,8 +26,6 @@ const INJURY_OPTIONS = [
   { label: "Rách nhu mô", value: "laceration" },
   { label: "Tổn thương mạch máu", value: "vascular" },
 ];
-
-// 2) Sub-options + điểm (theo yêu cầu của bạn)
 
 // Subcapsular hematoma – How much of the surface area… (1,2,3,3)
 const SUBCAPSULAR_OPTIONS = [
@@ -177,9 +173,7 @@ const AASTLiverForm = () => {
     }
   };
 
-  // genHtml: dùng getLabelFromValue để render label (ul/li tự động nếu là array; string thì label đơn)
   const genHtml = async ({ isCopy }) => {
-    // (Không cần validate form vì ta dùng state; nhưng giữ cấu trúc tương tự)
     const selectedMain = getLabelFromValue(INJURY_OPTIONS, injuries);
 
     const html = `
@@ -242,7 +236,6 @@ const AASTLiverForm = () => {
       </table>
     `;
 
-    // cập nhật state grade (để đồng bộ UI)
     try {
       setMaxGrade(computeMaxGrade());
     } catch (e) {
