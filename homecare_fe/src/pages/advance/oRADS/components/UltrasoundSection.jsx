@@ -350,7 +350,7 @@ export default function UltrasoundSection({
                       </Radio.Group>
                     </Form.Item>
 
-                    {usOtherEchoSept === "neither" && (
+                    {
                       <Form.Item
                         label="Bệnh nhân có phải là tiền mãn kinh hay đã mãn kinh không?"
                         required
@@ -370,7 +370,7 @@ export default function UltrasoundSection({
                           </Row>
                         </Radio.Group>
                       </Form.Item>
-                    )}
+                    }
                   </>
                 )}
 

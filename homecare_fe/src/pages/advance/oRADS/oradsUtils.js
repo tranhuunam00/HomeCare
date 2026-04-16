@@ -318,30 +318,30 @@ export function computeORADS(input = {}) {
       if (usBenignType === "hemorrhagic") {
         return size < 10
           ? OR2(
-              "Khuyến nghị:\n\nChẩn đoán hình ảnh:\n• Tiền mãn kinh:\n  • ≤5 cm: Không cần theo dõi\n  • >5 cm nhưng <10 cm: Siêu âm theo dõi sau 2–3 tháng\n• Hậu mãn kinh sớm (<5 năm):\n  • <10 cm, các lựa chọn: Siêu âm theo dõi sau 2–3 tháng / Siêu âm bởi bác sĩ chuyên khoa / MRI (kèm điểm O-RADS MRI)\n• Hậu mãn kinh muộn (≥5 năm): Không nên xảy ra; cần phân loại lại bằng các mô tả khác trong hệ thống thuật ngữ.\nLâm sàng:\nChuyển khám bác sĩ phụ khoa khi cần",
+              "\n\nChẩn đoán hình ảnh:\n• Tiền mãn kinh:\n  • ≤5 cm: Không cần theo dõi\n  • >5 cm nhưng <10 cm: Siêu âm theo dõi sau 2–3 tháng\n• Hậu mãn kinh sớm (<5 năm):\n  • <10 cm, các lựa chọn: Siêu âm theo dõi sau 2–3 tháng / Siêu âm bởi bác sĩ chuyên khoa / MRI (kèm điểm O-RADS MRI)\n• Hậu mãn kinh muộn (≥5 năm): Không nên xảy ra; cần phân loại lại bằng các mô tả khác trong hệ thống thuật ngữ.\nLâm sàng:\nChuyển khám bác sĩ phụ khoa khi cần",
             )
           : OR3(
-              "Khuyến nghị:\nChẩn đoán hình ảnh:\n• Nếu không được phẫu thuật cắt bỏ, cân nhắc siêu âm theo dõi trong vòng 6 tháng*\n• Nếu là tổn thương đặc, có thể cân nhắc siêu âm bởi chuyên gia (nếu có) hoặc MRI (kèm điểm O-RADS MRI)**\nLâm sàng:\nChuyển khám bác sĩ phụ khoa khi cần",
+              "\nChẩn đoán hình ảnh:\n• Nếu không được phẫu thuật cắt bỏ, cân nhắc siêu âm theo dõi trong vòng 6 tháng*\n• Nếu là tổn thương đặc, có thể cân nhắc siêu âm bởi chuyên gia (nếu có) hoặc MRI (kèm điểm O-RADS MRI)**\nLâm sàng:\nChuyển khám bác sĩ phụ khoa khi cần",
             );
       }
 
       if (usBenignType === "dermoid") {
         return size < 10
           ? OR2(
-              "Khuyến nghị:\nChẩn đoán hình ảnh:\n• ≤3 cm: Có thể cân nhắc siêu âm theo dõi sau 12 tháng*\n• >3 cm nhưng <10 cm: Nếu không được phẫu thuật cắt bỏ, siêu âm theo dõi sau 12 tháng*\nLâm sàng:\nChuyển khám bác sĩ phụ khoa khi cần\n* Hiện có ít bằng chứng để xác định nhu cầu, thời gian tối ưu hoặc khoảng cách theo dõi. Nếu ổn định, cân nhắc siêu âm theo dõi sau 24 tháng kể từ lần khám ban đầu, sau đó theo chỉ định lâm sàng.",
+              "\nChẩn đoán hình ảnh:\n• ≤3 cm: Có thể cân nhắc siêu âm theo dõi sau 12 tháng*\n• >3 cm nhưng <10 cm: Nếu không được phẫu thuật cắt bỏ, siêu âm theo dõi sau 12 tháng*\nLâm sàng:\nChuyển khám bác sĩ phụ khoa khi cần\n* Hiện có ít bằng chứng để xác định nhu cầu, thời gian tối ưu hoặc khoảng cách theo dõi. Nếu ổn định, cân nhắc siêu âm theo dõi sau 24 tháng kể từ lần khám ban đầu, sau đó theo chỉ định lâm sàng.",
             )
           : OR3(
-              "Khuyến nghị:\nChẩn đoán hình ảnh:\n• Nếu không được phẫu thuật cắt bỏ, cân nhắc siêu âm theo dõi trong vòng 6 tháng*\n• Nếu là tổn thương đặc, có thể cân nhắc siêu âm bởi chuyên gia (nếu có) hoặc MRI (kèm điểm O-RADS MRI)**\nLâm sàng:\nChuyển khám bác sĩ phụ khoa khi cần\n** MRI có tiêm thuốc tương phản có độ đặc hiệu cao hơn đối với các tổn thương đặc và các tổn thương dạng nang có thành phần đặc.",
+              "\nChẩn đoán hình ảnh:\n• Nếu không được phẫu thuật cắt bỏ, cân nhắc siêu âm theo dõi trong vòng 6 tháng*\n• Nếu là tổn thương đặc, có thể cân nhắc siêu âm bởi chuyên gia (nếu có) hoặc MRI (kèm điểm O-RADS MRI)**\nLâm sàng:\nChuyển khám bác sĩ phụ khoa khi cần\n** MRI có tiêm thuốc tương phản có độ đặc hiệu cao hơn đối với các tổn thương đặc và các tổn thương dạng nang có thành phần đặc.",
             );
       }
 
       if (usBenignType === "endometrioma") {
         return size < 10
           ? OR2(
-              "Khuyến nghị:\nChẩn đoán hình ảnh:\n• Tiền mãn kinh: <10 cm → Nếu không được phẫu thuật cắt bỏ, siêu âm theo dõi sau 12 tháng*\n• Hậu mãn kinh: <10 cm và là lần khám đầu, các lựa chọn: Siêu âm theo dõi sau 2–3 tháng / Siêu âm bởi chuyên gia / MRI (kèm điểm O-RADS MRI). Sau đó nếu không phẫu thuật, siêu âm theo dõi sau 12 tháng*\nLâm sàng:\nChuyển khám bác sĩ phụ khoa khi cần\n* Nguy cơ tăng ở phụ nữ sau mãn kinh hoặc khi tổn thương tồn tại >10 năm.",
+              "\nChẩn đoán hình ảnh:\n• Tiền mãn kinh: <10 cm → Nếu không được phẫu thuật cắt bỏ, siêu âm theo dõi sau 12 tháng*\n• Hậu mãn kinh: <10 cm và là lần khám đầu, các lựa chọn: Siêu âm theo dõi sau 2–3 tháng / Siêu âm bởi chuyên gia / MRI (kèm điểm O-RADS MRI). Sau đó nếu không phẫu thuật, siêu âm theo dõi sau 12 tháng*\nLâm sàng:\nChuyển khám bác sĩ phụ khoa khi cần\n* Nguy cơ tăng ở phụ nữ sau mãn kinh hoặc khi tổn thương tồn tại >10 năm.",
             )
           : OR3(
-              "Khuyến nghị:\nChẩn đoán hình ảnh:\n• Nếu không được phẫu thuật cắt bỏ, cân nhắc siêu âm theo dõi trong vòng 6 tháng*\n• Nếu là tổn thương đặc, có thể cân nhắc siêu âm bởi chuyên gia (nếu có) hoặc MRI (kèm điểm O-RADS MRI score)**\nLâm sàng:\nChuyển khám bác sĩ phụ khoa khi cần",
+              "\nChẩn đoán hình ảnh:\n• Nếu không được phẫu thuật cắt bỏ, cân nhắc siêu âm theo dõi trong vòng 6 tháng*\n• Nếu là tổn thương đặc, có thể cân nhắc siêu âm bởi chuyên gia (nếu có) hoặc MRI (kèm điểm O-RADS MRI score)**\nLâm sàng:\nChuyển khám bác sĩ phụ khoa khi cần",
             );
       }
 
@@ -360,47 +360,54 @@ export function computeORADS(input = {}) {
         2,
         "Hầu như chắc chắn lành tính (<1% rủi ro ác tính)",
         "<1%",
-        "Khuyến nghị: Siêu âm theo dõi sau 6 tháng*. Xử trí lâm sàng với bác sĩ phụ khoa khi cần.",
+        "Siêu âm theo dõi sau 6 tháng*. Xử trí lâm sàng với bác sĩ phụ khoa khi cần.",
       );
+
+      const OR2_6M_NONE = pack(
+        2,
+        "Hầu như chắc chắn lành tính (<1% rủi ro ác tính)",
+        "<1%",
+        "",
+      );
+
       const OR2_12M = pack(
         2,
         "Hầu như chắc chắn lành tính (<1% rủi ro ác tính)",
         "<1%",
-        "Khuyến nghị: Siêu âm theo dõi sau 12 tháng*. Xử trí lâm sàng với bác sĩ phụ khoa khi cần.",
+        "Siêu âm theo dõi sau 12 tháng*. Xử trí lâm sàng với bác sĩ phụ khoa khi cần.",
       );
       const OR3 = pack(
         3,
         "Nguy cơ ác tính thấp (1–10%)",
         "1–10%",
         ATT +
-          "\n\nKhuyến nghị:\nChẩn đoán hình ảnh:\n• Nếu không được phẫu thuật cắt bỏ, cân nhắc siêu âm theo dõi trong vòng 6 tháng*\n• Nếu là tổn thương đặc, có thể cân nhắc siêu âm bởi chuyên gia hoặc MRI (kèm điểm O-RADS MRI)**\nLâm sàng:\nChuyển khám bác sĩ phụ khoa khi cần",
+          "\nChẩn đoán hình ảnh:\n• Nếu không được phẫu thuật cắt bỏ, cân nhắc siêu âm theo dõi trong vòng 6 tháng*\n• Nếu là tổn thương đặc, có thể cân nhắc siêu âm bởi chuyên gia hoặc MRI (kèm điểm O-RADS MRI)**\nLâm sàng:\nChuyển khám bác sĩ phụ khoa khi cần",
       );
       const OR4 = pack(
         4,
         "Nguy cơ ác tính trung bình (10–50%)",
         "10–50%",
         ATT +
-          "\n\nKhuyến nghị:\nChẩn đoán hình ảnh:\n• Siêu âm bởi chuyên gia (nếu có) hoặc\n• MRI (kèm điểm O–RADS MRI)* hoặc\n• Theo phác đồ của bác sĩ ung thư phụ khoa\nLâm sàng:\nBác sĩ phụ khoa phối hợp tư vấn với bác sĩ ung thư phụ khoa hoặc do bác sĩ ung thư phụ khoa trực tiếp quản lý",
+          "\nChẩn đoán hình ảnh:\n• Siêu âm bởi chuyên gia (nếu có) hoặc\n• MRI (kèm điểm O–RADS MRI)* hoặc\n• Theo phác đồ của bác sĩ ung thư phụ khoa\nLâm sàng:\nBác sĩ phụ khoa phối hợp tư vấn với bác sĩ ung thư phụ khoa hoặc do bác sĩ ung thư phụ khoa trực tiếp quản lý",
       );
       const OR5 = pack(
         5,
         "Nguy cơ ác tính cao (≥50%)",
         "≥50%",
-        "Khuyến nghị:\nChẩn đoán hình ảnh:\nTheo phác đồ của bác sĩ ung thư phụ khoa\nLâm sàng:\nBác sĩ ung thư phụ khoa",
+        "\nChẩn đoán hình ảnh:\nTheo phác đồ của bác sĩ ung thư phụ khoa\nLâm sàng:\nBác sĩ ung thư phụ khoa",
       );
 
-      // --- A) Cystic WITHOUT solid (đã có + sửa nhỏ unilocular/irregular <10cm -> ORADS 3) ---
       if (usOtherComposition === "cystic_no_solid") {
         if (!usOtherChambers || !usOtherContour) return empty();
 
         // >= 10 cm
         if (size >= 10) {
           if (usOtherChambers === "multi") {
-            if (usOtherContour === "irregular") return OR4;
-            if (!usColorScore) return empty();
-            return usColorScore === 4 ? OR4 : OR3; // 1–3 -> OR3
+            return OR4;
           }
-          // uni/bi
+          if (usOtherChambers === "bi") {
+            return usOtherContour === "smooth" ? OR3 : OR4;
+          }
           return OR3;
         }
 
@@ -416,10 +423,12 @@ export function computeORADS(input = {}) {
               usOtherEchoSept,
             )
           ) {
-            return OR2_6M;
+            if (usOtherMenopause == "pre") {
+              return OR2_6M_NONE;
+            }
+            return OR2_12M;
           }
-          if (!usOtherMenopause) return empty();
-          return OR2_12M;
+          return OR2_6M_NONE;
         }
 
         if (usOtherChambers === "bi") {
