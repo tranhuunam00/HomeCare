@@ -1,6 +1,23 @@
 import React, { useState } from "react";
-import { Input, Avatar, Tooltip, Dropdown, Menu, Drawer, Divider } from "antd";
-import { MenuOutlined, AppstoreOutlined } from "@ant-design/icons";
+import {
+  Input,
+  Avatar,
+  Tooltip,
+  Dropdown,
+  Menu,
+  Drawer,
+  Divider,
+  Button,
+  Select,
+  Typography,
+} from "antd";
+import {
+  MenuOutlined,
+  AppstoreOutlined,
+  ApartmentOutlined,
+  UserAddOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import styles from "./TopHeader.module.scss";
 import { QRCodeCanvas } from "qrcode.react";
@@ -8,6 +25,10 @@ import { useGlobalAuth } from "../../contexts/AuthContext";
 import { USER_ROLE_ID } from "../../constant/app";
 import useToast from "../../hooks/useToast";
 import NotificationBell from "../../pages/notifications/NotificationBell";
+import FlowModal from "../../pages/patient/setting/nodes/FlowModal";
+import { toast } from "react-toastify";
+import ImportPatientModal from "../../pages/patient/Import/ImportPatientModal";
+import ReloadTSAndExamPartsButton from "../ReloadTSAndExamPartsButton";
 
 const qrValue = `https://www.daogroup.vn/`;
 const currentEndpont = `${
@@ -16,8 +37,21 @@ const currentEndpont = `${
 
 const TopHeader = ({ collapsed, toggleSidebar }) => {
   const [rightDrawerVisible, setRightDrawerVisible] = useState(false);
-  const { user, doctor, handleLogoutGlobal, isOnWorkList, setIsOnWorkList } =
-    useGlobalAuth();
+  const [openWorkflow, setOpenWorkflow] = useState(false);
+  const [openImportModal, setOpenImportModal] = useState(false);
+
+  const {
+    user,
+    doctor,
+    handleLogoutGlobal,
+    isOnWorkList,
+    setIsOnWorkList,
+    filterPatient: pendingFilters,
+    setFilterPatient: setPendingFilters,
+    clinicsAll,
+    templateServices,
+    totalPatient,
+  } = useGlobalAuth();
   const { showWarning } = useToast();
   const navigate = useNavigate();
 
@@ -79,6 +113,88 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
           />
         </Tooltip>
       </div>
+      <Tooltip title="Quy trình">
+        <Button
+          icon={<ApartmentOutlined />}
+          style={{
+            background: "linear-gradient(135deg, #3526b9, #69b1ff)",
+            border: "none",
+            color: "#fff",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background =
+              "linear-gradient(135deg, #24552f, #4096ff)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background =
+              "linear-gradient(135deg, #3526b9, #69b1ff)";
+          }}
+          onClick={() => setOpenWorkflow(true)}
+        >
+          Quy trình
+        </Button>
+      </Tooltip>
+      {isOnWorkList && (
+        <Typography.Title level={4} style={{ margin: 0, whiteSpace: "nowrap" }}>
+          Số Ca = {totalPatient}
+        </Typography.Title>
+      )}
+
+      {isOnWorkList && (
+        <Select
+          allowClear
+          style={{ width: "100%", maxWidth: 300 }}
+          value={pendingFilters.id_template_service}
+          placeholder="Phân hệ"
+          onChange={(value) =>
+            setPendingFilters({
+              ...pendingFilters,
+              id_template_service: value,
+            })
+          }
+        >
+          {templateServices?.map((t) => (
+            <Option key={t.id} value={t.id}>
+              {t.name}
+            </Option>
+          ))}
+        </Select>
+      )}
+      {isOnWorkList && <ReloadTSAndExamPartsButton />}
+      {isOnWorkList && (
+        <Select
+          className="smallSelect"
+          style={{ width: "100%", maxWidth: 300 }}
+          allowClear
+          showSearch
+          value={pendingFilters.id_clinic}
+          placeholder="Chọn phòng khám"
+          optionFilterProp="children"
+          onChange={(value) =>
+            setPendingFilters({ ...pendingFilters, id_clinic: value })
+          }
+        >
+          {clinicsAll?.map((c) => (
+            <Option key={c.id} value={c.id}>
+              {c.name}
+            </Option>
+          ))}
+        </Select>
+      )}
+      <Button
+        type="primary"
+        icon={<UserAddOutlined />}
+        onClick={() => navigate("/home/patients-diagnose/create")}
+      >
+        Thêm mới ca
+      </Button>
+      <Button
+        type="primary"
+        icon={<UploadOutlined />}
+        onClick={() => setOpenImportModal(true)}
+      >
+        Import danh sách ca
+      </Button>
 
       {/* --- Right side --- */}
       <div className={styles.topHeader__right}>
@@ -190,6 +306,38 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
           </div>
         </Drawer>
       </div>
+
+      <FlowModal
+        open={openWorkflow}
+        onClose={() => setOpenWorkflow(false)}
+        onAction={(step) => {
+          switch (step.action) {
+            case "LOCK_READ":
+              // call API lock
+              break;
+            case "CANCEL_READ":
+              // unlock
+              break;
+            case "APPROVE":
+              // duyệt
+              break;
+            case "CANCEL_APPROVE":
+              // hủy duyệt
+              break;
+            default:
+              console.log(step.action);
+          }
+        }}
+      />
+      <ImportPatientModal
+        open={openImportModal}
+        onClose={() => setOpenImportModal(false)}
+        onImportSuccess={() => {
+          toast.success(
+            "Import bệnh nhân thành công! Vui lòng làm mới trang để cập nhật dữ liệu.",
+          );
+        }}
+      />
     </div>
   );
 };

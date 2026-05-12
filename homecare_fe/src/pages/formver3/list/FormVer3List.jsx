@@ -357,12 +357,12 @@ export default function FormVer3List() {
         ),
       },
     ],
-    [examParts, templateServices, filters.page, filters.limit]
+    [examParts, templateServices, filters.page, filters.limit],
   );
 
   const columnsToRender = useMemo(
     () => allColumns.filter((col) => visibleKeys.includes(col.key)),
-    [visibleKeys, allColumns]
+    [visibleKeys, allColumns],
   );
 
   const toggleColumn = (key) => {
@@ -417,9 +417,9 @@ export default function FormVer3List() {
     if (alreadyEN.length > 0) {
       toast.warning(
         `⚠️ Bản ghi ID: ${alreadyEN.join(
-          ", "
+          ", ",
         )} đã là bản tiếng Anh. Vui lòng bỏ chọn trước khi nhân bản.`,
-        { autoClose: 6000 }
+        { autoClose: 6000 },
       );
 
       return;
@@ -434,7 +434,7 @@ export default function FormVer3List() {
       const res = await API_CALL.post(
         "/form-ver3/nhan-ban-us",
         { ids: filteredIds },
-        { timeout: 120000 }
+        { timeout: 120000 },
       );
 
       const { successed = [], failed = [] } = res?.data?.data || {};
@@ -641,9 +641,9 @@ export default function FormVer3List() {
             </Col>
 
             <Col xs={24} md={6} lg={4}>
-              <Form.Item label="ID bác sĩ">
+              <Form.Item>
                 <Input
-                  placeholder="Nhập ID"
+                  placeholder="Nhập ID bác sĩ"
                   value={uiFilters.id_doctor}
                   onChange={(e) =>
                     setUiFilters((s) => ({ ...s, id_doctor: e.target.value }))
@@ -691,7 +691,7 @@ export default function FormVer3List() {
                     .filter(
                       (e) =>
                         String(e.id_template_service) ===
-                        String(uiFilters.id_template_service)
+                        String(uiFilters.id_template_service),
                     )
                     .map((e) => (
                       <Option key={e.id} value={e.id}>

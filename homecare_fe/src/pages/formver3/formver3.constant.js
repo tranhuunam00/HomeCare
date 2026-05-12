@@ -1,5 +1,4 @@
 import dayjs from "dayjs";
-import { getAge } from "../../constant/app";
 
 export const IMAGE_QUALITY_OPTIONS = [
   { value: "good", label: "Đạt yêu cầu" },
@@ -144,7 +143,8 @@ export const buildDradv3FormValues = ({
       doctorUseFormVer3?.benh_nhan_gioi_tinh ?? patientDiagnose.gender,
 
     benh_nhan_tuoi:
-      doctorUseFormVer3?.benh_nhan_tuoi ?? getAge(patientDiagnose.dob),
+      doctorUseFormVer3?.benh_nhan_tuoi ??
+      calculateAge(patientDiagnose.dob, patientDiagnose.birth_year),
 
     benh_nhan_quoc_tich:
       doctorUseFormVer3?.benh_nhan_quoc_tich ?? patientDiagnose.countryCode,
@@ -346,4 +346,21 @@ export const examPartName = (selectedExamPart, languageTranslate) => {
   return languageTranslate === "vi"
     ? selectedExamPart?.name
     : selectedExamPart?.name_en || selectedExamPart?.name;
+};
+
+export const calculateAge = (dob, birthYear) => {
+  const today = dayjs();
+
+  // Ưu tiên dob nếu có
+  if (dob) {
+    const birthDate = dayjs(dob);
+    return today.diff(birthDate, "year");
+  }
+
+  // Nếu không có dob thì dùng năm sinh
+  if (birthYear) {
+    return today.year() - Number(birthYear);
+  }
+
+  return "";
 };

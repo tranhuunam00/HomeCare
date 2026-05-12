@@ -32,7 +32,6 @@ import {
   mapApiToForm,
 } from "../../formver2/utils";
 import {
-  getAge,
   sortTemplateServices,
   TRANSLATE_LANGUAGE,
   translateLabel,
@@ -48,6 +47,7 @@ import { handleTranslateToLanguage, toISODate } from "./util";
 import { hasProOrBusiness } from "../../../constant/permission";
 import SmartCASignModal from "../SmartCASignModal/SmartCASignModal";
 import SignedFilesBox from "../SmartCASignModal/SignedFilesBox";
+import { calculateAge } from "../../formver3/formver3.constant";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -191,7 +191,7 @@ export default function DoctorUseDFormVer2({
   const [filteredFormVer2Names, setFilteredFormVer2Names] = useState([]);
   const [resetKey, setResetKey] = useState(0);
   const [languageTranslate, setLanguageTransslate] = useState(
-    TRANSLATE_LANGUAGE.VI
+    TRANSLATE_LANGUAGE.VI,
   );
   const [status, setStatus] = useState(APPROVAL_STATUS.DRAFT);
 
@@ -251,10 +251,10 @@ export default function DoctorUseDFormVer2({
         // fill ảnh
 
         const left = apiData.image_doctor_use_form_ver2s?.find(
-          (x) => x.kind === "left"
+          (x) => x.kind === "left",
         );
         const right = apiData.image_doctor_use_form_ver2s?.find(
-          (x) => x.kind === "right"
+          (x) => x.kind === "right",
         );
 
         // Map API -> form values
@@ -375,7 +375,7 @@ export default function DoctorUseDFormVer2({
           apiCalls.push(
             API_CALL.get("/doctor-use-form-ver2/detail", {
               params: { id: id, withFormVer2: true },
-            })
+            }),
           );
         }
         const [diagnoseRes, dradsRes] = await Promise.all(apiCalls);
@@ -390,7 +390,8 @@ export default function DoctorUseDFormVer2({
           benh_nhan_gioi_tinh:
             dradsDetail?.benh_nhan_gioi_tinh || patientDiagnose.gender,
           benh_nhan_tuoi:
-            dradsDetail?.benh_nhan_tuoi || getAge(patientDiagnose.dob),
+            dradsDetail?.benh_nhan_tuoi ||
+            calculateAge(patientDiagnose.dob, patientDiagnose.birth_year),
           benh_nhan_quoc_tich:
             dradsDetail?.benh_nhan_quoc_tich || patientDiagnose.countryCode,
           benh_nhan_dien_thoai:
@@ -450,7 +451,7 @@ export default function DoctorUseDFormVer2({
 
   const currentFormVer2Name = useMemo(() => {
     const byPick = (formVer2Names || []).find(
-      (n) => n.id === selectedFormVer2NameId
+      (n) => n.id === selectedFormVer2NameId,
     );
     if (byPick) return byPick;
 
@@ -474,7 +475,7 @@ export default function DoctorUseDFormVer2({
         Number(n.id_exam_part) === Number(idExamPart) &&
         (n.isUsed == isUse || n.id == currentId) &&
         n.language?.includes(languageTranslate) &&
-        n.form_ver2s
+        n.form_ver2s,
     );
     if (!hasProOrBusiness(userPackages) && user.id_role != USER_ROLE.ADMIN) {
       filtered = filtered.filter(
@@ -482,7 +483,7 @@ export default function DoctorUseDFormVer2({
           f.form_ver2s &&
           (f.form_ver2s[0]?.ket_luan.toLowerCase().includes("bình thường") ||
             f.form_ver2s[0]?.ket_luan.toLowerCase() == "bình thường") &&
-          f.language?.includes(languageTranslate)
+          f.language?.includes(languageTranslate),
       );
     }
 
@@ -520,7 +521,7 @@ export default function DoctorUseDFormVer2({
   const filteredExamParts = useMemo(() => {
     if (!idTemplateService) return [];
     return (examParts || []).filter(
-      (p) => Number(p.id_template_service) === Number(idTemplateService)
+      (p) => Number(p.id_template_service) === Number(idTemplateService),
     );
   }, [examParts, idTemplateService]);
 
@@ -530,7 +531,7 @@ export default function DoctorUseDFormVer2({
       setLoading(true);
       try {
         const res = await API_CALL.get(
-          `/form-ver2/${idFormVer2}?withTables=true&withImages=true&includeDeleted=false`
+          `/form-ver2/${idFormVer2}?withTables=true&withImages=true&includeDeleted=false`,
         );
         const apiData = res?.data?.data?.data;
         if (!apiData) throw new Error("Không đọc được dữ liệu form");
@@ -843,7 +844,7 @@ export default function DoctorUseDFormVer2({
                 label={translateLabel(
                   languageTranslate,
                   "resultTemplate",
-                  false
+                  false,
                 )}
                 name="id_formver2_name"
                 rules={[{ required: true, message: "Chọn tên mẫu" }]}
@@ -867,12 +868,12 @@ export default function DoctorUseDFormVer2({
                       // nếu là đang sử dụng
                       try {
                         const res = await API_CALL.get(
-                          `/form-ver2/detail?id_formver2_name=${id_formver2_name}&withTables=false&withImages=false&includeDeleted=false`
+                          `/form-ver2/detail?id_formver2_name=${id_formver2_name}&withTables=false&withImages=false&includeDeleted=false`,
                         );
                         setIdFormVer2(res.data.data.data.id);
                       } catch (e) {
                         toast.error(
-                          "Không tải được dữ liệu. Vui lòng thử lại."
+                          "Không tải được dữ liệu. Vui lòng thử lại.",
                         );
                       } finally {
                         setLoading(false);
@@ -948,7 +949,7 @@ export default function DoctorUseDFormVer2({
             {translateLabel(
               languageTranslate,
               "technicalProtocol",
-              false
+              false,
             ).toUpperCase()}
           </Title>
 
@@ -994,7 +995,7 @@ export default function DoctorUseDFormVer2({
             {translateLabel(
               languageTranslate,
               "imagingFindings",
-              false
+              false,
             ).toUpperCase()}
           </Title>
 
@@ -1010,7 +1011,7 @@ export default function DoctorUseDFormVer2({
             {translateLabel(
               languageTranslate,
               "impression",
-              false
+              false,
             ).toUpperCase()}
           </Title>
           <Form.Item
@@ -1030,7 +1031,7 @@ export default function DoctorUseDFormVer2({
                 {translateLabel(
                   languageTranslate,
                   "icd10Classification",
-                  false
+                  false,
                 )}
                 <Tooltip title="Tra cứu ICD-10">
                   <a
@@ -1053,7 +1054,7 @@ export default function DoctorUseDFormVer2({
             label={translateLabel(
               languageTranslate,
               "gradingClassification",
-              false
+              false,
             )}
             name="phan_do_loai"
           >
@@ -1064,7 +1065,7 @@ export default function DoctorUseDFormVer2({
             label={translateLabel(
               languageTranslate,
               "differentialDiagnosis",
-              false
+              false,
             )}
             name="chan_doan_phan_biet"
           >
@@ -1075,7 +1076,7 @@ export default function DoctorUseDFormVer2({
             {translateLabel(
               languageTranslate,
               "recommendationsCounseling",
-              false
+              false,
             ).toUpperCase()}
           </Title>
           <Form.Item
@@ -1094,7 +1095,7 @@ export default function DoctorUseDFormVer2({
             {translateLabel(
               languageTranslate,
               "illustrativeImages",
-              false
+              false,
             ).toUpperCase()}
           </Title>
           <Form.Item label="">
@@ -1143,7 +1144,7 @@ export default function DoctorUseDFormVer2({
                 try {
                   if (
                     !window.confirm(
-                      "Bạn có chắc muốn xác nhận bản ghi này không? Lưu ý khi xác nhận sẽ không thể sửa đổi!"
+                      "Bạn có chắc muốn xác nhận bản ghi này không? Lưu ý khi xác nhận sẽ không thể sửa đổi!",
                     )
                   ) {
                     return;
@@ -1153,7 +1154,7 @@ export default function DoctorUseDFormVer2({
                     `/doctor-use-form-ver2/${idEdit}/approve`,
                     {
                       approval_status: APPROVAL_STATUS.APPROVED,
-                    }
+                    },
                   );
 
                   toast.success(`Phê duyệt Form #${idEdit} thành công!`);
@@ -1185,7 +1186,7 @@ export default function DoctorUseDFormVer2({
                   setIsEdit(
                     initialSnap.apiData?.id_doctor == doctor.id ||
                       user.id_role == USER_ROLE.ADMIN ||
-                      !idEdit
+                      !idEdit,
                   );
                 }
               }}
@@ -1194,7 +1195,7 @@ export default function DoctorUseDFormVer2({
                 const handleGenAi = async () => {
                   if (
                     !window.confirm(
-                      "Bạn có chắc muốn sử dụng tính năng AI không?"
+                      "Bạn có chắc muốn sử dụng tính năng AI không?",
                     )
                   ) {
                     return;
@@ -1202,10 +1203,11 @@ export default function DoctorUseDFormVer2({
                   try {
                     const v = form.getFieldsValue();
                     const selectedExamPart = examParts?.find(
-                      (ex) => ex.id == form.getFieldValue("id_exam_part")
+                      (ex) => ex.id == form.getFieldValue("id_exam_part"),
                     );
                     const selectedTemplateService = templateServices?.find(
-                      (ex) => ex.id == form.getFieldValue("id_template_service")
+                      (ex) =>
+                        ex.id == form.getFieldValue("id_template_service"),
                     );
 
                     const prompt = buildPrompt({
@@ -1217,7 +1219,7 @@ export default function DoctorUseDFormVer2({
                     });
 
                     const url = `https://api.home-care.vn/api/chatgpt/ask-gemini-recommendation?prompt=${encodeURIComponent(
-                      prompt
+                      prompt,
                     )}`;
                     const res = await API_CALL.get(url);
 
@@ -1321,10 +1323,10 @@ export default function DoctorUseDFormVer2({
             createdAt: initialSnap?.apiData?.createdAt,
           }}
           selectedExamPart={examParts?.find(
-            (ex) => ex.id == form.getFieldValue("id_exam_part")
+            (ex) => ex.id == form.getFieldValue("id_exam_part"),
           )}
           selectedTemplateService={templateServices?.find(
-            (ex) => ex.id == form.getFieldValue("id_template_service")
+            (ex) => ex.id == form.getFieldValue("id_template_service"),
           )}
           ImageLeftUrl={ImageLeftUrl}
           ImageRightUrl={ImageRightUrl}

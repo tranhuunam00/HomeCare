@@ -18,7 +18,6 @@ import dayjs from "dayjs";
 import useVietnamAddress from "../../../hooks/useVietnamAddress";
 import API_CALL from "../../../services/axiosClient";
 import {
-  getAge,
   PATIENT_DIAGNOSE_COLOR,
   PATIENT_DIAGNOSE_STATUS,
   USER_ROLE,
@@ -37,15 +36,9 @@ import SignedFilesBox from "../../doctor_use_form_ver2/SmartCASignModal/SignedFi
 import FormVer3GroupProcessPatientDiagnoise from "../../formver3/FormVer3GroupProcessPatientDiagnoise";
 import DoctorUseFormVer3Viewer from "../../formver3/components/DoctorUseFormVer3Viewer";
 import useLatestDoctorUseFormVer3 from "../../formver3/useLatestDoctorUseFormVer3";
+import { calculateAge } from "../../formver3/formver3.constant";
 
 const { Title, Text } = Typography;
-
-const calculateAge = (dob) => {
-  if (!dob) return "";
-  const today = dayjs();
-  const birthDate = dayjs(dob);
-  return today.diff(birthDate, "year");
-};
 
 const PatientDiagnoiseDetailPage = ({
   idFromList,
@@ -133,7 +126,7 @@ const PatientDiagnoiseDetailPage = ({
           if (ageUpdated !== undefined && ageUpdated !== null) {
             return <span>{ageUpdated}</span>;
           }
-          return val ? getAge(val) : "-";
+          return val ? calculateAge(record.dob, record.birth_year) : "-";
         },
       },
       {
@@ -259,6 +252,11 @@ const PatientDiagnoiseDetailPage = ({
       data?.name ||
       ""
     )?.toUpperCase(),
+    birth_year:
+      sono?.birth_year ||
+      doctorUseFormVer2?.birth_year ||
+      data?.birth_year ||
+      "",
     gender:
       sono?.benh_nhan_gioi_tinh ||
       doctorUseFormVer2?.benh_nhan_gioi_tinh ||
@@ -267,8 +265,9 @@ const PatientDiagnoiseDetailPage = ({
     age:
       sono?.benh_nhan_tuoi ||
       doctorUseFormVer2?.benh_nhan_tuoi ||
-      calculateAge(data?.dob) ||
+      calculateAge(data?.dob, data?.birth_year) ||
       "-",
+
     phone:
       sono?.benh_nhan_dien_thoai ||
       doctorUseFormVer2?.benh_nhan_dien_thoai ||
@@ -400,8 +399,8 @@ const PatientDiagnoiseDetailPage = ({
               <Text>{displayData.gender}</Text>
             </Col>
             <Col span={6}>
-              <Title level={5}>Ngày sinh:</Title>
-              <Text>{dayjs(data.dob).format("DD/MM/YYYY")}</Text>
+              <Title level={5}>Năm sinh:</Title>
+              <Text>{displayData.birth_year}</Text>
             </Col>
             <Col span={4}>
               <Title level={5}>Tuổi:</Title>

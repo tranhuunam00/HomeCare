@@ -18,7 +18,6 @@ import { toast } from "react-toastify";
 import { TUYEN_GIAP_STRUCTURE_OPTIONS } from "../tuyengiap/tuyengiap.constants";
 import { TUYEN_VU_STRUCTURE_OPTIONS } from "../tuyenvu/tuyenvu.constants";
 import {
-  getAge,
   getExamPartSono,
   getSonoTemplateService,
   TRANSLATE_LANGUAGE,
@@ -37,6 +36,7 @@ import { LANGUAGE_OPTIONS } from "../../../doctor_use_form_ver2/use/DoctorIUseFo
 import { ThamKhaoLinkHomeCare } from "../../../advance/component_common/Thamkhao";
 import { Grid } from "antd";
 import SmartCASignModal from "../../../doctor_use_form_ver2/SmartCASignModal/SmartCASignModal";
+import { calculateAge } from "../../../formver3/formver3.constant";
 const { useBreakpoint } = Grid;
 const { Option } = Select;
 
@@ -91,7 +91,7 @@ const UltrasoundBungForm = () => {
 
   useEffect(() => {
     const sonoTemplateServiceDB = getSonoTemplateService(
-      templateServices || []
+      templateServices || [],
     );
     setSonoTemplateService(sonoTemplateServiceDB);
     const sonoExamPartsDB = getExamPartSono(examParts, sonoTemplateServiceDB);
@@ -139,8 +139,8 @@ const UltrasoundBungForm = () => {
     f === FIELD1_OPTIONS[0]
       ? BUNG_STRUCTURE_OPTIONS
       : f === FIELD1_OPTIONS[1]
-      ? TUYEN_GIAP_STRUCTURE_OPTIONS
-      : TUYEN_VU_STRUCTURE_OPTIONS;
+        ? TUYEN_GIAP_STRUCTURE_OPTIONS
+        : TUYEN_VU_STRUCTURE_OPTIONS;
 
   // ========= map server data into form and rowsByField =========
   const mapSonoDataToForm = (data) => {
@@ -181,7 +181,6 @@ const UltrasoundBungForm = () => {
       setIdPatientDiagnose(data.id_patient_diagnose);
   };
 
-  // fetch detail if id present
   useEffect(() => {
     if (!id) return;
     const fetchDetail = async () => {
@@ -221,7 +220,8 @@ const UltrasoundBungForm = () => {
           benh_nhan_gioi_tinh:
             sonoDetail?.benh_nhan_gioi_tinh || patientDiagnose.gender,
           benh_nhan_tuoi:
-            sonoDetail?.benh_nhan_tuoi || getAge(patientDiagnose.dob),
+            sonoDetail?.benh_nhan_tuoi ||
+            calculateAge(patientDiagnose.dob, patientDiagnose.birth_year),
           benh_nhan_quoc_tich:
             sonoDetail?.benh_nhan_quoc_tich || patientDiagnose.countryCode,
           benh_nhan_dien_thoai:
@@ -246,10 +246,10 @@ const UltrasoundBungForm = () => {
         setPatientDiagnoseInitial(formValues);
 
         setIsApproved(
-          sonoDetail?.status === SONO_STATUS.APPROVED ? true : false
+          sonoDetail?.status === SONO_STATUS.APPROVED ? true : false,
         );
         setIdExamPart(
-          sonoDetail?.id_exam_part || patientDiagnose?.id_exam_part
+          sonoDetail?.id_exam_part || patientDiagnose?.id_exam_part,
         );
 
         // 4. Đưa dữ liệu vào form
@@ -267,7 +267,7 @@ const UltrasoundBungForm = () => {
 
   useEffect(() => {
     const printT = printTemplateGlobal.find(
-      (t) => t.id == initialSnap.id_print_template
+      (t) => t.id == initialSnap.id_print_template,
     );
     setPrintTemplate(printT);
     form.setFieldsValue({
@@ -320,7 +320,7 @@ const UltrasoundBungForm = () => {
       const res = await API_CALL.post(
         "/sono/analyze",
         { text: finalText },
-        { timeout: 120000 }
+        { timeout: 120000 },
       );
       const aiData = res.data?.data?.data || res.data?.data || [];
       const mapped = aiData.map((item) => ({
@@ -365,7 +365,7 @@ const UltrasoundBungForm = () => {
   const handleReset = () => {
     if (
       !window.confirm(
-        "Bạn có chắc chắn muốn reset dữ liệu siêu âm về trạng thái ban đầu không?"
+        "Bạn có chắc chắn muốn reset dữ liệu siêu âm về trạng thái ban đầu không?",
       )
     ) {
       return;
@@ -460,7 +460,7 @@ const UltrasoundBungForm = () => {
   const addOrUpdateListItem = (structure, status, position, size) => {
     setList((prev) => {
       const idx = prev.findIndex(
-        (it) => it.structure === structure && it.status === status
+        (it) => it.structure === structure && it.status === status,
       );
       const text = `Hình ảnh siêu âm ${field1 || ""}   ${status}${
         position ? ` tại ${position}` : ""
@@ -488,7 +488,9 @@ const UltrasoundBungForm = () => {
 
   const removeListItemByKey = (structure, status) => {
     setList((prev) =>
-      prev.filter((it) => !(it.structure === structure && it.status === status))
+      prev.filter(
+        (it) => !(it.structure === structure && it.status === status),
+      ),
     );
   };
 
@@ -531,7 +533,7 @@ const UltrasoundBungForm = () => {
     // sync list
     selectedStatuses.forEach((st) => {
       const exists = list.some(
-        (item) => item.structure === parent.structure && item.status === st
+        (item) => item.structure === parent.structure && item.status === st,
       );
       if (!exists) addOrUpdateListItem(parent.structure, st, null, null);
     });
@@ -558,7 +560,7 @@ const UltrasoundBungForm = () => {
       parent.structure,
       child.status,
       child.position,
-      child.size
+      child.size,
     );
   };
 
@@ -580,7 +582,7 @@ const UltrasoundBungForm = () => {
     const toRemove = rows[pIdx];
     if (toRemove && toRemove.statuses) {
       toRemove.statuses.forEach((st) =>
-        removeListItemByKey(toRemove.structure, st)
+        removeListItemByKey(toRemove.structure, st),
       );
     }
     const updated = rows.filter((_, i) => i !== pIdx);
@@ -604,11 +606,11 @@ const UltrasoundBungForm = () => {
 
       if (pIdx !== -1) {
         rowsOfField[pIdx].statuses = rowsOfField[pIdx].statuses.filter(
-          (s) => s !== item.status
+          (s) => s !== item.status,
         );
 
         rowsOfField[pIdx].children = rowsOfField[pIdx].children.filter(
-          (c) => c.status !== item.status
+          (c) => c.status !== item.status,
         );
       }
 
@@ -620,7 +622,7 @@ const UltrasoundBungForm = () => {
     if (item.field1 === field1) {
       const newRows = rows.filter(
         (p) =>
-          !(p.structure === item.structure && p.statuses.includes(item.status))
+          !(p.structure === item.structure && p.statuses.includes(item.status)),
       );
       setRows(newRows);
     }
@@ -834,7 +836,7 @@ const UltrasoundBungForm = () => {
                 label={translateLabel(
                   TRANSLATE_LANGUAGE.VI,
                   "resultPrint",
-                  false
+                  false,
                 )}
                 name="id_print_template"
                 rules={[{ required: true, message: "Chọn mẫu in" }]}
@@ -968,7 +970,7 @@ const UltrasoundBungForm = () => {
                               STRUCT &&
                               STRUCT[parent.structure] &&
                               STRUCT[parent.structure].needSize.includes(
-                                child.status
+                                child.status,
                               );
 
                             return !isNormal ? (
@@ -1134,7 +1136,7 @@ const UltrasoundBungForm = () => {
                       if (!acc[item.field1]) acc[item.field1] = [];
                       acc[item.field1].push(item);
                       return acc;
-                    }, {})
+                    }, {}),
                   ).map(([field, items], groupIdx) => (
                     <div key={groupIdx} style={{ marginBottom: 16 }}>
                       {/* dòng dẫn */}
@@ -1145,7 +1147,7 @@ const UltrasoundBungForm = () => {
                       {/* từng mô tả */}
                       {items.map((item) => {
                         const globalIndex = list.findIndex(
-                          (x) => x.id === item.id
+                          (x) => x.id === item.id,
                         );
 
                         return (

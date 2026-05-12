@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { Avatar, Layout, Menu } from "antd";
+import { Avatar, Button, Checkbox, Col, Layout, Menu, Space } from "antd";
 import {
   AppstoreOutlined,
   ArrowLeftOutlined,
@@ -16,14 +16,17 @@ import { USER_ROLE } from "../../constant/app";
 import { toast } from "react-toastify";
 import { hasProOrBusiness } from "../../constant/permission";
 import { Grid } from "antd";
+import {
+  PATIENT_DIAGNOSE_COLOR,
+  PATIENT_DIAGNOSE_STATUS_FILTER,
+} from "../patient/constant.patient";
 
 const { useBreakpoint } = Grid;
 
 const { Header } = Layout;
 
 const Sidebar = ({ collapsed }) => {
-  const { user, isReadingForm, userPackages, isOnWorkList, setIsOnWorkList } =
-    useGlobalAuth();
+  const { user, isReadingForm, userPackages } = useGlobalAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -249,7 +252,6 @@ const Sidebar = ({ collapsed }) => {
       defaultSelectedKeys={["products"]}
       mode="inline"
       items={menuItems}
-      style={{ height: "100%" }}
       inlineCollapsed={collapsed}
       selectedKeys={[location.pathname]}
       defaultOpenKeys={parentKey ? [parentKey] : []}
@@ -258,7 +260,13 @@ const Sidebar = ({ collapsed }) => {
 };
 
 const Home = () => {
-  const { collapsed, setCollapsed } = useGlobalAuth();
+  const {
+    collapsed,
+    setCollapsed,
+    isOnWorkList,
+    filterPatient: pendingFilters,
+    setFilterPatient: setPendingFilters,
+  } = useGlobalAuth();
   const [logo, setLogo] = useState("/logo_home_care.png");
   const screens = useBreakpoint();
   const deviceIsMobile = !screens.md;
@@ -315,6 +323,68 @@ const Home = () => {
               </div>
             )}
             <Sidebar collapsed={collapsed} />
+            {isOnWorkList && (
+              <Col span={24}>
+                <div style={{ width: "100%", paddingLeft: 2 }}>
+                  <h4 style={{ display: deviceIsMobile ? "none" : "block" }}>
+                    Lọc theo Trạng thái:
+                  </h4>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: 8,
+                      width: "100%",
+                    }}
+                  >
+                    {Object.entries(PATIENT_DIAGNOSE_STATUS_FILTER).map(
+                      ([key, label]) => {
+                        const intKey = Number(key);
+                        const isChecked =
+                          pendingFilters.status?.includes(intKey);
+
+                        return (
+                          <div
+                            key={key}
+                            onClick={() => {
+                              const current = pendingFilters.status || [];
+                              const newStatus = isChecked
+                                ? current.filter((x) => x !== intKey)
+                                : [...current, intKey];
+
+                              setPendingFilters({
+                                ...pendingFilters,
+                                status: newStatus,
+                              });
+                            }}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 8,
+                              backgroundColor: PATIENT_DIAGNOSE_COLOR[intKey],
+                              color: "#fff",
+                              opacity: isChecked ? 1 : 0.4,
+                              borderRadius: 6,
+                              padding: "8px 10px",
+                              cursor: "pointer",
+                            }}
+                          >
+                            <Checkbox
+                              checked={isChecked}
+                              onChange={() => {}}
+                              style={{ pointerEvents: "none" }} // click cả khối
+                            />
+                            <span style={{ fontSize: 13, fontWeight: 500 }}>
+                              {label}
+                            </span>
+                          </div>
+                        );
+                      },
+                    )}
+                  </div>
+                </div>
+              </Col>
+            )}
           </Sider>
 
           <Content style={{ padding: 8, background: "#fff" }}>

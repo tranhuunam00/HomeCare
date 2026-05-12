@@ -23,13 +23,8 @@ import ImageWithCaptionInput from "../ImageWithCaptionInput/ImageWithCaptionInpu
 import CustomSunEditor from "../../../components/Suneditor/CustomSunEditor";
 import { UploadOutlined } from "@ant-design/icons";
 import { toast } from "react-toastify";
+import { calculateAge } from "../../formver3/formver3.constant";
 
-const calculateAge = (dob) => {
-  if (!dob) return "";
-  const today = dayjs();
-  const birthDate = dayjs(dob);
-  return today.diff(birthDate, "year");
-};
 const { Title } = Typography;
 const { Option } = Select;
 
@@ -81,7 +76,7 @@ const TemplatePrintUse = () => {
         toast.error("Tải file thất bại!", err?.response?.data?.message);
       });
   };
-const { provinces, wards, setSelectedProvince } = useVietnamAddress();
+  const { provinces, wards, setSelectedProvince } = useVietnamAddress();
 
   useEffect(() => {
     setSelectedProvince(patient.province);
@@ -474,7 +469,7 @@ const { provinces, wards, setSelectedProvince } = useVietnamAddress();
                   </p>
                 </div>
                 <p style={{ margin: 0, padding: 0 }}>
-                  {calculateAge(patient.dob)}
+                  {calculateAge(patient.dob, patient.birth_year)}
                 </p>
               </div>
             </div>
@@ -513,9 +508,7 @@ const { provinces, wards, setSelectedProvince } = useVietnamAddress();
                   <div style={{ width: 150 }}>
                     <strong>Quận/Huyện</strong>
                   </div>
-                  <div>
-                    {wards.find((s) => s.code == patient.wards)?.name}
-                  </div>
+                  <div>{wards.find((s) => s.code == patient.wards)?.name}</div>
                 </div>
                 <div>
                   <div style={{ width: 150 }}>

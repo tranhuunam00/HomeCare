@@ -221,24 +221,6 @@ export const sortTemplateServices = (templateServices = []) => {
   });
 };
 
-export const getAge = (dobString) => {
-  if (!dobString) return null;
-
-  const dob = new Date(dobString);
-  const today = new Date();
-
-  let age = today.getFullYear() - dob.getFullYear();
-  const monthDiff = today.getMonth() - dob.getMonth();
-  const dayDiff = today.getDate() - dob.getDate();
-
-  // Nếu chưa tới sinh nhật năm nay thì trừ 1
-  if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
-    age--;
-  }
-
-  return age;
-};
-
 export const getSonoTemplateService = (templateServices) => {
   return templateServices.find((t) => t.code.toUpperCase().includes("SASK"));
 };

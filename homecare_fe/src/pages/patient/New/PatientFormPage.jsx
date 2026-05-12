@@ -92,11 +92,13 @@ const PatientFormPage = () => {
             province: data.province_code || undefined,
             ward: data.ward_code || undefined,
             id_clinic: data.id_clinic || doctor?.id_clinic || undefined,
-            dob: data.dob ? dayjs(data.dob) : null,
-            age: data.dob ? dayjs().diff(dayjs(data.dob), "year") : undefined,
+            birth_year: data.birth_year,
             id_template_service: data.id_template_service,
             id_exam_part: data.id_exam_part,
             status: data.status,
+            age: data.birth_year
+              ? new Date().getFullYear() - Number(data.birth_year)
+              : undefined,
           };
           form.setFieldsValue(dataMapping);
           setInitialValues(dataMapping);
@@ -111,18 +113,6 @@ const PatientFormPage = () => {
     }
   }, [id]);
 
-  const handleDobChange = (date) => {
-    if (date) {
-      const today = dayjs();
-      const birth = dayjs(date);
-      const age = today.diff(birth, "year");
-      form.setFieldsValue({ age });
-      form.setFieldsValue({ dob: date });
-    } else {
-      form.setFieldsValue({ age: undefined });
-      form.setFieldsValue({ dob: null });
-    }
-  };
   const onFinish = async (values) => {
     try {
       setLoading(true);
@@ -143,7 +133,7 @@ const PatientFormPage = () => {
         id_clinic: values.id_clinic || doctor?.id_clinic,
         createdBy: user?.id,
         status: PATIENT_DIAGNOSE_STATUS_CODE.NEW, // c
-        dob: values.dob,
+        birth_year: values.birth_year,
         id_template_service: values.id_template_service,
         id_exam_part: values.id_exam_part,
         Indication: values.Indication,
@@ -209,6 +199,8 @@ const PatientFormPage = () => {
         <ThamKhaoLinkHomeCare
           name={""}
           title={id ? "CẬP NHẬT CA" : "THÊM CA MỚI"}
+          hideToplabel={true}
+          hideAdditionalInfo={true}
         />
 
         <Form
@@ -257,22 +249,39 @@ const PatientFormPage = () => {
           <Row gutter={24}>
             <Col span={12}>
               <Form.Item
-                name="dob"
-                label="Ngày sinh"
+                name="birth_year"
+                label="Năm sinh"
                 rules={[
-                  { required: true, message: "Vui lòng nhập không để trống" },
+                  {
+                    required: true,
+                    message: "Vui lòng nhập năm sinh",
+                  },
                 ]}
               >
-                <DatePicker
-                  disabledDate={disabledDate}
-                  onChange={handleDobChange}
-                  style={{ width: "100%" }}
-                  format="DD/MM/YYYY"
+                <Input
+                  type="number"
+                  placeholder="Ví dụ: 1998"
+                  onChange={(e) => {
+                    const year = +e.target.value;
+
+                    if (!year) {
+                      form.setFieldsValue({ age: undefined });
+                      return;
+                    }
+
+                    const currentYear = new Date().getFullYear();
+
+                    form.setFieldsValue({
+                      birth_year: year,
+                      age: currentYear - year,
+                    });
+                  }}
                 />
               </Form.Item>
             </Col>
+
             <Col span={12}>
-              <Form.Item name="age" label="Tuổi" rules={[{ required: false }]}>
+              <Form.Item name="age" label="Tuổi">
                 <Input disabled />
               </Form.Item>
             </Col>
@@ -459,6 +468,11 @@ const PatientFormPage = () => {
             <h3 style={{ color: "#1677ff" }}>THÔNG TIN CHỈ ĐỊNH</h3>
 
             <ReloadTSAndExamPartsButton />
+
+            <h5 style={{ fontStyle: "italic", fontWeight: 400 }}>
+              Nếu mục nhập chỉ định bị rỗng, vui lòng ấn nút reload - bên trái
+              để lấy lại thông tin
+            </h5>
           </div>
           <Row gutter={16}>
             <Col span={12}>

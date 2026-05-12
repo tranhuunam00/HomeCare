@@ -200,7 +200,7 @@ const ImportPatientModal = ({ open, onClose, onImportSuccess }) => {
       "SID (*)",
       "Họ và tên (*)",
       "Giới tính (*)",
-      "Ngày sinh",
+      "Năm sinh",
       "SDT",
       "CCCD",
       "Email",
@@ -352,7 +352,7 @@ const ImportPatientModal = ({ open, onClose, onImportSuccess }) => {
 
     exampleRow.getCell(3).value = "Nguyễn Văn A";
     exampleRow.getCell(4).value = "Nam";
-    exampleRow.getCell(5).value = "1990-01-01";
+    exampleRow.getCell(5).value = "1990";
     exampleRow.getCell(6).value = "0912345678";
     exampleRow.getCell(7).value = "012345678901";
     exampleRow.getCell(8).value = "nguyenvana@gmail.com";

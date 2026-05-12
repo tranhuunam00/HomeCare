@@ -19,6 +19,7 @@ const TemplatePatientUser = ({ value = {}, onChange }) => {
       form.setFieldsValue({
         ...value,
         dob: value.dob ? dayjs(value.dob) : null,
+        birth_year: value.birth_year || null,
       });
     }
   }, [value]);

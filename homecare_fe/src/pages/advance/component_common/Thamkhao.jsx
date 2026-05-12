@@ -8,6 +8,8 @@ export const ThamKhaoLinkHomeCare = ({
   name,
   desc,
   isMobile,
+  hideToplabel = false,
+  hideAdditionalInfo = false,
 }) => {
   return (
     <div style={{ marginBottom: isMobile ? 0 : 40 }}>
@@ -18,6 +20,7 @@ export const ThamKhaoLinkHomeCare = ({
           marginBottom: 0,
           color: "rgba(18, 119, 49, 1)",
           fontSize: isMobile ? 18 : 24,
+          display: hideToplabel ? "none" : "block",
         }}
       >
         PHẦN MỀM D-RADS
@@ -36,7 +39,11 @@ export const ThamKhaoLinkHomeCare = ({
       </h3>
       <h2 style={{ marginBottom: 4, fontSize: isMobile ? 12 : 20 }}>{name}</h2>
       <h5>{desc}</h5>
-      <h5>
+      <h5
+        style={{
+          display: hideAdditionalInfo ? "none" : "block",
+        }}
+      >
         {"Xem thêm tại "}
         <a href={link || "https://home-care.vn/product/phan-mem-d-tirads/"}>
           www.home-care.vn

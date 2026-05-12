@@ -27,15 +27,10 @@ import {
   ApartmentOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
-import debounce from "lodash.debounce";
 import { useNavigate } from "react-router-dom";
 import API_CALL from "../../services/axiosClient";
 import { useGlobalAuth } from "../../contexts/AuthContext";
-import {
-  getAge,
-  PATIENT_DIAGNOSE_STATUS_CODE,
-  USER_ROLE,
-} from "../../constant/app";
+import { PATIENT_DIAGNOSE_STATUS_CODE, USER_ROLE } from "../../constant/app";
 
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
@@ -53,17 +48,22 @@ import ReloadTSAndExamPartsButton from "../../components/ReloadTSAndExamPartsBut
 import ResizableTitle from "./setting/ResizableTitle";
 import FlowModal from "./setting/nodes/FlowModal";
 import ImportPatientModal from "./Import/ImportPatientModal";
+import { calculateAge } from "../formver3/formver3.constant";
+import {
+  PATIENT_DIAGNOSE_COLOR,
+  PATIENT_DIAGNOSE_STATUS_FILTER,
+} from "./constant.patient";
 
 const { Option } = Select;
 const COLUMN_SETTING_STORAGE_KEY = "patientDiagnose_column_settings";
 
 const DATE_OPTIONS = [
-  { label: "Tất cả", value: "all" },
+  { label: "Tất cả", value: null },
   { label: "Hôm nay", value: "today" },
   { label: "Hôm qua", value: "yesterday" },
   { label: "Tuần này", value: "this_week" },
-  { label: "Tháng này", value: "this_month" },
-  { label: "Range", value: "range" },
+  // { label: "Tháng này", value: "this_month" },
+  { label: "Phạm vi", value: "range" },
 ];
 
 const PATIENT_DIAGNOSE_STATUS = {
@@ -73,24 +73,11 @@ const PATIENT_DIAGNOSE_STATUS = {
   4: "Đã duyệt",
 };
 
-const PATIENT_DIAGNOSE_STATUS_FILTER = {
-  1: "Chưa đọc",
-  2: "Đang đọc",
-  3: "Chờ duyệt",
-  4: "Đã duyệt",
-};
-
-const PATIENT_DIAGNOSE_COLOR = {
-  1: "#0b56e3d3", // New
-  2: "#F59E0B", // Reading
-  3: "#8317c6ff", // Waiting
-  4: "#10B981", // Done
-};
-
 const defaultVisibleKeys = [
   "STT",
   "id",
   "name",
+  "birth_year",
   "status",
   "dob",
   "gender",
@@ -109,66 +96,45 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
 
   const [data, setData] = useState([]);
   const [sameCCCDData, setSameCCCDData] = useState([]);
-  const [openWorkflow, setOpenWorkflow] = useState(false);
 
-  const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [openColumnModal, setOpenColumnModal] = useState(false);
   const [customColumns, setCustomColumns] = useState([]);
   const [chosenRecord, setChosenRecord] = useState();
   const [returnStatus, setReturnStatus] = useState(false);
-  const [openImportModal, setOpenImportModal] = useState(false);
-  const [importFile, setImportFile] = useState(null);
 
   const [visibleKeys, setVisibleKeys] = useState([]);
   const {
     user,
-    doctor,
     examParts,
     templateServices,
     clinicsAll,
     setIsOnWorkList,
     setCollapsed,
+    filterPatient: pendingFilters,
+    setFilterPatient: setPendingFilters,
+    setTotalPatient: setTotal,
+    totalPatient: total,
   } = useGlobalAuth();
 
   const { fetchTSAndExamParts } = useTemplateServicesAndExamParts();
 
   useEffect(() => {
-    setIsOnWorkList(false);
-    setCollapsed(false);
+    setIsOnWorkList(true);
+    setCollapsed(true);
     fetchTSAndExamParts();
     return () => setIsOnWorkList(false);
   }, []);
-
-  const [pendingFilters, setPendingFilters] = useState({
-    name: null,
-    PID: PID,
-    SID: null,
-    id_clinic: null,
-    status: [],
-    id_template_service: null,
-    date_type: null,
-    from_date: null,
-    to_date: null,
-  });
 
   const [filters, setFilters] = useState({
     PID: PID,
   });
 
   useEffect(() => {
-    const handler = setTimeout(() => {
-      setPage(1);
-      setFilters(pendingFilters);
-    }, 500); // ⏱ 300–500ms là hợp lý
-
-    return () => clearTimeout(handler);
+    setPage(1);
+    setFilters(pendingFilters);
   }, [pendingFilters]);
-
-  useEffect(() => {
-    fetchPatients();
-  }, [filters, page, limit]);
 
   const allColumns = useMemo(
     () => [
@@ -210,14 +176,11 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
       },
 
       {
-        title: "Tuổi",
-        dataIndex: "dob",
-        key: "dob",
+        title: "Năm sinh",
+        dataIndex: "birth_year",
+        key: "birth_year",
         width: 80,
         align: "center",
-        render: (val) => {
-          return val ? getAge(val) : "-";
-        },
       },
       { title: "CCCD", dataIndex: "CCCD", key: "CCCD", width: 160 },
       {
@@ -374,7 +337,11 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
   }, []);
 
   useEffect(() => {
-    fetchPatients(filters);
+    const timer = setTimeout(() => {
+      fetchPatients(filters);
+    }, 500);
+
+    return () => clearTimeout(timer);
   }, [filters, page, limit, returnStatus]);
 
   useEffect(() => {
@@ -405,7 +372,6 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
   };
 
   const fetchPatients = async (filters) => {
-    console.log("filters", filters);
     try {
       const res = await API_CALL.get("/patient-diagnose", {
         params: {
@@ -432,10 +398,10 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
       }
       const res = chosenRecord?.CCCD
         ? await API_CALL.get("/patient-diagnose", {
-            params: { CCCD: chosenRecord?.CCCD, page: 1, limit: 10 },
+            params: { CCCD: chosenRecord?.CCCD, page: 1, limit: 20 },
           })
         : await API_CALL.get("/patient-diagnose", {
-            params: { PID: chosenRecord?.PID, page: 1, limit: 10 },
+            params: { PID: chosenRecord?.PID, page: 1, limit: 20 },
           });
       const responseData = res.data.data;
       setSameCCCDData(responseData?.rows || []);
@@ -606,274 +572,6 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
         gap: 8,
       }}
     >
-      <div style={{ width: !deviceIsMobile ? 175 : "100%" }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: "12px",
-            marginBottom: 16,
-          }}
-        >
-          <Typography.Title
-            level={4}
-            style={{ margin: 0, whiteSpace: "nowrap" }}
-          >
-            Số Ca = {total}
-          </Typography.Title>
-
-          <Tooltip title="Quy trình">
-            <Button
-              icon={<ApartmentOutlined />}
-              style={{
-                background: "linear-gradient(135deg, #3526b9, #69b1ff)",
-                border: "none",
-                color: "#fff",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background =
-                  "linear-gradient(135deg, #24552f, #4096ff)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background =
-                  "linear-gradient(135deg, #3526b9, #69b1ff)";
-              }}
-              onClick={() => setOpenWorkflow(true)}
-            >
-              Quy trình
-            </Button>
-          </Tooltip>
-
-          <Space style={{ justifyContent: "space-around", display: "flex" }}>
-            {!isNotCreate && (
-              <Button
-                type="primary"
-                icon={<UserAddOutlined />}
-                onClick={() => navigate("/home/patients-diagnose/create")}
-              >
-                Thêm mới
-              </Button>
-            )}
-
-            <Tooltip title={"Cấu hình cột"}>
-              <Button
-                onClick={() => setOpenColumnModal(true)}
-                icon={<SettingOutlined />}
-              ></Button>
-            </Tooltip>
-          </Space>
-        </div>
-        <Button
-          icon={<UploadOutlined />}
-          onClick={() => setOpenImportModal(true)}
-        >
-          Import
-        </Button>
-
-        <Divider
-          style={{ margin: 16, display: deviceIsMobile ? "none" : "block" }}
-        />
-
-        <Divider
-          style={{ margin: 16, display: deviceIsMobile ? "none" : "block" }}
-        />
-        <div
-          style={{
-            display: deviceIsMobile ? "flex" : "block",
-            justifyContent: "end",
-            gap: "12px",
-          }}
-        >
-          <Row style={{ marginBottom: !deviceIsMobile ? 16 : 0, order: 1 }}>
-            <Space>
-              <Button
-                style={{ width: !deviceIsMobile ? 175 : "100%" }}
-                onClick={() => {
-                  setPendingFilters({
-                    name: null,
-                    PID: PID,
-                    SID: null,
-                    id_clinic: null,
-                    status: [],
-                    id_template_service: null,
-                    date_type: null,
-                    from_date: null,
-                    to_date: null,
-                  });
-                  setFilters({});
-                  setPage(1);
-                }}
-              >
-                Xóa lọc
-              </Button>
-            </Space>
-          </Row>
-          <Divider
-            style={{ margin: 16, display: deviceIsMobile ? "none" : "block" }}
-          />
-          <ConfigProvider
-            theme={{
-              components: {
-                Select: {
-                  fontSize: 13,
-                },
-              },
-            }}
-          >
-            <Col>
-              <Select
-                className="smallSelect"
-                allowClear
-                showSearch
-                value={pendingFilters.id_clinic}
-                placeholder="Chọn phòng khám"
-                style={{ width: deviceIsMobile ? 250 : 175 }}
-                optionFilterProp="children"
-                onChange={(value) =>
-                  setPendingFilters({ ...pendingFilters, id_clinic: value })
-                }
-              >
-                {clinicsAll?.map((c) => (
-                  <Option key={c.id} value={c.id}>
-                    {c.name}
-                  </Option>
-                ))}
-              </Select>
-            </Col>
-          </ConfigProvider>
-        </div>
-
-        <Divider
-          style={{ margin: 16, display: deviceIsMobile ? "none" : "block" }}
-        />
-
-        <div
-          style={{
-            display: "flex",
-            flexDirection: !deviceIsMobile ? "column" : "row",
-            width: "100%",
-            gap: 8,
-            marginTop: deviceIsMobile ? 8 : 0,
-          }}
-        >
-          <Col style={{ flex: 1 }}>
-            <Select
-              allowClear
-              style={{ width: "100%", maxWidth: 175 }}
-              value={pendingFilters.id_template_service}
-              placeholder="Phân hệ"
-              onChange={(value) =>
-                setPendingFilters({
-                  ...pendingFilters,
-                  id_template_service: value,
-                })
-              }
-            >
-              {templateServices?.map((t) => (
-                <Option key={t.id} value={t.id}>
-                  {t.name}
-                </Option>
-              ))}
-            </Select>
-          </Col>
-
-          <Divider
-            style={{ margin: 8, display: deviceIsMobile ? "none" : "block" }}
-          />
-
-          <Col style={{ flex: 1 }}>
-            <Select
-              allowClear
-              disabled={!pendingFilters.id_template_service}
-              style={{ width: "100%" }}
-              placeholder="Bộ phận"
-              value={pendingFilters.id_exam_part}
-              onChange={(value) =>
-                setPendingFilters({ ...pendingFilters, id_exam_part: value })
-              }
-            >
-              {examParts
-                ?.filter(
-                  (e) =>
-                    e.id_template_service == pendingFilters.id_template_service,
-                )
-                ?.map((e) => (
-                  <Option key={e.id} value={e.id}>
-                    {e.name}
-                  </Option>
-                ))}
-            </Select>
-          </Col>
-        </div>
-        <ReloadTSAndExamPartsButton />
-
-        <Divider style={{ margin: 8 }} />
-
-        <Col span={24}>
-          <div style={{ width: "100%" }}>
-            <h4 style={{ display: deviceIsMobile ? "none" : "block" }}>
-              Trạng thái:
-            </h4>
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: 8,
-                width: "100%",
-              }}
-            >
-              {Object.entries(PATIENT_DIAGNOSE_STATUS_FILTER).map(
-                ([key, label]) => {
-                  const intKey = Number(key);
-                  const isChecked = pendingFilters.status?.includes(intKey);
-
-                  return (
-                    <div
-                      key={key}
-                      onClick={() => {
-                        const current = pendingFilters.status || [];
-                        const newStatus = isChecked
-                          ? current.filter((x) => x !== intKey)
-                          : [...current, intKey];
-
-                        setPendingFilters({
-                          ...pendingFilters,
-                          status: newStatus,
-                        });
-                      }}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 8,
-                        backgroundColor: PATIENT_DIAGNOSE_COLOR[intKey],
-                        color: "#fff",
-                        opacity: isChecked ? 1 : 0.4,
-                        borderRadius: 6,
-                        padding: "8px 10px",
-                        cursor: "pointer",
-                        width: !deviceIsMobile ? "100%" : "calc(50% - 4px)",
-                        minWidth: !deviceIsMobile ? 175 : "unset",
-                      }}
-                    >
-                      <Checkbox
-                        checked={isChecked}
-                        onChange={() => {}}
-                        style={{ pointerEvents: "none" }} // click cả khối
-                      />
-                      <span style={{ fontSize: 13, fontWeight: 500 }}>
-                        {label}
-                      </span>
-                    </div>
-                  );
-                },
-              )}
-            </div>
-          </div>
-        </Col>
-      </div>
-
       <div
         style={{
           padding: 0,
@@ -881,23 +579,19 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
           width: !deviceIsMobile ? 200 : "100%",
         }}
       >
-        <Space
-          style={{
-            marginBottom: 16,
-            justifyContent: "space-between",
-            width: "100%",
-          }}
-        >
-          {/* <Space></Space> */}
-        </Space>
-
         <Row gutter={24} style={{ marginBottom: 16 }}>
-          <Col
-            span={chosenRecord || deviceIsMobile ? 12 : 5}
-            style={{ marginBottom: 5 }}
-          >
+          <Col span={1}>
+            <Tooltip title={"Cấu hình cột"}>
+              <Button
+                onClick={() => setOpenColumnModal(true)}
+                icon={<SettingOutlined />}
+              ></Button>
+            </Tooltip>
+          </Col>
+
+          <Col span={4} style={{ marginBottom: 5 }}>
             <Input
-              placeholder="Tìm theo tên"
+              placeholder="Tên"
               onChange={(e) =>
                 setPendingFilters({ ...pendingFilters, name: e.target.value })
               }
@@ -906,10 +600,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
             />
           </Col>
 
-          <Col
-            span={chosenRecord || deviceIsMobile ? 12 : 5}
-            style={{ marginBottom: 5 }}
-          >
+          <Col span={4} style={{ marginBottom: 5 }}>
             <Input
               placeholder="Tìm theo PID"
               onChange={(e) =>
@@ -919,7 +610,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
               value={pendingFilters?.PID}
             />
           </Col>
-          <Col span={chosenRecord || deviceIsMobile ? 24 : 14}>
+          <Col span={15}>
             <Space
               wrap
               style={{
@@ -1121,37 +812,6 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
           localStorage.getItem(COLUMN_SETTING_STORAGE_KEY) || "{}",
         )}
         onSave={handleSaveColumnSettings}
-      />
-
-      <ImportPatientModal
-        open={openImportModal}
-        onClose={() => setOpenImportModal(false)}
-        onImportSuccess={() => {
-          fetchPatients(filters);
-        }}
-      />
-
-      <FlowModal
-        open={openWorkflow}
-        onClose={() => setOpenWorkflow(false)}
-        onAction={(step) => {
-          switch (step.action) {
-            case "LOCK_READ":
-              // call API lock
-              break;
-            case "CANCEL_READ":
-              // unlock
-              break;
-            case "APPROVE":
-              // duyệt
-              break;
-            case "CANCEL_APPROVE":
-              // hủy duyệt
-              break;
-            default:
-              console.log(step.action);
-          }
-        }}
       />
     </div>
   );

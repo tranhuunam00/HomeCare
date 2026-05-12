@@ -59,7 +59,7 @@ const PreviewSono = ({
   }, [formSnapshot?.benh_nhan_dia_chi_tinh_thanh_pho]);
   const provinceName =
     provinces.find(
-      (p) => p.code == formSnapshot?.benh_nhan_dia_chi_tinh_thanh_pho
+      (p) => p.code == formSnapshot?.benh_nhan_dia_chi_tinh_thanh_pho,
     )?.name || formSnapshot?.benh_nhan_dia_chi_tinh_thanh_pho;
 
   const wardName =
@@ -169,7 +169,7 @@ const PreviewSono = ({
               {translateLabel(
                 languageTranslate,
                 "administrativeInfo",
-                false
+                false,
               ).toUpperCase()}
             </h3>
 
@@ -178,7 +178,7 @@ const PreviewSono = ({
                 label={translateLabel(
                   languageTranslate,
                   "fullName",
-                  false
+                  false,
                 ).toUpperCase()}
                 value={formSnapshot?.benh_nhan_ho_ten}
               />
@@ -186,7 +186,7 @@ const PreviewSono = ({
                 label={translateLabel(
                   languageTranslate,
                   "gender",
-                  false
+                  false,
                 ).toUpperCase()}
                 value={formSnapshot?.benh_nhan_gioi_tinh}
               />
@@ -194,7 +194,7 @@ const PreviewSono = ({
                 label={translateLabel(
                   languageTranslate,
                   "age",
-                  false
+                  false,
                 ).toUpperCase()}
                 value={formSnapshot?.benh_nhan_tuoi}
               />
@@ -204,7 +204,7 @@ const PreviewSono = ({
                 label={translateLabel(
                   languageTranslate,
                   "address",
-                  false
+                  false,
                 ).toUpperCase()}
                 value={formSnapshot?.benh_nhan_dia_chi_so_nha}
               />
@@ -214,7 +214,7 @@ const PreviewSono = ({
                 label={translateLabel(
                   languageTranslate,
                   "district",
-                  false
+                  false,
                 ).toUpperCase()}
                 value={wardName}
               />
@@ -223,7 +223,7 @@ const PreviewSono = ({
                 label={translateLabel(
                   languageTranslate,
                   "province",
-                  false
+                  false,
                 ).toUpperCase()}
                 value={provinceName}
               />
@@ -231,7 +231,7 @@ const PreviewSono = ({
                 label={translateLabel(
                   languageTranslate,
                   "nationality",
-                  false
+                  false,
                 ).toUpperCase()}
                 value={formSnapshot?.benh_nhan_quoc_tich}
               />
@@ -242,7 +242,7 @@ const PreviewSono = ({
                 label={translateLabel(
                   languageTranslate,
                   "phone",
-                  false
+                  false,
                 ).toUpperCase()}
                 value={formSnapshot?.benh_nhan_dien_thoai}
               />
@@ -250,7 +250,7 @@ const PreviewSono = ({
                 label={translateLabel(
                   languageTranslate,
                   "email",
-                  false
+                  false,
                 ).toUpperCase()}
                 value={formSnapshot?.benh_nhan_email}
               />
@@ -260,7 +260,7 @@ const PreviewSono = ({
                 label={translateLabel(
                   languageTranslate,
                   "patientId",
-                  false
+                  false,
                 ).toUpperCase()}
                 value={formSnapshot?.benh_nhan_pid}
               />
@@ -268,7 +268,7 @@ const PreviewSono = ({
                 label={translateLabel(
                   languageTranslate,
                   "sid",
-                  false
+                  false,
                 ).toUpperCase()}
                 value={formSnapshot?.benh_nhan_sid}
               />
@@ -278,7 +278,7 @@ const PreviewSono = ({
                 label={translateLabel(
                   languageTranslate,
                   "clinical",
-                  false
+                  false,
                 ).toUpperCase()}
                 value={formSnapshot?.benh_nhan_lam_sang}
               />
@@ -356,7 +356,7 @@ const PreviewSono = ({
             {translateLabel(
               languageTranslate,
               "imagingFindings",
-              false
+              false,
             ).toUpperCase()}
           </h3>
 
@@ -390,7 +390,7 @@ const PreviewSono = ({
           {fieldList.map((fieldName, fieldIdx) => {
             let parents = rowsByField[fieldName] || [];
             parents = parents.filter(
-              (p) => p.statuses[0] != "Không thấy bất thường"
+              (p) => p.statuses[0] != "Không thấy bất thường",
             );
             const hasSelected = parents.some((p) => p.statuses?.length > 0);
             if (!hasSelected) return null;
@@ -528,7 +528,7 @@ const PreviewSono = ({
             label={translateLabel(
               languageTranslate,
               "icd10Classification",
-              false
+              false,
             )}
             value={formSnapshot?.icd10}
           />
@@ -536,7 +536,7 @@ const PreviewSono = ({
             label={translateLabel(
               languageTranslate,
               "gradingClassification",
-              false
+              false,
             )}
             value={formSnapshot?.phan_do_loai}
           />
@@ -544,7 +544,7 @@ const PreviewSono = ({
             label={translateLabel(
               languageTranslate,
               "differentialDiagnosis",
-              false
+              false,
             )}
             value={formSnapshot?.chan_doan_phan_biet}
           />

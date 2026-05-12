@@ -22,6 +22,18 @@ export const GlobalAuthProvider = ({ children }) => {
   const [clinicsAll, setClinicsAll] = useState([]);
   const [isOnWorkList, setIsOnWorkList] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+  const [totalPatient, setTotalPatient] = useState(0);
+  const [filterPatient, setFilterPatient] = useState({
+    name: null,
+    PID: null,
+    SID: null,
+    id_clinic: null,
+    status: [],
+    id_template_service: null,
+    date_type: null,
+    from_date: null,
+    to_date: null,
+  });
 
   const handleLoginContext = ({ token, user, doctor }) => {
     storage.saveAuth({ token, user, doctor });
@@ -73,6 +85,10 @@ export const GlobalAuthProvider = ({ children }) => {
         setIsOnWorkList,
         collapsed,
         setCollapsed,
+        filterPatient,
+        setFilterPatient,
+        totalPatient,
+        setTotalPatient,
       }}
     >
       {children}
