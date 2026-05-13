@@ -25,34 +25,40 @@ export const USER_ROLE_ID = {
 };
 
 export const PATIENT_DIAGNOSE_STATUS = {
-  1: "Khởi tạo",
-  2: "Đang đọc",
-  3: "Chờ duyệt",
-  4: "Đã duyệt",
+  1: "Chưa đọc",
+  2: "Hội chẩn",
+  3: "Đang đọc",
+  4: "Đọc xong",
+  5: "Đang duyệt",
+  6: "Duyệt xong",
 };
 
 export const PATIENT_DIAGNOSE_STATUS_NAME = {
   NEW: 1,
-  IN_PROCESS: 2,
-  WAITING: 3,
-  VERIFY: 4,
-  TRANSLATE: 5,
+  CONSULTATION: 2,
+  IN_PROCESSING: 3,
+  READ_DONE: 4,
+  WAIT_VERIFY: 5,
+  VERIFIED: 6,
 };
 
 export const PATIENT_DIAGNOSE_STATUS_CODE = {
   NEW: 1,
-  INPROCESS: 2,
-  WAIT: 3,
-  VERIFY: 4,
+  CONSULTATION: 2,
+  IN_PROCESSING: 3,
+  READ_DONE: 4,
+  WAIT_VERIFY: 5,
+  VERIFIED: 6,
+};
+export const PATIENT_DIAGNOSE_COLOR = {
+  1: "#EF4444", // Chưa đọc - red
+  2: "#e2b86f", // Hội chẩn - amber
+  3: "#FB923C", // Đang đọc - orange
+  4: "#0EA5E9", // Đọc xong - sky blue
+  5: "#5ed36d", // Đang duyệt - violet
+  6: "#22C55E", // Duyệt xong - green
 };
 
-export const PATIENT_DIAGNOSE_COLOR = {
-  1: "Blue",
-  2: "#d7921a",
-  3: "#a51ad7",
-  4: "Green",
-  5: "#11111",
-};
 export function extractDynamicFieldsFromHtml(htmlString) {
   const parser = new DOMParser();
   const doc = parser.parseFromString(htmlString, "text/html");

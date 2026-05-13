@@ -12,14 +12,11 @@ import Sider from "antd/es/layout/Sider";
 import { Content } from "antd/es/layout/layout";
 import TopHeader from "../../components/TopHeader/TopHeader";
 import { useGlobalAuth } from "../../contexts/AuthContext";
-import { USER_ROLE } from "../../constant/app";
+import { PATIENT_DIAGNOSE_COLOR, USER_ROLE } from "../../constant/app";
 import { toast } from "react-toastify";
 import { hasProOrBusiness } from "../../constant/permission";
 import { Grid } from "antd";
-import {
-  PATIENT_DIAGNOSE_COLOR,
-  PATIENT_DIAGNOSE_STATUS_FILTER,
-} from "../patient/constant.patient";
+import { PATIENT_DIAGNOSE_STATUS_FILTER } from "../patient/constant.patient";
 
 const { useBreakpoint } = Grid;
 

@@ -30,7 +30,12 @@ import {
 import { useNavigate } from "react-router-dom";
 import API_CALL from "../../services/axiosClient";
 import { useGlobalAuth } from "../../contexts/AuthContext";
-import { PATIENT_DIAGNOSE_STATUS_CODE, USER_ROLE } from "../../constant/app";
+import {
+  PATIENT_DIAGNOSE_COLOR,
+  PATIENT_DIAGNOSE_STATUS,
+  PATIENT_DIAGNOSE_STATUS_CODE,
+  USER_ROLE,
+} from "../../constant/app";
 
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
@@ -49,10 +54,7 @@ import ResizableTitle from "./setting/ResizableTitle";
 import FlowModal from "./setting/nodes/FlowModal";
 import ImportPatientModal from "./Import/ImportPatientModal";
 import { calculateAge } from "../formver3/formver3.constant";
-import {
-  PATIENT_DIAGNOSE_COLOR,
-  PATIENT_DIAGNOSE_STATUS_FILTER,
-} from "./constant.patient";
+import { PATIENT_DIAGNOSE_STATUS_FILTER } from "./constant.patient";
 
 const { Option } = Select;
 const COLUMN_SETTING_STORAGE_KEY = "patientDiagnose_column_settings";
@@ -65,13 +67,6 @@ const DATE_OPTIONS = [
   // { label: "Tháng này", value: "this_month" },
   { label: "Phạm vi", value: "range" },
 ];
-
-const PATIENT_DIAGNOSE_STATUS = {
-  1: "Chưa đọc",
-  2: "Đang đọc",
-  3: "Chờ duyệt",
-  4: "Đã duyệt",
-};
 
 const defaultVisibleKeys = [
   "STT",

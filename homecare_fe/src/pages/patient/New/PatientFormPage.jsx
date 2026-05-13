@@ -551,7 +551,14 @@ const PatientFormPage = () => {
                 },
               ]}
             >
-              <Select placeholder="Chọn phòng khám">
+              <Select
+                placeholder="Chọn phòng khám"
+                showSearch
+                optionFilterProp="children"
+                filterOption={(input, option) =>
+                  option?.children?.toLowerCase()?.includes(input.toLowerCase())
+                }
+              >
                 {clinics.map((clinic) => (
                   <Option key={clinic.id} value={clinic.id}>
                     {clinic.name}

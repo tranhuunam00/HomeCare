@@ -17,6 +17,8 @@ import {
   PATIENT_DIAGNOSE_STATUS_NAME,
 } from "../../constant/app";
 import { useGlobalAuth } from "../../contexts/AuthContext";
+import { useState } from "react";
+import ConsultationSelectModal from "./components/ConsultationSelectModal/ConsultationSelectModal";
 
 const FormVer3GroupProcessPatientDiagnoise = ({
   patientDiagnose,
@@ -24,8 +26,13 @@ const FormVer3GroupProcessPatientDiagnoise = ({
   onStatusChange,
   onClose,
 }) => {
-  const { id, status, id_doctor_in_processing } = patientDiagnose;
+  const { id, status, id_doctor_in_processing, id_consulting_doctor } =
+    patientDiagnose;
+
   const { doctor, templateServices } = useGlobalAuth();
+
+  const [openConsultationModal, setOpenConsultationModal] = useState(false);
+
   const navigate = useNavigate();
 
   const onCheckandCreate = async () => {
@@ -73,16 +80,36 @@ const FormVer3GroupProcessPatientDiagnoise = ({
 
   const steps = [
     {
-      title: "Khởi tạo - Chưa đọc",
-      onStepClick: () => {},
+      key: PATIENT_DIAGNOSE_STATUS_NAME.NEW,
+      title: "Chưa đọc",
+      color: PATIENT_DIAGNOSE_COLOR[PATIENT_DIAGNOSE_STATUS_NAME.NEW],
+      onStepClick: () => {
+        setOpenConsultationModal(true);
+      },
     },
+
     {
-      title: "Chọn đọc",
+      key: PATIENT_DIAGNOSE_STATUS_NAME.CONSULTATION,
+      title: "Hội chẩn",
+      color: PATIENT_DIAGNOSE_COLOR[PATIENT_DIAGNOSE_STATUS_NAME.CONSULTATION],
       onStepClick: async () => {
         try {
-          const updateStatus = await API_CALL.put(`/patient-diagnose/${id}`, {
+          await onCheckandCreate();
+        } catch (error) {
+          toast.error("Không mở được ca bệnh");
+        }
+      },
+    },
+
+    {
+      key: PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESSING,
+      title: "Đang đọc",
+      color: PATIENT_DIAGNOSE_COLOR[PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESSING],
+      onStepClick: async () => {
+        try {
+          await API_CALL.put(`/patient-diagnose/${id}`, {
             ...patientDiagnose,
-            status: PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESS,
+            status: PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESSING,
           });
 
           await onCheckandCreate();
@@ -90,40 +117,45 @@ const FormVer3GroupProcessPatientDiagnoise = ({
           toast.error("Không cập nhật được trạng thái đọc ca bệnh");
         }
       },
-      color: PATIENT_DIAGNOSE_COLOR[1],
     },
+
     {
-      title: "Đang đọc",
+      key: PATIENT_DIAGNOSE_STATUS_NAME.READ_DONE,
+      title: "Đọc xong",
+      color: PATIENT_DIAGNOSE_COLOR[PATIENT_DIAGNOSE_STATUS_NAME.READ_DONE],
       onStepClick: async () => {
         try {
           await onCheckandCreate();
         } catch (error) {
-          toast.error("Không cập nhật được trạng thái đọc ca bệnh");
+          toast.error("Không mở được kết quả");
         }
       },
-      color: PATIENT_DIAGNOSE_COLOR[2],
     },
+
     {
-      title: "Chờ duyệt",
+      key: PATIENT_DIAGNOSE_STATUS_NAME.WAIT_VERIFY,
+      title: "Đang duyệt",
+      color: PATIENT_DIAGNOSE_COLOR[PATIENT_DIAGNOSE_STATUS_NAME.WAIT_VERIFY],
       onStepClick: async () => {
         try {
           await onCheckandCreate();
         } catch (error) {
-          toast.error("Không cập nhật được trạng thái đọc ca bệnh");
+          toast.error("Không mở được kết quả");
         }
       },
-      color: PATIENT_DIAGNOSE_COLOR[3],
     },
+
     {
-      title: "Đã duyệt",
+      key: PATIENT_DIAGNOSE_STATUS_NAME.VERIFIED,
+      title: "Duyệt xong",
+      color: PATIENT_DIAGNOSE_COLOR[PATIENT_DIAGNOSE_STATUS_NAME.VERIFIED],
       onStepClick: async () => {
         try {
           await onCheckandCreate();
         } catch (error) {
-          toast.error("Lỗi lấy thông tin");
+          toast.error("Không mở được kết quả");
         }
       },
-      color: PATIENT_DIAGNOSE_COLOR[4],
     },
   ];
 
@@ -131,23 +163,33 @@ const FormVer3GroupProcessPatientDiagnoise = ({
     changedStatus = PATIENT_DIAGNOSE_STATUS_NAME.NEW,
   ) => {
     try {
-      await API_CALL.put(`/patient-diagnose/${id}`, {
-        ...patientDiagnose,
-        status: changedStatus, // hoặc trạng thái bạn muốn
-      });
+      const updatePayload = {
+        status: changedStatus,
+      };
+
+      await API_CALL.post(
+        `/patient-diagnose/${id}/change-status`,
+        updatePayload,
+      );
       setPatientDiagnose({ ...patientDiagnose, status: changedStatus });
       if (onStatusChange) {
         onStatusChange();
       }
       navigate(`/home/patients-diagnose`);
-      toast.success("Đã hủy đọc ca bệnh");
+      toast.success("Thao tác thành công");
     } catch (error) {
-      toast.error("Không hủy được ca bệnh");
+      toast.error("Thao tác thất bại do lỗi ", error.message);
     }
   };
+
+  console.log(
+    "doctor.id == patientDiagnose.id_doctor_in_processing",
+    doctor.id,
+    patientDiagnose.id_doctor_in_processing,
+  );
+
   return (
     <div>
-      {/* <h3 style={{ margin: 0, padding: 0 }}>Phiên bản 3</h3> */}
       <div
         style={{
           position: "fixed",
@@ -160,7 +202,12 @@ const FormVer3GroupProcessPatientDiagnoise = ({
           boxShadow: "0 -2px 8px rgba(0,0,0,0.05)",
         }}
       >
-        <CustomSteps steps={steps} current={status} onClose={onClose} />
+        <CustomSteps
+          steps={steps}
+          current={steps.findIndex((s) => s.key === status)}
+          onClose={onClose}
+          is_consultation_doctor={patientDiagnose.id_consulting_doctor}
+        />
       </div>
 
       <div
@@ -177,9 +224,9 @@ const FormVer3GroupProcessPatientDiagnoise = ({
           boxShadow: "0 -2px 8px rgba(0,0,0,0.05)",
         }}
       >
-        {(status === PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESS ||
-          status === PATIENT_DIAGNOSE_STATUS_NAME.WAITING) &&
-          id_doctor_in_processing === doctor.id && (
+        {status == PATIENT_DIAGNOSE_STATUS_NAME.CONSULTATION &&
+          (doctor.id == patientDiagnose.id_receive_doctor ||
+            doctor.id == patientDiagnose.id_consulting_doctor) && (
             <div style={{ marginTop: 16 }}>
               <Button
                 style={{
@@ -194,12 +241,42 @@ const FormVer3GroupProcessPatientDiagnoise = ({
                 }}
                 onClick={() => {
                   const ok = window.confirm(
-                    "Bạn có chắc chắn muốn hủy đọc kết quả?\n\nNếu hủy, ca sẽ được trả về trạng thái MỚI.",
+                    "Bạn có chắc chắn muốn hủy hội chẩn?\n\nNếu Hủy, ca sẽ được trả về trạng thái MỚI.",
                   );
-                  if (ok) handleCancelReading();
+                  if (ok) handleCancelReading(PATIENT_DIAGNOSE_STATUS_NAME.NEW);
                 }}
               >
-                Hủy đọc kết quả
+                Hủy hội chẩn
+              </Button>
+            </div>
+          )}
+        {status == PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESSING &&
+          id_doctor_in_processing == doctor.id && (
+            <div style={{ marginTop: 16 }}>
+              <Button
+                style={{
+                  height: 45,
+                  padding: "16px 18px",
+                  borderRadius: 14,
+                  fontWeight: 800,
+                  letterSpacing: "0.06em",
+                  textTransform: "uppercase",
+                  color: "#c14728",
+                  background: "rgba(14,165,233,0.06)",
+                }}
+                onClick={() => {
+                  const ok = window.confirm(
+                    `Bạn có chắc chắn muốn hủy phiếu?\n\nNếu Hủy Phiếu, ca sẽ được trả về trạng thái ${id_consulting_doctor ? "HỘI CHẨN" : "MỚI"}.`,
+                  );
+                  if (ok)
+                    handleCancelReading(
+                      id_consulting_doctor
+                        ? PATIENT_DIAGNOSE_STATUS_NAME.CONSULTATION
+                        : PATIENT_DIAGNOSE_STATUS_NAME.NEW,
+                    );
+                }}
+              >
+                Hủy phiếu
               </Button>
             </div>
           )}
@@ -280,6 +357,16 @@ const FormVer3GroupProcessPatientDiagnoise = ({
             </div>
           )}
       </div>
+
+      <ConsultationSelectModal
+        open={openConsultationModal}
+        onClose={() => setOpenConsultationModal(false)}
+        patientDiagnose={patientDiagnose}
+        doctor={doctor}
+        onSuccess={onStatusChange}
+        onCheckandCreate={onCheckandCreate}
+        setPatientDiagnose={setPatientDiagnose}
+      />
     </div>
   );
 };

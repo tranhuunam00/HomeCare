@@ -494,7 +494,16 @@ const Profile = () => {
                 label="Phòng khám"
                 name="id_clinic"
               >
-                <Select placeholder="Chọn phòng khám" disabled={!isEditing}>
+                <Select
+                  placeholder="Chọn phòng khám"
+                  showSearch
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    option?.children
+                      ?.toLowerCase()
+                      ?.includes(input.toLowerCase())
+                  }
+                >
                   {clinics.map((clinic) => (
                     <Option key={clinic.id} value={clinic.id}>
                       {clinic.name}
