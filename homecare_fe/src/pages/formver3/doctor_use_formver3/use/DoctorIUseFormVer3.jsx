@@ -55,6 +55,7 @@ import PrintPreviewVer3NotDataDiagnose from "../../components/PrintPreviewVer3No
 import { handlePrint } from "../../../formver2/utils.js";
 import ImagingStructureTextTable from "../../components/ImagingStructureTextTable.jsx";
 import TranslateListRecordsVer3 from "../../components/TranslateListRecordsVer3.jsx";
+import { handleTranslateToLanguage } from "../../../doctor_use_form_ver2/use/util.js";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -912,75 +913,10 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
           </Form.Item>
 
           {/* Action bar */}
-          {(initialSnap.apiData?.id_doctor == doctor.id ||
-            user.id_role == USER_ROLE.ADMIN ||
-            !idEdit) && (
+          {
             <FormActionBar
               patientDiagnose={patientDiagnose}
               languageTranslate={languageTranslate}
-              onTranslate={async () => {
-                if (!idEdit) {
-                  toast.warning("Chưa có form để dịch");
-                  return;
-                }
-
-                try {
-                  setLoading(true);
-
-                  // 1️⃣ Check đã có bản EN chưa
-                  const enRecords = await checkEnglishVersion();
-
-                  const ok2 = window.confirm(
-                    "Bạn có chắc chắn muốn tạo bản dịch tiếng Anh cho kết quả này không?",
-                  );
-                  if (!ok2) {
-                    return;
-                  }
-
-                  if (enRecords.length > 0) {
-                    const ok = window.confirm(
-                      "Đã tồn tại bản dịch tiếng Anh.\n\n" +
-                        "👉 Bạn có thể xem trong mục 'CÁC BẢN DỊCH'.\n\n" +
-                        "❓ Bạn có muốn tạo thêm một bản dịch mới không?",
-                    );
-
-                    if (!ok) {
-                      toast.info(
-                        "Bạn có thể xem bản dịch trong mục CÁC BẢN DỊCH",
-                      );
-                      return;
-                    }
-                    // nếu OK → tiếp tục tạo
-                  }
-
-                  // 2️⃣ Gọi API translate
-                  const res = await API_CALL.post(
-                    `/doctorUseFormVer3/${idEdit}/translate`,
-                  );
-
-                  const newRecord = res?.data?.data || res?.data;
-
-                  toast.success("Tạo bản dịch tiếng Anh thành công");
-
-                  // 3️⃣ Chuyển sang bản EN mới
-                  if (newRecord?.id) {
-                    navigate(
-                      `/home/doctor-use-formver3/detail/${newRecord.id}`,
-                      {
-                        replace: true,
-                      },
-                    );
-                  }
-                } catch (error) {
-                  console.error("[translate] error", error);
-                  toast.error(
-                    error?.response?.data?.message ||
-                      "Không thể tạo bản dịch tiếng Anh",
-                  );
-                } finally {
-                  setLoading(false);
-                }
-              }}
               onSign={() => setSignModalOpen(true)}
               onPrint={() => {
                 printSourceRef.current = "manual"; // 👈 ĐÁNH DẤU
@@ -994,9 +930,10 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
                 }, 300);
               }}
               onExit={() => {
-                if (!window.confirm("Bạn có chắc muốn thoát không?")) {
-                  return;
-                }
+                if (isEdit)
+                  if (!window.confirm("Bạn có chắc muốn thoát không?")) {
+                    return;
+                  }
                 navigate(`/home/patients-diagnose`);
               }}
               onApprove={onApprove}
@@ -1126,8 +1063,90 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
                   status: PATIENT_DIAGNOSE_STATUS_CODE.READ_DONE,
                 }));
               }}
+              onTranslate={async () => {
+                if (!idEdit) {
+                  toast.warning("Chưa có form để dịch");
+                  return;
+                }
+
+                try {
+                  setLoading(true);
+
+                  // 1️⃣ Check đã có bản EN chưa
+                  const enRecords = await checkEnglishVersion();
+
+                  const ok2 = window.confirm(
+                    "Bạn có chắc chắn muốn tạo bản dịch tiếng Anh cho kết quả này không?",
+                  );
+                  if (!ok2) {
+                    return;
+                  }
+
+                  if (enRecords.length > 0) {
+                    const ok = window.confirm(
+                      "Đã tồn tại bản dịch tiếng Anh.\n\n" +
+                        "👉 Bạn có thể xem trong mục 'CÁC BẢN DỊCH'.\n\n" +
+                        "❓ Bạn có muốn tạo thêm một bản dịch mới không?",
+                    );
+
+                    if (!ok) {
+                      toast.info(
+                        "Bạn có thể xem bản dịch trong mục CÁC BẢN DỊCH",
+                      );
+                      return;
+                    }
+                    // nếu OK → tiếp tục tạo
+                  }
+
+                  // 2️⃣ Gọi API translate
+                  const res = await API_CALL.post(
+                    `/doctorUseFormVer3/${idEdit}/translate`,
+                  );
+
+                  const newRecord = res?.data?.data || res?.data;
+
+                  toast.success("Tạo bản dịch tiếng Anh thành công");
+
+                  // 3️⃣ Chuyển sang bản EN mới
+                  if (newRecord?.id) {
+                    navigate(
+                      `/home/doctor-use-formver3/detail/${newRecord.id}`,
+                      {
+                        replace: true,
+                      },
+                    );
+                  }
+                } catch (error) {
+                  console.error("[translate] error", error);
+                  toast.error(
+                    error?.response?.data?.message ||
+                      "Không thể tạo bản dịch tiếng Anh",
+                  );
+                } finally {
+                  setLoading(false);
+                }
+              }}
+              // onTranslateMulti={({ targetLang, sourceLang }) =>
+              //   handleTranslateToLanguage({
+              //     setLanguageTransslate,
+              //     form,
+              //     setLoading,
+
+              //     initialSnap,
+              //     doctor,
+              //     imageList,
+              //     setImageList,
+
+              //     toast,
+              //     idEdit,
+              //     setIdEdit,
+              //     navigate,
+              //     targetLang: targetLang,
+              //     sourceLang: sourceLang,
+              //   })
+              // }
             />
-          )}
+          }
         </Form>
       )}
 
@@ -1202,7 +1221,7 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
             editId={idEdit}
             imageList={imageList}
             isUse={isUse}
-            doctor={initialSnap?.apiData?.id_doctor_doctor || doctor}
+            doctor={initialSnap?.apiData?.id_receive_doctor_doctor}
             printTemplate={
               printTemplate ||
               initialSnap.apiData?.id_print_template_print_template
@@ -1210,6 +1229,8 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
             languageTranslate={languageTranslate}
             setPreviewOpen={setPreviewOpen}
             is_print={is_print}
+            consultingDoctor={initialSnap?.apiData?.id_consulting_doctor_doctor}
+            patientDiagnose={patientDiagnose}
           />
         </div>
       </Modal>

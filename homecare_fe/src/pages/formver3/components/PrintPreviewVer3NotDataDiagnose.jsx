@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button, Card, Divider } from "antd";
 
 import { translateLabel } from "../../../constant/app";
@@ -13,6 +13,8 @@ import PrintHeaderFromCustom from "../../products/TemplatePrint/print/PrintHeade
 import LegacyPrintHeader from "../../products/TemplatePrint/print/LegacyPrintHeader";
 import { CAN_THIEP_GROUP_CODE, examPartName } from "../formver3.constant";
 import { PAGE_PADDING_RIGHT } from "../../products/TemplatePrint/Setting/constant.setting.print";
+import DoctorResultSection from "./DoctorResultSection/DoctorResultSection";
+import API_CALL from "../../../services/axiosClient";
 
 const colSTT = { width: 60, textAlign: "center" };
 const colStructure = { width: 420 };
@@ -45,17 +47,28 @@ const PrintPreviewVer3NotDataDiagnose = ({
   isUse = false,
   imageList = [],
   printTemplate = {},
-  doctor = {},
   languageTranslate,
-  approvalStatus,
   imagingRows,
   selectedExamPart,
   isOnLyContent = false,
   setPreviewOpen,
   styleCustomParent = {},
-  is_print = false,
+  patientDiagnose,
 }) => {
-  console.log("approvalStatus", approvalStatus);
+  const [patientDiagnoseServer, setPatientDiagnoseServer] = useState({});
+  useEffect(() => {
+    const fetchDetail = async () => {
+      try {
+        const res = await API_CALL.get(
+          `/patient-diagnose/${patientDiagnose?.id}`,
+        );
+        setPatientDiagnoseServer(res.data.data);
+      } catch (err) {
+        console.error("Không thể lấy dữ liệu bệnh nhân:", err);
+      }
+    };
+    fetchDetail();
+  }, [patientDiagnose?.id]);
 
   const Circle = ({ checked }) =>
     !checked ? null : (
@@ -871,107 +884,14 @@ const PrintPreviewVer3NotDataDiagnose = ({
               </div>
             </>
           )}
-          {isUse && (
-            <>
-              <h3
-                style={{
-                  textAlign: "left",
-                  color: "#2f6db8",
-                  margin: 0,
-                  padding: 0,
-                  marginBottom: 0,
-                  marginTop: 20,
-                }}
-              >
-                {translateLabel(
-                  languageTranslate,
-                  "doctor",
-                  false,
-                ).toUpperCase()}
-              </h3>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                }}
-              >
-                <section
-                  style={{
-                    marginTop: 10,
-                  }}
-                >
-                  <div
-                    style={{ display: "flex", marginBottom: 6, fontSize: 15 }}
-                  >
-                    <div style={{ width: 150 }}>
-                      <strong>
-                        {translateLabel(languageTranslate, "fullName", false)}:
-                      </strong>
-                    </div>
-                    {[
-                      doctor.academic_title
-                        ? `${doctor.academic_title}.`
-                        : null,
-                      doctor.degree ? `${doctor.degree}.` : null,
-                      doctor.full_name,
-                    ]
-                      .filter(Boolean)
-                      .join(" ")}
-                  </div>
-                  <div
-                    style={{ display: "flex", marginBottom: 6, fontSize: 15 }}
-                  >
-                    <div style={{ width: 150 }}>
-                      <strong>
-                        {translateLabel(languageTranslate, "phone", false)}:
-                      </strong>
-                    </div>
-                    {doctor.phone_number}
-                  </div>
-                  <div
-                    style={{ display: "flex", marginBottom: 6, fontSize: 15 }}
-                  >
-                    <div style={{ width: 150 }}>
-                      <strong>
-                        {" "}
-                        {translateLabel(languageTranslate, "email", false)}:
-                      </strong>
-                    </div>
-                    {doctor?.id_user_user?.email || user.email}
-                  </div>
-                  <div
-                    style={{ display: "flex", marginBottom: 6, fontSize: 15 }}
-                  >
-                    <div style={{ width: 150 }}>
-                      <strong>
-                        {translateLabel(languageTranslate, "time", false)}:
-                      </strong>
-                    </div>
-                    {dayjs(formSnapshot.createdAt).format("DD-MM-YYYY HH:mm")}
-                  </div>
-                </section>
-                <section>
-                  <h4 style={{ padding: 0, margin: 0, marginBottom: 10 }}>
-                    {translateLabel(languageTranslate, "Chữ ký", false)}
-                  </h4>
-                  <img
-                    src={doctor?.signature_url}
-                    alt=""
-                    width={100}
-                    height={100}
-                  />
-                </section>
-                <section>
-                  <img
-                    src={doctor?.avatar_url}
-                    alt=""
-                    width={120}
-                    height={120}
-                  />
-                </section>
-              </div>
-            </>
-          )}
+
+          <DoctorResultSection
+            languageTranslate={languageTranslate}
+            translateLabel={translateLabel}
+            consultingDoctor={patientDiagnoseServer.id_consulting_doctor_doctor}
+            readingDoctor={patientDiagnoseServer?.id_receive_doctor_doctor}
+            createdAt={formSnapshot.createdAt}
+          />
         </Card>
       </div>
       {!isOnLyContent && (

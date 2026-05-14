@@ -96,7 +96,6 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
   const [limit, setLimit] = useState(10);
   const [openColumnModal, setOpenColumnModal] = useState(false);
   const [customColumns, setCustomColumns] = useState([]);
-  const [chosenRecord, setChosenRecord] = useState();
   const [returnStatus, setReturnStatus] = useState(false);
 
   const [visibleKeys, setVisibleKeys] = useState([]);
@@ -111,6 +110,8 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
     setFilterPatient: setPendingFilters,
     setTotalPatient: setTotal,
     totalPatient: total,
+    selectedPatientDiagnose,
+    setSelectedPatientDiagnose,
   } = useGlobalAuth();
 
   const { fetchTSAndExamParts } = useTemplateServicesAndExamParts();
@@ -340,13 +341,13 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
   }, [filters, page, limit, returnStatus]);
 
   useEffect(() => {
-    if (chosenRecord) {
+    if (selectedPatientDiagnose) {
       fetchPatientsByChosen();
       setCollapsed(true);
     } else {
       setCollapsed(false);
     }
-  }, [chosenRecord, returnStatus]);
+  }, [selectedPatientDiagnose, returnStatus]);
 
   const cleanParams = (obj) => {
     if (!obj) return {};
@@ -387,16 +388,16 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
 
   const fetchPatientsByChosen = async () => {
     try {
-      if (!chosenRecord?.CCCD && !chosenRecord?.PID) {
+      if (!selectedPatientDiagnose?.CCCD && !selectedPatientDiagnose?.PID) {
         setSameCCCDData([]);
         return;
       }
-      const res = chosenRecord?.CCCD
+      const res = selectedPatientDiagnose?.CCCD
         ? await API_CALL.get("/patient-diagnose", {
-            params: { CCCD: chosenRecord?.CCCD, page: 1, limit: 20 },
+            params: { CCCD: selectedPatientDiagnose?.CCCD, page: 1, limit: 20 },
           })
         : await API_CALL.get("/patient-diagnose", {
-            params: { PID: chosenRecord?.PID, page: 1, limit: 20 },
+            params: { PID: selectedPatientDiagnose?.PID, page: 1, limit: 20 },
           });
       const responseData = res.data.data;
       setSameCCCDData(responseData?.rows || []);
@@ -605,6 +606,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
               value={pendingFilters?.PID}
             />
           </Col>
+
           <Col span={15}>
             <Space
               wrap
@@ -694,12 +696,14 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
                 },
               }}
               rowClassName={(record) =>
-                chosenRecord?.id === record.id ? styles.selectedRow : ""
+                selectedPatientDiagnose?.id === record.id
+                  ? styles.selectedRow
+                  : ""
               }
               onRow={(record) => ({
                 onClick: () => {
                   !deviceIsMobile
-                    ? setChosenRecord(record)
+                    ? setSelectedPatientDiagnose(record)
                     : navigate(`/home/patients-diagnose/${record.id}`, {
                         state: { record },
                       });
@@ -739,12 +743,12 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
             />
           </div>
         </ConfigProvider>
-        {sameCCCDData.length > 0 && chosenRecord && (
+        {sameCCCDData.length > 0 && selectedPatientDiagnose && (
           <>
             <Divider style={{ margin: "12px 0" }} />
 
             <Typography.Text strong style={{ color: "#cf1322" }}>
-              Các kết quả quả khác của {chosenRecord?.name}: (
+              Các kết quả quả khác của {selectedPatientDiagnose?.name}: (
               {sameCCCDData.length}) bản ghi
             </Typography.Text>
 
@@ -770,7 +774,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
                 onRow={(record) => ({
                   onClick: () => {
                     !deviceIsMobile
-                      ? setChosenRecord(record)
+                      ? setSelectedPatientDiagnose(record)
                       : navigate(`/home/patients-diagnose/${record.id}`);
                   },
                   style: { cursor: "pointer", background: "#fafafa" },
@@ -780,7 +784,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
           </>
         )}
       </div>
-      {chosenRecord && (
+      {selectedPatientDiagnose && (
         <div
           style={{
             padding: 0,
@@ -791,9 +795,9 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
           }}
         >
           <PatientDiagnoiseDetailPage
-            idFromList={+chosenRecord?.id}
+            idFromList={+selectedPatientDiagnose?.id}
             onStatusChange={() => setReturnStatus((prev) => !prev)}
-            onClose={() => setChosenRecord(null)}
+            onClose={() => setSelectedPatientDiagnose(null)}
           />
         </div>
       )}

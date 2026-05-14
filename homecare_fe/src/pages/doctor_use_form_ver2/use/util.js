@@ -24,9 +24,10 @@ export const handleTranslateToLanguage = async ({
   setImageList,
 }) => {
   try {
+    console.log("heheheeh");
     if (
       !window.confirm(
-        `Bạn có chắc muốn dịch bản ghi này từ ${sourceLang} sang ${targetLang} không? Hệ thống sẽ tự động tạo bản dịch mới.`
+        `Bạn có chắc muốn dịch bản ghi này từ ${sourceLang} sang ${targetLang} không? Hệ thống sẽ tự động tạo bản dịch mới.`,
       )
     ) {
       return;
@@ -54,7 +55,7 @@ export const handleTranslateToLanguage = async ({
             targetLang,
             sourceLang,
           },
-          { timeout: 120000 }
+          { timeout: 120000 },
         ),
         API_CALL.post(
           "translate/html-text-google",
@@ -63,7 +64,7 @@ export const handleTranslateToLanguage = async ({
             targetLang,
             sourceLang,
           },
-          { timeout: 120000 }
+          { timeout: 120000 },
         ),
         imageList?.length
           ? API_CALL.post(
@@ -76,7 +77,7 @@ export const handleTranslateToLanguage = async ({
                 targetLang,
                 sourceLang,
               },
-              { timeout: 120000 }
+              { timeout: 120000 },
             )
           : Promise.resolve({ data: { data: {} } }),
       ]);
@@ -96,26 +97,26 @@ export const handleTranslateToLanguage = async ({
 
     form.setFieldValue(
       "quy_trinh_url",
-      translatedAddon.data.data.quy_trinh_url
+      translatedAddon.data.data.quy_trinh_url,
     );
     form.setFieldValue(
       "ket_qua_chan_doan",
-      translatedAddon.data.data.ket_qua_chan_doan
+      translatedAddon.data.data.ket_qua_chan_doan,
     );
     form.setFieldValue("phan_do_loai", translatedAddon.data.data.phan_do_loai);
     form.setFieldValue("icd10", translatedAddon.data.data.icd10);
     form.setFieldValue(
       "chan_doan_phan_biet",
-      translatedAddon.data.data.chan_doan_phan_biet
+      translatedAddon.data.data.chan_doan_phan_biet,
     );
     form.setFieldValue("khuyen_nghi", translatedAddon.data.data.khuyen_nghi);
     form.setFieldValue(
       "ImageLeftDesc",
-      translatedAddon.data.data.ImageLeftDesc
+      translatedAddon.data.data.ImageLeftDesc,
     );
     form.setFieldValue(
       "ImageRightDesc",
-      translatedAddon.data.data.ImageRightDesc
+      translatedAddon.data.data.ImageRightDesc,
     );
 
     form.setFieldValue("imageDescMeta", JSON.stringify(imageList));
@@ -148,7 +149,7 @@ export const handleTranslateToLanguage = async ({
 
     fd.append(
       "id_root",
-      initialSnap?.apiData?.id_root || initialSnap?.apiData?.id || idEdit
+      initialSnap?.apiData?.id_root || initialSnap?.apiData?.id || idEdit,
     );
 
     toast.info("Đang lưu bản dịch tiếng Anh...");

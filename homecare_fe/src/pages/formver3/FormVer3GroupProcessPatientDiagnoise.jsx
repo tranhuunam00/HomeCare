@@ -64,7 +64,6 @@ const FormVer3GroupProcessPatientDiagnoise = ({
         const doctorUseDFormVer3 = await API_CALL.get(`/doctorUseFormVer3`, {
           params: {
             id_patient_diagnose: id,
-            // id_doctor: doctor.id,
             orderBy: "id",
             orderDir: "DESC",
           },

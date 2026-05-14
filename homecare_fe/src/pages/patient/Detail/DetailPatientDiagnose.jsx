@@ -498,7 +498,10 @@ const PatientDiagnoiseDetailPage = ({
         </Card>
 
         {latestVer3 ? (
-          <DoctorUseFormVer3Viewer id_doctor_use_formver3={latestVer3.id} />
+          <DoctorUseFormVer3Viewer
+            id_doctor_use_formver3={latestVer3.id}
+            patientDiagnoise={data}
+          />
         ) : (
           <h2 style={{ textAlign: "center" }}>Chưa có bản ghi nào!</h2>
         )}

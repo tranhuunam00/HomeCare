@@ -9,7 +9,11 @@ import {
 import API_CALL from "../../../services/axiosClient";
 import PrintPreviewVer3NotDataDiagnose from "./PrintPreviewVer3NotDataDiagnose";
 
-export default function DoctorUseFormVer3Viewer({ id_doctor_use_formver3 }) {
+export default function DoctorUseFormVer3Viewer({
+  id_doctor_use_formver3,
+  patientDiagnoise,
+}) {
+  console.log("patientDiagnoise", patientDiagnoise);
   const { examParts, templateServices, doctor } = useGlobalAuth();
 
   const [loading, setLoading] = useState(true);
@@ -119,7 +123,7 @@ export default function DoctorUseFormVer3Viewer({ id_doctor_use_formver3 }) {
         },
       }}
     >
-      <Card>
+      <Card style={{ paddingBottom: 50 }}>
         <PrintPreviewVer3NotDataDiagnose
           approvalStatus={approvalStatus}
           imagingRows={imagingRows}
@@ -128,13 +132,14 @@ export default function DoctorUseFormVer3Viewer({ id_doctor_use_formver3 }) {
           selectedTemplateService={selectedTemplateService}
           imageList={imageList}
           isUse={true}
-          doctor={doctorInfo}
+          doctor={patientDiagnoise.id_receive_doctor_doctor}
           printTemplate={printTemplate}
           languageTranslate={formSnapshot?.language || "vi"}
           isOnLyContent={true}
           styleCustomParent={{
             fontSize: 12,
           }}
+          patientDiagnose={patientDiagnoise}
         />
       </Card>
     </ConfigProvider>

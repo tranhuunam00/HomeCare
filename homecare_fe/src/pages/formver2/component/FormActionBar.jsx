@@ -190,10 +190,6 @@ export default function FormActionBar({
       label: "DỊCH KHÁC",
       icon: <TranslationOutlined />,
       onClick: () => setLangModalOpen(true), // ✅ mở popup chọn ngôn ngữ
-      disabled:
-        !editId ||
-        (!availblePackage.includes("HOSPITAL") &&
-          user.id_role != USER_ROLE.ADMIN),
     },
     {
       key: KEY_ACTION_BUTTON.translate_en,
@@ -260,6 +256,7 @@ export default function FormActionBar({
     );
   };
 
+  console.log("keys", visionItemKeys);
   useEffect(() => {
     const { status, id_doctor_in_processing, id_receive_doctor } =
       patientDiagnose || {};
@@ -271,6 +268,9 @@ export default function FormActionBar({
       patientDiagnose?.id_receive_doctor !== doctor.id &&
       patientDiagnose?.id_verify_doctor !== doctor.id
     ) {
+      keys = [KEY_ACTION_BUTTON.exit];
+      setVisionItemKeys(keys);
+
       return;
     }
 
@@ -323,6 +323,8 @@ export default function FormActionBar({
             KEY_ACTION_BUTTON.huy_doc,
             KEY_ACTION_BUTTON.nhan_duyet,
             KEY_ACTION_BUTTON.duyet,
+            KEY_ACTION_BUTTON.translate_en,
+            // KEY_ACTION_BUTTON.translate_multi,
           ];
         }
         break;
@@ -354,6 +356,7 @@ export default function FormActionBar({
             patientDiagnose.id_receive_doctor == doctor.id
               ? KEY_ACTION_BUTTON.duyet
               : null,
+            KEY_ACTION_BUTTON.translate_en,
           ].filter(Boolean);
         }
         break;
@@ -370,6 +373,8 @@ export default function FormActionBar({
             KEY_ACTION_BUTTON.huy_duyet,
             KEY_ACTION_BUTTON.print,
             KEY_ACTION_BUTTON.preview,
+            KEY_ACTION_BUTTON.translate_en,
+
             editId && !isEdit
               ? KEY_ACTION_BUTTON.edit_duyet
               : KEY_ACTION_BUTTON.save_duyet,

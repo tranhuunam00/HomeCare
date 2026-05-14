@@ -1,39 +1,93 @@
 // src/contexts/GlobalAuthContext.jsx
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import storage from "../services/storage";
 
 const GlobalAuthContext = createContext();
+
+const SELECTED_PATIENT_STORAGE_KEY = "SELECTED_PATIENT_DIAGNOSE";
+
+const DEFAULT_FILTER_PATIENT = {
+  name: null,
+  PID: null,
+  SID: null,
+  id_clinic: null,
+  status: [],
+  id_template_service: null,
+  date_type: null,
+  from_date: null,
+  to_date: null,
+};
 
 export const GlobalAuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => storage.get("USER"));
   const [token, setToken] = useState(() => storage.get("TOKEN"));
   const [doctor, setDoctor] = useState(() => storage.get("DOCTOR"));
+
   const [templateServices, setTemplateServices] = useState([]);
   const [examParts, setExamParts] = useState([]);
   const [formVer2Names, setFormVer2Names] = useState([]);
   const [isReadingForm, setIsReadingForm] = useState(false);
   const [printTemplateGlobal, setPrintTemplateGlobal] = useState([{}]);
+
   const [userPackages, setUserPackages] = useState([
     { package_code: "BASIC", status: "active", end_date: "2030-01-01" },
   ]);
+
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+
   const [doctors, setDoctors] = useState([]);
   const [clinicsAll, setClinicsAll] = useState([]);
+
   const [isOnWorkList, setIsOnWorkList] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+
   const [totalPatient, setTotalPatient] = useState(0);
-  const [filterPatient, setFilterPatient] = useState({
-    name: null,
-    PID: null,
-    SID: null,
-    id_clinic: null,
-    status: [],
-    id_template_service: null,
-    date_type: null,
-    from_date: null,
-    to_date: null,
+
+  // LOAD từ localStorage
+  const [filterPatient, setFilterPatient] = useState(() => {
+    const saved = localStorage.getItem("FILTER_PATIENT");
+
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (err) {
+        console.error("Parse FILTER_PATIENT error:", err);
+      }
+    }
+
+    return DEFAULT_FILTER_PATIENT;
   });
+
+  const [selectedPatientDiagnose, setSelectedPatientDiagnose] = useState(() => {
+    const saved = localStorage.getItem(SELECTED_PATIENT_STORAGE_KEY);
+
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    return null;
+  });
+
+  useEffect(() => {
+    if (selectedPatientDiagnose) {
+      localStorage.setItem(
+        SELECTED_PATIENT_STORAGE_KEY,
+        JSON.stringify(selectedPatientDiagnose),
+      );
+    } else {
+      localStorage.removeItem(SELECTED_PATIENT_STORAGE_KEY);
+    }
+  }, [selectedPatientDiagnose]);
+
+  // SAVE xuống localStorage
+  useEffect(() => {
+    localStorage.setItem("FILTER_PATIENT", JSON.stringify(filterPatient));
+  }, [filterPatient]);
 
   const handleLoginContext = ({ token, user, doctor }) => {
     storage.saveAuth({ token, user, doctor });
@@ -44,6 +98,9 @@ export const GlobalAuthProvider = ({ children }) => {
 
   const handleLogoutGlobal = () => {
     storage.clearAuth();
+
+    localStorage.removeItem("FILTER_PATIENT");
+
     setUser(null);
     setToken(null);
     setDoctor(null);
@@ -61,34 +118,51 @@ export const GlobalAuthProvider = ({ children }) => {
         handleLoginContext,
         handleLogoutGlobal,
         isLoggedIn,
+
         setTemplateServices,
         templateServices,
+
         setExamParts,
         examParts,
+
         setFormVer2Names,
         formVer2Names,
+
         isReadingForm,
         setIsReadingForm,
+
         printTemplateGlobal,
         setPrintTemplateGlobal,
+
         userPackages,
         setUserPackages,
+
         notifications,
         setNotifications,
+
         unreadCount,
         setUnreadCount,
+
         doctors,
         setDoctors,
+
         clinicsAll,
         setClinicsAll,
+
         isOnWorkList,
         setIsOnWorkList,
+
         collapsed,
         setCollapsed,
+
         filterPatient,
         setFilterPatient,
+
         totalPatient,
         setTotalPatient,
+
+        selectedPatientDiagnose,
+        setSelectedPatientDiagnose,
       }}
     >
       {children}

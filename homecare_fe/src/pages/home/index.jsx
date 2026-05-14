@@ -320,6 +320,50 @@ const Home = () => {
               </div>
             )}
             <Sidebar collapsed={collapsed} />
+
+            {isOnWorkList && (
+              <Col span={12} style={{ marginBottom: 8 }}>
+                <div
+                  onClick={() =>
+                    setPendingFilters({
+                      ...pendingFilters,
+                      my_received_cases: !pendingFilters?.my_received_cases,
+                    })
+                  }
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    marginTop: 20,
+                    padding: "10px 12px",
+                    borderRadius: 10,
+                    background: pendingFilters?.my_received_cases
+                      ? "#dbeafe"
+                      : "#f3f4f6",
+                    border: pendingFilters?.my_received_cases
+                      ? "1px solid #6fc02d"
+                      : "1px solid #061b46",
+                    cursor: "pointer",
+                    minHeight: 44,
+                  }}
+                >
+                  <Checkbox checked={pendingFilters?.my_received_cases} />
+
+                  <span
+                    style={{
+                      fontSize: 13,
+                      fontWeight: 600,
+                      color: pendingFilters?.my_received_cases
+                        ? "#2563eb"
+                        : "#4b5563",
+                    }}
+                  >
+                    Ca đã nhận
+                  </span>
+                </div>
+              </Col>
+            )}
+
             {isOnWorkList && (
               <Col span={24}>
                 <div style={{ width: "100%", paddingLeft: 2 }}>
