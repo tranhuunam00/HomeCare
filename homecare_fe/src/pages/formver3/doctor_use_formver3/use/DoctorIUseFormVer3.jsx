@@ -20,6 +20,7 @@ import { useGlobalAuth } from "../../../../contexts/AuthContext";
 import API_CALL from "../../../../services/axiosClient";
 import useVietnamAddress from "../../../../hooks/useVietnamAddress";
 import {
+  PATIENT_DIAGNOSE_STATUS_CODE,
   sortTemplateServices,
   TRANSLATE_LANGUAGE,
   translateLabel,
@@ -29,7 +30,7 @@ import { APPROVAL_STATUS } from "../../../../components/ApprovalStatusTag";
 
 import FormActionBar, {
   KEY_ACTION_BUTTON,
-} from "../../../formver2/component/FormActionBar";
+} from "../../../formver2/component/FormActionBar.jsx";
 import PatientInfoSection from "../../../doctor_use_form_ver2/use/items/PatientInfoForm";
 import ImageWithCaptionInput from "../../../products/ImageWithCaptionInput/ImageWithCaptionInput";
 import HistoryModal from "../../../doctor_use_form_ver2/use/items/HistoryModal";
@@ -102,7 +103,6 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
     form.getFieldValue("imagingDiagnosisSummary"),
   );
 
-  const [status, setStatus] = useState(APPROVAL_STATUS.DRAFT);
   const [initialSnap, setInitialSnap] = useState({
     formValues: null,
     apiData: null,
@@ -248,8 +248,8 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
   };
 
   const onApprove = async () => {
-    if (!idEdit) {
-      toast.warning("Chưa có form để phê duyệt");
+    if (isEdit) {
+      toast.warning("Vui lòng lưu lại trước khi phê duyệt");
       return;
     }
 
@@ -260,17 +260,18 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
     try {
       setLoading(true);
 
-      const res = await API_CALL.patch(`/doctorUseFormVer3/${idEdit}/approve`);
+      await API_CALL.post(
+        `/patient-diagnose/${patientDiagnose.id}/change-status`,
+        {
+          status: PATIENT_DIAGNOSE_STATUS_CODE.VERIFIED,
+        },
+      );
+      setPatientDiagnose((prev) => ({
+        ...prev,
+        status: PATIENT_DIAGNOSE_STATUS_CODE.VERIFIED,
+      }));
 
       toast.success("Phê duyệt kết quả thành công");
-
-      setStatus(APPROVAL_FORMVER3_STATUS_NAME[2]);
-      if (res?.data?.data) {
-        setInitialSnap((prev) => ({
-          ...prev,
-          apiData: res.data.data,
-        }));
-      }
     } catch (error) {
       console.error("[onApprove] error", error);
       toast.error(
@@ -337,9 +338,7 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
               })) || [];
 
           setImageList(descImages);
-          setStatus(
-            APPROVAL_FORMVER3_STATUS_NAME[doctorUseFormVer3Server.status],
-          );
+
           try {
             const rows = JSON.parse(
               doctorUseFormVer3Server.imageDescription || "[]",
@@ -416,8 +415,11 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
         imagingRows,
         abnormalFindings,
       });
-
-      if (pendingAction.current === KEY_ACTION_BUTTON.save) {
+      console.log(" pendingAction.current", pendingAction.current);
+      if (
+        pendingAction.current === KEY_ACTION_BUTTON.save ||
+        pendingAction.current === KEY_ACTION_BUTTON.save_duyet
+      ) {
         const res = await API_CALL.postForm(`/doctorUseFormVer3`, formPayload, {
           headers: { "Content-Type": "multipart/form-data" },
         });
@@ -425,10 +427,9 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
         const newData = res?.data?.data || res?.data;
 
         if (newData?.id) {
-          toast.success("Tạo mới form thành công");
+          toast.success("Lưu thành công");
           setIdEdit(newData.id);
 
-          setStatus(APPROVAL_FORMVER3_STATUS_NAME[1]);
           setIsEdit(false);
           setInitialSnap({
             formValues: form.getFieldsValue(),
@@ -439,7 +440,7 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
             replace: true,
           });
         } else {
-          toast.warning("Tạo form thành công nhưng không nhận được ID");
+          toast.warning("Lưu thành công nhưng không nhận được ID");
         }
       }
     } catch (error) {
@@ -455,10 +456,7 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
     );
     if (!ok) return;
     if (!idEdit) {
-      console.log("[restoreFromSnapshot] not editID");
       const patientSnap = initialSnap.patientDiagnose;
-
-      console.log("patientSnap", patientSnap);
 
       if (!patientSnap) {
         toast.error("Không tìm thấy dữ liệu bệnh nhân gốc");
@@ -918,31 +916,8 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
             user.id_role == USER_ROLE.ADMIN ||
             !idEdit) && (
             <FormActionBar
+              patientDiagnose={patientDiagnose}
               languageTranslate={languageTranslate}
-              approvalStatus={status}
-              actionKeys={
-                patientDiagnose?.id_doctor_in_processing &&
-                patientDiagnose?.id_doctor_in_processing != doctor.id
-                  ? [
-                      KEY_ACTION_BUTTON.preview,
-                      KEY_ACTION_BUTTON.sign,
-                      KEY_ACTION_BUTTON.print,
-                      KEY_ACTION_BUTTON.exit,
-                    ]
-                  : [
-                      KEY_ACTION_BUTTON.reset,
-                      KEY_ACTION_BUTTON.save,
-                      KEY_ACTION_BUTTON.edit,
-                      KEY_ACTION_BUTTON.approve,
-                      KEY_ACTION_BUTTON.preview,
-                      // KEY_ACTION_BUTTON.AI,
-                      // KEY_ACTION_BUTTON.translate_multi,
-                      KEY_ACTION_BUTTON.translate_en,
-                      // KEY_ACTION_BUTTON.sign,
-                      KEY_ACTION_BUTTON.exit,
-                      KEY_ACTION_BUTTON.print,
-                    ]
-              }
               onTranslate={async () => {
                 if (!idEdit) {
                   toast.warning("Chưa có form để dịch");
@@ -1037,18 +1012,120 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
               onReset={restoreFromSnapshot}
               onPreview={() => setPreviewOpen(!previewOpen)}
               isEdit={isEdit}
-              onEdit={() => {
+              onEdit={async () => {
                 if (isEdit == true) {
                   setIsEdit(false);
                 } else {
-                  setIsEdit(
-                    initialSnap.apiData?.id_doctor == doctor.id ||
-                      user.id_role == USER_ROLE.ADMIN ||
-                      !idEdit,
+                  setIsEdit(true);
+                }
+                if (
+                  patientDiagnose?.status ===
+                  PATIENT_DIAGNOSE_STATUS_CODE.READ_DONE
+                ) {
+                  await API_CALL.post(
+                    `/patient-diagnose/${patientDiagnose.id}/change-status`,
+                    { status: PATIENT_DIAGNOSE_STATUS_CODE.IN_PROCESSING },
                   );
+                  setPatientDiagnose((prev) => ({
+                    ...prev,
+                    status: PATIENT_DIAGNOSE_STATUS_CODE.IN_PROCESSING,
+                  }));
+
+                  toast.success("Đã chuyển sang trạng thái ĐANG ĐỌC");
+                }
+              }}
+              onEditDuyet={async () => {
+                if (isEdit == true) {
+                  setIsEdit(false);
+                } else {
+                  setIsEdit(true);
+                }
+                if (
+                  patientDiagnose?.status ===
+                  PATIENT_DIAGNOSE_STATUS_CODE.VERIFIED
+                ) {
+                  await API_CALL.post(
+                    `/patient-diagnose/${patientDiagnose.id}/change-status`,
+                    { status: PATIENT_DIAGNOSE_STATUS_CODE.WAIT_VERIFY },
+                  );
+                  setPatientDiagnose((prev) => ({
+                    ...prev,
+                    status: PATIENT_DIAGNOSE_STATUS_CODE.WAIT_VERIFY,
+                  }));
                 }
               }}
               editId={idEdit}
+              onDocXong={async () => {
+                if (
+                  !window.confirm(
+                    "Bạn có chắc muốn chuyển sang trạng thái ĐỌC XONG? Lưu ý, nhớ lưu lại trước khi chuyển trạng thái!",
+                  )
+                ) {
+                  return;
+                }
+                await API_CALL.post(
+                  `/patient-diagnose/${patientDiagnose.id}/change-status`,
+                  { status: PATIENT_DIAGNOSE_STATUS_CODE.READ_DONE },
+                );
+                setPatientDiagnose((prev) => ({
+                  ...prev,
+                  status: PATIENT_DIAGNOSE_STATUS_CODE.READ_DONE,
+                }));
+                toast.success("Đã chuyển sang trạng thái ĐỌC XONG");
+              }}
+              onHuyDoc={async () => {
+                const newStatus = patientDiagnose.id_consulting_doctor
+                  ? PATIENT_DIAGNOSE_STATUS_CODE.CONSULTATION
+                  : PATIENT_DIAGNOSE_STATUS_CODE.NEW;
+
+                if (
+                  !window.confirm(
+                    `Bạn có chắc muốn chuyển về trạng thái ${newStatus == PATIENT_DIAGNOSE_STATUS_CODE.CONSULTATION ? "Hội Chẩn" : "Mới"}?`,
+                  )
+                ) {
+                  return;
+                }
+                await API_CALL.post(
+                  `/patient-diagnose/${patientDiagnose.id}/change-status`,
+                  {
+                    status: newStatus,
+                  },
+                );
+                setPatientDiagnose((prev) => ({
+                  ...prev,
+                  status: newStatus,
+                }));
+                toast.success(
+                  "Đã về trạng thái " +
+                    (newStatus == PATIENT_DIAGNOSE_STATUS_CODE.CONSULTATION
+                      ? "Hội Chẩn"
+                      : "Mới"),
+                );
+              }}
+              onNhanDuyet={async () => {
+                await API_CALL.post(
+                  `/patient-diagnose/${patientDiagnose.id}/change-status`,
+                  {
+                    status: PATIENT_DIAGNOSE_STATUS_CODE.WAIT_VERIFY,
+                  },
+                );
+                setPatientDiagnose((prev) => ({
+                  ...prev,
+                  status: PATIENT_DIAGNOSE_STATUS_CODE.WAIT_VERIFY,
+                }));
+              }}
+              onHuyDuyet={async () => {
+                await API_CALL.post(
+                  `/patient-diagnose/${patientDiagnose.id}/change-status`,
+                  {
+                    status: PATIENT_DIAGNOSE_STATUS_CODE.READ_DONE,
+                  },
+                );
+                setPatientDiagnose((prev) => ({
+                  ...prev,
+                  status: PATIENT_DIAGNOSE_STATUS_CODE.READ_DONE,
+                }));
+              }}
             />
           )}
         </Form>

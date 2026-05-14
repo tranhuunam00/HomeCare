@@ -169,7 +169,7 @@ const GroupProcessPatientDiagnoiseFormVer2 = ({
           </div>
         )}
 
-      {status === PATIENT_DIAGNOSE_STATUS_NAME.VERIFY &&
+      {status === PATIENT_DIAGNOSE_STATUS_NAME.VERIFIED &&
         id_doctor_in_processing === doctor.id && (
           <div style={{ marginTop: 16 }}>
             <Button

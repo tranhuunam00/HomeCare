@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Tooltip, Modal, Select } from "antd";
 import {
   ReloadOutlined,
@@ -12,6 +12,11 @@ import {
   GatewayOutlined,
   TranslationOutlined,
   SignatureOutlined,
+  DeleteRowOutlined,
+  DeleteOutlined,
+  DotNetOutlined,
+  FileDoneOutlined,
+  FileWordOutlined,
 } from "@ant-design/icons";
 import styles from "./FormActionBar.module.scss";
 import { useNavigate } from "react-router-dom";
@@ -20,7 +25,7 @@ import {
   getUsablePackageCodes,
   hasProOrBusiness,
 } from "../../../constant/permission";
-import { USER_ROLE } from "../../../constant/app";
+import { PATIENT_DIAGNOSE_STATUS_CODE, USER_ROLE } from "../../../constant/app";
 import { toast } from "react-toastify";
 import { APPROVAL_STATUS } from "../../../components/ApprovalStatusTag";
 import { LANGUAGE_OPTIONS } from "../../doctor_use_form_ver2/use/DoctorIUseFormVer2";
@@ -30,8 +35,14 @@ const { Option } = Select;
 export const KEY_ACTION_BUTTON = {
   reset: "reset",
   save: "save",
-  edit: "edit",
-  approve: "approve",
+  edit: "edit doc",
+  doc_xong: "doc_xong",
+  huy_doc: "huy_doc",
+  huy_duyet: "huy_duyet",
+  nhan_duyet: "nhan_duyet",
+  edit_duyet: "edit_duyet",
+  save_duyet: "save_duyet",
+  duyet: "approve",
   preview: "preview",
   export: "export",
   AI: "AI",
@@ -57,83 +68,125 @@ export default function FormActionBar({
   onTranslate = undefined,
   onTranslateMulti = undefined,
   onExit = undefined,
-  approvalStatus = APPROVAL_STATUS.DRAFT,
   languageTranslate,
   onSign,
+  patientDiagnose,
+  onHuyDoc = () => {},
+  onDocXong = () => {},
+  onNhanDuyet = () => {},
+  onHuyDuyet = () => {},
+  onEditDuyet = () => {},
 }) {
   const navigate = useNavigate();
-  const { userPackages, user } = useGlobalAuth();
+  const { userPackages, user, doctor } = useGlobalAuth();
 
   const availblePackage = getUsablePackageCodes(userPackages);
 
   const [langModalOpen, setLangModalOpen] = useState(false);
   const [selectedLang, setSelectedLang] = useState(null);
+  const [visionItemKeys, setVisionItemKeys] = useState([]);
 
   const emptyF = () => {};
 
   const items = [
     {
-      key: "reset",
+      key: KEY_ACTION_BUTTON.reset,
       label: "RESET",
       icon: <ReloadOutlined />,
       onClick: onReset ?? emptyF,
-      disabled:
-        approvalStatus == APPROVAL_STATUS.APPROVED || (!isEdit && !!editId),
     },
     {
-      key: "save",
-      label: "SAVE",
+      key: KEY_ACTION_BUTTON.save,
+      label: "LƯU (ĐỌC)",
       icon: <SaveOutlined />,
-      disabled:
-        (editId && !isEdit) || approvalStatus == APPROVAL_STATUS.APPROVED,
+      color: "blue",
     },
     {
-      key: "edit",
-      label: "EDIT",
+      key: KEY_ACTION_BUTTON.edit,
+      label: `SỬA (ĐỌC)`,
       icon: <EditOutlined />,
       onClick: onEdit,
-      disabled: !editId || approvalStatus == APPROVAL_STATUS.APPROVED,
+      color: "blue",
     },
     {
-      key: "approve",
-      label: "APPROVE",
+      key: KEY_ACTION_BUTTON.doc_xong,
+      label: `ĐỌC XONG`,
+      icon: <FileDoneOutlined />,
+      onClick: onDocXong,
+      color: "blue",
+    },
+    {
+      key: KEY_ACTION_BUTTON.huy_doc,
+      label: `HỦY ĐỌC`,
+      icon: <DeleteOutlined />,
+      onClick: onHuyDoc,
+      color: "red",
+    },
+    {
+      key: KEY_ACTION_BUTTON.nhan_duyet,
+      label: `NHẬN DUYỆT`,
+      icon: <FileWordOutlined />,
+      onClick: onNhanDuyet,
+      color: "green",
+    },
+
+    {
+      key: KEY_ACTION_BUTTON.edit_duyet,
+      label: `SỬA (DUYỆT)`,
+      icon: <EditOutlined />,
+      onClick: onEditDuyet,
+      color: "green",
+    },
+
+    {
+      key: KEY_ACTION_BUTTON.save_duyet,
+      label: `LƯU (DUYỆT)`,
+      icon: <SaveOutlined />,
+      onClick: () => onAction(KEY_ACTION_BUTTON.save_duyet),
+      color: "green",
+    },
+    {
+      key: KEY_ACTION_BUTTON.duyet,
+      label: "DUYỆT",
       icon: <CheckCircleOutlined />,
       onClick: onApprove ?? emptyF,
-      disabled: !editId || approvalStatus == APPROVAL_STATUS.APPROVED,
+      color: "green",
+    },
+
+    {
+      key: KEY_ACTION_BUTTON.huy_duyet,
+      label: "HỦY DUYỆT",
+      icon: <DeleteOutlined />,
+      onClick: onHuyDuyet,
+      color: "red",
     },
     {
-      key: "preview",
-      label: "PREVIEW",
+      key: KEY_ACTION_BUTTON.preview,
+      label: "XEM TRƯỚC",
       icon: <EyeOutlined />,
       onClick: onPreview ?? emptyF,
-      disabled: !editId,
     },
     {
-      key: "export",
+      key: KEY_ACTION_BUTTON.export,
       label: "EXPORT",
       icon: <ExportOutlined />,
       onClick: onPrint ?? emptyF,
       disabled: !editId,
     },
     {
-      key: "AI",
+      key: KEY_ACTION_BUTTON.AI,
       label: "AI GEN",
       icon: <GatewayOutlined />,
       onClick: onGenAi || emptyF,
-      disabled:
-        approvalStatus == APPROVAL_STATUS.APPROVED ||
-        (!availblePackage.includes("HOSPITAL") &&
-          user.id_role != USER_ROLE.ADMIN),
     },
     {
-      key: "print",
+      key: KEY_ACTION_BUTTON.print,
       label: "IN",
       icon: <PrinterOutlined />,
       onClick: onPrint || emptyF,
-      disabled: approvalStatus != APPROVAL_STATUS.APPROVED,
     },
     {
-      key: "translate_multi",
+      key: KEY_ACTION_BUTTON.translate_multi,
       label: "DỊCH KHÁC",
       icon: <TranslationOutlined />,
       onClick: () => setLangModalOpen(true), // ✅ mở popup chọn ngôn ngữ
@@ -143,7 +196,7 @@ export default function FormActionBar({
           user.id_role != USER_ROLE.ADMIN),
     },
     {
-      key: "translate_en",
+      key: KEY_ACTION_BUTTON.translate_en,
       label: "DỊCH ENGLISH",
       icon: <TranslationOutlined />,
       onClick: onTranslate || emptyF,
@@ -153,9 +206,10 @@ export default function FormActionBar({
         (!hasProOrBusiness(userPackages) && user.id_role != USER_ROLE.ADMIN),
     },
     {
-      key: "exit",
+      key: KEY_ACTION_BUTTON.exit,
       label: "EXIT",
       icon: <LogoutOutlined />,
+      color: "red",
       onClick: () => {
         if (onExit) {
           onExit();
@@ -165,50 +219,33 @@ export default function FormActionBar({
       },
     },
     {
-      key: "sign",
+      key: KEY_ACTION_BUTTON.sign,
       label: "KÝ",
       onClick: onSign ?? emptyF,
       icon: <SignatureOutlined />,
-      disabled: approvalStatus != APPROVAL_STATUS.APPROVED,
     },
 
     {
       key: "verifySign",
       label: "Xác thực chữ ký",
       icon: <SignatureOutlined />,
-      disabled: approvalStatus != APPROVAL_STATUS.APPROVED,
     },
   ];
 
   const genButtonC = (it) => {
     const disabledReason = (() => {
-      if (it.key === "save" && approvalStatus == APPROVAL_STATUS.APPROVED)
-        return "Không thể lưu vì mẫu đã được phê duyệt";
-      if (it.key === "edit" && approvalStatus == APPROVAL_STATUS.APPROVED)
-        return "Không thể chỉnh sửa mẫu đã được phê duyệt";
-      if (it.key === "print" && approvalStatus !== APPROVAL_STATUS.APPROVED)
-        return "Chỉ in được khi mẫu đã được phê duyệt";
-      if (it.key === "translate_multi" && !availblePackage.includes("HOSPITAL"))
-        return "Chức năng dịch đa ngôn ngữ chỉ khả dụng cho gói HOSPITAL";
-      if (
-        it.key === KEY_ACTION_BUTTON.AI &&
-        !availblePackage.includes("HOSPITAL")
-      )
-        return "Chức năng AI đề xuất chỉ khả dụng cho gói HOSPITAL";
-      if (it.key === "translate_en" && !hasProOrBusiness(userPackages))
-        return "Chức năng dịch chỉ khả dụng cho gói PRO và HOSPITAL";
-      if (it.disabled) return "Chức năng hiện không khả dụng";
       return null;
     })();
 
     const btn = (
       <Button
         key={it.key}
-        className={`${styles.btn} ${styles[it.key]}`}
+        className={`${styles.btn}`}
         icon={it.icon}
         block
         onClick={() => (it.onClick ? it.onClick() : onAction?.(it.key))}
         disabled={it.disabled}
+        style={{ borderBlockColor: it.color, borderColor: it.color }}
       >
         {it.label}
       </Button>
@@ -223,9 +260,145 @@ export default function FormActionBar({
     );
   };
 
+  useEffect(() => {
+    const { status, id_doctor_in_processing, id_receive_doctor } =
+      patientDiagnose || {};
+
+    let keys = [];
+
+    if (
+      patientDiagnose?.id_doctor_in_processing !== doctor.id &&
+      patientDiagnose?.id_receive_doctor !== doctor.id &&
+      patientDiagnose?.id_verify_doctor !== doctor.id
+    ) {
+      return;
+    }
+
+    switch (status) {
+      case PATIENT_DIAGNOSE_STATUS_CODE.NEW:
+        keys = [KEY_ACTION_BUTTON.exit];
+        break;
+
+      case PATIENT_DIAGNOSE_STATUS_CODE.CONSULTATION:
+        keys = [KEY_ACTION_BUTTON.exit];
+        break;
+
+      case PATIENT_DIAGNOSE_STATUS_CODE.IN_PROCESSING:
+        if (
+          id_doctor_in_processing != doctor.id &&
+          id_receive_doctor != doctor.id
+        ) {
+          keys = [KEY_ACTION_BUTTON.exit];
+        } else {
+          keys = [
+            id_doctor_in_processing == doctor.id
+              ? KEY_ACTION_BUTTON.reset
+              : null,
+            id_doctor_in_processing == doctor.id
+              ? editId && !isEdit
+                ? KEY_ACTION_BUTTON.edit
+                : KEY_ACTION_BUTTON.save
+              : null,
+            id_doctor_in_processing == doctor.id
+              ? KEY_ACTION_BUTTON.doc_xong
+              : null,
+            KEY_ACTION_BUTTON.exit,
+            id_doctor_in_processing == doctor.id
+              ? KEY_ACTION_BUTTON.huy_doc
+              : null,
+          ].filter(Boolean);
+        }
+        break;
+
+      case PATIENT_DIAGNOSE_STATUS_CODE.READ_DONE:
+        if (
+          id_doctor_in_processing != doctor.id &&
+          id_receive_doctor != doctor.id
+        ) {
+          keys = [KEY_ACTION_BUTTON.exit];
+        } else {
+          keys = [
+            editId && !isEdit ? KEY_ACTION_BUTTON.edit : KEY_ACTION_BUTTON.save,
+            KEY_ACTION_BUTTON.exit,
+            KEY_ACTION_BUTTON.huy_doc,
+            KEY_ACTION_BUTTON.nhan_duyet,
+            KEY_ACTION_BUTTON.duyet,
+          ];
+        }
+        break;
+
+      case PATIENT_DIAGNOSE_STATUS_CODE.WAIT_VERIFY:
+        if (
+          id_doctor_in_processing != doctor.id &&
+          id_receive_doctor != doctor.id
+        ) {
+          keys = [KEY_ACTION_BUTTON.exit];
+        } else {
+          keys = [
+            patientDiagnose.id_verify_doctor == doctor.id ||
+            patientDiagnose.id_receive_doctor == doctor.id
+              ? KEY_ACTION_BUTTON.reset
+              : null,
+            KEY_ACTION_BUTTON.exit,
+            patientDiagnose.id_verify_doctor == doctor.id ||
+            patientDiagnose.id_receive_doctor == doctor.id
+              ? KEY_ACTION_BUTTON.huy_duyet
+              : null,
+            patientDiagnose.id_verify_doctor == doctor.id ||
+            patientDiagnose.id_receive_doctor == doctor.id
+              ? editId && !isEdit
+                ? KEY_ACTION_BUTTON.edit_duyet
+                : KEY_ACTION_BUTTON.save_duyet
+              : null,
+            patientDiagnose.id_verify_doctor == doctor.id ||
+            patientDiagnose.id_receive_doctor == doctor.id
+              ? KEY_ACTION_BUTTON.duyet
+              : null,
+          ].filter(Boolean);
+        }
+        break;
+
+      case PATIENT_DIAGNOSE_STATUS_CODE.VERIFIED:
+        if (
+          id_doctor_in_processing != doctor.id &&
+          id_receive_doctor != doctor.id
+        ) {
+          keys = [KEY_ACTION_BUTTON.exit];
+        } else {
+          keys = [
+            KEY_ACTION_BUTTON.exit,
+            KEY_ACTION_BUTTON.huy_duyet,
+            KEY_ACTION_BUTTON.print,
+            KEY_ACTION_BUTTON.preview,
+            editId && !isEdit
+              ? KEY_ACTION_BUTTON.edit_duyet
+              : KEY_ACTION_BUTTON.save_duyet,
+          ];
+        }
+        break;
+
+      default:
+        keys = [KEY_ACTION_BUTTON.exit];
+        break;
+    }
+
+    setVisionItemKeys(keys);
+  }, [patientDiagnose, doctor?.id, editId, isEdit]);
+
   return (
     <div className="no-print">
-      {/* 🔹 Modal chọn ngôn ngữ dịch */}
+      <div className={styles.actionBar}>
+        <div className={styles.actionGrid}>
+          {!actionKeys?.length
+            ? items
+                .filter((it) => visionItemKeys.includes(it.key))
+                .map((it) => genButtonC(it))
+            : items
+                .filter((i) => actionKeys.includes(i.key))
+                .map((it) => genButtonC(it))}
+        </div>
+      </div>
+
       <Modal
         className="no-print"
         title="Chọn ngôn ngữ cần dịch"
@@ -265,16 +438,6 @@ export default function FormActionBar({
           ))}
         </Select>
       </Modal>
-
-      <div className={styles.actionBar}>
-        <div className={styles.actionGrid}>
-          {!actionKeys?.length
-            ? items.map((it) => genButtonC(it))
-            : items
-                .filter((i) => actionKeys.includes(i.key))
-                .map((it) => genButtonC(it))}
-        </div>
-      </div>
     </div>
   );
 }

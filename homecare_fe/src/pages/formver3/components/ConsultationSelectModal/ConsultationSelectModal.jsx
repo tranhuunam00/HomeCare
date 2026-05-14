@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Button, Select, message } from "antd";
-import { PATIENT_DIAGNOSE_STATUS_NAME } from "../../../../constant/app";
+import {
+  PATIENT_DIAGNOSE_STATUS_CODE,
+  PATIENT_DIAGNOSE_STATUS_NAME,
+} from "../../../../constant/app";
 import API_CALL from "../../../../services/axiosClient";
 import { useGlobalAuth } from "../../../../contexts/AuthContext";
 
@@ -122,41 +125,44 @@ const ConsultationSelectModal = ({
           Tôi đọc ca này
         </Button>
 
-        <div>
-          <div
-            style={{
-              marginBottom: 8,
-              fontWeight: 600,
-            }}
-          >
-            Chọn bác sĩ hội chẩn
-          </div>
+        {patientDiagnose.status == PATIENT_DIAGNOSE_STATUS_CODE.NEW && (
+          <>
+            <div>
+              <div
+                style={{
+                  marginBottom: 8,
+                  fontWeight: 600,
+                }}
+              >
+                Chọn bác sĩ hội chẩn
+              </div>
 
-          <Select
-            style={{ width: "100%" }}
-            placeholder="Chọn bác sĩ"
-            showSearch
-            optionFilterProp="label"
-            value={consultDoctorId}
-            onChange={setConsultDoctorId}
-            options={clinicDoctors.map((d) => ({
-              value: d.id,
-              label: d.full_name,
-            }))}
-          />
-        </div>
-
-        <Button
-          disabled={!consultDoctorId}
-          loading={loading}
-          style={{
-            background: "#F59E0B",
-            color: "#fff",
-          }}
-          onClick={handleConsultation}
-        >
-          Chuyển hội chẩn
-        </Button>
+              <Select
+                style={{ width: "100%" }}
+                placeholder="Chọn bác sĩ"
+                showSearch
+                optionFilterProp="label"
+                value={consultDoctorId}
+                onChange={setConsultDoctorId}
+                options={clinicDoctors.map((d) => ({
+                  value: d.id,
+                  label: d.full_name,
+                }))}
+              />
+            </div>
+            <Button
+              disabled={!consultDoctorId}
+              loading={loading}
+              style={{
+                background: "#F59E0B",
+                color: "#fff",
+              }}
+              onClick={handleConsultation}
+            >
+              Chuyển hội chẩn
+            </Button>
+          </>
+        )}
       </div>
     </Modal>
   );

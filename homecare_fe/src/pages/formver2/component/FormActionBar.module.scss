@@ -21,7 +21,7 @@ $clr-exit: #b91c1c; // red
 
 .actionGrid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 20px;
 
   @media (max-width: 992px) {

@@ -70,7 +70,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
   }, [formSnapshot?.benh_nhan_dia_chi_tinh_thanh_pho]);
   const provinceName =
     provinces.find(
-      (p) => p.code == formSnapshot?.benh_nhan_dia_chi_tinh_thanh_pho
+      (p) => p.code == formSnapshot?.benh_nhan_dia_chi_tinh_thanh_pho,
     )?.name || formSnapshot?.benh_nhan_dia_chi_tinh_thanh_pho;
 
   const wardName =
@@ -154,7 +154,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
             {translateLabel(
               languageTranslate,
               "Result_Report",
-              false
+              false,
             ).toUpperCase()}
           </h1>
           <h2
@@ -186,7 +186,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
                 {translateLabel(
                   languageTranslate,
                   "administrativeInfo",
-                  false
+                  false,
                 ).toUpperCase()}
               </h3>
 
@@ -195,7 +195,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
                   label={translateLabel(
                     languageTranslate,
                     "fullName",
-                    false
+                    false,
                   ).toUpperCase()}
                   value={formSnapshot?.benh_nhan_ho_ten}
                 />
@@ -203,7 +203,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
                   label={translateLabel(
                     languageTranslate,
                     "gender",
-                    false
+                    false,
                   ).toUpperCase()}
                   value={formSnapshot?.benh_nhan_gioi_tinh}
                 />
@@ -211,7 +211,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
                   label={translateLabel(
                     languageTranslate,
                     "age",
-                    false
+                    false,
                   ).toUpperCase()}
                   value={formSnapshot?.benh_nhan_tuoi}
                 />
@@ -221,7 +221,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
                   label={translateLabel(
                     languageTranslate,
                     "address",
-                    false
+                    false,
                   ).toUpperCase()}
                   value={formSnapshot?.benh_nhan_dia_chi_so_nha}
                 />
@@ -231,7 +231,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
                   label={translateLabel(
                     languageTranslate,
                     "district",
-                    false
+                    false,
                   ).toUpperCase()}
                   value={wardName}
                 />
@@ -240,7 +240,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
                   label={translateLabel(
                     languageTranslate,
                     "province",
-                    false
+                    false,
                   ).toUpperCase()}
                   value={provinceName}
                 />
@@ -248,7 +248,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
                   label={translateLabel(
                     languageTranslate,
                     "nationality",
-                    false
+                    false,
                   ).toUpperCase()}
                   value={formSnapshot?.benh_nhan_quoc_tich}
                 />
@@ -259,7 +259,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
                   label={translateLabel(
                     languageTranslate,
                     "phone",
-                    false
+                    false,
                   ).toUpperCase()}
                   value={formSnapshot?.benh_nhan_dien_thoai}
                 />
@@ -267,7 +267,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
                   label={translateLabel(
                     languageTranslate,
                     "email",
-                    false
+                    false,
                   ).toUpperCase()}
                   value={formSnapshot?.benh_nhan_email}
                 />
@@ -277,7 +277,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
                   label={translateLabel(
                     languageTranslate,
                     "patientId",
-                    false
+                    false,
                   ).toUpperCase()}
                   value={formSnapshot?.benh_nhan_pid}
                 />
@@ -285,7 +285,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
                   label={translateLabel(
                     languageTranslate,
                     "sid",
-                    false
+                    false,
                   ).toUpperCase()}
                   value={formSnapshot?.benh_nhan_sid}
                 />
@@ -295,7 +295,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
                   label={translateLabel(
                     languageTranslate,
                     "clinical",
-                    false
+                    false,
                   ).toUpperCase()}
                   value={formSnapshot?.benh_nhan_lam_sang}
                 />
@@ -315,7 +315,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
             {translateLabel(
               languageTranslate,
               "technicalProtocol",
-              false
+              false,
             ).toUpperCase()}
           </h3>
 
@@ -402,7 +402,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
                   href={
                     formSnapshot?.ImageRightDescLink ||
                     formSnapshot.image_form_ver2s?.find(
-                      (i) => i.kind == "right"
+                      (i) => i.kind == "right",
                     )?.link
                   }
                   target="_blank"
@@ -410,7 +410,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
                 >
                   {formSnapshot?.ImageRightDesc ||
                     formSnapshot.image_form_ver2s?.find(
-                      (i) => i.kind == "right"
+                      (i) => i.kind == "right",
                     )?.desc}
                 </a>
               </p>
@@ -430,7 +430,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
             {translateLabel(
               languageTranslate,
               "imagingFindings",
-              false
+              false,
             ).toUpperCase()}
           </h3>
 
@@ -450,7 +450,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
             {translateLabel(
               languageTranslate,
               "impression",
-              false
+              false,
             ).toUpperCase()}
           </h3>
           <p
@@ -467,7 +467,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
             label={translateLabel(
               languageTranslate,
               "icd10Classification",
-              false
+              false,
             )}
             value={formSnapshot?.icd10}
           />
@@ -475,7 +475,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
             label={translateLabel(
               languageTranslate,
               "gradingClassification",
-              false
+              false,
             )}
             value={formSnapshot?.phan_do_loai}
           />
@@ -483,7 +483,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
             label={translateLabel(
               languageTranslate,
               "differentialDiagnosis",
-              false
+              false,
             )}
             value={formSnapshot?.chan_doan_phan_biet}
           />
@@ -501,7 +501,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
             {translateLabel(
               languageTranslate,
               "recommendationsCounseling",
-              false
+              false,
             ).toUpperCase()}
           </h3>
           <p
@@ -528,7 +528,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
                 {translateLabel(
                   languageTranslate,
                   "illustrativeImages",
-                  false
+                  false,
                 ).toUpperCase()}
               </h3>
               <div
@@ -578,7 +578,7 @@ const PrintPreviewVer2NotDataDiagnose = ({
                 {translateLabel(
                   languageTranslate,
                   "doctor",
-                  false
+                  false,
                 ).toUpperCase()}
               </h3>
               <div
