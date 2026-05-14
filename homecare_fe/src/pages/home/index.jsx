@@ -345,6 +345,7 @@ const Home = () => {
                       : "1px solid #061b46",
                     cursor: "pointer",
                     minHeight: 44,
+                    minWidth: 80,
                   }}
                 >
                   <Checkbox checked={pendingFilters?.my_received_cases} />
