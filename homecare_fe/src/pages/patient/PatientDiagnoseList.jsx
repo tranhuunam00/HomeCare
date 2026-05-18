@@ -127,6 +127,10 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
 
       if (!updatedRecord?.id) return;
 
+      setSelectedPatientDiagnose(updatedRecord);
+
+      console.log("updatedRecord", updatedRecord);
+
       setData((prev) =>
         prev.map((item) =>
           item.id === updatedRecord.id

@@ -48,13 +48,19 @@ const PatientDiagnoiseDetailPage = ({
   const { id } = useParams();
   const location = useLocation();
   const chosenRecord = location.state?.record;
-  const [data, setData] = useState(null);
   const [clinics, setClinics] = useState([]);
   const [clinicName, setClinicName] = useState("");
 
   const navigate = useNavigate();
-  const { user, doctor, examParts, templateServices, clinicsAll } =
-    useGlobalAuth();
+  const {
+    user,
+    doctor,
+    examParts,
+    templateServices,
+    clinicsAll,
+    selectedPatientDiagnose: data,
+    setSelectedPatientDiagnose: setData,
+  } = useGlobalAuth();
   const [idEdit, setIdEdit] = useState();
 
   const [page, setPage] = useState(1);

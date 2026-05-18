@@ -1,6 +1,7 @@
-import React from "react";
 import { Resizable } from "react-resizable";
+import "react-resizable/css/styles.css";
 
+import "./ResizableTitle.scss";
 const ResizableTitle = (props) => {
   const { onResize, width, ...restProps } = props;
 
@@ -19,9 +20,7 @@ const ResizableTitle = (props) => {
         />
       }
       onResize={onResize}
-      draggableOpts={{
-        enableUserSelectHack: false,
-      }}
+      draggableOpts={{ enableUserSelectHack: false }}
     >
       <th {...restProps} />
     </Resizable>
