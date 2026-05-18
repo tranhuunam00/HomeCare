@@ -436,7 +436,8 @@ const FormVer3GroupProcessPatientDiagnoise = ({
 
         {(status === PATIENT_DIAGNOSE_STATUS_NAME.VERIFIED ||
           status === PATIENT_DIAGNOSE_STATUS_NAME.WAIT_VERIFY) &&
-          id_doctor_in_processing === doctor.id && (
+          (id_doctor_in_processing === doctor.id ||
+            id_receive_doctor === doctor.id) && (
             <div style={{ marginTop: 16 }}>
               <Button
                 style={{

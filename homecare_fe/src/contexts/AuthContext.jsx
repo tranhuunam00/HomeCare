@@ -1,6 +1,9 @@
 // src/contexts/GlobalAuthContext.jsx
 import { createContext, useContext, useState, useEffect } from "react";
+import { io } from "socket.io-client";
+
 import storage from "../services/storage";
+import { toast } from "react-toastify";
 
 const GlobalAuthContext = createContext();
 
@@ -19,6 +22,8 @@ const DEFAULT_FILTER_PATIENT = {
 };
 
 export const GlobalAuthProvider = ({ children }) => {
+  const [socket, setSocket] = useState(null);
+
   const [user, setUser] = useState(() => storage.get("USER"));
   const [token, setToken] = useState(() => storage.get("TOKEN"));
   const [doctor, setDoctor] = useState(() => storage.get("DOCTOR"));
@@ -72,6 +77,72 @@ export const GlobalAuthProvider = ({ children }) => {
 
     return null;
   });
+
+  useEffect(() => {
+    if (!user || !token) return;
+
+    const socketInstance = io(
+      import.meta.env.VITE_API_SOCKET_URL || "http://localhost:3001/socket",
+      {
+        auth: { token },
+      },
+    );
+
+    socketInstance.on("connect", () => {
+      console.log("Connected socket:", socketInstance.id);
+    });
+
+    socketInstance.on("disconnect", () => {
+      console.log("Socket disconnected");
+    });
+
+    socketInstance.on("notification:new", (data) => {
+      toast.info(`${data.title}\n${data.message}`, {
+        position: "bottom-right",
+      });
+
+      setNotifications((prev) => [data, ...prev]);
+
+      setUnreadCount((prev) => (prev || 0) + 1);
+    });
+
+    socketInstance.on("patient-diagnose-updated", (payload) => {
+      if (payload?.notification) {
+        setNotifications((prev) => {
+          const existed = prev.some((n) => n.id === payload.notification.id);
+
+          if (existed) return prev;
+
+          return [payload.notification, ...prev];
+        });
+
+        setUnreadCount((prev) => prev + 1);
+      }
+
+      if (
+        payload?.type === "CONSULTATION_ASSIGNED" &&
+        payload?.data?.id_consulting_doctor === doctor?.id
+      ) {
+        toast.info(
+          ` ${payload.notification.title}\n${payload.notification.message}`,
+          {
+            position: "top-right",
+          },
+        );
+      }
+      if (payload?.type === "CONSULTATION_REMOVED" && payload.notification) {
+        toast.warning(
+          ` ${payload.notification.title}\n${payload.notification.message}`,
+        );
+      }
+    });
+
+    setSocket(socketInstance);
+
+    return () => {
+      socketInstance.disconnect();
+    };
+  }, [user?.id, token]);
 
   useEffect(() => {
     if (selectedPatientDiagnose) {
@@ -163,6 +234,8 @@ export const GlobalAuthProvider = ({ children }) => {
 
         selectedPatientDiagnose,
         setSelectedPatientDiagnose,
+
+        socket,
       }}
     >
       {children}

@@ -637,7 +637,7 @@ const OnboardingWizard = ({ open, onClose, doctorId, is_use_onboard }) => {
       title: "Hoàn tất",
       content: (
         <div style={{ textAlign: "center" }}>
-          <h2>🎉🎉🎉 Chúc mừng!</h2>
+          <h2> Chúc mừng!</h2>
           <p>Bạn đã hoàn tất thiết lập ban đầu.</p>
         </div>
       ),

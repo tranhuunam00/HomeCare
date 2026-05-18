@@ -7,6 +7,7 @@
     "react-rnd": "^10.5.2",
     "react-slick": "^0.31.0",
     "slick-carousel": "^1.8.1",
+    "use-antd-resizable-header": "^3.2.2",
     "xlsx": "^0.18.5",
     "xlsx-js-style": "^1.2.0"
   }

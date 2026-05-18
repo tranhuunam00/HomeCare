@@ -188,11 +188,6 @@ const PatientFormPage = () => {
     }
   }, [initialValues, templateServices, examParts, clinics]);
 
-  const disabledDate = (current) => {
-    return current && current > dayjs().endOf("day");
-  };
-
-  console.log(form.getFieldsValue());
   return (
     <div style={{ paddingLeft: "20%", paddingRight: "20%" }}>
       <Card bordered>

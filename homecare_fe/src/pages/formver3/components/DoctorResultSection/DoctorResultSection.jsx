@@ -1,16 +1,18 @@
 import React from "react";
 import dayjs from "dayjs";
+import { translateLabel } from "../../../../constant/app";
 
 const DoctorResultSection = ({
   consultingDoctor,
   readingDoctor,
   createdAt,
+  languageTranslate,
 }) => {
   const hasConsultingDoctor = !!consultingDoctor?.id;
 
   const titleStyle = {
     fontWeight: 700,
-    fontSize: 15,
+    fontSize: 14,
     marginBottom: 4,
     lineHeight: 1.2,
   };
@@ -124,7 +126,13 @@ const DoctorResultSection = ({
                 borderRight: "1px solid #cfd4dc",
               }}
             >
-              <div style={titleStyle}>Họ tên, học hàm, học vị</div>
+              <div style={titleStyle}>
+                {translateLabel(
+                  languageTranslate,
+                  "Họ tên, học hàm, học vị",
+                  false,
+                )}
+              </div>
 
               <div style={valueStyle}>
                 {[
@@ -144,7 +152,13 @@ const DoctorResultSection = ({
               }}
             >
               <div style={titleStyle}>
-                {isReadingDoctor ? "Thời gian thực hiện" : "Nơi công tác"}
+                {isReadingDoctor
+                  ? translateLabel(
+                      languageTranslate,
+                      "Thời gian thực hiện",
+                      false,
+                    )
+                  : translateLabel(languageTranslate, "Nơi công tác", false)}
               </div>
 
               <div style={valueStyle}>
@@ -186,7 +200,7 @@ const DoctorResultSection = ({
                   fontSize: 15,
                 }}
               >
-                BÁC SĨ HỘI CHẨN
+                {translateLabel(languageTranslate, "BAC SI HOI CHAN", false)}
               </h3>
 
               {renderDoctorInfo(consultingDoctor)}
@@ -205,7 +219,7 @@ const DoctorResultSection = ({
               fontSize: 15,
             }}
           >
-            BÁC SĨ ĐỌC KẾT QUẢ
+            {translateLabel(languageTranslate, "BAC SI DOC KET QUA", false)}
           </h3>
 
           {renderDoctorInfo(readingDoctor, true)}

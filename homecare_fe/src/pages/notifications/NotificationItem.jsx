@@ -1,122 +1,148 @@
 import React from "react";
-import { List, Avatar, Tag, Tooltip } from "antd";
+import { List, Avatar, Tag, Tooltip, Badge } from "antd";
 import {
-  ExclamationCircleOutlined,
   MessageOutlined,
   AlertOutlined,
-  UserOutlined,
   FileTextOutlined,
   BellOutlined,
   ContainerOutlined,
+  GiftOutlined,
+  InfoCircleOutlined,
+  CheckCircleFilled,
+  EyeOutlined,
 } from "@ant-design/icons";
+
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/vi";
+
 import styles from "./NotificationBell.module.scss";
 
 dayjs.extend(relativeTime);
 dayjs.locale("vi");
 
-/**
- * @param {Object} props
- * @param {Object} props.item - notification object
- * @param {Function} props.onClick - callback khi click vào item
- */
+const TYPE_CONFIG = {
+  system: {
+    icon: <InfoCircleOutlined />,
+    color: "#1677ff",
+    bg: "#e6f4ff",
+    label: "Hệ thống",
+  },
+
+  package: {
+    icon: <ContainerOutlined />,
+    color: "#fa8c16",
+    bg: "#fff7e6",
+    label: "Gói dịch vụ",
+  },
+
+  diagnosis: {
+    icon: <FileTextOutlined />,
+    color: "#13c2c2",
+    bg: "#e6fffb",
+    label: "Ca bệnh",
+  },
+
+  chat: {
+    icon: <MessageOutlined />,
+    color: "#52c41a",
+    bg: "#f6ffed",
+    label: "Tin nhắn",
+  },
+
+  alert: {
+    icon: <AlertOutlined />,
+    color: "#f5222d",
+    bg: "#fff2f0",
+    label: "Cảnh báo",
+  },
+};
+
+const PRIORITY_CONFIG = {
+  low: {
+    color: "default",
+    label: "Thấp",
+  },
+
+  normal: {
+    color: "blue",
+    label: "Bình thường",
+  },
+
+  high: {
+    color: "red",
+    label: "Quan trọng",
+  },
+};
+
 const NotificationItem = ({ item, onClick }) => {
-  const {
-    id,
-    title,
-    message,
-    createdAt,
-    is_read,
-    priority,
-    type,
-    icon,
-    action_url,
-  } = item;
+  const { id, title, message, createdAt, is_read, priority, type, action_url } =
+    item;
 
-  // Chọn icon theo type hoặc custom icon
-  const renderIcon = () => {
-    // Nếu icon là URL hợp lệ
-    if (icon && icon.startsWith("http")) {
-      return <Avatar src={icon} />;
-    }
+  const typeConfig = TYPE_CONFIG[type] || TYPE_CONFIG.system;
 
-    // Nếu icon là tên biểu tượng từ backend
-    switch (icon || type) {
-      case "gift":
-        return (
-          <Avatar
-            style={{ backgroundColor: "#fadb14" }}
-            icon={<BellOutlined />}
-          />
-        );
-      case "package":
-        return (
-          <Avatar
-            style={{ backgroundColor: "#fa8c16" }}
-            icon={<ContainerOutlined />}
-          />
-        );
-      case "check-circle":
-        return (
-          <Avatar
-            style={{ backgroundColor: "#52c41a" }}
-            icon={<FileTextOutlined />}
-          />
-        );
-      case "x-circle":
-        return (
-          <Avatar
-            style={{ backgroundColor: "#f5222d" }}
-            icon={<AlertOutlined />}
-          />
-        );
-      case "diagnosis":
-        return (
-          <Avatar
-            style={{ backgroundColor: "#13c2c2" }}
-            icon={<FileTextOutlined />}
-          />
-        );
-      case "chat":
-        return (
-          <Avatar
-            style={{ backgroundColor: "#1677ff" }}
-            icon={<MessageOutlined />}
-          />
-        );
-      default:
-        return (
-          <Avatar style={{ backgroundColor: "#ccc" }} icon={<BellOutlined />} />
-        );
-    }
-  };
-
-  // Chọn màu theo priority
-  const priorityColor =
-    priority === "high" ? "red" : priority === "normal" ? "blue" : "default";
+  const priorityConfig = PRIORITY_CONFIG[priority] || PRIORITY_CONFIG.normal;
 
   return (
     <List.Item
-      className={`${styles.item} ${!is_read ? styles.unread : ""}`}
+      className={`${styles.item} ${!is_read ? styles.unread : styles.read}`}
       onClick={() => onClick(id, action_url)}
+      style={{
+        background: !is_read ? typeConfig.bg : "#fff",
+      }}
     >
       <List.Item.Meta
-        avatar={renderIcon()}
+        avatar={
+          <Badge dot={!is_read}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+            >
+              <Avatar
+                style={{
+                  backgroundColor: typeConfig.color,
+                  marginBottom: 10,
+                  marginLeft: 5,
+                }}
+                icon={typeConfig.icon}
+              />
+              {item.is_read ? (
+                <CheckCircleFilled style={{ color: "#52c41a" }} />
+              ) : item.is_seen ? (
+                <EyeOutlined style={{ color: "#999" }} />
+              ) : (
+                <Badge status="error" />
+              )}
+            </div>
+          </Badge>
+        }
         title={
-          <div className={styles.title}>
+          <div className={styles.titleRow}>
             <Tooltip title={title}>
-              <span>{title}</span>
+              <span
+                className={styles.title}
+                style={{
+                  fontWeight: !is_read ? 700 : 500,
+                }}
+              >
+                {title}
+              </span>
             </Tooltip>
+
+            <Tag color={typeConfig.color}>{typeConfig.label}</Tag>
           </div>
         }
         description={
           <>
             <div className={styles.message}>{message}</div>
+
             <div className={styles.meta}>
-              <Tag color={priorityColor}>{priority}</Tag>
-              <span>{dayjs(createdAt).fromNow()}</span>
+              <Tag color={priorityConfig.color}>{priorityConfig.label}</Tag>
+
+              <span className={styles.time}>{dayjs(createdAt).fromNow()}</span>
             </div>
           </>
         }

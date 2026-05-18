@@ -159,7 +159,7 @@ export const PACKAGE_FEES = {
   ],
   HOSPITAL: [
     { value: 1, label: "650.000", saving: 0, qr: "650k.jpg" },
-    { value: 3, label: "1.625.000", saving: 325000, qr: "1625k.jpg" },
+    { value: 3, label: "1.650.000", saving: 325000, qr: "1650k.jpg" },
     { value: 12, label: "5.850.000", saving: 2220000, qr: "5850k.jpg" },
   ],
 };

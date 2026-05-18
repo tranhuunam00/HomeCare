@@ -1,15 +1,24 @@
-// .react-resizable {
-//   position: relative;
-//   background-clip: padding-box;
-// }
+.react-resizable {
+  position: relative;
+  background-clip: padding-box;
+}
 
 .react-resizable-handle {
   position: absolute;
-  right: -2px;
-  bottom: 0;
-  z-index: 100;
-  width: 1px;
+  top: 0;
+  right: -5px;
+  width: 10px;
   height: 100%;
   cursor: col-resize;
-  background-color: rgba(134, 216, 189, 0.356);
+  z-index: 10;
+}
+
+.ant-table {
+  table-layout: fixed !important;
+}
+
+.ant-table-cell {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }

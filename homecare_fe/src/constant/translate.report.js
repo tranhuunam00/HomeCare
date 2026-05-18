@@ -57,6 +57,11 @@ export const TRANSLATE_MULTI_REPORT = {
     "Không đạt": "Không đạt",
     "Chụp lại": "Chụp lại",
     "Chụp thêm": "Chụp thêm",
+    "BAC SI HOI CHAN": "BÁC SĨ HỘI CHẨN",
+    "BAC SI DOC KET QUA": "BÁC SĨ ĐỌC KẾT QUẢ",
+    "Họ tên, học hàm, học vị": "Họ tên, học hàm, học vị",
+    "Thời gian thực hiện": "Thời gian thực hiện",
+    "Nơi công tác": "Nơi công tác",
   },
   en: {
     administrativeInfo: "ADMINISTRATIVE INFORMATION",
@@ -115,6 +120,11 @@ export const TRANSLATE_MULTI_REPORT = {
     "Không đạt": "Inadequate",
     "Chụp lại": "Retake",
     "Chụp thêm": "Additional shooting",
+    "BAC SI HOI CHAN": "CONSULTING DOCTOR",
+    "BAC SI DOC KET QUA": "READING DOCTOR",
+    "Họ tên, học hàm, học vị": "Full Name, Academic Title, Academic Degree",
+    "Thời gian thực hiện": "Performed Time",
+    "Nơi công tác": "Place of Work",
   },
   zh: {
     administrativeInfo: "行政信息",

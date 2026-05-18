@@ -359,7 +359,7 @@ const Home = () => {
                         : "#4b5563",
                     }}
                   >
-                    Ca đã nhận
+                    Ca liên quan
                   </span>
                 </div>
               </Col>

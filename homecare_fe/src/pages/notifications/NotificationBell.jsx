@@ -39,20 +39,29 @@ const NotificationBell = () => {
 
     try {
       const res = await API_CALL.get(
-        `/notification?limit=${limit}&offset=${offset}&user_id=${user?.id}`
+        `/notification?limit=${limit}&offset=${offset}&user_id=${user?.id}`,
       );
 
       const records = res.data.data.data || [];
       const total = res.data.data?.total || 0;
 
       setNotifications((prev) => {
-        const newData = pageNum === 1 ? records : [...prev, ...records];
-        const nextOffset = offset + records.length;
-        setHasMore(nextOffset < total);
-        setUnreadCount(newData.filter((n) => !n.is_read).length);
-        return newData;
-      });
+        const merged =
+          pageNum === 1 ? [...records, ...prev] : [...prev, ...records];
 
+        // unique theo id
+        const unique = Array.from(
+          new Map(merged.map((item) => [item.id, item])).values(),
+        );
+
+        const nextOffset = offset + records.length;
+
+        setHasMore(nextOffset < total);
+
+        setUnreadCount(unique.filter((n) => !n.is_read).length);
+
+        return unique;
+      });
       setPage(pageNum);
     } catch (err) {
       console.error("Fetch notifications error:", err);
@@ -62,8 +71,10 @@ const NotificationBell = () => {
   };
 
   useEffect(() => {
-    fetchNotifications();
-  }, []);
+    if (user?.id) {
+      fetchNotifications();
+    }
+  }, [user?.id]);
 
   // Đóng dropdown khi click ngoài
   useEffect(() => {
@@ -82,7 +93,7 @@ const NotificationBell = () => {
     try {
       await API_CALL.patch(`/notification/${id}/read`);
       setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
+        prev.map((n) => (n.id === id ? { ...n, is_read: true } : n)),
       );
       setUnreadCount((prev) => Math.max(prev - 1, 0));
       // if (actionUrl) window.open(actionUrl, "_blank");
@@ -96,7 +107,7 @@ const NotificationBell = () => {
     try {
       await API_CALL.patch("/notification/read-all");
       setNotifications((prev) =>
-        prev.map((n) => ({ ...n, is_read: true, read_at: new Date() }))
+        prev.map((n) => ({ ...n, is_read: true, read_at: new Date() })),
       );
       setUnreadCount(0);
       message.success("Tất cả thông báo đã được đánh dấu là đã đọc");

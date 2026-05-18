@@ -113,9 +113,62 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
     totalPatient: total,
     selectedPatientDiagnose,
     setSelectedPatientDiagnose,
+    socket,
   } = useGlobalAuth();
 
   const { fetchTSAndExamParts } = useTemplateServicesAndExamParts();
+
+  useEffect(() => {
+    console.log("socket", socket);
+    if (!socket) return;
+
+    const handlePatientUpdated = (payload) => {
+      const updatedRecord = payload?.data || payload;
+
+      if (!updatedRecord?.id) return;
+
+      setData((prev) =>
+        prev.map((item) =>
+          item.id === updatedRecord.id
+            ? {
+                ...item,
+                ...updatedRecord,
+              }
+            : item,
+        ),
+      );
+
+      setSameCCCDData((prev) =>
+        prev.map((item) =>
+          item.id === updatedRecord.id
+            ? {
+                ...item,
+                ...updatedRecord,
+              }
+            : item,
+        ),
+      );
+
+      setSelectedPatientDiagnose((prev) => {
+        if (!prev) return prev;
+
+        if (prev.id === updatedRecord.id) {
+          return {
+            ...prev,
+            ...updatedRecord,
+          };
+        }
+
+        return prev;
+      });
+    };
+
+    socket.on("patient-diagnose-updated", handlePatientUpdated);
+
+    return () => {
+      socket.off("patient-diagnose-updated", handlePatientUpdated);
+    };
+  }, [socket]);
 
   useEffect(() => {
     setIsOnWorkList(true);
