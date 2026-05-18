@@ -55,43 +55,40 @@ import PrintPreviewVer3NotDataDiagnose from "../../components/PrintPreviewVer3No
 import { handlePrint } from "../../../formver2/utils.js";
 import ImagingStructureTextTable from "../../components/ImagingStructureTextTable.jsx";
 import TranslateListRecordsVer3 from "../../components/TranslateListRecordsVer3.jsx";
-import { handleTranslateToLanguage } from "../../../doctor_use_form_ver2/use/util.js";
 
 const { Title } = Typography;
 const { TextArea } = Input;
 const { Option } = Select;
 
-export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
+export default function DoctorUseDFormVer3({
+  onFormChange,
+  isUse = false,
+  onBackDetail,
+  doctorUseFormVer3Id,
+}) {
   const printRef = useRef(null);
   const [form] = Form.useForm();
   const {
     examParts,
     templateServices,
-    user,
     doctor,
     setExamParts,
     setTemplateServices,
+    selectedPatientDiagnose,
+    setSelectedPatientDiagnose,
+    previewOpen,
+    setPreviewOpen,
   } = useGlobalAuth();
 
   const printSourceRef = useRef(null);
 
   const [reloading, setReloading] = useState(false);
   const [signModalOpen, setSignModalOpen] = useState(false);
-  const { provinces, wards, setSelectedProvince } = useVietnamAddress();
+  const { setSelectedProvince } = useVietnamAddress();
   const navigate = useNavigate();
-  const { patient_diagnose_id, id_doctor_use_formver3, is_print } = useParams();
+  const { is_print } = useParams();
 
-  const [idEdit, setIdEdit] = useState(id_doctor_use_formver3);
-
-  const [idPatientDiagnose, setIdPatientDiagnose] =
-    useState(patient_diagnose_id);
-
-  useEffect(() => {
-    setIdEdit(id_doctor_use_formver3);
-  }, [id_doctor_use_formver3]);
-  useEffect(() => {
-    setIdPatientDiagnose(patient_diagnose_id);
-  }, [patient_diagnose_id]);
+  const [idEdit, setIdEdit] = useState(doctorUseFormVer3Id);
 
   const [translateOpen, setTranslateOpen] = useState(false);
   const [patientDiagnose, setPatientDiagnose] = useState(null);
@@ -174,7 +171,7 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
   const checkEnglishVersion = async () => {
     const res = await API_CALL.get("/doctorUseFormVer3", {
       params: {
-        id_patient_diagnose: idPatientDiagnose,
+        id_patient_diagnose: selectedPatientDiagnose?.id,
         language: "en",
         page: 1,
         limit: 1,
@@ -288,9 +285,7 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
       try {
         setLoading(true);
         const apiCalls = [
-          idPatientDiagnose
-            ? API_CALL.get("/patient-diagnose/" + idPatientDiagnose)
-            : null,
+          API_CALL.get("/patient-diagnose/" + selectedPatientDiagnose?.id),
         ];
         if (idEdit) {
           apiCalls.push(API_CALL.get("/doctorUseFormVer3/detail/" + idEdit));
@@ -306,7 +301,6 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
           doctorUseFormVer3Server?.id_patient_diagnose_patient_diagnose ||
           null;
 
-        console.log("patientDiagnoseData", patientDiagnoseData);
         const formValues = buildDradv3FormValues({
           doctorUseFormVer3: doctorUseFormVer3Server,
           patientDiagnose: patientDiagnoseData,
@@ -378,7 +372,7 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
     };
 
     fetchDataFromServerWhenHaveIDs();
-  }, [idPatientDiagnose, idEdit]);
+  }, [selectedPatientDiagnose.id, idEdit]);
 
   useEffect(() => {
     if (
@@ -392,7 +386,6 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
   }, [printTemplateList]);
 
   const pendingAction = useRef(null);
-  const [previewOpen, setPreviewOpen] = useState();
 
   const [loading, setLoading] = useState();
 
@@ -416,7 +409,6 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
         imagingRows,
         abnormalFindings,
       });
-      console.log(" pendingAction.current", pendingAction.current);
       if (
         pendingAction.current === KEY_ACTION_BUTTON.save ||
         pendingAction.current === KEY_ACTION_BUTTON.save_duyet
@@ -437,9 +429,9 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
             apiData: newData,
           });
 
-          navigate(`/home/doctor-use-formver3/detail/${newData.id}`, {
-            replace: true,
-          });
+          // navigate(`/home/doctor-use-formver3/detail/${newData.id}`, {
+          //   replace: true,
+          // });
         } else {
           toast.warning("Lưu thành công nhưng không nhận được ID");
         }
@@ -534,12 +526,6 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
     }
   };
 
-  useEffect(() => {
-    setTimeout(() => {
-      setPreviewOpen(is_print == "true");
-    }, 500);
-  }, [is_print]);
-
   return (
     <div
       style={{
@@ -547,19 +533,9 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
         margin: "0 auto",
         padding: 0,
         marginBottom: 200,
+        paddingTop: 30,
       }}
     >
-      <Title
-        level={3}
-        style={{
-          textAlign: "center",
-          marginBottom: 8,
-          color: "rgba(18, 119, 49, 1)",
-        }}
-      >
-        PHẦN MỀM D-RADS | ĐỌC KẾT QUẢ | V3
-      </Title>
-
       {loading ? (
         <div style={{ textAlign: "center", padding: 40 }}>
           <Spin />
@@ -594,8 +570,7 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
             });
           }}
         >
-          {/* Hàng 1 */}
-          <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
+          {/* <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
             {translateLabel(languageTranslate, "administrativeInfo")}
           </Title>
 
@@ -610,7 +585,7 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
               translateLabel={translateLabel}
             />
           )}
-          <Divider />
+          <Divider /> */}
 
           <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
             {translateLabel(languageTranslate, "Kỹ thuật thực hiện", true)}
@@ -919,7 +894,7 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
               languageTranslate={languageTranslate}
               onSign={() => setSignModalOpen(true)}
               onPrint={() => {
-                printSourceRef.current = "manual"; // 👈 ĐÁNH DẤU
+                printSourceRef.current = "manual";
 
                 setPreviewOpen(true);
 
@@ -930,11 +905,7 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
                 }, 300);
               }}
               onExit={() => {
-                if (isEdit)
-                  if (!window.confirm("Bạn có chắc muốn thoát không?")) {
-                    return;
-                  }
-                navigate(`/home/patients-diagnose`);
+                setSelectedPatientDiagnose(null);
               }}
               onApprove={onApprove}
               onAction={(key) => {
@@ -1229,7 +1200,6 @@ export default function DoctorUseDFormVer3({ onFormChange, isUse = false }) {
             languageTranslate={languageTranslate}
             setPreviewOpen={setPreviewOpen}
             is_print={is_print}
-            consultingDoctor={initialSnap?.apiData?.id_consulting_doctor_doctor}
             patientDiagnose={patientDiagnose}
           />
         </div>

@@ -29,6 +29,7 @@ import { PATIENT_DIAGNOSE_STATUS_CODE, USER_ROLE } from "../../../constant/app";
 import { toast } from "react-toastify";
 import { APPROVAL_STATUS } from "../../../components/ApprovalStatusTag";
 import { LANGUAGE_OPTIONS } from "../../doctor_use_form_ver2/use/DoctorIUseFormVer2";
+import ActionButton from "./ActionButton/ActionButton";
 
 const { Option } = Select;
 
@@ -234,17 +235,14 @@ export default function FormActionBar({
     })();
 
     const btn = (
-      <Button
-        key={it.key}
-        className={`${styles.btn}`}
+      <ActionButton
         icon={it.icon}
-        block
-        onClick={() => (it.onClick ? it.onClick() : onAction?.(it.key))}
+        color={it.color}
         disabled={it.disabled}
-        style={{ borderBlockColor: it.color, borderColor: it.color }}
+        onClick={() => (it.onClick ? it.onClick() : onAction?.(it.key))}
       >
         {it.label}
-      </Button>
+      </ActionButton>
     );
 
     return disabledReason ? (

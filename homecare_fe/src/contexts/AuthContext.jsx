@@ -49,6 +49,8 @@ export const GlobalAuthProvider = ({ children }) => {
 
   const [totalPatient, setTotalPatient] = useState(0);
 
+  const [previewOpen, setPreviewOpen] = useState();
+
   // LOAD từ localStorage
   const [filterPatient, setFilterPatient] = useState(() => {
     const saved = localStorage.getItem("FILTER_PATIENT");
@@ -236,6 +238,9 @@ export const GlobalAuthProvider = ({ children }) => {
         setSelectedPatientDiagnose,
 
         socket,
+
+        previewOpen,
+        setPreviewOpen,
       }}
     >
       {children}

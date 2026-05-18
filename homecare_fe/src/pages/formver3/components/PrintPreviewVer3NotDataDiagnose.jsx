@@ -17,8 +17,6 @@ import DoctorResultSection from "./DoctorResultSection/DoctorResultSection";
 import API_CALL from "../../../services/axiosClient";
 
 const colSTT = { width: 60, textAlign: "center" };
-const colStructure = { width: 420 };
-const colStructure2 = { width: 350 };
 
 const thUnderline = {
   borderBottom: "1px solid #000",
@@ -53,22 +51,23 @@ const PrintPreviewVer3NotDataDiagnose = ({
   isOnLyContent = false,
   setPreviewOpen,
   styleCustomParent = {},
-  patientDiagnose,
 }) => {
-  const [patientDiagnoseServer, setPatientDiagnoseServer] = useState({});
+  const { doctor, selectedPatientDiagnose, setSelectedPatientDiagnose } =
+    useGlobalAuth();
+
   useEffect(() => {
     const fetchDetail = async () => {
       try {
         const res = await API_CALL.get(
-          `/patient-diagnose/${patientDiagnose?.id}`,
+          `/patient-diagnose/${selectedPatientDiagnose?.id}`,
         );
-        setPatientDiagnoseServer(res.data.data);
+        setSelectedPatientDiagnose(res.data.data);
       } catch (err) {
         console.error("Không thể lấy dữ liệu bệnh nhân:", err);
       }
     };
     fetchDetail();
-  }, [patientDiagnose?.id]);
+  }, [selectedPatientDiagnose?.id]);
 
   const Circle = ({ checked }) =>
     !checked ? null : (
@@ -248,13 +247,13 @@ const PrintPreviewVer3NotDataDiagnose = ({
               examPartName(
                 selectedTemplateService,
                 languageTranslate,
-              ).toUpperCase() ||
+              )?.toUpperCase() ||
               examPartName(
                 templateServices?.find(
                   (t) => t.id == formSnapshot.id_template_service,
                 ),
                 languageTranslate,
-              ).toUpperCase()
+              )?.toUpperCase()
             }`}</h2>
           )}
           {!isOnLyContent && isUse && (
@@ -410,9 +409,9 @@ const PrintPreviewVer3NotDataDiagnose = ({
                 examPartName(
                   selectedTemplateService,
                   languageTranslate,
-                ).toUpperCase() +
+                )?.toUpperCase() +
                 " - " +
-                examPartName(selectedExamPart, languageTranslate).toUpperCase()
+                examPartName(selectedExamPart, languageTranslate)?.toUpperCase()
               }
             />
           )}
@@ -888,8 +887,10 @@ const PrintPreviewVer3NotDataDiagnose = ({
           <DoctorResultSection
             languageTranslate={languageTranslate}
             translateLabel={translateLabel}
-            consultingDoctor={patientDiagnoseServer.id_consulting_doctor_doctor}
-            readingDoctor={patientDiagnoseServer?.id_receive_doctor_doctor}
+            consultingDoctor={
+              selectedPatientDiagnose.id_consulting_doctor_doctor
+            }
+            readingDoctor={selectedPatientDiagnose?.id_receive_doctor_doctor}
             createdAt={formSnapshot.createdAt}
             languageTranslate={languageTranslate}
           />

@@ -19,12 +19,14 @@ import {
 import { useGlobalAuth } from "../../contexts/AuthContext";
 import { useState } from "react";
 import ConsultationSelectModal from "./components/ConsultationSelectModal/ConsultationSelectModal";
+import ActionButton from "../formver2/component/ActionButton/ActionButton";
 
 const FormVer3GroupProcessPatientDiagnoise = ({
   patientDiagnose,
   setPatientDiagnose,
   onStatusChange,
   onClose,
+  onOpenReading,
 }) => {
   const {
     id,
@@ -34,129 +36,7 @@ const FormVer3GroupProcessPatientDiagnoise = ({
     id_receive_doctor,
   } = patientDiagnose;
 
-  const { doctor, templateServices } = useGlobalAuth();
-
-  const [openConsultationModal, setOpenConsultationModal] = useState(false);
-
-  const navigate = useNavigate();
-
-  const onCheckandCreate = async () => {
-    try {
-      if (
-        templateServices
-          .find((t) => t.id == patientDiagnose.id_template_service)
-          ?.code.toUpperCase()
-          .includes("SASK")
-      ) {
-        const sonoResult = await API_CALL.get(`/sono`, {
-          params: {
-            id_patient_diagnose: id,
-            // id_doctor: doctor.id,
-          },
-        });
-
-        if (sonoResult.data.data.data.data?.length) {
-          navigate(`/home/sono/bung/${sonoResult.data.data.data.data[0].id}`);
-        } else {
-          navigate(`/home/sono/use/patient-diagnose/${id}`);
-        }
-      } else {
-        const doctorUseDFormVer3 = await API_CALL.get(`/doctorUseFormVer3`, {
-          params: {
-            id_patient_diagnose: id,
-            orderBy: "id",
-            orderDir: "DESC",
-          },
-        });
-
-        if (doctorUseDFormVer3.data.data.data?.length) {
-          navigate(
-            `/home/doctor-use-formver3/detail/${doctorUseDFormVer3.data.data.data[0].id}/${patientDiagnose.status == PATIENT_DIAGNOSE_STATUS_NAME.VERIFIED}`,
-          );
-        } else {
-          navigate(`/home/form-drad-v3/use/patient-diagnose/${id}`);
-        }
-      }
-    } catch (error) {
-      toast.error("Không cập nhật được trạng thái đọc ca bệnh");
-    }
-  };
-
-  const steps = [
-    {
-      key: PATIENT_DIAGNOSE_STATUS_NAME.NEW,
-      title: "Chưa đọc",
-      color: PATIENT_DIAGNOSE_COLOR[PATIENT_DIAGNOSE_STATUS_NAME.NEW],
-      onStepClick: () => {
-        setOpenConsultationModal(true);
-      },
-    },
-
-    {
-      key: PATIENT_DIAGNOSE_STATUS_NAME.CONSULTATION,
-      title: "Hội chẩn",
-      color: PATIENT_DIAGNOSE_COLOR[PATIENT_DIAGNOSE_STATUS_NAME.CONSULTATION],
-      onStepClick: async () => {
-        try {
-          setOpenConsultationModal(true);
-        } catch (error) {
-          toast.error("Không mở được ca bệnh");
-        }
-      },
-    },
-
-    {
-      key: PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESSING,
-      title: "Đang đọc",
-      color: PATIENT_DIAGNOSE_COLOR[PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESSING],
-      onStepClick: async () => {
-        try {
-          await onCheckandCreate();
-        } catch (error) {
-          toast.error("Không cập nhật được trạng thái đọc ca bệnh");
-        }
-      },
-    },
-
-    {
-      key: PATIENT_DIAGNOSE_STATUS_NAME.READ_DONE,
-      title: "Đọc xong",
-      color: PATIENT_DIAGNOSE_COLOR[PATIENT_DIAGNOSE_STATUS_NAME.READ_DONE],
-      onStepClick: async () => {
-        try {
-          await onCheckandCreate();
-        } catch (error) {
-          toast.error("Không mở được kết quả");
-        }
-      },
-    },
-
-    {
-      key: PATIENT_DIAGNOSE_STATUS_NAME.WAIT_VERIFY,
-      title: "Đang duyệt",
-      color: PATIENT_DIAGNOSE_COLOR[PATIENT_DIAGNOSE_STATUS_NAME.WAIT_VERIFY],
-      onStepClick: async () => {
-        try {
-          await onCheckandCreate();
-        } catch (error) {
-          toast.error("Không mở được kết quả");
-        }
-      },
-    },
-
-    {
-      key: PATIENT_DIAGNOSE_STATUS_NAME.VERIFIED,
-      title: "Duyệt xong",
-      color: PATIENT_DIAGNOSE_COLOR[PATIENT_DIAGNOSE_STATUS_NAME.VERIFIED],
-      onStepClick: async () => {
-        try {
-          await onCheckandCreate();
-        } catch (error) {
-          toast.error("Không mở được kết quả");
-        }
-      },
-    },
-  ];
+  const { doctor, setPreviewOpen } = useGlobalAuth();
 
   const handleCancelReading = async (
     changedStatus = PATIENT_DIAGNOSE_STATUS_NAME.NEW,
@@ -202,26 +82,6 @@ const FormVer3GroupProcessPatientDiagnoise = ({
           position: "fixed",
           zIndex: 3,
           display: "flex",
-          flexDirection: "column",
-          background: "#ffffff",
-          width: "41vw",
-          borderBottom: "1px solid #3950d163",
-          boxShadow: "0 -2px 8px rgba(0,0,0,0.05)",
-        }}
-      >
-        <CustomSteps
-          steps={steps}
-          current={steps.findIndex((s) => s.key === status)}
-          onClose={onClose}
-          is_consultation_doctor={patientDiagnose.id_consulting_doctor}
-        />
-      </div>
-
-      <div
-        style={{
-          position: "fixed",
-          zIndex: 3,
-          display: "flex",
           flexDirection: "row",
           background: "#ffffff",
           gap: 30,
@@ -235,21 +95,14 @@ const FormVer3GroupProcessPatientDiagnoise = ({
           (doctor.id == patientDiagnose.id_receive_doctor ||
             doctor.id == patientDiagnose.id_consulting_doctor) && (
             <div style={{ marginTop: 16 }}>
-              <Button
-                style={{
-                  height: 45,
-                  padding: "16px 18px",
-                  borderRadius: 14,
-                  fontWeight: 800,
-                  letterSpacing: "0.06em",
-                  textTransform: "uppercase",
-                  color: "#c14728",
-                  background: "rgba(14,165,233,0.06)",
-                }}
+              <ActionButton
+                color="red"
+                icon={<WarningOutlined />}
                 onClick={() => {
                   const ok = window.confirm(
                     "Bạn có chắc chắn muốn hủy hội chẩn?\n\nNếu Hủy, ca sẽ được trả về trạng thái MỚI.",
                   );
+
                   if (ok) {
                     handleCancelReading(
                       PATIENT_DIAGNOSE_STATUS_NAME.NEW,
@@ -264,7 +117,7 @@ const FormVer3GroupProcessPatientDiagnoise = ({
                 }}
               >
                 Hủy hội chẩn
-              </Button>
+              </ActionButton>
             </div>
           )}
 
@@ -272,22 +125,15 @@ const FormVer3GroupProcessPatientDiagnoise = ({
           (doctor.id == patientDiagnose.id_receive_doctor ||
             doctor.id == patientDiagnose.id_consulting_doctor) && (
             <div style={{ marginTop: 16 }}>
-              <Button
-                style={{
-                  height: 45,
-                  padding: "16px 18px",
-                  borderRadius: 14,
-                  fontWeight: 800,
-                  letterSpacing: "0.06em",
-                  textTransform: "uppercase",
-                  color: "#dfbc21",
-                  background: "rgba(14,165,233,0.06)",
-                }}
+              <ActionButton
+                color="amber"
+                icon={<ReadOutlined />}
                 onClick={() => {
                   const ok = window.confirm(
                     "Bạn có chắc chắn muốn nhận đọc?\n\nNếu Nhận đọc, ca sẽ được chuyển sang trạng thái ĐANG XỬ LÝ.",
                   );
-                  if (ok)
+
+                  if (ok) {
                     handleCancelReading(
                       PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESSING,
                       () => {
@@ -297,27 +143,20 @@ const FormVer3GroupProcessPatientDiagnoise = ({
                         }));
                       },
                     );
+                  }
                 }}
               >
                 Nhận đọc
-              </Button>
+              </ActionButton>
             </div>
           )}
 
         {status == PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESSING &&
           id_doctor_in_processing == doctor.id && (
             <div style={{ marginTop: 16 }}>
-              <Button
-                style={{
-                  height: 45,
-                  padding: "16px 18px",
-                  borderRadius: 14,
-                  fontWeight: 800,
-                  letterSpacing: "0.06em",
-                  textTransform: "uppercase",
-                  color: "#c14728",
-                  background: "rgba(14,165,233,0.06)",
-                }}
+              <ActionButton
+                color="red"
+                icon={<WarningOutlined />}
                 onClick={() => {
                   const ok = window.confirm(
                     `Bạn có chắc chắn muốn hủy đọc?\n\nNếu Hủy đọc, ca sẽ được trả về trạng thái ${id_consulting_doctor ? "HỘI CHẨN" : "MỚI"}.`,
@@ -340,7 +179,7 @@ const FormVer3GroupProcessPatientDiagnoise = ({
                 }}
               >
                 Hủy đọc
-              </Button>
+              </ActionButton>
             </div>
           )}
 
@@ -349,17 +188,9 @@ const FormVer3GroupProcessPatientDiagnoise = ({
             id_consulting_doctor == doctor.id ||
             id_receive_doctor == doctor.id) && (
             <div style={{ marginTop: 16 }}>
-              <Button
-                style={{
-                  height: 45,
-                  padding: "16px 18px",
-                  borderRadius: 14,
-                  fontWeight: 800,
-                  letterSpacing: "0.06em",
-                  textTransform: "uppercase",
-                  color: "#87ca1b",
-                  background: "rgba(14,165,233,0.06)",
-                }}
+              <ActionButton
+                color="green"
+                icon={<CheckCircleOutlined />}
                 onClick={() => {
                   handleCancelReading(
                     PATIENT_DIAGNOSE_STATUS_NAME.WAIT_VERIFY,
@@ -373,7 +204,7 @@ const FormVer3GroupProcessPatientDiagnoise = ({
                 }}
               >
                 Nhận duyệt
-              </Button>
+              </ActionButton>
             </div>
           )}
 
@@ -381,17 +212,9 @@ const FormVer3GroupProcessPatientDiagnoise = ({
           status == PATIENT_DIAGNOSE_STATUS_NAME.WAIT_VERIFY) &&
           patientDiagnose.id_verify_doctor == doctor.id && (
             <div style={{ marginTop: 16 }}>
-              <Button
-                style={{
-                  height: 45,
-                  padding: "16px 18px",
-                  borderRadius: 14,
-                  fontWeight: 800,
-                  letterSpacing: "0.06em",
-                  textTransform: "uppercase",
-                  color: "#87ca1b",
-                  background: "rgba(14,165,233,0.06)",
-                }}
+              <ActionButton
+                color="green"
+                icon={<CheckCircleOutlined />}
                 onClick={() => {
                   handleCancelReading(
                     PATIENT_DIAGNOSE_STATUS_NAME.VERIFIED,
@@ -405,32 +228,22 @@ const FormVer3GroupProcessPatientDiagnoise = ({
                 }}
               >
                 Duyệt
-              </Button>
+              </ActionButton>
             </div>
           )}
 
         <div style={{ marginTop: 16 }}>
           {status === PATIENT_DIAGNOSE_STATUS_NAME.VERIFIED && (
-            <Button
-              danger
-              type="primary"
+            <ActionButton
+              color="teal"
+              icon={<PrinterOutlined />}
               onClick={async () => {
-                await onCheckandCreate();
-              }}
-              style={{
-                height: 45,
-                padding: "16px 18px",
-                borderRadius: 14,
-                fontWeight: 800,
-                letterSpacing: "0.06em",
-                textTransform: "uppercase",
-                color: "#3c7e06",
-                background: "rgba(14,165,233,0.06)",
-                width: 150,
+                onOpenReading();
+                setPreviewOpen(true);
               }}
             >
               In
-            </Button>
+            </ActionButton>
           )}
         </div>
 
@@ -439,23 +252,15 @@ const FormVer3GroupProcessPatientDiagnoise = ({
           (id_doctor_in_processing === doctor.id ||
             id_receive_doctor === doctor.id) && (
             <div style={{ marginTop: 16 }}>
-              <Button
-                style={{
-                  height: 45,
-                  padding: "16px 18px",
-                  borderRadius: 14,
-                  fontWeight: 800,
-                  letterSpacing: "0.06em",
-                  textTransform: "uppercase",
-                  color: "#b91c1c",
-                  border: "1px solid rgba(185,28,28,0.35)",
-                  background: "rgba(185,28,28,0.06)",
-                }}
+              <ActionButton
+                color="red"
+                icon={<WarningOutlined />}
                 onClick={() => {
                   const ok = window.confirm(
                     "Bạn có chắc chắn muốn hủy kết quả đã duyệt?\n\nNếu hủy, ca sẽ được trả về trạng thái Đọc Xong.",
                   );
-                  if (ok)
+
+                  if (ok) {
                     handleCancelReading(
                       PATIENT_DIAGNOSE_STATUS_NAME.READ_DONE,
                       () => {
@@ -465,46 +270,26 @@ const FormVer3GroupProcessPatientDiagnoise = ({
                         }));
                       },
                     );
+                  }
                 }}
               >
                 Hủy duyệt
-              </Button>
+              </ActionButton>
             </div>
           )}
 
         <div style={{ marginTop: 16 }}>
-          <Button
-            danger
-            type="primary"
+          <ActionButton
+            color="blue"
+            icon={<WarningOutlined />}
             onClick={() => {
               onClose();
             }}
-            style={{
-              height: 45,
-              padding: "16px 18px",
-              borderRadius: 14,
-              fontWeight: 800,
-              letterSpacing: "0.06em",
-              textTransform: "uppercase",
-              color: "#0551df",
-              background: "rgba(14,165,233,0.06)",
-              width: 150,
-            }}
           >
             Exit
-          </Button>
+          </ActionButton>
         </div>
       </div>
-
-      <ConsultationSelectModal
-        open={openConsultationModal}
-        onClose={() => setOpenConsultationModal(false)}
-        patientDiagnose={patientDiagnose}
-        doctor={doctor}
-        onSuccess={onStatusChange}
-        onCheckandCreate={onCheckandCreate}
-        setPatientDiagnose={setPatientDiagnose}
-      />
     </div>
   );
 };

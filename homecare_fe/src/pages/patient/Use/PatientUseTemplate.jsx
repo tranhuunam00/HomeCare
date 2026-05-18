@@ -155,8 +155,8 @@ const PatientUseTemplate = () => {
     // 🔍 Chỉ lấy key dạng {{{text:...}}}
     const textObjectToTranslate = Object.fromEntries(
       Object.entries(inputsRenderTrans).filter(([key]) =>
-        key.includes("{{{text:")
-      )
+        key.includes("{{{text:"),
+      ),
     );
 
     const payloadsRender = textObjectToTranslate;
@@ -312,10 +312,10 @@ const PatientUseTemplate = () => {
   useEffect(() => {
     const doctor_print_templates =
       patientDiagnose?.doctor_print_templates?.find(
-        (d) => d.status == patientDiagnose?.status
+        (d) => d.status == patientDiagnose?.status,
       );
     const exist = printTemplateList?.find(
-      (p) => p.id == doctor_print_templates?.id_print_template
+      (p) => p.id == doctor_print_templates?.id_print_template,
     );
 
     // console.log("exist", exist);
@@ -380,7 +380,7 @@ const PatientUseTemplate = () => {
             }, {});
 
           if (
-            patientDiagnose.status == PATIENT_DIAGNOSE_STATUS_CODE.INPROCESS
+            patientDiagnose?.status == PATIENT_DIAGNOSE_STATUS_CODE.INPROCESS
           ) {
             setInputsRender({
               ...inputsRender,
@@ -472,7 +472,7 @@ const PatientUseTemplate = () => {
     <h3 style="color: #4299d4">MEDICAL AND PROTOCOL</h3>
     ${replaceInputsInHtml(
       relatedTemplateChoose?.description || "",
-      inputsRenderTrans
+      inputsRenderTrans,
     )}
     <div style="display: flex; justify-content: center; gap: 40px; margin-top: 50px;">
       <div style="text-align: center; width: 300px; font-size: 13px">
@@ -508,12 +508,12 @@ const PatientUseTemplate = () => {
     <h3 style="color: #4299d4">IMAGES DESCRIPTION</h3>
     ${replaceInputsInHtml(
       relatedTemplateChoose?.result || "",
-      inputsRenderTrans
+      inputsRenderTrans,
     )}
     <h3 style="color: #4299d4">RESULT</h3>
     ${replaceInputsInHtml(
       relatedTemplateChoose?.recommendation || "",
-      inputsRenderTrans
+      inputsRenderTrans,
     )}
   `;
     setHtmlTranslate(html);
@@ -564,11 +564,11 @@ const PatientUseTemplate = () => {
           setIdTemplateService(data?.id_template_service);
           setInputsRender({
             "{{{text:Bộ phận thăm khám}}}": examParts?.find(
-              (ex) => data?.id_exam_part == ex.id
+              (ex) => data?.id_exam_part == ex.id,
             )?.name,
           });
           const doctor_print_templates = data?.doctor_print_templates?.find(
-            (d) => d.status == data?.status
+            (d) => d.status == data?.status,
           );
           if (data.status == PATIENT_DIAGNOSE_STATUS_CODE.VERIFY) {
             setIsOpenPreview(true);
@@ -589,7 +589,7 @@ const PatientUseTemplate = () => {
 
             setIdTemplateService(doctor_print_templates?.id_template_service);
             setRelatedTemplatesChooseId(
-              doctor_print_templates?.id_template_translate
+              doctor_print_templates?.id_template_translate,
             );
 
             setImageList(imageList);
@@ -684,7 +684,7 @@ const PatientUseTemplate = () => {
       formData.append("status", status);
       formData.append(
         "name",
-        `Phiếu ${new Date().toLocaleDateString("vi-VN")}`
+        `Phiếu ${new Date().toLocaleDateString("vi-VN")}`,
       );
       formData.append("inputsAddon", JSON.stringify(inputsAddon));
       formData.append("inputsAddonTrans", JSON.stringify(inputsAddonTrans));
@@ -716,11 +716,11 @@ const PatientUseTemplate = () => {
       }
       formData.append(
         "descriptions",
-        JSON.stringify(descriptionsArr.join("{{D}}"))
+        JSON.stringify(descriptionsArr.join("{{D}}")),
       );
       formData.append(
         "descriptionsTrans",
-        JSON.stringify(descriptionsArrTrans.join("{{D}}"))
+        JSON.stringify(descriptionsArrTrans.join("{{D}}")),
       );
       // Xử lý inputsRender
       const replaceLabels = [];
@@ -751,12 +751,12 @@ const PatientUseTemplate = () => {
       formData.append("inputsRender", JSON.stringify(inputsRenderJson));
       formData.append(
         "inputsRenderTrans",
-        JSON.stringify(inputsRenderJsonTrans)
+        JSON.stringify(inputsRenderJsonTrans),
       );
 
       formData.append(
         "replaceFields",
-        JSON.stringify(replaceLabels.join("{{D}}"))
+        JSON.stringify(replaceLabels.join("{{D}}")),
       );
 
       for (let i = 0; i < imageListForm.length; i++) {
@@ -766,8 +766,8 @@ const PatientUseTemplate = () => {
       formData.append(
         "imagesFormDesc",
         JSON.stringify(
-          imageListForm.map((dc, i) => ({ ...dc, attachment_url: links[i] }))
-        )
+          imageListForm.map((dc, i) => ({ ...dc, attachment_url: links[i] })),
+        ),
       );
 
       // Gửi API
@@ -890,7 +890,7 @@ const PatientUseTemplate = () => {
                 <strong>Bộ phận thăm khám: </strong>
                 {
                   examParts?.find(
-                    (ex) => ex.id == patientDiagnose?.id_exam_part
+                    (ex) => ex.id == patientDiagnose?.id_exam_part,
                   )?.name
                 }
               </p>
@@ -950,7 +950,7 @@ const PatientUseTemplate = () => {
               }}
               handleReset={() => {
                 const confirm = window.confirm(
-                  "Bạn có chắc chắn muốn reset quả đọc không?\n"
+                  "Bạn có chắc chắn muốn reset quả đọc không?\n",
                 );
                 if (!confirm) return;
               }}
@@ -962,7 +962,7 @@ const PatientUseTemplate = () => {
               }}
               handleCancelRead={async () => {
                 const confirm = window.confirm(
-                  "Bạn có chắc chắn muốn quay về trạng thái đọc quả không?\n"
+                  "Bạn có chắc chắn muốn quay về trạng thái đọc quả không?\n",
                 );
                 if (!confirm) return;
                 const res = await updateStatusPatientDiagnose(1);
@@ -972,12 +972,12 @@ const PatientUseTemplate = () => {
               }}
               handleConfirm={async () => {
                 const confirm = window.confirm(
-                  "Bạn có chắc chắn muốn chốt kết quả không?\nSau khi chốt sẽ không thể sửa."
+                  "Bạn có chắc chắn muốn chốt kết quả không?\nSau khi chốt sẽ không thể sửa.",
                 );
                 if (confirm) {
                   try {
                     const data = await createDoctorPrintTemplate(
-                      PATIENT_DIAGNOSE_STATUS_CODE.VERIFY
+                      PATIENT_DIAGNOSE_STATUS_CODE.VERIFY,
                     );
 
                     if (data) {
@@ -997,12 +997,12 @@ const PatientUseTemplate = () => {
               handlePrint={handlePrint}
               handleSend={async () => {
                 const confirm = window.confirm(
-                  "Bạn có chắc chắn muốn chốt kết quả không?\nSau khi chốt sẽ không thể sửa."
+                  "Bạn có chắc chắn muốn chốt kết quả không?\nSau khi chốt sẽ không thể sửa.",
                 );
                 if (confirm) {
                   try {
                     const data = await createDoctorPrintTemplate(
-                      PATIENT_DIAGNOSE_STATUS_CODE.WAIT
+                      PATIENT_DIAGNOSE_STATUS_CODE.WAIT,
                     );
 
                     if (data) {
@@ -1021,7 +1021,7 @@ const PatientUseTemplate = () => {
               }}
               handleTranslate={async () => {
                 const confirmed = window.confirm(
-                  "Bạn có chắc chắn muốn bắt đầu dịch nội dung không?"
+                  "Bạn có chắc chắn muốn bắt đầu dịch nội dung không?",
                 );
                 if (!confirmed) return;
 
@@ -1041,7 +1041,7 @@ const PatientUseTemplate = () => {
               handlePrint={handlePrint}
               handleCancelVerify={async () => {
                 const confirm = window.confirm(
-                  "Bạn có chắc chắn muốn hủy kết quả duyệt không?\n"
+                  "Bạn có chắc chắn muốn hủy kết quả duyệt không?\n",
                 );
                 if (!confirm) return;
                 const res = await updateStatusPatientDiagnose(3);

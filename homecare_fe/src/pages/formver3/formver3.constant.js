@@ -1,4 +1,9 @@
 import dayjs from "dayjs";
+import {
+  PATIENT_DIAGNOSE_COLOR,
+  PATIENT_DIAGNOSE_STATUS_NAME,
+} from "../../constant/app";
+import { toast } from "react-toastify";
 
 export const IMAGE_QUALITY_OPTIONS = [
   { value: "good", label: "Đạt yêu cầu" },
@@ -267,7 +272,7 @@ export function buildFormDataDoctorUseFormVer3(values, extra) {
   fd.append("id_print_template", String(values.id_print_template ?? ""));
 
   fd.append("language", values.language);
-  fd.append("implementMethod", values.implementMethod);
+  fd.append("implementMethod", values.implementMethod || "");
   fd.append("contrastInjection", values.contrastInjection);
   fd.append("imageQuatity", values.imageQuatity);
 
@@ -364,3 +369,81 @@ export const calculateAge = (dob, birthYear) => {
 
   return "";
 };
+
+export const stepsStatus = ({ setOpenConsultationModal, onCheckandCreate }) => [
+  {
+    key: PATIENT_DIAGNOSE_STATUS_NAME.NEW,
+    title: "Chưa đọc",
+    color: PATIENT_DIAGNOSE_COLOR[PATIENT_DIAGNOSE_STATUS_NAME.NEW],
+    onStepClick: () => {
+      setOpenConsultationModal(true);
+    },
+  },
+
+  {
+    key: PATIENT_DIAGNOSE_STATUS_NAME.CONSULTATION,
+    title: "Hội chẩn",
+    color: PATIENT_DIAGNOSE_COLOR[PATIENT_DIAGNOSE_STATUS_NAME.CONSULTATION],
+    onStepClick: async () => {
+      try {
+        setOpenConsultationModal(true);
+      } catch (error) {
+        toast.error("Không mở được ca bệnh");
+      }
+    },
+  },
+
+  {
+    key: PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESSING,
+    title: "Đang đọc",
+    color: PATIENT_DIAGNOSE_COLOR[PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESSING],
+    onStepClick: async () => {
+      try {
+        await onCheckandCreate();
+      } catch (error) {
+        toast.error("Không cập nhật được trạng thái đọc ca bệnh");
+      }
+    },
+  },
+
+  {
+    key: PATIENT_DIAGNOSE_STATUS_NAME.READ_DONE,
+    title: "Đọc xong",
+    color: PATIENT_DIAGNOSE_COLOR[PATIENT_DIAGNOSE_STATUS_NAME.READ_DONE],
+    onStepClick: async () => {
+      try {
+        await onCheckandCreate();
+      } catch (error) {
+        toast.error("Không mở được kết quả");
+      }
+    },
+  },
+
+  {
+    key: PATIENT_DIAGNOSE_STATUS_NAME.WAIT_VERIFY,
+    title: "Đang duyệt",
+    color: PATIENT_DIAGNOSE_COLOR[PATIENT_DIAGNOSE_STATUS_NAME.WAIT_VERIFY],
+    onStepClick: async () => {
+      try {
+        await onCheckandCreate();
+      } catch (error) {
+        console.log("error", error);
+
+        toast.error("Không mở được kết quả");
+      }
+    },
+  },
+
+  {
+    key: PATIENT_DIAGNOSE_STATUS_NAME.VERIFIED,
+    title: "Duyệt xong",
+    color: PATIENT_DIAGNOSE_COLOR[PATIENT_DIAGNOSE_STATUS_NAME.VERIFIED],
+    onStepClick: async () => {
+      try {
+        await onCheckandCreate();
+      } catch (error) {
+        toast.error("Không mở được kết quả");
+      }
+    },
+  },
+];

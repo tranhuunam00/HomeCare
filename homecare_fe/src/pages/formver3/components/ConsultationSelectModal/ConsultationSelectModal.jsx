@@ -125,7 +125,7 @@ const ConsultationSelectModal = ({
           Tôi đọc ca này
         </Button>
 
-        {patientDiagnose.status == PATIENT_DIAGNOSE_STATUS_CODE.NEW && (
+        {patientDiagnose?.status == PATIENT_DIAGNOSE_STATUS_CODE.NEW && (
           <>
             <div>
               <div

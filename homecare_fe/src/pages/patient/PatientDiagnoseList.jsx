@@ -44,17 +44,18 @@ import styles from "./PatientDiagnoseList.module.scss";
 import ColumnSettingModal from "./setting/ColumnSettingModal";
 import DragDropExample from "./setting/ColumnSettingModal";
 import PatientDiagnoiseDetailPage from "./Detail/DetailPatientDiagnose";
-import useVietnamAddress, {
-  getProvinceNameByCode,
-  getWardNameByCode,
-} from "../../hooks/useVietnamAddress";
+
 import useTemplateServicesAndExamParts from "../../hooks/useTemplateServicesAndExamParts";
 import ReloadTSAndExamPartsButton from "../../components/ReloadTSAndExamPartsButton";
 import ResizableTitle from "./setting/ResizableTitle";
 import FlowModal from "./setting/nodes/FlowModal";
 import ImportPatientModal from "./Import/ImportPatientModal";
-import { calculateAge } from "../formver3/formver3.constant";
+
 import { PATIENT_DIAGNOSE_STATUS_FILTER } from "./constant.patient";
+import DoctorUseDFormVer3 from "../formver3/doctor_use_formver3/use/DoctorIUseFormVer3";
+import { stepsStatus } from "../formver3/formver3.constant";
+import ConsultationSelectModal from "../formver3/components/ConsultationSelectModal/ConsultationSelectModal";
+import CustomSteps from "../../components/CustomSteps/CustomSteps";
 
 const { Option } = Select;
 const COLUMN_SETTING_STORAGE_KEY = "patientDiagnose_column_settings";
@@ -64,7 +65,6 @@ const DATE_OPTIONS = [
   { label: "Hôm nay", value: "today" },
   { label: "Hôm qua", value: "yesterday" },
   { label: "Tuần này", value: "this_week" },
-  // { label: "Tháng này", value: "this_month" },
   { label: "Phạm vi", value: "range" },
 ];
 
@@ -82,7 +82,7 @@ const defaultVisibleKeys = [
 
 const STORAGE_KEY = "visibleColumns_patientDiagnose";
 
-const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
+const PatientTablePage = ({ PID = null }) => {
   const navigate = useNavigate();
   const { useBreakpoint } = Grid;
 
@@ -97,7 +97,11 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
   const [limit, setLimit] = useState(10);
   const [openColumnModal, setOpenColumnModal] = useState(false);
   const [customColumns, setCustomColumns] = useState([]);
-  const [returnStatus, setReturnStatus] = useState(false);
+
+  const [doctorUseFormVer3Id, setDoctorUseFormVer3Id] = useState(null);
+
+  const [rightPanelMode, setRightPanelMode] = useState("detail");
+  const [openConsultationModal, setOpenConsultationModal] = useState(false);
 
   const [visibleKeys, setVisibleKeys] = useState([]);
   const {
@@ -114,12 +118,12 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
     selectedPatientDiagnose,
     setSelectedPatientDiagnose,
     socket,
+    doctor,
   } = useGlobalAuth();
 
   const { fetchTSAndExamParts } = useTemplateServicesAndExamParts();
 
   useEffect(() => {
-    console.log("socket", socket);
     if (!socket) return;
 
     const handlePatientUpdated = (payload) => {
@@ -396,7 +400,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [filters, page, limit, returnStatus]);
+  }, [filters, page, limit]);
 
   useEffect(() => {
     if (selectedPatientDiagnose) {
@@ -405,7 +409,7 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
     } else {
       setCollapsed(false);
     }
-  }, [selectedPatientDiagnose, returnStatus]);
+  }, [selectedPatientDiagnose]);
 
   const cleanParams = (obj) => {
     if (!obj) return {};
@@ -618,6 +622,41 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
     [customColumns],
   );
 
+  const onCheckandCreate = async () => {
+    try {
+      if (
+        templateServices
+          .find((t) => t.id == selectedPatientDiagnose.id_template_service)
+          ?.code.toUpperCase()
+          .includes("SASK")
+      ) {
+        const sonoResult = await API_CALL.get(`/sono`, {
+          params: {
+            id_patient_diagnose: selectedPatientDiagnose.id,
+            // id_doctor: doctor.id,
+          },
+        });
+
+        if (sonoResult.data.data.data.data?.length) {
+          navigate(`/home/sono/bung/${sonoResult.data.data.data.data[0].id}`);
+        } else {
+          navigate(`/home/sono/use/patient-diagnose/${id}`);
+        }
+      } else {
+        setRightPanelMode("reading");
+        // if (doctorUseDFormVer3.data.data.data?.length) {
+        //   navigate(
+        //     `/home/doctor-use-formver3/detail/${doctorUseDFormVer3.data.data.data[0].id}/${patientDiagnose.status == PATIENT_DIAGNOSE_STATUS_NAME.VERIFIED}`,
+        //   );
+        // } else {
+        //   navigate(`/home/form-drad-v3/use/patient-diagnose/${id}`);
+        // }
+      }
+    } catch (error) {
+      toast.error("Không cập nhật được trạng thái đọc ca bệnh");
+    }
+  };
+
   return (
     <div
       style={{
@@ -760,11 +799,8 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
               }
               onRow={(record) => ({
                 onClick: () => {
-                  !deviceIsMobile
-                    ? setSelectedPatientDiagnose(record)
-                    : navigate(`/home/patients-diagnose/${record.id}`, {
-                        state: { record },
-                      });
+                  setRightPanelMode("detail");
+                  setSelectedPatientDiagnose(record);
                 },
                 style: { cursor: "pointer" },
               })}
@@ -852,11 +888,49 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
             overflowY: "scroll",
           }}
         >
-          <PatientDiagnoiseDetailPage
-            idFromList={+selectedPatientDiagnose?.id}
-            onStatusChange={() => setReturnStatus((prev) => !prev)}
-            onClose={() => setSelectedPatientDiagnose(null)}
-          />
+          <div
+            style={{
+              position: "fixed",
+              zIndex: 3,
+              display: "flex",
+              flexDirection: "column",
+              background: "#ffffff",
+              width: "41vw",
+              borderBottom: "1px solid #3950d163",
+              boxShadow: "0 -2px 8px rgba(0,0,0,0.05)",
+            }}
+          >
+            <CustomSteps
+              steps={stepsStatus({
+                setOpenConsultationModal,
+                onCheckandCreate,
+              })}
+              current={stepsStatus({
+                setOpenConsultationModal,
+                onCheckandCreate,
+              }).findIndex((s) => s.key === selectedPatientDiagnose.status)}
+              is_consultation_doctor={
+                selectedPatientDiagnose.id_consulting_doctor
+              }
+            />
+          </div>
+          <div>
+            {rightPanelMode === "detail" ? (
+              <PatientDiagnoiseDetailPage
+                idFromList={selectedPatientDiagnose?.id}
+                onOpenReading={() => setRightPanelMode("reading")}
+                onClose={() => setSelectedPatientDiagnose(null)}
+                setDoctorUseFormVer3Id={setDoctorUseFormVer3Id}
+              />
+            ) : (
+              <DoctorUseDFormVer3
+                patient_diagnose_id={selectedPatientDiagnose?.id}
+                isUse={true}
+                onBackDetail={() => setRightPanelMode("detail")}
+                doctorUseFormVer3Id={doctorUseFormVer3Id}
+              />
+            )}
+          </div>
         </div>
       )}
 
@@ -869,6 +943,14 @@ const PatientTablePage = ({ isNotCreate = false, PID = null }) => {
           localStorage.getItem(COLUMN_SETTING_STORAGE_KEY) || "{}",
         )}
         onSave={handleSaveColumnSettings}
+      />
+
+      <ConsultationSelectModal
+        open={openConsultationModal}
+        onClose={() => setOpenConsultationModal(false)}
+        patientDiagnose={selectedPatientDiagnose}
+        doctor={doctor}
+        setPatientDiagnose={selectedPatientDiagnose}
       />
     </div>
   );
