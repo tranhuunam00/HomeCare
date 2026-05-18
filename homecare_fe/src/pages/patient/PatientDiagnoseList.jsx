@@ -77,6 +77,7 @@ const defaultVisibleKeys = [
   "dob",
   "gender",
   "Indication",
+  "action",
 ];
 
 const STORAGE_KEY = "visibleColumns_patientDiagnose";

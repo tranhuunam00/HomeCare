@@ -160,11 +160,7 @@ const DoctorResultSection = ({
   };
 
   return (
-    <div
-      style={{
-        marginTop: 14,
-      }}
-    >
+    <div style={{}}>
       <div
         style={{
           display: "grid",

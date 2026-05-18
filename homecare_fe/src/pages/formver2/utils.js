@@ -315,7 +315,7 @@ export const handlePrint = (printRef) => {
             text-align: left; 
             font-size: 14px
           }
-          h3 { margin-top: 24px; font-size: 16px !important }
+          h3 { margin-top: 0px; font-size: 16px !important; margin-bottom: 0 }
           .no-print {
             display: none;
           }
