@@ -56,6 +56,10 @@ import DoctorUseDFormVer3 from "../formver3/doctor_use_formver3/use/DoctorIUseFo
 import { stepsStatus } from "../formver3/formver3.constant";
 import ConsultationSelectModal from "../formver3/components/ConsultationSelectModal/ConsultationSelectModal";
 import CustomSteps from "../../components/CustomSteps/CustomSteps";
+import {
+  getProvinceNameByCode,
+  getWardNameByCode,
+} from "../../hooks/useVietnamAddress";
 
 const { Option } = Select;
 const COLUMN_SETTING_STORAGE_KEY = "patientDiagnose_column_settings";
@@ -119,6 +123,7 @@ const PatientTablePage = ({ PID = null }) => {
     setSelectedPatientDiagnose,
     socket,
     doctor,
+    numberLanguageDoctorUseFormV3,
   } = useGlobalAuth();
 
   const { fetchTSAndExamParts } = useTemplateServicesAndExamParts();
@@ -883,7 +888,6 @@ const PatientTablePage = ({ PID = null }) => {
           style={{
             padding: 0,
             flex: 1,
-            width: 200,
             maxHeight: "115vh",
             overflowY: "scroll",
           }}
@@ -893,13 +897,13 @@ const PatientTablePage = ({ PID = null }) => {
               position: "fixed",
               zIndex: 3,
               display: "flex",
-              flexDirection: "column",
               background: "#ffffff",
-              width: "41vw",
               borderBottom: "1px solid #3950d163",
               boxShadow: "0 -2px 8px rgba(0,0,0,0.05)",
+              alignItems: "center",
             }}
           >
+            <h5>Ngôn ngữ dùng: {numberLanguageDoctorUseFormV3}</h5>
             <CustomSteps
               steps={stepsStatus({
                 setOpenConsultationModal,
@@ -948,9 +952,7 @@ const PatientTablePage = ({ PID = null }) => {
       <ConsultationSelectModal
         open={openConsultationModal}
         onClose={() => setOpenConsultationModal(false)}
-        patientDiagnose={selectedPatientDiagnose}
-        doctor={doctor}
-        setPatientDiagnose={selectedPatientDiagnose}
+        onGoReading={() => setRightPanelMode("reading")}
       />
     </div>
   );

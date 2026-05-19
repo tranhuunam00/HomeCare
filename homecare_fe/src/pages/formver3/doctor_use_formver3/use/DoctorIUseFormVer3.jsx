@@ -55,6 +55,7 @@ import PrintPreviewVer3NotDataDiagnose from "../../components/PrintPreviewVer3No
 import { handlePrint } from "../../../formver2/utils.js";
 import ImagingStructureTextTable from "../../components/ImagingStructureTextTable.jsx";
 import TranslateListRecordsVer3 from "../../components/TranslateListRecordsVer3.jsx";
+import useLatestDoctorUseFormVer3 from "../../useLatestDoctorUseFormVer3.js";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -63,7 +64,6 @@ const { Option } = Select;
 export default function DoctorUseDFormVer3({
   onFormChange,
   isUse = false,
-  onBackDetail,
   doctorUseFormVer3Id,
 }) {
   const printRef = useRef(null);
@@ -84,7 +84,7 @@ export default function DoctorUseDFormVer3({
 
   const [reloading, setReloading] = useState(false);
   const [signModalOpen, setSignModalOpen] = useState(false);
-  const { setSelectedProvince } = useVietnamAddress();
+  const { provinces, wards, setSelectedProvince } = useVietnamAddress();
   const navigate = useNavigate();
   const { is_print } = useParams();
 
@@ -117,6 +117,17 @@ export default function DoctorUseDFormVer3({
   });
 
   const [imagingRows, setImagingRows] = useState(DEFAULT_IMAGING_ROWS);
+
+  const { record } = useLatestDoctorUseFormVer3(
+    selectedPatientDiagnose?.id,
+    languageTranslate,
+  );
+
+  useEffect(() => {
+    if (record?.id && record?.id != idEdit) {
+      setIdEdit(record.id);
+    }
+  }, [record?.id, idEdit]);
 
   useEffect(() => {
     if (formVer3 && !idEdit) {
@@ -351,7 +362,12 @@ export default function DoctorUseDFormVer3({
             patientDiagnose: patientDiagnoseData,
           });
 
-          setLanguageTransslate(doctorUseFormVer3Server.language);
+          if (
+            doctorUseFormVer3Server.language &&
+            doctorUseFormVer3Server.language !== languageTranslate
+          ) {
+            setLanguageTransslate(doctorUseFormVer3Server.language);
+          }
         }
 
         setPatientDiagnose(
@@ -1056,8 +1072,8 @@ export default function DoctorUseDFormVer3({
                   if (enRecords.length > 0) {
                     const ok = window.confirm(
                       "Đã tồn tại bản dịch tiếng Anh.\n\n" +
-                        "👉 Bạn có thể xem trong mục 'CÁC BẢN DỊCH'.\n\n" +
-                        "❓ Bạn có muốn tạo thêm một bản dịch mới không?",
+                        "Bạn có thể xem trong mục 'CÁC BẢN DỊCH'.\n\n" +
+                        "Bạn có muốn tạo thêm một bản dịch mới không?",
                     );
 
                     if (!ok) {
@@ -1141,6 +1157,7 @@ export default function DoctorUseDFormVer3({
         id_patient_diagnose={initialSnap.apiData?.id_patient_diagnose || idEdit}
         idCurrent={idEdit}
         language={languageTranslate}
+        setLanguageTransslate={setLanguageTransslate}
       />
 
       <SmartCASignModal

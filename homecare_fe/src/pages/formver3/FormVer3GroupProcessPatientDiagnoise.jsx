@@ -152,7 +152,8 @@ const FormVer3GroupProcessPatientDiagnoise = ({
           )}
 
         {status == PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESSING &&
-          id_doctor_in_processing == doctor.id && (
+          (id_doctor_in_processing == doctor.id ||
+            patientDiagnose.id_receive_doctor == doctor.id) && (
             <div style={{ marginTop: 16 }}>
               <ActionButton
                 color="red"
@@ -210,7 +211,8 @@ const FormVer3GroupProcessPatientDiagnoise = ({
 
         {(status == PATIENT_DIAGNOSE_STATUS_NAME.READ_DONE ||
           status == PATIENT_DIAGNOSE_STATUS_NAME.WAIT_VERIFY) &&
-          patientDiagnose.id_verify_doctor == doctor.id && (
+          (patientDiagnose.id_verify_doctor == doctor.id ||
+            patientDiagnose.id_receive_doctor == doctor.id) && (
             <div style={{ marginTop: 16 }}>
               <ActionButton
                 color="green"

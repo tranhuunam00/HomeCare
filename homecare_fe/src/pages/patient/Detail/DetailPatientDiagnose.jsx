@@ -127,9 +127,6 @@ const PatientDiagnoiseDetailPage = ({
               >
                 X
               </Button>
-              <Button type="primary" onClick={onOpenReading}>
-                Đọc kết quả
-              </Button>
             </Space>
           }
         >

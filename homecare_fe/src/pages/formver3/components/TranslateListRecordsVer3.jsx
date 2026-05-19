@@ -11,6 +11,7 @@ export default function TranslateListRecordsVer3({
   onClose,
   id_patient_diagnose,
   idCurrent,
+  setLanguageTransslate,
 }) {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
@@ -88,7 +89,7 @@ export default function TranslateListRecordsVer3({
           type="link"
           onClick={() => {
             onClose();
-            navigate(`/home/doctor-use-formver3/detail/${record.id}`);
+            setLanguageTransslate(record.language);
           }}
         >
           Xem chi tiết

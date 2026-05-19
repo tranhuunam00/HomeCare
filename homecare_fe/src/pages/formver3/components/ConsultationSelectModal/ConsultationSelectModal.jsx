@@ -7,26 +7,18 @@ import {
 import API_CALL from "../../../../services/axiosClient";
 import { useGlobalAuth } from "../../../../contexts/AuthContext";
 
-const ConsultationSelectModal = ({
-  open,
-  onClose,
-  patientDiagnose,
-  doctor,
-  onSuccess,
-  onCheckandCreate,
-  setPatientDiagnose,
-}) => {
+const ConsultationSelectModal = ({ open, onClose, onGoReading }) => {
   const [loading, setLoading] = useState(false);
   const [consultDoctorId, setConsultDoctorId] = useState();
   const [clinicDoctors, setClinicDoctors] = useState([]);
-
-  console.log("patientDiagnose", patientDiagnose);
+  const { selectedPatientDiagnose, setSelectedPatientDiagnose, doctor } =
+    useGlobalAuth();
 
   const fetchDoctors = async () => {
     try {
       const res = await API_CALL.get("/doctor", {
         params: {
-          id_clinic: patientDiagnose.id_clinic,
+          id_clinic: selectedPatientDiagnose.id_clinic,
           status: 1,
         },
       });
@@ -50,22 +42,20 @@ const ConsultationSelectModal = ({
       setLoading(true);
 
       await API_CALL.post(
-        `/patient-diagnose/${patientDiagnose.id}/change-status`,
+        `/patient-diagnose/${selectedPatientDiagnose.id}/change-status`,
         {
           status: PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESSING,
         },
       );
 
-      setPatientDiagnose((prev) => ({
+      setSelectedPatientDiagnose((prev) => ({
         ...prev,
         status: PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESSING,
         id_doctor_in_processing: doctor.id,
       }));
 
-      onSuccess?.();
-      onClose?.();
-
-      await onCheckandCreate?.();
+      onClose();
+      onGoReading();
     } catch (err) {
       message.error("Không thể nhận đọc");
     } finally {
@@ -78,7 +68,7 @@ const ConsultationSelectModal = ({
       setLoading(true);
 
       await API_CALL.post(
-        `/patient-diagnose/${patientDiagnose.id}/change-status`,
+        `/patient-diagnose/${selectedPatientDiagnose.id}/change-status`,
         {
           status: PATIENT_DIAGNOSE_STATUS_NAME.CONSULTATION,
           id_consulting_doctor: consultDoctorId,
@@ -86,15 +76,15 @@ const ConsultationSelectModal = ({
         },
       );
 
-      setPatientDiagnose((prev) => ({
+      setSelectedPatientDiagnose((prev) => ({
         ...prev,
         status: PATIENT_DIAGNOSE_STATUS_NAME.CONSULTATION,
         id_consulting_doctor: consultDoctorId,
         id_receive_doctor: doctor.id,
       }));
 
-      onSuccess?.();
       onClose?.();
+      onGoReading();
     } catch (err) {
       message.error("Không thể chuyển hội chẩn");
     } finally {
@@ -125,7 +115,8 @@ const ConsultationSelectModal = ({
           Tôi đọc ca này
         </Button>
 
-        {patientDiagnose?.status == PATIENT_DIAGNOSE_STATUS_CODE.NEW && (
+        {selectedPatientDiagnose?.status ==
+          PATIENT_DIAGNOSE_STATUS_CODE.NEW && (
           <>
             <div>
               <div

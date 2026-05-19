@@ -51,6 +51,9 @@ export const GlobalAuthProvider = ({ children }) => {
 
   const [previewOpen, setPreviewOpen] = useState();
 
+  const [numberLanguageDoctorUseFormV3, setNumberLanguageDoctorUseFormV3] =
+    useState(1);
+
   // LOAD từ localStorage
   const [filterPatient, setFilterPatient] = useState(() => {
     const saved = localStorage.getItem("FILTER_PATIENT");
@@ -157,7 +160,6 @@ export const GlobalAuthProvider = ({ children }) => {
     }
   }, [selectedPatientDiagnose]);
 
-  // SAVE xuống localStorage
   useEffect(() => {
     localStorage.setItem("FILTER_PATIENT", JSON.stringify(filterPatient));
   }, [filterPatient]);
@@ -241,6 +243,9 @@ export const GlobalAuthProvider = ({ children }) => {
 
         previewOpen,
         setPreviewOpen,
+
+        numberLanguageDoctorUseFormV3,
+        setNumberLanguageDoctorUseFormV3,
       }}
     >
       {children}

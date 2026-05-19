@@ -178,24 +178,22 @@ const PrintPreviewVer3NotDataDiagnose = ({
   const isCanThiepGroup = resolvedTemplateService?.code
     ? CAN_THIEP_GROUP_CODE.includes(resolvedTemplateService.code)
     : false;
+
   useEffect(() => {
-    setSelectedProvince(formSnapshot?.benh_nhan_dia_chi_tinh_thanh_pho);
-  }, [formSnapshot?.benh_nhan_dia_chi_tinh_thanh_pho]);
+    setSelectedProvince(selectedPatientDiagnose?.province_code);
+  }, [selectedPatientDiagnose?.province_code]);
+
   const provinceName =
-    provinces.find(
-      (p) => p.code == formSnapshot?.benh_nhan_dia_chi_tinh_thanh_pho,
-    )?.name || formSnapshot?.benh_nhan_dia_chi_tinh_thanh_pho;
+    provinces.find((p) => p.code == selectedPatientDiagnose?.province_code)
+      ?.name || selectedPatientDiagnose?.province_code;
 
   const wardName =
-    wards.find((w) => w.code == formSnapshot?.benh_nhan_dia_chi_xa_phuong)
-      ?.name || formSnapshot?.benh_nhan_dia_chi_xa_phuong;
-
-  console.log(
-    "formSnapshot?.imagingDiagnosisSummary",
-    formSnapshot?.imagingDiagnosisSummary,
-  );
+    wards.find((w) => w.code == selectedPatientDiagnose?.ward_code)?.name ||
+    selectedPatientDiagnose?.ward_code;
 
   const abnormalRows = imagingRows?.filter((row) => row.status === "abnormal");
+
+  console.log("selectedPatientDiagnose", selectedPatientDiagnose);
 
   return (
     <div>
@@ -282,7 +280,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                     "fullName",
                     false,
                   ).toUpperCase()}
-                  value={formSnapshot?.benh_nhan_ho_ten}
+                  value={selectedPatientDiagnose?.name}
                 />
                 <PrintItem
                   label={translateLabel(
@@ -290,7 +288,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                     "gender",
                     false,
                   ).toUpperCase()}
-                  value={formSnapshot?.benh_nhan_gioi_tinh}
+                  value={selectedPatientDiagnose?.gender}
                 />
                 <PrintItem
                   label={translateLabel(
@@ -298,7 +296,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                     "age",
                     false,
                   ).toUpperCase()}
-                  value={formSnapshot?.benh_nhan_tuoi}
+                  value={selectedPatientDiagnose?.birth_year}
                 />
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -308,7 +306,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                     "address",
                     false,
                   ).toUpperCase()}
-                  value={formSnapshot?.benh_nhan_dia_chi_so_nha}
+                  value={selectedPatientDiagnose?.address}
                 />
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -335,7 +333,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                     "nationality",
                     false,
                   ).toUpperCase()}
-                  value={formSnapshot?.benh_nhan_quoc_tich}
+                  value={selectedPatientDiagnose?.countryCode}
                 />
               </div>
 
@@ -346,7 +344,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                     "phone",
                     false,
                   ).toUpperCase()}
-                  value={formSnapshot?.benh_nhan_dien_thoai}
+                  value={selectedPatientDiagnose?.phoneNumber}
                 />
                 <PrintItem
                   label={translateLabel(
@@ -354,7 +352,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                     "email",
                     false,
                   ).toUpperCase()}
-                  value={formSnapshot?.benh_nhan_email}
+                  value={selectedPatientDiagnose?.email}
                 />
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -364,7 +362,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                     "patientId",
                     false,
                   ).toUpperCase()}
-                  value={formSnapshot?.benh_nhan_pid}
+                  value={selectedPatientDiagnose?.PID}
                 />
                 <PrintItem
                   label={translateLabel(
@@ -372,7 +370,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                     "sid",
                     false,
                   ).toUpperCase()}
-                  value={formSnapshot?.benh_nhan_sid}
+                  value={selectedPatientDiagnose?.SID}
                 />
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -382,7 +380,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                     "clinical",
                     false,
                   ).toUpperCase()}
-                  value={formSnapshot?.benh_nhan_lam_sang}
+                  value={selectedPatientDiagnose?.Indication}
                 />
               </div>
             </>

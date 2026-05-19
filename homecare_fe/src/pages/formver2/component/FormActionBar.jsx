@@ -197,10 +197,7 @@ export default function FormActionBar({
       label: "DỊCH ENGLISH",
       icon: <TranslationOutlined />,
       onClick: onTranslate || emptyF,
-      disabled:
-        !editId ||
-        languageTranslate != "vi" ||
-        (!hasProOrBusiness(userPackages) && user.id_role != USER_ROLE.ADMIN),
+      disabled: !editId || languageTranslate != "vi",
     },
     {
       key: KEY_ACTION_BUTTON.exit,
@@ -256,8 +253,12 @@ export default function FormActionBar({
 
   console.log("keys", visionItemKeys);
   useEffect(() => {
-    const { status, id_doctor_in_processing, id_receive_doctor } =
-      patientDiagnose || {};
+    const {
+      status,
+      id_doctor_in_processing,
+      id_receive_doctor,
+      id_verify_doctor,
+    } = patientDiagnose || {};
 
     let keys = [];
 
@@ -328,10 +329,7 @@ export default function FormActionBar({
         break;
 
       case PATIENT_DIAGNOSE_STATUS_CODE.WAIT_VERIFY:
-        if (
-          id_doctor_in_processing != doctor.id &&
-          id_receive_doctor != doctor.id
-        ) {
+        if (id_receive_doctor != doctor.id && id_verify_doctor != doctor.id) {
           keys = [KEY_ACTION_BUTTON.exit];
         } else {
           keys = [
@@ -360,10 +358,7 @@ export default function FormActionBar({
         break;
 
       case PATIENT_DIAGNOSE_STATUS_CODE.VERIFIED:
-        if (
-          id_doctor_in_processing != doctor.id &&
-          id_receive_doctor != doctor.id
-        ) {
+        if (id_verify_doctor != doctor.id && id_receive_doctor != doctor.id) {
           keys = [KEY_ACTION_BUTTON.exit];
         } else {
           keys = [
