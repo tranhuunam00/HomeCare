@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Button, Card, Divider } from "antd";
+import { Button, Card, Divider, Image } from "antd";
 
 import { translateLabel } from "../../../constant/app";
 
@@ -54,6 +54,9 @@ const PrintPreviewVer3NotDataDiagnose = ({
 }) => {
   const { doctor, selectedPatientDiagnose, setSelectedPatientDiagnose } =
     useGlobalAuth();
+
+  const [previewImageOpen, setPreviewImageOpen] = useState(false);
+  const [previewImage, setPreviewImage] = useState("");
 
   useEffect(() => {
     const fetchDetail = async () => {
@@ -849,7 +852,8 @@ const PrintPreviewVer3NotDataDiagnose = ({
                 style={{
                   display: "flex",
                   flexWrap: "wrap",
-                  justifyContent: "space-between",
+                  justifyContent: "space-around",
+                  width: "100%",
                 }}
               >
                 {imageList
@@ -858,8 +862,9 @@ const PrintPreviewVer3NotDataDiagnose = ({
                     <section
                       key={index}
                       style={{
-                        width: "33%",
-                        marginBottom: "16px",
+                        flex: "0 0 calc(33.333% - 11px)",
+                        maxWidth: "calc(33.333% - 11px)",
+                        textAlign: "center",
                       }}
                     >
                       <img
@@ -867,17 +872,32 @@ const PrintPreviewVer3NotDataDiagnose = ({
                         alt={`img-${index}`}
                         width={300}
                         height={220}
+                        onClick={() => {
+                          setPreviewImage(item.url || item.rawUrl);
+                          setPreviewImageOpen(true);
+                        }}
                         style={{
                           objectFit: "contain",
                           backgroundColor: "#e4e4e4ff",
                           width: "100%",
+                          cursor: "zoom-in",
                         }}
                       />
+
                       <p style={{ textAlign: "center" }}>
                         {item.caption || ""}
                       </p>
                     </section>
                   ))}
+
+                <Image
+                  style={{ display: "none" }}
+                  preview={{
+                    visible: previewImageOpen,
+                    src: previewImage,
+                    onVisibleChange: (vis) => setPreviewImageOpen(vis),
+                  }}
+                />
               </div>
             </>
           )}
