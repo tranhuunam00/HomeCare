@@ -12,7 +12,6 @@ const AdvancedSampleSection = ({
   isAdvanceSample = true,
   languageTranslate,
 }) => {
-  console.log("languageTranslate", languageTranslate);
   return (
     <Row>
       {/* Mẫu nâng cao */}

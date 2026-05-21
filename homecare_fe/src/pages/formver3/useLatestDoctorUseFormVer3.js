@@ -24,19 +24,21 @@ export default function useLatestDoctorUseFormVer3(
           page: 1,
           limit: 20,
         };
-        if (language) {
-          params.language = language;
-        }
 
         const res = await API_CALL.get("/doctorUseFormVer3", {
           params,
         });
 
         const rows = res?.data?.data?.data || [];
-        setRecord(rows.length ? rows[0] : null);
 
         const uniqueLanguages = [...new Set(rows.map((item) => item.language))];
         setNumberLanguageDoctorUseFormV3(uniqueLanguages.length);
+
+        const filteredRows = language
+          ? rows.filter((item) => item.language === language)
+          : rows;
+
+        setRecord(filteredRows.length ? filteredRows[0] : null);
       } catch (e) {
         console.error("fetch latest doctorUseFormVer3 error", e);
         setRecord(null);

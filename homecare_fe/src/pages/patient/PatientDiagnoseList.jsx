@@ -60,6 +60,7 @@ import {
   getProvinceNameByCode,
   getWardNameByCode,
 } from "../../hooks/useVietnamAddress";
+import TranslateListRecordsVer3 from "../formver3/components/TranslateListRecordsVer3";
 
 const { Option } = Select;
 const COLUMN_SETTING_STORAGE_KEY = "patientDiagnose_column_settings";
@@ -107,6 +108,8 @@ const PatientTablePage = ({ PID = null }) => {
   const [rightPanelMode, setRightPanelMode] = useState("detail");
   const [openConsultationModal, setOpenConsultationModal] = useState(false);
 
+  const [translateOpen, setTranslateOpen] = useState(false);
+
   const [visibleKeys, setVisibleKeys] = useState([]);
   const {
     user,
@@ -124,6 +127,10 @@ const PatientTablePage = ({ PID = null }) => {
     socket,
     doctor,
     numberLanguageDoctorUseFormV3,
+    languageTranslate,
+    setLanguageTransslate,
+    selectedDoctorUseFormVer3,
+    setSelectedDoctorUseFormVer3,
   } = useGlobalAuth();
 
   const { fetchTSAndExamParts } = useTemplateServicesAndExamParts();
@@ -544,16 +551,19 @@ const PatientTablePage = ({ PID = null }) => {
     },
   };
   const handleResize =
-    (index) =>
+    (key) =>
     (e, { size }) => {
       setCustomColumns((prev) => {
-        const next = [...prev];
-        next[index] = {
-          ...next[index],
-          width: size.width,
-        };
+        const next = prev.map((col) =>
+          col.key === key
+            ? {
+                ...col,
+                width: size.width,
+              }
+            : col,
+        );
 
-        // lưu width vào localStorage
+        // save localStorage
         const saved = JSON.parse(
           localStorage.getItem(COLUMN_SETTING_STORAGE_KEY) || "{}",
         );
@@ -564,7 +574,7 @@ const PatientTablePage = ({ PID = null }) => {
             ...saved,
             widths: {
               ...(saved.widths || {}),
-              [next[index].key]: size.width,
+              [key]: size.width,
             },
           }),
         );
@@ -617,11 +627,11 @@ const PatientTablePage = ({ PID = null }) => {
 
   const mergedColumns = useMemo(
     () =>
-      customColumns.map((col, index) => ({
+      customColumns.map((col) => ({
         ...col,
         onHeaderCell: () => ({
           width: col.width,
-          onResize: handleResize(index),
+          onResize: handleResize(col.key),
         }),
       })),
     [customColumns],
@@ -785,7 +795,13 @@ const PatientTablePage = ({ PID = null }) => {
               columns={mergedColumns}
               dataSource={data}
               bordered
-              scroll={{ x: 1200, y: 800 }}
+              scroll={{
+                x: mergedColumns.reduce(
+                  (total, col) => total + (col.width || 120),
+                  0,
+                ),
+                y: 800,
+              }}
               pagination={{
                 current: page,
                 pageSize: limit,
@@ -864,11 +880,17 @@ const PatientTablePage = ({ PID = null }) => {
               <Table
                 rowKey="id"
                 size="small"
-                columns={tableColumns}
+                tableLayout="fixed"
+                columns={mergedColumns}
                 dataSource={sameCCCDData}
                 bordered
                 pagination={false}
-                scroll={{ x: 1200 }}
+                scroll={{
+                  x: mergedColumns.reduce(
+                    (total, col) => total + (col.width || 120),
+                    0,
+                  ),
+                }}
                 style={{ marginTop: 8 }}
                 onRow={(record) => ({
                   onClick: () => {
@@ -903,7 +925,16 @@ const PatientTablePage = ({ PID = null }) => {
               alignItems: "center",
             }}
           >
-            <h5>Ngôn ngữ dùng: {numberLanguageDoctorUseFormV3}</h5>
+            <Button
+              type="primary"
+              ghost
+              style={{
+                borderColor: "#38e204",
+              }}
+              onClick={() => setTranslateOpen(true)}
+            >
+              Bản dịch: {numberLanguageDoctorUseFormV3}
+            </Button>
             <CustomSteps
               steps={stepsStatus({
                 setOpenConsultationModal,
@@ -953,6 +984,15 @@ const PatientTablePage = ({ PID = null }) => {
         open={openConsultationModal}
         onClose={() => setOpenConsultationModal(false)}
         onGoReading={() => setRightPanelMode("reading")}
+      />
+
+      <TranslateListRecordsVer3
+        open={translateOpen}
+        onClose={() => setTranslateOpen(false)}
+        id_patient_diagnose={selectedPatientDiagnose?.id}
+        selectedDoctorUseFormVer3={selectedDoctorUseFormVer3}
+        setLanguageTransslate={setLanguageTransslate}
+        setSelectedDoctorUseFormVer3={setSelectedDoctorUseFormVer3}
       />
     </div>
   );

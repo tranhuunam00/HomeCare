@@ -4,6 +4,7 @@ import { io } from "socket.io-client";
 
 import storage from "../services/storage";
 import { toast } from "react-toastify";
+import { TRANSLATE_LANGUAGE } from "../constant/app";
 
 const GlobalAuthContext = createContext();
 
@@ -54,6 +55,13 @@ export const GlobalAuthProvider = ({ children }) => {
   const [numberLanguageDoctorUseFormV3, setNumberLanguageDoctorUseFormV3] =
     useState(1);
 
+  const [languageTranslate, setLanguageTransslate] = useState(
+    TRANSLATE_LANGUAGE.VI,
+  );
+
+  const [selectedDoctorUseFormVer3, setSelectedDoctorUseFormVer3] =
+    useState(null);
+
   // LOAD từ localStorage
   const [filterPatient, setFilterPatient] = useState(() => {
     const saved = localStorage.getItem("FILTER_PATIENT");
@@ -82,6 +90,10 @@ export const GlobalAuthProvider = ({ children }) => {
 
     return null;
   });
+
+  useEffect(() => {
+    if (!selectedPatientDiagnose) setLanguageTransslate(TRANSLATE_LANGUAGE.VI);
+  }, [selectedPatientDiagnose]);
 
   useEffect(() => {
     if (!user || !token) return;
@@ -246,6 +258,12 @@ export const GlobalAuthProvider = ({ children }) => {
 
         numberLanguageDoctorUseFormV3,
         setNumberLanguageDoctorUseFormV3,
+
+        languageTranslate,
+        setLanguageTransslate,
+
+        selectedDoctorUseFormVer3,
+        setSelectedDoctorUseFormVer3,
       }}
     >
       {children}

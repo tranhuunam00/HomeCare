@@ -251,7 +251,6 @@ export default function FormActionBar({
     );
   };
 
-  console.log("keys", visionItemKeys);
   useEffect(() => {
     const {
       status,

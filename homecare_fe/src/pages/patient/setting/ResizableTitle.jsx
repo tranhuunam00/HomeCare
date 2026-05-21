@@ -1,7 +1,9 @@
+import React from "react";
 import { Resizable } from "react-resizable";
 import "react-resizable/css/styles.css";
 
 import "./ResizableTitle.scss";
+
 const ResizableTitle = (props) => {
   const { onResize, width, ...restProps } = props;
 
@@ -16,15 +18,27 @@ const ResizableTitle = (props) => {
       handle={
         <span
           className="react-resizable-handle"
-          onClick={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
         />
       }
       onResize={onResize}
-      draggableOpts={{ enableUserSelectHack: false }}
+      draggableOpts={{
+        enableUserSelectHack: false,
+      }}
     >
-      <th {...restProps} />
+      <th
+        {...restProps}
+        style={{
+          ...restProps.style,
+          width,
+          minWidth: width,
+          maxWidth: width,
+        }}
+      />
     </Resizable>
   );
 };
 
-export default ResizableTitle;
+export default React.memo(ResizableTitle);

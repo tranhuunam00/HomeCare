@@ -10,8 +10,9 @@ export default function TranslateListRecordsVer3({
   open,
   onClose,
   id_patient_diagnose,
-  idCurrent,
+  selectedDoctorUseFormVer3,
   setLanguageTransslate,
+  setSelectedDoctorUseFormVer3,
 }) {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
@@ -30,7 +31,25 @@ export default function TranslateListRecordsVer3({
             limit: 100,
           },
         });
-        setData(res.data.data.data?.filter((a) => !a.deletedAt) || []);
+        const rows = res.data.data.data?.filter((a) => !a.deletedAt) || [];
+
+        const latestByLanguage = Object.values(
+          rows.reduce((acc, item) => {
+            const lang = item.language || "unknown";
+
+            // nếu chưa có hoặc id lớn hơn => lấy mới hơn
+            if (!acc[lang] || item.id > acc[lang].id) {
+              acc[lang] = item;
+            }
+
+            return acc;
+          }, {}),
+        );
+
+        // sort mới nhất lên đầu
+        latestByLanguage.sort((a, b) => b.id - a.id);
+
+        setData(latestByLanguage);
       } catch (err) {
         toast.error("Không tải được lịch sử thay đổi");
         console.error(err);
@@ -50,7 +69,9 @@ export default function TranslateListRecordsVer3({
       render: (val) => (
         <span
           style={
-            val == idCurrent ? { fontWeight: "bold", color: "#d46b08" } : {}
+            val == selectedDoctorUseFormVer3?.id
+              ? { fontWeight: "bold", color: "#d46b08" }
+              : {}
           }
         >
           {val}
@@ -89,6 +110,7 @@ export default function TranslateListRecordsVer3({
           type="link"
           onClick={() => {
             onClose();
+            setSelectedDoctorUseFormVer3(record);
             setLanguageTransslate(record.language);
           }}
         >

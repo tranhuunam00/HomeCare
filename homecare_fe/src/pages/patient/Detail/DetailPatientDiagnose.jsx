@@ -49,10 +49,12 @@ const PatientDiagnoiseDetailPage = ({
     templateServices,
     selectedPatientDiagnose,
     setSelectedPatientDiagnose,
+    languageTranslate,
   } = useGlobalAuth();
 
   const { record: latestVer3 } = useLatestDoctorUseFormVer3(
     selectedPatientDiagnose?.id,
+    languageTranslate,
   );
 
   useEffect(() => {

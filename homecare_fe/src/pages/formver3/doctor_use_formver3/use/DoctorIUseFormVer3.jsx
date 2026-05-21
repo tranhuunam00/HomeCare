@@ -78,6 +78,8 @@ export default function DoctorUseDFormVer3({
     setSelectedPatientDiagnose,
     previewOpen,
     setPreviewOpen,
+    languageTranslate,
+    setLanguageTransslate,
   } = useGlobalAuth();
 
   const printSourceRef = useRef(null);
@@ -85,18 +87,14 @@ export default function DoctorUseDFormVer3({
   const [reloading, setReloading] = useState(false);
   const [signModalOpen, setSignModalOpen] = useState(false);
   const { provinces, wards, setSelectedProvince } = useVietnamAddress();
-  const navigate = useNavigate();
   const { is_print } = useParams();
 
   const [idEdit, setIdEdit] = useState(doctorUseFormVer3Id);
 
-  const [translateOpen, setTranslateOpen] = useState(false);
   const [patientDiagnose, setPatientDiagnose] = useState(null);
   const [imageList, setImageList] = useState([{}, {}, {}]);
   const [filteredFormVer3Names, setFilteredFormVer3Names] = useState([]);
-  const [languageTranslate, setLanguageTransslate] = useState(
-    TRANSLATE_LANGUAGE.VI,
-  );
+
   const [diagnosisSummary, setDiagnosisSummary] = useState(
     form.getFieldValue("imagingDiagnosisSummary"),
   );
@@ -690,11 +688,7 @@ export default function DoctorUseDFormVer3({
                 rules={[{ required: true }]}
                 labelCol={{ flex: "0 0 90px" }}
               >
-                <Select
-                  disabled={!isEdit}
-                  placeholder="VI / EN"
-                  onChange={(lang) => setLanguageTransslate(lang)}
-                >
+                <Select disabled={!isEdit} placeholder="VI / EN">
                   {LANGUAGE_OPTIONS.map((opt) => (
                     <Option
                       key={opt.value}
@@ -1082,27 +1076,25 @@ export default function DoctorUseDFormVer3({
                       );
                       return;
                     }
-                    // nếu OK → tiếp tục tạo
                   }
 
-                  // 2️⃣ Gọi API translate
                   const res = await API_CALL.post(
                     `/doctorUseFormVer3/${idEdit}/translate`,
                   );
 
                   const newRecord = res?.data?.data || res?.data;
 
-                  toast.success("Tạo bản dịch tiếng Anh thành công");
+                  toast.success(
+                    "Tạo bản dịch tiếng Anh thành công. Vui lòng vào phần Các Bản Dịch để kiểm tra",
+                  );
 
-                  // 3️⃣ Chuyển sang bản EN mới
-                  if (newRecord?.id) {
-                    navigate(
-                      `/home/doctor-use-formver3/detail/${newRecord.id}`,
-                      {
-                        replace: true,
-                      },
-                    );
-                  }
+                  console.log(
+                    "newRecord.language",
+                    newRecord.language,
+                    newRecord.id,
+                  );
+                  setIdEdit(newRecord.id);
+                  toast.success("qua");
                 } catch (error) {
                   console.error("[translate] error", error);
                   toast.error(
@@ -1136,29 +1128,6 @@ export default function DoctorUseDFormVer3({
           }
         </Form>
       )}
-
-      <Title level={4} style={{ margin: "24px 0 16px" }}>
-        <a
-          style={{
-            fontStyle: "italic",
-            color: "#b17b16ff",
-            textDecoration: "underline",
-            cursor: "pointer",
-          }}
-          onClick={() => setTranslateOpen(true)}
-        >
-          CÁC BẢN DỊCH
-        </a>
-      </Title>
-
-      <TranslateListRecordsVer3
-        open={translateOpen}
-        onClose={() => setTranslateOpen(false)}
-        id_patient_diagnose={initialSnap.apiData?.id_patient_diagnose || idEdit}
-        idCurrent={idEdit}
-        language={languageTranslate}
-        setLanguageTransslate={setLanguageTransslate}
-      />
 
       <SmartCASignModal
         open={signModalOpen}
