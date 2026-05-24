@@ -642,6 +642,7 @@ export default function OradsForm() {
           )}
 
           {/* Summary */}
+
           <Divider />
           <Row gutter={24} className={styles.summaryRow}>
             <Col span={8}>
@@ -665,6 +666,11 @@ export default function OradsForm() {
           >
             <AIRecommendationEditor value={aiText} onChange={setAiText} />
           </Row>
+          <img
+            src="/public/product/orads/summary.png"
+            style={{ maxWidth: 900 }}
+            alt=""
+          />
 
           <Divider />
           <div className={styles.buttonRow} style={{ display: "flex", gap: 8 }}>
