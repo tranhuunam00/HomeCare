@@ -1,0 +1,55 @@
+name: Deploy HomeCare
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy to Server
+    runs-on: ubuntu-latest
+    if: startsWith(github.event.head_commit.message, 'release v') || startsWith(github.event.head_commit.message, 'Release v')
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Execute Remote SSH Commands
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT || 22 }}
+          script: |
+            # Source user profiles and NVM to load node/npm/pm2 into the shell environment
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            
+            # Source bash profile for general node installations (e.g. if installed via n/nvm/fnm/apt)
+            [ -f "$HOME/.profile" ] && source "$HOME/.profile"
+            [ -f "$HOME/.bashrc" ] && source "$HOME/.bashrc"
+            
+            # Go to the repository directory on the server
+            cd /root/Homecare || { echo "Directory not found!"; exit 1; }
+            
+            echo "=== Pulling latest changes from git ==="
+            git fetch origin main
+            git checkout main
+            git pull origin main
+            
+            echo "=== Navigating to homecare_fe ==="
+            cd homecare_fe || { echo "homecare_fe directory not found!"; exit 1; }
+            
+            echo "=== Installing frontend dependencies ==="
+            npm install --no-audit --no-fund
+            
+            echo "=== Building frontend ==="
+            npm run build
+            
+            echo "=== Reloading PM2 process ==="
+            # Reload if process exists, otherwise start the PM2 service
+            pm2 reload fe-homecare || pm2 start serve --name fe-homecare -- -s dist -l 3000
+            
+            echo "=== Deployment Completed Successfully! ==="
