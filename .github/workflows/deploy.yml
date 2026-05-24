@@ -32,7 +32,7 @@ jobs:
             [ -f "$HOME/.bashrc" ] && source "$HOME/.bashrc"
             
             # Go to the repository directory on the server
-            cd Homecare || { echo "Directory not found!"; exit 1; }
+            cd HomeCare || { echo "Directory not found!"; exit 1; }
             
             echo "=== Pulling latest changes from git ==="
             git fetch origin main
