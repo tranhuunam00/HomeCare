@@ -17,9 +17,11 @@ const WORKFLOW_STATES = {
     title: "Hội chẩn",
     badge: "Trạng thái hỗ trợ",
     color: "var(--color-consult)",
-    desc: "Ca bệnh khó đang được thảo luận bởi các bác sĩ. Không ai được phép sửa nội dung phiếu ngoài những người được giao hội chẩn.",
+    desc: "Ca bệnh khó đang chờ ý kiến chuyên môn của Bác sĩ hội chẩn (BS2). Tại đây, cả Bác sĩ chính (BS1) và Bác sĩ hội chẩn (BS2) đều có các hành động tương tác đặc thù.",
     transitions: [
-      { name: "Chọn đọc", to: "Đang đọc", desc: "Bác sĩ được chỉ định chính bắt đầu nhập kết quả sau khi đã thống nhất ý kiến hội chẩn." }
+      { name: "Nhận đọc (BS2)", to: "Đang đọc", desc: "Bác sĩ hội chẩn (BS2) đồng ý tham gia, bấm Nhận đọc để chuyển ca về Đang đọc và tiến hành ghi kết quả." },
+      { name: "Từ chối hội chẩn (BS2)", to: "Đang đọc (Rollback)", desc: "Bác sĩ hội chẩn (BS2) từ chối, ca tự động trả lại quyền cho Bác sĩ chính (BS1) để đọc tiếp." },
+      { name: "Tự nhận đọc lại (BS1)", to: "Đang đọc", desc: "Bác sĩ chính (BS1) có quyền tự lấy lại ca bất kỳ lúc nào để tự đọc (không chờ BS2 nữa)." }
     ],
     upgrades: []
   },
@@ -27,12 +29,12 @@ const WORKFLOW_STATES = {
     title: "Đang đọc",
     badge: "Trạng thái chỉnh sửa",
     color: "var(--color-reading)",
-    desc: "Bác sĩ chẩn đoán hình ảnh đang nhập mô tả kết quả, kết luận và chọn hình ảnh in ấn. Hệ thống liên tục tự động lưu nháp.",
+    desc: "Bác sĩ (BS1 tự đọc hoặc BS2 được mời hội chẩn) đang ghi nội dung kết quả, kết luận. Hệ thống tự động lưu nháp.",
     transitions: [
-      { name: "Lưu đọc", to: "Đang đọc (Bản nháp)", desc: "Lưu tạm thông tin để có thể quay lại đọc tiếp sau đó." },
-      { name: "Đọc xong", to: "Đọc xong", desc: "Hoàn tất việc điền kết quả và gửi lên hệ thống chờ phê duyệt." },
-      { name: "Hủy tiếp nhận", to: "Chưa đọc", desc: "Huỷ bỏ việc nhận đọc ca bệnh này, trả kết quả về trạng thái Chưa đọc (Mới) chờ bác sĩ khác nhận." },
-      { name: "Duyệt (Trực tiếp)", to: "Duyệt", desc: "Nếu bác sĩ chẩn đoán có quyền duyệt ca (quy trình 1 cấp - Auto Approve), ca sẽ được duyệt luôn." }
+      { name: "Lưu nháp (BS1/BS2)", to: "Đang đọc (Bản nháp)", desc: "Lưu tạm thông tin kết quả chẩn đoán." },
+      { name: "Đọc xong (BS1/BS2)", to: "Đọc xong", desc: "Hoàn tất ghi kết quả và chuyển lên hàng chờ trưởng khoa phê duyệt." },
+      { name: "Mời hội chẩn (BS1)", to: "Hội chẩn", desc: "BS1 trong lúc đọc thấy ca khó có thể gán BS2 vào để cùng hội chẩn." },
+      { name: "Hủy đọc (BS1)", to: "Chưa đọc", desc: "BS1 hủy nhận ca, trả kết quả về hàng chờ tự do cho toàn viện." }
     ],
     upgrades: []
   },
@@ -42,7 +44,7 @@ const WORKFLOW_STATES = {
     color: "var(--color-done)",
     desc: "Phiếu kết quả đã hoàn thành. Ca bệnh được đẩy vào tab 'Chờ duyệt'. Bác sĩ đọc không thể chỉnh sửa kết quả trừ khi yêu cầu sửa lại.",
     transitions: [
-      { name: "Sửa đọc", to: "Đang đọc", desc: "Bác sĩ đọc tự thu hồi phiếu kết quả để sửa lại khi chưa có ai phê duyệt." },
+      { name: "Sửa đọc", to: "Đang đọc", desc: "Bác sĩ đọc kéo ngược ca về lại trạng thái soạn thảo để sửa lỗi sai." },
       { name: "Nhận duyệt", to: "Đang duyệt", desc: "Bác sĩ duyệt hoặc Trưởng khoa khóa ca bệnh để tiến hành rà soát." }
     ],
     upgrades: []
@@ -68,8 +70,7 @@ const WORKFLOW_STATES = {
       { name: "Sửa duyệt", to: "Đang duyệt", desc: "Trường hợp phát hiện sai sót sau khi đã ký duyệt, cần chỉnh sửa lại." },
       { name: "Hủy duyệt", to: "Đọc xong", desc: "Hủy bỏ chữ ký số để đưa kết quả về lại trạng thái chờ duyệt ban đầu." }
     ],
-    upgrades: [
-    ]
+    upgrades: []
   }
 };
 
@@ -82,14 +83,15 @@ const WORKFLOW_TRANSITIONS = {
   t_done_reading: { title: "Sửa đọc", from: "Đọc xong", to: "Đang đọc", desc: "Bác sĩ đọc tự thu hồi phiếu kết quả để sửa lại khi chưa có ai phê duyệt." },
   t_done_reviewing: { title: "Nhận duyệt", from: "Đọc xong", to: "Đang duyệt", desc: "Người phê duyệt khóa ca để bắt đầu thực hiện rà soát kết quả." },
   t_reviewing_approved: { title: "Duyệt xong", from: "Đang duyệt", to: "Duyệt", desc: "Ký chữ ký số để xuất bản phiếu kết quả và đồng bộ dữ liệu." },
-  t_reading_approved: { title: "Duyệt (Trực tiếp)", from: "Đang đọc", to: "Duyệt", desc: "Quy trình một cấp dành cho các ca bệnh thường quy hoặc bác sĩ có thẩm quyền cao tự thực hiện cả hai vai trò." },
+  t_done_approved: { title: "Duyệt luôn", from: "Đọc xong", to: "Duyệt", desc: "Bác sĩ chính (BS1) tự phê duyệt kết quả của chính mình ngay từ màn hình Đọc xong mà không cần thông qua trạng thái Đang duyệt." },
   t_approved_reviewing: { title: "Sửa duyệt", from: "Duyệt", to: "Đang duyệt", desc: "Chuyển về rà soát lại để chỉnh sửa một số nội dung nhỏ trong phiếu đã duyệt." },
   t_approved_done: { title: "Hủy duyệt", from: "Duyệt", to: "Đọc xong", desc: "Rút lại quyết định ký duyệt, đẩy ca về hàng chờ duyệt lại từ đầu." },
   t_reading_self: { title: "Lưu đọc", from: "Đang đọc", to: "Đang đọc (Lưu nháp)", desc: "Tự động hoặc chủ động lưu lại bản phác thảo kết quả chẩn đoán." },
   t_reviewing_self: { title: "Lưu duyệt", from: "Đang duyệt", to: "Đang duyệt (Nháp)", desc: "Lưu tạm các chỉnh sửa, ghi chú sửa đổi của người duyệt trước khi ký số." },
   u_reading_consult: { title: "Yêu cầu hội chẩn", from: "Đang đọc", to: "Hội chẩn", desc: "Đề xuất mới: Cho phép yêu cầu hội chẩn giữa chừng ngay trong lúc đang đọc nếu phát hiện bất thường nghiêm trọng ngoài tầm xử lý." },
   t_reviewing_done: { title: "Hủy nhận duyệt", from: "Đang duyệt", to: "Đọc xong", desc: "Huỷ bỏ việc nhận duyệt, trả kết quả về trạng thái Đọc xong để người đọc có thể chủ động sửa đổi." },
-  u_reviewing_reading: { title: "Trả ca / Yêu cầu sửa", from: "Đang duyệt", to: "Đang đọc", desc: "Đề xuất mới: Người duyệt từ chối duyệt ca và gửi yêu cầu bác sĩ đọc chỉnh sửa lại kèm theo note lý do lỗi cụ thể." }
+  u_reviewing_reading: { title: "Trả ca / Yêu cầu sửa", from: "Đang duyệt", to: "Đang đọc", desc: "Đề xuất mới: Người duyệt từ chối duyệt ca và gửi yêu cầu bác sĩ đọc chỉnh sửa lại kèm theo note lý do lỗi cụ thể." },
+  u_consult_reading_reject: { title: "Từ chối hội chẩn", from: "Hội chẩn", to: "Đang đọc", desc: "Đề xuất mới: Bác sĩ hội chẩn từ chối tiếp nhận ca. Hệ thống tự động phục hồi ca về trạng thái Đang đọc của Bác sĩ chính (rollback), đồng thời gửi thông báo và không làm mất ca của bác sĩ chính." }
 };
 
 const DradsStateDiagram = () => {
@@ -366,6 +368,17 @@ const DradsStateDiagram = () => {
           <h2 style={{ fontSize: "1.1rem", fontWeight: 600, color: "#fff", margin: 0 }}>Sơ đồ Trạng thái Quy trình Báo cáo D-RADS</h2>
           <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>Sơ đồ máy trạng thái (State Machine) tương tác</span>
         </div>
+        <div style={{ display: "flex", gap: "16px", fontSize: "0.85rem", background: "rgba(255,255,255,0.03)", padding: "8px 16px", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
+          <span style={{ display: "flex", alignItems: "center", gap: "8px", fontWeight: 500 }}>
+            <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#3b82f6", boxShadow: "0 0 8px #3b82f6" }}></span> Bác sĩ chính (BS1)
+          </span>
+          <span style={{ display: "flex", alignItems: "center", gap: "8px", fontWeight: 500 }}>
+            <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#a855f7", boxShadow: "0 0 8px #a855f7" }}></span> Bác sĩ hội chẩn (BS2)
+          </span>
+          <span style={{ display: "flex", alignItems: "center", gap: "8px", fontWeight: 500 }}>
+            <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#6366f1", boxShadow: "0 0 8px #6366f1" }}></span> Duyệt viên
+          </span>
+        </div>
       </div>
 
       <div className="main-grid" onClick={() => setSelectedSvgId(null)}>
@@ -378,7 +391,7 @@ const DradsStateDiagram = () => {
               </pattern>
               <marker id="arrow-svg" viewBox="0 0 10 10" refX="24" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
                 <path d="M 0 0 L 10 5 L 0 10 z" fill="#9ca3af" />
-              </marker>
+              </pattern>
               <marker id="arrow-selected-svg" viewBox="0 0 10 10" refX="24" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
                 <path d="M 0 0 L 10 5 L 0 10 z" fill="#fff" />
               </marker>
@@ -471,16 +484,6 @@ const DradsStateDiagram = () => {
                 onClick={() => setSelectedSvgId("t_reviewing_approved")}
               />
 
-              {/* 9. Đang đọc -> Duyệt (Duyệt thẳng - 1 Cấp) */}
-              <path
-                id="t_reading_approved"
-                d="M 520 240 Q 860 380 1190 230"
-                className={`flow-line ${selectedSvgId === "t_reading_approved" ? "selected" : ""}`}
-                stroke={selectedSvgId === "t_reading_approved" ? "#fff" : "#9ca3af"}
-                markerEnd={selectedSvgId === "t_reading_approved" ? "url(#arrow-selected-svg)" : "url(#arrow-svg)"}
-                onClick={() => setSelectedSvgId("t_reading_approved")}
-              />
-
               {/* 10. Duyệt -> Đang duyệt (Sửa duyệt) */}
               <path
                 id="t_approved_reviewing"
@@ -511,6 +514,16 @@ const DradsStateDiagram = () => {
                 onClick={() => setSelectedSvgId("t_reading_self")}
               />
 
+              {/* 13. Đọc xong -> Duyệt (Duyệt luôn bởi BS1) */}
+              <path
+                id="t_done_approved"
+                d="M 800 240 Q 1000 320 1190 220"
+                className={`flow-line ${selectedSvgId === "t_done_approved" ? "selected" : ""}`}
+                stroke={selectedSvgId === "t_done_approved" ? "#fff" : "#9ca3af"}
+                markerEnd={selectedSvgId === "t_done_approved" ? "url(#arrow-selected-svg)" : "url(#arrow-svg)"}
+                onClick={() => setSelectedSvgId("t_done_approved")}
+              />
+
               {/* Loop 13: Đang duyệt -> Đang duyệt (Lưu duyệt) */}
               <path
                 id="t_reviewing_self"
@@ -519,16 +532,6 @@ const DradsStateDiagram = () => {
                 stroke={selectedSvgId === "t_reviewing_self" ? "#fff" : "#9ca3af"}
                 markerEnd={selectedSvgId === "t_reviewing_self" ? "url(#arrow-selected-svg)" : "url(#arrow-svg)"}
                 onClick={() => setSelectedSvgId("t_reviewing_self")}
-              />
-
-              {/* 14. Đang duyệt -> Đọc xong (Hủy nhận duyệt) */}
-              <path
-                id="t_reviewing_done"
-                d="M 970 230 Q 885 270 800 240"
-                className={`flow-line ${selectedSvgId === "t_reviewing_done" ? "selected" : ""}`}
-                stroke={selectedSvgId === "t_reviewing_done" ? "#fff" : "#9ca3af"}
-                markerEnd={selectedSvgId === "t_reviewing_done" ? "url(#arrow-selected-svg)" : "url(#arrow-svg)"}
-                onClick={() => setSelectedSvgId("t_reviewing_done")}
               />
 
               {/* ================= UPGRADE PATHS ================= */}
@@ -542,6 +545,16 @@ const DradsStateDiagram = () => {
                 onClick={() => setSelectedSvgId("u_reading_consult")}
               />
 
+              {/* 14. Đang duyệt -> Đọc xong (Hủy nhận duyệt) */}
+              <path
+                id="t_reviewing_done"
+                d="M 970 230 Q 885 270 800 240"
+                className={`flow-line ${selectedSvgId === "t_reviewing_done" ? "selected" : ""}`}
+                stroke={selectedSvgId === "t_reviewing_done" ? "#fff" : "#9ca3af"}
+                markerEnd={selectedSvgId === "t_reviewing_done" ? "url(#arrow-selected-svg)" : "url(#arrow-svg)"}
+                onClick={() => setSelectedSvgId("t_reviewing_done")}
+              />
+
               {/* U2. Đang duyệt -> Đang đọc (Trả ca / Yêu cầu sửa) */}
               <path
                 id="u_reviewing_reading"
@@ -551,74 +564,88 @@ const DradsStateDiagram = () => {
                 markerEnd={selectedSvgId === "u_reviewing_reading" ? "url(#arrow-selected-svg)" : "url(#arrow-svg)"}
                 onClick={() => setSelectedSvgId("u_reviewing_reading")}
               />
+
+              {/* U3. Hội chẩn -> Đang đọc (Từ chối hội chẩn / Rollback về BS chính) */}
+              <path
+                id="u_consult_reading_reject"
+                d="M 295 390 Q 295 240 450 220"
+                className={`flow-line ${selectedSvgId === "u_consult_reading_reject" ? "selected" : ""}`}
+                stroke={selectedSvgId === "u_consult_reading_reject" ? "#fff" : "#9ca3af"}
+                markerEnd={selectedSvgId === "u_consult_reading_reject" ? "url(#arrow-selected-svg)" : "url(#arrow-svg)"}
+                onClick={() => setSelectedSvgId("u_consult_reading_reject")}
+              />
             </g>
 
             {/* TRANSITION LABELS */}
             <g>
-              {/* 1. Chọn đọc luôn */}
-              <rect x="300" y="188" width="80" height="20" className="line-text-bg" />
-              <text x="340" y="198" className="line-text" onClick={() => setSelectedSvgId("t_unread_reading")}>Chọn đọc luôn</text>
+              {/* 1. Chọn đọc (BS1) */}
+              <rect x="290" y="188" width="100" height="20" className="line-text-bg" />
+              <text x="340" y="198" className="line-text" onClick={() => setSelectedSvgId("t_unread_reading")}>Chọn đọc (BS1)</text>
 
-              {/* 2. Chọn bác sĩ hội chẩn */}
+              {/* 2. Mời hội chẩn (BS1) */}
               <rect x="75" y="310" width="115" height="20" className="line-text-bg" />
-              <text x="132" y="320" className="line-text" onClick={() => setSelectedSvgId("t_unread_consult")}>Chọn bác sĩ hội chẩn</text>
+              <text x="132" y="320" className="line-text" onClick={() => setSelectedSvgId("t_unread_consult")}>Mời hội chẩn (BS1)</text>
 
-              {/* 3. Chọn đọc */}
-              <rect x="385" y="380" width="60" height="20" className="line-text-bg" />
-              <text x="415" y="390" className="line-text" onClick={() => setSelectedSvgId("t_consult_reading")}>Chọn đọc</text>
+              {/* 3. Nhận đọc (BS1/BS2) */}
+              <rect x="360" y="380" width="110" height="20" className="line-text-bg" />
+              <text x="415" y="390" className="line-text" onClick={() => setSelectedSvgId("t_consult_reading")}>Nhận đọc (BS1/BS2)</text>
 
-              {/* 4. Hủy tiếp nhận */}
+              {/* 4. Hủy đọc (BS1) */}
               <rect x="300" y="105" width="80" height="20" className="line-text-bg" />
-              <text x="340" y="115" className="line-text" onClick={() => setSelectedSvgId("t_reading_unread")}>Hủy tiếp nhận</text>
+              <text x="340" y="115" className="line-text" onClick={() => setSelectedSvgId("t_reading_unread")}>Hủy đọc (BS1)</text>
 
-              {/* 5. Đọc xong */}
-              <rect x="630" y="188" width="60" height="20" className="line-text-bg" />
-              <text x="660" y="198" className="line-text" onClick={() => setSelectedSvgId("t_reading_done")}>Đọc xong</text>
+              {/* 5. Đọc xong (BS1/BS2) */}
+              <rect x="610" y="188" width="110" height="20" className="line-text-bg" />
+              <text x="665" y="198" className="line-text" onClick={() => setSelectedSvgId("t_reading_done")}>Đọc xong (BS1/BS2)</text>
 
-              {/* 6. Sửa đọc */}
-              <rect x="630" y="105" width="60" height="20" className="line-text-bg" />
-              <text x="660" y="115" className="line-text" onClick={() => setSelectedSvgId("t_done_reading")}>Sửa đọc</text>
+              {/* 6. Sửa kết quả (BS1) */}
+              <rect x="610" y="105" width="100" height="20" className="line-text-bg" />
+              <text x="660" y="115" className="line-text" onClick={() => setSelectedSvgId("t_done_reading")}>Sửa kết quả (BS1)</text>
 
-              {/* 7. Nhận duyệt */}
-              <rect x="885" y="188" width="70" height="20" className="line-text-bg" />
-              <text x="920" y="198" className="line-text" onClick={() => setSelectedSvgId("t_done_reviewing")}>Nhận duyệt</text>
+              {/* 7. Nhận duyệt (BS1/Duyệt viên) */}
+              <rect x="830" y="188" width="150" height="20" className="line-text-bg" />
+              <text x="905" y="198" className="line-text" onClick={() => setSelectedSvgId("t_done_reviewing")}>Nhận duyệt (BS1/Duyệt viên)</text>
 
-              {/* 8. Duyệt xong */}
-              <rect x="1120" y="188" width="65" height="20" className="line-text-bg" />
-              <text x="1152" y="198" className="line-text" onClick={() => setSelectedSvgId("t_reviewing_approved")}>Duyệt xong</text>
+              {/* 8. Ký duyệt (BS1/Duyệt viên) */}
+              <rect x="1080" y="188" width="130" height="20" className="line-text-bg" />
+              <text x="1145" y="198" className="line-text" onClick={() => setSelectedSvgId("t_reviewing_approved")}>Ký duyệt (BS1/Duyệt viên)</text>
 
-              {/* 9. Duyệt (Direct) */}
-              <rect x="830" y="310" width="40" height="20" className="line-text-bg" />
-              <text x="850" y="320" className="line-text" onClick={() => setSelectedSvgId("t_reading_approved")}>Duyệt</text>
+              {/* 10. Sửa duyệt (BS1/Duyệt viên) */}
+              <rect x="1080" y="100" width="120" height="20" className="line-text-bg" />
+              <text x="1140" y="110" className="line-text" onClick={() => setSelectedSvgId("t_approved_reviewing")}>Sửa duyệt (BS1/Duyệt viên)</text>
 
-              {/* 10. sửa duyệt */}
-              <rect x="1115" y="100" width="60" height="20" className="line-text-bg" />
-              <text x="1145" y="110" className="line-text" onClick={() => setSelectedSvgId("t_approved_reviewing")}>sửa duyệt</text>
+              {/* 11. Hủy duyệt (BS1/Duyệt viên) */}
+              <rect x="950" y="55" width="130" height="20" className="line-text-bg" />
+              <text x="1015" y="65" className="line-text" onClick={() => setSelectedSvgId("t_approved_done")}>Hủy duyệt (BS1/Duyệt viên)</text>
 
-              {/* 11. hủy duyệt */}
-              <rect x="990" y="55" width="60" height="20" className="line-text-bg" />
-              <text x="1020" y="65" className="line-text" onClick={() => setSelectedSvgId("t_approved_done")}>hủy duyệt</text>
+              {/* 12. Lưu nháp (BS1/BS2) */}
+              <rect x="460" y="280" width="100" height="20" className="line-text-bg" />
+              <text x="510" y="290" className="line-text" onClick={() => setSelectedSvgId("t_reading_self")}>Lưu nháp (BS1/BS2)</text>
 
-              {/* 12. lưu đọc */}
-              <rect x="480" y="280" width="50" height="20" className="line-text-bg" />
-              <text x="505" y="290" className="line-text" onClick={() => setSelectedSvgId("t_reading_self")}>lưu đọc</text>
+              {/* 13. Duyệt luôn (BS1) */}
+              <rect x="965" y="270" width="110" height="20" className="line-text-bg" />
+              <text x="1020" y="280" className="line-text" onClick={() => setSelectedSvgId("t_done_approved")}>Duyệt luôn (BS1)</text>
 
-              {/* 13. lưu duyệt */}
-              <rect x="980" y="100" width="60" height="20" className="line-text-bg" />
-              <text x="1010" y="110" className="line-text" onClick={() => setSelectedSvgId("t_reviewing_self")}>lưu duyệt</text>
-
-              {/* 14. Hủy nhận duyệt */}
-              <rect x="840" y="240" width="100" height="20" className="line-text-bg" />
-              <text x="890" y="250" className="line-text" onClick={() => setSelectedSvgId("t_reviewing_done")}>Hủy nhận duyệt</text>
+              {/* 13. Lưu duyệt (BS1/Duyệt viên) */}
+              <rect x="940" y="100" width="130" height="20" className="line-text-bg" />
+              <text x="1005" y="110" className="line-text" onClick={() => setSelectedSvgId("t_reviewing_self")}>Lưu duyệt (BS1/Duyệt viên)</text>
 
               {/* UPGRADE LABELS */}
-              {/* U1. Yêu cầu hội chẩn */}
-              <rect x="290" y="280" width="115" height="20" className="line-text-bg" />
-              <text x="347" y="290" className="line-text" onClick={() => setSelectedSvgId("u_reading_consult")}>Yêu cầu hội chẩn</text>
+              {/* U1. Mời hội chẩn (BS1) */}
+              <rect x="270" y="280" width="150" height="20" className="line-text-bg" />
+              <text x="345" y="290" className="line-text" onClick={() => setSelectedSvgId("u_reading_consult")}>Mời hội chẩn (BS1)</text>
 
-              {/* U2. Trả ca / Yêu cầu sửa */}
-              <rect x="700" y="280" width="130" height="20" className="line-text-bg" />
-              <text x="765" y="290" className="line-text" onClick={() => setSelectedSvgId("u_reviewing_reading")}>Trả ca / Yêu cầu sửa</text>
+              {/* 14. Hủy nhận duyệt (BS1/Duyệt viên) */}
+              <rect x="800" y="240" width="160" height="20" className="line-text-bg" />
+              <text x="880" y="250" className="line-text" onClick={() => setSelectedSvgId("t_reviewing_done")}>Hủy nhận duyệt (BS1/Duyệt viên)</text>
+
+              {/* U2. Yêu cầu sửa (BS1/Duyệt viên -> BS1/BS2) */}
+              <rect x="660" y="280" width="200" height="20" className="line-text-bg" />
+              <text x="760" y="290" className="line-text" onClick={() => setSelectedSvgId("u_reviewing_reading")}>Yêu cầu sửa (BS1/Duyệt viên → BS1/BS2)</text>
+
+              {/* U3. Từ chối hội chẩn (BS2 -> BS1) */}
+              <rect x="230" y="270" width="150" height="20" className="line-text-bg" />
+              <text x="305" y="280" className="line-text" onClick={() => setSelectedSvgId("u_consult_reading_reject")}>Từ chối hội chẩn (BS2 → BS1)</text>
             </g>
 
             {/* STATES */}
@@ -739,7 +766,7 @@ const DradsStateDiagram = () => {
                   <div key={i} className="transition-item">
                     <div className="transition-item-title">
                       <span>{trans.name}</span>
-                      <span style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}> {trans.to}</span>
+                      <span style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}> → {trans.to}</span>
                     </div>
                     <div style={{ color: "var(--text-muted)", fontSize: "0.75rem", lineHeight: 1.4 }}>
                       {trans.desc}
