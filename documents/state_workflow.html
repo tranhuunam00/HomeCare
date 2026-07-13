@@ -521,16 +521,16 @@
 
           <!-- UPGRADE LABELS -->
           <!-- U1. Yêu cầu hội chẩn (giữa chừng) -->
-          <rect x="290" y="280" width="115" height="20" class="line-text-bg upgrade-element"></rect>
-          <text id="lbl_u_reading_consult" x="347" y="290" class="line-text upgrade-element" fill="#ec4899">Yêu cầu hội chẩn</text>
+          <rect x="290" y="280" width="115" height="20" class="line-text-bg"></rect>
+          <text id="lbl_u_reading_consult" x="347" y="290" class="line-text">Yêu cầu hội chẩn</text>
 
           <!-- 14. Hủy nhận duyệt -->
           <rect x="840" y="240" width="100" height="20" class="line-text-bg"></rect>
           <text id="lbl_t_reviewing_done" x="890" y="250" class="line-text">Hủy nhận duyệt</text>
 
           <!-- U2. Trả ca / Yêu cầu sửa -->
-          <rect x="700" y="280" width="130" height="20" class="line-text-bg upgrade-element"></rect>
-          <text id="lbl_u_reviewing_reading" x="765" y="290" class="line-text upgrade-element" fill="#ec4899">Trả ca / Yêu cầu sửa</text>
+          <rect x="700" y="280" width="130" height="20" class="line-text-bg"></rect>
+          <text id="lbl_u_reviewing_reading" x="765" y="290" class="line-text">Trả ca / Yêu cầu sửa</text>
         </g>
 
         <!-- ================= NODES (STATES) ================= -->
@@ -618,10 +618,7 @@
           { name: "Chọn đọc luôn", to: "Đang đọc", desc: "Bác sĩ trực tiếp bấm vào ca bệnh và mở giao diện đọc kết quả." },
           { name: "Chọn bác sĩ hội chẩn", to: "Hội chẩn", desc: "Chuyển ca bệnh đến hội đồng bác sĩ chuyên khoa hoặc bác sĩ cấp cao hơn để thảo luận." }
         ],
-        upgrades: [
-          "Bổ dung cơ chế tự động phân bổ: Dựa vào loại ca (siêu âm, X-quang) và tải của từng bác sĩ để chỉ định tự động ca chưa đọc.",
-          "Đồng bộ tự động trạng thái hủy tiếp nhận từ HIS để làm sạch danh sách chờ."
-        ]
+        upgrades: []
       },
       n_consult: {
         title: "Hội chẩn",
@@ -631,9 +628,7 @@
         transitions: [
           { name: "Chọn đọc", to: "Đang đọc", desc: "Bác sĩ được chỉ định chính bắt đầu nhập kết quả sau khi đã thống nhất ý kiến hội chẩn." }
         ],
-        upgrades: [
-          "Tích hợp chatroom và chia sẻ hình ảnh trực tiếp thời gian thực (Real-time DICOM viewer) để tăng tốc độ hội chẩn trực tuyến."
-        ]
+        upgrades: []
       },
       n_reading: {
         title: "Đang đọc",
@@ -646,10 +641,7 @@
           { name: "Hủy tiếp nhận", to: "Chưa đọc", desc: "Huỷ bỏ việc nhận đọc ca bệnh này, trả kết quả về trạng thái Chưa đọc (Mới) chờ bác sĩ khác nhận." },
           { name: "Duyệt (Trực tiếp)", to: "Duyệt", desc: "Nếu bác sĩ chẩn đoán có quyền duyệt ca (quy trình 1 cấp - Auto Approve), ca sẽ được duyệt luôn." }
         ],
-        upgrades: [
-          "Thêm nút 'Yêu cầu hội chẩn' trực tiếp từ màn hình 'Đang đọc' khi bác sĩ phát hiện ca khó đột xuất (Trong sơ đồ hiện tại không thể chuyển từ Đang đọc sang Hội chẩn).",
-          "Tự động cảnh báo cấu hình thiết bị in thiếu thông tin để tránh trường hợp duyệt xong không in được."
-        ]
+        upgrades: []
       },
       n_done: {
         title: "Đọc xong",
@@ -660,9 +652,7 @@
           { name: "Sửa đọc", to: "Đang đọc", desc: "Bác sĩ đọc kéo ngược ca về lại trạng thái soạn thảo để sửa lỗi sai." },
           { name: "Nhận duyệt", to: "Đang duyệt", desc: "Bác sĩ duyệt hoặc Trưởng khoa khóa ca bệnh để tiến hành rà soát." }
         ],
-        upgrades: [
-          "Báo động đỏ (Red Alert): Tự động đánh dấu hoặc gửi thông báo SMS/Zalo cho bác sĩ duyệt khi có các kết quả khẩn cấp (như tràn dịch, phình động mạch...)."
-        ]
+        upgrades: []
       },
       n_reviewing: {
         title: "Đang duyệt",
@@ -674,9 +664,7 @@
           { name: "Duyệt xong", to: "Duyệt", desc: "Ký số phê duyệt phiếu kết quả, sẵn sàng xuất bản và trả kết quả." },
           { name: "Hủy nhận duyệt", to: "Đọc xong", desc: "Từ chối duyệt ca hoặc trả lại phiếu để bác sĩ tự sửa kết quả." }
         ],
-        upgrades: [
-          "Bổ sung nút 'Yêu cầu sửa lại' kèm theo note lý do lỗi cụ thể để phản hồi nhanh cho người đọc."
-        ]
+        upgrades: []
       },
       n_approved: {
         title: "Duyệt",
@@ -687,9 +675,7 @@
           { name: "Sửa duyệt", to: "Đang duyệt", desc: "Trường hợp phát hiện sai sót sau khi đã ký duyệt, cần chỉnh sửa lại." },
           { name: "Hủy duyệt", to: "Đọc xong", desc: "Hủy bỏ chữ ký số để đưa kết quả về lại trạng thái chờ duyệt ban đầu." }
         ],
-        upgrades: [
-          "Tự động khóa hoàn toàn sau 24h: Ngăn chặn tuyệt đối việc hủy duyệt hoặc sửa duyệt sau khi kết quả đã được gửi đi lâu để đảm bảo tính pháp lý."
-        ]
+        upgrades: []
       }
     };
 

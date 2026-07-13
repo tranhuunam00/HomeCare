@@ -25,6 +25,8 @@ import {
 import { toast } from "react-toastify";
 import { ThamKhaoLinkHomeCare } from "../../advance/component_common/Thamkhao";
 import ReloadTSAndExamPartsButton from "../../../components/ReloadTSAndExamPartsButton";
+import useConfirmAction from "../../../hooks/useConfirmAction";
+import ConfirmActionModal from "../../../components/ConfirmActionModal/ConfirmActionModal";
 
 const { Option } = Select;
 
@@ -38,6 +40,7 @@ const PatientFormPage = () => {
   const { user, doctor, examParts, templateServices } = useGlobalAuth();
   const [initialValues, setInitialValues] = useState(null);
   const [idTemplateService, setIdTemplateService] = useState(null);
+  const { confirmState, openConfirm } = useConfirmAction();
 
   const fetchClinics = async () => {
     try {
@@ -113,53 +116,65 @@ const PatientFormPage = () => {
     }
   }, [id]);
 
-  const onFinish = async (values) => {
-    try {
-      setLoading(true);
+  const buildPayload = (values) => ({
+    name: values.name,
+    PID: values.pid,
+    SID: values.sid,
+    gender: values.gender,
+    CCCD: values.cccd,
+    phoneNumber: values.phone,
+    email: values.email,
+    address: values.address,
+    countryCode: values.country,
+    province_code: values.province + "",
+    district_code: values.district + "",
+    ward_code: values.ward + "",
+    id_clinic: values.id_clinic || doctor?.id_clinic,
+    createdBy: user?.id,
+    status: PATIENT_DIAGNOSE_STATUS_CODE.NEW,
+    birth_year: values.birth_year,
+    id_template_service: values.id_template_service,
+    id_exam_part: values.id_exam_part,
+    Indication: values.Indication,
+  });
 
-      const payload = {
-        name: values.name,
-        PID: values.pid,
-        SID: values.sid,
-        gender: values.gender,
-        CCCD: values.cccd,
-        phoneNumber: values.phone,
-        email: values.email,
-        address: values.address,
-        countryCode: values.country,
-        province_code: values.province + "",
-        district_code: values.district + "",
-        ward_code: values.ward + "",
-        id_clinic: values.id_clinic || doctor?.id_clinic,
-        createdBy: user?.id,
-        status: PATIENT_DIAGNOSE_STATUS_CODE.NEW, // c
-        birth_year: values.birth_year,
-        id_template_service: values.id_template_service,
-        id_exam_part: values.id_exam_part,
-        Indication: values.Indication,
-      };
-      if (id) {
-        console.log("initialValues.status ", initialValues.status);
-        if (initialValues.status != PATIENT_DIAGNOSE_STATUS_CODE.NEW) {
-          toast.warn("Bạn chỉ được cập nhật khi trạng thái là mới");
-          return;
-        }
-        // Update
-        await API_CALL.put(`/patient-diagnose/${id}`, payload);
-        message.success("Cập nhật thành công");
-      } else {
-        // Create
-        await API_CALL.post("/patient-diagnose", payload);
-        message.success("Tạo mới thành công");
+  // Validate form → mở modal xác nhận → chạy API
+  const handleSubmitClick = async () => {
+    try {
+      const values = await form.validateFields();
+
+      if (id && initialValues?.status !== PATIENT_DIAGNOSE_STATUS_CODE.NEW) {
+        toast.warn("Bạn chỉ được cập nhật khi trạng thái là mới");
+        return;
       }
 
-      navigate("/home/patients-diagnose");
-    } catch (err) {
-      message.error("Có lỗi xảy ra, vui lòng thử lại");
-      console.error(err);
-    } finally {
-      setLoading(false);
+      openConfirm({
+        title: id ? "Xác nhận cập nhật ca" : "Xác nhận tạo ca mới",
+        message: id
+          ? `Bạn có chắc chắn muốn cập nhật thông tin ca bệnh này không?`
+          : `Bạn có chắc chắn muốn tạo ca bệnh mới không?`,
+        successMessage: id ? "Cập nhật ca bệnh thành công!" : "Tạo ca bệnh mới thành công!",
+        errorMessage: id
+          ? "Cập nhật thất bại, vui lòng thử lại."
+          : "Tạo mới thất bại, vui lòng thử lại.",
+        onConfirm: async () => {
+          const payload = buildPayload(values);
+          if (id) {
+            await API_CALL.put(`/patient-diagnose/${id}`, payload);
+          } else {
+            await API_CALL.post("/patient-diagnose", payload);
+          }
+          navigate("/home/patients-diagnose");
+        },
+      });
+    } catch (validationError) {
+      // Ant Design form validation failed – fields will show inline errors automatically
     }
+  };
+
+  // onFinish kept for backward compatibility (e.g. Enter key submit)
+  const onFinish = async () => {
+    await handleSubmitClick();
   };
 
   useEffect(() => {
@@ -581,13 +596,19 @@ const PatientFormPage = () => {
             </Col>
             <Col>
               <Form.Item>
-                <Button type="primary" htmlType="submit" loading={loading}>
+                <Button
+                  type="primary"
+                  onClick={handleSubmitClick}
+                  loading={confirmState.loading}
+                >
                   {id ? "Cập nhật" : "Tạo mới"}
                 </Button>
               </Form.Item>
             </Col>
           </Row>
         </Form>
+
+        <ConfirmActionModal {...confirmState} />
       </Card>
     </div>
   );

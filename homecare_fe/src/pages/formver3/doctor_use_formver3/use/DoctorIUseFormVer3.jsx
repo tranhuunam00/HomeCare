@@ -19,6 +19,7 @@ import styles from "./DoctorIUseFormVer3.module.scss";
 import { useGlobalAuth } from "../../../../contexts/AuthContext";
 import API_CALL from "../../../../services/axiosClient";
 import useVietnamAddress from "../../../../hooks/useVietnamAddress";
+import usePatientDiagnoseStatus from "../../../../hooks/usePatientDiagnoseStatus";
 import {
   PATIENT_DIAGNOSE_STATUS_CODE,
   sortTemplateServices,
@@ -65,6 +66,7 @@ export default function DoctorUseDFormVer3({
   onFormChange,
   isUse = false,
   doctorUseFormVer3Id,
+  onStatusChange,
 }) {
   const printRef = useRef(null);
   const [form] = Form.useForm();
@@ -83,6 +85,7 @@ export default function DoctorUseDFormVer3({
   } = useGlobalAuth();
 
   const printSourceRef = useRef(null);
+  const { transitionStatus } = usePatientDiagnoseStatus();
 
   const [reloading, setReloading] = useState(false);
   const [signModalOpen, setSignModalOpen] = useState(false);
@@ -126,6 +129,20 @@ export default function DoctorUseDFormVer3({
       setIdEdit(record.id);
     }
   }, [record?.id, idEdit]);
+
+  // Sync trạng thái từ global context về local state để tránh stale status gây lỗi chuyển trạng thái
+  useEffect(() => {
+    if (
+      selectedPatientDiagnose?.status !== undefined &&
+      patientDiagnose?.status !== undefined &&
+      selectedPatientDiagnose.status !== patientDiagnose.status
+    ) {
+      setPatientDiagnose((prev) => {
+        if (!prev) return prev;
+        return { ...prev, status: selectedPatientDiagnose.status };
+      });
+    }
+  }, [selectedPatientDiagnose?.status]);
 
   useEffect(() => {
     if (formVer3 && !idEdit) {
@@ -260,33 +277,14 @@ export default function DoctorUseDFormVer3({
       return;
     }
 
-    if (!window.confirm("Bạn có chắc chắn muốn phê duyệt kết quả này không?")) {
-      return;
-    }
-
-    try {
-      setLoading(true);
-
-      await API_CALL.post(
-        `/patient-diagnose/${patientDiagnose.id}/change-status`,
-        {
-          status: PATIENT_DIAGNOSE_STATUS_CODE.VERIFIED,
-        },
-      );
-      setPatientDiagnose((prev) => ({
-        ...prev,
-        status: PATIENT_DIAGNOSE_STATUS_CODE.VERIFIED,
-      }));
-
-      toast.success("Phê duyệt kết quả thành công");
-    } catch (error) {
-      console.error("[onApprove] error", error);
-      toast.error(
-        error?.response?.data?.message || "Không thể phê duyệt kết quả",
-      );
-    } finally {
-      setLoading(false);
-    }
+    await transitionStatus({
+      patientDiagnoseId: patientDiagnose.id,
+      newStatus: PATIENT_DIAGNOSE_STATUS_CODE.VERIFIED,
+      confirmMessage: "Bạn có chắc chắn muốn phê duyệt kết quả này không?",
+      successMessage: "Phê duyệt kết quả thành công",
+      localSetState: setPatientDiagnose,
+      onStatusChange,
+    });
   };
 
   useEffect(() => {
@@ -931,166 +929,89 @@ export default function DoctorUseDFormVer3({
               onPreview={() => setPreviewOpen(!previewOpen)}
               isEdit={isEdit}
               onEdit={async () => {
-                if (isEdit == true) {
-                  setIsEdit(false);
-                } else {
-                  setIsEdit(true);
-                }
+                setIsEdit(!isEdit);
                 if (
                   patientDiagnose?.status ===
                   PATIENT_DIAGNOSE_STATUS_CODE.READ_DONE
                 ) {
-                  try {
-                    await API_CALL.post(
-                      `/patient-diagnose/${patientDiagnose.id}/change-status`,
-                      { status: PATIENT_DIAGNOSE_STATUS_CODE.IN_PROCESSING },
-                    );
-                    setPatientDiagnose((prev) => ({
-                      ...prev,
-                      status: PATIENT_DIAGNOSE_STATUS_CODE.IN_PROCESSING,
-                    }));
-
-                    toast.success("Đã chuyển sang trạng thái ĐANG ĐỌC");
-                  } catch (error) {
-                    toast.error(error?.response?.data?.message || "Không thể chuyển trạng thái");
-                  }
+                  await transitionStatus({
+                    patientDiagnoseId: patientDiagnose.id,
+                    newStatus: PATIENT_DIAGNOSE_STATUS_CODE.IN_PROCESSING,
+                    successMessage: "Đã chuyển sang trạng thái ĐANG ĐỌC",
+                    localSetState: setPatientDiagnose,
+                    onStatusChange,
+                  });
                 }
               }}
               onEditDuyet={async () => {
-                if (isEdit == true) {
-                  setIsEdit(false);
-                } else {
-                  setIsEdit(true);
-                }
+                setIsEdit(!isEdit);
                 if (
                   patientDiagnose?.status ===
                   PATIENT_DIAGNOSE_STATUS_CODE.VERIFIED
                 ) {
-                  try {
-                    await API_CALL.post(
-                      `/patient-diagnose/${patientDiagnose.id}/change-status`,
-                      { status: PATIENT_DIAGNOSE_STATUS_CODE.WAIT_VERIFY },
-                    );
-                    setPatientDiagnose((prev) => ({
-                      ...prev,
-                      status: PATIENT_DIAGNOSE_STATUS_CODE.WAIT_VERIFY,
-                    }));
-                  } catch (error) {
-                    toast.error(error?.response?.data?.message || "Không thể chuyển trạng thái");
-                  }
+                  await transitionStatus({
+                    patientDiagnoseId: patientDiagnose.id,
+                    newStatus: PATIENT_DIAGNOSE_STATUS_CODE.WAIT_VERIFY,
+                    successMessage: null,
+                    localSetState: setPatientDiagnose,
+                    onStatusChange,
+                  });
                 }
               }}
               editId={idEdit}
               onDocXong={async () => {
-                if (
-                  !window.confirm(
-                    "Bạn có chắc muốn chuyển sang trạng thái ĐỌC XONG? Lưu ý, nhớ lưu lại trước khi chuyển trạng thái!",
-                  )
-                ) {
-                  return;
-                }
-                try {
-                  await API_CALL.post(
-                    `/patient-diagnose/${patientDiagnose.id}/change-status`,
-                    { status: PATIENT_DIAGNOSE_STATUS_CODE.READ_DONE },
-                  );
-                  setPatientDiagnose((prev) => ({
-                    ...prev,
-                    status: PATIENT_DIAGNOSE_STATUS_CODE.READ_DONE,
-                  }));
-                  toast.success("Đã chuyển sang trạng thái ĐỌC XONG");
-                } catch (error) {
-                  toast.error(error?.response?.data?.message || "Không thể chuyển trạng thái ĐỌC XONG");
-                }
+                await transitionStatus({
+                  patientDiagnoseId: patientDiagnose.id,
+                  newStatus: PATIENT_DIAGNOSE_STATUS_CODE.READ_DONE,
+                  confirmMessage: "Bạn có chắc muốn chuyển sang trạng thái ĐỌC XONG? Lưu ý, nhớ lưu lại trước khi chuyển trạng thái!",
+                  successMessage: "Đã chuyển sang trạng thái ĐỌC XONG",
+                  localSetState: setPatientDiagnose,
+                  onStatusChange,
+                });
               }}
               onHuyDoc={async () => {
                 const newStatus = patientDiagnose.id_consulting_doctor
                   ? PATIENT_DIAGNOSE_STATUS_CODE.CONSULTATION
                   : PATIENT_DIAGNOSE_STATUS_CODE.NEW;
 
-                if (
-                  !window.confirm(
-                    `Bạn có chắc muốn chuyển về trạng thái ${newStatus == PATIENT_DIAGNOSE_STATUS_CODE.CONSULTATION ? "Hội Chẩn" : "Mới"}?`,
-                  )
-                ) {
-                  return;
-                }
-                try {
-                  await API_CALL.post(
-                    `/patient-diagnose/${patientDiagnose.id}/change-status`,
-                    {
-                      status: newStatus,
-                    },
-                  );
-                  setPatientDiagnose((prev) => ({
-                    ...prev,
-                    status: newStatus,
-                  }));
-                  toast.success(
-                    "Đã về trạng thái " +
-                      (newStatus == PATIENT_DIAGNOSE_STATUS_CODE.CONSULTATION
-                        ? "Hội Chẩn"
-                        : "Mới"),
-                  );
-                } catch (error) {
-                  toast.error(error?.response?.data?.message || "Không thể hủy đọc");
-                }
+                const newStatusLabel = newStatus === PATIENT_DIAGNOSE_STATUS_CODE.CONSULTATION ? "Hội Chẩn" : "Mới";
+
+                await transitionStatus({
+                  patientDiagnoseId: patientDiagnose.id,
+                  newStatus,
+                  confirmMessage: `Bạn có chắc muốn chuyển về trạng thái ${newStatusLabel}?`,
+                  successMessage: `Đã về trạng thái ${newStatusLabel}`,
+                  localSetState: setPatientDiagnose,
+                  onStatusChange,
+                });
               }}
               onNhanDuyet={async () => {
-                try {
-                  await API_CALL.post(
-                    `/patient-diagnose/${patientDiagnose.id}/change-status`,
-                    {
-                      status: PATIENT_DIAGNOSE_STATUS_CODE.WAIT_VERIFY,
-                    },
-                  );
-                  setPatientDiagnose((prev) => ({
-                    ...prev,
-                    status: PATIENT_DIAGNOSE_STATUS_CODE.WAIT_VERIFY,
-                  }));
-                } catch (error) {
-                  toast.error(error?.response?.data?.message || "Không thể nhận duyệt");
-                }
+                await transitionStatus({
+                  patientDiagnoseId: patientDiagnose.id,
+                  newStatus: PATIENT_DIAGNOSE_STATUS_CODE.WAIT_VERIFY,
+                  successMessage: null,
+                  localSetState: setPatientDiagnose,
+                  onStatusChange,
+                });
               }}
               onHuyDuyet={async () => {
-                try {
-                  await API_CALL.post(
-                    `/patient-diagnose/${patientDiagnose.id}/change-status`,
-                    {
-                      status: PATIENT_DIAGNOSE_STATUS_CODE.READ_DONE,
-                    },
-                  );
-                  setPatientDiagnose((prev) => ({
-                    ...prev,
-                    status: PATIENT_DIAGNOSE_STATUS_CODE.READ_DONE,
-                  }));
-                } catch (error) {
-                  toast.error(error?.response?.data?.message || "Không thể hủy duyệt");
-                }
+                await transitionStatus({
+                  patientDiagnoseId: patientDiagnose.id,
+                  newStatus: PATIENT_DIAGNOSE_STATUS_CODE.READ_DONE,
+                  successMessage: null,
+                  localSetState: setPatientDiagnose,
+                  onStatusChange,
+                });
               }}
               onTraCa={async () => {
-                if (
-                  !window.confirm(
-                    "Bạn có chắc chắn muốn từ chối duyệt và trả ca này về trạng thái Đang đọc?",
-                  )
-                ) {
-                  return;
-                }
-                try {
-                  await API_CALL.post(
-                    `/patient-diagnose/${patientDiagnose.id}/change-status`,
-                    {
-                      status: PATIENT_DIAGNOSE_STATUS_CODE.IN_PROCESSING,
-                    },
-                  );
-                  setPatientDiagnose((prev) => ({
-                    ...prev,
-                    status: PATIENT_DIAGNOSE_STATUS_CODE.IN_PROCESSING,
-                  }));
-                  toast.success("Đã trả ca về trạng thái ĐANG ĐỌC");
-                } catch (error) {
-                  toast.error(error?.response?.data?.message || "Không thể trả ca");
-                }
+                await transitionStatus({
+                  patientDiagnoseId: patientDiagnose.id,
+                  newStatus: PATIENT_DIAGNOSE_STATUS_CODE.IN_PROCESSING,
+                  confirmMessage: "Bạn có chắc chắn muốn từ chối duyệt và trả ca này về trạng thái Đang đọc?",
+                  successMessage: "Đã trả ca về trạng thái ĐANG ĐỌC",
+                  localSetState: setPatientDiagnose,
+                  onStatusChange,
+                });
               }}
               onTranslate={async () => {
                 if (!idEdit) {

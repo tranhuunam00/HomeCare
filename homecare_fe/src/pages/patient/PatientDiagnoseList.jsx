@@ -61,6 +61,7 @@ import {
   getWardNameByCode,
 } from "../../hooks/useVietnamAddress";
 import TranslateListRecordsVer3 from "../formver3/components/TranslateListRecordsVer3";
+import FormVer3GroupProcessPatientDiagnoise from "../formver3/FormVer3GroupProcessPatientDiagnoise";
 
 const { Option } = Select;
 const COLUMN_SETTING_STORAGE_KEY = "patientDiagnose_column_settings";
@@ -672,6 +673,11 @@ const PatientTablePage = ({ PID = null }) => {
     }
   };
 
+  const handleStatusChange = () => {
+    fetchPatients(filters);
+    fetchPatientsByChosen();
+  };
+
   return (
     <div
       style={{
@@ -950,12 +956,26 @@ const PatientTablePage = ({ PID = null }) => {
             />
           </div>
           <div>
+            {/* Fixed bottom action bar — rendered once at this level to avoid
+                overlap with FormActionBar (position:fixed) in reading mode */}
+            {selectedPatientDiagnose && (
+              <div style={{ display: rightPanelMode === "detail" ? "block" : "none" }}>
+                <FormVer3GroupProcessPatientDiagnoise
+                  patientDiagnose={selectedPatientDiagnose}
+                  setPatientDiagnose={setSelectedPatientDiagnose}
+                  onStatusChange={handleStatusChange}
+                  onClose={() => setSelectedPatientDiagnose(null)}
+                  onOpenReading={() => setRightPanelMode("reading")}
+                />
+              </div>
+            )}
             {rightPanelMode === "detail" ? (
               <PatientDiagnoiseDetailPage
                 idFromList={selectedPatientDiagnose?.id}
                 onOpenReading={() => setRightPanelMode("reading")}
                 onClose={() => setSelectedPatientDiagnose(null)}
                 setDoctorUseFormVer3Id={setDoctorUseFormVer3Id}
+                onStatusChange={handleStatusChange}
               />
             ) : (
               <DoctorUseDFormVer3
@@ -963,6 +983,7 @@ const PatientTablePage = ({ PID = null }) => {
                 isUse={true}
                 onBackDetail={() => setRightPanelMode("detail")}
                 doctorUseFormVer3Id={doctorUseFormVer3Id}
+                onStatusChange={handleStatusChange}
               />
             )}
           </div>

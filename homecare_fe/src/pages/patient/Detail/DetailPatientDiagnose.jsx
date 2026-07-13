@@ -32,7 +32,6 @@ import {
   ArrowLeftOutlined,
 } from "@ant-design/icons";
 import SignedFilesBox from "../../doctor_use_form_ver2/SmartCASignModal/SignedFilesBox";
-import FormVer3GroupProcessPatientDiagnoise from "../../formver3/FormVer3GroupProcessPatientDiagnoise";
 import DoctorUseFormVer3Viewer from "../../formver3/components/DoctorUseFormVer3Viewer";
 import useLatestDoctorUseFormVer3 from "../../formver3/useLatestDoctorUseFormVer3";
 import { calculateAge } from "../../formver3/formver3.constant";
@@ -97,15 +96,7 @@ const PatientDiagnoiseDetailPage = ({
 
   return (
     <div style={{ height: "100%" }}>
-      <FormVer3GroupProcessPatientDiagnoise
-        patientDiagnose={selectedPatientDiagnose}
-        setPatientDiagnose={setSelectedPatientDiagnose}
-        onStatusChange={onStatusChange}
-        onClose={() => {
-          setSelectedPatientDiagnose(null);
-        }}
-        onOpenReading={onOpenReading}
-      />
+
 
       <ConfigProvider
         theme={{
