@@ -32,6 +32,7 @@ export const ACTION_FACTORY = {
   },
 
   navigate: {
+    label: "Chuyển trang (Navigate)",
     create: () => ({
       type: "navigate",
       payload: {

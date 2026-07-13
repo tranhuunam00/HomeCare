@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sơ đồ Trạng thái Quy trình Đọc ca D-RADS</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+    :root {
+      --bg-color: #0b0b14;
+      --panel-bg: rgba(20, 20, 35, 0.6);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      
+      --color-unread: #3b82f6;     /* Blue */
+      --color-consult: #a855f7;    /* Purple */
+      --color-reading: #f59e0b;    /* Orange/Amber */
+      --color-done: #06b6d4;       /* Cyan */
+      --color-reviewing: #6366f1;  /* Indigo */
+      --color-approved: #10b981;   /* Emerald */
+      --color-cancelled: #ef4444;  /* Red */
+      --color-upgrade: #ec4899;    /* Pink */
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: var(--bg-color);
+      background-image: 
+        radial-gradient(circle at 20% 30%, rgba(59, 130, 246, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(168, 85, 247, 0.05) 0%, transparent 40%);
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header styling */
+    header {
+      padding: 20px 40px;
+      border-bottom: 1px solid var(--border-color);
+      backdrop-filter: blur(8px);
+      background: rgba(11, 11, 20, 0.5);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-badge {
+      background: linear-gradient(135deg, var(--color-unread), var(--color-consult));
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.2rem;
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: -0.025em;
+    }
+
+    /* Controls & Actions */
+    .controls {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid transparent;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-upgrade {
+      background: rgba(236, 72, 153, 0.1);
+      border-color: rgba(236, 72, 153, 0.3);
+      color: #f472b6;
+      box-shadow: 0 4px 12px rgba(236, 72, 153, 0.05);
+    }
+
+    .btn-upgrade.active {
+      background: var(--color-upgrade);
+      border-color: var(--color-upgrade);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(236, 72, 153, 0.4);
+    }
+
+    .btn-upgrade:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(236, 72, 153, 0.2);
+    }
+
+    /* App container grid */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      flex: 1;
+      height: calc(100vh - 81px);
+    }
+
+    /* Flow canvas area */
+    .canvas-container {
+      position: relative;
+      background: radial-gradient(circle at center, rgba(255, 255, 255, 0.005) 0%, transparent 100%);
+      overflow: auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+    }
+
+    .canvas-svg {
+      width: 1300px;
+      height: 600px;
+      user-select: none;
+      background: rgba(255,255,255,0.002);
+      border-radius: 16px;
+    }
+
+    /* Node details panel */
+    .detail-panel {
+      background: var(--panel-bg);
+      border-left: 1px solid var(--border-color);
+      backdrop-filter: blur(20px);
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      overflow-y: auto;
+    }
+
+    .panel-header {
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 16px;
+    }
+
+    .panel-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .panel-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .section-title {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .text-body {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: #d1d5db;
+    }
+
+    /* SVG elements style */
+    .node-rect {
+      fill: rgba(20, 20, 30, 0.8);
+      stroke-width: 1.5;
+      rx: 14;
+      ry: 14;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .node-rect:hover {
+      filter: brightness(1.2) drop-shadow(0 4px 12px currentColor);
+      transform: translateY(-2px);
+    }
+
+    .node-rect.selected {
+      stroke-width: 3;
+      filter: brightness(1.3) drop-shadow(0 6px 20px currentColor);
+    }
+
+    .node-text {
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      fill: #fff;
+      pointer-events: none;
+      text-anchor: middle;
+      dominant-baseline: middle;
+    }
+
+    .flow-line {
+      fill: none;
+      stroke-width: 2;
+      stroke-dasharray: 6 4;
+      animation: flow 30s linear infinite;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .flow-line:hover {
+      stroke-width: 4.5;
+    }
+
+    .flow-line.selected {
+      stroke-width: 4;
+      stroke-dasharray: none;
+      animation: none;
+    }
+
+    .line-text-bg {
+      fill: #0b0b14;
+      rx: 4;
+      ry: 4;
+    }
+
+    .line-text {
+      font-family: 'Outfit', sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      fill: #9ca3af;
+      cursor: pointer;
+      text-anchor: middle;
+      dominant-baseline: middle;
+      transition: fill 0.3s;
+    }
+
+    .line-text:hover {
+      fill: #fff;
+    }
+
+    /* Animations */
+    @keyframes flow {
+      from {
+        stroke-dashoffset: 500;
+      }
+      to {
+        stroke-dashoffset: 0;
+      }
+    }
+
+    /* Upgrade mode overlay style */
+    .upgrade-element {
+      opacity: 0.15;
+      pointer-events: none;
+      transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .upgrade-active .upgrade-element {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Interactive lists in panel */
+    .transition-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .transition-item {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .transition-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .transition-item-title {
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .upgrade-badge-inline {
+      background: rgba(236, 72, 153, 0.15);
+      border: 1px solid rgba(236, 72, 153, 0.3);
+      color: #ec4899;
+      font-size: 0.7rem;
+      padding: 1px 6px;
+      border-radius: 10px;
+    }
+
+    .recommendation-card {
+      background: linear-gradient(135deg, rgba(236, 72, 153, 0.08), rgba(168, 85, 247, 0.08));
+      border: 1px solid rgba(236, 72, 153, 0.2);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 10px;
+    }
+
+    .recommendation-card h4 {
+      color: #ec4899;
+      margin-bottom: 8px;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .recommendation-card li {
+      font-size: 0.9rem;
+      color: #e5e7eb;
+      margin-left: 16px;
+      margin-bottom: 6px;
+      line-height: 1.5;
+    }
+
+    /* Grid overlay for canvas background */
+    .grid-pattern {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.015);
+      stroke-width: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo-area">
+      <div class="logo-badge">D</div>
+      <div>
+        <h1>Quy trình Trạng thái Báo cáo D-RADS</h1>
+        <p style="font-size: 0.8rem; color: var(--text-muted);">Sơ đồ máy trạng thái (State Machine) tương tác & Đề xuất nâng cấp</p>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="btn btn-upgrade" id="toggleUpgradeBtn">
+        ✨ Đang ẩn Đề xuất nâng cấp
+      </button>
+    </div>
+  </header>
+
+  <div class="main-grid">
+    <!-- SVG Canvas -->
+    <div class="canvas-container">
+      <svg class="canvas-svg" id="workflowCanvas" viewBox="0 0 1300 600">
+        <!-- SVG Definitions (markers, gradients, patterns) -->
+        <defs>
+          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" class="grid-pattern" />
+          </pattern>
+          
+          <!-- Standard Arrow Marker -->
+          <marker id="arrow" viewBox="0 0 10 10" refX="24" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#9ca3af" />
+          </marker>
+          
+          <!-- Selected/Highlighted Arrow Marker -->
+          <marker id="arrow-selected" viewBox="0 0 10 10" refX="24" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#fff" />
+          </marker>
+          
+          <!-- Upgrade Arrow Marker -->
+          <marker id="arrow-upgrade" viewBox="0 0 10 10" refX="24" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#ec4899" />
+          </marker>
+        </defs>
+
+        <!-- Grid background -->
+        <rect width="100%" height="100%" fill="url(#grid)" />
+
+        <!-- ================= TRANSITIONS (EDGES) ================= -->
+        <g id="transitions-group">
+          <!-- 1. Chưa đọc -> Đang đọc (Chọn đọc luôn) -->
+          <path id="t_unread_reading" d="M 230 200 L 450 200" class="flow-line" stroke="#9ca3af" marker-end="url(#arrow)"></path>
+          
+          <!-- 2. Chưa đọc -> Hội chẩn (Chọn bác sĩ hội chẩn) -->
+          <path id="t_unread_consult" d="M 155 240 Q 155 350 230 400" class="flow-line" stroke="#9ca3af" marker-end="url(#arrow)"></path>
+          
+          <!-- 3. Hội chẩn -> Đang đọc (Chọn đọc) -->
+          <path id="t_consult_reading" d="M 370 425 Q 480 425 500 240" class="flow-line" stroke="#9ca3af" marker-end="url(#arrow)"></path>
+          
+          <!-- 4. Đang đọc -> Chưa đọc (Hủy phiếu) -->
+          <path id="t_reading_unread" d="M 450 170 Q 340 100 230 170" class="flow-line" stroke="#9ca3af" marker-end="url(#arrow)"></path>
+          
+          <!-- 5. Đang đọc -> Đọc xong (Đọc xong) -->
+          <path id="t_reading_done" d="M 590 200 L 730 200" class="flow-line" stroke="#9ca3af" marker-end="url(#arrow)"></path>
+          
+          <!-- 6. Đọc xong -> Đang đọc (Sửa đọc) -->
+          <path id="t_done_reading" d="M 730 170 Q 660 100 590 170" class="flow-line" stroke="#9ca3af" marker-end="url(#arrow)"></path>
+          
+          <!-- 7. Đọc xong -> Đang duyệt (Nhận duyệt) -->
+          <path id="t_done_reviewing" d="M 870 200 L 970 200" class="flow-line" stroke="#9ca3af" marker-end="url(#arrow)"></path>
+          
+          <!-- 8. Đang duyệt -> Duyệt (Duyệt xong) -->
+          <path id="t_reviewing_approved" d="M 1110 200 L 1190 200" class="flow-line" stroke="#9ca3af" marker-end="url(#arrow)"></path>
+          
+          <!-- 9. Đang đọc -> Duyệt (Duyệt thẳng - 1 Cấp) -->
+          <path id="t_reading_approved" d="M 520 240 Q 860 380 1190 230" class="flow-line" stroke="#9ca3af" marker-end="url(#arrow)"></path>
+          
+          <!-- 10. Duyệt -> Đang duyệt (Sửa duyệt) -->
+          <path id="t_approved_reviewing" d="M 1210 160 Q 1150 90 1090 160" class="flow-line" stroke="#9ca3af" marker-end="url(#arrow)"></path>
+          
+          <!-- 11. Duyệt -> Đọc xong (Hủy duyệt) -->
+          <path id="t_approved_done" d="M 1250 160 Q 1040 -10 800 160" class="flow-line" stroke="#9ca3af" marker-end="url(#arrow)"></path>
+
+          <!-- Loop 12: Đang đọc -> Đang đọc (Lưu đọc) -->
+          <path id="t_reading_self" d="M 480 240 C 470 300 550 300 540 240" class="flow-line" stroke="#9ca3af" marker-end="url(#arrow)"></path>
+
+          <!-- Loop 13: Đang duyệt -> Đang duyệt (Lưu duyệt) -->
+          <path id="t_reviewing_self" d="M 1000 160 C 970 90 1070 90 1040 160" class="flow-line" stroke="#9ca3af" marker-end="url(#arrow)"></path>
+
+          <!-- ================= UPGRADE TRANSITIONS ================= -->
+          <!-- U1. Đang đọc -> Hội chẩn (Yêu cầu hội chẩn giữa chừng) -->
+          <path id="u_reading_consult" d="M 470 240 Q 320 320 320 390" class="flow-line upgrade-element" stroke="#ec4899" marker-end="url(#arrow-upgrade)"></path>
+          
+          <!-- 14. Đang duyệt -> Đọc xong (Hủy nhận duyệt) -->
+          <path id="t_reviewing_done" d="M 970 230 Q 885 270 800 240" class="flow-line" stroke="#9ca3af" marker-end="url(#arrow)"></path>
+
+          <!-- U2. Đang duyệt -> Đang đọc (Trả ca / Yêu cầu sửa) -->
+          <path id="u_reviewing_reading" d="M 1040 240 Q 780 380 520 240" class="flow-line upgrade-element" stroke="#ec4899" marker-end="url(#arrow-upgrade)"></path>
+        </g>
+
+        <!-- ================= TRANSITION LABELS ================= -->
+        <g id="labels-group">
+          <!-- 1. Chọn đọc luôn -->
+          <rect x="300" y="188" width="80" height="20" class="line-text-bg"></rect>
+          <text id="lbl_t_unread_reading" x="340" y="198" class="line-text">Chọn đọc luôn</text>
+          
+          <!-- 2. Chọn bác sĩ hội chẩn -->
+          <rect x="75" y="310" width="115" height="20" class="line-text-bg"></rect>
+          <text id="lbl_t_unread_consult" x="132" y="320" class="line-text">Chọn bác sĩ hội chẩn</text>
+          
+          <!-- 3. Chọn đọc -->
+          <rect x="385" y="380" width="60" height="20" class="line-text-bg"></rect>
+          <text id="lbl_t_consult_reading" x="415" y="390" class="line-text">Chọn đọc</text>
+          
+          <!-- 4. Hủy tiếp nhận -->
+          <rect x="300" y="105" width="80" height="20" class="line-text-bg"></rect>
+          <text id="lbl_t_reading_unread" x="340" y="115" class="line-text">Hủy tiếp nhận</text>
+          
+          <!-- 5. Đọc xong -->
+          <rect x="630" y="188" width="60" height="20" class="line-text-bg"></rect>
+          <text id="lbl_t_reading_done" x="660" y="198" class="line-text">Đọc xong</text>
+          
+          <!-- 6. Sửa đọc -->
+          <rect x="630" y="105" width="60" height="20" class="line-text-bg"></rect>
+          <text id="lbl_t_done_reading" x="660" y="115" class="line-text">Sửa đọc</text>
+          
+          <!-- 7. Nhận duyệt -->
+          <rect x="885" y="188" width="70" height="20" class="line-text-bg"></rect>
+          <text id="lbl_t_done_reviewing" x="920" y="198" class="line-text">Nhận duyệt</text>
+          
+          <!-- 8. Duyệt xong -->
+          <rect x="1120" y="188" width="65" height="20" class="line-text-bg"></rect>
+          <text id="lbl_t_reviewing_approved" x="1152" y="198" class="line-text">Duyệt xong</text>
+          
+          <!-- 9. Duyệt (Direct) -->
+          <rect x="830" y="310" width="40" height="20" class="line-text-bg"></rect>
+          <text id="lbl_t_reading_approved" x="850" y="320" class="line-text">Duyệt</text>
+          
+          <!-- 10. sửa duyệt -->
+          <rect x="1115" y="100" width="60" height="20" class="line-text-bg"></rect>
+          <text id="lbl_t_approved_reviewing" x="1145" y="110" class="line-text">sửa duyệt</text>
+          
+          <!-- 11. hủy duyệt -->
+          <rect x="990" y="55" width="60" height="20" class="line-text-bg"></rect>
+          <text id="lbl_t_approved_done" x="1020" y="65" class="line-text">hủy duyệt</text>
+
+          <!-- 12. lưu đọc -->
+          <rect x="480" y="280" width="50" height="20" class="line-text-bg"></rect>
+          <text id="lbl_t_reading_self" x="505" y="290" class="line-text">lưu đọc</text>
+
+          <!-- 13. lưu duyệt -->
+          <rect x="980" y="100" width="60" height="20" class="line-text-bg"></rect>
+          <text id="lbl_t_reviewing_self" x="1010" y="110" class="line-text">lưu duyệt</text>
+
+          <!-- UPGRADE LABELS -->
+          <!-- U1. Yêu cầu hội chẩn (giữa chừng) -->
+          <rect x="290" y="280" width="115" height="20" class="line-text-bg upgrade-element"></rect>
+          <text id="lbl_u_reading_consult" x="347" y="290" class="line-text upgrade-element" fill="#ec4899">Yêu cầu hội chẩn</text>
+
+          <!-- 14. Hủy nhận duyệt -->
+          <rect x="840" y="240" width="100" height="20" class="line-text-bg"></rect>
+          <text id="lbl_t_reviewing_done" x="890" y="250" class="line-text">Hủy nhận duyệt</text>
+
+          <!-- U2. Trả ca / Yêu cầu sửa -->
+          <rect x="700" y="280" width="130" height="20" class="line-text-bg upgrade-element"></rect>
+          <text id="lbl_u_reviewing_reading" x="765" y="290" class="line-text upgrade-element" fill="#ec4899">Trả ca / Yêu cầu sửa</text>
+        </g>
+
+        <!-- ================= NODES (STATES) ================= -->
+        <!-- 1. Chưa đọc -->
+        <g id="n_unread" transform="translate(80, 160)">
+          <rect width="150" height="80" class="node-rect" stroke="var(--color-unread)" fill="rgba(59, 130, 246, 0.05)" style="color: var(--color-unread)"></rect>
+          <text x="75" y="40" class="node-text">Chưa đọc</text>
+        </g>
+
+        <!-- 2. Hội chẩn -->
+        <g id="n_consult" transform="translate(220, 390)">
+          <rect width="150" height="70" class="node-rect" stroke="var(--color-consult)" fill="rgba(168, 85, 247, 0.05)" style="color: var(--color-consult)"></rect>
+          <text x="75" y="35" class="node-text">Hội chẩn</text>
+        </g>
+
+        <!-- 3. Đang đọc -->
+        <g id="n_reading" transform="translate(450, 160)">
+          <rect width="140" height="80" class="node-rect" stroke="var(--color-reading)" fill="rgba(245, 158, 11, 0.05)" style="color: var(--color-reading)"></rect>
+          <text x="70" y="40" class="node-text">Đang đọc</text>
+        </g>
+
+        <!-- 4. Đọc xong -->
+        <g id="n_done" transform="translate(730, 160)">
+          <rect width="140" height="80" class="node-rect" stroke="var(--color-done)" fill="rgba(6, 182, 212, 0.05)" style="color: var(--color-done)"></rect>
+          <text x="70" y="40" class="node-text">Đọc xong</text>
+        </g>
+
+        <!-- 5. Đang duyệt -->
+        <g id="n_reviewing" transform="translate(970, 160)">
+          <rect width="140" height="80" class="node-rect" stroke="var(--color-reviewing)" fill="rgba(99, 102, 241, 0.05)" style="color: var(--color-reviewing)"></rect>
+          <text x="70" y="40" class="node-text">Đang duyệt</text>
+        </g>
+
+        <!-- 6. Duyệt -->
+        <g id="n_approved" transform="translate(1190, 160)">
+          <rect width="120" height="80" class="node-rect" stroke="var(--color-approved)" fill="rgba(16, 185, 129, 0.05)" style="color: var(--color-approved)"></rect>
+          <text x="60" y="40" class="node-text">Duyệt</text>
+        </g>
+
+      </svg>
+    </div>
+
+    <!-- Side detail panel -->
+    <div class="detail-panel">
+      <div class="panel-header">
+        <div class="panel-title" id="elementTitle">
+          <span>Quy trình D-RADS</span>
+        </div>
+        <span class="badge" id="elementBadge" style="background: rgba(255,255,255,0.1); color: #fff;">Chung</span>
+      </div>
+
+      <div class="panel-section">
+        <div class="section-title">Mô tả</div>
+        <p class="text-body" id="elementDesc">
+          Chọn một trạng thái (khối hình chữ nhật) hoặc một hành động (nhãn trên mũi tên) để xem chi tiết nghiệp vụ và đề xuất cải tiến tối ưu hóa.
+        </p>
+      </div>
+
+      <div class="panel-section" id="optionsSection" style="display:none;">
+        <div class="section-title">Các chuyển dịch trạng thái tiếp theo</div>
+        <div class="transition-list" id="transitionList"></div>
+      </div>
+
+      <!-- Upgrade recommendation section -->
+      <div class="recommendation-card" id="recommendationCard">
+        <h4>💡 Đề xuất Nâng cấp Chung</h4>
+        <ul style="margin: 0;" id="recommendationList">
+          <li><strong>Quy trình hội chẩn linh động:</strong> Cho phép yêu cầu hội chẩn ngay khi đang đọc dở ca thay vì chỉ cho phép chọn hội chẩn từ đầu.</li>
+          <li><strong>Cơ chế "Trả về":</strong> Khi người duyệt không đồng ý, nên có hành động trả về "Yêu cầu chỉnh sửa" trực tiếp về trạng thái "Đọc xong" thay vì chỉ có "Hủy duyệt".</li>
+          <li><strong>Trạng thái Đã hủy:</strong> Bổ sung trạng thái hủy ca tiếp nhận cho các ca lỗi hoặc ca không chụp được để giải phóng danh sách chờ.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // State machine database
+    const states = {
+      n_unread: {
+        title: "Chưa đọc",
+        badge: "Trạng thái bắt đầu",
+        color: "var(--color-unread)",
+        desc: "Ca bệnh mới được đồng bộ từ HIS hoặc nhập thủ công vào hệ thống. Đang nằm trong hàng đợi của worklist, chờ bác sĩ nhận đọc.",
+        transitions: [
+          { name: "Chọn đọc luôn", to: "Đang đọc", desc: "Bác sĩ trực tiếp bấm vào ca bệnh và mở giao diện đọc kết quả." },
+          { name: "Chọn bác sĩ hội chẩn", to: "Hội chẩn", desc: "Chuyển ca bệnh đến hội đồng bác sĩ chuyên khoa hoặc bác sĩ cấp cao hơn để thảo luận." }
+        ],
+        upgrades: [
+          "Bổ dung cơ chế tự động phân bổ: Dựa vào loại ca (siêu âm, X-quang) và tải của từng bác sĩ để chỉ định tự động ca chưa đọc.",
+          "Đồng bộ tự động trạng thái hủy tiếp nhận từ HIS để làm sạch danh sách chờ."
+        ]
+      },
+      n_consult: {
+        title: "Hội chẩn",
+        badge: "Trạng thái hỗ trợ",
+        color: "var(--color-consult)",
+        desc: "Ca bệnh khó đang được thảo luận bởi các bác sĩ. Không ai được phép sửa nội dung phiếu ngoài những người được giao hội chẩn.",
+        transitions: [
+          { name: "Chọn đọc", to: "Đang đọc", desc: "Bác sĩ được chỉ định chính bắt đầu nhập kết quả sau khi đã thống nhất ý kiến hội chẩn." }
+        ],
+        upgrades: [
+          "Tích hợp chatroom và chia sẻ hình ảnh trực tiếp thời gian thực (Real-time DICOM viewer) để tăng tốc độ hội chẩn trực tuyến."
+        ]
+      },
+      n_reading: {
+        title: "Đang đọc",
+        badge: "Trạng thái chỉnh sửa",
+        color: "var(--color-reading)",
+        desc: "Bác sĩ chẩn đoán hình ảnh đang nhập mô tả kết quả, kết luận và chọn hình ảnh in ấn. Hệ thống liên tục tự động lưu nháp.",
+        transitions: [
+          { name: "Lưu đọc", to: "Đang đọc (Bản nháp)", desc: "Lưu tạm thông tin để có thể quay lại đọc tiếp sau đó." },
+          { name: "Đọc xong", to: "Đọc xong", desc: "Hoàn tất việc điền kết quả và gửi lên hệ thống chờ phê duyệt." },
+          { name: "Hủy tiếp nhận", to: "Chưa đọc", desc: "Huỷ bỏ việc nhận đọc ca bệnh này, trả kết quả về trạng thái Chưa đọc (Mới) chờ bác sĩ khác nhận." },
+          { name: "Duyệt (Trực tiếp)", to: "Duyệt", desc: "Nếu bác sĩ chẩn đoán có quyền duyệt ca (quy trình 1 cấp - Auto Approve), ca sẽ được duyệt luôn." }
+        ],
+        upgrades: [
+          "Thêm nút 'Yêu cầu hội chẩn' trực tiếp từ màn hình 'Đang đọc' khi bác sĩ phát hiện ca khó đột xuất (Trong sơ đồ hiện tại không thể chuyển từ Đang đọc sang Hội chẩn).",
+          "Tự động cảnh báo cấu hình thiết bị in thiếu thông tin để tránh trường hợp duyệt xong không in được."
+        ]
+      },
+      n_done: {
+        title: "Đọc xong",
+        badge: "Trạng thái sẵn sàng duyệt",
+        color: "var(--color-done)",
+        desc: "Phiếu kết quả đã hoàn thành. Ca bệnh được đẩy vào tab 'Chờ duyệt'. Bác sĩ đọc không thể chỉnh sửa kết quả trừ khi yêu cầu sửa lại.",
+        transitions: [
+          { name: "Sửa đọc", to: "Đang đọc", desc: "Bác sĩ đọc kéo ngược ca về lại trạng thái soạn thảo để sửa lỗi sai." },
+          { name: "Nhận duyệt", to: "Đang duyệt", desc: "Bác sĩ duyệt hoặc Trưởng khoa khóa ca bệnh để tiến hành rà soát." }
+        ],
+        upgrades: [
+          "Báo động đỏ (Red Alert): Tự động đánh dấu hoặc gửi thông báo SMS/Zalo cho bác sĩ duyệt khi có các kết quả khẩn cấp (như tràn dịch, phình động mạch...)."
+        ]
+      },
+      n_reviewing: {
+        title: "Đang duyệt",
+        badge: "Trạng thái rà soát",
+        color: "var(--color-reviewing)",
+        desc: "Ca bệnh được mở bởi người có thẩm quyền phê duyệt. Phiếu kết quả đang được kiểm tra câu chữ và tính đúng đắn của chẩn đoán.",
+        transitions: [
+          { name: "Lưu duyệt", to: "Đang duyệt (Nháp)", desc: "Người duyệt lưu tạm ý kiến hoặc bản chỉnh sửa nháp." },
+          { name: "Duyệt xong", to: "Duyệt", desc: "Ký số phê duyệt phiếu kết quả, sẵn sàng xuất bản và trả kết quả." },
+          { name: "Hủy nhận duyệt", to: "Đọc xong", desc: "Từ chối duyệt ca hoặc trả lại phiếu để bác sĩ tự sửa kết quả." }
+        ],
+        upgrades: [
+          "Bổ sung nút 'Yêu cầu sửa lại' kèm theo note lý do lỗi cụ thể để phản hồi nhanh cho người đọc."
+        ]
+      },
+      n_approved: {
+        title: "Duyệt",
+        badge: "Trạng thái cuối cùng",
+        color: "var(--color-approved)",
+        desc: "Kết quả đã được ký số chính thức. Phiếu được gửi tự động đến người bệnh qua SMS/Zalo/Webportal và đồng bộ dữ liệu chẩn đoán về HIS của bệnh viện.",
+        transitions: [
+          { name: "Sửa duyệt", to: "Đang duyệt", desc: "Trường hợp phát hiện sai sót sau khi đã ký duyệt, cần chỉnh sửa lại." },
+          { name: "Hủy duyệt", to: "Đọc xong", desc: "Hủy bỏ chữ ký số để đưa kết quả về lại trạng thái chờ duyệt ban đầu." }
+        ],
+        upgrades: [
+          "Tự động khóa hoàn toàn sau 24h: Ngăn chặn tuyệt đối việc hủy duyệt hoặc sửa duyệt sau khi kết quả đã được gửi đi lâu để đảm bảo tính pháp lý."
+        ]
+      }
+    };
+
+    const transitions = {
+      t_unread_reading: { title: "Chọn đọc luôn", from: "Chưa đọc", to: "Đang đọc", desc: "Chuyển dịch khi bác sĩ chủ động nhận ca trên worklist để đọc." },
+      t_unread_consult: { title: "Chọn bác sĩ hội chẩn", from: "Chưa đọc", to: "Hội chẩn", desc: "Trường hợp ca bệnh được đánh dấu cần hội ý chuyên môn trước khi đưa ra kết quả." },
+      t_consult_reading: { title: "Chọn đọc", from: "Hội chẩn", to: "Đang đọc", desc: "Chuyển tiếp sau khi buổi hội chẩn kết thúc để bác sĩ chính ghi kết quả." },
+      t_reading_unread: { title: "Hủy tiếp nhận", from: "Đang đọc", to: "Chưa đọc", desc: "Huỷ bỏ việc nhận đọc ca bệnh này, đưa ca bệnh quay về trạng thái Mới (Chưa đọc) chờ người khác nhận." },
+      t_reading_done: { title: "Đọc xong", from: "Đang đọc", to: "Đọc xong", desc: "Chuyển tiếp phiếu kết quả lên hàng đợi phê duyệt của trưởng khoa." },
+      t_done_reading: { title: "Sửa đọc", from: "Đọc xong", to: "Đang đọc", desc: "Bác sĩ đọc tự thu hồi phiếu kết quả để sửa lại khi chưa có ai phê duyệt." },
+      t_done_reviewing: { title: "Nhận duyệt", from: "Đọc xong", to: "Đang duyệt", desc: "Người phê duyệt khóa ca để bắt đầu thực hiện rà soát kết quả." },
+      t_reviewing_approved: { title: "Duyệt xong", from: "Đang duyệt", to: "Duyệt", desc: "Ký chữ ký số để xuất bản phiếu kết quả và đồng bộ dữ liệu." },
+      t_reading_approved: { title: "Duyệt (Trực tiếp)", from: "Đang đọc", to: "Duyệt", desc: "Quy trình một cấp dành cho các ca bệnh thường quy hoặc bác sĩ có thẩm quyền cao tự thực hiện cả hai vai trò." },
+      t_approved_reviewing: { title: "Sửa duyệt", from: "Duyệt", to: "Đang duyệt", desc: "Chuyển về rà soát lại để chỉnh sửa một số nội dung nhỏ trong phiếu đã duyệt." },
+      t_approved_done: { title: "Hủy duyệt", from: "Duyệt", to: "Đọc xong", desc: "Rút lại quyết định ký duyệt, đẩy ca về hàng chờ duyệt lại từ đầu." },
+      t_reading_self: { title: "Lưu đọc", from: "Đang đọc", to: "Đang đọc (Lưu nháp)", desc: "Tự động hoặc chủ động lưu lại bản phác thảo kết quả chẩn đoán." },
+      t_reviewing_self: { title: "Lưu duyệt", from: "Đang duyệt", to: "Đang duyệt (Nháp)", desc: "Lưu tạm các chỉnh sửa, ghi chú sửa đổi của người duyệt trước khi ký số." },
+      
+      // Upgrade paths
+      u_reading_consult: { title: "Yêu cầu hội chẩn", from: "Đang đọc", to: "Hội chẩn", desc: "Đề xuất mới: Cho phép yêu cầu hội chẩn giữa chừng ngay trong lúc đang đọc nếu phát hiện bất thường nghiêm trọng ngoài tầm xử lý." },
+      t_reviewing_done: { title: "Hủy nhận duyệt", from: "Đang duyệt", to: "Đọc xong", desc: "Huỷ bỏ việc nhận duyệt, trả kết quả về trạng thái Đọc xong để người đọc có thể chủ động sửa đổi." },
+      u_reviewing_reading: { title: "Trả ca / Yêu cầu sửa", from: "Đang duyệt", to: "Đang đọc", desc: "Đề xuất mới: Người duyệt từ chối duyệt ca và gửi yêu cầu bác sĩ đọc chỉnh sửa lại kèm theo note lý do lỗi cụ thể." }
+    };
+
+    let upgradeMode = false;
+    let selectedElementId = null;
+
+    // Toggle upgrade mode
+    const toggleUpgradeBtn = document.getElementById('toggleUpgradeBtn');
+    const canvas = document.getElementById('workflowCanvas');
+
+    toggleUpgradeBtn.addEventListener('click', () => {
+      upgradeMode = !upgradeMode;
+      if (upgradeMode) {
+        canvas.classList.add('upgrade-active');
+        toggleUpgradeBtn.innerText = '✨ Đang hiện Đề xuất nâng cấp';
+        toggleUpgradeBtn.classList.add('active');
+      } else {
+        canvas.classList.remove('upgrade-active');
+        toggleUpgradeBtn.innerText = '✨ Đang ẩn Đề xuất nâng cấp';
+        toggleUpgradeBtn.classList.remove('active');
+        // If selected element is an upgrade element, clear details
+        if (selectedElementId && (selectedElementId.startsWith('u_') || selectedElementId === 'n_cancelled')) {
+          clearSelection();
+        }
+      }
+    });
+
+    // Handle clicks on elements
+    const elements = document.querySelectorAll('.node-rect, .flow-line, .line-text');
+    elements.forEach(elem => {
+      elem.addEventListener('click', (e) => {
+        e.stopPropagation();
+        
+        // Remove selection from previous
+        clearSelection();
+
+        const id = elem.id.startsWith('lbl_') ? elem.id.replace('lbl_', '') : elem.id;
+        selectedElementId = id;
+
+        // Highlight
+        const visualElem = document.getElementById(id);
+        if (visualElem) {
+          visualElem.classList.add('selected');
+          if (visualElem.classList.contains('node-rect')) {
+            visualElem.setAttribute('stroke-width', '3');
+          }
+        }
+
+        // Show info
+        showDetails(id);
+      });
+    });
+
+    // Reset selection when clicking background
+    canvas.addEventListener('click', () => {
+      clearSelection();
+    });
+
+    function clearSelection() {
+      if (selectedElementId) {
+        const visualElem = document.getElementById(selectedElementId);
+        if (visualElem) {
+          visualElem.classList.remove('selected');
+          if (visualElem.classList.contains('node-rect')) {
+            visualElem.setAttribute('stroke-width', '1.5');
+          }
+        }
+      }
+      selectedElementId = null;
+      resetDetailsPanel();
+    }
+
+    function showDetails(id) {
+      const isNode = id.startsWith('n_');
+      const isTransition = id.startsWith('t_') || id.startsWith('u_');
+      const data = isNode ? states[id] : transitions[id];
+
+      if (!data) return;
+
+      const titleNode = document.getElementById('elementTitle');
+      const badgeNode = document.getElementById('elementBadge');
+      const descNode = document.getElementById('elementDesc');
+      const optionsSection = document.getElementById('optionsSection');
+      const recommendationCard = document.getElementById('recommendationCard');
+      const recommendationList = document.getElementById('recommendationList');
+
+      // Set Title and Color Badge
+      titleNode.innerHTML = `<span style="color: ${data.color || '#fff'}">${data.title}</span>`;
+      badgeNode.innerText = data.badge || (isTransition ? "Hành động" : "Trạng thái");
+      badgeNode.style.background = isTransition ? 'rgba(255, 255, 255, 0.1)' : (data.color + '22');
+      badgeNode.style.color = isTransition ? '#fff' : data.color;
+      badgeNode.style.border = isTransition ? 'none' : `1px solid ${data.color}33`;
+
+      // Set Description
+      descNode.innerText = data.desc;
+
+      // Transitions List for Nodes
+      if (isNode && data.transitions && data.transitions.length > 0) {
+        optionsSection.style.display = 'block';
+        const listNode = document.getElementById('transitionList');
+        listNode.innerHTML = '';
+        data.transitions.forEach(trans => {
+          const item = document.createElement('div');
+          item.className = 'transition-item';
+          item.innerHTML = `
+            <div class="transition-item-title">
+              <span>${trans.name}</span>
+              <span style="color: var(--text-muted);">👉 ${trans.to}</span>
+            </div>
+            <div style="color: var(--text-muted); font-size: 0.8rem; line-height: 1.4;">${trans.desc}</div>
+          `;
+          listNode.appendChild(item);
+        });
+      } else {
+        optionsSection.style.display = 'none';
+      }
+
+      // Show Upgrades
+      if (data.upgrades && data.upgrades.length > 0) {
+        recommendationCard.style.display = 'block';
+        recommendationCard.querySelector('h4').innerText = '💡 Đề xuất Nâng cấp';
+        recommendationList.innerHTML = '';
+        data.upgrades.forEach(upg => {
+          const li = document.createElement('li');
+          li.innerHTML = upg;
+          recommendationList.appendChild(li);
+        });
+      } else if (isTransition && id.startsWith('u_')) {
+        recommendationCard.style.display = 'block';
+        recommendationCard.querySelector('h4').innerHTML = '<span class="upgrade-badge-inline">✨ Tính năng Đề xuất</span>';
+        recommendationList.innerHTML = `
+          <li>Hành động này giải quyết vấn đề nghẽn cổ chai của quy trình hiện tại, tăng tính linh hoạt cho người sử dụng chuyên môn.</li>
+        `;
+      } else {
+        recommendationCard.style.display = 'none';
+      }
+    }
+
+    function resetDetailsPanel() {
+      document.getElementById('elementTitle').innerHTML = '<span>Quy trình D-RADS</span>';
+      document.getElementById('elementBadge').innerText = 'Chung';
+      document.getElementById('elementBadge').style.background = 'rgba(255,255,255,0.1)';
+      document.getElementById('elementBadge').style.color = '#fff';
+      document.getElementById('elementBadge').style.border = 'none';
+      document.getElementById('elementDesc').innerText = 'Chọn một trạng thái (khối hình chữ nhật) hoặc một hành động (nhãn trên mũi tên) để xem chi tiết nghiệp vụ và đề xuất cải tiến tối ưu hóa.';
+      document.getElementById('optionsSection').style.display = 'none';
+      
+      const recommendationCard = document.getElementById('recommendationCard');
+      recommendationCard.style.display = 'block';
+      recommendationCard.querySelector('h4').innerText = '💡 Đề xuất Nâng cấp Chung';
+      document.getElementById('recommendationList').innerHTML = `
+        <li><strong>Quy trình hội chẩn linh động:</strong> Cho phép yêu cầu hội chẩn ngay khi đang đọc dở ca thay vì chỉ cho phép chọn hội chẩn từ đầu.</li>
+        <li><strong>Cơ chế "Trả về":</strong> Khi người duyệt không đồng ý, nên có hành động trả về "Yêu cầu chỉnh sửa" trực tiếp về trạng thái "Đọc xong" thay vì chỉ có "Hủy duyệt".</li>
+        <li><strong>Trạng thái Đã hủy:</strong> Bổ sung trạng thái hủy ca tiếp nhận cho các ca lỗi hoặc ca không chụp được để giải phóng danh sách chờ.</li>
+      `;
+    }
+  </script>
+</body>
+</html>
