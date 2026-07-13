@@ -69,7 +69,6 @@ const WORKFLOW_STATES = {
       { name: "Hủy duyệt", to: "Đọc xong", desc: "Hủy bỏ chữ ký số để đưa kết quả về lại trạng thái chờ duyệt ban đầu." }
     ],
     upgrades: [
-      "Tự động khóa hoàn toàn sau 24h: Ngăn chặn tuyệt đối việc hủy duyệt hoặc sửa duyệt sau khi kết quả đã được gửi đi lâu để đảm bảo tính pháp lý."
     ]
   }
 };
