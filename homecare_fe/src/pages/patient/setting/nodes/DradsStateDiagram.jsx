@@ -11,10 +11,7 @@ const WORKFLOW_STATES = {
       { name: "Chọn đọc luôn", to: "Đang đọc", desc: "Bác sĩ trực tiếp bấm vào ca bệnh và mở giao diện đọc kết quả." },
       { name: "Chọn bác sĩ hội chẩn", to: "Hội chẩn", desc: "Chuyển ca bệnh đến hội đồng bác sĩ chuyên khoa hoặc bác sĩ cấp cao hơn để thảo luận." }
     ],
-    upgrades: [
-      "Bổ sung cơ chế tự động phân bổ: Dựa vào loại ca (siêu âm, X-quang) và tải của từng bác sĩ để chỉ định tự động ca chưa đọc.",
-      "Đồng bộ tự động trạng thái hủy tiếp nhận từ HIS để làm sạch danh sách chờ."
-    ]
+    upgrades: []
   },
   n_consult: {
     title: "Hội chẩn",
@@ -24,9 +21,7 @@ const WORKFLOW_STATES = {
     transitions: [
       { name: "Chọn đọc", to: "Đang đọc", desc: "Bác sĩ được chỉ định chính bắt đầu nhập kết quả sau khi đã thống nhất ý kiến hội chẩn." }
     ],
-    upgrades: [
-      "Tích hợp chatroom và chia sẻ hình ảnh trực tiếp thời gian thực (Real-time DICOM viewer) để tăng tốc độ hội chẩn trực tuyến."
-    ]
+    upgrades: []
   },
   n_reading: {
     title: "Đang đọc",
@@ -50,9 +45,7 @@ const WORKFLOW_STATES = {
       { name: "Sửa đọc", to: "Đang đọc", desc: "Bác sĩ đọc tự thu hồi phiếu kết quả để sửa lại khi chưa có ai phê duyệt." },
       { name: "Nhận duyệt", to: "Đang duyệt", desc: "Bác sĩ duyệt hoặc Trưởng khoa khóa ca bệnh để tiến hành rà soát." }
     ],
-    upgrades: [
-      "Báo động đỏ (Red Alert): Tự động đánh dấu hoặc gửi thông báo SMS/Zalo cho bác sĩ duyệt khi có các kết quả khẩn cấp."
-    ]
+    upgrades: []
   },
   n_reviewing: {
     title: "Đang duyệt",
@@ -64,9 +57,7 @@ const WORKFLOW_STATES = {
       { name: "Duyệt xong", to: "Duyệt", desc: "Ký số phê duyệt phiếu kết quả, sẵn sàng xuất bản và trả kết quả." },
       { name: "Hủy nhận duyệt", to: "Đọc xong", desc: "Từ chối duyệt ca hoặc trả lại phiếu để bác sĩ tự sửa kết quả." }
     ],
-    upgrades: [
-      "Bổ sung nút 'Yêu cầu sửa lại' kèm theo note lý do lỗi cụ thể để phản hồi nhanh cho người đọc."
-    ]
+    upgrades: []
   },
   n_approved: {
     title: "Duyệt",
