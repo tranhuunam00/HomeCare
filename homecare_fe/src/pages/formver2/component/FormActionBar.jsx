@@ -55,6 +55,8 @@ export const KEY_ACTION_BUTTON = {
   verifySign: "verifySign",
   tra_ca: "tra_ca",
   consultation: "consultation",
+  huy_consultation: "huy_consultation",
+  tu_choi_consultation: "tu_choi_consultation",
 };
 
 export default function FormActionBar({
@@ -81,6 +83,7 @@ export default function FormActionBar({
   onEditDuyet = () => {},
   onTraCa = () => {},
   onConsultation = () => {},
+  onTuChoiConsultation = () => {},
 }) {
   const navigate = useNavigate();
   const { userPackages, user, doctor } = useGlobalAuth();
@@ -133,6 +136,20 @@ export default function FormActionBar({
       icon: <FileWordOutlined />,
       onClick: onConsultation,
       color: "consultation",
+    },
+    {
+      key: KEY_ACTION_BUTTON.huy_consultation,
+      label: `HỦY HỘI CHẨN`,
+      icon: <DeleteOutlined />,
+      onClick: onHuyDoc,
+      color: "red",
+    },
+    {
+      key: KEY_ACTION_BUTTON.tu_choi_consultation,
+      label: `TỪ CHỐI HỘI CHẨN`,
+      icon: <DeleteOutlined />,
+      onClick: onTuChoiConsultation,
+      color: "red",
     },
     {
       key: KEY_ACTION_BUTTON.nhan_duyet,
@@ -282,7 +299,8 @@ export default function FormActionBar({
     if (
       patientDiagnose?.id_doctor_in_processing !== doctor.id &&
       patientDiagnose?.id_receive_doctor !== doctor.id &&
-      patientDiagnose?.id_verify_doctor !== doctor.id
+      patientDiagnose?.id_verify_doctor !== doctor.id &&
+      patientDiagnose?.id_consulting_doctor !== doctor.id
     ) {
       keys = [KEY_ACTION_BUTTON.exit];
       setVisionItemKeys(keys);
@@ -296,7 +314,16 @@ export default function FormActionBar({
         break;
 
       case PATIENT_DIAGNOSE_STATUS_CODE.CONSULTATION:
-        keys = [KEY_ACTION_BUTTON.exit];
+        if (patientDiagnose.id_receive_doctor == doctor.id) {
+          keys = [KEY_ACTION_BUTTON.exit, KEY_ACTION_BUTTON.huy_consultation];
+        } else if (patientDiagnose.id_consulting_doctor == doctor.id) {
+          keys = [
+            KEY_ACTION_BUTTON.exit,
+            KEY_ACTION_BUTTON.tu_choi_consultation,
+          ];
+        } else {
+          keys = [KEY_ACTION_BUTTON.exit];
+        }
         break;
 
       case PATIENT_DIAGNOSE_STATUS_CODE.IN_PROCESSING:

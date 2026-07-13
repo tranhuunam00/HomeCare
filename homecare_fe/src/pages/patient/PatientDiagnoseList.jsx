@@ -945,10 +945,12 @@ const PatientTablePage = ({ PID = null }) => {
               steps={stepsStatus({
                 setOpenConsultationModal,
                 onCheckandCreate,
+                isConsultation: !!selectedPatientDiagnose.id_consulting_doctor || selectedPatientDiagnose.status === PATIENT_DIAGNOSE_STATUS_CODE.CONSULTATION,
               })}
               current={stepsStatus({
                 setOpenConsultationModal,
                 onCheckandCreate,
+                isConsultation: !!selectedPatientDiagnose.id_consulting_doctor || selectedPatientDiagnose.status === PATIENT_DIAGNOSE_STATUS_CODE.CONSULTATION,
               }).findIndex((s) => s.key === selectedPatientDiagnose.status)}
               is_consultation_doctor={
                 selectedPatientDiagnose.id_consulting_doctor

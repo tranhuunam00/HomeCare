@@ -903,6 +903,17 @@ export default function DoctorUseDFormVer3({
               languageTranslate={languageTranslate}
               onSign={() => setSignModalOpen(true)}
               onConsultation={onOpenConsultation}
+              onTuChoiConsultation={async () => {
+                await transitionStatus({
+                  patientDiagnoseId: patientDiagnose.id,
+                  newStatus: PATIENT_DIAGNOSE_STATUS_CODE.IN_PROCESSING,
+                  confirmMessage: "Bạn có chắc muốn từ chối hội chẩn? Nếu từ chối, ca sẽ rollback về trạng thái ĐANG ĐỌC của Bác sĩ chính.",
+                  successMessage: "Từ chối hội chẩn thành công",
+                  localSetState: setPatientDiagnose,
+                  onStatusChange,
+                  additionalPayload: { is_consultation_reject: true },
+                });
+              }}
               onPrint={() => {
                 printSourceRef.current = "manual";
 

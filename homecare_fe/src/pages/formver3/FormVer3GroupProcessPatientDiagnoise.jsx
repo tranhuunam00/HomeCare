@@ -55,8 +55,7 @@ const FormVer3GroupProcessPatientDiagnoise = ({
         }}
       >
         {status == PATIENT_DIAGNOSE_STATUS_NAME.CONSULTATION &&
-          (doctor.id == patientDiagnose.id_receive_doctor ||
-            doctor.id == patientDiagnose.id_consulting_doctor) && (
+          doctor.id == patientDiagnose.id_receive_doctor && (
             <div style={{ marginTop: 16 }}>
               <ActionButton
                 color="red"
@@ -74,6 +73,30 @@ const FormVer3GroupProcessPatientDiagnoise = ({
                 }
               >
                 Hủy hội chẩn
+              </ActionButton>
+            </div>
+          )}
+
+        {status == PATIENT_DIAGNOSE_STATUS_NAME.CONSULTATION &&
+          doctor.id == patientDiagnose.id_consulting_doctor && (
+            <div style={{ marginTop: 16 }}>
+              <ActionButton
+                color="red"
+                icon={<WarningOutlined />}
+                onClick={() =>
+                  transitionStatus({
+                    patientDiagnoseId: id,
+                    newStatus: PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESSING,
+                    confirmMessage:
+                      "Bạn có chắc chắn muốn từ chối hội chẩn?\n\nNếu từ chối, ca sẽ rollback về trạng thái ĐANG ĐỌC của Bác sĩ chính.",
+                    successMessage: "Từ chối hội chẩn thành công",
+                    localSetState: setPatientDiagnose,
+                    onStatusChange,
+                    additionalPayload: { is_consultation_reject: true },
+                  })
+                }
+              >
+                Từ chối hội chẩn
               </ActionButton>
             </div>
           )}

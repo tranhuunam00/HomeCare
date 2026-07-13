@@ -370,7 +370,7 @@ export const calculateAge = (dob, birthYear) => {
   return "";
 };
 
-export const stepsStatus = ({ setOpenConsultationModal, onCheckandCreate }) => [
+export const stepsStatus = ({ setOpenConsultationModal, onCheckandCreate, isConsultation = false }) => [
   {
     key: PATIENT_DIAGNOSE_STATUS_NAME.NEW,
     title: "Chưa đọc",
@@ -380,7 +380,7 @@ export const stepsStatus = ({ setOpenConsultationModal, onCheckandCreate }) => [
     },
   },
 
-  {
+  isConsultation && {
     key: PATIENT_DIAGNOSE_STATUS_NAME.CONSULTATION,
     title: "Hội chẩn",
     color: PATIENT_DIAGNOSE_COLOR[PATIENT_DIAGNOSE_STATUS_NAME.CONSULTATION],
@@ -446,4 +446,4 @@ export const stepsStatus = ({ setOpenConsultationModal, onCheckandCreate }) => [
       }
     },
   },
-];
+].filter(Boolean);

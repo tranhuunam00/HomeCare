@@ -378,9 +378,12 @@
     </div>
 
     <div class="controls">
-      <button class="btn btn-upgrade" id="toggleUpgradeBtn">
-        ✨ Đang ẩn Đề xuất nâng cấp
-      </button>
+      <!-- Roles Legend -->
+      <div style="display: flex; gap: 16px; margin-right: 24px; font-size: 0.85rem; background: rgba(255,255,255,0.03); padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border-color);">
+        <span style="display: flex; align-items: center; gap: 8px; font-weight: 500;"><span style="width: 8px; height: 8px; border-radius: 50%; background: #3b82f6; box-shadow: 0 0 8px #3b82f6;"></span> Bác sĩ chính (BS1)</span>
+        <span style="display: flex; align-items: center; gap: 8px; font-weight: 500;"><span style="width: 8px; height: 8px; border-radius: 50%; background: #a855f7; box-shadow: 0 0 8px #a855f7;"></span> Bác sĩ hội chẩn (BS2)</span>
+        <span style="display: flex; align-items: center; gap: 8px; font-weight: 500;"><span style="width: 8px; height: 8px; border-radius: 50%; background: #6366f1; box-shadow: 0 0 8px #6366f1;"></span> Duyệt viên</span>
+      </div>
     </div>
   </header>
 
@@ -439,9 +442,6 @@
           <!-- 8. Đang duyệt -> Duyệt (Duyệt xong) -->
           <path id="t_reviewing_approved" d="M 1110 200 L 1190 200" class="flow-line" stroke="#9ca3af" marker-end="url(#arrow)"></path>
           
-          <!-- 9. Đang đọc -> Duyệt (Duyệt thẳng - 1 Cấp) -->
-          <path id="t_reading_approved" d="M 520 240 Q 860 380 1190 230" class="flow-line" stroke="#9ca3af" marker-end="url(#arrow)"></path>
-          
           <!-- 10. Duyệt -> Đang duyệt (Sửa duyệt) -->
           <path id="t_approved_reviewing" d="M 1210 160 Q 1150 90 1090 160" class="flow-line" stroke="#9ca3af" marker-end="url(#arrow)"></path>
           
@@ -451,86 +451,96 @@
           <!-- Loop 12: Đang đọc -> Đang đọc (Lưu đọc) -->
           <path id="t_reading_self" d="M 480 240 C 470 300 550 300 540 240" class="flow-line" stroke="#9ca3af" marker-end="url(#arrow)"></path>
 
+          <!-- 13. Đọc xong -> Duyệt (Duyệt luôn bởi BS1) -->
+          <path id="t_done_approved" d="M 800 240 Q 1000 320 1190 220" class="flow-line" stroke="#9ca3af" marker-end="url(#arrow)"></path>
+
           <!-- Loop 13: Đang duyệt -> Đang duyệt (Lưu duyệt) -->
           <path id="t_reviewing_self" d="M 1000 160 C 970 90 1070 90 1040 160" class="flow-line" stroke="#9ca3af" marker-end="url(#arrow)"></path>
 
           <!-- ================= UPGRADE TRANSITIONS ================= -->
           <!-- U1. Đang đọc -> Hội chẩn (Yêu cầu hội chẩn giữa chừng) -->
-          <path id="u_reading_consult" d="M 470 240 Q 320 320 320 390" class="flow-line upgrade-element" stroke="#ec4899" marker-end="url(#arrow-upgrade)"></path>
+          <path id="u_reading_consult" d="M 470 240 Q 320 320 320 390" class="flow-line" stroke="#9ca3af" marker-end="url(#arrow)"></path>
           
           <!-- 14. Đang duyệt -> Đọc xong (Hủy nhận duyệt) -->
           <path id="t_reviewing_done" d="M 970 230 Q 885 270 800 240" class="flow-line" stroke="#9ca3af" marker-end="url(#arrow)"></path>
 
           <!-- U2. Đang duyệt -> Đang đọc (Trả ca / Yêu cầu sửa) -->
-          <path id="u_reviewing_reading" d="M 1040 240 Q 780 380 520 240" class="flow-line upgrade-element" stroke="#ec4899" marker-end="url(#arrow-upgrade)"></path>
+          <path id="u_reviewing_reading" d="M 1040 240 Q 780 380 520 240" class="flow-line" stroke="#9ca3af" marker-end="url(#arrow)"></path>
+
+          <!-- U3. Hội chẩn -> Đang đọc (Từ chối hội chẩn / Rollback về BS chính) -->
+          <path id="u_consult_reading_reject" d="M 295 390 Q 295 240 450 220" class="flow-line" stroke="#9ca3af" marker-end="url(#arrow)"></path>
         </g>
 
         <!-- ================= TRANSITION LABELS ================= -->
         <g id="labels-group">
           <!-- 1. Chọn đọc luôn -->
-          <rect x="300" y="188" width="80" height="20" class="line-text-bg"></rect>
-          <text id="lbl_t_unread_reading" x="340" y="198" class="line-text">Chọn đọc luôn</text>
+          <rect x="290" y="188" width="100" height="20" class="line-text-bg"></rect>
+          <text id="lbl_t_unread_reading" x="340" y="198" class="line-text">Chọn đọc (BS1)</text>
           
           <!-- 2. Chọn bác sĩ hội chẩn -->
           <rect x="75" y="310" width="115" height="20" class="line-text-bg"></rect>
-          <text id="lbl_t_unread_consult" x="132" y="320" class="line-text">Chọn bác sĩ hội chẩn</text>
+          <text id="lbl_t_unread_consult" x="132" y="320" class="line-text">Mời hội chẩn (BS1)</text>
           
           <!-- 3. Chọn đọc -->
-          <rect x="385" y="380" width="60" height="20" class="line-text-bg"></rect>
-          <text id="lbl_t_consult_reading" x="415" y="390" class="line-text">Chọn đọc</text>
+          <rect x="360" y="380" width="110" height="20" class="line-text-bg"></rect>
+          <text id="lbl_t_consult_reading" x="415" y="390" class="line-text">Nhận đọc (BS1/BS2)</text>
           
           <!-- 4. Hủy tiếp nhận -->
           <rect x="300" y="105" width="80" height="20" class="line-text-bg"></rect>
-          <text id="lbl_t_reading_unread" x="340" y="115" class="line-text">Hủy tiếp nhận</text>
+          <text id="lbl_t_reading_unread" x="340" y="115" class="line-text">Hủy đọc (BS1)</text>
           
           <!-- 5. Đọc xong -->
-          <rect x="630" y="188" width="60" height="20" class="line-text-bg"></rect>
-          <text id="lbl_t_reading_done" x="660" y="198" class="line-text">Đọc xong</text>
+          <rect x="610" y="188" width="110" height="20" class="line-text-bg"></rect>
+          <text id="lbl_t_reading_done" x="665" y="198" class="line-text">Đọc xong (BS1/BS2)</text>
           
           <!-- 6. Sửa đọc -->
-          <rect x="630" y="105" width="60" height="20" class="line-text-bg"></rect>
-          <text id="lbl_t_done_reading" x="660" y="115" class="line-text">Sửa đọc</text>
+          <rect x="610" y="105" width="100" height="20" class="line-text-bg"></rect>
+          <text id="lbl_t_done_reading" x="660" y="115" class="line-text">Sửa kết quả (BS1)</text>
           
           <!-- 7. Nhận duyệt -->
-          <rect x="885" y="188" width="70" height="20" class="line-text-bg"></rect>
-          <text id="lbl_t_done_reviewing" x="920" y="198" class="line-text">Nhận duyệt</text>
+          <rect x="830" y="188" width="150" height="20" class="line-text-bg"></rect>
+          <text id="lbl_t_done_reviewing" x="905" y="198" class="line-text">Nhận duyệt (BS1/Duyệt viên)</text>
           
           <!-- 8. Duyệt xong -->
-          <rect x="1120" y="188" width="65" height="20" class="line-text-bg"></rect>
-          <text id="lbl_t_reviewing_approved" x="1152" y="198" class="line-text">Duyệt xong</text>
-          
-          <!-- 9. Duyệt (Direct) -->
-          <rect x="830" y="310" width="40" height="20" class="line-text-bg"></rect>
-          <text id="lbl_t_reading_approved" x="850" y="320" class="line-text">Duyệt</text>
+          <rect x="1080" y="188" width="130" height="20" class="line-text-bg"></rect>
+          <text id="lbl_t_reviewing_approved" x="1145" y="198" class="line-text">Ký duyệt (BS1/Duyệt viên)</text>
           
           <!-- 10. sửa duyệt -->
-          <rect x="1115" y="100" width="60" height="20" class="line-text-bg"></rect>
-          <text id="lbl_t_approved_reviewing" x="1145" y="110" class="line-text">sửa duyệt</text>
+          <rect x="1080" y="100" width="120" height="20" class="line-text-bg"></rect>
+          <text id="lbl_t_approved_reviewing" x="1140" y="110" class="line-text">Sửa duyệt (BS1/Duyệt viên)</text>
           
           <!-- 11. hủy duyệt -->
-          <rect x="990" y="55" width="60" height="20" class="line-text-bg"></rect>
-          <text id="lbl_t_approved_done" x="1020" y="65" class="line-text">hủy duyệt</text>
+          <rect x="950" y="55" width="130" height="20" class="line-text-bg"></rect>
+          <text id="lbl_t_approved_done" x="1015" y="65" class="line-text">Hủy duyệt (BS1/Duyệt viên)</text>
 
           <!-- 12. lưu đọc -->
-          <rect x="480" y="280" width="50" height="20" class="line-text-bg"></rect>
-          <text id="lbl_t_reading_self" x="505" y="290" class="line-text">lưu đọc</text>
+          <rect x="460" y="280" width="100" height="20" class="line-text-bg"></rect>
+          <text id="lbl_t_reading_self" x="510" y="290" class="line-text">Lưu nháp (BS1/BS2)</text>
+
+          <!-- 13. Duyệt luôn (Direct) -->
+          <rect x="965" y="270" width="110" height="20" class="line-text-bg"></rect>
+          <text id="lbl_t_done_approved" x="1020" y="280" class="line-text">Duyệt luôn (BS1)</text>
 
           <!-- 13. lưu duyệt -->
-          <rect x="980" y="100" width="60" height="20" class="line-text-bg"></rect>
-          <text id="lbl_t_reviewing_self" x="1010" y="110" class="line-text">lưu duyệt</text>
+          <rect x="940" y="100" width="130" height="20" class="line-text-bg"></rect>
+          <text id="lbl_t_reviewing_self" x="1005" y="110" class="line-text">Lưu duyệt (BS1/Duyệt viên)</text>
 
           <!-- UPGRADE LABELS -->
           <!-- U1. Yêu cầu hội chẩn (giữa chừng) -->
-          <rect x="290" y="280" width="115" height="20" class="line-text-bg"></rect>
-          <text id="lbl_u_reading_consult" x="347" y="290" class="line-text">Yêu cầu hội chẩn</text>
+          <rect x="270" y="280" width="150" height="20" class="line-text-bg"></rect>
+          <text id="lbl_u_reading_consult" x="345" y="290" class="line-text">Mời hội chẩn (BS1)</text>
 
           <!-- 14. Hủy nhận duyệt -->
-          <rect x="840" y="240" width="100" height="20" class="line-text-bg"></rect>
-          <text id="lbl_t_reviewing_done" x="890" y="250" class="line-text">Hủy nhận duyệt</text>
+          <rect x="800" y="240" width="160" height="20" class="line-text-bg"></rect>
+          <text id="lbl_t_reviewing_done" x="880" y="250" class="line-text">Hủy nhận duyệt (BS1/Duyệt viên)</text>
 
           <!-- U2. Trả ca / Yêu cầu sửa -->
-          <rect x="700" y="280" width="130" height="20" class="line-text-bg"></rect>
-          <text id="lbl_u_reviewing_reading" x="765" y="290" class="line-text">Trả ca / Yêu cầu sửa</text>
+          <rect x="660" y="280" width="200" height="20" class="line-text-bg"></rect>
+          <text id="lbl_u_reviewing_reading" x="760" y="290" class="line-text">Yêu cầu sửa (BS1/Duyệt viên -> BS1/BS2)</text>
+
+          <!-- U3. Từ chối hội chẩn -->
+          <rect x="230" y="270" width="150" height="20" class="line-text-bg"></rect>
+          <text id="lbl_u_consult_reading_reject" x="305" y="280" class="line-text">Từ chối hội chẩn (BS2 -> BS1)</text>
         </g>
 
         <!-- ================= NODES (STATES) ================= -->
@@ -593,16 +603,6 @@
         <div class="section-title">Các chuyển dịch trạng thái tiếp theo</div>
         <div class="transition-list" id="transitionList"></div>
       </div>
-
-      <!-- Upgrade recommendation section -->
-      <div class="recommendation-card" id="recommendationCard">
-        <h4>💡 Đề xuất Nâng cấp Chung</h4>
-        <ul style="margin: 0;" id="recommendationList">
-          <li><strong>Quy trình hội chẩn linh động:</strong> Cho phép yêu cầu hội chẩn ngay khi đang đọc dở ca thay vì chỉ cho phép chọn hội chẩn từ đầu.</li>
-          <li><strong>Cơ chế "Trả về":</strong> Khi người duyệt không đồng ý, nên có hành động trả về "Yêu cầu chỉnh sửa" trực tiếp về trạng thái "Đọc xong" thay vì chỉ có "Hủy duyệt".</li>
-          <li><strong>Trạng thái Đã hủy:</strong> Bổ sung trạng thái hủy ca tiếp nhận cho các ca lỗi hoặc ca không chụp được để giải phóng danh sách chờ.</li>
-        </ul>
-      </div>
     </div>
   </div>
 
@@ -624,24 +624,24 @@
         title: "Hội chẩn",
         badge: "Trạng thái hỗ trợ",
         color: "var(--color-consult)",
-        desc: "Ca bệnh khó đang được thảo luận bởi các bác sĩ. Không ai được phép sửa nội dung phiếu ngoài những người được giao hội chẩn.",
+        desc: "Ca bệnh khó đang chờ ý kiến chuyên môn của Bác sĩ hội chẩn (BS2). Tại đây, cả Bác sĩ chính (BS1) và Bác sĩ hội chẩn (BS2) đều có các hành động tương tác đặc thù.",
         transitions: [
-          { name: "Chọn đọc", to: "Đang đọc", desc: "Bác sĩ được chỉ định chính bắt đầu nhập kết quả sau khi đã thống nhất ý kiến hội chẩn." }
-        ],
-        upgrades: []
+          { name: "Nhận đọc (BS2)", to: "Đang đọc", desc: "Bác sĩ hội chẩn (BS2) đồng ý tham gia, bấm Nhận đọc để chuyển ca về Đang đọc và tiến hành ghi kết quả." },
+          { name: "Từ chối hội chẩn (BS2)", to: "Đang đọc (Rollback)", desc: "Bác sĩ hội chẩn (BS2) từ chối, ca tự động trả lại quyền cho Bác sĩ chính (BS1) để đọc tiếp." },
+          { name: "Tự nhận đọc lại (BS1)", to: "Đang đọc", desc: "Bác sĩ chính (BS1) có quyền tự lấy lại ca bất kỳ lúc nào để tự đọc (không chờ BS2 nữa)." }
+        ]
       },
       n_reading: {
         title: "Đang đọc",
         badge: "Trạng thái chỉnh sửa",
         color: "var(--color-reading)",
-        desc: "Bác sĩ chẩn đoán hình ảnh đang nhập mô tả kết quả, kết luận và chọn hình ảnh in ấn. Hệ thống liên tục tự động lưu nháp.",
+        desc: "Bác sĩ (BS1 tự đọc hoặc BS2 được mời hội chẩn) đang ghi nội dung kết quả, kết luận. Hệ thống tự động lưu nháp.",
         transitions: [
-          { name: "Lưu đọc", to: "Đang đọc (Bản nháp)", desc: "Lưu tạm thông tin để có thể quay lại đọc tiếp sau đó." },
-          { name: "Đọc xong", to: "Đọc xong", desc: "Hoàn tất việc điền kết quả và gửi lên hệ thống chờ phê duyệt." },
-          { name: "Hủy tiếp nhận", to: "Chưa đọc", desc: "Huỷ bỏ việc nhận đọc ca bệnh này, trả kết quả về trạng thái Chưa đọc (Mới) chờ bác sĩ khác nhận." },
-          { name: "Duyệt (Trực tiếp)", to: "Duyệt", desc: "Nếu bác sĩ chẩn đoán có quyền duyệt ca (quy trình 1 cấp - Auto Approve), ca sẽ được duyệt luôn." }
-        ],
-        upgrades: []
+          { name: "Lưu nháp (BS1/BS2)", to: "Đang đọc (Bản nháp)", desc: "Lưu tạm thông tin kết quả chẩn đoán." },
+          { name: "Đọc xong (BS1/BS2)", to: "Đọc xong", desc: "Hoàn tất ghi kết quả và chuyển lên hàng chờ trưởng khoa phê duyệt." },
+          { name: "Mời hội chẩn (BS1)", to: "Hội chẩn", desc: "BS1 trong lúc đọc thấy ca khó có thể gán BS2 vào để cùng hội chẩn." },
+          { name: "Hủy đọc (BS1)", to: "Chưa đọc", desc: "BS1 hủy nhận ca, trả kết quả về hàng chờ tự do cho toàn viện." }
+        ]
       },
       n_done: {
         title: "Đọc xong",
@@ -688,7 +688,7 @@
       t_done_reading: { title: "Sửa đọc", from: "Đọc xong", to: "Đang đọc", desc: "Bác sĩ đọc tự thu hồi phiếu kết quả để sửa lại khi chưa có ai phê duyệt." },
       t_done_reviewing: { title: "Nhận duyệt", from: "Đọc xong", to: "Đang duyệt", desc: "Người phê duyệt khóa ca để bắt đầu thực hiện rà soát kết quả." },
       t_reviewing_approved: { title: "Duyệt xong", from: "Đang duyệt", to: "Duyệt", desc: "Ký chữ ký số để xuất bản phiếu kết quả và đồng bộ dữ liệu." },
-      t_reading_approved: { title: "Duyệt (Trực tiếp)", from: "Đang đọc", to: "Duyệt", desc: "Quy trình một cấp dành cho các ca bệnh thường quy hoặc bác sĩ có thẩm quyền cao tự thực hiện cả hai vai trò." },
+      t_done_approved: { title: "Duyệt luôn", from: "Đọc xong", to: "Duyệt", desc: "Bác sĩ chính (BS1) tự phê duyệt kết quả của chính mình ngay từ màn hình Đọc xong mà không cần thông qua trạng thái Đang duyệt." },
       t_approved_reviewing: { title: "Sửa duyệt", from: "Duyệt", to: "Đang duyệt", desc: "Chuyển về rà soát lại để chỉnh sửa một số nội dung nhỏ trong phiếu đã duyệt." },
       t_approved_done: { title: "Hủy duyệt", from: "Duyệt", to: "Đọc xong", desc: "Rút lại quyết định ký duyệt, đẩy ca về hàng chờ duyệt lại từ đầu." },
       t_reading_self: { title: "Lưu đọc", from: "Đang đọc", to: "Đang đọc (Lưu nháp)", desc: "Tự động hoặc chủ động lưu lại bản phác thảo kết quả chẩn đoán." },
@@ -697,32 +697,11 @@
       // Upgrade paths
       u_reading_consult: { title: "Yêu cầu hội chẩn", from: "Đang đọc", to: "Hội chẩn", desc: "Đề xuất mới: Cho phép yêu cầu hội chẩn giữa chừng ngay trong lúc đang đọc nếu phát hiện bất thường nghiêm trọng ngoài tầm xử lý." },
       t_reviewing_done: { title: "Hủy nhận duyệt", from: "Đang duyệt", to: "Đọc xong", desc: "Huỷ bỏ việc nhận duyệt, trả kết quả về trạng thái Đọc xong để người đọc có thể chủ động sửa đổi." },
-      u_reviewing_reading: { title: "Trả ca / Yêu cầu sửa", from: "Đang duyệt", to: "Đang đọc", desc: "Đề xuất mới: Người duyệt từ chối duyệt ca và gửi yêu cầu bác sĩ đọc chỉnh sửa lại kèm theo note lý do lỗi cụ thể." }
+      u_reviewing_reading: { title: "Trả ca / Yêu cầu sửa", from: "Đang duyệt", to: "Đang đọc", desc: "Đề xuất mới: Người duyệt từ chối duyệt ca và gửi yêu cầu bác sĩ đọc chỉnh sửa lại kèm theo note lý do lỗi cụ thể." },
+      u_consult_reading_reject: { title: "Từ chối hội chẩn", from: "Hội chẩn", to: "Đang đọc", desc: "Đề xuất mới: Bác sĩ hội chẩn từ chối tiếp nhận ca. Hệ thống tự động phục hồi ca về trạng thái Đang đọc của Bác sĩ chính (rollback), đồng thời gửi thông báo và không làm mất ca của bác sĩ chính." }
     };
 
-    let upgradeMode = false;
     let selectedElementId = null;
-
-    // Toggle upgrade mode
-    const toggleUpgradeBtn = document.getElementById('toggleUpgradeBtn');
-    const canvas = document.getElementById('workflowCanvas');
-
-    toggleUpgradeBtn.addEventListener('click', () => {
-      upgradeMode = !upgradeMode;
-      if (upgradeMode) {
-        canvas.classList.add('upgrade-active');
-        toggleUpgradeBtn.innerText = '✨ Đang hiện Đề xuất nâng cấp';
-        toggleUpgradeBtn.classList.add('active');
-      } else {
-        canvas.classList.remove('upgrade-active');
-        toggleUpgradeBtn.innerText = '✨ Đang ẩn Đề xuất nâng cấp';
-        toggleUpgradeBtn.classList.remove('active');
-        // If selected element is an upgrade element, clear details
-        if (selectedElementId && (selectedElementId.startsWith('u_') || selectedElementId === 'n_cancelled')) {
-          clearSelection();
-        }
-      }
-    });
 
     // Handle clicks on elements
     const elements = document.querySelectorAll('.node-rect, .flow-line, .line-text');
@@ -750,6 +729,7 @@
       });
     });
 
+    const canvas = document.getElementById('workflowCanvas');
     // Reset selection when clicking background
     canvas.addEventListener('click', () => {
       clearSelection();
@@ -780,8 +760,6 @@
       const badgeNode = document.getElementById('elementBadge');
       const descNode = document.getElementById('elementDesc');
       const optionsSection = document.getElementById('optionsSection');
-      const recommendationCard = document.getElementById('recommendationCard');
-      const recommendationList = document.getElementById('recommendationList');
 
       // Set Title and Color Badge
       titleNode.innerHTML = `<span style="color: ${data.color || '#fff'}">${data.title}</span>`;
@@ -813,26 +791,6 @@
       } else {
         optionsSection.style.display = 'none';
       }
-
-      // Show Upgrades
-      if (data.upgrades && data.upgrades.length > 0) {
-        recommendationCard.style.display = 'block';
-        recommendationCard.querySelector('h4').innerText = '💡 Đề xuất Nâng cấp';
-        recommendationList.innerHTML = '';
-        data.upgrades.forEach(upg => {
-          const li = document.createElement('li');
-          li.innerHTML = upg;
-          recommendationList.appendChild(li);
-        });
-      } else if (isTransition && id.startsWith('u_')) {
-        recommendationCard.style.display = 'block';
-        recommendationCard.querySelector('h4').innerHTML = '<span class="upgrade-badge-inline">✨ Tính năng Đề xuất</span>';
-        recommendationList.innerHTML = `
-          <li>Hành động này giải quyết vấn đề nghẽn cổ chai của quy trình hiện tại, tăng tính linh hoạt cho người sử dụng chuyên môn.</li>
-        `;
-      } else {
-        recommendationCard.style.display = 'none';
-      }
     }
 
     function resetDetailsPanel() {
@@ -843,15 +801,6 @@
       document.getElementById('elementBadge').style.border = 'none';
       document.getElementById('elementDesc').innerText = 'Chọn một trạng thái (khối hình chữ nhật) hoặc một hành động (nhãn trên mũi tên) để xem chi tiết nghiệp vụ và đề xuất cải tiến tối ưu hóa.';
       document.getElementById('optionsSection').style.display = 'none';
-      
-      const recommendationCard = document.getElementById('recommendationCard');
-      recommendationCard.style.display = 'block';
-      recommendationCard.querySelector('h4').innerText = '💡 Đề xuất Nâng cấp Chung';
-      document.getElementById('recommendationList').innerHTML = `
-        <li><strong>Quy trình hội chẩn linh động:</strong> Cho phép yêu cầu hội chẩn ngay khi đang đọc dở ca thay vì chỉ cho phép chọn hội chẩn từ đầu.</li>
-        <li><strong>Cơ chế "Trả về":</strong> Khi người duyệt không đồng ý, nên có hành động trả về "Yêu cầu chỉnh sửa" trực tiếp về trạng thái "Đọc xong" thay vì chỉ có "Hủy duyệt".</li>
-        <li><strong>Trạng thái Đã hủy:</strong> Bổ sung trạng thái hủy ca tiếp nhận cho các ca lỗi hoặc ca không chụp được để giải phóng danh sách chờ.</li>
-      `;
     }
   </script>
 </body>
