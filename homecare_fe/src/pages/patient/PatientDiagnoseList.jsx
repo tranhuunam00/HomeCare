@@ -151,9 +151,9 @@ const PatientTablePage = ({ PID = null }) => {
         prev.map((item) =>
           item.id === updatedRecord.id
             ? {
-                ...item,
-                ...updatedRecord,
-              }
+              ...item,
+              ...updatedRecord,
+            }
             : item,
         ),
       );
@@ -162,9 +162,9 @@ const PatientTablePage = ({ PID = null }) => {
         prev.map((item) =>
           item.id === updatedRecord.id
             ? {
-                ...item,
-                ...updatedRecord,
-              }
+              ...item,
+              ...updatedRecord,
+            }
             : item,
         ),
       );
@@ -369,7 +369,7 @@ const PatientTablePage = ({ PID = null }) => {
             record.createdBy === user?.id) && (
             <Space>
               <Button
-                icon={<EditOutlined />} // 👉 Nút cập nhật
+                icon={<EditOutlined />} //  Nút cập nhật
                 type="text"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -468,11 +468,11 @@ const PatientTablePage = ({ PID = null }) => {
       }
       const res = selectedPatientDiagnose?.CCCD
         ? await API_CALL.get("/patient-diagnose", {
-            params: { CCCD: selectedPatientDiagnose?.CCCD, page: 1, limit: 20 },
-          })
+          params: { CCCD: selectedPatientDiagnose?.CCCD, page: 1, limit: 20 },
+        })
         : await API_CALL.get("/patient-diagnose", {
-            params: { PID: selectedPatientDiagnose?.PID, page: 1, limit: 20 },
-          });
+          params: { PID: selectedPatientDiagnose?.PID, page: 1, limit: 20 },
+        });
       const responseData = res.data.data;
       setSameCCCDData(responseData?.rows || []);
     } catch (err) {
@@ -552,36 +552,36 @@ const PatientTablePage = ({ PID = null }) => {
   };
   const handleResize =
     (key) =>
-    (e, { size }) => {
-      setCustomColumns((prev) => {
-        const next = prev.map((col) =>
-          col.key === key
-            ? {
+      (e, { size }) => {
+        setCustomColumns((prev) => {
+          const next = prev.map((col) =>
+            col.key === key
+              ? {
                 ...col,
                 width: size.width,
               }
-            : col,
-        );
+              : col,
+          );
 
-        // save localStorage
-        const saved = JSON.parse(
-          localStorage.getItem(COLUMN_SETTING_STORAGE_KEY) || "{}",
-        );
+          // save localStorage
+          const saved = JSON.parse(
+            localStorage.getItem(COLUMN_SETTING_STORAGE_KEY) || "{}",
+          );
 
-        localStorage.setItem(
-          COLUMN_SETTING_STORAGE_KEY,
-          JSON.stringify({
-            ...saved,
-            widths: {
-              ...(saved.widths || {}),
-              [key]: size.width,
-            },
-          }),
-        );
+          localStorage.setItem(
+            COLUMN_SETTING_STORAGE_KEY,
+            JSON.stringify({
+              ...saved,
+              widths: {
+                ...(saved.widths || {}),
+                [key]: size.width,
+              },
+            }),
+          );
 
-        return next;
-      });
-    };
+          return next;
+        });
+      };
 
   useEffect(() => {
     const saved = localStorage.getItem(COLUMN_SETTING_STORAGE_KEY);

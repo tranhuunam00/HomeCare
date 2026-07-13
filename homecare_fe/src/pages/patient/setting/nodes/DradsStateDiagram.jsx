@@ -39,10 +39,7 @@ const WORKFLOW_STATES = {
       { name: "Hủy tiếp nhận", to: "Chưa đọc", desc: "Huỷ bỏ việc nhận đọc ca bệnh này, trả kết quả về trạng thái Chưa đọc (Mới) chờ bác sĩ khác nhận." },
       { name: "Duyệt (Trực tiếp)", to: "Duyệt", desc: "Nếu bác sĩ chẩn đoán có quyền duyệt ca (quy trình 1 cấp - Auto Approve), ca sẽ được duyệt luôn." }
     ],
-    upgrades: [
-      "Thêm nút 'Yêu cầu hội chẩn' trực tiếp từ màn hình 'Đang đọc' khi bác sĩ phát hiện ca khó đột xuất.",
-      "Tự động cảnh báo cấu hình thiết bị in thiếu thông tin để tránh trường hợp duyệt xong không in được."
-    ]
+    upgrades: []
   },
   n_done: {
     title: "Đọc xong",
@@ -106,13 +103,13 @@ const WORKFLOW_TRANSITIONS = {
 };
 
 const DradsStateDiagram = () => {
-  const [svgUpgradeMode, setSvgUpgradeMode] = useState(false);
+  const [svgUpgradeMode, setSvgUpgradeMode] = useState(true);
   const [selectedSvgId, setSelectedSvgId] = useState(null);
 
   const selectedData = selectedSvgId
     ? (selectedSvgId.startsWith("n_")
-        ? WORKFLOW_STATES[selectedSvgId]
-        : WORKFLOW_TRANSITIONS[selectedSvgId])
+      ? WORKFLOW_STATES[selectedSvgId]
+      : WORKFLOW_TRANSITIONS[selectedSvgId])
     : null;
 
   return (
@@ -377,25 +374,8 @@ const DradsStateDiagram = () => {
       <div className="diagram-header">
         <div>
           <h2 style={{ fontSize: "1.1rem", fontWeight: 600, color: "#fff", margin: 0 }}>Sơ đồ Trạng thái Quy trình Báo cáo D-RADS</h2>
-          <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>Sơ đồ máy trạng thái (State Machine) tương tác & Đề xuất nâng cấp</span>
+          <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>Sơ đồ máy trạng thái (State Machine) tương tác</span>
         </div>
-        <Button
-          className={`btn-upgrade ${svgUpgradeMode ? "active" : ""}`}
-          style={{
-            background: svgUpgradeMode ? "#ec4899" : "rgba(236, 72, 153, 0.1)",
-            borderColor: svgUpgradeMode ? "#ec4899" : "rgba(236, 72, 153, 0.3)",
-            color: svgUpgradeMode ? "#fff" : "#f472b6",
-            boxShadow: svgUpgradeMode ? "0 2px 10px rgba(236, 72, 153, 0.3)" : "none"
-          }}
-          onClick={() => {
-            setSvgUpgradeMode(!svgUpgradeMode);
-            if (selectedSvgId && (selectedSvgId.startsWith("u_") || selectedSvgId === "n_cancelled")) {
-              setSelectedSvgId(null);
-            }
-          }}
-        >
-          {svgUpgradeMode ? "Ẩn đề xuất nâng cấp" : "Hiện đề xuất nâng cấp"}
-        </Button>
       </div>
 
       <div className="main-grid" onClick={() => setSelectedSvgId(null)}>
@@ -430,7 +410,7 @@ const DradsStateDiagram = () => {
                 markerEnd={selectedSvgId === "t_unread_reading" ? "url(#arrow-selected-svg)" : "url(#arrow-svg)"}
                 onClick={() => setSelectedSvgId("t_unread_reading")}
               />
-              
+
               {/* 2. Chưa đọc -> Hội chẩn (Chọn bác sĩ hội chẩn) */}
               <path
                 id="t_unread_consult"
@@ -440,7 +420,7 @@ const DradsStateDiagram = () => {
                 markerEnd={selectedSvgId === "t_unread_consult" ? "url(#arrow-selected-svg)" : "url(#arrow-svg)"}
                 onClick={() => setSelectedSvgId("t_unread_consult")}
               />
-              
+
               {/* 3. Hội chẩn -> Đang đọc (Chọn đọc) */}
               <path
                 id="t_consult_reading"
@@ -450,7 +430,7 @@ const DradsStateDiagram = () => {
                 markerEnd={selectedSvgId === "t_consult_reading" ? "url(#arrow-selected-svg)" : "url(#arrow-svg)"}
                 onClick={() => setSelectedSvgId("t_consult_reading")}
               />
-              
+
               {/* 4. Đang đọc -> Chưa đọc (Hủy tiếp nhận) */}
               <path
                 id="t_reading_unread"
@@ -460,7 +440,7 @@ const DradsStateDiagram = () => {
                 markerEnd={selectedSvgId === "t_reading_unread" ? "url(#arrow-selected-svg)" : "url(#arrow-svg)"}
                 onClick={() => setSelectedSvgId("t_reading_unread")}
               />
-              
+
               {/* 5. Đang đọc -> Đọc xong (Đọc xong) */}
               <path
                 id="t_reading_done"
@@ -470,7 +450,7 @@ const DradsStateDiagram = () => {
                 markerEnd={selectedSvgId === "t_reading_done" ? "url(#arrow-selected-svg)" : "url(#arrow-svg)"}
                 onClick={() => setSelectedSvgId("t_reading_done")}
               />
-              
+
               {/* 6. Đọc xong -> Đang đọc (Sửa đọc) */}
               <path
                 id="t_done_reading"
@@ -480,7 +460,7 @@ const DradsStateDiagram = () => {
                 markerEnd={selectedSvgId === "t_done_reading" ? "url(#arrow-selected-svg)" : "url(#arrow-svg)"}
                 onClick={() => setSelectedSvgId("t_done_reading")}
               />
-              
+
               {/* 7. Đọc xong -> Đang duyệt (Nhận duyệt) */}
               <path
                 id="t_done_reviewing"
@@ -490,7 +470,7 @@ const DradsStateDiagram = () => {
                 markerEnd={selectedSvgId === "t_done_reviewing" ? "url(#arrow-selected-svg)" : "url(#arrow-svg)"}
                 onClick={() => setSelectedSvgId("t_done_reviewing")}
               />
-              
+
               {/* 8. Đang duyệt -> Duyệt (Duyệt xong) */}
               <path
                 id="t_reviewing_approved"
@@ -500,7 +480,7 @@ const DradsStateDiagram = () => {
                 markerEnd={selectedSvgId === "t_reviewing_approved" ? "url(#arrow-selected-svg)" : "url(#arrow-svg)"}
                 onClick={() => setSelectedSvgId("t_reviewing_approved")}
               />
-              
+
               {/* 9. Đang đọc -> Duyệt (Duyệt thẳng - 1 Cấp) */}
               <path
                 id="t_reading_approved"
@@ -510,7 +490,7 @@ const DradsStateDiagram = () => {
                 markerEnd={selectedSvgId === "t_reading_approved" ? "url(#arrow-selected-svg)" : "url(#arrow-svg)"}
                 onClick={() => setSelectedSvgId("t_reading_approved")}
               />
-              
+
               {/* 10. Duyệt -> Đang duyệt (Sửa duyệt) */}
               <path
                 id="t_approved_reviewing"
@@ -520,7 +500,7 @@ const DradsStateDiagram = () => {
                 markerEnd={selectedSvgId === "t_approved_reviewing" ? "url(#arrow-selected-svg)" : "url(#arrow-svg)"}
                 onClick={() => setSelectedSvgId("t_approved_reviewing")}
               />
-              
+
               {/* 11. Duyệt -> Đọc xong (Hủy duyệt) */}
               <path
                 id="t_approved_done"
@@ -566,19 +546,19 @@ const DradsStateDiagram = () => {
               <path
                 id="u_reading_consult"
                 d="M 470 240 Q 320 320 320 390"
-                className={`flow-line upgrade-element ${selectedSvgId === "u_reading_consult" ? "selected" : ""}`}
-                stroke={selectedSvgId === "u_reading_consult" ? "#fff" : "#ec4899"}
-                markerEnd={selectedSvgId === "u_reading_consult" ? "url(#arrow-selected-svg)" : "url(#arrow-upgrade-svg)"}
+                className={`flow-line ${selectedSvgId === "u_reading_consult" ? "selected" : ""}`}
+                stroke={selectedSvgId === "u_reading_consult" ? "#fff" : "#9ca3af"}
+                markerEnd={selectedSvgId === "u_reading_consult" ? "url(#arrow-selected-svg)" : "url(#arrow-svg)"}
                 onClick={() => setSelectedSvgId("u_reading_consult")}
               />
-              
+
               {/* U2. Đang duyệt -> Đang đọc (Trả ca / Yêu cầu sửa) */}
               <path
                 id="u_reviewing_reading"
                 d="M 1040 240 Q 780 380 520 240"
-                className={`flow-line upgrade-element ${selectedSvgId === "u_reviewing_reading" ? "selected" : ""}`}
-                stroke={selectedSvgId === "u_reviewing_reading" ? "#fff" : "#ec4899"}
-                markerEnd={selectedSvgId === "u_reviewing_reading" ? "url(#arrow-selected-svg)" : "url(#arrow-upgrade-svg)"}
+                className={`flow-line ${selectedSvgId === "u_reviewing_reading" ? "selected" : ""}`}
+                stroke={selectedSvgId === "u_reviewing_reading" ? "#fff" : "#9ca3af"}
+                markerEnd={selectedSvgId === "u_reviewing_reading" ? "url(#arrow-selected-svg)" : "url(#arrow-svg)"}
                 onClick={() => setSelectedSvgId("u_reviewing_reading")}
               />
             </g>
@@ -588,43 +568,43 @@ const DradsStateDiagram = () => {
               {/* 1. Chọn đọc luôn */}
               <rect x="300" y="188" width="80" height="20" className="line-text-bg" />
               <text x="340" y="198" className="line-text" onClick={() => setSelectedSvgId("t_unread_reading")}>Chọn đọc luôn</text>
-              
+
               {/* 2. Chọn bác sĩ hội chẩn */}
               <rect x="75" y="310" width="115" height="20" className="line-text-bg" />
               <text x="132" y="320" className="line-text" onClick={() => setSelectedSvgId("t_unread_consult")}>Chọn bác sĩ hội chẩn</text>
-              
+
               {/* 3. Chọn đọc */}
               <rect x="385" y="380" width="60" height="20" className="line-text-bg" />
               <text x="415" y="390" className="line-text" onClick={() => setSelectedSvgId("t_consult_reading")}>Chọn đọc</text>
-              
+
               {/* 4. Hủy tiếp nhận */}
               <rect x="300" y="105" width="80" height="20" className="line-text-bg" />
               <text x="340" y="115" className="line-text" onClick={() => setSelectedSvgId("t_reading_unread")}>Hủy tiếp nhận</text>
-              
+
               {/* 5. Đọc xong */}
               <rect x="630" y="188" width="60" height="20" className="line-text-bg" />
               <text x="660" y="198" className="line-text" onClick={() => setSelectedSvgId("t_reading_done")}>Đọc xong</text>
-              
+
               {/* 6. Sửa đọc */}
               <rect x="630" y="105" width="60" height="20" className="line-text-bg" />
               <text x="660" y="115" className="line-text" onClick={() => setSelectedSvgId("t_done_reading")}>Sửa đọc</text>
-              
+
               {/* 7. Nhận duyệt */}
               <rect x="885" y="188" width="70" height="20" className="line-text-bg" />
               <text x="920" y="198" className="line-text" onClick={() => setSelectedSvgId("t_done_reviewing")}>Nhận duyệt</text>
-              
+
               {/* 8. Duyệt xong */}
               <rect x="1120" y="188" width="65" height="20" className="line-text-bg" />
               <text x="1152" y="198" className="line-text" onClick={() => setSelectedSvgId("t_reviewing_approved")}>Duyệt xong</text>
-              
+
               {/* 9. Duyệt (Direct) */}
               <rect x="830" y="310" width="40" height="20" className="line-text-bg" />
               <text x="850" y="320" className="line-text" onClick={() => setSelectedSvgId("t_reading_approved")}>Duyệt</text>
-              
+
               {/* 10. sửa duyệt */}
               <rect x="1115" y="100" width="60" height="20" className="line-text-bg" />
               <text x="1145" y="110" className="line-text" onClick={() => setSelectedSvgId("t_approved_reviewing")}>sửa duyệt</text>
-              
+
               {/* 11. hủy duyệt */}
               <rect x="990" y="55" width="60" height="20" className="line-text-bg" />
               <text x="1020" y="65" className="line-text" onClick={() => setSelectedSvgId("t_approved_done")}>hủy duyệt</text>
@@ -643,12 +623,12 @@ const DradsStateDiagram = () => {
 
               {/* UPGRADE LABELS */}
               {/* U1. Yêu cầu hội chẩn */}
-              <rect x="290" y="280" width="115" height="20" className="line-text-bg upgrade-element" />
-              <text x="347" y="290" className="line-text upgrade-element" fill="#ec4899" onClick={() => setSelectedSvgId("u_reading_consult")}>Yêu cầu hội chẩn</text>
+              <rect x="290" y="280" width="115" height="20" className="line-text-bg" />
+              <text x="347" y="290" className="line-text" onClick={() => setSelectedSvgId("u_reading_consult")}>Yêu cầu hội chẩn</text>
 
               {/* U2. Trả ca / Yêu cầu sửa */}
-              <rect x="700" y="280" width="130" height="20" className="line-text-bg upgrade-element" />
-              <text x="765" y="290" className="line-text upgrade-element" fill="#ec4899" onClick={() => setSelectedSvgId("u_reviewing_reading")}>Trả ca / Yêu cầu sửa</text>
+              <rect x="700" y="280" width="130" height="20" className="line-text-bg" />
+              <text x="765" y="290" className="line-text" onClick={() => setSelectedSvgId("u_reviewing_reading")}>Trả ca / Yêu cầu sửa</text>
             </g>
 
             {/* STATES */}
@@ -769,7 +749,7 @@ const DradsStateDiagram = () => {
                   <div key={i} className="transition-item">
                     <div className="transition-item-title">
                       <span>{trans.name}</span>
-                      <span style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>👉 {trans.to}</span>
+                      <span style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}> {trans.to}</span>
                     </div>
                     <div style={{ color: "var(--text-muted)", fontSize: "0.75rem", lineHeight: 1.4 }}>
                       {trans.desc}
@@ -781,7 +761,7 @@ const DradsStateDiagram = () => {
           )}
 
           {/* Recommendation Cards */}
-          {selectedData?.upgrades?.length > 0 ? (
+          {selectedData?.upgrades?.length > 0 && (
             <div className="recommendation-card">
               <h4>Đề xuất Nâng cấp</h4>
               <ul style={{ margin: 0, paddingLeft: 12 }}>
@@ -790,23 +770,7 @@ const DradsStateDiagram = () => {
                 ))}
               </ul>
             </div>
-          ) : selectedSvgId && selectedSvgId.startsWith("u_") ? (
-            <div className="recommendation-card">
-              <h4><span className="upgrade-badge-inline">Tính năng Đề xuất</span></h4>
-              <ul style={{ margin: 0, paddingLeft: 12 }}>
-                <li>Hành động này giải quyết vấn đề nghẽn cổ chai của quy trình hiện tại, tăng tính linh hoạt cho người sử dụng chuyên môn.</li>
-              </ul>
-            </div>
-          ) : !selectedSvgId ? (
-            <div className="recommendation-card">
-              <h4>Đề xuất Nâng cấp Chung</h4>
-              <ul style={{ margin: 0, paddingLeft: 12 }}>
-                <li><strong>Quy trình hội chẩn linh động:</strong> Cho phép yêu cầu hội chẩn ngay khi đang đọc dở ca thay vì chỉ cho phép chọn hội chẩn từ đầu.</li>
-                <li><strong>Cơ chế "Trả về":</strong> Khi người duyệt không đồng ý, nên có hành động trả về "Yêu cầu chỉnh sửa" trực tiếp về trạng thái "Đang đọc" thay vì chỉ có "Hủy duyệt".</li>
-                <li><strong>Kiểm soát Hủy duyệt:</strong> Khóa tính năng hủy duyệt sau 24h hoặc sau khi ca đã đồng bộ sang HIS để bảo đảm pháp lý.</li>
-              </ul>
-            </div>
-          ) : null}
+          )}
         </div>
       </div>
     </div>

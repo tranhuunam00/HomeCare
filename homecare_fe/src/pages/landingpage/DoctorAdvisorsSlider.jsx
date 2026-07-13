@@ -78,11 +78,11 @@ const DoctorAdvisorsSlider = ({ doctors = [] }) => {
       {selectedDoctor && (
         <div
           className={styles["hover-popup"]}
-          onClick={handleClosePopup} // 👉 click ra ngoài để tắt
+          onClick={handleClosePopup} //  click ra ngoài để tắt
         >
           <div
             className={styles["popup-content"]}
-            onClick={(e) => e.stopPropagation()} // 👉 chặn click bên trong popup làm tắt
+            onClick={(e) => e.stopPropagation()} //  chặn click bên trong popup làm tắt
           >
             <Avatar
               className={styles["popup-content_avatar"]}
