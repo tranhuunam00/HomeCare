@@ -65,7 +65,7 @@ const FormVer3GroupProcessPatientDiagnoise = ({
       callback();
       toast.success("Thao tác thành công");
     } catch (error) {
-      toast.error("Thao tác thất bại do lỗi ", error.message);
+      toast.error(error?.response?.data?.message || error.message || "Thao tác thất bại");
     }
   };
 

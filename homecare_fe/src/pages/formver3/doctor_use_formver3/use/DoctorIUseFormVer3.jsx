@@ -940,16 +940,20 @@ export default function DoctorUseDFormVer3({
                   patientDiagnose?.status ===
                   PATIENT_DIAGNOSE_STATUS_CODE.READ_DONE
                 ) {
-                  await API_CALL.post(
-                    `/patient-diagnose/${patientDiagnose.id}/change-status`,
-                    { status: PATIENT_DIAGNOSE_STATUS_CODE.IN_PROCESSING },
-                  );
-                  setPatientDiagnose((prev) => ({
-                    ...prev,
-                    status: PATIENT_DIAGNOSE_STATUS_CODE.IN_PROCESSING,
-                  }));
+                  try {
+                    await API_CALL.post(
+                      `/patient-diagnose/${patientDiagnose.id}/change-status`,
+                      { status: PATIENT_DIAGNOSE_STATUS_CODE.IN_PROCESSING },
+                    );
+                    setPatientDiagnose((prev) => ({
+                      ...prev,
+                      status: PATIENT_DIAGNOSE_STATUS_CODE.IN_PROCESSING,
+                    }));
 
-                  toast.success("Đã chuyển sang trạng thái ĐANG ĐỌC");
+                    toast.success("Đã chuyển sang trạng thái ĐANG ĐỌC");
+                  } catch (error) {
+                    toast.error(error?.response?.data?.message || "Không thể chuyển trạng thái");
+                  }
                 }
               }}
               onEditDuyet={async () => {
@@ -962,14 +966,18 @@ export default function DoctorUseDFormVer3({
                   patientDiagnose?.status ===
                   PATIENT_DIAGNOSE_STATUS_CODE.VERIFIED
                 ) {
-                  await API_CALL.post(
-                    `/patient-diagnose/${patientDiagnose.id}/change-status`,
-                    { status: PATIENT_DIAGNOSE_STATUS_CODE.WAIT_VERIFY },
-                  );
-                  setPatientDiagnose((prev) => ({
-                    ...prev,
-                    status: PATIENT_DIAGNOSE_STATUS_CODE.WAIT_VERIFY,
-                  }));
+                  try {
+                    await API_CALL.post(
+                      `/patient-diagnose/${patientDiagnose.id}/change-status`,
+                      { status: PATIENT_DIAGNOSE_STATUS_CODE.WAIT_VERIFY },
+                    );
+                    setPatientDiagnose((prev) => ({
+                      ...prev,
+                      status: PATIENT_DIAGNOSE_STATUS_CODE.WAIT_VERIFY,
+                    }));
+                  } catch (error) {
+                    toast.error(error?.response?.data?.message || "Không thể chuyển trạng thái");
+                  }
                 }
               }}
               editId={idEdit}
@@ -981,15 +989,19 @@ export default function DoctorUseDFormVer3({
                 ) {
                   return;
                 }
-                await API_CALL.post(
-                  `/patient-diagnose/${patientDiagnose.id}/change-status`,
-                  { status: PATIENT_DIAGNOSE_STATUS_CODE.READ_DONE },
-                );
-                setPatientDiagnose((prev) => ({
-                  ...prev,
-                  status: PATIENT_DIAGNOSE_STATUS_CODE.READ_DONE,
-                }));
-                toast.success("Đã chuyển sang trạng thái ĐỌC XONG");
+                try {
+                  await API_CALL.post(
+                    `/patient-diagnose/${patientDiagnose.id}/change-status`,
+                    { status: PATIENT_DIAGNOSE_STATUS_CODE.READ_DONE },
+                  );
+                  setPatientDiagnose((prev) => ({
+                    ...prev,
+                    status: PATIENT_DIAGNOSE_STATUS_CODE.READ_DONE,
+                  }));
+                  toast.success("Đã chuyển sang trạng thái ĐỌC XONG");
+                } catch (error) {
+                  toast.error(error?.response?.data?.message || "Không thể chuyển trạng thái ĐỌC XONG");
+                }
               }}
               onHuyDoc={async () => {
                 const newStatus = patientDiagnose.id_consulting_doctor
@@ -1003,46 +1015,58 @@ export default function DoctorUseDFormVer3({
                 ) {
                   return;
                 }
-                await API_CALL.post(
-                  `/patient-diagnose/${patientDiagnose.id}/change-status`,
-                  {
+                try {
+                  await API_CALL.post(
+                    `/patient-diagnose/${patientDiagnose.id}/change-status`,
+                    {
+                      status: newStatus,
+                    },
+                  );
+                  setPatientDiagnose((prev) => ({
+                    ...prev,
                     status: newStatus,
-                  },
-                );
-                setPatientDiagnose((prev) => ({
-                  ...prev,
-                  status: newStatus,
-                }));
-                toast.success(
-                  "Đã về trạng thái " +
-                    (newStatus == PATIENT_DIAGNOSE_STATUS_CODE.CONSULTATION
-                      ? "Hội Chẩn"
-                      : "Mới"),
-                );
+                  }));
+                  toast.success(
+                    "Đã về trạng thái " +
+                      (newStatus == PATIENT_DIAGNOSE_STATUS_CODE.CONSULTATION
+                        ? "Hội Chẩn"
+                        : "Mới"),
+                  );
+                } catch (error) {
+                  toast.error(error?.response?.data?.message || "Không thể hủy đọc");
+                }
               }}
               onNhanDuyet={async () => {
-                await API_CALL.post(
-                  `/patient-diagnose/${patientDiagnose.id}/change-status`,
-                  {
+                try {
+                  await API_CALL.post(
+                    `/patient-diagnose/${patientDiagnose.id}/change-status`,
+                    {
+                      status: PATIENT_DIAGNOSE_STATUS_CODE.WAIT_VERIFY,
+                    },
+                  );
+                  setPatientDiagnose((prev) => ({
+                    ...prev,
                     status: PATIENT_DIAGNOSE_STATUS_CODE.WAIT_VERIFY,
-                  },
-                );
-                setPatientDiagnose((prev) => ({
-                  ...prev,
-                  status: PATIENT_DIAGNOSE_STATUS_CODE.WAIT_VERIFY,
-                }));
+                  }));
+                } catch (error) {
+                  toast.error(error?.response?.data?.message || "Không thể nhận duyệt");
+                }
               }}
               onHuyDuyet={async () => {
-                await API_CALL.post(
-                  `/patient-diagnose/${patientDiagnose.id}/change-status`,
-                  {
+                try {
+                  await API_CALL.post(
+                    `/patient-diagnose/${patientDiagnose.id}/change-status`,
+                    {
+                      status: PATIENT_DIAGNOSE_STATUS_CODE.READ_DONE,
+                    },
+                  );
+                  setPatientDiagnose((prev) => ({
+                    ...prev,
                     status: PATIENT_DIAGNOSE_STATUS_CODE.READ_DONE,
-                  },
-                );
-                setPatientDiagnose((prev) => ({
-                  ...prev,
-                  status: PATIENT_DIAGNOSE_STATUS_CODE.READ_DONE,
-                }));
+                  }));
+                } catch (error) {
+                  toast.error(error?.response?.data?.message || "Không thể hủy duyệt");
+                }
               }}
               onTraCa={async () => {
                 if (
@@ -1052,17 +1076,21 @@ export default function DoctorUseDFormVer3({
                 ) {
                   return;
                 }
-                await API_CALL.post(
-                  `/patient-diagnose/${patientDiagnose.id}/change-status`,
-                  {
+                try {
+                  await API_CALL.post(
+                    `/patient-diagnose/${patientDiagnose.id}/change-status`,
+                    {
+                      status: PATIENT_DIAGNOSE_STATUS_CODE.IN_PROCESSING,
+                    },
+                  );
+                  setPatientDiagnose((prev) => ({
+                    ...prev,
                     status: PATIENT_DIAGNOSE_STATUS_CODE.IN_PROCESSING,
-                  },
-                );
-                setPatientDiagnose((prev) => ({
-                  ...prev,
-                  status: PATIENT_DIAGNOSE_STATUS_CODE.IN_PROCESSING,
-                }));
-                toast.success("Đã trả ca về trạng thái ĐANG ĐỌC");
+                  }));
+                  toast.success("Đã trả ca về trạng thái ĐANG ĐỌC");
+                } catch (error) {
+                  toast.error(error?.response?.data?.message || "Không thể trả ca");
+                }
               }}
               onTranslate={async () => {
                 if (!idEdit) {
