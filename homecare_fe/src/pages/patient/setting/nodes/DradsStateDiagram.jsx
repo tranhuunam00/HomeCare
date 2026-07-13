@@ -391,7 +391,7 @@ const DradsStateDiagram = () => {
               </pattern>
               <marker id="arrow-svg" viewBox="0 0 10 10" refX="24" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
                 <path d="M 0 0 L 10 5 L 0 10 z" fill="#9ca3af" />
-              </pattern>
+              </marker>
               <marker id="arrow-selected-svg" viewBox="0 0 10 10" refX="24" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
                 <path d="M 0 0 L 10 5 L 0 10 z" fill="#fff" />
               </marker>
