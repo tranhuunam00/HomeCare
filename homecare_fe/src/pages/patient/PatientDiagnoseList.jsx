@@ -984,6 +984,7 @@ const PatientTablePage = ({ PID = null }) => {
                 onBackDetail={() => setRightPanelMode("detail")}
                 doctorUseFormVer3Id={doctorUseFormVer3Id}
                 onStatusChange={handleStatusChange}
+                onOpenConsultation={() => setOpenConsultationModal(true)}
               />
             )}
           </div>
@@ -1005,6 +1006,7 @@ const PatientTablePage = ({ PID = null }) => {
         open={openConsultationModal}
         onClose={() => setOpenConsultationModal(false)}
         onGoReading={() => setRightPanelMode("reading")}
+        onStatusChange={handleStatusChange}
       />
 
       <TranslateListRecordsVer3

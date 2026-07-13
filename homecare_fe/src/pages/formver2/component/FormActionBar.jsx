@@ -54,6 +54,7 @@ export const KEY_ACTION_BUTTON = {
   sign: "sign",
   verifySign: "verifySign",
   tra_ca: "tra_ca",
+  consultation: "consultation",
 };
 
 export default function FormActionBar({
@@ -79,6 +80,7 @@ export default function FormActionBar({
   onHuyDuyet = () => {},
   onEditDuyet = () => {},
   onTraCa = () => {},
+  onConsultation = () => {},
 }) {
   const navigate = useNavigate();
   const { userPackages, user, doctor } = useGlobalAuth();
@@ -124,6 +126,13 @@ export default function FormActionBar({
       icon: <DeleteOutlined />,
       onClick: onHuyDoc,
       color: "red",
+    },
+    {
+      key: KEY_ACTION_BUTTON.consultation,
+      label: `HỘI CHẨN`,
+      icon: <FileWordOutlined />,
+      onClick: onConsultation,
+      color: "consultation",
     },
     {
       key: KEY_ACTION_BUTTON.nhan_duyet,
@@ -312,6 +321,9 @@ export default function FormActionBar({
             KEY_ACTION_BUTTON.exit,
             id_doctor_in_processing == doctor.id
               ? KEY_ACTION_BUTTON.huy_doc
+              : null,
+            id_doctor_in_processing == doctor.id
+              ? KEY_ACTION_BUTTON.consultation
               : null,
           ].filter(Boolean);
         }

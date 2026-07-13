@@ -67,6 +67,7 @@ export default function DoctorUseDFormVer3({
   isUse = false,
   doctorUseFormVer3Id,
   onStatusChange,
+  onOpenConsultation,
 }) {
   const printRef = useRef(null);
   const [form] = Form.useForm();
@@ -901,6 +902,7 @@ export default function DoctorUseDFormVer3({
               patientDiagnose={patientDiagnose}
               languageTranslate={languageTranslate}
               onSign={() => setSignModalOpen(true)}
+              onConsultation={onOpenConsultation}
               onPrint={() => {
                 printSourceRef.current = "manual";
 

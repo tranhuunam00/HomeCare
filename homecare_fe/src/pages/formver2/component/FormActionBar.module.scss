@@ -9,6 +9,7 @@ $clr-preview: #7c3aed; // purple
 $clr-export: #0f766e; // teal
 $clr-AI: #677721; // slate
 $clr-exit: #b91c1c; // red
+$clr-consultation: #ea580c; // orange
 
 .actionBar {
   position: fixed;
@@ -145,5 +146,14 @@ $clr-exit: #b91c1c; // red
   background-color: rgba($clr-exit, 0.06);
   &:hover {
     background-color: rgba($clr-exit, 0.12);
+  }
+}
+
+.consultation {
+  color: $clr-consultation;
+  border-color: rgba($clr-consultation, 0.35);
+  background-color: rgba($clr-consultation, 0.06);
+  &:hover {
+    background-color: rgba($clr-consultation, 0.12);
   }
 }

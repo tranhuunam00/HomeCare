@@ -6,13 +6,14 @@ import {
 } from "../../../../constant/app";
 import API_CALL from "../../../../services/axiosClient";
 import { useGlobalAuth } from "../../../../contexts/AuthContext";
+import usePatientDiagnoseStatus from "../../../../hooks/usePatientDiagnoseStatus";
 
-const ConsultationSelectModal = ({ open, onClose, onGoReading }) => {
-  const [loading, setLoading] = useState(false);
+const ConsultationSelectModal = ({ open, onClose, onGoReading, onStatusChange }) => {
   const [consultDoctorId, setConsultDoctorId] = useState();
   const [clinicDoctors, setClinicDoctors] = useState([]);
   const { selectedPatientDiagnose, setSelectedPatientDiagnose, doctor } =
     useGlobalAuth();
+  const { transitionStatus, transitioning } = usePatientDiagnoseStatus();
 
   const fetchDoctors = async () => {
     try {
@@ -32,63 +33,59 @@ const ConsultationSelectModal = ({ open, onClose, onGoReading }) => {
   };
 
   useEffect(() => {
-    if (open) {
+    if (open && selectedPatientDiagnose?.id_clinic) {
       fetchDoctors();
     }
-  }, [open]);
+  }, [open, selectedPatientDiagnose?.id_clinic]);
 
   const handleReadNow = async () => {
-    try {
-      setLoading(true);
+    const success = await transitionStatus({
+      patientDiagnoseId: selectedPatientDiagnose.id,
+      newStatus: PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESSING,
+      successMessage: "Đã nhận đọc ca bệnh",
+      onStatusChange,
+    });
 
-      await API_CALL.post(
-        `/patient-diagnose/${selectedPatientDiagnose.id}/change-status`,
-        {
-          status: PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESSING,
-        },
-      );
-
-      setSelectedPatientDiagnose((prev) => ({
-        ...prev,
-        status: PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESSING,
-        id_doctor_in_processing: doctor.id,
-      }));
-
+    if (success) {
+      // Cập nhật thêm id_doctor_in_processing vào global state vì hook chỉ cập nhật status mặc định
+      setSelectedPatientDiagnose((prev) => {
+        if (!prev || prev.id !== selectedPatientDiagnose.id) return prev;
+        return {
+          ...prev,
+          id_doctor_in_processing: doctor.id,
+        };
+      });
       onClose();
       onGoReading();
-    } catch (err) {
-      message.error("Không thể nhận đọc");
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleConsultation = async () => {
-    try {
-      setLoading(true);
+    if (!consultDoctorId) return;
 
-      await API_CALL.post(
-        `/patient-diagnose/${selectedPatientDiagnose.id}/change-status`,
-        {
-          status: PATIENT_DIAGNOSE_STATUS_NAME.CONSULTATION,
-          id_consulting_doctor: consultDoctorId,
-          id_receive_doctor: doctor.id,
-        },
-      );
-
-      setSelectedPatientDiagnose((prev) => ({
-        ...prev,
-        status: PATIENT_DIAGNOSE_STATUS_NAME.CONSULTATION,
+    const success = await transitionStatus({
+      patientDiagnoseId: selectedPatientDiagnose.id,
+      newStatus: PATIENT_DIAGNOSE_STATUS_NAME.CONSULTATION,
+      additionalPayload: {
         id_consulting_doctor: consultDoctorId,
         id_receive_doctor: doctor.id,
-      }));
+      },
+      successMessage: "Đã chuyển hội chẩn thành công",
+      onStatusChange,
+    });
 
+    if (success) {
+      // Đồng bộ nốt các trường liên quan vào global context
+      setSelectedPatientDiagnose((prev) => {
+        if (!prev || prev.id !== selectedPatientDiagnose.id) return prev;
+        return {
+          ...prev,
+          id_consulting_doctor: consultDoctorId,
+          id_receive_doctor: doctor.id,
+        };
+      });
       onClose?.();
       onGoReading();
-    } catch (err) {
-      message.error("Không thể chuyển hội chẩn");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -109,14 +106,14 @@ const ConsultationSelectModal = ({ open, onClose, onGoReading }) => {
         <Button
           type="primary"
           size="large"
-          loading={loading}
+          loading={transitioning}
           onClick={handleReadNow}
         >
           Tôi đọc ca này
         </Button>
 
-        {selectedPatientDiagnose?.status ==
-          PATIENT_DIAGNOSE_STATUS_CODE.NEW && (
+        {(selectedPatientDiagnose?.status == PATIENT_DIAGNOSE_STATUS_CODE.NEW ||
+          selectedPatientDiagnose?.status == PATIENT_DIAGNOSE_STATUS_CODE.IN_PROCESSING) && (
           <>
             <div>
               <div
@@ -143,7 +140,7 @@ const ConsultationSelectModal = ({ open, onClose, onGoReading }) => {
             </div>
             <Button
               disabled={!consultDoctorId}
-              loading={loading}
+              loading={transitioning}
               style={{
                 background: "#F59E0B",
                 color: "#fff",
