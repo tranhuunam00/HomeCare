@@ -53,6 +53,7 @@ export const KEY_ACTION_BUTTON = {
   translate_en: "translate_en",
   sign: "sign",
   verifySign: "verifySign",
+  tra_ca: "tra_ca",
 };
 
 export default function FormActionBar({
@@ -77,6 +78,7 @@ export default function FormActionBar({
   onNhanDuyet = () => {},
   onHuyDuyet = () => {},
   onEditDuyet = () => {},
+  onTraCa = () => {},
 }) {
   const navigate = useNavigate();
   const { userPackages, user, doctor } = useGlobalAuth();
@@ -159,6 +161,13 @@ export default function FormActionBar({
       label: "HỦY DUYỆT",
       icon: <DeleteOutlined />,
       onClick: onHuyDuyet,
+      color: "red",
+    },
+    {
+      key: KEY_ACTION_BUTTON.tra_ca,
+      label: "TRẢ CA",
+      icon: <DeleteOutlined />,
+      onClick: onTraCa,
       color: "red",
     },
     {
@@ -340,6 +349,10 @@ export default function FormActionBar({
             patientDiagnose.id_verify_doctor == doctor.id ||
             patientDiagnose.id_receive_doctor == doctor.id
               ? KEY_ACTION_BUTTON.huy_duyet
+              : null,
+            patientDiagnose.id_verify_doctor == doctor.id ||
+            patientDiagnose.id_receive_doctor == doctor.id
+              ? KEY_ACTION_BUTTON.tra_ca
               : null,
             patientDiagnose.id_verify_doctor == doctor.id ||
             patientDiagnose.id_receive_doctor == doctor.id

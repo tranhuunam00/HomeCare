@@ -1044,6 +1044,26 @@ export default function DoctorUseDFormVer3({
                   status: PATIENT_DIAGNOSE_STATUS_CODE.READ_DONE,
                 }));
               }}
+              onTraCa={async () => {
+                if (
+                  !window.confirm(
+                    "Bạn có chắc chắn muốn từ chối duyệt và trả ca này về trạng thái Đang đọc?",
+                  )
+                ) {
+                  return;
+                }
+                await API_CALL.post(
+                  `/patient-diagnose/${patientDiagnose.id}/change-status`,
+                  {
+                    status: PATIENT_DIAGNOSE_STATUS_CODE.IN_PROCESSING,
+                  },
+                );
+                setPatientDiagnose((prev) => ({
+                  ...prev,
+                  status: PATIENT_DIAGNOSE_STATUS_CODE.IN_PROCESSING,
+                }));
+                toast.success("Đã trả ca về trạng thái ĐANG ĐỌC");
+              }}
               onTranslate={async () => {
                 if (!idEdit) {
                   toast.warning("Chưa có form để dịch");

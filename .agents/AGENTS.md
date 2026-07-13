@@ -9,3 +9,6 @@ All agents working on this repository must adhere to the following rules:
 
 2.  **No Arbitrary Emojis/Icons:**
     *   Do not use arbitrary emoji icons in button labels, modals, tab headers, or layout sections unless explicitly requested.
+
+3.  **No Automatic Git Commits:**
+    *   Do not automatically perform git commits (`git commit`) or git pushes (`git push`). Code commits and repository pushes must be handled by the user themselves, or only executed when explicitly instructed by the user.

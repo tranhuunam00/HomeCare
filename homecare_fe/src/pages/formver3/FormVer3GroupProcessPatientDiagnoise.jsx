@@ -252,7 +252,8 @@ const FormVer3GroupProcessPatientDiagnoise = ({
         {(status === PATIENT_DIAGNOSE_STATUS_NAME.VERIFIED ||
           status === PATIENT_DIAGNOSE_STATUS_NAME.WAIT_VERIFY) &&
           (id_doctor_in_processing === doctor.id ||
-            id_receive_doctor === doctor.id) && (
+            id_receive_doctor === doctor.id ||
+            patientDiagnose.id_verify_doctor === doctor.id) && (
             <div style={{ marginTop: 16 }}>
               <ActionButton
                 color="red"
@@ -276,6 +277,36 @@ const FormVer3GroupProcessPatientDiagnoise = ({
                 }}
               >
                 Hủy duyệt
+              </ActionButton>
+            </div>
+          )}
+
+        {status === PATIENT_DIAGNOSE_STATUS_NAME.WAIT_VERIFY &&
+          (id_receive_doctor === doctor.id ||
+            patientDiagnose.id_verify_doctor === doctor.id) && (
+            <div style={{ marginTop: 16 }}>
+              <ActionButton
+                color="orange"
+                icon={<WarningOutlined />}
+                onClick={() => {
+                  const ok = window.confirm(
+                    "Bạn có chắc chắn muốn từ chối duyệt và trả ca này về trạng thái Đang đọc để chỉnh sửa?",
+                  );
+
+                  if (ok) {
+                    handleCancelReading(
+                      PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESSING,
+                      () => {
+                        setPatientDiagnose((prev) => ({
+                          ...prev,
+                          status: PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESSING,
+                        }));
+                      },
+                    );
+                  }
+                }}
+              >
+                Yêu cầu sửa
               </ActionButton>
             </div>
           )}
