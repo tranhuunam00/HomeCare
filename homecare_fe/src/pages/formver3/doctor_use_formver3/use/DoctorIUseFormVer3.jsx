@@ -158,7 +158,7 @@ export default function DoctorUseDFormVer3({
         setImagingRows(DEFAULT_IMAGING_ROWS);
       }
     }
-  }, [formVer3]);
+  }, [formVer3, idEdit]);
   const abnormalFindings = useMemo(() => {
     return imagingRows
       .filter(
