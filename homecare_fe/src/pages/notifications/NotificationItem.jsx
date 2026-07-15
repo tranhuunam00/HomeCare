@@ -1,153 +1,136 @@
 import React from "react";
-import { List, Avatar, Tag, Tooltip, Badge } from "antd";
+import { Spin, Tooltip } from "antd";
 import {
-  MessageOutlined,
-  AlertOutlined,
-  FileTextOutlined,
-  BellOutlined,
-  ContainerOutlined,
-  GiftOutlined,
   InfoCircleOutlined,
-  CheckCircleFilled,
-  EyeOutlined,
+  ContainerOutlined,
+  FileTextOutlined,
+  MessageOutlined,
+  WarningOutlined,
+  CheckCircleOutlined,
+  UserAddOutlined,
+  SwapOutlined,
 } from "@ant-design/icons";
-
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/vi";
-
 import styles from "./NotificationBell.module.scss";
 
 dayjs.extend(relativeTime);
 dayjs.locale("vi");
 
-const TYPE_CONFIG = {
+export const NOTIFICATION_TYPE_CONFIG = {
   system: {
-    icon: <InfoCircleOutlined />,
-    color: "#1677ff",
-    bg: "#e6f4ff",
     label: "Hệ thống",
+    icon: <InfoCircleOutlined />,
+    color: "#3b82f6",
+    bgColor: "#eff6ff",
+    badgeBg: "#dbeafe",
+    badgeColor: "#1d4ed8",
   },
-
   package: {
-    icon: <ContainerOutlined />,
-    color: "#fa8c16",
-    bg: "#fff7e6",
     label: "Gói dịch vụ",
+    icon: <ContainerOutlined />,
+    color: "#f59e0b",
+    bgColor: "#fffbeb",
+    badgeBg: "#fef3c7",
+    badgeColor: "#b45309",
   },
-
   diagnosis: {
-    icon: <FileTextOutlined />,
-    color: "#13c2c2",
-    bg: "#e6fffb",
     label: "Ca bệnh",
+    icon: <FileTextOutlined />,
+    color: "#0891b2",
+    bgColor: "#ecfeff",
+    badgeBg: "#cffafe",
+    badgeColor: "#0e7490",
   },
-
   chat: {
-    icon: <MessageOutlined />,
-    color: "#52c41a",
-    bg: "#f6ffed",
     label: "Tin nhắn",
+    icon: <MessageOutlined />,
+    color: "#16a34a",
+    bgColor: "#f0fdf4",
+    badgeBg: "#dcfce7",
+    badgeColor: "#15803d",
   },
-
   alert: {
-    icon: <AlertOutlined />,
-    color: "#f5222d",
-    bg: "#fff2f0",
     label: "Cảnh báo",
+    icon: <WarningOutlined />,
+    color: "#dc2626",
+    bgColor: "#fef2f2",
+    badgeBg: "#fee2e2",
+    badgeColor: "#b91c1c",
   },
-};
-
-const PRIORITY_CONFIG = {
-  low: {
-    color: "default",
-    label: "Thấp",
+  status_change: {
+    label: "Cập nhật",
+    icon: <SwapOutlined />,
+    color: "#7c3aed",
+    bgColor: "#f5f3ff",
+    badgeBg: "#ede9fe",
+    badgeColor: "#6d28d9",
   },
-
-  normal: {
-    color: "blue",
-    label: "Bình thường",
-  },
-
-  high: {
-    color: "red",
-    label: "Quan trọng",
+  new_patient: {
+    label: "Ca mới",
+    icon: <UserAddOutlined />,
+    color: "#0f766e",
+    bgColor: "#f0fdfa",
+    badgeBg: "#ccfbf1",
+    badgeColor: "#0f766e",
   },
 };
 
 const NotificationItem = ({ item, onClick }) => {
-  const { id, title, message, createdAt, is_read, priority, type, action_url } =
-    item;
-
-  const typeConfig = TYPE_CONFIG[type] || TYPE_CONFIG.system;
-
-  const priorityConfig = PRIORITY_CONFIG[priority] || PRIORITY_CONFIG.normal;
+  const { id, title, message, createdAt, is_read, type, action_url } = item;
+  const cfg = NOTIFICATION_TYPE_CONFIG[type] || NOTIFICATION_TYPE_CONFIG.system;
 
   return (
-    <List.Item
-      className={`${styles.item} ${!is_read ? styles.unread : styles.read}`}
+    <div
+      className={`${styles.item} ${!is_read ? styles.itemUnread : styles.itemRead}`}
       onClick={() => onClick(id, action_url)}
-      style={{
-        background: !is_read ? typeConfig.bg : "#fff",
-      }}
     >
-      <List.Item.Meta
-        avatar={
-          <Badge dot={!is_read}>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-              }}
-            >
-              <Avatar
-                style={{
-                  backgroundColor: typeConfig.color,
-                  marginBottom: 10,
-                  marginLeft: 5,
-                }}
-                icon={typeConfig.icon}
-              />
-              {item.is_read ? (
-                <CheckCircleFilled style={{ color: "#52c41a" }} />
-              ) : item.is_seen ? (
-                <EyeOutlined style={{ color: "#999" }} />
-              ) : (
-                <Badge status="error" />
-              )}
-            </div>
-          </Badge>
-        }
-        title={
-          <div className={styles.titleRow}>
-            <Tooltip title={title}>
-              <span
-                className={styles.title}
-                style={{
-                  fontWeight: !is_read ? 700 : 500,
-                }}
-              >
-                {title}
-              </span>
-            </Tooltip>
+      {/* Avatar */}
+      <div className={styles.avatarWrap}>
+        <div
+          className={styles.avatar}
+          style={{ background: cfg.bgColor, color: cfg.color }}
+        >
+          {cfg.icon}
+        </div>
+        {!is_read && <span className={styles.unreadDot} />}
+      </div>
 
-            <Tag color={typeConfig.color}>{typeConfig.label}</Tag>
-          </div>
-        }
-        description={
-          <>
-            <div className={styles.message}>{message}</div>
+      {/* Content */}
+      <div className={styles.content}>
+        <div className={styles.titleLine}>
+          <span
+            className={`${styles.itemTitle} ${is_read ? styles.itemTitleRead : ""}`}
+          >
+            {title}
+          </span>
+          <span
+            className={styles.typeBadge}
+            style={{ background: cfg.badgeBg, color: cfg.badgeColor }}
+          >
+            {cfg.label}
+          </span>
+        </div>
 
-            <div className={styles.meta}>
-              <Tag color={priorityConfig.color}>{priorityConfig.label}</Tag>
+        {message && (
+          <Tooltip title={message} placement="topLeft">
+            <div className={styles.itemMessage}>{message}</div>
+          </Tooltip>
+        )}
 
-              <span className={styles.time}>{dayjs(createdAt).fromNow()}</span>
-            </div>
-          </>
-        }
-      />
-    </List.Item>
+        <div className={styles.itemFooter}>
+          <span className={styles.itemTime}>
+            {dayjs(createdAt).fromNow()}
+          </span>
+          {is_read && (
+            <CheckCircleOutlined
+              style={{ fontSize: 11, color: "#94a3b8" }}
+            />
+          )}
+        </div>
+      </div>
+    </div>
   );
 };
 

@@ -1,65 +1,56 @@
 import React, { useState, useEffect, useRef } from "react";
+import { Badge, Dropdown, Spin, Button, Tooltip } from "antd";
 import {
-  Badge,
-  Dropdown,
-  List,
-  Spin,
-  Button,
-  Tag,
-  Avatar,
-  Space,
-  Radio,
-  message,
-} from "antd";
-import { BellOutlined, CheckOutlined } from "@ant-design/icons";
+  BellOutlined,
+  CheckOutlined,
+  ReloadOutlined,
+} from "@ant-design/icons";
 import dayjs from "dayjs";
 import API_CALL from "../../services/axiosClient";
 import styles from "./NotificationBell.module.scss";
 import NotificationItem from "./NotificationItem";
 import { useGlobalAuth } from "../../contexts/AuthContext";
 
+const TABS = [
+  { key: "all", label: "Tất cả" },
+  { key: "unread", label: "Chưa đọc" },
+  { key: "diagnosis", label: "Ca bệnh" },
+  { key: "package", label: "Gói dịch vụ" },
+];
+
 const NotificationBell = () => {
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const [filter, setFilter] = useState("all"); // "all" | "unread"
+  const [activeTab, setActiveTab] = useState("all");
 
   const dropdownRef = useRef(null);
   const { user, notifications, setNotifications, unreadCount, setUnreadCount } =
     useGlobalAuth();
 
-  // Fetch notification list
-  const fetchNotifications = async (pageNum = 1) => {
+  const fetchNotifications = async (pageNum = 1, tab = activeTab) => {
     if (loading) return;
     setLoading(true);
-
-    const limit = 20;
+    const limit = 15;
     const offset = (pageNum - 1) * limit;
 
     try {
-      const res = await API_CALL.get(
-        `/notification?limit=${limit}&offset=${offset}&user_id=${user?.id}`,
-      );
+      let url = `/notification?limit=${limit}&offset=${offset}&user_id=${user?.id}`;
+      if (tab === "unread") url += "&is_read=false";
+      else if (tab !== "all") url += `&type=${tab}`;
 
-      const records = res.data.data.data || [];
-      const total = res.data.data?.total || 0;
+      const res = await API_CALL.get(url);
+      const records = res.data.data?.data || res.data.data || [];
+      const total = res.data.data?.total || res.data.total || 0;
 
       setNotifications((prev) => {
-        const merged =
-          pageNum === 1 ? [...records, ...prev] : [...prev, ...records];
-
-        // unique theo id
+        const merged = pageNum === 1 ? records : [...prev, ...records];
         const unique = Array.from(
-          new Map(merged.map((item) => [item.id, item])).values(),
+          new Map(merged.map((item) => [item.id, item])).values()
         );
-
-        const nextOffset = offset + records.length;
-
-        setHasMore(nextOffset < total);
-
+        setHasMore(offset + records.length < total);
         setUnreadCount(unique.filter((n) => !n.is_read).length);
-
         return unique;
       });
       setPage(pageNum);
@@ -71,12 +62,17 @@ const NotificationBell = () => {
   };
 
   useEffect(() => {
-    if (user?.id) {
-      fetchNotifications();
-    }
+    if (user?.id) fetchNotifications(1, activeTab);
   }, [user?.id]);
 
-  // Đóng dropdown khi click ngoài
+  // Refetch khi đổi tab
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    setPage(1);
+    fetchNotifications(1, tab);
+  };
+
+  // Click outside close
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -88,82 +84,120 @@ const NotificationBell = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [visible]);
 
-  // Đánh dấu 1 cái đã đọc
   const markAsRead = async (id, actionUrl) => {
     try {
       await API_CALL.patch(`/notification/${id}/read`);
       setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, is_read: true } : n)),
+        prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
       );
       setUnreadCount((prev) => Math.max(prev - 1, 0));
-      // if (actionUrl) window.open(actionUrl, "_blank");
     } catch (err) {
       console.error("Mark read failed:", err);
     }
   };
 
-  // Đánh dấu tất cả là đã đọc
   const markAllAsRead = async () => {
     try {
       await API_CALL.patch("/notification/read-all");
-      setNotifications((prev) =>
-        prev.map((n) => ({ ...n, is_read: true, read_at: new Date() })),
-      );
+      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
       setUnreadCount(0);
-      message.success("Tất cả thông báo đã được đánh dấu là đã đọc");
     } catch (err) {
       console.error("Mark all as read failed:", err);
-      message.error("Không thể đánh dấu tất cả là đã đọc");
     }
   };
 
-  // Lọc danh sách hiển thị
-  const filteredNotifications =
-    filter === "unread"
+  // Filter for display
+  const displayList =
+    activeTab === "unread"
       ? notifications.filter((n) => !n.is_read)
-      : notifications;
+      : activeTab === "all"
+      ? notifications
+      : notifications.filter((n) => n.type === activeTab);
 
   const menuContent = (
-    <div className={styles.dropdownContainer} ref={dropdownRef}>
-      <div className={styles.header}>
-        <Space size={8}>
-          <Radio.Group
-            size="small"
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            optionType="button"
-            buttonStyle="solid"
+    <div className={styles.panel} ref={dropdownRef}>
+      {/* Header */}
+      <div className={styles.panelHeader}>
+        <div className={styles.panelHeaderLeft}>
+          <span className={styles.panelTitle}>Thông báo</span>
+          <span className={styles.panelSubtitle}>
+            {unreadCount > 0 ? `${unreadCount} chưa đọc` : "Tất cả đã đọc"}
+          </span>
+        </div>
+        <div className={styles.panelHeaderRight}>
+          <Tooltip title="Làm mới">
+            <Button
+              type="text"
+              size="small"
+              icon={<ReloadOutlined spin={loading} />}
+              onClick={() => fetchNotifications(1, activeTab)}
+              style={{ color: "#94a3b8", width: 28, height: 28, padding: 0 }}
+            />
+          </Tooltip>
+          {unreadCount > 0 && (
+            <Tooltip title="Đánh dấu tất cả đã đọc">
+              <Button
+                type="text"
+                size="small"
+                icon={<CheckOutlined />}
+                onClick={markAllAsRead}
+                style={{ color: "#3b82f6", width: 28, height: 28, padding: 0 }}
+              />
+            </Tooltip>
+          )}
+        </div>
+      </div>
+
+      {/* Filter tabs */}
+      <div className={styles.filterTabs}>
+        {TABS.map((tab) => (
+          <button
+            key={tab.key}
+            className={`${styles.filterTab} ${activeTab === tab.key ? styles.active : ""}`}
+            onClick={() => handleTabChange(tab.key)}
           >
-            <Radio.Button value="all">Tất cả</Radio.Button>
-            <Radio.Button value="unread">Chưa đọc</Radio.Button>
-          </Radio.Group>
-        </Space>
-        {unreadCount > 0 && (
-          <Button
-            type="link"
-            size="small"
-            icon={<CheckOutlined />}
-            onClick={markAllAsRead}
-          >
-            Đánh dấu tất cả
-          </Button>
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* List */}
+      <div className={styles.list}>
+        {displayList.length === 0 && !loading ? (
+          <div className={styles.empty}>
+            <BellOutlined style={{ fontSize: 32, color: "#e2e8f0" }} />
+            <span>Không có thông báo nào</span>
+          </div>
+        ) : (
+          displayList.map((item) => (
+            <NotificationItem key={item.id} item={item} onClick={markAsRead} />
+          ))
+        )}
+        {loading && (
+          <div style={{ display: "flex", justifyContent: "center", padding: 16 }}>
+            <Spin size="small" />
+          </div>
         )}
       </div>
 
-      <List
-        className={styles.list}
-        dataSource={filteredNotifications}
-        renderItem={(item) => (
-          <NotificationItem item={item} onClick={markAsRead} />
+      {/* Footer */}
+      <div className={styles.panelFooter}>
+        {hasMore && !loading && (
+          <Button
+            type="link"
+            size="small"
+            onClick={() => fetchNotifications(page + 1, activeTab)}
+            style={{ fontSize: 12, color: "#3b82f6" }}
+          >
+            Xem thêm
+          </Button>
         )}
-      />
-      {loading && <Spin style={{ display: "block", margin: "8px auto" }} />}
-      {hasMore && !loading && (
-        <Button type="link" block onClick={() => fetchNotifications(page + 1)}>
-          Xem thêm
-        </Button>
-      )}
-      {!hasMore && <div className={styles.footer}>Hết thông báo</div>}
+        {!hasMore && displayList.length > 0 && (
+          <span style={{ fontSize: 11, color: "#94a3b8" }}>
+            Đã hiển thị tất cả
+          </span>
+        )}
+      </div>
     </div>
   );
 
@@ -174,11 +208,15 @@ const NotificationBell = () => {
       open={visible}
       onOpenChange={(open) => setVisible(open)}
       placement="bottomRight"
-      arrow
+      arrow={false}
     >
-      <Badge count={unreadCount} overflowCount={99}>
-        <BellOutlined className={styles.bellIcon} />
-      </Badge>
+      <Tooltip title="Thông báo">
+        <Badge count={unreadCount} overflowCount={99} size="small">
+          <div className={styles.bellWrap}>
+            <BellOutlined className={styles.bellIcon} />
+          </div>
+        </Badge>
+      </Tooltip>
     </Dropdown>
   );
 };
