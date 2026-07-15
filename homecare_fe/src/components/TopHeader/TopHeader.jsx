@@ -203,16 +203,19 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
       )}
       {isOnWorkList && (
         <Select
+          mode="multiple"
           size="small"
-          style={{ width: 160, height: 28 }}
+          style={{ minWidth: 160, maxWidth: 240, height: 28 }}
           allowClear
           showSearch
           popupMatchSelectWidth={false}
-          value={pendingFilters.id_clinic}
+          value={Array.isArray(pendingFilters.id_clinic) ? pendingFilters.id_clinic : (pendingFilters.id_clinic ? [pendingFilters.id_clinic] : [])}
           placeholder="Chọn phòng khám"
           optionFilterProp="children"
-          onChange={(value) =>
-            setPendingFilters({ ...pendingFilters, id_clinic: value })
+          maxTagCount={1}
+          maxTagPlaceholder={(omittedValues) => `+${omittedValues.length}`}
+          onChange={(values) =>
+            setPendingFilters({ ...pendingFilters, id_clinic: values })
           }
         >
           {clinicsAll?.map((c) => (

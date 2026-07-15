@@ -15,7 +15,7 @@ const DEFAULT_FILTER_PATIENT = {
   name: null,
   PID: null,
   SID: null,
-  id_clinic: null,
+  id_clinic: [],
   status: [],
   id_template_service: null,
   date_type: null,
@@ -74,7 +74,11 @@ export const GlobalAuthProvider = ({ children }) => {
       if (activeFilters.date_type) params.date_type = activeFilters.date_type;
       if (activeFilters.from_date) params.from_date = activeFilters.from_date;
       if (activeFilters.to_date) params.to_date = activeFilters.to_date;
-      if (activeFilters.id_clinic) params.id_clinic = activeFilters.id_clinic;
+      if (activeFilters.id_clinic && Array.isArray(activeFilters.id_clinic) && activeFilters.id_clinic.length > 0) {
+        params.id_clinic = activeFilters.id_clinic;
+      } else if (activeFilters.id_clinic && !Array.isArray(activeFilters.id_clinic)) {
+        params.id_clinic = activeFilters.id_clinic;
+      }
       if (activeFilters.id_template_service) params.id_template_service = activeFilters.id_template_service;
       if (activeFilters.name) params.name = activeFilters.name;
       if (activeFilters.PID) params.PID = activeFilters.PID;

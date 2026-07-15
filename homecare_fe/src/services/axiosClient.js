@@ -13,6 +13,20 @@ const axiosInstance = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  paramsSerializer: {
+    serialize: (params) => {
+      const parts = [];
+      Object.entries(params).forEach(([key, value]) => {
+        if (value === null || value === undefined) return;
+        if (Array.isArray(value)) {
+          value.forEach((v) => parts.push(`${encodeURIComponent(key)}[]=${encodeURIComponent(v)}`));
+        } else {
+          parts.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
+        }
+      });
+      return parts.join("&");
+    },
+  },
 });
 
 // ✅ Request Interceptor (đính token nếu có)
