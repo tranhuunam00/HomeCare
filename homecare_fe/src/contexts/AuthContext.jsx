@@ -135,11 +135,19 @@ export const GlobalAuthProvider = ({ children }) => {
     );
 
     socketInstance.on("connect", () => {
-      console.log("Connected socket:", socketInstance.id);
+      console.log("=== Connected socket successfully! ID: ===", socketInstance.id);
     });
 
-    socketInstance.on("disconnect", () => {
-      console.log("Socket disconnected");
+    socketInstance.on("connect_error", (err) => {
+      console.error("=== Socket Connection Error ===", err.message, err);
+    });
+
+    socketInstance.on("error", (err) => {
+      console.error("=== Socket Generic Error ===", err);
+    });
+
+    socketInstance.on("disconnect", (reason) => {
+      console.log("=== Socket disconnected! Reason: ===", reason);
     });
 
     socketInstance.on("notification:new", (data) => {
@@ -161,7 +169,17 @@ export const GlobalAuthProvider = ({ children }) => {
       const belongsToMyClinics = recordClinicId && (
         +recordClinicId === +userClinicId || associatedClinics.includes(+recordClinicId)
       );
-      const isAdmin = user?.id_role === USER_ROLE.ADMIN;
+      const isAdmin = user?.id_role && +user.id_role === +USER_ROLE.ADMIN;
+
+      console.log("=== Socket client verification ===", {
+        recordClinicId,
+        userClinicId,
+        associatedClinics,
+        belongsToMyClinics,
+        isAdmin,
+        userRoleId: user?.id_role,
+        adminRoleId: USER_ROLE.ADMIN
+      });
 
       if (isAdmin || belongsToMyClinics) {
         console.log("=== Event clinic ID matches user access -> fetching counts ===");

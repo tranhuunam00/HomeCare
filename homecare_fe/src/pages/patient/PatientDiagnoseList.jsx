@@ -147,7 +147,7 @@ const PatientTablePage = ({ PID = null }) => {
 
       setSelectedPatientDiagnose(updatedRecord);
 
-      console.log("updatedRecord", updatedRecord);
+      console.log("=== PatientDiagnoseList received socket update: patient-diagnose-updated ===", updatedRecord);
 
       setData((prev) =>
         prev.map((item) =>
