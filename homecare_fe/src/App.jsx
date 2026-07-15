@@ -97,6 +97,7 @@ import KidneycancerForm from "./pages/advance/cancer/Kidney/KidneycancerForm";
 import OvarycancerForm from "./pages/advance/cancer/OvaryCancer/OvarycancerForm";
 import CervixcancerForm from "./pages/advance/cancer/CervixCancer/CervixcancerForm";
 import ProstatecancerForm from "./pages/advance/cancer/Prostate/ProstatecancerForm";
+import AuditLogsList from "./pages/audit-logs/AuditLogsList";
 
 function App() {
   useAuthInitializer();
@@ -335,6 +336,7 @@ function App() {
           <Route path="subscription" element={<SubscriptionPage />} />
           <Route path="package-request" element={<PackageRequestsList />} />
           <Route path="package-user" element={<UserPackagesList />} />
+          <Route path="audit-logs" element={<AuditLogsList />} />
         </Route>
       </Routes>
       <OnboardingWizard

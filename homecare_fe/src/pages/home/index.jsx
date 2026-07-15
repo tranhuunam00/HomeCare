@@ -7,6 +7,7 @@ import {
   ArrowLeftOutlined,
   MailOutlined,
   SettingOutlined,
+  HistoryOutlined,
 } from "@ant-design/icons";
 
 import Sider from "antd/es/layout/Sider";
@@ -116,6 +117,11 @@ const Sidebar = ({ collapsed }) => {
           key: "/home/clinics",
           icon: <Avatar src="/icons/clinic.png" size={avatarSize} />,
           label: "Phòng khám",
+        },
+        {
+          key: "/home/audit-logs",
+          icon: <HistoryOutlined style={{ fontSize: 16 }} />,
+          label: "Nhật ký thao tác",
         },
         user?.id_role === USER_ROLE.ADMIN && {
           key: "Dịch vụ khám",
@@ -236,7 +242,23 @@ const Sidebar = ({ collapsed }) => {
 
   const currentPath = location.pathname;
 
-  const parentKey = menuItems.find((item) =>
+  const filterMenuItems = (items) => {
+    return items
+      .filter(Boolean)
+      .map((item) => {
+        if (item.children) {
+          return {
+            ...item,
+            children: filterMenuItems(item.children),
+          };
+        }
+        return item;
+      });
+  };
+
+  const filteredMenuItems = filterMenuItems(menuItems);
+
+  const parentKey = filteredMenuItems.find((item) =>
     item?.children?.some((child) => child.key === currentPath),
   )?.key;
 
@@ -245,7 +267,7 @@ const Sidebar = ({ collapsed }) => {
       onClick={(e) => handleClick(e, isReadingForm)}
       defaultSelectedKeys={["products"]}
       mode="inline"
-      items={menuItems}
+      items={filteredMenuItems}
       inlineCollapsed={collapsed}
       selectedKeys={[location.pathname]}
       defaultOpenKeys={parentKey ? [parentKey] : []}
