@@ -199,6 +199,45 @@ const PatientMiniInfo = ({ patient, templateServices, examParts }) => {
 };
 
 const PatientTablePage = ({ PID = null }) => {
+  const containerRef = React.useRef(null);
+  const [leftWidth, setLeftWidth] = useState(() => {
+    const saved = localStorage.getItem("patient_diagnose_left_width");
+    return saved ? parseFloat(saved) : 50;
+  });
+  const [isResizing, setIsResizing] = useState(false);
+  const [isResizerHovered, setIsResizerHovered] = useState(false);
+
+  const handleMouseDown = (e) => {
+    e.preventDefault();
+    setIsResizing(true);
+    const startX = e.clientX;
+    const startWidthPercent = leftWidth;
+    const containerWidth = containerRef?.current?.getBoundingClientRect()?.width || 1200;
+
+    const handleMouseMove = (moveEvent) => {
+      const deltaX = moveEvent.clientX - startX;
+      const deltaPercent = (deltaX / containerWidth) * 100;
+      let newPercent = startWidthPercent + deltaPercent;
+
+      if (newPercent < 20) newPercent = 20;
+      if (newPercent > 80) newPercent = 80;
+
+      setLeftWidth(newPercent);
+      localStorage.setItem("patient_diagnose_left_width", newPercent.toString());
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+      document.body.style.userSelect = "";
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+
+    document.body.style.userSelect = "none";
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+  };
+
   const navigate = useNavigate();
   const { useBreakpoint } = Grid;
 
@@ -800,17 +839,18 @@ const PatientTablePage = ({ PID = null }) => {
 
   return (
     <div
+      ref={containerRef}
       style={{
         display: "flex",
         flexDirection: !deviceIsMobile ? "row" : "column",
-        gap: 8,
+        gap: !deviceIsMobile && selectedPatientDiagnose ? 0 : 8,
       }}
     >
       <div
         style={{
           padding: 0,
-          flex: 1,
-          width: !deviceIsMobile ? 200 : "100%",
+          width: !deviceIsMobile && selectedPatientDiagnose ? `${leftWidth}%` : "100%",
+          flexShrink: 0,
         }}
       >
         <div
@@ -1053,6 +1093,38 @@ const PatientTablePage = ({ PID = null }) => {
           </>
         )}
       </div>
+      {!deviceIsMobile && selectedPatientDiagnose && (
+        <div
+          onMouseDown={handleMouseDown}
+          onMouseEnter={() => setIsResizerHovered(true)}
+          onMouseLeave={() => setIsResizerHovered(false)}
+          style={{
+            width: "6px",
+            cursor: "col-resize",
+            background: isResizing || isResizerHovered ? "#3b82f6" : "#e2e8f0",
+            alignSelf: "stretch",
+            zIndex: 10,
+            transition: "background 0.2s, width 0.2s",
+            margin: "0 4px",
+            borderRadius: "3px",
+            position: "relative",
+            flexShrink: 0,
+          }}
+        >
+          {/* Grab indicator line in the middle */}
+          <div style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: "2px",
+            height: "30px",
+            background: isResizing || isResizerHovered ? "#ffffff" : "#a1a1aa",
+            borderRadius: "1px",
+            transition: "background 0.2s",
+          }} />
+        </div>
+      )}
       {selectedPatientDiagnose && (
         <div
           style={{
