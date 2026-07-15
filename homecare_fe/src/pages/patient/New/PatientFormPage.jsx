@@ -11,6 +11,7 @@ import {
   Col,
   Card,
   Divider,
+  ConfigProvider,
 } from "antd";
 import axios from "axios";
 import dayjs from "dayjs";
@@ -74,47 +75,59 @@ const PatientFormPage = () => {
     fetchCountries();
   }, []);
 
+  const fetchData = async () => {
+    if (!id) return;
+    try {
+      const res = await API_CALL.get(`/patient-diagnose/${id}`);
+      const data = res.data.data;
+      // Gán giá trị vào form
+      const dataMapping = {
+        name: data.name,
+        pid: data.PID,
+        sid: data.SID,
+        Indication: data.Indication,
+        gender: data.gender,
+        cccd: data.CCCD,
+        phone: data.phoneNumber,
+        email: data.email,
+        address: data.address,
+        country: data.countryCode,
+        province: data.province_code ? Number(data.province_code) : undefined,
+        ward: data.ward_code ? Number(data.ward_code) : undefined,
+        id_clinic: data.id_clinic || doctor?.id_clinic || undefined,
+        birth_year: data.birth_year,
+        id_template_service: data.id_template_service,
+        id_exam_part: data.id_exam_part,
+        status: data.status,
+        age: data.birth_year
+          ? new Date().getFullYear() - Number(data.birth_year)
+          : undefined,
+      };
+      form.setFieldsValue(dataMapping);
+      setInitialValues(dataMapping);
+      setIdTemplateService(data.id_template_service);
+      setSelectedProvince(data.province_code);
+    } catch (err) {
+      message.error("Không thể tải thông tin bệnh nhân");
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     if (id) {
-      const fetchData = async () => {
-        try {
-          const res = await API_CALL.get(`/patient-diagnose/${id}`);
-          const data = res.data.data;
-          // Gán giá trị vào form
-          const dataMapping = {
-            name: data.name,
-            pid: data.PID,
-            sid: data.SID,
-            Indication: data.Indication,
-            gender: data.gender,
-            cccd: data.CCCD,
-            phone: data.phoneNumber,
-            email: data.email,
-            address: data.address,
-            country: data.countryCode,
-            province: data.province_code || undefined,
-            ward: data.ward_code || undefined,
-            id_clinic: data.id_clinic || doctor?.id_clinic || undefined,
-            birth_year: data.birth_year,
-            id_template_service: data.id_template_service,
-            id_exam_part: data.id_exam_part,
-            status: data.status,
-            age: data.birth_year
-              ? new Date().getFullYear() - Number(data.birth_year)
-              : undefined,
-          };
-          form.setFieldsValue(dataMapping);
-          setInitialValues(dataMapping);
-          setIdTemplateService(data.id_template_service);
-          setSelectedProvince(data.province_code);
-        } catch (err) {
-          message.error("Không thể tải thông tin bệnh nhân");
-          console.error(err);
-        }
-      };
       fetchData();
     }
   }, [id]);
+
+  const handleReset = () => {
+    if (id) {
+      fetchData();
+    } else {
+      form.resetFields();
+      setSelectedProvince(undefined);
+      setIdTemplateService(undefined);
+    }
+  };
 
   const buildPayload = (values) => ({
     name: values.name,
@@ -204,25 +217,38 @@ const PatientFormPage = () => {
   }, [initialValues, templateServices, examParts, clinics]);
 
   return (
-    <div style={{ paddingLeft: "20%", paddingRight: "20%" }}>
-      <Card bordered>
-        <ThamKhaoLinkHomeCare
-          name={""}
-          title={id ? "CẬP NHẬT CA" : "THÊM CA MỚI"}
-          hideToplabel={true}
-          hideAdditionalInfo={true}
-        />
+    <div style={{ paddingLeft: "1%", paddingRight: "1%" }}>
+      <ConfigProvider
+        theme={{
+          token: {
+            controlHeight: 28,
+            fontSize: 12,
+          },
+          components: {
+            Form: {
+              itemMarginBottom: 6,
+            },
+            Card: {
+              paddingLG: 10,
+            },
+          },
+        }}
+      >
+        <Card bordered>
+          <h3 style={{ textAlign: "center", margin: "2px 0 8px 0", color: "#15803d", fontWeight: "bold", fontSize: "16px" }}>
+            {id ? "CẬP NHẬT CA" : "THÊM CA MỚI"}
+          </h3>
 
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={onFinish}
-          initialValues={{ country: "Vietnam" }}
-        >
-          {/* Họ tên + Giới tính */}
-          <h3 style={{ color: "#1677ff" }}>THÔNG TIN HÀNH CHÍNH</h3>
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={onFinish}
+            initialValues={{ country: "Vietnam" }}
+          >
+            {/* Họ tên + Giới tính + Năm sinh + Tuổi */}
+            <h4 style={{ color: "#1677ff", margin: "4px 0 8px 0" }}>THÔNG TIN HÀNH CHÍNH</h4>
           <Row gutter={24}>
-            <Col span={12}>
+            <Col span={8}>
               <Form.Item
                 name="name"
                 label="Họ và tên"
@@ -237,7 +263,7 @@ const PatientFormPage = () => {
                 <Input />
               </Form.Item>
             </Col>
-            <Col span={12}>
+            <Col span={4}>
               <Form.Item
                 name="gender"
                 label="Giới tính"
@@ -255,9 +281,7 @@ const PatientFormPage = () => {
                 </Select>
               </Form.Item>
             </Col>
-          </Row>
-          <Row gutter={24}>
-            <Col span={12}>
+            <Col span={6}>
               <Form.Item
                 name="birth_year"
                 label="Năm sinh"
@@ -290,7 +314,7 @@ const PatientFormPage = () => {
               </Form.Item>
             </Col>
 
-            <Col span={12}>
+            <Col span={6}>
               <Form.Item name="age" label="Tuổi">
                 <Input disabled />
               </Form.Item>
@@ -298,7 +322,7 @@ const PatientFormPage = () => {
           </Row>
 
           <Row gutter={16}>
-            <Col span={12}>
+            <Col span={8}>
               <Form.Item
                 name="province"
                 label="Tỉnh/Thành phố"
@@ -327,7 +351,7 @@ const PatientFormPage = () => {
                 </Select>
               </Form.Item>
             </Col>
-            <Col span={12}>
+            <Col span={8}>
               <Form.Item
                 name="ward"
                 label="Phường/Xã"
@@ -354,15 +378,9 @@ const PatientFormPage = () => {
                 </Select>
               </Form.Item>
             </Col>
-          </Row>
-
-          <Row>
-            <Col span={24}>
+            <Col span={8}>
               <Form.Item name="address" label="Chi tiết địa chỉ">
-                <Input.TextArea
-                  placeholder="Nhập địa chỉ cụ thể (số nhà, ngõ...)"
-                  autoSize={{ minRows: 1, maxRows: 2 }}
-                />
+                <Input placeholder="Nhập địa chỉ cụ thể (số nhà, ngõ...)" />
               </Form.Item>
             </Col>
           </Row>
@@ -473,16 +491,15 @@ const PatientFormPage = () => {
               </Form.Item>
             </Col>
           </Row>
-          <Divider />
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <h3 style={{ color: "#1677ff" }}>THÔNG TIN CHỈ ĐỊNH</h3>
+          <Divider style={{ margin: "8px 0" }} />
+          <div style={{ display: "flex", alignItems: "center", margin: "4px 0 8px 0", gap: 12 }}>
+            <h4 style={{ color: "#1677ff", margin: 0 }}>THÔNG TIN CHỈ ĐỊNH</h4>
 
             <ReloadTSAndExamPartsButton />
 
-            <h5 style={{ fontStyle: "italic", fontWeight: 400 }}>
-              Nếu mục nhập chỉ định bị rỗng, vui lòng ấn nút reload - bên trái
-              để lấy lại thông tin
-            </h5>
+            <span style={{ fontStyle: "italic", fontWeight: 400, fontSize: "11px", color: "#64748b" }}>
+              Nếu mục nhập chỉ định bị rỗng, vui lòng ấn nút reload bên trái để lấy lại thông tin
+            </span>
           </div>
           <Row gutter={16}>
             <Col span={12}>
@@ -582,13 +599,7 @@ const PatientFormPage = () => {
             <Col>
               <Form.Item>
                 <Button
-                  onClick={() => {
-                    if (initialValues) {
-                      form.setFieldsValue(initialValues);
-                      setSelectedProvince(initialValues.province);
-                    }
-                  }}
-                  disabled={!initialValues}
+                  onClick={handleReset}
                 >
                   Reset
                 </Button>
@@ -610,6 +621,7 @@ const PatientFormPage = () => {
 
         <ConfirmActionModal {...confirmState} />
       </Card>
+      </ConfigProvider>
     </div>
   );
 };
