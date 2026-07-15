@@ -14,7 +14,12 @@
   :global {
     .ant-table-thead > tr > th {
       padding: 4px 6px; // 👈 thu gọn chiều cao header
-      line-height: 1;
+      line-height: 1.2;
+      font-size: 11px !important;
+      font-weight: 600 !important;
+    }
+    .ant-table-tbody > tr > td {
+      font-size: 11px !important;
     }
   }
 }

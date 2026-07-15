@@ -1,7 +1,7 @@
 import { Button, Form, Space, Tooltip } from "antd";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { PATIENT_DIAGNOSE_STATUS_NAME } from "../constant/app";
+import { PATIENT_DIAGNOSE_STATUS_NAME, PATIENT_DIAGNOSE_COLOR } from "../constant/app";
 import {
   EyeOutlined,
   StopOutlined,
@@ -13,14 +13,6 @@ import {
   UpOutlined,
   DownOutlined,
 } from "@ant-design/icons";
-
-// Màu chuẩn theo status
-const PATIENT_DIAGNOSE_COLOR = {
-  1: "#1890ff", // blue
-  2: "#faad14", // gold
-  3: "#fa8c16", // orange
-  4: "#52c41a", // green
-};
 
 const CompletionActionsDiagnose = ({
   statusCode,

@@ -888,11 +888,10 @@ const PatientTablePage = ({ PID = null }) => {
         </ConfigProvider>
         {sameCCCDData.length > 0 && selectedPatientDiagnose && (
           <>
-            <Divider style={{ margin: "12px 0" }} />
+            <Divider style={{ margin: "6px 0" }} />
 
-            <Typography.Text strong style={{ color: "#cf1322" }}>
-              Các kết quả quả khác của {selectedPatientDiagnose?.name}: (
-              {sameCCCDData.length}) bản ghi
+            <Typography.Text strong style={{ color: "#1e3a8a", fontSize: "11px", display: "block", marginBottom: "4px" }}>
+              Lịch sử ca khám của {selectedPatientDiagnose?.name} ({sameCCCDData.length} ca)
             </Typography.Text>
 
             <ConfigProvider
@@ -908,6 +907,7 @@ const PatientTablePage = ({ PID = null }) => {
               <Table
                 rowKey="id"
                 size="small"
+                rootClassName={styles.patientTable}
                 tableLayout="fixed"
                 columns={mergedColumns}
                 dataSource={sameCCCDData}

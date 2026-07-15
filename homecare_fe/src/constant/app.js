@@ -51,12 +51,12 @@ export const PATIENT_DIAGNOSE_STATUS_CODE = {
   VERIFIED: 6,
 };
 export const PATIENT_DIAGNOSE_COLOR = {
-  1: "#EF4444", // Chưa đọc - red
-  2: "#e2b86f", // Hội chẩn - amber
-  3: "#FB923C", // Đang đọc - orange
-  4: "#0EA5E9", // Đọc xong - sky blue
-  5: "#5ed36d", // Đang duyệt - violet
-  6: "#22C55E", // Duyệt xong - green
+  1: "#f43f5e", // Chưa đọc - Rose red
+  2: "#d97706", // Hội chẩn - Amber gold
+  3: "#f97316", // Đang đọc - Active orange
+  4: "#0284c7", // Đọc xong - Sky blue
+  5: "#8b5cf6", // Đang duyệt - Violet purple
+  6: "#10b981", // Duyệt xong - Emerald green
 };
 
 export function extractDynamicFieldsFromHtml(htmlString) {
