@@ -92,7 +92,14 @@ div[style*="text-align: left"], div[style*="textAlign: left"], td:first-child, t
     box-shadow: none;
     page-break-after: always;
   }
-}:contentReference[oaicite:27]{index=27}
+}
+
+.ant-menu-item, .ant-menu-submenu-title {
+  height: 32px !important;
+  line-height: 32px !important;
+  margin-top: 2px !important;
+  margin-bottom: 2px !important;
+}
 
 
 .ant-menu-item-selected {

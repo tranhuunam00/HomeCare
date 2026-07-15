@@ -3,10 +3,10 @@
   justify-content: space-between;
   align-items: center;
   height: 40px;
-  padding: 0 12px;
+  padding: 0;
   background: #f8f9fa;
   box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
-  width: calc(100vw - 84px);
+  width: calc(100vw - 20px);
   gap: 8px;
 }
 
@@ -67,6 +67,7 @@
 .dropdownMenu {
   min-width: 220px;
 }
+
 .topHeader__rightToggle {
   font-size: 20px;
   cursor: pointer;
@@ -78,6 +79,7 @@
     color: #1677ff;
   }
 }
+
 .qrContact {
   margin-top: 24px;
   padding: 16px;
@@ -149,9 +151,11 @@
     font-weight: bold;
   }
 }
+
 .topHeader__right_name {
   font-size: 12px;
 }
+
 .topHeader__right_avatar {
   width: 28px;
   height: 28px;
@@ -161,9 +165,11 @@
   .topHeader__right_name {
     font-size: 8px;
   }
+
   .topHeader__right {
     margin-left: 12px;
   }
+
   .topHeader__right_avatar {
     width: 28px;
     height: 28px;
