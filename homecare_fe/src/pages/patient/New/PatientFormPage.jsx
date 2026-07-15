@@ -451,7 +451,16 @@ const PatientFormPage = () => {
           </Row>
           <Row gutter={16}>
             <Col span={8}>
-              <Form.Item name="cccd" label="CCCD">
+              <Form.Item
+                name="cccd"
+                label="CCCD"
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng nhập không để trống trường dữ liệu",
+                  },
+                ]}
+              >
                 <Input placeholder="Nhập số CCCD / CMND" />
               </Form.Item>
             </Col>
