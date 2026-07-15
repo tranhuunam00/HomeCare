@@ -141,7 +141,7 @@ const ImagingStructureTable = ({
       </Button>
       {rows.some((r) => r.status === "abnormal") && (
         <>
-          <div style={{ marginTop: 24, fontWeight: 600 }}>
+          <div style={{ marginTop: 24, fontWeight: 600, fontSize: "13px", color: "#374151" }}>
             {translateLabel(languageTranslate, "Mô tả chi tiết", false)}
           </div>
 
@@ -149,11 +149,11 @@ const ImagingStructureTable = ({
             .filter((r) => r.status === "abnormal")
             .map((row, idx) => (
               <Row key={row.id} gutter={8} style={{ marginTop: 8 }}>
-                <Col span={1}>{idx + 1}</Col>
-                <Col span={5}>
-                  <strong>{row.name}</strong>
+                <Col span={1} style={{ fontSize: "12px", color: "#6b7280", paddingTop: "5px" }}>{idx + 1}</Col>
+                <Col span={6} style={{ fontSize: "12px", fontWeight: "600", color: "#1f2937", lineHeight: "1.4", paddingTop: "5px" }}>
+                  {row.name}
                 </Col>
-                <Col span={18}>
+                <Col span={17}>
                   <TextArea
                     disabled={!isEdit}
                     placeholder="Nhập mô tả bất thường..."
