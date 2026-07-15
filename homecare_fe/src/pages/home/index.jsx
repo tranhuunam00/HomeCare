@@ -6,19 +6,13 @@ import {
   ArrowLeftOutlined,
   MailOutlined,
   SettingOutlined,
-  CloseSquareOutlined,
-  TeamOutlined,
-  SyncOutlined,
-  CheckCircleOutlined,
-  ClockCircleOutlined,
-  FileDoneOutlined,
 } from "@ant-design/icons";
 
 import Sider from "antd/es/layout/Sider";
 import { Content } from "antd/es/layout/layout";
 import TopHeader from "../../components/TopHeader/TopHeader";
 import { useGlobalAuth } from "../../contexts/AuthContext";
-import { PATIENT_DIAGNOSE_COLOR, USER_ROLE } from "../../constant/app";
+import { PATIENT_DIAGNOSE_COLOR, USER_ROLE, getPatientDiagnoseIcon } from "../../constant/app";
 import { toast } from "react-toastify";
 import { hasProOrBusiness } from "../../constant/permission";
 import { Grid } from "antd";
@@ -259,25 +253,7 @@ const Sidebar = ({ collapsed }) => {
   );
 };
 
-const getStatusIcon = (status, color = "#fff") => {
-  const style = { color, fontSize: 13 };
-  switch (status) {
-    case 1:
-      return <CloseSquareOutlined style={style} />;
-    case 2:
-      return <TeamOutlined style={style} />;
-    case 3:
-      return <SyncOutlined spin style={style} />;
-    case 4:
-      return <CheckCircleOutlined style={style} />;
-    case 5:
-      return <ClockCircleOutlined style={style} />;
-    case 6:
-      return <FileDoneOutlined style={style} />;
-    default:
-      return null;
-  }
-};
+
 
 const Home = () => {
   const {
@@ -402,7 +378,7 @@ const Home = () => {
                               boxShadow: isChecked ? "0 0 4px rgba(0,0,0,0.2)" : "none",
                             }}
                           >
-                            {getStatusIcon(intKey, "#fff")}
+                            {getPatientDiagnoseIcon(intKey, { style: { color: "#fff" }, spin: intKey === 3 })}
                           </div>
                         </Tooltip>
                       );
@@ -477,7 +453,7 @@ const Home = () => {
                               checked={isChecked}
                               style={{ pointerEvents: "none", transform: "scale(0.85)" }}
                             />
-                            {getStatusIcon(intKey, PATIENT_DIAGNOSE_COLOR[intKey])}
+                            {getPatientDiagnoseIcon(intKey, { style: { color: PATIENT_DIAGNOSE_COLOR[intKey] }, spin: intKey === 3 })}
                             <span style={{ fontSize: 11, fontWeight: 500, color: "#334155" }}>
                               {label}
                             </span>

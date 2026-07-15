@@ -26,12 +26,6 @@ import {
   EditOutlined,
   ApartmentOutlined,
   UploadOutlined,
-  CloseSquareOutlined,
-  TeamOutlined,
-  SyncOutlined,
-  CheckCircleOutlined,
-  ClockCircleOutlined,
-  FileDoneOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import API_CALL from "../../services/axiosClient";
@@ -41,6 +35,7 @@ import {
   PATIENT_DIAGNOSE_STATUS,
   PATIENT_DIAGNOSE_STATUS_CODE,
   USER_ROLE,
+  getPatientDiagnoseIcon,
 } from "../../constant/app";
 
 import { toast } from "react-toastify";
@@ -237,44 +232,21 @@ const PatientTablePage = ({ PID = null }) => {
         dataIndex: "status",
         key: "status",
         width: 115,
-        render: (status) => {
-          let icon = null;
-          switch (status) {
-            case 1:
-              icon = <CloseSquareOutlined style={{ marginRight: 4 }} />;
-              break;
-            case 2:
-              icon = <TeamOutlined style={{ marginRight: 4 }} />;
-              break;
-            case 3:
-              icon = <SyncOutlined spin style={{ marginRight: 4 }} />;
-              break;
-            case 4:
-              icon = <CheckCircleOutlined style={{ marginRight: 4 }} />;
-              break;
-            case 5:
-              icon = <ClockCircleOutlined style={{ marginRight: 4 }} />;
-              break;
-            case 6:
-              icon = <FileDoneOutlined style={{ marginRight: 4 }} />;
-              break;
-          }
-          return (
-            <Tag
-              style={{
-                width: 96,
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "2px 0",
-              }}
-              color={PATIENT_DIAGNOSE_COLOR[status]}
-            >
-              {icon}
-              <span>{PATIENT_DIAGNOSE_STATUS[status]}</span>
-            </Tag>
-          );
-        },
+        render: (status) => (
+          <Tag
+            style={{
+              width: 96,
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "2px 0",
+            }}
+            color={PATIENT_DIAGNOSE_COLOR[status]}
+          >
+            {getPatientDiagnoseIcon(status, { style: { marginRight: 4 }, spin: status === 3 })}
+            <span>{PATIENT_DIAGNOSE_STATUS[status]}</span>
+          </Tag>
+        ),
         sorter: true,
       },
       {

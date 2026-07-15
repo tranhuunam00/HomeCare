@@ -1,7 +1,16 @@
+import React from "react";
 import { toast } from "react-toastify";
 import API_CALL from "../services/axiosClient";
 import { TRANSLATE_MULTI_REPORT } from "./translate.report";
 import dayjs from "dayjs";
+import {
+  FileTextOutlined,
+  TeamOutlined,
+  SyncOutlined,
+  CheckCircleOutlined,
+  ClockCircleOutlined,
+  FileDoneOutlined,
+} from "@ant-design/icons";
 
 export const ROLE = {
   admin: "ADMIN",
@@ -57,6 +66,27 @@ export const PATIENT_DIAGNOSE_COLOR = {
   4: "#0284c7", // Đọc xong - Sky blue
   5: "#8b5cf6", // Đang duyệt - Violet purple
   6: "#10b981", // Duyệt xong - Emerald green
+};
+
+export const getPatientDiagnoseIcon = (status, styleProps = {}) => {
+  const style = { fontSize: 13, ...styleProps.style };
+  const { spin, ...rest } = styleProps;
+  switch (Number(status)) {
+    case 1:
+      return React.createElement(FileTextOutlined, { style, ...rest });
+    case 2:
+      return React.createElement(TeamOutlined, { style, ...rest });
+    case 3:
+      return React.createElement(SyncOutlined, { spin, style, ...rest });
+    case 4:
+      return React.createElement(CheckCircleOutlined, { style, ...rest });
+    case 5:
+      return React.createElement(ClockCircleOutlined, { style, ...rest });
+    case 6:
+      return React.createElement(FileDoneOutlined, { style, ...rest });
+    default:
+      return null;
+  }
 };
 
 export function extractDynamicFieldsFromHtml(htmlString) {

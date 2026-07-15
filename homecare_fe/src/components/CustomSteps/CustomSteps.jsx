@@ -2,7 +2,7 @@ import React from "react";
 import { Tooltip } from "antd";
 import "./CustomSteps.scss";
 import { CloseOutlined } from "@ant-design/icons";
-import { PATIENT_DIAGNOSE_STATUS_CODE } from "../../constant/app";
+import { PATIENT_DIAGNOSE_STATUS_CODE, getPatientDiagnoseIcon } from "../../constant/app";
 
 const CustomSteps = ({
   steps = [],
@@ -36,23 +36,33 @@ const CustomSteps = ({
           !is_consultation_doctor &&
           current + 1 > PATIENT_DIAGNOSE_STATUS_CODE.CONSULTATION;
 
-        const backgroundColor =
-          isNotConsultation &&
-          step.key === PATIENT_DIAGNOSE_STATUS_CODE.CONSULTATION
-            ? "#1a1818"
-            : isActive
-              ? step.color
-              : isCompleted
-                ? `${step.color}22`
-                : "#e5e7eb";
+        const isConsultationStep = step.key === PATIENT_DIAGNOSE_STATUS_CODE.CONSULTATION;
+        const isSkipped = isNotConsultation && isConsultationStep;
+        const isUpcoming = index > current;
 
-        const borderColor = step.color;
-
-        const textColor = isActive
-          ? "#fff"
-          : isCompleted
+        const backgroundColor = isSkipped
+          ? "#f3f4f6"
+          : isActive
             ? step.color
-            : "#6b7280";
+            : isCompleted
+              ? `${step.color}15`
+              : "#f9fafb";
+
+        const borderColor = isSkipped
+          ? "#cbd5e1"
+          : isUpcoming
+            ? "#d1d5db"
+            : step.color;
+
+        const borderStyle = isUpcoming ? "dashed" : "solid";
+
+        const iconColor = isSkipped
+          ? "#94a3b8"
+          : isActive
+            ? "#fff"
+            : isCompleted
+              ? step.color
+              : "#9ca3af";
 
         const stepContent = (
           <div
@@ -60,26 +70,44 @@ const CustomSteps = ({
             onClick={() => (isActive ? step.onStepClick?.() : null)}
             style={{
               background: backgroundColor,
-              border: `1px solid ${borderColor}`,
-              color: textColor,
+              border: `1px ${borderStyle} ${borderColor}`,
               cursor: isActive ? "pointer" : "default",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: isActive ? 26 : 22,
+              height: isActive ? 26 : 22,
+              borderRadius: isActive ? "50%" : "4px",
+              transform: isActive ? "scale(1.15)" : "none",
+              boxShadow: isActive ? `0 2px 6px ${step.color}44` : "none",
+              zIndex: isActive ? 3 : 1,
+              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
             }}
           >
-            <span className="step-title">{step.title}</span>
+            {getPatientDiagnoseIcon(step.key, { style: { color: iconColor, fontSize: isActive ? 14 : 12 }, spin: isActive })}
           </div>
         );
 
         return (
-          <div key={index} className="step-wrapper">
-            {isActive ? (
-              <Tooltip title="Ấn để thao tác chi tiết" placement="top">
-                {stepContent}
-              </Tooltip>
-            ) : (
-              stepContent
-            )}
+          <div key={index} className="step-wrapper" style={{ display: "inline-flex", alignItems: "center" }}>
+            <Tooltip
+              title={isActive ? "Ấn để thao tác chi tiết" : step.title}
+              placement="top"
+            >
+              {stepContent}
+            </Tooltip>
 
-            {index < steps.length - 1 && <div className="arrow" />}
+            {index < steps.length - 1 && (
+              <div 
+                className={`arrow ${isCompleted ? "completed" : "disabled"}`} 
+                style={{ 
+                  color: isCompleted ? step.color : "#d1d5db",
+                  fontWeight: isCompleted ? "bold" : "normal",
+                  marginLeft: 4,
+                  marginRight: 4,
+                }} 
+              />
+            )}
           </div>
         );
       })}
