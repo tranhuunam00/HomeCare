@@ -7,7 +7,7 @@ import { useGlobalAuth } from "../../../../contexts/AuthContext";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 
-const PackageCard = ({ planKey, plan, onSelect, isLanding }) => {
+const PackageCard = ({ planKey, plan, onSelect, isLanding, compact }) => {
   const { doctor } = useGlobalAuth();
   const fees = PACKAGE_FEES[planKey];
   const navigate = useNavigate();
@@ -24,36 +24,52 @@ const PackageCard = ({ planKey, plan, onSelect, isLanding }) => {
   };
 
   return (
-    <Card className={styles.packageCard} hoverable>
+    <Card 
+      className={styles.packageCard} 
+      hoverable
+      bodyStyle={compact ? { padding: "12px 10px" } : undefined}
+      styles={compact ? { body: { padding: "12px 10px" } } : undefined}
+    >
       <div className={styles.contentWrapper}>
         <div className={styles.header}>
-          <h3>{plan.name}</h3>
+          <h3 style={compact ? { fontSize: "14px", marginBottom: 2 } : undefined}>{plan.name}</h3>
           {plan.isFree && (
             <h4
               style={{
                 color: "red",
                 fontWeight: 500,
-                fontSize: 16,
+                fontSize: compact ? 12 : 16,
+                margin: 0
               }}
             >
               Miễn phí
             </h4>
           )}
           {!plan.isFree && (
-            <h4 style={{ color: "green", fontWeight: 500, fontSize: 16 }}>
+            <h4 style={{ color: "green", fontWeight: 500, fontSize: compact ? 12 : 16, margin: 0 }}>
               Trả phí
             </h4>
           )}
-          <p className={styles.desc}>{plan.description}</p>
+          <p 
+            className={styles.desc}
+            style={compact ? { fontSize: "11px", marginBottom: 6, lineHeight: "14px", height: "42px", overflow: "hidden" } : undefined}
+          >
+            {plan.description}
+          </p>
         </div>
 
-        <ul className={styles.features}>
+        <ul 
+          className={styles.features}
+          style={compact ? { margin: "8px 0 12px", padding: "0 4px" } : undefined}
+        >
           {plan.permissions.map((feat, index) => (
-            <li key={index}>
+            <li key={index} style={compact ? { fontSize: "11px", padding: "3px 0", gap: "4px" } : undefined}>
               <CheckOutlined className={styles.icon} />
-              <span>{feat.label}</span>
+              <span style={compact ? { whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "80%" } : undefined}>
+                {feat.label}
+              </span>
               <Tooltip title={feat.description}>
-                <InfoCircleOutlined className={styles.infoIcon} />
+                <InfoCircleOutlined className={styles.infoIcon} style={compact ? { fontSize: "10px" } : undefined} />
               </Tooltip>
             </li>
           ))}
@@ -64,10 +80,12 @@ const PackageCard = ({ planKey, plan, onSelect, isLanding }) => {
         block
         className={styles.button}
         onClick={handleSelect}
+        size={compact ? "small" : "middle"}
+        style={compact ? { fontSize: "12px", borderRadius: 4, height: 28 } : undefined}
       >
         Đăng ký ngay
       </Button>
-      <Divider />
+      {!compact && <Divider />}
     </Card>
   );
 };
