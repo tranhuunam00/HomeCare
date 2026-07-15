@@ -2,31 +2,32 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 64px;
-  padding: 0 24px;
+  height: 40px;
+  padding: 0 12px;
   background: #f8f9fa;
   box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
   width: calc(100vw - 84px);
+  gap: 8px;
 }
 
 .topHeader__left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
 }
 
 .topHeader__logo {
-  width: 36px;
-  height: 36px;
+  width: 26px;
+  height: 26px;
 }
 
 .topHeader__title {
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 600;
 }
 
 .topHeader__toggleIcon {
-  font-size: 20px;
+  font-size: 16px;
   cursor: pointer;
   transition: 0.3s;
 
@@ -38,17 +39,17 @@
 .topHeader__right {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 8px;
 }
 
 .topHeader__search {
-  width: 300px;
+  width: 200px;
   border-radius: 20px;
   background: #fff;
 }
 
 .topHeader__icon {
-  font-size: 20px;
+  font-size: 16px;
   cursor: pointer;
   color: #444;
 }
@@ -152,8 +153,8 @@
   font-size: 12px;
 }
 .topHeader__right_avatar {
-  width: 50px;
-  height: 50px;
+  width: 28px;
+  height: 28px;
 }
 
 @media (max-width: 768px) {
@@ -161,10 +162,10 @@
     font-size: 8px;
   }
   .topHeader__right {
-    margin-left: 30px;
+    margin-left: 12px;
   }
   .topHeader__right_avatar {
-    width: 50px;
-    height: 30px;
+    width: 28px;
+    height: 28px;
   }
 }

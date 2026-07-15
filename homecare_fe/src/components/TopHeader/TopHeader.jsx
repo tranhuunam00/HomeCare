@@ -107,7 +107,7 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
         {!collapsed && <span className={styles.topHeader__title}>D-RADS</span>}
         <Tooltip title={collapsed ? "Mở rộng menu" : "Thu nhỏ menu"}>
           <MenuOutlined
-            style={{ marginLeft: 50, cursor: "pointer" }}
+            style={{ marginLeft: 16, cursor: "pointer" }}
             onClick={toggleSidebar}
             className={styles.topHeader__toggleIcon}
           />
@@ -115,11 +115,14 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
       </div>
       <Tooltip title="Quy trình">
         <Button
+          size="small"
           icon={<ApartmentOutlined />}
           style={{
             background: "linear-gradient(135deg, #3526b9, #69b1ff)",
             border: "none",
             color: "#fff",
+            height: 28,
+            fontSize: "12px",
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.background =
@@ -135,15 +138,17 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
         </Button>
       </Tooltip>
       {isOnWorkList && (
-        <Typography.Title level={4} style={{ margin: 0, whiteSpace: "nowrap" }}>
+        <span style={{ fontSize: "12px", fontWeight: "600", color: "#334155", whiteSpace: "nowrap" }}>
           Số Ca = {totalPatient}
-        </Typography.Title>
+        </span>
       )}
 
       {isOnWorkList && (
         <Select
+          size="small"
           allowClear
-          style={{ width: "100%", maxWidth: 300 }}
+          style={{ width: 130, height: 28 }}
+          popupMatchSelectWidth={false}
           value={pendingFilters.id_template_service}
           placeholder="Phân hệ"
           onChange={(value) =>
@@ -160,13 +165,49 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
           ))}
         </Select>
       )}
-      {isOnWorkList && <ReloadTSAndExamPartsButton />}
+      {isOnWorkList && (
+        <Input
+          placeholder="PID"
+          size="small"
+          onChange={(e) =>
+            setPendingFilters({ ...pendingFilters, PID: e.target.value })
+          }
+          allowClear
+          value={pendingFilters?.PID}
+          style={{
+            width: 100,
+            height: 28,
+            fontSize: "12px",
+            borderRadius: "4px",
+            borderColor: "#cbd5e1",
+          }}
+        />
+      )}
+      {isOnWorkList && (
+        <Input
+          placeholder="Họ tên bệnh nhân"
+          size="small"
+          onChange={(e) =>
+            setPendingFilters({ ...pendingFilters, name: e.target.value })
+          }
+          allowClear
+          value={pendingFilters?.name}
+          style={{
+            width: 140,
+            height: 28,
+            fontSize: "12px",
+            borderRadius: "4px",
+            borderColor: "#cbd5e1",
+          }}
+        />
+      )}
       {isOnWorkList && (
         <Select
-          className="smallSelect"
-          style={{ width: "100%", maxWidth: 300 }}
+          size="small"
+          style={{ width: 160, height: 28 }}
           allowClear
           showSearch
+          popupMatchSelectWidth={false}
           value={pendingFilters.id_clinic}
           placeholder="Chọn phòng khám"
           optionFilterProp="children"
@@ -183,17 +224,21 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
       )}
       <Button
         type="primary"
+        size="small"
+        style={{ height: 28, fontSize: "12px" }}
         icon={<UserAddOutlined />}
         onClick={() => navigate("/home/patients-diagnose/create")}
       >
-        Thêm mới ca
+        Thêm
       </Button>
       <Button
         type="primary"
+        size="small"
+        style={{ height: 28, fontSize: "12px" }}
         icon={<UploadOutlined />}
         onClick={() => setOpenImportModal(true)}
       >
-        Import danh sách ca
+        Import
       </Button>
 
       {/* --- Right side --- */}

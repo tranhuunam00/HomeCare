@@ -15,21 +15,19 @@ $clr-consultation: #ea580c; // orange
   position: fixed;
   bottom: 0;
   background: rgb(255, 255, 255);
-  border-top: 1px solid rgba(45, 19, 173, 0.233);
-  padding-top: 8;
+  border-top: 1px solid #e2e8f0;
+  padding: 6px 12px;
+  z-index: 3;
+  width: 100%;
 }
 
 .actionGrid {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 10px;
-
-  @media (max-width: 992px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  @media (max-width: 576px) {
-    grid-template-columns: 1fr;
-  }
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  width: 100%;
+  flex-wrap: wrap;
 }
 
 .btn {

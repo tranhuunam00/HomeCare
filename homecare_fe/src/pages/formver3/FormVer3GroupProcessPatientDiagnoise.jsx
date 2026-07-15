@@ -47,16 +47,18 @@ const FormVer3GroupProcessPatientDiagnoise = ({
           display: "flex",
           flexDirection: "row",
           background: "#ffffff",
-          gap: 30,
+          gap: 6,
           width: "41vw",
           bottom: 0,
-          borderTop: "1px solid #474f946c",
+          borderTop: "1px solid #e2e8f0",
           boxShadow: "0 -2px 8px rgba(0,0,0,0.05)",
+          padding: "4px 8px",
+          alignItems: "center",
         }}
       >
         {status == PATIENT_DIAGNOSE_STATUS_NAME.CONSULTATION &&
           doctor.id == patientDiagnose.id_receive_doctor && (
-            <div style={{ marginTop: 16 }}>
+            <div style={{ margin: 0 }}>
               <ActionButton
                 color="red"
                 icon={<WarningOutlined />}
@@ -79,7 +81,7 @@ const FormVer3GroupProcessPatientDiagnoise = ({
 
         {status == PATIENT_DIAGNOSE_STATUS_NAME.CONSULTATION &&
           doctor.id == patientDiagnose.id_consulting_doctor && (
-            <div style={{ marginTop: 16 }}>
+            <div style={{ margin: 0 }}>
               <ActionButton
                 color="red"
                 icon={<WarningOutlined />}
@@ -104,7 +106,7 @@ const FormVer3GroupProcessPatientDiagnoise = ({
         {status == PATIENT_DIAGNOSE_STATUS_NAME.CONSULTATION &&
           (doctor.id == patientDiagnose.id_receive_doctor ||
             doctor.id == patientDiagnose.id_consulting_doctor) && (
-            <div style={{ marginTop: 16 }}>
+            <div style={{ margin: 0 }}>
               <ActionButton
                 color="amber"
                 icon={<ReadOutlined />}
@@ -128,7 +130,7 @@ const FormVer3GroupProcessPatientDiagnoise = ({
         {status == PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESSING &&
           (id_doctor_in_processing == doctor.id ||
             patientDiagnose.id_receive_doctor == doctor.id) && (
-            <div style={{ marginTop: 16 }}>
+            <div style={{ margin: 0 }}>
               <ActionButton
                 color="red"
                 icon={<WarningOutlined />}
@@ -155,7 +157,7 @@ const FormVer3GroupProcessPatientDiagnoise = ({
           (id_doctor_in_processing == doctor.id ||
             id_consulting_doctor == doctor.id ||
             id_receive_doctor == doctor.id) && (
-            <div style={{ marginTop: 16 }}>
+            <div style={{ margin: 0 }}>
               <ActionButton
                 color="green"
                 icon={<CheckCircleOutlined />}
@@ -178,7 +180,7 @@ const FormVer3GroupProcessPatientDiagnoise = ({
           status == PATIENT_DIAGNOSE_STATUS_NAME.WAIT_VERIFY) &&
           (patientDiagnose.id_verify_doctor == doctor.id ||
             patientDiagnose.id_receive_doctor == doctor.id) && (
-            <div style={{ marginTop: 16 }}>
+            <div style={{ margin: 0 }}>
               <ActionButton
                 color="green"
                 icon={<CheckCircleOutlined />}
@@ -197,7 +199,7 @@ const FormVer3GroupProcessPatientDiagnoise = ({
             </div>
           )}
 
-        <div style={{ marginTop: 16 }}>
+        <div style={{ margin: 0 }}>
           {status === PATIENT_DIAGNOSE_STATUS_NAME.VERIFIED && (
             <ActionButton
               color="teal"
@@ -217,7 +219,7 @@ const FormVer3GroupProcessPatientDiagnoise = ({
           (id_doctor_in_processing === doctor.id ||
             id_receive_doctor === doctor.id ||
             patientDiagnose.id_verify_doctor === doctor.id) && (
-            <div style={{ marginTop: 16 }}>
+            <div style={{ margin: 0 }}>
               <ActionButton
                 color="red"
                 icon={<WarningOutlined />}
@@ -241,7 +243,7 @@ const FormVer3GroupProcessPatientDiagnoise = ({
         {status === PATIENT_DIAGNOSE_STATUS_NAME.WAIT_VERIFY &&
           (id_receive_doctor === doctor.id ||
             patientDiagnose.id_verify_doctor === doctor.id) && (
-            <div style={{ marginTop: 16 }}>
+            <div style={{ margin: 0 }}>
               <ActionButton
                 color="orange"
                 icon={<WarningOutlined />}
@@ -262,7 +264,7 @@ const FormVer3GroupProcessPatientDiagnoise = ({
             </div>
           )}
 
-        <div style={{ marginTop: 16 }}>
+        <div style={{ margin: 0 }}>
           <ActionButton
             color="blue"
             icon={<WarningOutlined />}

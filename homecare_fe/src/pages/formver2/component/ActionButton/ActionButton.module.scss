@@ -8,17 +8,20 @@ $clr-amber: #b45309;
 $clr-olive: #677721;
 
 .btn {
-  height: 36px;
-  padding: 16px 18px;
+  height: 28px;
+  padding: 2px 10px;
 
   border-radius: 4px;
-  border-width: 1.5px;
+  border-width: 1px;
   border-style: solid;
 
   font-weight: 600;
-  font-size: 12px;
-  letter-spacing: 0.06em;
+  font-size: 11px;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   background: #fff;
 
@@ -34,8 +37,10 @@ $clr-olive: #677721;
     color 0.18s ease;
 
   :global(.ant-btn-icon) {
-    font-size: 18px;
-    margin-right: 10px;
+    font-size: 14px;
+    margin-right: 6px;
+    display: flex;
+    align-items: center;
   }
 
   &:hover:not(:disabled) {

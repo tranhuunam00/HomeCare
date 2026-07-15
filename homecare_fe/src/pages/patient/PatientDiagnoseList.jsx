@@ -693,87 +693,109 @@ const PatientTablePage = ({ PID = null }) => {
           width: !deviceIsMobile ? 200 : "100%",
         }}
       >
-        <Row gutter={24} style={{ marginBottom: 16 }}>
-          <Col span={1}>
-            <Tooltip title={"Cấu hình cột"}>
-              <Button
-                onClick={() => setOpenColumnModal(true)}
-                icon={<SettingOutlined />}
-              ></Button>
-            </Tooltip>
-          </Col>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: "6px",
+            background: "#ffffff",
+            padding: "6px 8px",
+            borderRadius: "6px",
+            border: "1px solid #e2e8f0",
+            marginBottom: "10px",
+            width: "100%",
+            boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.03)",
+          }}
+        >
 
-          <Col span={4} style={{ marginBottom: 5 }}>
-            <Input
-              placeholder="Tên"
-              onChange={(e) =>
-                setPendingFilters({ ...pendingFilters, name: e.target.value })
-              }
-              allowClear
-              value={pendingFilters?.name}
-            />
-          </Col>
-
-          <Col span={4} style={{ marginBottom: 5 }}>
-            <Input
-              placeholder="Tìm theo PID"
-              onChange={(e) =>
-                setPendingFilters({ ...pendingFilters, PID: e.target.value })
-              }
-              allowClear
-              value={pendingFilters?.PID}
-            />
-          </Col>
-
-          <Col span={15}>
-            <Space
-              wrap
-              style={{
-                width: "100%",
-                justifyContent: deviceIsMobile ? "space-between" : "flex-start",
-              }}
-            >
-              {DATE_OPTIONS.map(({ label, value }) => {
-                const isActive = pendingFilters.date_type === value;
-                return (
-                  <Button
-                    key={value}
-                    type={isActive ? "primary" : "default"}
-                    onClick={() => {
-                      setPendingFilters({
-                        ...pendingFilters,
-                        date_type: value,
-                        ...(value !== "range" && {
-                          from_date: null,
-                          to_date: null,
-                        }),
-                      });
-                    }}
-                    style={{ width: deviceIsMobile ? 100 : "auto" }}
-                  >
-                    {label}
-                  </Button>
-                );
-              })}
-              {pendingFilters.date_type === "range" && (
-                <RangePicker
-                  style={{ width: "100%" }}
-                  onChange={(dates) =>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
+              flexWrap: "wrap",
+              width: deviceIsMobile ? "100%" : "auto",
+            }}
+          >
+            {DATE_OPTIONS.map(({ label, value }) => {
+              const isActive = pendingFilters.date_type === value;
+              return (
+                <Button
+                  key={value}
+                  size="small"
+                  onClick={() => {
                     setPendingFilters({
                       ...pendingFilters,
-                      from_date: dates?.[0]
-                        ? dayjs(dates[0]).format("YYYY-MM-DD")
-                        : null,
-                      to_date: dates?.[1]
-                        ? dayjs(dates[1]).format("YYYY-MM-DD")
-                        : null,
-                    })
-                  }
-                />
-              )}
-            </Space>
-          </Col>
-        </Row>
+                      date_type: value,
+                      ...(value !== "range" && {
+                        from_date: null,
+                        to_date: null,
+                      }),
+                    });
+                  }}
+                  style={{
+                    fontSize: "12px",
+                    height: 28,
+                    padding: "0 10px",
+                    borderRadius: "4px",
+                    border: isActive ? "1px solid #2563eb" : "1px solid #e2e8f0",
+                    background: isActive ? "#2563eb" : "#f8fafc",
+                    color: isActive ? "#ffffff" : "#475569",
+                    fontWeight: isActive ? "600" : "500",
+                    boxShadow: isActive ? "0 1px 3px rgba(37, 99, 235, 0.2)" : "none",
+                  }}
+                >
+                  {label}
+                </Button>
+              );
+            })}
+          </div>
+
+          {pendingFilters.date_type === "range" && (
+            <RangePicker
+              size="small"
+              style={{
+                width: deviceIsMobile ? "100%" : 220,
+                height: 28,
+                fontSize: "12px",
+                borderRadius: "4px",
+                borderColor: "#cbd5e1",
+              }}
+              onChange={(dates) =>
+                setPendingFilters({
+                  ...pendingFilters,
+                  from_date: dates?.[0]
+                    ? dayjs(dates[0]).format("YYYY-MM-DD")
+                    : null,
+                  to_date: dates?.[1]
+                    ? dayjs(dates[1]).format("YYYY-MM-DD")
+                    : null,
+                })
+              }
+            />
+          )}
+
+          {!deviceIsMobile && <div style={{ flex: 1 }} />}
+
+          <Tooltip title={"Cấu hình cột"}>
+            <Button
+              size="small"
+              onClick={() => setOpenColumnModal(true)}
+              icon={<SettingOutlined style={{ fontSize: "14px", color: "#475569" }} />}
+              style={{
+                height: 28,
+                width: 28,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: "4px",
+                borderColor: "#cbd5e1",
+                background: "#f8fafc",
+              }}
+            />
+          </Tooltip>
+        </div>
 
         <Divider style={{ margin: 0, marginBottom: 10 }} />
         <ConfigProvider
@@ -926,16 +948,27 @@ const PatientTablePage = ({ PID = null }) => {
               zIndex: 3,
               display: "flex",
               background: "#ffffff",
-              borderBottom: "1px solid #3950d163",
-              boxShadow: "0 -2px 8px rgba(0,0,0,0.05)",
+              borderBottom: "1px solid #e2e8f0",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
               alignItems: "center",
+              padding: "4px 8px",
+              gap: "8px",
+              borderRadius: "4px",
             }}
           >
             <Button
               type="primary"
               ghost
+              size="small"
               style={{
-                borderColor: "#38e204",
+                borderColor: "#34d399",
+                color: "#059669",
+                fontSize: "11px",
+                height: "22px",
+                padding: "0 8px",
+                display: "flex",
+                alignItems: "center",
+                fontWeight: "500",
               }}
               onClick={() => setTranslateOpen(true)}
             >

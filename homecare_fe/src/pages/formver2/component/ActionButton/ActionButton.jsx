@@ -10,7 +10,7 @@ export default function ActionButton({
   disabled,
   tooltip,
   color = "blue",
-  block = true,
+  block = false,
   className,
 }) {
   const btn = (
