@@ -17,6 +17,7 @@ import {
   ConfigProvider,
   Grid,
   Tooltip,
+  Popover,
 } from "antd";
 import {
   SettingOutlined,
@@ -26,6 +27,7 @@ import {
   EditOutlined,
   ApartmentOutlined,
   UploadOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import API_CALL from "../../services/axiosClient";
@@ -54,7 +56,7 @@ import ImportPatientModal from "./Import/ImportPatientModal";
 
 import { PATIENT_DIAGNOSE_STATUS_FILTER } from "./constant.patient";
 import DoctorUseDFormVer3 from "../formver3/doctor_use_formver3/use/DoctorIUseFormVer3";
-import { stepsStatus } from "../formver3/formver3.constant";
+import { stepsStatus, calculateAge } from "../formver3/formver3.constant";
 import ConsultationSelectModal from "../formver3/components/ConsultationSelectModal/ConsultationSelectModal";
 import CustomSteps from "../../components/CustomSteps/CustomSteps";
 import {
@@ -88,6 +90,113 @@ const defaultVisibleKeys = [
 ];
 
 const STORAGE_KEY = "visibleColumns_patientDiagnose";
+
+const PatientMiniInfo = ({ patient, templateServices, examParts }) => {
+  const displayData = {
+    name: (patient?.name || "")?.toUpperCase(),
+    gender: patient?.gender || "-",
+    birth_year: patient?.birth_year || "",
+    age: calculateAge(patient?.dob, patient?.birth_year) || "-",
+    phone: patient?.phoneNumber || "-",
+    PID: patient?.PID || "-",
+    SID: patient?.SID || "-",
+    CCCD: patient?.CCCD || "-",
+    email: patient?.email || "-",
+    clinical: patient?.Indication || "Không có thông tin lâm sàng",
+  };
+
+  const indicationName = templateServices?.find(
+    (t) => t.id == patient?.id_template_service,
+  )?.name || "-";
+
+  const examPartName = examParts?.find(
+    (t) => t.id == patient?.id_exam_part,
+  )?.name || "-";
+
+  return (
+    <div style={{ width: 400, padding: "4px", fontFamily: "Inter, sans-serif" }}>
+      {/* Header gradient banner */}
+      <div style={{ 
+        background: "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)", 
+        padding: "12px 14px", 
+        borderRadius: "6px", 
+        marginBottom: "12px",
+        border: "1px solid #bfdbfe"
+      }}>
+        <span style={{ color: "#2563eb", fontSize: "9px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+          BỆNH NHÂN
+        </span>
+        <h4 style={{ margin: "2px 0 6px 0", fontSize: "15px", fontWeight: "700", color: "#1e3a8a" }}>
+          {displayData.name}
+        </h4>
+        <div style={{ display: "flex", gap: "16px", fontSize: "11px", color: "#1e40af" }}>
+          <span>Giới tính: <strong>{displayData.gender}</strong></span>
+          <span>Năm sinh: <strong>{displayData.birth_year}</strong></span>
+          <span>Tuổi: <strong>{displayData.age}</strong></span>
+        </div>
+      </div>
+
+      {/* Grid details */}
+      <Row gutter={[12, 10]} style={{ padding: "0 4px" }}>
+        <Col span={8}>
+          <span style={{ color: "#8c8c8c", display: "block", fontSize: "9px", textTransform: "uppercase", letterSpacing: "0.3px", marginBottom: 2 }}>PID</span>
+          <span style={{ fontSize: "11px", fontWeight: "600", color: "#262626" }}>{displayData.PID}</span>
+        </Col>
+        <Col span={8}>
+          <span style={{ color: "#8c8c8c", display: "block", fontSize: "9px", textTransform: "uppercase", letterSpacing: "0.3px", marginBottom: 2 }}>SID</span>
+          <span style={{ fontSize: "11px", fontWeight: "600", color: "#262626", wordBreak: "break-all", lineHeight: 1.1 }}>{displayData.SID}</span>
+        </Col>
+        <Col span={8}>
+          <span style={{ color: "#8c8c8c", display: "block", fontSize: "9px", textTransform: "uppercase", letterSpacing: "0.3px", marginBottom: 2 }}>CCCD</span>
+          <span style={{ fontSize: "11px", fontWeight: "600", color: "#262626" }}>{displayData.CCCD}</span>
+        </Col>
+
+        <Col span={8}>
+          <span style={{ color: "#8c8c8c", display: "block", fontSize: "9px", textTransform: "uppercase", letterSpacing: "0.3px", marginBottom: 2 }}>Mã ca (ID)</span>
+          <span style={{ fontSize: "11px", fontWeight: "600", color: "#262626" }}>{patient.id}</span>
+        </Col>
+        <Col span={8}>
+          <span style={{ color: "#8c8c8c", display: "block", fontSize: "9px", textTransform: "uppercase", letterSpacing: "0.3px", marginBottom: 2 }}>SĐT</span>
+          <span style={{ fontSize: "11px", fontWeight: "600", color: "#262626" }}>{displayData.phone}</span>
+        </Col>
+        <Col span={8}>
+          <span style={{ color: "#8c8c8c", display: "block", fontSize: "9px", textTransform: "uppercase", letterSpacing: "0.3px", marginBottom: 2 }}>Email</span>
+          <span style={{ fontSize: "11px", fontWeight: "600", color: "#262626", wordBreak: "break-all", lineHeight: 1.1 }}>{displayData.email}</span>
+        </Col>
+
+        <Col span={12}>
+          <span style={{ color: "#8c8c8c", display: "block", fontSize: "9px", textTransform: "uppercase", letterSpacing: "0.3px", marginBottom: 2 }}>Chỉ định</span>
+          <span style={{ fontSize: "11px", fontWeight: "600", color: "#262626" }}>{indicationName}</span>
+        </Col>
+        <Col span={12}>
+          <span style={{ color: "#8c8c8c", display: "block", fontSize: "9px", textTransform: "uppercase", letterSpacing: "0.3px", marginBottom: 2 }}>Bộ phận khám</span>
+          <span style={{ fontSize: "11px", fontWeight: "600", color: "#262626" }}>{examPartName}</span>
+        </Col>
+      </Row>
+
+      <Divider style={{ margin: "10px 0" }} />
+
+      {/* Clinical Diagnosis section */}
+      <div style={{ padding: "0 4px" }}>
+        <span style={{ color: "#c2410c", display: "block", fontSize: "9px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 4 }}>
+          Thông tin lâm sàng
+        </span>
+        <div style={{ 
+          background: "#fff7ed", 
+          border: "1px solid #ffedd5", 
+          borderRadius: "6px", 
+          padding: "8px 10px", 
+          fontSize: "11px", 
+          color: "#c2410c", 
+          fontWeight: "500",
+          lineHeight: "1.4"
+        }}>
+          {displayData.clinical}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const PatientTablePage = ({ PID = null }) => {
   const navigate = useNavigate();
@@ -1000,6 +1109,42 @@ const PatientTablePage = ({ PID = null }) => {
                 selectedPatientDiagnose.id_consulting_doctor
               }
             />
+            {rightPanelMode === "reading" && (
+              <Popover
+                content={
+                  <PatientMiniInfo
+                    patient={selectedPatientDiagnose}
+                    templateServices={templateServices}
+                    examParts={examParts}
+                  />
+                }
+                title={
+                  <span style={{ fontSize: "12px", fontWeight: "600", color: "#1d4ed8" }}>
+                    Thông tin hành chính bệnh nhân
+                  </span>
+                }
+                trigger="click"
+                placement="bottomLeft"
+              >
+                <Button
+                  icon={<UserOutlined />}
+                  style={{
+                    marginLeft: 20,
+                    borderRadius: "4px",
+                    borderColor: "#3b82f6",
+                    color: "#1d4ed8",
+                    fontSize: "11px",
+                    height: "22px",
+                    padding: "0 8px",
+                    display: "flex",
+                    alignItems: "center",
+                    fontWeight: "500",
+                  }}
+                >
+                  Thông tin BN
+                </Button>
+              </Popover>
+            )}
           </div>
           <div>
             {/* Fixed bottom action bar — rendered once at this level to avoid

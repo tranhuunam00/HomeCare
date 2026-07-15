@@ -38,6 +38,17 @@ import { calculateAge } from "../../formver3/formver3.constant";
 
 const { Title, Text } = Typography;
 
+const InfoItem = ({ label, children }) => (
+  <div style={{ marginBottom: 6 }}>
+    <div style={{ fontSize: '10px', color: '#8c8c8c', textTransform: 'uppercase', letterSpacing: '0.3px', marginBottom: 2 }}>
+      {label}
+    </div>
+    <div style={{ fontSize: '12px', fontWeight: '500', color: '#262626', lineHeight: '1.3', wordBreak: 'break-all' }}>
+      {children}
+    </div>
+  </div>
+);
+
 const PatientDiagnoiseDetailPage = ({
   onStatusChange,
   onOpenReading,
@@ -92,12 +103,11 @@ const PatientDiagnoiseDetailPage = ({
     email: selectedPatientDiagnose?.email || "-",
     countryCode: selectedPatientDiagnose?.countryCode || "-",
     id_template_service: selectedPatientDiagnose?.id_template_service,
+    updatedAt: selectedPatientDiagnose?.updatedAt,
   };
 
   return (
     <div style={{ height: "100%" }}>
-
-
       <ConfigProvider
         theme={{
           token: {
@@ -109,6 +119,8 @@ const PatientDiagnoiseDetailPage = ({
       >
         <Card
           title="WORK SPACE"
+          style={{ marginBottom: 6 }}
+          bodyStyle={{ padding: "10px 16px 2px 16px" }}
           bordered
           extra={
             <Space>
@@ -123,106 +135,85 @@ const PatientDiagnoiseDetailPage = ({
             </Space>
           }
         >
-          <Row gutter={24}>
+          <Row gutter={[24, 12]} style={{ padding: "4px 2px" }}>
+            {/* Row 1: Demographics */}
             <Col span={8}>
-              <Title level={5}>Họ và tên:</Title>
-              <Text>{displayData.name}</Text>
-            </Col>
-            <Col span={6}>
-              <Title level={5}>Giới tính:</Title>
-              <Text>{displayData.gender}</Text>
-            </Col>
-            <Col span={6}>
-              <Title level={5}>Năm sinh:</Title>
-              <Text>{displayData.birth_year}</Text>
+              <InfoItem label="Họ và tên">{displayData.name}</InfoItem>
             </Col>
             <Col span={4}>
-              <Title level={5}>Tuổi:</Title>
-              <Text>{displayData.age}</Text>
+              <InfoItem label="Giới tính">{displayData.gender}</InfoItem>
             </Col>
-          </Row>
+            <Col span={6}>
+              <InfoItem label="Năm sinh">{displayData.birth_year}</InfoItem>
+            </Col>
+            <Col span={6}>
+              <InfoItem label="Tuổi">{displayData.age}</InfoItem>
+            </Col>
 
-          <Divider />
 
-          <Row gutter={24}>
+
+            {/* Row 2: Identifiers */}
             <Col span={2}>
-              <Title level={5}>ID</Title>
-              <Text>{selectedPatientDiagnose.id}</Text>
-            </Col>
-            <Col span={5}>
-              <Title level={5}>PID:</Title>
-              <Text>{displayData.PID}</Text>
-            </Col>
-            <Col span={12}>
-              <Title level={5}>SID:</Title>
-              <Text>{displayData.SID}</Text>
-            </Col>
-            <Col span={5}>
-              <Title level={5}>CCCD:</Title>
-              <Text>{displayData.CCCD}</Text>
-            </Col>
-          </Row>
-
-          <Row gutter={24} style={{ marginTop: 6 }}>
-            <Col span={12}>
-              <Title level={5}>Trạng thái:</Title>
-              <Tag
-                color={PATIENT_DIAGNOSE_COLOR[selectedPatientDiagnose.status]}
-              >
-                {PATIENT_DIAGNOSE_STATUS[selectedPatientDiagnose.status]}
-              </Tag>
-            </Col>
-          </Row>
-
-          <Row gutter={24} style={{ marginTop: 6 }}>
-            <Col span={6}>
-              <Title level={5}>SĐT:</Title>
-              <Text>{displayData.phone}</Text>
-            </Col>
-            <Col span={12}>
-              <Title level={5}>Email:</Title>
-              <Text>{displayData.email}</Text>
+              <InfoItem label="ID">{selectedPatientDiagnose.id}</InfoItem>
             </Col>
             <Col span={6}>
-              <Title level={5}>Quốc tịch:</Title>
-              <Text>{displayData.countryCode}</Text>
+              <InfoItem label="PID">{displayData.PID}</InfoItem>
             </Col>
-          </Row>
+            <Col span={10}>
+              <InfoItem label="SID">{displayData.SID}</InfoItem>
+            </Col>
+            <Col span={6}>
+              <InfoItem label="CCCD">{displayData.CCCD}</InfoItem>
+            </Col>
 
-          <Row gutter={24} style={{ marginTop: 6 }}>
-            <Col span={12}>
-              <Title level={5}>Ngày tạo:</Title>
-              <Text>
-                {dayjs(selectedPatientDiagnose.createdAt).format(
-                  "HH:mm DD/MM/YYYY",
-                )}
-              </Text>
+            {/* Row 3: Status & Contact */}
+            <Col span={4}>
+              <div style={{ marginBottom: 6 }}>
+                <div style={{ fontSize: '10px', color: '#8c8c8c', textTransform: 'uppercase', letterSpacing: '0.3px', marginBottom: 2 }}>
+                  Trạng thái
+                </div>
+                <Tag
+                  color={PATIENT_DIAGNOSE_COLOR[selectedPatientDiagnose.status]}
+                  style={{ fontSize: '12px', padding: '1px 6px', fontWeight: 5, margin: 0 }}
+                >
+                  {PATIENT_DIAGNOSE_STATUS[selectedPatientDiagnose.status]}
+                </Tag>
+              </div>
             </Col>
-            <Col span={12}>
-              <Title level={5}>Cập nhật gần nhất:</Title>
-              <Text>
-                {dayjs(displayData.updatedAt).format("HH:mm DD/MM/YYYY")}
-              </Text>
+            <Col span={6}>
+              <InfoItem label="SĐT">{displayData.phone}</InfoItem>
             </Col>
-          </Row>
+            <Col span={10}>
+              <InfoItem label="Email">{displayData.email}</InfoItem>
+            </Col>
+            <Col span={4}>
+              <InfoItem label="Quốc tịch">{displayData.countryCode}</InfoItem>
+            </Col>
 
-          <Divider />
-          <Row gutter={24} style={{ marginTop: 6 }}>
-            <Col span={12}>
-              <Title level={5}>Chỉ định:</Title>
-              <Text>
+            {/* Row 4: Timestamps & Indications */}
+            <Col span={6}>
+              <InfoItem label="Ngày tạo">
+                {dayjs(selectedPatientDiagnose.createdAt).format("HH:mm DD/MM/YYYY")}
+              </InfoItem>
+            </Col>
+            <Col span={6}>
+              <InfoItem label="Cập nhật gần nhất">
+                {displayData.updatedAt ? dayjs(displayData.updatedAt).format("HH:mm DD/MM/YYYY") : "-"}
+              </InfoItem>
+            </Col>
+            <Col span={6}>
+              <InfoItem label="Chỉ định">
                 {
                   templateServices?.find(
                     (t) => t.id == displayData.id_template_service,
-                  )?.name
+                  )?.name || "-"
                 }
-              </Text>
+              </InfoItem>
             </Col>
-            <Col span={10}>
-              <Title level={5}>Bộ phận thăm khám:</Title>
-              <Text>
-                {examParts?.find((t) => t.id == displayData.id_exam_part)?.name}
-              </Text>
+            <Col span={6}>
+              <InfoItem label="Bộ phận thăm khám">
+                {examParts?.find((t) => t.id == displayData.id_exam_part)?.name || "-"}
+              </InfoItem>
             </Col>
           </Row>
         </Card>

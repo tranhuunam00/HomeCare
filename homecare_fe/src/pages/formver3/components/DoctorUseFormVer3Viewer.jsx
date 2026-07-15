@@ -123,7 +123,7 @@ export default function DoctorUseFormVer3Viewer({
         },
       }}
     >
-      <Card style={{ paddingBottom: 50 }}>
+      <Card style={{ marginTop: 0 }} bodyStyle={{ padding: "8px 12px" }}>
         <PrintPreviewVer3NotDataDiagnose
           approvalStatus={approvalStatus}
           imagingRows={imagingRows}

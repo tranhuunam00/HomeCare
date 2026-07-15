@@ -619,7 +619,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
             style={{
               width: "100%",
               borderCollapse: "collapse",
-              marginTop: 12,
+              marginTop: 6,
               fontSize: 15,
               ...styleCustomParent,
             }}
@@ -641,6 +641,11 @@ const PrintPreviewVer3NotDataDiagnose = ({
                       style={{
                         ...thUnderline,
                         textAlign: "center",
+                        width: 100,
+                        fontSize: 12,
+                        fontWeight: 500,
+                        whiteSpace: "nowrap",
+                        padding: "4px 6px",
                         ...styleCustomParent,
                       }}
                     >
@@ -650,6 +655,11 @@ const PrintPreviewVer3NotDataDiagnose = ({
                       style={{
                         ...thUnderline,
                         textAlign: "center",
+                        width: 100,
+                        fontSize: 12,
+                        fontWeight: 500,
+                        whiteSpace: "nowrap",
+                        padding: "4px 6px",
                         ...styleCustomParent,
                       }}
                     >
