@@ -13,6 +13,7 @@ import {
   Typography,
   Tooltip,
   Spin,
+  Tag,
 } from "antd";
 import { UploadOutlined, EditOutlined } from "@ant-design/icons";
 import { useParams } from "react-router-dom";
@@ -52,6 +53,7 @@ const Profile = () => {
   const [avatarFile, setAvatarFile] = useState(null);
   const [signatureFile, setSignatureFile] = useState(null);
   const [clinics, setClinics] = useState([]);
+  const [authorizedClinics, setAuthorizedClinics] = useState([]);
   const [loading, setLoading] = useState(false);
   const { user, doctor } = useGlobalAuth();
   const { showSuccess, showError } = useToast();
@@ -105,10 +107,20 @@ const Profile = () => {
     }
   };
 
+  const fetchAuthorizedClinics = async (id) => {
+    try {
+      const res = await API_CALL.get(`/doctor/clinics/${id}`);
+      setAuthorizedClinics(res.data?.data || []);
+    } catch (error) {
+      console.error("Lỗi lấy danh sách phân quyền phòng khám:", error);
+    }
+  };
+
   useEffect(() => {
     if (realId) {
       fetchDoctorById(realId);
       fetchDoctorSignInfo(); // ✅ call chữ ký
+      fetchAuthorizedClinics(realId);
     }
   }, [realId]);
 
@@ -344,6 +356,7 @@ const Profile = () => {
                     rules={[
                       { required: true, message: "Vui lòng nhập họ và tên" },
                     ]}
+                    style={{ marginBottom: 12 }}
                   >
                     {isEditing && editableFields.includes("full_name") ? (
                       <Input placeholder="Nguyễn Văn A" />
@@ -359,6 +372,7 @@ const Profile = () => {
                     rules={[
                       { required: true, message: "Vui lòng chọn ngày sinh" },
                     ]}
+                    style={{ marginBottom: 12 }}
                   >
                     {isEditing && editableFields.includes("dob") ? (
                       <DatePicker
@@ -384,6 +398,7 @@ const Profile = () => {
                     rules={[
                       { required: true, message: "Vui lòng chọn giới tính" },
                     ]}
+                    style={{ marginBottom: 12 }}
                   >
                     {isEditing && editableFields.includes("gender") ? (
                       <Select placeholder="Chọn giới tính">
@@ -408,6 +423,7 @@ const Profile = () => {
                         message: "Vui lòng nhập email hợp lệ",
                       },
                     ]}
+                    style={{ marginBottom: 12 }}
                   >
                     {isEditing ? (
                       <Input placeholder="abc@gmail.com" />
@@ -428,6 +444,7 @@ const Profile = () => {
                         message: "Vui lòng nhập số điện thoại",
                       },
                     ]}
+                    style={{ marginBottom: 12 }}
                   >
                     {isEditing ? (
                       <Input placeholder="0912345678" />
@@ -440,7 +457,7 @@ const Profile = () => {
 
               <Row gutter={16}>
                 <Col span={12}>
-                  <Form.Item label="Học hàm" name="academic_title">
+                  <Form.Item label="Học hàm" name="academic_title" style={{ marginBottom: 12 }}>
                     {isEditing ? (
                       <Select placeholder="Chọn học hàm">
                         {ACADEMIC_TITLES.map((item) => (
@@ -461,7 +478,7 @@ const Profile = () => {
                 </Col>
 
                 <Col span={12}>
-                  <Form.Item label="Học vị" name="degree">
+                  <Form.Item label="Học vị" name="degree" style={{ marginBottom: 12 }}>
                     {isEditing ? (
                       <Select placeholder="Chọn học vị">
                         {DEGREES.map((item) => (
@@ -480,7 +497,7 @@ const Profile = () => {
                   </Form.Item>
                 </Col>
               </Row>
-              <Form.Item label="Lý lịch khoa học" name="description">
+              <Form.Item label="Lý lịch khoa học" name="description" style={{ marginBottom: 12 }}>
                 {isEditing ? (
                   <Input.TextArea />
                 ) : (
@@ -493,6 +510,7 @@ const Profile = () => {
                 ]}
                 label="Phòng khám"
                 name="id_clinic"
+                style={{ marginBottom: 12 }}
               >
                 <Select
                   placeholder="Chọn phòng khám"
@@ -503,6 +521,7 @@ const Profile = () => {
                       ?.toLowerCase()
                       ?.includes(input.toLowerCase())
                   }
+                  disabled={!isEditing}
                 >
                   {clinics.map((clinic) => (
                     <Option key={clinic.id} value={clinic.id}>
@@ -511,6 +530,36 @@ const Profile = () => {
                   ))}
                 </Select>
               </Form.Item>
+
+              {authorizedClinics.length > 0 && (
+                <div style={{ marginTop: 8, marginBottom: 12 }}>
+                  <span style={{ color: "#1e3a8a", fontSize: "13px", display: "block", marginBottom: 8, fontWeight: "600" }}>
+                    Phòng khám khác được phân quyền truy cập
+                  </span>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                    {authorizedClinics.map((item) => {
+                      const clinic = clinics.find((c) => c.id == item.id_clinic);
+                      return (
+                        <Tag
+                          key={item.id_clinic}
+                          color="blue"
+                          style={{
+                            padding: "4px 10px",
+                            borderRadius: 6,
+                            margin: 0,
+                            fontWeight: 500,
+                            border: "1px solid #bfdbfe",
+                            background: "#eff6ff",
+                            color: "#1e40af"
+                          }}
+                        >
+                          {clinic?.name || `Phòng khám ${item.id_clinic}`}
+                        </Tag>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               <Col span={6} className={styles.signatureSection}>
                 <Form.Item
