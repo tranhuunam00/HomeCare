@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { Avatar, Button, Checkbox, Col, Layout, Menu, Space, Tooltip } from "antd";
+import API_CALL from "../../services/axiosClient";
+import { Avatar, Badge, Button, Checkbox, Col, Layout, Menu, Space, Tooltip } from "antd";
 import {
   AppstoreOutlined,
   ArrowLeftOutlined,
@@ -262,6 +263,7 @@ const Home = () => {
     isOnWorkList,
     filterPatient: pendingFilters,
     setFilterPatient: setPendingFilters,
+    counts,
   } = useGlobalAuth();
   const [logo, setLogo] = useState("/logo_home_care.png");
   const screens = useBreakpoint();
@@ -322,28 +324,30 @@ const Home = () => {
               <div style={{ padding: collapsed ? "0" : "0 12px", width: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}>
                 {collapsed ? (
                   <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, width: "100%", padding: "4px 0" }}>
-                    <Tooltip title="Lọc ca tôi tham gia (nhận, đang đọc, duyệt hoặc hội chẩn)" placement="right">
-                      <div
-                        onClick={() =>
-                          setPendingFilters({
-                            ...pendingFilters,
-                            my_received_cases: !pendingFilters?.my_received_cases,
-                          })
-                        }
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          width: 26,
-                          height: 26,
-                          borderRadius: 4,
-                          background: pendingFilters?.my_received_cases ? "#dbeafe" : "#f3f4f6",
-                          border: pendingFilters?.my_received_cases ? "1px solid #3b82f6" : "1px solid #cbd5e1",
-                          cursor: "pointer",
-                        }}
-                      >
-                        <Checkbox checked={pendingFilters?.my_received_cases} style={{ pointerEvents: "none", transform: "scale(0.8)" }} />
-                      </div>
+                    <Tooltip title={`Lọc ca tôi tham gia (${counts.myReceivedCount || 0})`} placement="right">
+                      <Badge count={counts.myReceivedCount || 0} size="small" showZero={false} color="#3b82f6" offset={[0, 0]}>
+                        <div
+                          onClick={() =>
+                            setPendingFilters({
+                              ...pendingFilters,
+                              my_received_cases: !pendingFilters?.my_received_cases,
+                            })
+                          }
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            width: 26,
+                            height: 26,
+                            borderRadius: 4,
+                            background: pendingFilters?.my_received_cases ? "#dbeafe" : "#f3f4f6",
+                            border: pendingFilters?.my_received_cases ? "1px solid #3b82f6" : "1px solid #cbd5e1",
+                            cursor: "pointer",
+                          }}
+                        >
+                          <Checkbox checked={pendingFilters?.my_received_cases} style={{ pointerEvents: "none", transform: "scale(0.8)" }} />
+                        </div>
+                      </Badge>
                     </Tooltip>
 
                     <div style={{ width: "60%", height: 1, background: "#cbd5e1", margin: "2px 0" }} />
@@ -351,35 +355,38 @@ const Home = () => {
                     {Object.entries(PATIENT_DIAGNOSE_STATUS_FILTER).map(([key, label]) => {
                       const intKey = Number(key);
                       const isChecked = pendingFilters.status?.includes(intKey);
+                      const count = counts.statusCounts?.[intKey] || 0;
                       return (
-                        <Tooltip key={key} title={`Lọc ca ${label.toLowerCase()}`} placement="right">
-                          <div
-                            onClick={() => {
-                              const current = pendingFilters.status || [];
-                              const newStatus = isChecked
-                                ? current.filter((x) => x !== intKey)
-                                : [...current, intKey];
-                              setPendingFilters({
-                                ...pendingFilters,
-                                status: newStatus,
-                              });
-                            }}
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              width: 24,
-                              height: 24,
-                              backgroundColor: PATIENT_DIAGNOSE_COLOR[intKey],
-                              borderRadius: 4,
-                              opacity: isChecked ? 1 : 0.35,
-                              cursor: "pointer",
-                              border: isChecked ? "1px solid #fff" : "none",
-                              boxShadow: isChecked ? "0 0 4px rgba(0,0,0,0.2)" : "none",
-                            }}
-                          >
-                            {getPatientDiagnoseIcon(intKey, { style: { color: "#fff" }, spin: intKey === 3 })}
-                          </div>
+                        <Tooltip key={key} title={`Lọc ca ${label.toLowerCase()} (${count})`} placement="right">
+                          <Badge count={count} size="small" showZero={false} color="#475569" offset={[0, 0]}>
+                            <div
+                              onClick={() => {
+                                const current = pendingFilters.status || [];
+                                const newStatus = isChecked
+                                  ? current.filter((x) => x !== intKey)
+                                  : [...current, intKey];
+                                setPendingFilters({
+                                  ...pendingFilters,
+                                  status: newStatus,
+                                });
+                              }}
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                width: 24,
+                                height: 24,
+                                backgroundColor: PATIENT_DIAGNOSE_COLOR[intKey],
+                                borderRadius: 4,
+                                opacity: isChecked ? 1 : 0.35,
+                                cursor: "pointer",
+                                border: isChecked ? "1px solid #fff" : "none",
+                                boxShadow: isChecked ? "0 0 4px rgba(0,0,0,0.2)" : "none",
+                              }}
+                            >
+                              {getPatientDiagnoseIcon(intKey, { style: { color: "#fff" }, spin: intKey === 3 })}
+                            </div>
+                          </Badge>
                         </Tooltip>
                       );
                     })}
@@ -397,7 +404,7 @@ const Home = () => {
                         style={{
                           display: "flex",
                           alignItems: "center",
-                          gap: 6,
+                          justifyContent: "space-between",
                           marginTop: 4,
                           padding: "4px 8px",
                           borderRadius: 6,
@@ -408,9 +415,14 @@ const Home = () => {
                           width: "100%",
                         }}
                       >
-                        <Checkbox checked={pendingFilters?.my_received_cases} style={{ transform: "scale(0.85)" }} />
-                        <span style={{ fontSize: 11, fontWeight: 600, color: pendingFilters?.my_received_cases ? "#1d4ed8" : "#4b5563" }}>
-                          Ca liên quan
+                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <Checkbox checked={pendingFilters?.my_received_cases} style={{ transform: "scale(0.85)" }} />
+                          <span style={{ fontSize: 11, fontWeight: 600, color: pendingFilters?.my_received_cases ? "#1d4ed8" : "#4b5563" }}>
+                            Ca liên quan
+                          </span>
+                        </div>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: pendingFilters?.my_received_cases ? "#1d4ed8" : "#64748b" }}>
+                          {counts.myReceivedCount || 0}
                         </span>
                       </div>
                     </Tooltip>
@@ -423,6 +435,7 @@ const Home = () => {
                       {Object.entries(PATIENT_DIAGNOSE_STATUS_FILTER).map(([key, label]) => {
                         const intKey = Number(key);
                         const isChecked = pendingFilters.status?.includes(intKey);
+                        const count = counts.statusCounts?.[intKey] || 0;
                         return (
                           <div
                             key={key}
@@ -439,7 +452,7 @@ const Home = () => {
                             style={{
                               display: "flex",
                               alignItems: "center",
-                              gap: 6,
+                              justifyContent: "space-between",
                               background: isChecked ? "rgba(202, 196, 250, 0.15)" : "transparent",
                               borderRadius: 4,
                               padding: "4px 8px",
@@ -449,13 +462,18 @@ const Home = () => {
                               border: "1px solid #cbd5e1",
                             }}
                           >
-                            <Checkbox
-                              checked={isChecked}
-                              style={{ pointerEvents: "none", transform: "scale(0.85)" }}
-                            />
-                            {getPatientDiagnoseIcon(intKey, { style: { color: PATIENT_DIAGNOSE_COLOR[intKey] }, spin: intKey === 3 })}
-                            <span style={{ fontSize: 11, fontWeight: 500, color: "#334155" }}>
-                              {label}
+                            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                              <Checkbox
+                                checked={isChecked}
+                                style={{ pointerEvents: "none", transform: "scale(0.85)" }}
+                              />
+                              {getPatientDiagnoseIcon(intKey, { style: { color: PATIENT_DIAGNOSE_COLOR[intKey] }, spin: intKey === 3 })}
+                              <span style={{ fontSize: 11, fontWeight: 500, color: "#334155" }}>
+                                {label}
+                              </span>
+                            </div>
+                            <span style={{ fontSize: 11, fontWeight: 600, color: PATIENT_DIAGNOSE_COLOR[intKey] }}>
+                              {count}
                             </span>
                           </div>
                         );

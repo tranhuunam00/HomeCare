@@ -5,6 +5,7 @@ import { io } from "socket.io-client";
 import storage from "../services/storage";
 import { toast } from "react-toastify";
 import { TRANSLATE_LANGUAGE } from "../constant/app";
+import API_CALL from "../services/axiosClient";
 
 const GlobalAuthContext = createContext();
 
@@ -61,6 +62,20 @@ export const GlobalAuthProvider = ({ children }) => {
 
   const [selectedDoctorUseFormVer3, setSelectedDoctorUseFormVer3] =
     useState(null);
+
+  const [counts, setCounts] = useState({ statusCounts: {}, myReceivedCount: 0 });
+
+  const fetchCounts = async () => {
+    try {
+      const res = await API_CALL.get("/patient-diagnose/counts");
+      const responseData = res?.data?.data !== undefined ? res.data.data : res?.data;
+      if (responseData) {
+        setCounts(responseData);
+      }
+    } catch (err) {
+      console.error("Fetch counts error:", err);
+    }
+  };
 
   // LOAD từ localStorage
   const [filterPatient, setFilterPatient] = useState(() => {
@@ -124,6 +139,7 @@ export const GlobalAuthProvider = ({ children }) => {
     });
 
     socketInstance.on("patient-diagnose-updated", (payload) => {
+      fetchCounts();
       if (payload?.notification) {
         setNotifications((prev) => {
           const existed = prev.some((n) => n.id === payload.notification.id);
@@ -160,6 +176,13 @@ export const GlobalAuthProvider = ({ children }) => {
       socketInstance.disconnect();
     };
   }, [user?.id, token]);
+
+  useEffect(() => {
+    if (!token) return;
+    fetchCounts();
+    const interval = setInterval(fetchCounts, 20000);
+    return () => clearInterval(interval);
+  }, [token]);
 
   useEffect(() => {
     if (selectedPatientDiagnose) {
@@ -264,6 +287,9 @@ export const GlobalAuthProvider = ({ children }) => {
 
         selectedDoctorUseFormVer3,
         setSelectedDoctorUseFormVer3,
+
+        counts,
+        fetchCounts,
       }}
     >
       {children}
