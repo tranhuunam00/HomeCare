@@ -26,6 +26,12 @@ import {
   EditOutlined,
   ApartmentOutlined,
   UploadOutlined,
+  CloseSquareOutlined,
+  TeamOutlined,
+  SyncOutlined,
+  CheckCircleOutlined,
+  ClockCircleOutlined,
+  FileDoneOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import API_CALL from "../../services/axiosClient";
@@ -230,12 +236,45 @@ const PatientTablePage = ({ PID = null }) => {
         title: "Trạng thái",
         dataIndex: "status",
         key: "status",
-        width: 100,
-        render: (status) => (
-          <Tag style={{ width: 80 }} color={PATIENT_DIAGNOSE_COLOR[status]}>
-            {PATIENT_DIAGNOSE_STATUS[status]}
-          </Tag>
-        ),
+        width: 115,
+        render: (status) => {
+          let icon = null;
+          switch (status) {
+            case 1:
+              icon = <CloseSquareOutlined style={{ marginRight: 4 }} />;
+              break;
+            case 2:
+              icon = <TeamOutlined style={{ marginRight: 4 }} />;
+              break;
+            case 3:
+              icon = <SyncOutlined spin style={{ marginRight: 4 }} />;
+              break;
+            case 4:
+              icon = <CheckCircleOutlined style={{ marginRight: 4 }} />;
+              break;
+            case 5:
+              icon = <ClockCircleOutlined style={{ marginRight: 4 }} />;
+              break;
+            case 6:
+              icon = <FileDoneOutlined style={{ marginRight: 4 }} />;
+              break;
+          }
+          return (
+            <Tag
+              style={{
+                width: 96,
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "2px 0",
+              }}
+              color={PATIENT_DIAGNOSE_COLOR[status]}
+            >
+              {icon}
+              <span>{PATIENT_DIAGNOSE_STATUS[status]}</span>
+            </Tag>
+          );
+        },
         sorter: true,
       },
       {

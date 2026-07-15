@@ -6,6 +6,12 @@ import {
   ArrowLeftOutlined,
   MailOutlined,
   SettingOutlined,
+  CloseSquareOutlined,
+  TeamOutlined,
+  SyncOutlined,
+  CheckCircleOutlined,
+  ClockCircleOutlined,
+  FileDoneOutlined,
 } from "@ant-design/icons";
 
 import Sider from "antd/es/layout/Sider";
@@ -253,6 +259,26 @@ const Sidebar = ({ collapsed }) => {
   );
 };
 
+const getStatusIcon = (status, color = "#fff") => {
+  const style = { color, fontSize: 13 };
+  switch (status) {
+    case 1:
+      return <CloseSquareOutlined style={style} />;
+    case 2:
+      return <TeamOutlined style={style} />;
+    case 3:
+      return <SyncOutlined spin style={style} />;
+    case 4:
+      return <CheckCircleOutlined style={style} />;
+    case 5:
+      return <ClockCircleOutlined style={style} />;
+    case 6:
+      return <FileDoneOutlined style={style} />;
+    default:
+      return null;
+  }
+};
+
 const Home = () => {
   const {
     collapsed,
@@ -320,7 +346,7 @@ const Home = () => {
               <div style={{ padding: collapsed ? "0" : "0 12px", width: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}>
                 {collapsed ? (
                   <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, width: "100%", padding: "4px 0" }}>
-                    <Tooltip title="Ca liên quan" placement="right">
+                    <Tooltip title="Lọc ca tôi tham gia (nhận, đang đọc, duyệt hoặc hội chẩn)" placement="right">
                       <div
                         onClick={() =>
                           setPendingFilters({
@@ -350,7 +376,7 @@ const Home = () => {
                       const intKey = Number(key);
                       const isChecked = pendingFilters.status?.includes(intKey);
                       return (
-                        <Tooltip key={key} title={label} placement="right">
+                        <Tooltip key={key} title={`Lọc ca ${label.toLowerCase()}`} placement="right">
                           <div
                             onClick={() => {
                               const current = pendingFilters.status || [];
@@ -370,14 +396,13 @@ const Home = () => {
                               height: 24,
                               backgroundColor: PATIENT_DIAGNOSE_COLOR[intKey],
                               borderRadius: 4,
-                              opacity: isChecked ? 1 : 0.4,
+                              opacity: isChecked ? 1 : 0.35,
                               cursor: "pointer",
+                              border: isChecked ? "1px solid #fff" : "none",
+                              boxShadow: isChecked ? "0 0 4px rgba(0,0,0,0.2)" : "none",
                             }}
                           >
-                            <Checkbox
-                              checked={isChecked}
-                              style={{ pointerEvents: "none", transform: "scale(0.8)" }}
-                            />
+                            {getStatusIcon(intKey, "#fff")}
                           </div>
                         </Tooltip>
                       );
@@ -385,32 +410,34 @@ const Home = () => {
                   </div>
                 ) : (
                   <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 4 }}>
-                    <div
-                      onClick={() =>
-                        setPendingFilters({
-                          ...pendingFilters,
-                          my_received_cases: !pendingFilters?.my_received_cases,
-                        })
-                      }
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 6,
-                        marginTop: 4,
-                        padding: "4px 8px",
-                        borderRadius: 6,
-                        background: pendingFilters?.my_received_cases ? "#dbeafe" : "#f3f4f6",
-                        border: pendingFilters?.my_received_cases ? "1px solid #3b82f6" : "1px solid #cbd5e1",
-                        cursor: "pointer",
-                        height: 28,
-                        width: "100%",
-                      }}
-                    >
-                      <Checkbox checked={pendingFilters?.my_received_cases} style={{ transform: "scale(0.85)" }} />
-                      <span style={{ fontSize: 11, fontWeight: 600, color: pendingFilters?.my_received_cases ? "#1d4ed8" : "#4b5563" }}>
-                        Ca liên quan
-                      </span>
-                    </div>
+                    <Tooltip title="Các ca tôi tham gia (nhận, đang đọc, duyệt hoặc hội chẩn)" placement="bottom">
+                      <div
+                        onClick={() =>
+                          setPendingFilters({
+                            ...pendingFilters,
+                            my_received_cases: !pendingFilters?.my_received_cases,
+                          })
+                        }
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 6,
+                          marginTop: 4,
+                          padding: "4px 8px",
+                          borderRadius: 6,
+                          background: pendingFilters?.my_received_cases ? "#dbeafe" : "#f3f4f6",
+                          border: pendingFilters?.my_received_cases ? "1px solid #3b82f6" : "1px solid #cbd5e1",
+                          cursor: "pointer",
+                          height: 28,
+                          width: "100%",
+                        }}
+                      >
+                        <Checkbox checked={pendingFilters?.my_received_cases} style={{ transform: "scale(0.85)" }} />
+                        <span style={{ fontSize: 11, fontWeight: 600, color: pendingFilters?.my_received_cases ? "#1d4ed8" : "#4b5563" }}>
+                          Ca liên quan
+                        </span>
+                      </div>
+                    </Tooltip>
 
                     <div style={{ fontSize: 11, fontWeight: 600, color: "#475569", marginTop: 8, marginBottom: 2 }}>
                       Lọc theo Trạng thái:
@@ -437,21 +464,21 @@ const Home = () => {
                               display: "flex",
                               alignItems: "center",
                               gap: 6,
-                              backgroundColor: PATIENT_DIAGNOSE_COLOR[intKey],
-                              color: "#fff",
-                              opacity: isChecked ? 1 : 0.45,
+                              background: isChecked ? "rgba(202, 196, 250, 0.15)" : "transparent",
                               borderRadius: 4,
                               padding: "4px 8px",
                               cursor: "pointer",
                               width: "100%",
                               height: 26,
+                              border: "1px solid #cbd5e1",
                             }}
                           >
                             <Checkbox
                               checked={isChecked}
                               style={{ pointerEvents: "none", transform: "scale(0.85)" }}
                             />
-                            <span style={{ fontSize: 11, fontWeight: 500, whiteSpace: "nowrap" }}>
+                            {getStatusIcon(intKey, PATIENT_DIAGNOSE_COLOR[intKey])}
+                            <span style={{ fontSize: 11, fontWeight: 500, color: "#334155" }}>
                               {label}
                             </span>
                           </div>
