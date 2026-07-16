@@ -954,7 +954,6 @@ const PrintPreviewVer3NotDataDiagnose = ({
             }
             readingDoctor={selectedPatientDiagnose?.id_receive_doctor_doctor}
             createdAt={formSnapshot.createdAt}
-            languageTranslate={languageTranslate}
           />
         </Card>
       </div>
