@@ -79,27 +79,28 @@ const PackageList = ({ isLanding = false }) => {
       </Row>
 
       <Modal
-        title="Xác nhận đăng ký gói"
+        title={<span className={styles.modalTitle}>Xác nhận đăng ký gói</span>}
         open={modalVisible}
         onCancel={() => {
           setModalVisible(false);
           setShowQR(false);
         }}
         footer={null}
+        className={styles.subscriptionModal}
       >
-        <p>
+        <p className={styles.selectedPlanLabel}>
           Bạn đang chọn gói:{" "}
-          <strong style={{ color: "#1677ff" }}>{selectedPackage}</strong>
+          <strong className={styles.planName}>{selectedPackage}</strong>
         </p>
 
-        <div style={{ marginTop: 12 }}>
-          <label>Chu kỳ thanh toán</label>
+        <div className={styles.formGroup}>
+          <label className={styles.fieldLabel}>Chu kỳ thanh toán</label>
           <Select
-            style={{ width: "100%", marginTop: 4 }}
+            className={styles.selectField}
             value={duration}
             onChange={(val) => {
               setDuration(val);
-              setShowQR(false); // đổi duration thì ẩn QR, disable lại nút
+              setShowQR(false);
             }}
           >
             {DURATION_OPTIONS.map((d) => {
@@ -111,7 +112,7 @@ const PackageList = ({ isLanding = false }) => {
                 <Option key={d.value} value={d.value}>
                   {`${d.label} – ${feeItem?.label} đ`}
                   {feeItem?.saving > 0 && (
-                    <span style={{ color: "#52c41a", marginLeft: 6 }}>
+                    <span className={styles.savingTag}>
                       (Tiết kiệm {feeItem.saving.toLocaleString("vi-VN")} đ)
                     </span>
                   )}
@@ -121,9 +122,10 @@ const PackageList = ({ isLanding = false }) => {
           </Select>
         </div>
 
-        <div style={{ marginTop: 12 }}>
-          <label>Ghi chú (tùy chọn)</label>
+        <div className={styles.formGroup}>
+          <label className={styles.fieldLabel}>Ghi chú (tùy chọn)</label>
           <Input.TextArea
+            className={styles.textAreaField}
             rows={3}
             placeholder="Nhập ghi chú ... "
             value={note}
@@ -136,7 +138,7 @@ const PackageList = ({ isLanding = false }) => {
           <Button
             type="default"
             block
-            style={{ marginTop: 16 }}
+            className={styles.btnProceed}
             onClick={() => setShowQR(true)}
           >
             Tiến hành thanh toán
@@ -145,13 +147,13 @@ const PackageList = ({ isLanding = false }) => {
 
         {/* QR tự động từ PACKAGE_FEES */}
         {showQR && qrImage && (
-          <div style={{ marginTop: 16, textAlign: "center" }}>
+          <div className={styles.qrContainer}>
             <img
               src={qrImage}
               alt="QR Payment"
-              style={{ width: 200, borderRadius: 8 }}
+              className={styles.qrImage}
             />
-            <p style={{ marginTop: 8, color: "#888" }}>
+            <p className={styles.qrTip}>
               Vui lòng quét mã và thanh toán trước khi gửi yêu cầu
             </p>
           </div>
@@ -161,9 +163,9 @@ const PackageList = ({ isLanding = false }) => {
         <Button
           type="primary"
           block
-          style={{ marginTop: 16 }}
+          className={styles.btnConfirm}
           loading={loading}
-          disabled={hasQR && !showQR} // chỉ bật sau khi bấm “Tiến hành thanh toán”
+          disabled={hasQR && !showQR}
           onClick={handleSubmit}
         >
           Xác nhận thanh toán

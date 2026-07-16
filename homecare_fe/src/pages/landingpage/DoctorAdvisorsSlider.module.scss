@@ -1,85 +1,163 @@
+// SCSS Variables cho màu sắc chủ đạo xanh lá và trắng
+$primary-color: #0b6b4f;
+$hover-color: #095a42;
+$selected-color: #04580f;
+$bg-light: #f4faf8;
+$bg-light-fade: rgba(11, 107, 79, 0.08);
+
+.doctor-slider {
+  margin-top: 30px;
+}
+
+.slider-slide {
+  padding: 0 12px; // Tạo khoảng cách ngang tự nhiên giữa các card
+  box-sizing: border-box;
+}
+
+.doctor-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px 16px;
+  margin: 0 auto; // Căn giữa card trong slide wrapper
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 220px; // Khóa cứng kích thước card để không bị kéo giãn to đùng
+
+  &:hover {
+    transform: translateY(-4px);
+    border-color: rgba(11, 107, 79, 0.3);
+    box-shadow: 0 10px 15px -3px rgba(11, 107, 79, 0.1);
+
+    .avatar-wrapper-avatar {
+      border-color: $primary-color;
+      box-shadow: 0 0 0 4px $bg-light;
+    }
+  }
+}
+
+.avatar-wrapper {
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.avatar-wrapper-avatar {
+  width: 90px;
+  height: 90px;
+  border: 2.5px solid #f1f5f9;
+  transition: all 0.25s ease;
+}
+
+.doctor-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e293b;
+  text-align: center;
+  margin-top: 8px;
+  line-height: 1.4;
+}
+
+/* POPUP */
 .hover-popup {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 999;
-  animation: fadeIn 0.3s ease;
+  z-index: 1000;
+  animation: fadeIn 0.25s ease;
 }
 
 .popup-content {
-  background: #fff;
-  padding: 30px;
-  border-radius: 12px;
+  background: #ffffff;
+  padding: 32px;
+  border-radius: 16px;
   text-align: center;
-  width: 500px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  width: 480px;
+  max-width: 90vw;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
   animation: scaleIn 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.popup-content_avatar {
+  width: 120px;
+  height: 120px;
+  border: 3.5px solid $bg-light;
+  box-shadow: 0 4px 6px -1px rgba(11, 107, 79, 0.1);
+}
+
+.popup-content_name {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 16px 0 8px;
 }
 
 .popup-desc {
+  color: #475569;
+  font-size: 14.5px;
+  line-height: 1.6;
+  text-align: justify;
   margin-top: 10px;
-  color: #444;
-  font-size: 15px;
-  line-height: 1.5;
-  text-align: start;
+  width: 100%;
 }
 
 .popup-close {
-  margin-top: 20px;
-  background: #04580f;
+  margin-top: 24px;
+  background: $primary-color;
   color: white;
   border: none;
-  border-radius: 6px;
-  padding: 8px 16px;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-weight: 600;
   cursor: pointer;
-}
-.avatar-wrapper-avatar {
-  height: 100px;
-  width: 100px;
-}
-.popup-content_avatar {
-  height: 160px;
-  width: 160px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: $hover-color;
+  }
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes scaleIn {
-  from {
-    transform: scale(0.9);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); }
 }
+
 @media (max-width: 768px) {
   .avatar-wrapper-avatar {
-    height: 70px;
     width: 70px;
+    height: 70px;
   }
   .doctor-name {
-    font-size: 10px;
+    font-size: 13px;
+  }
+  .popup-content {
+    padding: 24px;
   }
   .popup-content_avatar {
-    height: 80px;
-    width: 80px;
+    width: 90px;
+    height: 90px;
   }
   .popup-content_name {
-    font-size: 10px;
+    font-size: 16px;
   }
   .popup-desc {
-    font-size: 8px;
+    font-size: 13px;
   }
 }

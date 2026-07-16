@@ -43,3 +43,56 @@
 .read-the-docs {
   color: #888;
 }
+
+/* Ant Design Menu Overrides to use brand green color (#0b6b4f) */
+.ant-menu-item-selected {
+  background-color: rgba(11, 107, 79, 0.08) !important;
+  color: #0b6b4f !important;
+}
+
+.ant-menu-item-selected a,
+.ant-menu-item-selected span {
+  color: #0b6b4f !important;
+}
+
+.ant-menu-item-selected .ant-menu-item-icon,
+.ant-menu-item-selected .anticon {
+  color: #0b6b4f !important;
+}
+
+.ant-menu-item:hover,
+.ant-menu-item-active,
+.ant-menu-submenu-title:hover,
+.ant-menu-submenu-active {
+  color: #095a42 !important;
+}
+
+.ant-menu-submenu-selected > .ant-menu-submenu-title {
+  color: #0b6b4f !important;
+}
+
+.ant-menu-submenu-selected > .ant-menu-submenu-title .ant-menu-submenu-arrow,
+.ant-menu-submenu-title:hover .ant-menu-submenu-arrow {
+  color: #095a42 !important;
+}
+
+.ant-menu-item::after {
+  border-right: 3px solid #0b6b4f !important;
+  border-right-color: #0b6b4f !important;
+}
+
+.ant-menu-submenu-open > .ant-menu-submenu-title {
+  color: #0b6b4f !important;
+}
+
+/* Override default Ant Design blue highlight effects */
+.ant-menu-item-selected::after {
+  border-right-color: #0b6b4f !important;
+}
+.ant-menu-light .ant-menu-item-selected {
+  color: #0b6b4f !important;
+  background-color: rgba(11, 107, 79, 0.08) !important;
+}
+.ant-menu-light .ant-menu-submenu-selected > .ant-menu-submenu-title {
+  color: #0b6b4f !important;
+}

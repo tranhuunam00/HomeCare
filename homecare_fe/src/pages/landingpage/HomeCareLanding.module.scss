@@ -1,60 +1,228 @@
-.homecare {
-  color: #1c1c1c;
-  box-sizing: border-box;
-  width: calc(100vw - 15px);
-  padding-top: 120px;
+// HomeCareLanding.module.scss
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
-  &_auth_buttons {
-    margin-top: 30px;
-    margin-right: 20px;
+// SCSS Variables cho màu sắc chủ đạo xanh lá và trắng
+$primary-color: #0b6b4f;
+$hover-color: #095a42;
+$selected-color: #04580f;
+$bg-light: #f4faf8;
+$bg-light-fade: rgba(11, 107, 79, 0.08);
+
+.homecare {
+  color: #1e293b;
+  box-sizing: border-box;
+  width: 100%;
+  overflow-x: hidden;
+  background-color: #ffffff;
+  padding-top: 64px; // Khớp với chiều cao Header cố định
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  /* HERO SECTION (LEFT-ALIGNED WITH SIDE-OVERLAY) */
+  &__hero {
+    position: relative;
+    background: url("/landing/hero.jpg") center/cover no-repeat;
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 80px 8% 60px;
+    text-align: left;
+  }
+
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    // Gradient tối ở bên trái (để làm nổi bật chữ trắng) và trong suốt dần sang bên phải (để lộ hình ảnh bác sĩ)
+    background: linear-gradient(90deg, rgba(6, 78, 59, 0.92) 0%, rgba(15, 23, 42, 0.85) 45%, rgba(15, 23, 42, 0.3) 100%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 640px;
+    margin: 0;
+    background: none;
+    backdrop-filter: none;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
+  }
+
+  .hero-tag {
+    display: inline-block;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #34d399; // Xanh lá sáng (mint) để nổi bật trên nền tối
+    border: 1px solid rgba(52, 211, 153, 0.3);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 16px;
+    border-radius: 9999px;
+    margin-bottom: 24px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .hero-title {
+    font-size: 52px;
+    font-weight: 800;
+    line-height: 1.25;
+    margin-bottom: 24px;
+    letter-spacing: -0.5px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+
+    .title-line-1 {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .title-line-2 {
+      display: block;
+    }
+
+    .title-word {
+      color: #ffffff;
+      text-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .title-dot {
+      color: #34d399;
+      opacity: 0.8;
+      font-size: 40px;
+      margin: 0 4px;
+      user-select: none;
+    }
+
+    .title-word-highlight {
+      color: #34d399;
+      font-weight: 800;
+      text-shadow: 0 0 20px rgba(52, 211, 153, 0.4), 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+  }
+
+  .hero-subtitle {
+    font-size: 18px;
+    line-height: 1.65;
+    color: #e2e8f0; // Chữ phụ màu sáng
+    font-weight: 400;
+    margin-bottom: 36px;
+    max-width: 680px; // Tăng kích thước để nén khít chữ vào đúng 2 dòng
+    margin-left: 0;
+    margin-right: 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .hero-actions {
     display: flex;
     gap: 16px;
-    button {
-      background: #0b6b4f;
-      border-color: #0b6b4f;
-      color: white;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .hero-btn-primary {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+    border: none !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    height: 48px !important;
+    padding: 0 28px !important;
+    border-radius: 8px !important;
+    box-shadow: 0 8px 16px rgba(5, 150, 105, 0.3) !important;
+    transition: all 0.2s ease !important;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 20px rgba(5, 150, 105, 0.4) !important;
     }
+  }
 
-    button:hover {
-      background: #095a42;
-      border-color: #095a42;
+  .hero-btn-secondary {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.35) !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    height: 48px !important;
+    padding: 0 28px !important;
+    border-radius: 8px !important;
+    transition: all 0.2s ease !important;
+
+    &:hover {
+      border-color: rgba(255, 255, 255, 0.6) !important;
+      background-color: rgba(255, 255, 255, 0.2) !important;
     }
   }
 
-  &__header {
-    padding: 0 0px;
-    background-color: #fff;
-    flex: 1;
+  /* SECTION HEADER UTILITY */
+  .section-header {
+    text-align: center;
+    margin-bottom: 48px;
   }
 
-  &__menu {
-    background: none;
-    border-bottom: none;
-    font-size: 20px;
-    font-weight: 600;
-    justify-content: center;
+  .section-tag {
+    font-size: 13px;
+    font-weight: 700;
+    color: $primary-color;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 8px;
+    display: block;
   }
 
-  &__logo img {
-    height: 70px;
+  .section-title {
+    font-size: 32px;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0;
   }
 
+  .title-divider {
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(90deg, $primary-color 0%, $selected-color 100%);
+    margin: 16px auto 0;
+    border-radius: 2px;
+  }
+
+  /* ADVISORS SECTION */
+  &__advisors {
+    padding: 80px 24px;
+    max-width: 1240px;
+    margin: 0 auto;
+    background-color: #ffffff;
+  }
+
+  .advisors-slider-container {
+    margin-top: 24px;
+  }
+
+  .loading-text {
+    font-size: 15px;
+    color: #64748b;
+    font-style: italic;
+  }
+
+  /* AGENCY & SERVICES */
   &__agency {
-    padding: 80px 30px;
-    background: linear-gradient(
-      135deg,
-      #82f84c63 10%,
-      #f3785363 50%,
-      #263af1a9 100%
-    );
+    padding: 80px 24px;
+    background: linear-gradient(135deg, #f8fafc 0%, $bg-light 50%, #d1ebe0 100%);
+    border-top: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
 
     &-container {
       display: flex;
       justify-content: space-between;
+      align-items: center;
       flex-wrap: wrap;
       max-width: 1240px;
-      margin: auto;
-      gap: 40px;
+      margin: 0 auto;
+      gap: 56px;
     }
 
     &-left {
@@ -62,174 +230,214 @@
       text-align: center;
 
       img {
-        max-width: 300px;
-        margin-bottom: 20px;
+        max-width: 180px;
+        margin-bottom: 24px;
+        filter: drop-shadow(0 10px 15px rgba(11, 107, 79, 0.1));
       }
 
       h2 {
-        font-size: 28px;
-        font-weight: 700;
-        margin-bottom: 16px;
+        font-size: 32px;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0 0 12px;
+        letter-spacing: -0.5px;
       }
 
-      p {
-        text-align: center;
-        font-size: 24px;
+      .motto {
+        font-size: 18px;
         font-weight: 500;
-        color: #555;
+        color: $primary-color;
+        margin: 0;
       }
     }
 
     &-right {
-      flex: 1 1 55%;
+      flex: 1 1 50%;
     }
 
     &-services {
       list-style: none;
       padding: 0;
-      margin-bottom: 24px;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
 
-      li {
-        margin-bottom: 20px;
-
-        strong {
-          display: block;
-          font-size: 16px;
-          font-weight: 600;
-          color: #000;
-        }
-
-        span {
-          display: block;
-          font-size: 14px;
-          color: #666;
-          margin-top: 4px;
-        }
-      }
       &_module {
         display: flex;
-        img {
-          height: 40px;
-          padding-right: 30px;
+        gap: 20px;
+        background-color: rgba(255, 255, 255, 0.75);
+        padding: 16px 20px;
+        border-radius: 12px;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+        transition: all 0.25s ease;
+
+        &:hover {
+          background-color: #ffffff;
+          border-color: rgba(11, 107, 79, 0.3);
+          transform: translateX(4px);
+          box-shadow: 0 10px 15px -3px rgba(11, 107, 79, 0.05);
         }
+
+        .icon-bullet {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 32px;
+          height: 32px;
+          background-color: $bg-light;
+          border: 1px solid rgba(11, 107, 79, 0.2);
+          border-radius: 50%;
+          flex-shrink: 0;
+
+          .bullet-number {
+            font-size: 14px;
+            font-weight: 700;
+            color: $primary-color;
+          }
+        }
+
         strong {
-          font-size: 11px;
+          font-size: 15px;
+          font-weight: 500;
+          color: #334155;
+          line-height: 1.6;
         }
       }
     }
-
-    &-tools {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-
-      img {
-        height: 40px;
-      }
-    }
   }
 
-  &__hero {
-    background: url("/landing/hero.jpg") center/cover no-repeat;
-    height: 80vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-  }
+  /* CONTACT / CTA */
+  &__cta {
+    padding: 80px 24px;
+    background-color: #ffffff;
 
-  &__footer {
-    background-color: #02664f;
-    color: #fff;
-    padding: 60px 20px 30px;
-
-    &-content {
-      max-width: 1280px;
+    .cta-card {
+      max-width: 900px;
       margin: 0 auto;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 32px;
-    }
+      background: linear-gradient(135deg, $primary-color 0%, $hover-color 50%, $selected-color 100%);
+      padding: 48px 32px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 20px 25px -5px rgba(11, 107, 79, 0.3);
+      color: #ffffff;
 
-    &-col {
-      img {
-        height: 72px;
-        margin-bottom: 16px;
+      h3 {
+        font-size: 28px;
+        font-weight: 800;
+        color: #ffffff;
+        margin: 0 0 12px;
       }
 
       p {
-        margin-bottom: 12px;
-        font-size: 15px;
-        line-height: 1.6;
-      }
-
-      h4 {
         font-size: 16px;
-        font-weight: 700;
-        margin-bottom: 12px;
+        color: #a7f3d0;
+        margin: 0 0 32px;
+        max-width: 580px;
+        margin-left: auto;
+        margin-right: auto;
       }
 
-      ul {
-        padding: 0;
-        list-style: none;
+      .contact-btn {
+        background-color: #ffffff !important;
+        border: none !important;
+        color: $primary-color !important;
+        font-weight: 700 !important;
+        height: 50px !important;
+        padding: 0 36px !important;
+        border-radius: 8px !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+        transition: all 0.25s ease !important;
 
-        li {
-          font-size: 14px;
-          margin-bottom: 6px;
-          cursor: pointer;
-        }
-      }
-
-      .homecare__store {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-
-        img {
-          height: 40px;
-          cursor: pointer;
+        &:hover {
+          transform: scale(1.02);
+          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.15) !important;
         }
       }
     }
   }
 
-  &__copyright {
+  /* LOGO AT MODAL */
+  &__logo {
     text-align: center;
-    font-size: 13px;
-    padding: 16px;
-    color: #ddd;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
-    background-color: #014e3e;
+    margin-bottom: 20px;
+    img {
+      height: 72px;
+    }
   }
-}
 
-.homecare__logo_head {
-  width: 100px;
-}
-.homecare__avatar_head {
-  width: 50px;
-  height: 50px;
-  margin-top: 20px;
-}
-.homecare__avatar_head_name {
-  margin-top: 8px;
-  font-weight: bold;
-  font-size: 12px;
-}
-.homecare__agency-left_logo {
-  width: 150px;
-  height: 150px;
-}
-.mobileMenuButton {
-  display: none;
+  .mobile-br {
+    display: none;
+  }
 }
 
 @media (max-width: 768px) {
-  .homecare__menu {
-    display: none;
-  }
+  .homecare {
+    &__hero {
+      justify-content: center;
+      padding: 100px 24px 60px;
+      text-align: center;
+    }
 
-  .mobileMenuButton {
-    display: block;
+    .hero-overlay {
+      background: linear-gradient(180deg, rgba(6, 78, 59, 0.95) 0%, rgba(15, 23, 42, 0.9) 100%);
+    }
+
+    .hero-content {
+      max-width: 100%;
+    }
+
+    .hero-title {
+      font-size: 28px;
+      justify-content: center;
+      gap: 8px;
+      
+      .title-dot {
+        font-size: 20px;
+      }
+    }
+
+    .hero-subtitle {
+      font-size: 14px;
+    }
+
+    .mobile-br {
+      display: block;
+    }
+
+    .hero-actions {
+      justify-content: center;
+    }
+
+    &__agency-left {
+      flex: 1 1 100%;
+      img {
+        max-width: 140px;
+      }
+      h2 {
+        font-size: 26px;
+      }
+    }
+
+    &__agency-right {
+      flex: 1 1 100%;
+    }
+
+    .section-title {
+      font-size: 26px;
+    }
+
+    &__cta {
+      .cta-card {
+        padding: 32px 20px;
+        h3 {
+          font-size: 22px;
+        }
+        p {
+          font-size: 14px;
+        }
+      }
+    }
   }
 }

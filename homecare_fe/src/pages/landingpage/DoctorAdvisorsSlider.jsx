@@ -41,34 +41,39 @@ const DoctorAdvisorsSlider = ({ doctors = [] }) => {
     setSelectedDoctor(null);
   };
 
+  const containerStyle = {
+    maxWidth: doctors.length < 5 ? `${doctors.length * 260}px` : "1240px",
+    margin: "0 auto",
+  };
+
   return (
-    <div className={styles["doctor-slider"]}>
+    <div className={styles["doctor-slider"]} style={containerStyle}>
       <Slider {...settings}>
         {doctors.map((doc, index) => (
-          <div
-            key={index}
-            className={styles["doctor-card"]}
-            onClick={() => handleClickDoctor(doc)}
-          >
-            <div className={styles["avatar-wrapper"]}>
-              <Avatar
-                className={styles["avatar-wrapper-avatar"]}
-                src={doc.avatar_url || "/default_doctor.png"}
-                style={{
-                  border: "2px solid #04580f",
-                  margin: "0 auto",
-                  cursor: "pointer",
-                }}
-              />
-            </div>
-            <div className={styles["doctor-name"]}>
-              {[
-                doc.academic_title ? `${doc.academic_title}.` : null,
-                doc.degree ? `${doc.degree}.` : null,
-                doc.full_name,
-              ]
-                .filter(Boolean)
-                .join(" ")}
+          <div key={index} className={styles["slider-slide"]}>
+            <div
+              className={styles["doctor-card"]}
+              onClick={() => handleClickDoctor(doc)}
+            >
+              <div className={styles["avatar-wrapper"]}>
+                <Avatar
+                  className={styles["avatar-wrapper-avatar"]}
+                  src={doc.avatar_url || "/default_doctor.png"}
+                  style={{
+                    margin: "0 auto",
+                    cursor: "pointer",
+                  }}
+                />
+              </div>
+              <div className={styles["doctor-name"]}>
+                {[
+                  doc.academic_title ? `${doc.academic_title}.` : null,
+                  doc.degree ? `${doc.degree}.` : null,
+                  doc.full_name,
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+              </div>
             </div>
           </div>
         ))}
@@ -88,7 +93,6 @@ const DoctorAdvisorsSlider = ({ doctors = [] }) => {
               className={styles["popup-content_avatar"]}
               src={selectedDoctor.avatar_url || "/default_doctor.png"}
               style={{
-                border: "3px solid #04580f",
                 marginBottom: 20,
               }}
             />

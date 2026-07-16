@@ -118,7 +118,7 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
           size="small"
           icon={<ApartmentOutlined />}
           style={{
-            background: "linear-gradient(135deg, #3526b9, #69b1ff)",
+            background: "linear-gradient(135deg, #0b6b4f, #10b981)",
             border: "none",
             color: "#fff",
             height: 28,
@@ -126,11 +126,11 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.background =
-              "linear-gradient(135deg, #24552f, #4096ff)";
+              "linear-gradient(135deg, #095a42, #34d399)";
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.background =
-              "linear-gradient(135deg, #3526b9, #69b1ff)";
+              "linear-gradient(135deg, #0b6b4f, #10b981)";
           }}
           onClick={() => setOpenWorkflow(true)}
         >
@@ -228,7 +228,22 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
       <Button
         type="primary"
         size="small"
-        style={{ height: 28, fontSize: "12px" }}
+        style={{
+          height: 28,
+          fontSize: "12px",
+          background: "linear-gradient(135deg, #0b6b4f 0%, #04580f 100%)",
+          borderColor: "transparent",
+          transition: "all 0.2s ease",
+          cursor: "pointer",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background =
+            "linear-gradient(135deg, #095a42 0%, #10b981 100%)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background =
+            "linear-gradient(135deg, #0b6b4f 0%, #04580f 100%)";
+        }}
         icon={<UserAddOutlined />}
         onClick={() => navigate("/home/patients-diagnose/create")}
       >
@@ -237,7 +252,22 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
       <Button
         type="primary"
         size="small"
-        style={{ height: 28, fontSize: "12px" }}
+        style={{
+          height: 28,
+          fontSize: "12px",
+          background: "linear-gradient(135deg, #0b6b4f 0%, #04580f 100%)",
+          borderColor: "transparent",
+          transition: "all 0.2s ease",
+          cursor: "pointer",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background =
+            "linear-gradient(135deg, #095a42 0%, #10b981 100%)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background =
+            "linear-gradient(135deg, #0b6b4f 0%, #04580f 100%)";
+        }}
         icon={<UploadOutlined />}
         onClick={() => setOpenImportModal(true)}
       >

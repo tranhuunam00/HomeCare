@@ -1,71 +1,127 @@
+// Constants cho màu sắc chủ đạo xanh lá và trắng
+$primary-color: #0b6b4f;
+$hover-color: #095a42;
+$selected-color: #04580f;
+$bg-light: #f4faf8;
+$bg-light-fade: rgba(11, 107, 79, 0.08);
+
 .packageCard {
   display: flex;
   flex-direction: column;
   height: 100%;
   justify-content: space-between;
+  border-radius: 12px !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.01) !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+
+  :global(.ant-card-body) {
+    padding: 16px !important; // Thu hẹp padding của Card từ 24px xuống 16px
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: rgba(11, 107, 79, 0.3) !important;
+    box-shadow: 0 12px 20px -5px rgba(11, 107, 79, 0.08), 0 4px 6px -2px rgba(11, 107, 79, 0.02) !important;
+  }
 
   .contentWrapper {
-    flex: 1; /* ✅ chiếm toàn bộ khoảng trắng */
+    flex: 1; /* chiếm toàn bộ khoảng trắng */
     display: flex;
     flex-direction: column;
   }
 
   .header {
     text-align: center;
+    padding-bottom: 6px;
+    
     h3 {
-      font-size: 1.2rem;
-      color: #003a8c;
-      font-weight: 600;
+      font-size: 1.15rem;
+      color: #0f172a;
+      font-weight: 700;
+      margin-bottom: 4px;
+      letter-spacing: -0.5px;
     }
+    
     .desc {
-      color: #666;
-      font-size: 0.9rem;
-      margin-bottom: 10px;
+      color: #64748b;
+      font-size: 0.85rem;
+      margin-bottom: 6px;
+      line-height: 1.4;
     }
   }
 
   .features {
-    flex: 1; /* ✅ giãn ra tối đa đẩy button xuống */
+    flex: 1; /* giãn ra tối đa đẩy button xuống */
     list-style: none;
-    padding: 0 8px;
-    margin: 12px 0 24px;
+    padding: 0 4px;
+    margin: 6px 0 14px; // Giảm margin đứng
 
     li {
-      font-size: 0.95rem;
-      padding: 6px 0;
+      font-size: 12.5px; // Giảm cỡ chữ để tránh xuống dòng
+      padding: 3.5px 0;   // Thu gọn tối đa padding từ 8px xuống 3.5px
       display: flex;
       align-items: center;
       gap: 6px;
+      border-bottom: 1px dashed #f8fafc; // Đường nét đứt siêu mờ để tiết kiệm thị giác
+
+      &:last-child {
+        border-bottom: none;
+      }
 
       .icon {
-        color: #52c41a;
+        color: #10b981; // Xanh emerald lá cây
+        font-size: 12px;
       }
 
       .infoIcon {
-        color: #999;
+        color: #94a3b8;
         margin-left: auto;
         cursor: pointer;
+        transition: color 0.15s ease;
+        font-size: 11px;
+
         &:hover {
-          color: #1677ff;
+          color: $primary-color;
         }
       }
     }
   }
 
   .button {
-    border-radius: 8px;
-    font-weight: 500;
-    margin-top: auto;
+    background: linear-gradient(135deg, $primary-color 0%, $selected-color 100%) !important;
+    border: none !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    height: 38px !important;
+    border-radius: 6px !important;
+    box-shadow: 0 4px 8px rgba(11, 107, 79, 0.15) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    cursor: pointer !important;
+
+    &:hover {
+      transform: translateY(-2px);
+      background: linear-gradient(135deg, #10b981 0%, $primary-color 100%) !important; // Chuyển sang xanh ngọc lục bảo tươi
+      box-shadow: 0 6px 14px rgba(16, 185, 129, 0.3) !important;
+      color: #ffffff !important;
+    }
+
+    &:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 4px rgba(11, 107, 79, 0.15) !important;
+      transition: all 0.05s ease !important;
+    }
   }
 }
+
 .priceWrapper {
-  margin-top: auto; // đẩy xuống đáy card
-  padding-top: 12px;
-  text-align: right; // căn phải
+  margin-top: auto;
+  padding-top: 8px;
+  text-align: right;
 
   .priceItem {
-    font-size: 14px;
-    margin-bottom: 6px;
+    font-size: 13px;
+    margin-bottom: 4px;
 
     strong {
       font-weight: 600;

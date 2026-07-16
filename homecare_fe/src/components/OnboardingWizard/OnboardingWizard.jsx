@@ -593,20 +593,21 @@ const OnboardingWizard = ({ open, onClose, doctorId, is_use_onboard }) => {
           </Spin>
 
           <Modal
-            title="Xác nhận đăng ký gói"
+            title={<span style={{ fontWeight: 700, fontSize: 16, color: "#0f172a" }}>Xác nhận đăng ký gói</span>}
             open={modalVisible}
             onCancel={() => setModalVisible(false)}
             footer={null}
           >
-            <p>
-              Bạn đang chọn gói: <strong style={{ color: "#1677ff" }}>{selectedPackage}</strong>
+            <p style={{ fontSize: 14, color: "#475569", marginBottom: 16, borderBottom: "1px solid #f1f5f9", paddingBottom: 10 }}>
+              Bạn đang chọn gói: <strong style={{ color: "#0b6b4f", fontSize: 16 }}>{selectedPackage}</strong>
             </p>
-            <div style={{ marginTop: 12 }}>
-              <label>Chu kỳ sử dụng</label>
+            <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 6 }}>
+              <label style={{ fontSize: 13, fontWeight: 600, color: "#334155" }}>Chu kỳ sử dụng</label>
               <Select
-                style={{ width: "100%", marginTop: 4 }}
+                style={{ width: "100%" }}
                 value={duration}
                 onChange={(val) => setDuration(val)}
+                dropdownStyle={{ borderRadius: 8 }}
               >
                 {DURATION_OPTIONS.map((d) => {
                   const feeItem = fees?.find((f) => f.value === d.value);
@@ -618,7 +619,7 @@ const OnboardingWizard = ({ open, onClose, doctorId, is_use_onboard }) => {
                   return (
                     <Option key={d.value} value={d.value}>
                       {`${d.label} – ${feeItem?.label} đ`}
-                      {saving > 0 && <span style={{ color: "#52c41a", marginLeft: 6 }}>(Tiết kiệm {saving.toLocaleString("vi-VN")} đ)</span>}
+                      {saving > 0 && <span style={{ color: "#10b981", fontWeight: 600, marginLeft: 6 }}>(Tiết kiệm {saving.toLocaleString("vi-VN")} đ)</span>}
                     </Option>
                   );
                 })}
@@ -627,9 +628,18 @@ const OnboardingWizard = ({ open, onClose, doctorId, is_use_onboard }) => {
             <Button
               type="primary"
               block
-              style={{ marginTop: 16 }}
               loading={loadingPackage}
               onClick={handleSubmitPackage}
+              style={{
+                marginTop: 20,
+                background: "linear-gradient(135deg, #0b6b4f 0%, #04580f 100%)",
+                borderColor: "transparent",
+                color: "#ffffff",
+                fontWeight: 600,
+                height: 40,
+                borderRadius: 8,
+                boxShadow: "0 4px 10px rgba(11, 107, 79, 0.2)",
+              }}
             >
               Gửi yêu cầu đăng ký
             </Button>
