@@ -66,9 +66,10 @@ const CustomSteps = ({
 
         const stepContent = (
           <div
-            className="step-item"
+            className={`step-item ${isActive ? "active" : ""} ${isCompleted ? "completed" : ""}`}
             onClick={() => (isActive ? step.onStepClick?.() : null)}
             style={{
+              "--step-color": step.color,
               background: backgroundColor,
               border: `1px ${borderStyle} ${borderColor}`,
               cursor: isActive ? "pointer" : "default",
@@ -78,10 +79,8 @@ const CustomSteps = ({
               width: isActive ? 26 : 22,
               height: isActive ? 26 : 22,
               borderRadius: isActive ? "50%" : "4px",
-              transform: isActive ? "scale(1.15)" : "none",
               boxShadow: isActive ? `0 2px 6px ${step.color}44` : "none",
               zIndex: isActive ? 3 : 1,
-              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
             }}
           >
             {getPatientDiagnoseIcon(step.key, { style: { color: iconColor, fontSize: isActive ? 14 : 12 }, spin: isActive })}

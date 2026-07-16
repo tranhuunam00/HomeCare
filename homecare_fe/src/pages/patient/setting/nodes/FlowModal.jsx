@@ -30,7 +30,7 @@ import TextArea from "antd/es/input/TextArea";
 
 const DEFAULT_NODE_STYLE = {
   background: "#ffffff",
-  border: "#1677ff",
+  border: "#0b6b4f",
   text: "#000000",
 };
 
@@ -259,6 +259,7 @@ const FlowModal = ({ open, onClose }) => {
       width="92%"
       title="QUY TRÌNH D-RADS"
       destroyOnClose
+      className="flow-modal-custom"
     >
       <Tabs
         defaultActiveKey="1"
@@ -556,7 +557,7 @@ const FlowModal = ({ open, onClose }) => {
                 )}
 
                 {/* ===== CANVAS ===== */}
-                <div style={{ height: "70vh", marginTop: 12 }}>
+                <div style={{ height: "62vh" }}>
                   <ReactFlow
                     nodes={nodes}
                     edges={edges}

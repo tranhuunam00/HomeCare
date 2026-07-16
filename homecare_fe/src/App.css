@@ -96,3 +96,68 @@
 .ant-menu-light .ant-menu-submenu-selected > .ant-menu-submenu-title {
   color: #0b6b4f !important;
 }
+
+/* FLOW MODAL (QUY TRÌNH D-RADS) CUSTOM THEME AND SPACING */
+.flow-modal-custom {
+  top: 12px !important;
+  margin: 0 auto !important;
+  padding-bottom: 0 !important;
+}
+
+.flow-modal-custom .ant-modal-content {
+  border-radius: 12px !important;
+  padding: 12px 20px !important;
+}
+
+.flow-modal-custom .ant-modal-body {
+  padding: 0 !important;
+}
+
+/* Tab indicator & text */
+.flow-modal-custom .ant-tabs-tab-btn:hover {
+  color: #0b6b4f !important;
+}
+
+.flow-modal-custom .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #0b6b4f !important;
+  font-weight: 700 !important;
+}
+
+.flow-modal-custom .ant-tabs-ink-bar {
+  background: #0b6b4f !important;
+}
+
+/* Buttons style */
+.flow-modal-custom .ant-btn {
+  border-radius: 6px !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  cursor: pointer !important;
+  height: 32px !important;
+  line-height: 32px !important;
+  padding: 0 16px !important;
+  font-size: 13px !important;
+}
+
+.flow-modal-custom .ant-btn:hover:not(:disabled) {
+  transform: translateY(-1.5px) !important;
+}
+
+.flow-modal-custom .ant-btn:active:not(:disabled) {
+  transform: translateY(1px) !important;
+  transition: all 0.05s ease !important;
+}
+
+/* Primary Button green gradient overrides */
+.flow-modal-custom .ant-btn-primary {
+  background: linear-gradient(135deg, #0b6b4f 0%, #04580f 100%) !important;
+  border-color: transparent !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  box-shadow: 0 2px 4px rgba(11, 107, 79, 0.15) !important;
+}
+
+.flow-modal-custom .ant-btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #10b981 0%, #0b6b4f 100%) !important;
+  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3) !important;
+}
+
