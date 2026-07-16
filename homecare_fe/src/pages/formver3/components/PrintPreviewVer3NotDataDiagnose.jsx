@@ -4,6 +4,7 @@ import { Button, Card, Divider, Image } from "antd";
 import { translateLabel } from "../../../constant/app";
 
 import styles from "./PrintPreviewVer3NotDataDiagnose.module.scss";
+import "suneditor/dist/css/suneditor.min.css";
 import dayjs from "dayjs";
 import { useGlobalAuth } from "../../../contexts/AuthContext";
 import useVietnamAddress from "../../../hooks/useVietnamAddress";
@@ -47,6 +48,8 @@ const PrintPreviewVer3NotDataDiagnose = ({
   printTemplate = {},
   languageTranslate,
   imagingRows,
+  isFreeText = false,
+  freeTextContent = "",
   selectedExamPart,
   isOnLyContent = false,
   setPreviewOpen,
@@ -592,124 +595,153 @@ const PrintPreviewVer3NotDataDiagnose = ({
             )}
           </div>
 
-          <h3
-            style={{
-              textAlign: "left",
-              color: "#2f6db8",
-              margin: 0,
-              padding: 0,
-              marginBottom: 0,
-              marginTop: 20,
-            }}
-          >
-            {isCanThiepGroup
-              ? translateLabel(
-                  languageTranslate,
-                  "QUY TRÌNH THỦ THUẬT",
-                  false,
-                ).toUpperCase()
-              : translateLabel(
-                  languageTranslate,
-                  "imagingFindings",
-                  false,
-                ).toUpperCase()}
-          </h3>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 20, marginBottom: 4 }}>
+            <h3
+              style={{
+                textAlign: "left",
+                color: "#2f6db8",
+                margin: 0,
+                padding: 0,
+              }}
+            >
+              {isCanThiepGroup
+                ? translateLabel(
+                    languageTranslate,
+                    "QUY TRÌNH THỦ THUẬT",
+                    false,
+                  ).toUpperCase()
+                : translateLabel(
+                    languageTranslate,
+                    "imagingFindings",
+                    false,
+                  ).toUpperCase()}
+            </h3>
+            <span
+              className="no-print"
+              style={{
+                fontSize: 10,
+                padding: "2px 6px",
+                borderRadius: 4,
+                fontWeight: 500,
+                backgroundColor: isFreeText ? "#e6f7ff" : "#f9f0ff",
+                color: isFreeText ? "#096dd9" : "#531dab",
+                border: isFreeText ? "1px solid #91d5ff" : "1px solid #d3adf7",
+                display: "inline-block",
+              }}
+            >
+              {isFreeText ? "Văn bản tự do" : "Bảng cấu trúc"}
+            </span>
+          </div>
 
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              marginTop: 6,
-              fontSize: 15,
-              ...styleCustomParent,
-            }}
-          >
-            <thead>
-              <tr>
-                <th style={{ ...thUnderline, ...colSTT }}></th>
-                <th
-                  style={{ ...thUnderline, width: isCanThiepGroup ? 350 : 420 }}
-                ></th>
-
-                {isCanThiepGroup ? (
-                  <th style={thUnderline}>
-                    {translateLabel(languageTranslate, "Mô tả", false)}
-                  </th>
-                ) : (
-                  <>
-                    <th
-                      style={{
-                        ...thUnderline,
-                        textAlign: "center",
-                        width: 100,
-                        fontSize: 12,
-                        fontWeight: 500,
-                        whiteSpace: "nowrap",
-                        padding: "4px 6px",
-                        ...styleCustomParent,
-                      }}
-                    >
-                      {translateLabel(languageTranslate, "Bình thường", false)}
-                    </th>
-                    <th
-                      style={{
-                        ...thUnderline,
-                        textAlign: "center",
-                        width: 100,
-                        fontSize: 12,
-                        fontWeight: 500,
-                        whiteSpace: "nowrap",
-                        padding: "4px 6px",
-                        ...styleCustomParent,
-                      }}
-                    >
-                      {translateLabel(languageTranslate, "Bất thường", false)}
-                    </th>
-                  </>
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {imagingRows.map((row, index) => (
-                <tr key={row.id || index}>
-                  <td style={{ ...tdUnderlineCenter, ...colSTT }}>
-                    {index + 1}
-                  </td>
-
-                  <td
-                    style={{
-                      ...tdUnderlineLeft,
-                      width: isCanThiepGroup ? 350 : 420,
-                    }}
-                  >
-                    {row.name}
-                  </td>
+          {isFreeText ? (
+            // Chế độ văn bản tự do: hiển thị HTML
+            <div
+              className="sun-editor-editable"
+              style={{
+                marginTop: 8,
+                fontSize: 15,
+                lineHeight: 1.6,
+                ...styleCustomParent,
+              }}
+              dangerouslySetInnerHTML={{ __html: freeTextContent || "<p>—</p>" }}
+            />
+          ) : (
+            <table
+              style={{
+                width: "100%",
+                borderCollapse: "collapse",
+                marginTop: 6,
+                fontSize: 15,
+                ...styleCustomParent,
+              }}
+            >
+              <thead>
+                <tr>
+                  <th style={{ ...thUnderline, ...colSTT }}></th>
+                  <th
+                    style={{ ...thUnderline, width: isCanThiepGroup ? 350 : 420 }}
+                  ></th>
 
                   {isCanThiepGroup ? (
-                    <td
-                      style={{
-                        ...tdUnderlineLeft,
-                        whiteSpace: "pre-line",
-                        fontSize: 15,
-                        ...styleCustomParent,
-                      }}
-                    >
-                      {row.description || ""}
-                    </td>
+                    <th style={thUnderline}>
+                      {translateLabel(languageTranslate, "Mô tả", false)}
+                    </th>
                   ) : (
                     <>
-                      <td style={tdUnderlineCenter}>
-                        <Circle checked={row.status === "normal"} />
-                      </td>
-                      <td style={tdUnderlineCenter}>
-                        <Circle checked={row.status === "abnormal"} />
-                      </td>
+                      <th
+                        style={{
+                          ...thUnderline,
+                          textAlign: "center",
+                          width: 100,
+                          fontSize: 12,
+                          fontWeight: 500,
+                          whiteSpace: "nowrap",
+                          padding: "4px 6px",
+                          ...styleCustomParent,
+                        }}
+                      >
+                        {translateLabel(languageTranslate, "Bình thường", false)}
+                      </th>
+                      <th
+                        style={{
+                          ...thUnderline,
+                          textAlign: "center",
+                          width: 100,
+                          fontSize: 12,
+                          fontWeight: 500,
+                          whiteSpace: "nowrap",
+                          padding: "4px 6px",
+                          ...styleCustomParent,
+                        }}
+                      >
+                        {translateLabel(languageTranslate, "Bất thường", false)}
+                      </th>
                     </>
                   )}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {(imagingRows || []).map((row, index) => (
+                  <tr key={row.id || index}>
+                    <td style={{ ...tdUnderlineCenter, ...colSTT }}>
+                      {index + 1}
+                    </td>
+
+                    <td
+                      style={{
+                        ...tdUnderlineLeft,
+                        width: isCanThiepGroup ? 350 : 420,
+                      }}
+                    >
+                      {row.name}
+                    </td>
+
+                    {isCanThiepGroup ? (
+                      <td
+                        style={{
+                          ...tdUnderlineLeft,
+                          whiteSpace: "pre-line",
+                          fontSize: 15,
+                          ...styleCustomParent,
+                        }}
+                      >
+                        {row.description || ""}
+                      </td>
+                    ) : (
+                      <>
+                        <td style={tdUnderlineCenter}>
+                          <Circle checked={row.status === "normal"} />
+                        </td>
+                        <td style={tdUnderlineCenter}>
+                          <Circle checked={row.status === "abnormal"} />
+                        </td>
+                      </>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
 
           {!isCanThiepGroup && abnormalRows?.length > 0 && (
             <>

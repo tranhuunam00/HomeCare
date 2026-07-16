@@ -19,6 +19,7 @@ import API_CALL from "../../../services/axiosClient";
 import {
   PATIENT_DIAGNOSE_COLOR,
   PATIENT_DIAGNOSE_STATUS,
+  PATIENT_DIAGNOSE_STATUS_CODE,
   USER_ROLE,
 } from "../../../constant/app";
 import PatientTablePage from "../PatientDiagnoseList";
@@ -124,6 +125,29 @@ const PatientDiagnoiseDetailPage = ({
           bordered
           extra={
             <Space>
+              {(selectedPatientDiagnose.status === PATIENT_DIAGNOSE_STATUS_CODE.IN_PROCESSING ||
+                selectedPatientDiagnose.status === PATIENT_DIAGNOSE_STATUS_CODE.READ_DONE) && (
+                <Button
+                  type="primary"
+                  size="small"
+                  onClick={() => onOpenReading(true)}
+                  icon={<EditOutlined />}
+                >
+                  Sửa đọc
+                </Button>
+              )}
+              {(selectedPatientDiagnose.status === PATIENT_DIAGNOSE_STATUS_CODE.WAIT_VERIFY ||
+                selectedPatientDiagnose.status === PATIENT_DIAGNOSE_STATUS_CODE.VERIFIED) && (
+                <Button
+                  type="primary"
+                  size="small"
+                  onClick={() => onOpenReading(true)}
+                  icon={<EditOutlined />}
+                  style={{ backgroundColor: "#52c41a", borderColor: "#52c41a" }}
+                >
+                  Sửa duyệt
+                </Button>
+              )}
               <Button
                 size="small"
                 type="text"

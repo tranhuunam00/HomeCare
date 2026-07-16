@@ -214,6 +214,21 @@ const FormVer3GroupProcessPatientDiagnoise = ({
           )}
         </div>
 
+        {status !== PATIENT_DIAGNOSE_STATUS_NAME.NEW && (
+          <div style={{ margin: 0 }}>
+            <ActionButton
+              color="cyan"
+              icon={<FileSearchOutlined />}
+              onClick={async () => {
+                onOpenReading();
+                setPreviewOpen(true);
+              }}
+            >
+              Xem trước
+            </ActionButton>
+          </div>
+        )}
+
         {(status === PATIENT_DIAGNOSE_STATUS_NAME.VERIFIED ||
           status === PATIENT_DIAGNOSE_STATUS_NAME.WAIT_VERIFY) &&
           (id_doctor_in_processing === doctor.id ||
@@ -263,6 +278,32 @@ const FormVer3GroupProcessPatientDiagnoise = ({
               </ActionButton>
             </div>
           )}
+
+        {(status === PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESSING ||
+          status === PATIENT_DIAGNOSE_STATUS_NAME.READ_DONE) && (
+          <div style={{ margin: 0 }}>
+            <ActionButton
+              color="blue"
+              icon={<ReadOutlined />}
+              onClick={() => onOpenReading(true)}
+            >
+              Sửa đọc
+            </ActionButton>
+          </div>
+        )}
+
+        {(status === PATIENT_DIAGNOSE_STATUS_NAME.WAIT_VERIFY ||
+          status === PATIENT_DIAGNOSE_STATUS_NAME.VERIFIED) && (
+          <div style={{ margin: 0 }}>
+            <ActionButton
+              color="green"
+              icon={<CheckCircleOutlined />}
+              onClick={() => onOpenReading(true)}
+            >
+              Sửa duyệt
+            </ActionButton>
+          </div>
+        )}
 
         <div style={{ margin: 0 }}>
           <ActionButton

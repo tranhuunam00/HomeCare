@@ -21,6 +21,8 @@ export default function DoctorUseFormVer3Viewer({
 
   const [formSnapshot, setFormSnapshot] = useState(null);
   const [imagingRows, setImagingRows] = useState(DEFAULT_IMAGING_ROWS);
+  const [isFreeText, setIsFreeText] = useState(false);
+  const [freeTextContent, setFreeTextContent] = useState("");
   const [imageList, setImageList] = useState([]);
   const [printTemplate, setPrintTemplate] = useState(null);
   const [selectedExamPart, setSelectedExamPart] = useState(null);
@@ -51,13 +53,22 @@ export default function DoctorUseFormVer3Viewer({
           createdAt: apiData.createdAt,
         });
 
-        /* ========= 2. Imaging rows ========= */
+        /* ========= 2. Imaging rows + isFreeText ========= */
         try {
-          const rows = JSON.parse(apiData.imageDescription || "[]");
-          setImagingRows(
-            Array.isArray(rows) && rows.length ? rows : DEFAULT_IMAGING_ROWS,
-          );
+          const parsed = JSON.parse(apiData.imageDescription || "[]");
+          if (parsed && typeof parsed === "object" && !Array.isArray(parsed) && parsed.isFreeText) {
+            setIsFreeText(true);
+            setFreeTextContent(parsed.text || "");
+            setImagingRows([]);
+          } else if (Array.isArray(parsed) && parsed.length) {
+            setIsFreeText(false);
+            setImagingRows(parsed);
+          } else {
+            setIsFreeText(false);
+            setImagingRows(DEFAULT_IMAGING_ROWS);
+          }
         } catch {
+          setIsFreeText(false);
           setImagingRows(DEFAULT_IMAGING_ROWS);
         }
 
@@ -126,7 +137,9 @@ export default function DoctorUseFormVer3Viewer({
       <Card style={{ marginTop: 0 }} bodyStyle={{ padding: "8px 12px" }}>
         <PrintPreviewVer3NotDataDiagnose
           approvalStatus={approvalStatus}
-          imagingRows={imagingRows}
+          imagingRows={isFreeText ? [] : imagingRows}
+          isFreeText={isFreeText}
+          freeTextContent={freeTextContent}
           formSnapshot={formSnapshot}
           selectedExamPart={selectedExamPart}
           selectedTemplateService={selectedTemplateService}

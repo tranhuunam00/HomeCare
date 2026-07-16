@@ -11,6 +11,7 @@ import {
   Spin,
   Modal,
   Divider,
+  Switch,
 } from "antd";
 import { QuestionCircleOutlined, ReloadOutlined } from "@ant-design/icons";
 import { useNavigate, useParams } from "react-router-dom";
@@ -48,6 +49,7 @@ import {
   LANGUAGE_OPTIONS,
   PATIENT_FIELDS,
   TEMPLATE_GROUP_RENDER_MAP,
+  generateTextFromStructuredRows,
 } from "../../formver3.constant";
 import AdvancedSampleSection from "../../components/AdvancedSampleSection";
 import ImagingStructureTable from "../../components/ImagingStructureTable3.jsx";
@@ -57,6 +59,7 @@ import { handlePrint } from "../../../formver2/utils.js";
 import ImagingStructureTextTable from "../../components/ImagingStructureTextTable.jsx";
 import TranslateListRecordsVer3 from "../../components/TranslateListRecordsVer3.jsx";
 import useLatestDoctorUseFormVer3 from "../../useLatestDoctorUseFormVer3.js";
+import CustomSunEditor from "../../../../components/Suneditor/CustomSunEditor";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -68,6 +71,7 @@ export default function DoctorUseDFormVer3({
   doctorUseFormVer3Id,
   onStatusChange,
   onOpenConsultation,
+  initEditMode = false,
 }) {
   const printRef = useRef(null);
   const [form] = Form.useForm();
@@ -119,6 +123,9 @@ export default function DoctorUseDFormVer3({
   });
 
   const [imagingRows, setImagingRows] = useState(DEFAULT_IMAGING_ROWS);
+  // isFreeText: chế độ văn bản tự do (SunEditor) thay cho bảng cấu trúc
+  const [isFreeText, setIsFreeText] = useState(false);
+  const [freeTextContent, setFreeTextContent] = useState("");
 
   const { record } = useLatestDoctorUseFormVer3(
     selectedPatientDiagnose?.id,
@@ -149,12 +156,20 @@ export default function DoctorUseDFormVer3({
     if (formVer3 && !idEdit) {
       form.setFieldsValue(buildFormVer3Values(formVer3));
       try {
-        const rows = JSON.parse(formVer3.imageDescription || "[]");
-
-        setImagingRows(
-          Array.isArray(rows) && rows.length ? rows : DEFAULT_IMAGING_ROWS,
-        );
+        const parsed = JSON.parse(formVer3.imageDescription || "[]");
+        if (parsed && typeof parsed === "object" && !Array.isArray(parsed) && parsed.isFreeText) {
+          // Template mặc định văn bản tự do
+          setIsFreeText(true);
+          setFreeTextContent(parsed.text || "");
+        } else if (Array.isArray(parsed) && parsed.length) {
+          setIsFreeText(false);
+          setImagingRows(parsed);
+        } else {
+          setIsFreeText(false);
+          setImagingRows(DEFAULT_IMAGING_ROWS);
+        }
       } catch {
+        setIsFreeText(false);
         setImagingRows(DEFAULT_IMAGING_ROWS);
       }
     }
@@ -232,10 +247,11 @@ export default function DoctorUseDFormVer3({
     });
     const filterDatas = data.data.data.items.filter((item) => {
       return (
-        item.id_template_service == selectedIDs.id_template_service &&
-        item.id_exam_part == selectedIDs.id_exam_part &&
-        item.isUsed == true &&
-        item.isApproved == true
+        (item.id_template_service == selectedIDs.id_template_service &&
+          item.id_exam_part == selectedIDs.id_exam_part &&
+          item.isUsed == true &&
+          item.isApproved == true) ||
+        item.id === 999999
       );
     });
 
@@ -343,13 +359,21 @@ export default function DoctorUseDFormVer3({
           setImageList(descImages);
 
           try {
-            const rows = JSON.parse(
+            const parsed = JSON.parse(
               doctorUseFormVer3Server.imageDescription || "[]",
             );
-            setImagingRows(
-              Array.isArray(rows) && rows.length ? rows : DEFAULT_IMAGING_ROWS,
-            );
+            if (parsed && typeof parsed === "object" && !Array.isArray(parsed) && parsed.isFreeText) {
+              setIsFreeText(true);
+              setFreeTextContent(parsed.text || "");
+            } else if (Array.isArray(parsed) && parsed.length) {
+              setIsFreeText(false);
+              setImagingRows(parsed);
+            } else {
+              setIsFreeText(false);
+              setImagingRows(DEFAULT_IMAGING_ROWS);
+            }
           } catch {
+            setIsFreeText(false);
             setImagingRows(DEFAULT_IMAGING_ROWS);
           }
           setFormVer3(doctorUseFormVer3Server?.id_formver3_formver3);
@@ -402,7 +426,11 @@ export default function DoctorUseDFormVer3({
 
   const [loading, setLoading] = useState();
 
-  const [isEdit, setIsEdit] = useState(!idEdit);
+  const [isEdit, setIsEdit] = useState(initEditMode || !idEdit);
+
+  useEffect(() => {
+    setIsEdit(initEditMode || !idEdit);
+  }, [initEditMode, idEdit]);
 
   const filteredExamParts = useMemo(() => {
     if (!selectedIDs.id_template_service) return [];
@@ -415,12 +443,18 @@ export default function DoctorUseDFormVer3({
 
   const onFinish = async (values) => {
     try {
+      // Serialize imageDescription theo mode
+      const imageDescriptionJson = isFreeText
+        ? JSON.stringify({ isFreeText: true, text: freeTextContent })
+        : undefined; // undefined → buildFormData sẽ dùng imagingRows
+
       const formPayload = buildFormDataDoctorUseFormVer3(values, {
         id_patient_diagnose: patientDiagnose?.id,
         imageList,
         formVer3,
-        imagingRows,
-        abnormalFindings,
+        imagingRows: isFreeText ? undefined : imagingRows,
+        abnormalFindings: isFreeText ? [] : abnormalFindings,
+        imageDescriptionJson,
       });
       if (
         pendingAction.current === KEY_ACTION_BUTTON.save ||
@@ -545,7 +579,7 @@ export default function DoctorUseDFormVer3({
         maxWidth: 1100,
         margin: "0 auto",
         padding: 0,
-        marginBottom: 200,
+        paddingBottom: 250,
         paddingTop: 30,
       }}
     >
@@ -750,11 +784,35 @@ export default function DoctorUseDFormVer3({
                       const res = await API_CALL.get(
                         `/formVer3?id_formver3_name=${id_formver3_name}`,
                       );
-                      setFormVer3(res.data.data.items[0]);
-                      setSelectedIDs((prev) => ({
-                        ...prev,
-                        id_formver3_name: id_formver3_name,
-                      }));
+                      const templateData = res.data?.data?.items?.[0] || res.data?.data?.[0];
+                      if (templateData) {
+                        setFormVer3(templateData);
+                        setSelectedIDs((prev) => ({
+                          ...prev,
+                          id_formver3_name: id_formver3_name,
+                        }));
+
+                        // Điền các trường thông tin từ template mới
+                        form.setFieldsValue(buildFormVer3Values(templateData));
+
+                        // Phân tích trạng thái tự do (free text) của template mới
+                        try {
+                          const parsed = JSON.parse(templateData.imageDescription || "[]");
+                          if (parsed && typeof parsed === "object" && !Array.isArray(parsed) && parsed.isFreeText) {
+                            setIsFreeText(true);
+                            setFreeTextContent(parsed.text || "");
+                          } else if (Array.isArray(parsed) && parsed.length) {
+                            setIsFreeText(false);
+                            setImagingRows(parsed);
+                          } else {
+                            setIsFreeText(false);
+                            setImagingRows(DEFAULT_IMAGING_ROWS);
+                          }
+                        } catch {
+                          setIsFreeText(false);
+                          setImagingRows(DEFAULT_IMAGING_ROWS);
+                        }
+                      }
                     } catch (e) {
                       toast.error("Không tải được dữ liệu. Vui lòng thử lại.");
                     } finally {
@@ -835,22 +893,62 @@ export default function DoctorUseDFormVer3({
             languageTranslate={languageTranslate}
           />
 
-          {/* Ảnh minh hoạ */}
-          <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
-            {isCanThiepGroup
-              ? translateLabel(
-                  languageTranslate,
-                  "QUY TRÌNH THỦ THUẬT",
-                  false,
-                ).toUpperCase()
-              : translateLabel(
-                  languageTranslate,
-                  "imagingFindings",
-                  false,
-                ).toUpperCase()}
-          </Title>
+          {/* === MÔ TẢ HÌNH ẢNH - Toggle chế độ === */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", margin: "24px 0 12px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <Title level={4} style={{ color: "#2f6db8", margin: 0 }}>
+                {isCanThiepGroup
+                  ? translateLabel(languageTranslate, "QUY TRÌNH THỦ THUẬT", false).toUpperCase()
+                  : translateLabel(languageTranslate, "imagingFindings", false).toUpperCase()}
+              </Title>
+              <span
+                style={{
+                  fontSize: 10,
+                  padding: "2px 8px",
+                  borderRadius: 12,
+                  fontWeight: 600,
+                  backgroundColor: isFreeText ? "#e6f7ff" : "#f9f0ff",
+                  color: isFreeText ? "#096dd9" : "#531dab",
+                  border: isFreeText ? "1px solid #91d5ff" : "1px solid #d3adf7",
+                  display: "inline-block",
+                }}
+              >
+                {isFreeText ? "Văn bản tự do" : "Bảng cấu trúc"}
+              </span>
+            </div>
+            {isEdit && (
+              <Tooltip title={isFreeText ? "Chuyển sang chế độ bảng cấu trúc" : "Chuyển sang văn bản tự do (soạn thảo)"}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: 12, color: "#888" }}>Văn bản tự do</span>
+                  <Switch
+                    checked={isFreeText}
+                    size="small"
+                    onChange={(checked) => {
+                      setIsFreeText(checked);
+                      if (checked) {
+                        // Tự động chuyển đổi bảng cấu trúc hiện có sang văn bản tự do nếu editor đang trống
+                        if (!freeTextContent || freeTextContent === "<p><br></p>" || freeTextContent === "") {
+                          const convertedHTML = generateTextFromStructuredRows(imagingRows, languageTranslate);
+                          setFreeTextContent(convertedHTML);
+                        }
+                      }
+                    }}
+                  />
+                </div>
+              </Tooltip>
+            )}
+          </div>
 
-          {isCanThiepGroup ? (
+          {isFreeText ? (
+            // Chế độ văn bản tự do: SunEditor full features
+            <div style={{ border: "1px solid #e5e7eb", borderRadius: 6, overflow: "hidden" }}>
+              <CustomSunEditor
+                value={freeTextContent}
+                onChange={setFreeTextContent}
+                disabled={!isEdit}
+              />
+            </div>
+          ) : isCanThiepGroup ? (
             <ImagingStructureTextTable
               rows={imagingRows}
               setRows={setImagingRows}
@@ -1145,7 +1243,9 @@ export default function DoctorUseDFormVer3({
         <div ref={printRef}>
           <PrintPreviewVer3NotDataDiagnose
             approvalStatus={status}
-            imagingRows={imagingRows}
+            imagingRows={isFreeText ? [] : imagingRows}
+            isFreeText={isFreeText}
+            freeTextContent={freeTextContent}
             formSnapshot={{
               ...form.getFieldsValue(),
               createdAt: initialSnap?.apiData?.createdAt,

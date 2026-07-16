@@ -431,6 +431,10 @@ export default function FormActionBar({
         break;
     }
 
+    if (editId && !keys.includes(KEY_ACTION_BUTTON.preview)) {
+      keys.push(KEY_ACTION_BUTTON.preview);
+    }
+
     setVisionItemKeys(keys);
   }, [patientDiagnose, doctor?.id, editId, isEdit]);
 

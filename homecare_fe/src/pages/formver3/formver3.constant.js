@@ -260,8 +260,12 @@ export function buildFormDataDoctorUseFormVer3(values, extra) {
   if (extra?.formVer3)
     fd.append("id_formver3", String(extra.formVer3.id ?? ""));
 
-  if (extra?.imagingRows)
+  if (extra?.imageDescriptionJson !== undefined) {
+    // isFreeText mode: truyền sẵn chuỗi JSON
+    fd.append("imageDescription", extra.imageDescriptionJson);
+  } else if (extra?.imagingRows) {
     fd.append("imageDescription", JSON.stringify(extra?.imagingRows));
+  }
   if (extra?.abnormalFindings)
     fd.append("unUsualDescription", extra.abnormalFindings.join("; "));
 
@@ -447,3 +451,51 @@ export const stepsStatus = ({ setOpenConsultationModal, onCheckandCreate, isCons
     },
   },
 ].filter(Boolean);
+
+export const generateTextFromStructuredRows = (rows = [], language = "vi") => {
+  if (!rows || rows.length === 0) return "";
+  
+  const headers = language === "vi" 
+    ? { stt: "STT", name: "Bộ phận thăm khám", normal: "Bình thường", abnormal: "Bất thường", desc: "Mô tả chi tiết" }
+    : { stt: "No.", name: "Exam Part", normal: "Normal", abnormal: "Abnormal", desc: "Detailed Description" };
+
+  const tableHeader = `
+    <thead>
+      <tr style="background-color: #f3f4f6; font-weight: bold;">
+        <th style="border: 1px solid #cfd4dc; padding: 8px; text-align: center; width: 50px;">${headers.stt}</th>
+        <th style="border: 1px solid #cfd4dc; padding: 8px; text-align: left; width: 250px;">${headers.name}</th>
+        <th style="border: 1px solid #cfd4dc; padding: 8px; text-align: center; width: 100px;">${headers.normal}</th>
+        <th style="border: 1px solid #cfd4dc; padding: 8px; text-align: center; width: 100px;">${headers.abnormal}</th>
+        <th style="border: 1px solid #cfd4dc; padding: 8px; text-align: left;">${headers.desc}</th>
+      </tr>
+    </thead>
+  `;
+
+  const tableBodyRows = rows.map((row, idx) => {
+    const isNormal = row.status === "normal";
+    const isAbnormal = row.status === "abnormal";
+    const normalSymbol = isNormal ? "✓" : "";
+    const abnormalSymbol = isAbnormal ? "✓" : "";
+    const description = isAbnormal ? (row.description || "") : "";
+    
+    return `
+      <tr>
+        <td style="border: 1px solid #cfd4dc; padding: 8px; text-align: center;">${idx + 1}</td>
+        <td style="border: 1px solid #cfd4dc; padding: 8px; text-align: left;"><strong>${row.name || ""}</strong></td>
+        <td style="border: 1px solid #cfd4dc; padding: 8px; text-align: center; color: #096dd9; font-weight: bold;">${normalSymbol}</td>
+        <td style="border: 1px solid #cfd4dc; padding: 8px; text-align: center; color: #ff4d4f; font-weight: bold;">${abnormalSymbol}</td>
+        <td style="border: 1px solid #cfd4dc; padding: 8px; text-align: left;">${description}</td>
+      </tr>
+    `;
+  }).join("");
+
+  return `
+    <table style="width: 100%; border-collapse: collapse; border: 1px solid #cfd4dc; margin-bottom: 16px;">
+      ${tableHeader}
+      <tbody>
+        ${tableBodyRows}
+      </tbody>
+    </table>
+    <p><br></p>
+  `;
+};

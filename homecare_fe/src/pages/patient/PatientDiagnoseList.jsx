@@ -256,6 +256,7 @@ const PatientTablePage = ({ PID = null }) => {
   const [doctorUseFormVer3Id, setDoctorUseFormVer3Id] = useState(null);
 
   const [rightPanelMode, setRightPanelMode] = useState("detail");
+  const [initEditMode, setInitEditMode] = useState(false);
   const [openConsultationModal, setOpenConsultationModal] = useState(false);
 
   const [translateOpen, setTranslateOpen] = useState(false);
@@ -797,7 +798,7 @@ const PatientTablePage = ({ PID = null }) => {
     [customColumns],
   );
 
-  const onCheckandCreate = async () => {
+  const onCheckandCreate = async (forceEditMode = false) => {
     try {
       if (
         templateServices
@@ -818,6 +819,7 @@ const PatientTablePage = ({ PID = null }) => {
           navigate(`/home/sono/use/patient-diagnose/${id}`);
         }
       } else {
+        setInitEditMode(forceEditMode);
         setRightPanelMode("reading");
         // if (doctorUseDFormVer3.data.data.data?.length) {
         //   navigate(
@@ -1169,7 +1171,7 @@ const PatientTablePage = ({ PID = null }) => {
             <CustomSteps
               steps={stepsStatus({
                 setOpenConsultationModal,
-                onCheckandCreate,
+                onCheckandCreate: () => onCheckandCreate(false),
                 isConsultation: !!selectedPatientDiagnose.id_consulting_doctor || selectedPatientDiagnose.status === PATIENT_DIAGNOSE_STATUS_CODE.CONSULTATION,
               })}
               current={stepsStatus({
@@ -1228,14 +1230,20 @@ const PatientTablePage = ({ PID = null }) => {
                   setPatientDiagnose={setSelectedPatientDiagnose}
                   onStatusChange={handleStatusChange}
                   onClose={() => setSelectedPatientDiagnose(null)}
-                  onOpenReading={() => setRightPanelMode("reading")}
+                  onOpenReading={(editMode = false) => {
+                    setInitEditMode(editMode);
+                    setRightPanelMode("reading");
+                  }}
                 />
               </div>
             )}
             {rightPanelMode === "detail" ? (
               <PatientDiagnoiseDetailPage
                 idFromList={selectedPatientDiagnose?.id}
-                onOpenReading={() => setRightPanelMode("reading")}
+                onOpenReading={(editMode = false) => {
+                  setInitEditMode(editMode);
+                  setRightPanelMode("reading");
+                }}
                 onClose={() => setSelectedPatientDiagnose(null)}
                 setDoctorUseFormVer3Id={setDoctorUseFormVer3Id}
                 onStatusChange={handleStatusChange}
@@ -1248,6 +1256,7 @@ const PatientTablePage = ({ PID = null }) => {
                 doctorUseFormVer3Id={doctorUseFormVer3Id}
                 onStatusChange={handleStatusChange}
                 onOpenConsultation={() => setOpenConsultationModal(true)}
+                initEditMode={initEditMode}
               />
             )}
           </div>

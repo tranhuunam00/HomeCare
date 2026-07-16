@@ -4,6 +4,7 @@ import styles from "./ImagingStructureTable.module.scss";
 import TextArea from "antd/es/input/TextArea";
 import { formatIndentedList } from "../formver3.constant";
 import { translateLabel } from "../../../constant/app";
+import { SyncOutlined } from "@ant-design/icons";
 
 const ImagingStructureTable = ({
   rows,
@@ -173,10 +174,25 @@ const ImagingStructureTable = ({
             ))}
 
           <Button
-            type={autoSync ? "primary" : "default"}
+            type="default"
             size="small"
+            icon={<SyncOutlined spin={autoSync} />}
             disabled={!isEdit}
             onClick={() => setAutoSync((prev) => !prev)}
+            style={{
+              borderColor: autoSync ? "#3b82f6" : "#d9d9d9",
+              color: autoSync ? "#1d4ed8" : "#595959",
+              backgroundColor: autoSync ? "#eff6ff" : "#fafafa",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              fontWeight: 500,
+              fontSize: "12px",
+              padding: "4px 12px",
+              height: "28px",
+              borderRadius: "6px",
+              transition: "all 0.3s ease",
+            }}
           >
             {autoSync ? "Tắt tự động đồng bộ" : "Bật tự động đồng bộ"}
           </Button>
