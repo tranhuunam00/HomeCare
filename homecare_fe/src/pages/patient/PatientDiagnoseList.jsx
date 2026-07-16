@@ -65,6 +65,8 @@ import {
 } from "../../hooks/useVietnamAddress";
 import TranslateListRecordsVer3 from "../formver3/components/TranslateListRecordsVer3";
 import FormVer3GroupProcessPatientDiagnoise from "../formver3/FormVer3GroupProcessPatientDiagnoise";
+import useConfirmAction from "../../hooks/useConfirmAction";
+import ConfirmActionModal from "../../components/ConfirmActionModal/ConfirmActionModal";
 
 const { Option } = Select;
 const COLUMN_SETTING_STORAGE_KEY = "patientDiagnose_column_settings";
@@ -200,6 +202,7 @@ const PatientMiniInfo = ({ patient, templateServices, examParts }) => {
 
 const PatientTablePage = ({ PID = null }) => {
   const containerRef = React.useRef(null);
+  const { confirmState, openConfirm } = useConfirmAction();
   const [leftWidth, setLeftWidth] = useState(() => {
     const saved = localStorage.getItem("patient_diagnose_left_width");
     return saved ? parseFloat(saved) : 50;
@@ -642,14 +645,19 @@ const PatientTablePage = ({ PID = null }) => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Bạn có chắc chắn muốn xóa bản ghi này?")) return;
-    try {
-      await API_CALL.del(`/patient-diagnose/${id}`);
-      message.success("Xóa thành công");
-      fetchPatients();
-    } catch (err) {
-      message.error("Xóa thất bại, vui lòng thử lại");
-    }
+    openConfirm({
+      title: "Xác nhận xóa",
+      message: "Bạn có chắc chắn muốn xóa bản ghi này?",
+      onConfirm: async () => {
+        try {
+          await API_CALL.del(`/patient-diagnose/${id}`);
+          message.success("Xóa thành công");
+          fetchPatients();
+        } catch (err) {
+          message.error("Xóa thất bại, vui lòng thử lại");
+        }
+      },
+    });
   };
 
   const handleClone = async (record) => {
@@ -1289,6 +1297,7 @@ const PatientTablePage = ({ PID = null }) => {
         setLanguageTransslate={setLanguageTransslate}
         setSelectedDoctorUseFormVer3={setSelectedDoctorUseFormVer3}
       />
+      <ConfirmActionModal {...confirmState} />
     </div>
   );
 };

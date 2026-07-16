@@ -4,6 +4,8 @@ import styles from "./AccountPage.module.scss";
 import API_CALL from "../../services/axiosClient";
 import { useGlobalAuth } from "../../contexts/AuthContext";
 import { toast } from "react-toastify";
+import useConfirmAction from "../../hooks/useConfirmAction";
+import ConfirmActionModal from "../../components/ConfirmActionModal/ConfirmActionModal";
 
 const { Title, Text } = Typography;
 
@@ -11,33 +13,38 @@ const ChangePasswordSection = () => {
   const [form] = Form.useForm();
   const { user } = useGlobalAuth();
   const [loading, setLoading] = useState(false);
+  const { confirmState, openConfirm } = useConfirmAction();
 
   const onFinish = async (values) => {
-    const confirm = window.confirm("Bạn có chắc chắn muốn đổi mật khẩu không?");
-    if (!confirm) return;
-
-    try {
-      setLoading(true);
-      const payload = {
-        oldPassword: values.currentPassword,
-        newPassword: values.newPassword,
-      };
-      await API_CALL.patch("/users/password", payload);
-      toast.success("Đổi mật khẩu thành công!");
-      form.resetFields();
-    } catch (err) {
-      console.error("Change password error:", err);
-      toast.error(
-        err?.response?.data?.message ||
-          "Đổi mật khẩu thất bại, vui lòng thử lại"
-      );
-    } finally {
-      setLoading(false);
-    }
+    openConfirm({
+      title: "Xác nhận đổi mật khẩu",
+      message: "Bạn có chắc chắn muốn đổi mật khẩu không?",
+      onConfirm: async () => {
+        try {
+          setLoading(true);
+          const payload = {
+            oldPassword: values.currentPassword,
+            newPassword: values.newPassword,
+          };
+          await API_CALL.patch("/users/password", payload);
+          toast.success("Đổi mật khẩu thành công!");
+          form.resetFields();
+        } catch (err) {
+          console.error("Change password error:", err);
+          toast.error(
+            err?.response?.data?.message ||
+              "Đổi mật khẩu thất bại, vui lòng thử lại"
+          );
+        } finally {
+          setLoading(false);
+        }
+      },
+    });
   };
 
   return (
-    <Card className={styles["account-page__card"]} title="Đổi mật khẩu">
+    <>
+      <Card className={styles["account-page__card"]} title="Đổi mật khẩu">
       <Form
         form={form}
         layout="vertical"
@@ -99,6 +106,8 @@ const ChangePasswordSection = () => {
         </Form.Item>
       </Form>
     </Card>
+      <ConfirmActionModal {...confirmState} />
+    </>
   );
 };
 

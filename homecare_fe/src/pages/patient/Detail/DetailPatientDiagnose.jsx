@@ -136,18 +136,7 @@ const PatientDiagnoiseDetailPage = ({
                   Sửa đọc
                 </Button>
               )}
-              {(selectedPatientDiagnose.status === PATIENT_DIAGNOSE_STATUS_CODE.WAIT_VERIFY ||
-                selectedPatientDiagnose.status === PATIENT_DIAGNOSE_STATUS_CODE.VERIFIED) && (
-                <Button
-                  type="primary"
-                  size="small"
-                  onClick={() => onOpenReading(true)}
-                  icon={<EditOutlined />}
-                  style={{ backgroundColor: "#52c41a", borderColor: "#52c41a" }}
-                >
-                  Sửa duyệt
-                </Button>
-              )}
+
               <Button
                 size="small"
                 type="text"

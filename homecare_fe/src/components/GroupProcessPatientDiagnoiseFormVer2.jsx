@@ -15,6 +15,8 @@ import {
 import { toast } from "react-toastify";
 import { useGlobalAuth } from "../contexts/AuthContext";
 import { Button } from "antd";
+import useConfirmAction from "../hooks/useConfirmAction";
+import ConfirmActionModal from "./ConfirmActionModal/ConfirmActionModal";
 
 const GroupProcessPatientDiagnoiseFormVer2 = ({
   patientDiagnose,
@@ -25,6 +27,7 @@ const GroupProcessPatientDiagnoiseFormVer2 = ({
   const { id, status, id_doctor_in_processing } = patientDiagnose;
   const { doctor, templateServices } = useGlobalAuth();
   const navigate = useNavigate();
+  const { confirmState, openConfirm } = useConfirmAction();
 
   const onCheckandCreate = async () => {
     try {
@@ -155,13 +158,13 @@ const GroupProcessPatientDiagnoiseFormVer2 = ({
               danger
               type="primary"
               onClick={() => {
-                const ok = window.confirm(
-                  "Bạn có chắc chắn muốn hủy đọc kết quả?\n\nNếu hủy, ca sẽ được trả về trạng thái MỚI.",
-                );
-
-                if (ok) {
-                  handleCancelReading();
-                }
+                openConfirm({
+                  title: "Xác nhận hủy đọc",
+                  message: "Bạn có chắc chắn muốn hủy đọc kết quả?\n\nNếu hủy, ca sẽ được trả về trạng thái MỚI.",
+                  onConfirm: async () => {
+                    await handleCancelReading();
+                  },
+                });
               }}
             >
               Hủy đọc kết quả
@@ -176,19 +179,20 @@ const GroupProcessPatientDiagnoiseFormVer2 = ({
               danger
               type="primary"
               onClick={() => {
-                const ok = window.confirm(
-                  "Bạn có chắc chắn muốn hủy kết quả đã duyệt\n\nNếu hủy, ca sẽ được trả về trạng thái CHỜ DUYỆT.",
-                );
-
-                if (ok) {
-                  handleCancelReading(PATIENT_DIAGNOSE_STATUS_NAME.WAITING);
-                }
+                openConfirm({
+                  title: "Xác nhận hủy duyệt",
+                  message: "Bạn có chắc chắn muốn hủy kết quả đã duyệt?\n\nNếu hủy, ca sẽ được trả về trạng thái CHỜ DUYỆT.",
+                  onConfirm: async () => {
+                    await handleCancelReading(PATIENT_DIAGNOSE_STATUS_NAME.WAITING);
+                  },
+                });
               }}
             >
               Hủy duyệt
             </Button>
           </div>
         )}
+      <ConfirmActionModal {...confirmState} />
     </div>
   );
 };

@@ -21,6 +21,8 @@ import { useGlobalAuth } from "../../../../contexts/AuthContext";
 import API_CALL from "../../../../services/axiosClient";
 import useVietnamAddress from "../../../../hooks/useVietnamAddress";
 import usePatientDiagnoseStatus from "../../../../hooks/usePatientDiagnoseStatus";
+import useConfirmAction from "../../../../hooks/useConfirmAction";
+import ConfirmActionModal from "../../../../components/ConfirmActionModal/ConfirmActionModal";
 import {
   PATIENT_DIAGNOSE_STATUS_CODE,
   sortTemplateServices,
@@ -91,6 +93,7 @@ export default function DoctorUseDFormVer3({
 
   const printSourceRef = useRef(null);
   const { transitionStatus } = usePatientDiagnoseStatus();
+  const { confirmState, openConfirm } = useConfirmAction();
 
   const [reloading, setReloading] = useState(false);
   const [signModalOpen, setSignModalOpen] = useState(false);
@@ -491,10 +494,15 @@ export default function DoctorUseDFormVer3({
     }
   };
   const restoreFromSnapshot = () => {
-    const ok = window.confirm(
-      "Toàn bộ dữ liệu sẽ quay về trạng thái gốc từ hệ thống. Bạn có chắc muốn hoàn tác?",
-    );
-    if (!ok) return;
+    openConfirm({
+      title: "Xác nhận hoàn tác",
+      message: "Toàn bộ dữ liệu sẽ quay về trạng thái gốc từ hệ thống. Bạn có chắc muốn hoàn tác?",
+      onConfirm: async () => {
+        doRestore();
+      },
+    });
+  };
+  const doRestore = () => {
     if (!idEdit) {
       const patientSnap = initialSnap.patientDiagnose;
 
@@ -913,13 +921,21 @@ export default function DoctorUseDFormVer3({
                   display: "inline-block",
                 }}
               >
-                {isFreeText ? "Văn bản tự do" : "Bảng cấu trúc"}
+                {isFreeText
+                  ? (languageTranslate === "en" ? "Free text" : "Văn bản tự do")
+                  : (languageTranslate === "en" ? "Structured table" : "Bảng cấu trúc")}
               </span>
             </div>
             {isEdit && (
-              <Tooltip title={isFreeText ? "Chuyển sang chế độ bảng cấu trúc" : "Chuyển sang văn bản tự do (soạn thảo)"}>
+              <Tooltip
+                title={isFreeText
+                  ? (languageTranslate === "en" ? "Switch to structured table" : "Chuyển sang chế độ bảng cấu trúc")
+                  : (languageTranslate === "en" ? "Switch to free text (editor)" : "Chuyển sang văn bản tự do (soạn thảo)")}
+              >
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 12, color: "#888" }}>Văn bản tự do</span>
+                  <span style={{ fontSize: 12, color: "#888" }}>
+                    {languageTranslate === "en" ? "Free text" : "Văn bản tự do"}
+                  </span>
                   <Switch
                     checked={isFreeText}
                     size="small"
@@ -1002,14 +1018,18 @@ export default function DoctorUseDFormVer3({
               onSign={() => setSignModalOpen(true)}
               onConsultation={onOpenConsultation}
               onTuChoiConsultation={async () => {
-                await transitionStatus({
-                  patientDiagnoseId: patientDiagnose.id,
-                  newStatus: PATIENT_DIAGNOSE_STATUS_CODE.IN_PROCESSING,
-                  confirmMessage: "Bạn có chắc muốn từ chối hội chẩn? Nếu từ chối, ca sẽ rollback về trạng thái ĐANG ĐỌC của Bác sĩ chính.",
-                  successMessage: "Từ chối hội chẩn thành công",
-                  localSetState: setPatientDiagnose,
-                  onStatusChange,
-                  additionalPayload: { is_consultation_reject: true },
+                openConfirm({
+                  title: "Xác nhận từ chối hội chẩn",
+                  message: "Bạn có chắc muốn từ chối hội chẩn? Nếu từ chối, ca sẽ rollback về trạng thái ĐANG ĐỌC của Bác sĩ chính.",
+                  onConfirm: () =>
+                    transitionStatus({
+                      patientDiagnoseId: patientDiagnose.id,
+                      newStatus: PATIENT_DIAGNOSE_STATUS_CODE.IN_PROCESSING,
+                      successMessage: "Từ chối hội chẩn thành công",
+                      localSetState: setPatientDiagnose,
+                      onStatusChange,
+                      additionalPayload: { is_consultation_reject: true },
+                    }),
                 });
               }}
               onPrint={() => {
@@ -1028,13 +1048,14 @@ export default function DoctorUseDFormVer3({
               }}
               onApprove={onApprove}
               onAction={(key) => {
-                if (
-                  !window.confirm("Bạn có chắc muốn lưu lại dữ liệu không?")
-                ) {
-                  return;
-                }
-                pendingAction.current = key;
-                form.submit();
+                openConfirm({
+                  title: "Xác nhận lưu",
+                  message: "Bạn có chắc muốn lưu lại dữ liệu không?",
+                  onConfirm: async () => {
+                    pendingAction.current = key;
+                    form.submit();
+                  },
+                });
               }}
               onReset={restoreFromSnapshot}
               onPreview={() => setPreviewOpen(!previewOpen)}
@@ -1071,13 +1092,17 @@ export default function DoctorUseDFormVer3({
               }}
               editId={idEdit}
               onDocXong={async () => {
-                await transitionStatus({
-                  patientDiagnoseId: patientDiagnose.id,
-                  newStatus: PATIENT_DIAGNOSE_STATUS_CODE.READ_DONE,
-                  confirmMessage: "Bạn có chắc muốn chuyển sang trạng thái ĐỌC XONG? Lưu ý, nhớ lưu lại trước khi chuyển trạng thái!",
-                  successMessage: "Đã chuyển sang trạng thái ĐỌC XONG",
-                  localSetState: setPatientDiagnose,
-                  onStatusChange,
+                openConfirm({
+                  title: "Xác nhận đọc xong",
+                  message: "Bạn có chắc muốn chuyển sang trạng thái ĐỌC XONG? Lưu ý, nhớ lưu lại trước khi chuyển trạng thái!",
+                  onConfirm: () =>
+                    transitionStatus({
+                      patientDiagnoseId: patientDiagnose.id,
+                      newStatus: PATIENT_DIAGNOSE_STATUS_CODE.READ_DONE,
+                      successMessage: "Đã chuyển sang trạng thái ĐỌC XONG",
+                      localSetState: setPatientDiagnose,
+                      onStatusChange,
+                    }),
                 });
               }}
               onHuyDoc={async () => {
@@ -1087,13 +1112,17 @@ export default function DoctorUseDFormVer3({
 
                 const newStatusLabel = newStatus === PATIENT_DIAGNOSE_STATUS_CODE.CONSULTATION ? "Hội Chẩn" : "Mới";
 
-                await transitionStatus({
-                  patientDiagnoseId: patientDiagnose.id,
-                  newStatus,
-                  confirmMessage: `Bạn có chắc muốn chuyển về trạng thái ${newStatusLabel}?`,
-                  successMessage: `Đã về trạng thái ${newStatusLabel}`,
-                  localSetState: setPatientDiagnose,
-                  onStatusChange,
+                openConfirm({
+                  title: "Xác nhận hủy đọc",
+                  message: `Bạn có chắc muốn chuyển về trạng thái ${newStatusLabel}?`,
+                  onConfirm: () =>
+                    transitionStatus({
+                      patientDiagnoseId: patientDiagnose.id,
+                      newStatus,
+                      successMessage: `Đã về trạng thái ${newStatusLabel}`,
+                      localSetState: setPatientDiagnose,
+                      onStatusChange,
+                    }),
                 });
               }}
               onNhanDuyet={async () => {
@@ -1115,13 +1144,17 @@ export default function DoctorUseDFormVer3({
                 });
               }}
               onTraCa={async () => {
-                await transitionStatus({
-                  patientDiagnoseId: patientDiagnose.id,
-                  newStatus: PATIENT_DIAGNOSE_STATUS_CODE.IN_PROCESSING,
-                  confirmMessage: "Bạn có chắc chắn muốn từ chối duyệt và trả ca này về trạng thái Đang đọc?",
-                  successMessage: "Đã trả ca về trạng thái ĐANG ĐỌC",
-                  localSetState: setPatientDiagnose,
-                  onStatusChange,
+                openConfirm({
+                  title: "Xác nhận trả ca",
+                  message: "Bạn có chắc chắn muốn từ chối duyệt và trả ca này về trạng thái Đang đọc?",
+                  onConfirm: () =>
+                    transitionStatus({
+                      patientDiagnoseId: patientDiagnose.id,
+                      newStatus: PATIENT_DIAGNOSE_STATUS_CODE.IN_PROCESSING,
+                      successMessage: "Đã trả ca về trạng thái ĐANG ĐỌC",
+                      localSetState: setPatientDiagnose,
+                      onStatusChange,
+                    }),
                 });
               }}
               onTranslate={async () => {
@@ -1132,56 +1165,59 @@ export default function DoctorUseDFormVer3({
 
                 try {
                   setLoading(true);
-
-                  // 1️⃣ Check đã có bản EN chưa
                   const enRecords = await checkEnglishVersion();
+                  setLoading(false);
 
-                  const ok2 = window.confirm(
-                    "Bạn có chắc chắn muốn tạo bản dịch tiếng Anh cho kết quả này không?",
-                  );
-                  if (!ok2) {
-                    return;
-                  }
+                  const doTranslate = async () => {
+                    try {
+                      setLoading(true);
+                      const res = await API_CALL.post(
+                        `/doctorUseFormVer3/${idEdit}/translate`,
+                      );
+                      const newRecord = res?.data?.data || res?.data;
+                      toast.success(
+                        "Tạo bản dịch tiếng Anh thành công. Vui lòng vào phần Các Bản Dịch để kiểm tra",
+                      );
+                      console.log(
+                        "newRecord.language",
+                        newRecord.language,
+                        newRecord.id,
+                      );
+                      setIdEdit(newRecord.id);
+                      toast.success("qua");
+                    } catch (error) {
+                      console.error("[translate] error", error);
+                      toast.error(
+                        error?.response?.data?.message ||
+                          "Không thể tạo bản dịch tiếng Anh",
+                      );
+                    } finally {
+                      setLoading(false);
+                    }
+                  };
 
                   if (enRecords.length > 0) {
-                    const ok = window.confirm(
-                      "Đã tồn tại bản dịch tiếng Anh.\n\n" +
+                    openConfirm({
+                      title: "Xác nhận tạo bản dịch",
+                      message:
+                        "Đã tồn tại bản dịch tiếng Anh.\n\n" +
                         "Bạn có thể xem trong mục 'CÁC BẢN DỊCH'.\n\n" +
                         "Bạn có muốn tạo thêm một bản dịch mới không?",
-                    );
-
-                    if (!ok) {
-                      toast.info(
-                        "Bạn có thể xem bản dịch trong mục CÁC BẢN DỊCH",
-                      );
-                      return;
-                    }
+                      onConfirm: doTranslate,
+                    });
+                  } else {
+                    openConfirm({
+                      title: "Xác nhận dịch",
+                      message: "Bạn có chắc chắn muốn tạo bản dịch tiếng Anh cho kết quả này không?",
+                      onConfirm: doTranslate,
+                    });
                   }
-
-                  const res = await API_CALL.post(
-                    `/doctorUseFormVer3/${idEdit}/translate`,
-                  );
-
-                  const newRecord = res?.data?.data || res?.data;
-
-                  toast.success(
-                    "Tạo bản dịch tiếng Anh thành công. Vui lòng vào phần Các Bản Dịch để kiểm tra",
-                  );
-
-                  console.log(
-                    "newRecord.language",
-                    newRecord.language,
-                    newRecord.id,
-                  );
-                  setIdEdit(newRecord.id);
-                  toast.success("qua");
                 } catch (error) {
                   console.error("[translate] error", error);
                   toast.error(
                     error?.response?.data?.message ||
                       "Không thể tạo bản dịch tiếng Anh",
                   );
-                } finally {
                   setLoading(false);
                 }
               }}
@@ -1272,6 +1308,7 @@ export default function DoctorUseDFormVer3({
           />
         </div>
       </Modal>
+      <ConfirmActionModal {...confirmState} />
     </div>
   );
 }

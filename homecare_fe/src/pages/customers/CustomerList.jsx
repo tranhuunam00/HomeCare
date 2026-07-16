@@ -16,11 +16,14 @@ import API_CALL from "../../services/axiosClient";
 import styles from "./CustomerList.module.scss";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import useConfirmAction from "../../hooks/useConfirmAction";
+import ConfirmActionModal from "../../components/ConfirmActionModal/ConfirmActionModal";
 
 const { Option } = Select;
 
 const CustomerList = () => {
   const navigate = useNavigate();
+  const { confirmState, openConfirm } = useConfirmAction();
 
   // Dữ liệu chính
   const [doctors, setDoctors] = useState([]);
@@ -125,18 +128,23 @@ const CustomerList = () => {
     } đọc kết quả các phòng khám sau?\n- ${selectedClinics
       .map((sec) => getClinicName(sec.value))
       .join("\n- ")}`;
-    if (!window.confirm(confirmMessage)) return;
 
-    try {
-      await API_CALL.post("/doctor/set-clinics", {
-        id_doctor: selectedDoctor.id,
-        id_clinic_list: selectedClinics.map((sec) => sec.value),
-      });
-      toast.success("Phân quyền thành công!");
-      closePermissionModal();
-    } catch (err) {
-      toast.error("Phân quyền thất bại");
-    }
+    openConfirm({
+      title: "Xác nhận phân quyền",
+      message: confirmMessage,
+      onConfirm: async () => {
+        try {
+          await API_CALL.post("/doctor/set-clinics", {
+            id_doctor: selectedDoctor.id,
+            id_clinic_list: selectedClinics.map((sec) => sec.value),
+          });
+          toast.success("Phân quyền thành công!");
+          closePermissionModal();
+        } catch (err) {
+          toast.error("Phân quyền thất bại");
+        }
+      },
+    });
   };
 
   const toggleAdvisor = async (doctor) => {
@@ -144,19 +152,24 @@ const CustomerList = () => {
     const confirmMsg = newStatus
       ? `Bạn có chắc muốn đặt bác sĩ "${doctor.full_name}" làm cố vấn?`
       : `Bạn có chắc muốn hủy trạng thái cố vấn của bác sĩ "${doctor.full_name}"?`;
-    if (!window.confirm(confirmMsg)) return;
 
-    try {
-      await API_CALL.put(`/doctor/${doctor.id}/advisor`, {
-        is_advisor: newStatus,
-      });
-      toast.success(
-        newStatus ? "Đã đặt làm cố vấn" : "Đã hủy trạng thái cố vấn",
-      );
-      fetchDoctors();
-    } catch (err) {
-      toast.error("Cập nhật trạng thái cố vấn thất bại");
-    }
+    openConfirm({
+      title: "Xác nhận đổi trạng thái cố vấn",
+      message: confirmMsg,
+      onConfirm: async () => {
+        try {
+          await API_CALL.put(`/doctor/${doctor.id}/advisor`, {
+            is_advisor: newStatus,
+          });
+          toast.success(
+            newStatus ? "Đã đặt làm cố vấn" : "Đã hủy trạng thái cố vấn",
+          );
+          fetchDoctors();
+        } catch (err) {
+          toast.error("Cập nhật trạng thái cố vấn thất bại");
+        }
+      },
+    });
   };
 
   // ======= EFFECTS =======
@@ -398,6 +411,7 @@ const CustomerList = () => {
           </ul>
         </div>
       </Modal>
+      <ConfirmActionModal {...confirmState} />
     </div>
   );
 };

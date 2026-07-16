@@ -28,6 +28,8 @@ import styles from "./partnersList.module.scss";
 import { useGlobalAuth } from "../../../contexts/AuthContext";
 import { USER_ROLE } from "../../../constant/app";
 import API_CALL from "../../../services/axiosClient";
+import useConfirmAction from "../../../hooks/useConfirmAction";
+import ConfirmActionModal from "../../../components/ConfirmActionModal/ConfirmActionModal";
 
 const { Option } = Select;
 
@@ -43,6 +45,7 @@ const STATUS_ICONS = {
 
 const PartnerList = () => {
   const { user } = useGlobalAuth();
+  const { confirmState, openConfirm } = useConfirmAction();
 
   const [partners, setPartners] = useState([]);
   const [intergration, setIntergration] = useState([]);
@@ -120,18 +123,19 @@ const PartnerList = () => {
   // 🔄 Update status
   const handleStatusUpdate = async (id, newStatus, currentStatus) => {
     if (newStatus === currentStatus) return;
-    const confirmChange = window.confirm(
-      `Bạn có chắc chắn muốn chuyển trạng thái từ "${currentStatus}" sang "${newStatus}" không?`
-    );
-    if (!confirmChange) return;
-
-    try {
-      await API_CALL.patch(`/partner/${id}/status`, { status: newStatus });
-      toast.success("Cập nhật trạng thái thành công");
-      fetchPartners();
-    } catch (err) {
-      toast.error(err?.response?.data?.message || "Cập nhật thất bại");
-    }
+    openConfirm({
+      title: "Xác nhận chuyển trạng thái",
+      message: `Bạn có chắc chắn muốn chuyển trạng thái từ "${currentStatus}" sang "${newStatus}" không?`,
+      onConfirm: async () => {
+        try {
+          await API_CALL.patch(`/partner/${id}/status`, { status: newStatus });
+          toast.success("Cập nhật trạng thái thành công");
+          fetchPartners();
+        } catch (err) {
+          toast.error(err?.response?.data?.message || "Cập nhật thất bại");
+        }
+      },
+    });
   };
 
   // 🆕 Tạo mới đối tác
@@ -451,6 +455,7 @@ const PartnerList = () => {
           </Form>
         </Modal>
       </Spin>
+      <ConfirmActionModal {...confirmState} />
     </div>
   );
 };

@@ -5,6 +5,8 @@ import TextArea from "antd/es/input/TextArea";
 import { formatIndentedList } from "../formver3.constant";
 import { translateLabel } from "../../../constant/app";
 import { SyncOutlined } from "@ant-design/icons";
+import useConfirmAction from "../../../hooks/useConfirmAction";
+import ConfirmActionModal from "../../../components/ConfirmActionModal/ConfirmActionModal";
 
 const ImagingStructureTable = ({
   rows,
@@ -15,6 +17,7 @@ const ImagingStructureTable = ({
   languageTranslate,
   form,
 }) => {
+  const { confirmState, openConfirm } = useConfirmAction();
   const [autoSync, setAutoSync] = useState(true);
   const isFirstSyncRef = useRef(true);
 
@@ -60,10 +63,13 @@ const ImagingStructureTable = ({
   };
 
   const handleDelete = (id) => {
-    const ok = window.confirm("Bạn có chắc muốn xóa hàng này không?");
-    if (!ok) return;
-
-    setRows((prev) => prev.filter((r) => r.id !== id));
+    openConfirm({
+      title: "Xác nhận xóa",
+      message: "Bạn có chắc muốn xóa hàng này không?",
+      onConfirm: async () => {
+        setRows((prev) => prev.filter((r) => r.id !== id));
+      },
+    });
   };
 
   return (
@@ -198,6 +204,7 @@ const ImagingStructureTable = ({
           </Button>
         </>
       )}
+      <ConfirmActionModal {...confirmState} />
     </div>
   );
 };

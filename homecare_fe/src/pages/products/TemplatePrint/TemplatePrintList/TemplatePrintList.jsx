@@ -11,10 +11,13 @@ import API_CALL from "../../../../services/axiosClient";
 import { toast } from "react-toastify";
 import { useGlobalAuth } from "../../../../contexts/AuthContext";
 import { USER_ROLE } from "../../../../constant/app";
+import useConfirmAction from "../../../../hooks/useConfirmAction";
+import ConfirmActionModal from "../../../../components/ConfirmActionModal/ConfirmActionModal";
 
 const TemplatePrintList = () => {
   const navigate = useNavigate();
   const { clinicsAll, user } = useGlobalAuth();
+  const { confirmState, openConfirm } = useConfirmAction();
 
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -62,44 +65,48 @@ const TemplatePrintList = () => {
   }, [page, pageSize, filter]);
 
   const handleDelete = async (id) => {
-    const confirm = window.confirm(
-      "Bạn có chắc chắn muốn xóa mẫu in này? Thao tác này không thể hoàn tác.",
-    );
-    if (!confirm) return;
-
-    try {
-      await API_CALL.del(`/print-template/${id}`);
-      toast.success("Đã xóa thành công");
-      fetchTemplates();
-    } catch (err) {
-      console.error("Lỗi xóa:", err);
-      toast.error("Xóa thất bại");
-    }
+    openConfirm({
+      title: "Xác nhận xóa",
+      message: "Bạn có chắc chắn muốn xóa mẫu in này? Thao tác này không thể hoàn tác.",
+      onConfirm: async () => {
+        try {
+          await API_CALL.del(`/print-template/${id}`);
+          toast.success("Đã xóa thành công");
+          fetchTemplates();
+        } catch (err) {
+          console.error("Lỗi xóa:", err);
+          toast.error("Xóa thất bại");
+        }
+      },
+    });
   };
 
   const handleClone = async (record) => {
-    const confirm = window.confirm("Bạn có muốn clone mẫu in này không?");
-    if (!confirm) return;
+    openConfirm({
+      title: "Xác nhận clone",
+      message: "Bạn có muốn clone mẫu in này không?",
+      onConfirm: async () => {
+        try {
+          const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
 
-    try {
-      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+          const payload = {
+            ...record,
+            id: undefined,
+            name: `${record.name} - Copy ${timestamp}`,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          };
 
-      const payload = {
-        ...record,
-        id: undefined,
-        name: `${record.name} - Copy ${timestamp}`,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      };
+          await API_CALL.post("/print-template", payload);
 
-      await API_CALL.post("/print-template", payload);
-
-      toast.success("Clone thành công");
-      fetchTemplates();
-    } catch (err) {
-      console.error(err);
-      toast.error("Clone thất bại");
-    }
+          toast.success("Clone thành công");
+          fetchTemplates();
+        } catch (err) {
+          console.error(err);
+          toast.error("Clone thất bại");
+        }
+      },
+    });
   };
 
   const columns = [
@@ -282,6 +289,7 @@ const TemplatePrintList = () => {
           }}
         />
       </Spin>
+      <ConfirmActionModal {...confirmState} />
     </div>
   );
 };

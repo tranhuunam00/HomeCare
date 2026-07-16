@@ -4,6 +4,8 @@ import TextArea from "antd/es/input/TextArea";
 import debounce from "lodash/debounce";
 import styles from "./ImagingStructureTable.module.scss";
 import { translateLabel } from "../../../constant/app";
+import useConfirmAction from "../../../hooks/useConfirmAction";
+import ConfirmActionModal from "../../../components/ConfirmActionModal/ConfirmActionModal";
 
 const ImagingStructureTextTable = ({
   rows,
@@ -11,6 +13,7 @@ const ImagingStructureTextTable = ({
   isEdit,
   languageTranslate,
 }) => {
+  const { confirmState, openConfirm } = useConfirmAction();
   const [localRows, setLocalRows] = useState(rows);
 
   useEffect(() => {
@@ -39,11 +42,15 @@ const ImagingStructureTextTable = ({
   };
 
   const handleDelete = (id) => {
-    if (!window.confirm("Bạn có chắc muốn xóa hàng này không?")) return;
-
-    const next = localRows.filter((r) => r.id !== id);
-    setLocalRows(next);
-    setRows(next); // delete thì update ngay, không cần debounce
+    openConfirm({
+      title: "Xác nhận xóa",
+      message: "Bạn có chắc muốn xóa hàng này không?",
+      onConfirm: async () => {
+        const next = localRows.filter((r) => r.id !== id);
+        setLocalRows(next);
+        setRows(next);
+      },
+    });
   };
 
   const handleAddRow = () => {
@@ -127,6 +134,7 @@ const ImagingStructureTextTable = ({
       <Button type="link" disabled={!isEdit} onClick={handleAddRow}>
         + Thêm hàng
       </Button>
+      <ConfirmActionModal {...confirmState} />
     </div>
   );
 };

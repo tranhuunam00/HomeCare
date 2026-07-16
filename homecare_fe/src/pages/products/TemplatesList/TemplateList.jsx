@@ -13,11 +13,14 @@ import { useNavigate } from "react-router-dom";
 import { useGlobalAuth } from "../../../contexts/AuthContext";
 import { USER_ROLE } from "../../../constant/app";
 import { toast } from "react-toastify";
+import useConfirmAction from "../../../hooks/useConfirmAction";
+import ConfirmActionModal from "../../../components/ConfirmActionModal/ConfirmActionModal";
 
 const { Option } = Select;
 
 const TemplateList = () => {
   const [templates, setTemplates] = useState([]);
+  const { confirmState, openConfirm } = useConfirmAction();
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -107,18 +110,22 @@ const TemplateList = () => {
   }, [page, limit, submittedFilter]);
 
   const handleDeleteTemplate = async (id) => {
-    const confirmed = window.confirm("Bạn có chắc chắn muốn xóa mẫu này?");
-    if (!confirmed) return;
-    try {
-      setLoading(true);
-      await API_CALL.del(`/templates/${id}`);
-      toast.success("Đã xóa thành công");
-      fetchTemplates();
-    } catch (err) {
-      toast.error("Xóa thất bại, vui lòng thử lại");
-    } finally {
-      setLoading(false);
-    }
+    openConfirm({
+      title: "Xác nhận xóa",
+      message: "Bạn có chắc chắn muốn xóa mẫu này?",
+      onConfirm: async () => {
+        try {
+          setLoading(true);
+          await API_CALL.del(`/templates/${id}`);
+          toast.success("Đã xóa thành công");
+          fetchTemplates();
+        } catch (err) {
+          toast.error("Xóa thất bại, vui lòng thử lại");
+        } finally {
+          setLoading(false);
+        }
+      },
+    });
   };
 
   const handleCloneTemplate = async ({
@@ -240,7 +247,8 @@ const TemplateList = () => {
   ];
 
   return (
-    <Spin spinning={loading} tip="Đang tải dữ liệu...">
+    <>
+      <Spin spinning={loading} tip="Đang tải dữ liệu...">
       <div className={styles.TemplateList}>
         <h2 className={styles.title}>Danh sách Template Mẫu</h2>
         <Row
@@ -346,6 +354,8 @@ const TemplateList = () => {
         </Spin>
       </div>
     </Spin>
+      <ConfirmActionModal {...confirmState} />
+    </>
   );
 };
 

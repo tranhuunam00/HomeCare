@@ -26,6 +26,8 @@ import dayjs from "dayjs";
 import styles from "./packageRequestsList.module.scss";
 import { useGlobalAuth } from "../../../contexts/AuthContext";
 import { USER_ROLE } from "../../../constant/app";
+import useConfirmAction from "../../../hooks/useConfirmAction";
+import ConfirmActionModal from "../../../components/ConfirmActionModal/ConfirmActionModal";
 
 const { Option } = Select;
 const { RangePicker } = DatePicker;
@@ -45,6 +47,7 @@ const STATUS_ICONS = {
 
 const PackageRequestsList = () => {
   const { user } = useGlobalAuth();
+  const { confirmState, openConfirm } = useConfirmAction();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({
@@ -110,20 +113,21 @@ const PackageRequestsList = () => {
 
   const handleStatusUpdate = async (id, newStatus, currentStatus) => {
     if (newStatus === currentStatus) return;
-    const confirmChange = window.confirm(
-      `Bạn có chắc chắn muốn chuyển trạng thái từ "${currentStatus}" sang "${newStatus}" không?`
-    );
-    if (!confirmChange) return;
-
-    try {
-      await API_CALL.patch(`/package/requests/${id}/status`, {
-        status: newStatus,
-      });
-      toast.success("Cập nhật trạng thái thành công");
-      fetchRequests();
-    } catch (err) {
-      toast.error(err?.response?.data?.message || "Cập nhật thất bại");
-    }
+    openConfirm({
+      title: "Xác nhận chuyển trạng thái",
+      message: `Bạn có chắc chắn muốn chuyển trạng thái từ "${currentStatus}" sang "${newStatus}" không?`,
+      onConfirm: async () => {
+        try {
+          await API_CALL.patch(`/package/requests/${id}/status`, {
+            status: newStatus,
+          });
+          toast.success("Cập nhật trạng thái thành công");
+          fetchRequests();
+        } catch (err) {
+          toast.error(err?.response?.data?.message || "Cập nhật thất bại");
+        }
+      },
+    });
   };
 
   const columns = [
@@ -478,6 +482,7 @@ const PackageRequestsList = () => {
           )}
         </Modal>
       </Spin>
+      <ConfirmActionModal {...confirmState} />
     </div>
   );
 };

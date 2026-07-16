@@ -37,6 +37,8 @@ import { ThamKhaoLinkHomeCare } from "../../../advance/component_common/Thamkhao
 import { Grid } from "antd";
 import SmartCASignModal from "../../../doctor_use_form_ver2/SmartCASignModal/SmartCASignModal";
 import { calculateAge } from "../../../formver3/formver3.constant";
+import useConfirmAction from "../../../../hooks/useConfirmAction";
+import ConfirmActionModal from "../../../../components/ConfirmActionModal/ConfirmActionModal";
 const { useBreakpoint } = Grid;
 const { Option } = Select;
 
@@ -68,6 +70,7 @@ const UltrasoundBungForm = () => {
   const [form] = Form.useForm();
   const { doctor, user, printTemplateGlobal, examParts, templateServices } =
     useGlobalAuth();
+  const { confirmState, openConfirm } = useConfirmAction();
   const [idExamPart, setIdExamPart] = useState(null);
   const [sonoTemplateService, setSonoTemplateService] = useState(null);
   const [sonoExamParts, setSonoExamParts] = useState([]);
@@ -363,13 +366,16 @@ const UltrasoundBungForm = () => {
   };
 
   const handleReset = () => {
-    if (
-      !window.confirm(
-        "Bạn có chắc chắn muốn reset dữ liệu siêu âm về trạng thái ban đầu không?",
-      )
-    ) {
-      return;
-    }
+    openConfirm({
+      title: "Xác nhận reset",
+      message: "Bạn có chắc chắn muốn reset dữ liệu siêu âm về trạng thái ban đầu không?",
+      onConfirm: async () => {
+        doReset();
+      },
+    });
+  };
+
+  const doReset = () => {
 
     // ===============================
     // CASE 1: EDIT → reset về DB
@@ -1199,8 +1205,13 @@ const UltrasoundBungForm = () => {
               .catch(() => setOpenPreview(true));
           }}
           onExit={() => {
-            if (!window.confirm("Bạn có chắc muốn thoát không?")) return;
-            navigate(`/home/`);
+            openConfirm({
+              title: "Xác nhận thoát",
+              message: "Bạn có chắc muốn thoát không?",
+              onConfirm: async () => {
+                navigate(`/home/`);
+              },
+            });
           }}
           isEdit={isEdit}
           onReset={handleReset}
@@ -1264,6 +1275,7 @@ const UltrasoundBungForm = () => {
         onClose={() => setSignModalOpen(false)}
         id_sono_result={idEdit}
       />
+      <ConfirmActionModal {...confirmState} />
     </div>
   );
 };

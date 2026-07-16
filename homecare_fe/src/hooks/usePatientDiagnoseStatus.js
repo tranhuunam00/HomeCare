@@ -17,7 +17,6 @@ export default function usePatientDiagnoseStatus() {
   const transitionStatus = async ({
     patientDiagnoseId,
     newStatus,
-    confirmMessage = null,
     successMessage = "Thao tác thành công",
     localSetState = null,
     onStatusChange = null,
@@ -26,12 +25,6 @@ export default function usePatientDiagnoseStatus() {
     // Đặt guard NGAY ĐẦU — shared giữa mọi instances của hook
     if (_inFlight) return false;
     _inFlight = true;
-
-    // Nếu user cancel confirm → reset guard và thoát
-    if (confirmMessage && !window.confirm(confirmMessage)) {
-      _inFlight = false;
-      return false;
-    }
 
     try {
       setTransitioning(true);

@@ -629,7 +629,9 @@ const PrintPreviewVer3NotDataDiagnose = ({
                 display: "inline-block",
               }}
             >
-              {isFreeText ? "Văn bản tự do" : "Bảng cấu trúc"}
+              {isFreeText
+                ? (languageTranslate === "en" ? "Free text" : "Văn bản tự do")
+                : (languageTranslate === "en" ? "Structured table" : "Bảng cấu trúc")}
             </span>
           </div>
 

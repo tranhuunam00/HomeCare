@@ -23,6 +23,8 @@ import FormActionBar, {
 import dayjs from "dayjs";
 
 import { toast } from "react-toastify";
+import useConfirmAction from "../../hooks/useConfirmAction";
+import ConfirmActionModal from "../../components/ConfirmActionModal/ConfirmActionModal";
 import CustomSunEditor from "../../components/Suneditor/CustomSunEditor";
 
 import styles from "./FormVer3.module.scss";
@@ -60,6 +62,7 @@ const toISODate = (d = new Date()) => new Date(d).toISOString().slice(0, 10); //
 
 export default function DFormVer3({ id_formVer3 }) {
   const [form] = Form.useForm();
+  const { confirmState, openConfirm } = useConfirmAction();
   const { id: idFromParam } = useParams();
   const [editId, setEditId] = useState(id_formVer3 ?? idFromParam);
   const [loading, setLoading] = useState();
@@ -246,38 +249,39 @@ export default function DFormVer3({ id_formVer3 }) {
   const onApprove = async () => {
     if (!editId) return;
 
-    const ok = window.confirm("Bạn có chắc muốn DUYỆT kết quả này không?");
-    if (!ok) return;
+    openConfirm({
+      title: "Xác nhận duyệt",
+      message: "Bạn có chắc muốn DUYỆT kết quả này không?",
+      onConfirm: async () => {
+        try {
+          setLoading(true);
 
-    try {
-      setLoading(true);
+          await API_CALL.patch(`/formVer3/${editId}/approve`);
 
-      await API_CALL.patch(`/formVer3/${editId}/approve`);
+          toast.success("Duyệt FormVer3 thành công");
 
-      toast.success("Duyệt FormVer3 thành công");
+          // Reload lại detail để sync data mới
+          const res = await API_CALL.get(`/formVer3/${editId}`);
+          const data = res?.data?.data?.data;
 
-      // Reload lại detail để sync data mới
-      const res = await API_CALL.get(`/formVer3/${editId}`);
-      const data = res?.data?.data?.data;
-
-      if (data) {
-        form.setFieldsValue({
-          ...initialSnap.formValues,
-        });
-
-        setInitialSnap({
-          formValues: form.getFieldsValue(),
-          apiData: data,
-        });
-
-        setIsEdit(false);
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error("Không thể duyệt FormVer3");
-    } finally {
-      setLoading(false);
-    }
+          if (data) {
+            form.setFieldsValue({
+              ...initialSnap.formValues,
+              status: 2, // Đã duyệt
+            });
+            setInitialSnap((prev) => ({
+              ...prev,
+              apiData: data,
+            }));
+          }
+        } catch (err) {
+          console.error("Approve error:", err);
+          toast.error("Duyệt thất bại!");
+        } finally {
+          setLoading(false);
+        }
+      },
+    });
   };
 
   useEffect(() => {
@@ -320,8 +324,16 @@ export default function DFormVer3({ id_formVer3 }) {
   }, [selectedIds]);
 
   const restoreFromSnapshot = () => {
-    const ok = window.confirm("Bạn có chắc muốn reset toàn bộ dữ liệu không?");
-    if (!ok) return;
+    openConfirm({
+      title: "Xác nhận khôi phục",
+      message: "Bạn có chắc muốn reset toàn bộ dữ liệu không?",
+      onConfirm: async () => {
+        doRestoreFromSnapshot();
+      },
+    });
+  };
+
+  const doRestoreFromSnapshot = () => {
 
     // 🟢 CASE CREATE
     if (!editId) {
@@ -680,6 +692,7 @@ export default function DFormVer3({ id_formVer3 }) {
           imagingRows={imagingRows}
         />
       </Modal>
+      <ConfirmActionModal {...confirmState} />
     </div>
   );
 }

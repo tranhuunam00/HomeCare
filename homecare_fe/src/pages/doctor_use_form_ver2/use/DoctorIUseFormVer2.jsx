@@ -48,6 +48,8 @@ import { hasProOrBusiness } from "../../../constant/permission";
 import SmartCASignModal from "../SmartCASignModal/SmartCASignModal";
 import SignedFilesBox from "../SmartCASignModal/SignedFilesBox";
 import { calculateAge } from "../../formver3/formver3.constant";
+import useConfirmAction from "../../../hooks/useConfirmAction";
+import ConfirmActionModal from "../../../components/ConfirmActionModal/ConfirmActionModal";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -141,6 +143,7 @@ export default function DoctorUseDFormVer2({
   } = useGlobalAuth();
 
   const [reloading, setReloading] = useState(false);
+  const { confirmState, openConfirm } = useConfirmAction();
 
   const [signModalOpen, setSignModalOpen] = useState(false);
 
@@ -611,9 +614,15 @@ export default function DoctorUseDFormVer2({
   };
 
   const restoreFromSnapshot = () => {
-    if (!window.confirm("Bạn có chắc muốn khôi phục dữ liệu không?")) {
-      return;
-    }
+    openConfirm({
+      title: "Xác nhận khôi phục",
+      message: "Bạn có chắc muốn khôi phục dữ liệu không?",
+      onConfirm: async () => {
+        doRestoreFromSnapshot();
+      },
+    });
+  };
+  const doRestoreFromSnapshot = () => {
     if (!idEdit) {
       form.resetFields();
       setImageDescEditor("<p></p>");
@@ -1135,45 +1144,48 @@ export default function DoctorUseDFormVer2({
               }
               onSign={() => setSignModalOpen(true)}
               onExit={() => {
-                if (!window.confirm("Bạn có chắc muốn thoát không?")) {
-                  return;
-                }
-                navigate(`/home/doctor-use-form-drad`);
+                openConfirm({
+                  title: "Xác nhận thoát",
+                  message: "Bạn có chắc muốn thoát không?",
+                  onConfirm: async () => {
+                    navigate(`/home/doctor-use-form-drad`);
+                  },
+                });
               }}
               onApprove={async () => {
-                try {
-                  if (
-                    !window.confirm(
-                      "Bạn có chắc muốn xác nhận bản ghi này không? Lưu ý khi xác nhận sẽ không thể sửa đổi!",
-                    )
-                  ) {
-                    return;
-                  }
-                  setLoading(true);
-                  await API_CALL.patch(
-                    `/doctor-use-form-ver2/${idEdit}/approve`,
-                    {
-                      approval_status: APPROVAL_STATUS.APPROVED,
-                    },
-                  );
+                openConfirm({
+                  title: "Xác nhận phê duyệt",
+                  message: "Bạn có chắc muốn xác nhận bản ghi này không? Lưu ý khi xác nhận sẽ không thể sửa đổi!",
+                  onConfirm: async () => {
+                    try {
+                      setLoading(true);
+                      await API_CALL.patch(
+                        `/doctor-use-form-ver2/${idEdit}/approve`,
+                        {
+                          approval_status: APPROVAL_STATUS.APPROVED,
+                        },
+                      );
 
-                  toast.success(`Phê duyệt Form #${idEdit} thành công!`);
-                  setStatus(APPROVAL_STATUS.APPROVED);
-                } catch (err) {
-                  console.error("Approve error:", err);
-                  toast.error("Phê duyệt thất bại!");
-                } finally {
-                  setLoading(false);
-                }
+                      toast.success(`Phê duyệt Form #${idEdit} thành công!`);
+                      setStatus(APPROVAL_STATUS.APPROVED);
+                    } catch (err) {
+                      console.error("Approve error:", err);
+                      toast.error("Phê duyệt thất bại!");
+                    } finally {
+                      setLoading(false);
+                    }
+                  },
+                });
               }}
               onAction={(key) => {
-                if (
-                  !window.confirm("Bạn có chắc muốn lưu lại dữ liệu không?")
-                ) {
-                  return;
-                }
-                pendingAction.current = key;
-                form.submit();
+                openConfirm({
+                  title: "Xác nhận lưu",
+                  message: "Bạn có chắc muốn lưu lại dữ liệu không?",
+                  onConfirm: async () => {
+                    pendingAction.current = key;
+                    form.submit();
+                  },
+                });
               }}
               onPrint={onPrint}
               onReset={restoreFromSnapshot}
@@ -1192,46 +1204,40 @@ export default function DoctorUseDFormVer2({
               }}
               editId={idEdit}
               onGenAi={async () => {
-                const handleGenAi = async () => {
-                  if (
-                    !window.confirm(
-                      "Bạn có chắc muốn sử dụng tính năng AI không?",
-                    )
-                  ) {
-                    return;
-                  }
-                  try {
-                    const v = form.getFieldsValue();
-                    const selectedExamPart = examParts?.find(
-                      (ex) => ex.id == form.getFieldValue("id_exam_part"),
-                    );
-                    const selectedTemplateService = templateServices?.find(
-                      (ex) =>
-                        ex.id == form.getFieldValue("id_template_service"),
-                    );
+                openConfirm({
+                  title: "Xác nhận sử dụng AI",
+                  message: "Bạn có chắc muốn sử dụng tính năng AI không?",
+                  onConfirm: async () => {
+                    try {
+                      const v = form.getFieldsValue();
+                      const selectedExamPart = examParts?.find(
+                        (ex) => ex.id == form.getFieldValue("id_exam_part"),
+                      );
+                      const selectedTemplateService = templateServices?.find(
+                        (ex) =>
+                          ex.id == form.getFieldValue("id_template_service"),
+                      );
 
-                    const prompt = buildPrompt({
-                      v,
-                      selectedExamPart,
-                      selectedTemplateService,
-                      currentFormVer2Name,
-                      imageDescHTML: imageDescEditor || "", // lấy từ state của bạn
-                    });
+                      const prompt = buildPrompt({
+                        v,
+                        selectedExamPart,
+                        selectedTemplateService,
+                        currentFormVer2Name,
+                        imageDescHTML: imageDescEditor || "",
+                      });
 
-                    const url = `https://api.home-care.vn/api/chatgpt/ask-gemini-recommendation?prompt=${encodeURIComponent(
-                      prompt,
-                    )}`;
-                    const res = await API_CALL.get(url);
+                      const url = `https://api.home-care.vn/api/chatgpt/ask-gemini-recommendation?prompt=${encodeURIComponent(
+                        prompt,
+                      )}`;
+                      const res = await API_CALL.get(url);
 
-                    // Đổ thẳng vào "Khuyến nghị & tư vấn"
-                    form.setFieldsValue({ khuyen_nghi: res.data.data });
-                  } catch (e) {
-                    console.error(e);
-                    toast.error("Gọi AI thất bại.");
-                  }
-                };
-
-                await handleGenAi();
+                      form.setFieldsValue({ khuyen_nghi: res.data.data });
+                    } catch (e) {
+                      console.error(e);
+                      toast.error("Gọi AI thất bại.");
+                    }
+                  },
+                });
               }}
               onTranslate={() =>
                 handleTranslateToLanguage({
@@ -1253,6 +1259,7 @@ export default function DoctorUseDFormVer2({
                   navigate,
                   targetLang: "en",
                   sourceLang: "vi",
+                  openConfirm,
                 })
               }
               onTranslateMulti={({ targetLang, sourceLang }) =>
@@ -1275,6 +1282,7 @@ export default function DoctorUseDFormVer2({
                   navigate,
                   targetLang: targetLang,
                   sourceLang: sourceLang,
+                  openConfirm,
                 })
               }
             />
@@ -1365,6 +1373,7 @@ export default function DoctorUseDFormVer2({
         onClose={() => setSignModalOpen(false)}
         id_doctor_use_form_ver2={idEdit}
       />
+      <ConfirmActionModal {...confirmState} />
     </div>
   );
 }

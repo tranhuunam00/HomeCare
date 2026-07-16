@@ -22,20 +22,13 @@ export const handleTranslateToLanguage = async ({
   targetLang = "en",
   sourceLang = "vi",
   setImageList,
+  openConfirm,
 }) => {
-  try {
-    console.log("heheheeh");
-    if (
-      !window.confirm(
-        `Bạn có chắc muốn dịch bản ghi này từ ${sourceLang} sang ${targetLang} không? Hệ thống sẽ tự động tạo bản dịch mới.`,
-      )
-    ) {
-      return;
-    }
-
-    setLanguageTransslate(targetLang);
-    form.setFieldValue("language", targetLang);
-    setLoading(true);
+  const proceedTranslation = async () => {
+    try {
+      setLanguageTransslate(targetLang);
+      form.setFieldValue("language", targetLang);
+      setLoading(true);
 
     const [translatedAddon, translatedImageDescEditor, translatedCaptions] =
       await Promise.all([
@@ -166,10 +159,21 @@ export const handleTranslateToLanguage = async ({
     } else {
       toast.warning("Dịch thành công nhưng không nhận được ID mới!");
     }
-  } catch (error) {
-    console.error("Translate & Save Error:", error);
-    toast.error("Lỗi khi dịch hoặc lưu bản dịch!");
-  } finally {
-    setLoading(false);
+    } catch (error) {
+      console.error("Translate & Save Error:", error);
+      toast.error("Lỗi khi dịch hoặc lưu bản dịch!");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (openConfirm) {
+    openConfirm({
+      title: "Xác nhận dịch",
+      message: `Bạn có chắc muốn dịch bản ghi này từ ${sourceLang} sang ${targetLang} không? Hệ thống sẽ tự động tạo bản dịch mới.`,
+      onConfirm: proceedTranslation,
+    });
+  } else {
+    proceedTranslation();
   }
 };

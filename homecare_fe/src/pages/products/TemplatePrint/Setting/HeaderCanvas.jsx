@@ -11,8 +11,11 @@ import {
 import API_CALL from "../../../../services/axiosClient";
 import { toast } from "react-toastify";
 import EditorPanel from "./editor/EditorPanel";
+import useConfirmAction from "../../../../hooks/useConfirmAction";
+import ConfirmActionModal from "../../../../components/ConfirmActionModal/ConfirmActionModal";
 
 const HeaderCanvas = ({ headerInfo }) => {
+  const { confirmState, openConfirm } = useConfirmAction();
   const [history, setHistory] = useState([]);
   const [isReset, setIsReset] = useState(false);
   const [templateCode, setTemplateCode] = useState(
@@ -226,24 +229,27 @@ const HeaderCanvas = ({ headerInfo }) => {
   };
 
   const saveHeaderToApi = async () => {
-    const ok = window.confirm("Bạn có muốn lưu cấu hình header không?");
-    if (!ok) return;
+    openConfirm({
+      title: "Lưu cấu hình",
+      message: "Bạn có muốn lưu cấu hình header không?",
+      onConfirm: async () => {
+        try {
+          const payload = {
+            custom: isReset ? null : JSON.stringify(headerBlocks),
+          };
 
-    try {
-      const payload = {
-        custom: isReset ? null : JSON.stringify(headerBlocks),
-      };
+          await API_CALL.put(`/print-template/${headerInfo.id}`, payload);
 
-      await API_CALL.put(`/print-template/${headerInfo.id}`, payload);
+          toast.success("Lưu cấu hình header thành công!");
+          setLastSavedBlocks(JSON.parse(JSON.stringify(headerBlocks)));
 
-      toast.success("Lưu cấu hình header thành công!");
-      setLastSavedBlocks(JSON.parse(JSON.stringify(headerBlocks)));
-
-      setIsReset(false);
-    } catch (err) {
-      console.error(err);
-      toast.error("Lưu cấu hình header thất bại");
-    }
+          setIsReset(false);
+        } catch (err) {
+          console.error(err);
+          toast.error("Lưu cấu hình header thất bại");
+        }
+      },
+    });
   };
 
   const resetToLastSaved = () => {
@@ -252,13 +258,14 @@ const HeaderCanvas = ({ headerInfo }) => {
       return;
     }
 
-    const ok = window.confirm(
-      "Quay lại bản đã lưu gần nhất? Mọi thay đổi chưa lưu sẽ mất.",
-    );
-    if (!ok) return;
-
-    setHeaderBlocks(JSON.parse(JSON.stringify(lastSavedBlocks)));
-    setHistory([]);
+    openConfirm({
+      title: "Xác nhận khôi phục",
+      message: "Quay lại bản đã lưu gần nhất? Mọi thay đổi chưa lưu sẽ mất.",
+      onConfirm: async () => {
+        setHeaderBlocks(JSON.parse(JSON.stringify(lastSavedBlocks)));
+        setHistory([]);
+      },
+    });
   };
   if (!ready) return null;
 
@@ -405,6 +412,7 @@ const HeaderCanvas = ({ headerInfo }) => {
       <div className={styles.editorPanel}>
         <EditorPanel block={selectedBlock} onChange={updateBlock} />
       </div>
+      <ConfirmActionModal {...confirmState} />
     </div>
   );
 };

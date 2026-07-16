@@ -41,6 +41,8 @@ import {
 } from "../formver3.constant";
 import { languageTag } from "../../formver2/list/FormVer2List";
 import { FormVer3CloneModal } from "../components/FormVer3CloneModal";
+import useConfirmAction from "../../../hooks/useConfirmAction";
+import ConfirmActionModal from "../../../components/ConfirmActionModal/ConfirmActionModal";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -104,6 +106,7 @@ const STORAGE_KEY = "visibleColumns_formVer3";
 export default function FormVer3List() {
   const navigate = useNavigate();
   const { examParts = [], templateServices = [], user } = useGlobalAuth();
+  const { confirmState, openConfirm } = useConfirmAction();
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
   const [loading, setLoading] = useState(false);
@@ -523,19 +526,21 @@ export default function FormVer3List() {
   const confirmToggleApprove = (record) => {
     const isApproved = record.status === 2;
 
-    const message = isApproved
+    const msg = isApproved
       ? "Bạn có chắc muốn HỦY DUYỆT form này?\nTrạng thái sẽ quay về Nháp (DRAFT)."
       : "Bạn có chắc muốn DUYỆT form này?\nTrạng thái sẽ chuyển sang Hoàn thành.";
 
-    const confirmed = window.confirm(message);
-
-    if (!confirmed) return;
-
-    if (isApproved) {
-      unapproveForm(record);
-    } else {
-      approveForm(record);
-    }
+    openConfirm({
+      title: isApproved ? "Hủy duyệt" : "Duyệt",
+      message: msg,
+      onConfirm: async () => {
+        if (isApproved) {
+          await unapproveForm(record);
+        } else {
+          await approveForm(record);
+        }
+      },
+    });
   };
 
   /* ======= UI ======= */
@@ -784,6 +789,7 @@ export default function FormVer3List() {
             }} // ✅ reload list sau khi clone
           />
         )}
+        <ConfirmActionModal {...confirmState} />
       </div>
     </Spin>
   );

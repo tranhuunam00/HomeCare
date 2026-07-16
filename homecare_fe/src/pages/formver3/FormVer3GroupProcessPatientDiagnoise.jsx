@@ -19,6 +19,8 @@ import { useState } from "react";
 import ConsultationSelectModal from "./components/ConsultationSelectModal/ConsultationSelectModal";
 import ActionButton from "../formver2/component/ActionButton/ActionButton";
 import usePatientDiagnoseStatus from "../../hooks/usePatientDiagnoseStatus";
+import useConfirmAction from "../../hooks/useConfirmAction";
+import ConfirmActionModal from "../../components/ConfirmActionModal/ConfirmActionModal";
 
 const FormVer3GroupProcessPatientDiagnoise = ({
   patientDiagnose,
@@ -37,6 +39,7 @@ const FormVer3GroupProcessPatientDiagnoise = ({
 
   const { doctor, setPreviewOpen } = useGlobalAuth();
   const { transitionStatus } = usePatientDiagnoseStatus();
+  const { confirmState, openConfirm } = useConfirmAction();
 
   return (
     <div>
@@ -63,14 +66,17 @@ const FormVer3GroupProcessPatientDiagnoise = ({
                 color="red"
                 icon={<WarningOutlined />}
                 onClick={() =>
-                  transitionStatus({
-                    patientDiagnoseId: id,
-                    newStatus: PATIENT_DIAGNOSE_STATUS_NAME.NEW,
-                    confirmMessage:
-                      "Bạn có chắc chắn muốn hủy hội chẩn?\n\nNếu Hủy, ca sẽ được trả về trạng thái MỚI.",
-                    successMessage: "Thao tác thành công",
-                    localSetState: setPatientDiagnose,
-                    onStatusChange,
+                  openConfirm({
+                    title: "Xác nhận hủy hội chẩn",
+                    message: "Bạn có chắc chắn muốn hủy hội chẩn?\n\nNếu Hủy, ca sẽ được trả về trạng thái MỚI.",
+                    onConfirm: () =>
+                      transitionStatus({
+                        patientDiagnoseId: id,
+                        newStatus: PATIENT_DIAGNOSE_STATUS_NAME.NEW,
+                        successMessage: "Thao tác thành công",
+                        localSetState: setPatientDiagnose,
+                        onStatusChange,
+                      }),
                   })
                 }
               >
@@ -86,15 +92,18 @@ const FormVer3GroupProcessPatientDiagnoise = ({
                 color="red"
                 icon={<WarningOutlined />}
                 onClick={() =>
-                  transitionStatus({
-                    patientDiagnoseId: id,
-                    newStatus: PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESSING,
-                    confirmMessage:
-                      "Bạn có chắc chắn muốn từ chối hội chẩn?\n\nNếu từ chối, ca sẽ rollback về trạng thái ĐANG ĐỌC của Bác sĩ chính.",
-                    successMessage: "Từ chối hội chẩn thành công",
-                    localSetState: setPatientDiagnose,
-                    onStatusChange,
-                    additionalPayload: { is_consultation_reject: true },
+                  openConfirm({
+                    title: "Xác nhận từ chối hội chẩn",
+                    message: "Bạn có chắc chắn muốn từ chối hội chẩn?\n\nNếu từ chối, ca sẽ rollback về trạng thái ĐANG ĐỌC của Bác sĩ chính.",
+                    onConfirm: () =>
+                      transitionStatus({
+                        patientDiagnoseId: id,
+                        newStatus: PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESSING,
+                        successMessage: "Từ chối hội chẩn thành công",
+                        localSetState: setPatientDiagnose,
+                        onStatusChange,
+                        additionalPayload: { is_consultation_reject: true },
+                      }),
                   })
                 }
               >
@@ -111,14 +120,17 @@ const FormVer3GroupProcessPatientDiagnoise = ({
                 color="amber"
                 icon={<ReadOutlined />}
                 onClick={() =>
-                  transitionStatus({
-                    patientDiagnoseId: id,
-                    newStatus: PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESSING,
-                    confirmMessage:
-                      "Bạn có chắc chắn muốn nhận đọc?\n\nNếu Nhận đọc, ca sẽ được chuyển sang trạng thái ĐANG XỬ LÝ.",
-                    successMessage: "Thao tác thành công",
-                    localSetState: setPatientDiagnose,
-                    onStatusChange,
+                  openConfirm({
+                    title: "Xác nhận nhận đọc",
+                    message: "Bạn có chắc chắn muốn nhận đọc?\n\nNếu Nhận đọc, ca sẽ được chuyển sang trạng thái ĐANG XỬ LÝ.",
+                    onConfirm: () =>
+                      transitionStatus({
+                        patientDiagnoseId: id,
+                        newStatus: PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESSING,
+                        successMessage: "Thao tác thành công",
+                        localSetState: setPatientDiagnose,
+                        onStatusChange,
+                      }),
                   })
                 }
               >
@@ -138,13 +150,17 @@ const FormVer3GroupProcessPatientDiagnoise = ({
                   const newStatus = id_consulting_doctor
                     ? PATIENT_DIAGNOSE_STATUS_NAME.CONSULTATION
                     : PATIENT_DIAGNOSE_STATUS_NAME.NEW;
-                  transitionStatus({
-                    patientDiagnoseId: id,
-                    newStatus,
-                    confirmMessage: `Bạn có chắc chắn muốn hủy đọc?\n\nNếu Hủy đọc, ca sẽ được trả về trạng thái ${id_consulting_doctor ? "HỘI CHẨN" : "MỚI"}.`,
-                    successMessage: "Thao tác thành công",
-                    localSetState: setPatientDiagnose,
-                    onStatusChange,
+                  openConfirm({
+                    title: "Xác nhận hủy đọc",
+                    message: `Bạn có chắc chắn muốn hủy đọc?\n\nNếu Hủy đọc, ca sẽ được trả về trạng thái ${id_consulting_doctor ? "HỘI CHẨN" : "MỚI"}.`,
+                    onConfirm: () =>
+                      transitionStatus({
+                        patientDiagnoseId: id,
+                        newStatus,
+                        successMessage: "Thao tác thành công",
+                        localSetState: setPatientDiagnose,
+                        onStatusChange,
+                      }),
                   });
                 }}
               >
@@ -239,14 +255,17 @@ const FormVer3GroupProcessPatientDiagnoise = ({
                 color="red"
                 icon={<WarningOutlined />}
                 onClick={() =>
-                  transitionStatus({
-                    patientDiagnoseId: id,
-                    newStatus: PATIENT_DIAGNOSE_STATUS_NAME.READ_DONE,
-                    confirmMessage:
-                      "Bạn có chắc chắn muốn hủy kết quả đã duyệt?\n\nNếu hủy, ca sẽ được trả về trạng thái Đọc Xong.",
-                    successMessage: "Thao tác thành công",
-                    localSetState: setPatientDiagnose,
-                    onStatusChange,
+                  openConfirm({
+                    title: "Xác nhận hủy duyệt",
+                    message: "Bạn có chắc chắn muốn hủy kết quả đã duyệt?\n\nNếu hủy, ca sẽ được trả về trạng thái Đọc Xong.",
+                    onConfirm: () =>
+                      transitionStatus({
+                        patientDiagnoseId: id,
+                        newStatus: PATIENT_DIAGNOSE_STATUS_NAME.READ_DONE,
+                        successMessage: "Thao tác thành công",
+                        localSetState: setPatientDiagnose,
+                        onStatusChange,
+                      }),
                   })
                 }
               >
@@ -263,14 +282,17 @@ const FormVer3GroupProcessPatientDiagnoise = ({
                 color="orange"
                 icon={<WarningOutlined />}
                 onClick={() =>
-                  transitionStatus({
-                    patientDiagnoseId: id,
-                    newStatus: PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESSING,
-                    confirmMessage:
-                      "Bạn có chắc chắn muốn từ chối duyệt và trả ca này về trạng thái Đang đọc để chỉnh sửa?",
-                    successMessage: "Thao tác thành công",
-                    localSetState: setPatientDiagnose,
-                    onStatusChange,
+                  openConfirm({
+                    title: "Xác nhận từ chối duyệt",
+                    message: "Bạn có chắc chắn muốn từ chối duyệt và trả ca này về trạng thái Đang đọc để chỉnh sửa?",
+                    onConfirm: () =>
+                      transitionStatus({
+                        patientDiagnoseId: id,
+                        newStatus: PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESSING,
+                        successMessage: "Thao tác thành công",
+                        localSetState: setPatientDiagnose,
+                        onStatusChange,
+                      }),
                   })
                 }
               >
@@ -292,18 +314,7 @@ const FormVer3GroupProcessPatientDiagnoise = ({
           </div>
         )}
 
-        {(status === PATIENT_DIAGNOSE_STATUS_NAME.WAIT_VERIFY ||
-          status === PATIENT_DIAGNOSE_STATUS_NAME.VERIFIED) && (
-          <div style={{ margin: 0 }}>
-            <ActionButton
-              color="green"
-              icon={<CheckCircleOutlined />}
-              onClick={() => onOpenReading(true)}
-            >
-              Sửa duyệt
-            </ActionButton>
-          </div>
-        )}
+
 
         <div style={{ margin: 0 }}>
           <ActionButton
@@ -317,6 +328,7 @@ const FormVer3GroupProcessPatientDiagnoise = ({
           </ActionButton>
         </div>
       </div>
+      <ConfirmActionModal {...confirmState} />
     </div>
   );
 };

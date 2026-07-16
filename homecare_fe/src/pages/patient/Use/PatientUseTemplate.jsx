@@ -35,6 +35,8 @@ import StatusButtonPatientDiagnose from "../../../components/Status2ButtonPatien
 import PrintPreview from "./PrintPreview.jsx";
 import AddonInputSection from "./InputsAdon.jsx";
 import ImageWithCaptionInput from "../../products/ImageWithCaptionInput/ImageWithCaptionInput.jsx";
+import useConfirmAction from "../../../hooks/useConfirmAction";
+import ConfirmActionModal from "../../../components/ConfirmActionModal/ConfirmActionModal";
 
 const urlToFile = async (url, fallbackName = "image") => {
   const res = await fetch(url);
@@ -91,6 +93,7 @@ const PatientUseTemplate = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const [loading, setLoading] = React.useState(false);
+  const { confirmState, openConfirm } = useConfirmAction();
   const [printTemplate, setPrintTemplate] = useState({});
   const [idPrintTemplate, setIdPrintTemplate] = useState();
 
@@ -949,10 +952,11 @@ const PatientUseTemplate = () => {
                 }
               }}
               handleReset={() => {
-                const confirm = window.confirm(
-                  "Bạn có chắc chắn muốn reset quả đọc không?\n",
-                );
-                if (!confirm) return;
+                openConfirm({
+                  title: "Xác nhận reset",
+                  message: "Bạn có chắc chắn muốn reset kết quả đọc không?",
+                  onConfirm: async () => {},
+                });
               }}
               handleCancelResult={async () => {
                 const res = await updateStatusPatientDiagnose(2);
@@ -961,73 +965,78 @@ const PatientUseTemplate = () => {
                 }
               }}
               handleCancelRead={async () => {
-                const confirm = window.confirm(
-                  "Bạn có chắc chắn muốn quay về trạng thái đọc quả không?\n",
-                );
-                if (!confirm) return;
-                const res = await updateStatusPatientDiagnose(1);
-                if (res) {
-                  setPatientDiagnose({ ...patientDiagnose, status: 1 });
-                }
+                openConfirm({
+                  title: "Xác nhận quay về",
+                  message: "Bạn có chắc chắn muốn quay về trạng thái đọc kết quả không?",
+                  onConfirm: async () => {
+                    const res = await updateStatusPatientDiagnose(1);
+                    if (res) {
+                      setPatientDiagnose({ ...patientDiagnose, status: 1 });
+                    }
+                  },
+                });
               }}
               handleConfirm={async () => {
-                const confirm = window.confirm(
-                  "Bạn có chắc chắn muốn chốt kết quả không?\nSau khi chốt sẽ không thể sửa.",
-                );
-                if (confirm) {
-                  try {
-                    const data = await createDoctorPrintTemplate(
-                      PATIENT_DIAGNOSE_STATUS_CODE.VERIFY,
-                    );
+                openConfirm({
+                  title: "Xác nhận chốt kết quả",
+                  message: "Bạn có chắc chắn muốn chốt kết quả không?\nSau khi chốt sẽ không thể sửa.",
+                  onConfirm: async () => {
+                    try {
+                      const data = await createDoctorPrintTemplate(
+                        PATIENT_DIAGNOSE_STATUS_CODE.VERIFY,
+                      );
 
-                    if (data) {
-                      toast.success("Chốt kết quả thành công!");
-                      setPatientDiagnose({
-                        ...patientDiagnose,
-                        status: PATIENT_DIAGNOSE_STATUS_CODE.VERIFY,
-                      });
-                      navigate("/home/patients-diagnose");
+                      if (data) {
+                        toast.success("Chốt kết quả thành công!");
+                        setPatientDiagnose({
+                          ...patientDiagnose,
+                          status: PATIENT_DIAGNOSE_STATUS_CODE.VERIFY,
+                        });
+                        navigate("/home/patients-diagnose");
+                      }
+                    } catch (error) {
+                      console.error("Lỗi khi chốt kết quả:", error);
+                      toast.error("Chốt kết quả thất bại!");
                     }
-                  } catch (error) {
-                    console.error("Lỗi khi chốt kết quả:", error);
-                    toast.error("Chốt kết quả thất bại!");
-                  }
-                }
+                  },
+                });
               }}
               handlePrint={handlePrint}
               handleSend={async () => {
-                const confirm = window.confirm(
-                  "Bạn có chắc chắn muốn chốt kết quả không?\nSau khi chốt sẽ không thể sửa.",
-                );
-                if (confirm) {
-                  try {
-                    const data = await createDoctorPrintTemplate(
-                      PATIENT_DIAGNOSE_STATUS_CODE.WAIT,
-                    );
+                openConfirm({
+                  title: "Xác nhận chốt kết quả",
+                  message: "Bạn có chắc chắn muốn chốt kết quả không?\nSau khi chốt sẽ không thể sửa.",
+                  onConfirm: async () => {
+                    try {
+                      const data = await createDoctorPrintTemplate(
+                        PATIENT_DIAGNOSE_STATUS_CODE.WAIT,
+                      );
 
-                    if (data) {
-                      toast.success("Chốt kết quả thành công!");
-                      setPatientDiagnose({
-                        ...patientDiagnose,
-                        status: PATIENT_DIAGNOSE_STATUS_CODE.WAIT,
-                      });
-                      navigate("/home/patients-diagnose");
+                      if (data) {
+                        toast.success("Chốt kết quả thành công!");
+                        setPatientDiagnose({
+                          ...patientDiagnose,
+                          status: PATIENT_DIAGNOSE_STATUS_CODE.WAIT,
+                        });
+                        navigate("/home/patients-diagnose");
+                      }
+                    } catch (error) {
+                      console.error("Lỗi khi chốt kết quả:", error);
+                      toast.error("Chốt kết quả thất bại!");
                     }
-                  } catch (error) {
-                    console.error("Lỗi khi chốt kết quả:", error);
-                    toast.error("Chốt kết quả thất bại!");
-                  }
-                }
+                  },
+                });
               }}
               handleTranslate={async () => {
-                const confirmed = window.confirm(
-                  "Bạn có chắc chắn muốn bắt đầu dịch nội dung không?",
-                );
-                if (!confirmed) return;
-
-                setIsTrans(true);
-                toast.success("Bắt đầu dịch");
-                await handleTranslateInputs();
+                openConfirm({
+                  title: "Xác nhận dịch",
+                  message: "Bạn có chắc chắn muốn bắt đầu dịch nội dung không?",
+                  onConfirm: async () => {
+                    setIsTrans(true);
+                    toast.success("Bắt đầu dịch");
+                    await handleTranslateInputs();
+                  },
+                });
               }}
             />
           </Card>
@@ -1040,14 +1049,16 @@ const PatientUseTemplate = () => {
               statusCode={patientDiagnose?.status}
               handlePrint={handlePrint}
               handleCancelVerify={async () => {
-                const confirm = window.confirm(
-                  "Bạn có chắc chắn muốn hủy kết quả duyệt không?\n",
-                );
-                if (!confirm) return;
-                const res = await updateStatusPatientDiagnose(3);
-                if (res) {
-                  setPatientDiagnose({ ...patientDiagnose, status: 3 });
-                }
+                openConfirm({
+                  title: "Xác nhận hủy duyệt",
+                  message: "Bạn có chắc chắn muốn hủy kết quả duyệt không?",
+                  onConfirm: async () => {
+                    const res = await updateStatusPatientDiagnose(3);
+                    if (res) {
+                      setPatientDiagnose({ ...patientDiagnose, status: 3 });
+                    }
+                  },
+                });
               }}
             />
           </Card>
@@ -1181,6 +1192,7 @@ const PatientUseTemplate = () => {
           />
         )}
       </div>
+      <ConfirmActionModal {...confirmState} />
     </Spin>
   );
 };
