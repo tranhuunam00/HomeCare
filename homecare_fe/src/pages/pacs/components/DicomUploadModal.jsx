@@ -31,11 +31,15 @@ export default function DicomUploadModal({
 
     try {
       setUploading(true);
+      const token = localStorage.getItem('TOKEN');
       const res = await axios.post(
         `${apiEndpoint}/api/pacs/upload?patientDiagnoseId=${patientDiagnoseId}`,
         formData,
         {
-          headers: { 'Content-Type': 'multipart/form-data' },
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
         }
       );
 

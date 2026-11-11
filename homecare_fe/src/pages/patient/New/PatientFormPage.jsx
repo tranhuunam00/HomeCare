@@ -189,7 +189,13 @@ const PatientFormPage = () => {
               const formData = new FormData();
               dicomFileList.forEach((file) => formData.append("files", file));
               const apiEndpoint = import.meta.env.VITE_API_ENDPOINT || "http://localhost:3001";
-              await axios.post(`${apiEndpoint}/api/pacs/upload?patientDiagnoseId=${newPatientId}`, formData);
+              const token = localStorage.getItem("TOKEN");
+              await axios.post(`${apiEndpoint}/api/pacs/upload?patientDiagnoseId=${newPatientId}`, formData, {
+                headers: {
+                  "Content-Type": "multipart/form-data",
+                  ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                },
+              });
               toast.success("Đã tải và lưu trữ ảnh DICOM vào hệ thống PACS!");
             } catch (pacsErr) {
               console.error("Lỗi tải DICOM vào PACS:", pacsErr);
