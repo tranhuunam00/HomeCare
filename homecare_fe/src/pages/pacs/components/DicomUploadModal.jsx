@@ -108,7 +108,7 @@ export default function DicomUploadModal({
       setFileList((prev) => prev.filter((item) => item.uid !== file.uid));
       setUploadError(null);
     },
-    accept: '.dcm,.zip',
+    accept: '.dcm,.dicom,.zip,.pdf,.docx,.doc,.mp4,.mov,.avi,.webm,.png,.jpg,.jpeg,.webp,.bmp',
   };
 
   const handleModalClose = () => {
@@ -125,7 +125,7 @@ export default function DicomUploadModal({
     <Modal
       title={
         <div>
-          <span style={{ fontWeight: '600' }}>Tải ảnh DICOM (PACS)</span>
+          <span style={{ fontWeight: '600' }}>Tải tệp chẩn đoán hình ảnh & Tư liệu (D-PACS)</span>
           {patientName && (
             <span style={{ fontSize: '13px', color: '#64748b', marginLeft: 8 }}>
               - Ca bệnh: {patientName} (ID: #{patientDiagnoseId})
@@ -149,7 +149,7 @@ export default function DicomUploadModal({
           {uploading ? 'Đang tải lên...' : `Bắt đầu tải lên (${fileList.length} file)`}
         </Button>,
       ]}
-      width={560}
+      width={580}
       destroyOnClose
     >
       <div style={{ margin: '16px 0' }}>
@@ -158,10 +158,10 @@ export default function DicomUploadModal({
             <InboxOutlined style={{ color: '#3b82f6', fontSize: '42px' }} />
           </p>
           <p className="ant-upload-text" style={{ fontWeight: '500' }}>
-            Nhấp hoặc kéo thả file DICOM vào đây
+            Nhấp hoặc kéo thả file DICOM, Video, Ảnh hoặc Tài liệu vào đây
           </p>
           <p className="ant-upload-hint" style={{ color: '#64748b', fontSize: '12px' }}>
-            Hỗ trợ các file định dạng ảnh DICOM tiêu chuẩn (<code>.dcm</code>) hoặc file nén (<code>.zip</code>) chứa toàn bộ chuỗi lát cắt CT/MRI/X-quang.
+            Hỗ trợ lát cắt DICOM (<code>.dcm</code>), file nén (<code>.zip</code>), video nội soi/siêu âm (<code>.mp4, .mov, .avi</code>), ảnh lâm sàng và tài liệu kết quả (<code>.pdf, .docx</code>).
           </p>
         </Dragger>
 

@@ -493,7 +493,7 @@ export default function PacsMprModal({
                 letterSpacing: '0.4px',
               }}
             >
-              VR-PACS 3D VOLUME & MULTI-PLANAR RECONSTRUCTION (MPR)
+              D-PACS 3D VOLUME & MULTI-PLANAR RECONSTRUCTION (MPR)
             </span>
             <span style={{ fontSize: '12px', color: '#94a3b8' }}>
               {patientName} ({modality} - {numSlices} lát cắt)

@@ -1110,7 +1110,7 @@ export default function DoctorUseDFormVer3({
                 );
               }}
             >
-              Mở PACS Viewer (DICOM)
+              Mở D-PACS Viewer
             </Button>
           </div>
 

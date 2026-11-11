@@ -634,17 +634,17 @@ const PatientFormPage = () => {
           )}
 
           {/* -------------------------------------------------------- */}
-          {/* HÌNH ẢNH DICOM (PACS)                                    */}
+          {/* HÌNH ẢNH CHẨN ĐOÁN & HỒ SƠ Y TẾ (D-PACS)                */}
           {/* -------------------------------------------------------- */}
           <Divider orientation="left">
             <span style={{ color: "#0284c7", fontWeight: "600", fontSize: "14px" }}>
-              HÌNH ẢNH CHẨN ĐOÁN DICOM (PACS)
+              HÌNH ẢNH CHẨN ĐOÁN & HỒ SƠ Y TẾ (D-PACS)
             </span>
           </Divider>
 
           <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
             <Col span={24}>
-              <Form.Item label="Tải lên file DICOM (.dcm hoặc file nén .zip)">
+              <Form.Item label="Tải lên tệp chẩn đoán hình ảnh & Tài liệu (DICOM, Video, Ảnh, PDF, Word, ZIP)">
                 <Upload.Dragger
                   multiple
                   fileList={dicomFileList}
@@ -657,16 +657,16 @@ const PatientFormPage = () => {
                       prev.filter((item) => item.uid !== file.uid)
                     );
                   }}
-                  accept=".dcm,.zip"
+                  accept=".dcm,.dicom,.zip,.pdf,.docx,.doc,.mp4,.mov,.avi,.webm,.png,.jpg,.jpeg,.webp,.bmp"
                 >
                   <p className="ant-upload-drag-icon">
                     <InboxOutlined style={{ color: "#0284c7", fontSize: "36px" }} />
                   </p>
                   <p className="ant-upload-text" style={{ fontWeight: "500" }}>
-                    Nhấp hoặc kéo thả file ảnh DICOM (.dcm) hoặc file nén (.zip) vào đây
+                    Nhấp hoặc kéo thả file DICOM, Video nội soi/siêu âm, Tài liệu (.pdf, .docx), Ảnh hoặc file nén (.zip) vào đây
                   </p>
                   <p className="ant-upload-hint" style={{ color: "#64748b", fontSize: "12px" }}>
-                    File DICOM tải lên sẽ được tự động lưu trữ vào hệ thống PACS và đồng bộ với ca bệnh ngay sau khi tạo mới.
+                    Tự động đồng bộ vào D-PACS: Lát cắt DICOM nạp vào Viewer 2D/3D MPR; Video/Ảnh/PDF lưu vào tư liệu đính kèm ca bệnh.
                   </p>
                 </Upload.Dragger>
               </Form.Item>

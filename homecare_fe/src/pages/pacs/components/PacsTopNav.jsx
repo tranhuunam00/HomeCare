@@ -70,7 +70,7 @@ export default function PacsTopNav({
             color: '#f8fafc',
           }}
         >
-          VR-PACS VIEWER
+          D-PACS VIEWER
         </span>
       </div>
 
