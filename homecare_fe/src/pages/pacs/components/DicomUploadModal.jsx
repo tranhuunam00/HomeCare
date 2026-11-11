@@ -16,7 +16,10 @@ export default function DicomUploadModal({
   const [fileList, setFileList] = useState([]);
   const [uploading, setUploading] = useState(false);
 
-  const apiEndpoint = import.meta.env.VITE_API_ENDPOINT || 'http://localhost:3001';
+  const apiEndpoint =
+    typeof window !== 'undefined' && window.location.hostname.includes('home-care.vn')
+      ? 'https://api.home-care.vn'
+      : import.meta.env.VITE_API_ENDPOINT || 'http://localhost:3001';
 
   const handleUpload = async () => {
     if (fileList.length === 0) {

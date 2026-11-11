@@ -9,6 +9,7 @@ import PacsSidebar from './components/PacsSidebar';
 import PacsSeriesStrip from './components/PacsSeriesStrip';
 import PacsViewport from './components/PacsViewport';
 import PacsCaptureAlert from './components/PacsCaptureAlert';
+import PacsUploadAlert from './components/PacsUploadAlert';
 import PacsAttachmentViewer from './components/PacsAttachmentViewer';
 import PacsMprModal from './components/PacsMprModal';
 import { PACS_TOOLS } from './constants/pacs.constants';
@@ -26,7 +27,15 @@ export default function PacsViewerPage() {
   const [searchParams] = useSearchParams();
   const patientDiagnoseId = searchParams.get('patientDiagnoseId') || '';
 
-  const apiEndpoint = import.meta.env.VITE_API_ENDPOINT || 'http://localhost:3001';
+  const apiEndpoint = useMemo(() => {
+    const envUrl = import.meta.env.VITE_API_ENDPOINT;
+    if (typeof window !== 'undefined' && window.location.hostname.includes('home-care.vn')) {
+      if (!envUrl || envUrl.includes('localhost') || envUrl.includes('127.0.0.1')) {
+        return 'https://api.home-care.vn';
+      }
+    }
+    return envUrl || 'http://localhost:3001';
+  }, []);
 
   // Custom hook: Data access and DICOM loading
   const {
@@ -36,12 +45,15 @@ export default function PacsViewerPage() {
     currentIndex,
     setCurrentIndex,
     dicomCache,
+    setDicomCache,
     windowCenter,
     setWindowCenter,
     windowWidth,
     setWindowWidth,
     loadStudy,
     uploadDicom,
+    uploadState,
+    resetUploadState,
     getAuthHeaders,
   } = usePacsStudy(patientDiagnoseId, apiEndpoint);
 
@@ -105,46 +117,99 @@ export default function PacsViewerPage() {
   const [currentDrawing, setCurrentDrawing] = useState(null);
 
   // 🏥 Medical Standard (DICOM Presentation State - GSPS):
-  // Persist doctor's annotations & display parameters across page reloads without modifying raw DICOM files
+  // Persist doctor's annotations & display parameters across page reloads on both PACS Server and local cache
   const presentationStateKey = patientDiagnoseId ? `pacs_presentation_state_${patientDiagnoseId}` : null;
 
-  // Restore presentation state on load
+  // Restore presentation state from PACS Server on load (with localStorage fallback)
   useEffect(() => {
-    if (!presentationStateKey) return;
-    try {
-      const saved = localStorage.getItem(presentationStateKey);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.annotations && typeof parsed.annotations === 'object') {
-          setAnnotations(parsed.annotations);
-        }
-        if (parsed.windowCenter !== undefined) setWindowCenter(parsed.windowCenter);
-        if (parsed.windowWidth !== undefined) setWindowWidth(parsed.windowWidth);
-        if (parsed.colorLut) setColorLut(parsed.colorLut);
-        if (parsed.invert !== undefined) setInvert(parsed.invert);
-      }
-    } catch (e) {
-      console.warn('Lỗi khôi phục trạng thái đo đạc (Presentation State):', e);
-    }
-  }, [presentationStateKey, setWindowCenter, setWindowWidth]);
+    if (!patientDiagnoseId) return;
 
-  // Auto-save presentation state when annotations or WW/WL change
+    let isMounted = true;
+    const fetchServerState = async () => {
+      try {
+        const token = localStorage.getItem('TOKEN');
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const res = await axios.get(`${apiEndpoint}/api/pacs/presentation-state/${patientDiagnoseId}`, { headers });
+        const serverPS = res.data?.data?.data || res.data?.data;
+
+        if (isMounted && serverPS) {
+          if (serverPS.annotations && Object.keys(serverPS.annotations).length > 0) {
+            setAnnotations(serverPS.annotations);
+          }
+          if (serverPS.windowCenter !== undefined) setWindowCenter(serverPS.windowCenter);
+          if (serverPS.windowWidth !== undefined) setWindowWidth(serverPS.windowWidth);
+          if (serverPS.colorLut) setColorLut(serverPS.colorLut);
+          if (serverPS.invert !== undefined) setInvert(serverPS.invert);
+          return;
+        }
+      } catch (err) {
+        console.warn('Lỗi tải Presentation State từ server, chuyển sang đọc bộ nhớ cục bộ:', err.message);
+      }
+
+      // Local storage fallback
+      if (isMounted && presentationStateKey) {
+        try {
+          const saved = localStorage.getItem(presentationStateKey);
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            if (parsed.annotations) setAnnotations(parsed.annotations);
+            if (parsed.windowCenter !== undefined) setWindowCenter(parsed.windowCenter);
+            if (parsed.windowWidth !== undefined) setWindowWidth(parsed.windowWidth);
+            if (parsed.colorLut) setColorLut(parsed.colorLut);
+            if (parsed.invert !== undefined) setInvert(parsed.invert);
+          }
+        } catch (e) {
+          console.warn('Lỗi khôi phục trạng thái cục bộ:', e);
+        }
+      }
+    };
+
+    fetchServerState();
+    return () => {
+      isMounted = false;
+    };
+  }, [patientDiagnoseId, apiEndpoint, presentationStateKey, setWindowCenter, setWindowWidth]);
+
+  // Auto-save presentation state to both localStorage and PACS Server (debounced)
+  const saveTimeoutRef = useRef(null);
   useEffect(() => {
-    if (!presentationStateKey) return;
-    try {
-      const stateToSave = {
-        annotations,
-        windowCenter,
-        windowWidth,
-        colorLut,
-        invert,
-        updatedAt: new Date().toISOString(),
-      };
-      localStorage.setItem(presentationStateKey, JSON.stringify(stateToSave));
-    } catch (e) {
-      console.warn('Lỗi tự động lưu trạng thái đo đạc:', e);
+    if (!patientDiagnoseId) return;
+
+    const stateToSave = {
+      patientDiagnoseId: Number(patientDiagnoseId),
+      annotations,
+      windowCenter,
+      windowWidth,
+      colorLut,
+      invert,
+      updatedAt: new Date().toISOString(),
+    };
+
+    // 1. Instant local persistence
+    if (presentationStateKey) {
+      try {
+        localStorage.setItem(presentationStateKey, JSON.stringify(stateToSave));
+      } catch (e) {}
     }
-  }, [presentationStateKey, annotations, windowCenter, windowWidth, colorLut, invert]);
+
+    // 2. Debounced PACS Server persistence (save 800ms after user finishes measuring)
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    saveTimeoutRef.current = setTimeout(async () => {
+      try {
+        const token = localStorage.getItem('TOKEN');
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        await axios.post(`${apiEndpoint}/api/pacs/presentation-state`, stateToSave, { headers });
+      } catch (err) {
+        console.warn('Lưu trạng thái lên PACS Server thất bại:', err.message);
+      }
+    }, 800);
+
+    return () => {
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    };
+  }, [patientDiagnoseId, presentationStateKey, annotations, windowCenter, windowWidth, colorLut, invert, apiEndpoint]);
 
   // Canvas Refs
   const imageCanvasRef = useRef(null);
@@ -572,6 +637,17 @@ export default function PacsViewerPage() {
         totalSlices={captureAlert.totalSlices}
       />
 
+      {/* Prominent DICOM & Document Upload Notification Toast */}
+      <PacsUploadAlert
+        status={uploadState.status}
+        fileName={uploadState.fileName}
+        fileSize={uploadState.fileSize}
+        progress={uploadState.progress}
+        message={uploadState.message}
+        details={uploadState.details}
+        onClose={resetUploadState}
+      />
+
       {/* Top Navbar */}
       <PacsTopNav
         activeTool={activeTool}
@@ -585,6 +661,7 @@ export default function PacsViewerPage() {
         onApplyPreset={handleApplyPreset}
         currentMeta={currentMeta}
         onOpenMpr={() => setMprOpen(true)}
+        onUploadDicom={uploadDicom}
       />
 
       {/* Main Body */}
@@ -765,10 +842,12 @@ export default function PacsViewerPage() {
         onClose={() => setMprOpen(false)}
         instances={instances}
         dicomCache={dicomCache}
+        setDicomCache={setDicomCache}
+        apiEndpoint={apiEndpoint}
+        getAuthHeaders={getAuthHeaders}
         patientName={study?.patientName || 'Lê Văn Út'}
         modality={study?.modality || 'MR'}
       />
-      </div>
     </div>
   );
 }

@@ -16,6 +16,27 @@ export function usePacsStudy(patientDiagnoseId, apiEndpoint) {
   const [windowCenter, setWindowCenter] = useState(128);
   const [windowWidth, setWindowWidth] = useState(255);
 
+  // Upload state for user feedback (placed at top with all states to preserve hook order)
+  const [uploadState, setUploadState] = useState({
+    status: 'idle', // 'idle' | 'uploading' | 'success' | 'error'
+    fileName: '',
+    fileSize: 0,
+    progress: 0,
+    message: '',
+    details: '',
+  });
+
+  const resetUploadState = useCallback(() => {
+    setUploadState({
+      status: 'idle',
+      fileName: '',
+      fileSize: 0,
+      progress: 0,
+      message: '',
+      details: '',
+    });
+  }, []);
+
   const getAuthHeaders = useCallback(() => {
     const token = localStorage.getItem('TOKEN');
     return token ? { Authorization: `Bearer ${token}` } : {};
@@ -96,9 +117,17 @@ export function usePacsStudy(patientDiagnoseId, apiEndpoint) {
     const formData = new FormData();
     formData.append('files', file);
 
+    setUploadState({
+      status: 'uploading',
+      fileName: file.name,
+      fileSize: file.size,
+      progress: 20,
+      message: `Đang tải lên tệp: ${file.name}`,
+      details: 'Đang truyền dữ liệu và giải nén trên máy chủ PACS...',
+    });
+
     try {
-      message.loading({ content: 'Đang tải lên file DICOM...', key: 'dicom_upload' });
-      await axios.post(
+      const res = await axios.post(
         `${apiEndpoint}/api/pacs/upload?patientDiagnoseId=${patientDiagnoseId}`,
         formData,
         {
@@ -106,14 +135,48 @@ export function usePacsStudy(patientDiagnoseId, apiEndpoint) {
             'Content-Type': 'multipart/form-data',
             ...getAuthHeaders(),
           },
+          onUploadProgress: (progressEvent) => {
+            if (progressEvent.total) {
+              const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+              setUploadState((prev) => ({
+                ...prev,
+                progress: Math.min(percent, 90),
+                details:
+                  percent < 100
+                    ? `Đang truyền file (${percent}%)...`
+                    : 'Máy chủ đang phân tích chỉ mục không gian DICOM...',
+              }));
+            }
+          },
         }
       );
-      message.success({ content: 'Tải file DICOM thành công!', key: 'dicom_upload' });
+
+      const responseStudy = res.data?.data?.data || res.data?.data;
+      const count = responseStudy?.instances?.length || 0;
+      const attCount = responseStudy?.attachedFiles?.length || 0;
+
+      setUploadState({
+        status: 'success',
+        fileName: file.name,
+        fileSize: file.size,
+        progress: 100,
+        message: 'Tải lên thành công!',
+        details: `Đã nạp thành công ${count} lát cắt DICOM${
+          attCount > 0 ? ` và ${attCount} tệp đính kèm` : ''
+        } vào ca bệnh #${patientDiagnoseId}.`,
+      });
+
       await loadStudy();
     } catch (err) {
-      message.error({
-        content: 'Lỗi tải lên: ' + (err.response?.data?.message || err.message),
-        key: 'dicom_upload',
+      const errorMsg =
+        err.response?.data?.message || err.message || 'Lỗi kết nối máy chủ PACS';
+      setUploadState({
+        status: 'error',
+        fileName: file.name,
+        fileSize: file.size,
+        progress: 0,
+        message: 'Tải lên thất bại!',
+        details: Array.isArray(errorMsg) ? errorMsg.join(', ') : String(errorMsg),
       });
     }
     return false;
@@ -126,12 +189,15 @@ export function usePacsStudy(patientDiagnoseId, apiEndpoint) {
     currentIndex,
     setCurrentIndex,
     dicomCache,
+    setDicomCache,
     windowCenter,
     setWindowCenter,
     windowWidth,
     setWindowWidth,
     loadStudy,
     uploadDicom,
+    uploadState,
+    resetUploadState,
     getAuthHeaders,
   };
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Tooltip, Dropdown } from 'antd';
+import { Button, Tooltip, Dropdown, Upload } from 'antd';
 import {
   ZoomInOutlined,
   DragOutlined,
@@ -11,6 +11,7 @@ import {
   FullscreenOutlined,
   LineOutlined,
   SlidersOutlined,
+  UploadOutlined,
 } from '@ant-design/icons';
 import { WW_WL_PRESETS, PACS_TOOLS } from '../constants/pacs.constants';
 
@@ -26,6 +27,7 @@ export default function PacsTopNav({
   onApplyPreset,
   currentMeta,
   onOpenMpr,
+  onUploadDicom,
 }) {
   const handleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -216,6 +218,30 @@ export default function PacsTopNav({
 
       {/* Right Actions */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        {onUploadDicom && (
+          <Upload
+            showUploadList={false}
+            beforeUpload={onUploadDicom}
+            accept=".dcm,.dicom,.zip,.pdf,.docx,.doc,.mp4,.png,.jpg,.jpeg"
+          >
+            <Tooltip title="Tải lên DICOM (.dcm, .zip) hoặc tệp lâm sàng (PDF, Word, Video)">
+              <Button
+                size="small"
+                icon={<UploadOutlined />}
+                style={{
+                  backgroundColor: '#0369a1',
+                  borderColor: '#0284c7',
+                  color: '#ffffff',
+                  fontWeight: '600',
+                  fontSize: '12px',
+                }}
+              >
+                Tải lên DICOM / Tệp
+              </Button>
+            </Tooltip>
+          </Upload>
+        )}
+
         <Button
           type="primary"
           size="small"
