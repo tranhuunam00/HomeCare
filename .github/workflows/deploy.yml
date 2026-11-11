@@ -4,12 +4,17 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   deploy:
     name: Deploy to Server
     runs-on: ubuntu-latest
-    if: startsWith(github.event.head_commit.message, 'release v') || startsWith(github.event.head_commit.message, 'Release v')
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      contains(github.event.head_commit.message, 'release') ||
+      contains(github.event.head_commit.message, 'Release') ||
+      contains(github.event.head_commit.message, 'RELEASE')
     
     steps:
       - name: Checkout Code
