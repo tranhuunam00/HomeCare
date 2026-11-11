@@ -188,7 +188,10 @@ const PatientFormPage = () => {
             try {
               const formData = new FormData();
               dicomFileList.forEach((file) => formData.append("files", file));
-              const apiEndpoint = import.meta.env.VITE_API_ENDPOINT || "http://localhost:3001";
+              const apiEndpoint =
+                typeof window !== 'undefined' && window.location.hostname.includes('home-care.vn')
+                  ? 'https://api.home-care.vn'
+                  : import.meta.env.VITE_API_ENDPOINT || 'http://localhost:3001';
               const token = localStorage.getItem("TOKEN");
               await axios.post(`${apiEndpoint}/api/pacs/upload?patientDiagnoseId=${newPatientId}`, formData, {
                 headers: {
