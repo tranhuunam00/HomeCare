@@ -42,6 +42,7 @@ import {
 
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
+import DicomUploadModal from "../pacs/components/DicomUploadModal";
 const { RangePicker } = DatePicker;
 import styles from "./PatientDiagnoseList.module.scss";
 import ColumnSettingModal from "./setting/ColumnSettingModal";
@@ -263,6 +264,7 @@ const PatientTablePage = ({ PID = null }) => {
   const [openConsultationModal, setOpenConsultationModal] = useState(false);
 
   const [translateOpen, setTranslateOpen] = useState(false);
+  const [openDicomModal, setOpenDicomModal] = useState(false);
 
   const [visibleKeys, setVisibleKeys] = useState([]);
   const {
@@ -532,6 +534,17 @@ const PatientTablePage = ({ PID = null }) => {
           (user?.id_role === USER_ROLE.ADMIN ||
             record.createdBy === user?.id) && (
             <Space>
+              <Tooltip title="Mở ảnh DICOM (PACS)">
+                <Button
+                  icon={<EyeOutlined />}
+                  type="text"
+                  style={{ color: "#0284c7" }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.open(`/pacs/viewer?patientDiagnoseId=${record.id}`, "_blank");
+                  }}
+                />
+              </Tooltip>
               <Button
                 icon={<EditOutlined />} //  Nút cập nhật
                 type="text"
@@ -1176,6 +1189,43 @@ const PatientTablePage = ({ PID = null }) => {
             >
               Bản dịch: {numberLanguageDoctorUseFormV3}
             </Button>
+            <Button
+              style={{
+                borderRadius: "4px",
+                borderColor: "#0284c7",
+                color: "#0284c7",
+                fontSize: "11px",
+                height: "22px",
+                padding: "0 8px",
+                display: "flex",
+                alignItems: "center",
+                fontWeight: "500",
+              }}
+              onClick={() =>
+                window.open(
+                  `/pacs/viewer?patientDiagnoseId=${selectedPatientDiagnose?.id}`,
+                  "_blank"
+                )
+              }
+            >
+              Xem DICOM (PACS)
+            </Button>
+            <Button
+              style={{
+                borderRadius: "4px",
+                borderColor: "#64748b",
+                color: "#475569",
+                fontSize: "11px",
+                height: "22px",
+                padding: "0 8px",
+                display: "flex",
+                alignItems: "center",
+                fontWeight: "500",
+              }}
+              onClick={() => setOpenDicomModal(true)}
+            >
+              Tải DICOM
+            </Button>
             <CustomSteps
               steps={stepsStatus({
                 setOpenConsultationModal,
@@ -1296,6 +1346,12 @@ const PatientTablePage = ({ PID = null }) => {
         selectedDoctorUseFormVer3={selectedDoctorUseFormVer3}
         setLanguageTransslate={setLanguageTransslate}
         setSelectedDoctorUseFormVer3={setSelectedDoctorUseFormVer3}
+      />
+      <DicomUploadModal
+        open={openDicomModal}
+        onClose={() => setOpenDicomModal(false)}
+        patientDiagnoseId={selectedPatientDiagnose?.id}
+        patientName={selectedPatientDiagnose?.name}
       />
       <ConfirmActionModal {...confirmState} />
     </div>

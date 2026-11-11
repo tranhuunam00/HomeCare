@@ -48,6 +48,7 @@ import AASTLiverForm from "./pages/advance/AASTLiverForm/AASTLiverForm";
 import BosniakForm from "./pages/advance/BosniakForm/BosniakForm";
 import LIRADSForm from "./pages/advance/Lirad/LIRADSForm";
 import ORADSModalityOnly from "./pages/advance/oRADS/OradsForm";
+import PacsViewerPage from "./pages/pacs/PacsViewerPage";
 import FormVer2 from "./pages/formver2/Test";
 import DFormVer2 from "./pages/formver2/FormVer2";
 import FormVer2List from "./pages/formver2/list/FormVer2List";
@@ -168,6 +169,8 @@ function App() {
           path="/guild/subscription"
           element={<GuideMenuSubscriptionPage />}
         />
+
+        <Route path="/pacs/viewer" element={<PacsViewerPage />} />
 
         <Route
           path="/home"

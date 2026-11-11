@@ -17,11 +17,16 @@ export default function usePatientDiagnoseStatus() {
   const transitionStatus = async ({
     patientDiagnoseId,
     newStatus,
+    confirmMessage = null,
     successMessage = "Thao tác thành công",
     localSetState = null,
     onStatusChange = null,
     additionalPayload = {},
   }) => {
+    if (confirmMessage && typeof window !== "undefined" && !window.confirm(confirmMessage)) {
+      return false;
+    }
+
     // Đặt guard NGAY ĐẦU — shared giữa mọi instances của hook
     if (_inFlight) return false;
     _inFlight = true;

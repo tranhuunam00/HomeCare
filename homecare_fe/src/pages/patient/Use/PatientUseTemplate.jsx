@@ -37,6 +37,7 @@ import AddonInputSection from "./InputsAdon.jsx";
 import ImageWithCaptionInput from "../../products/ImageWithCaptionInput/ImageWithCaptionInput.jsx";
 import useConfirmAction from "../../../hooks/useConfirmAction";
 import ConfirmActionModal from "../../../components/ConfirmActionModal/ConfirmActionModal";
+import DicomUploadModal from "../../pacs/components/DicomUploadModal";
 
 const urlToFile = async (url, fallbackName = "image") => {
   const res = await fetch(url);
@@ -89,6 +90,18 @@ const calculateAge = (dob) => {
 const { Title } = Typography;
 const { Option } = Select;
 
+function dataURLtoFile(dataurl, filename) {
+  const arr = dataurl.split(',');
+  const mime = arr[0].match(/:(.*?);/)[1];
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new File([u8arr], filename, { type: mime });
+}
+
 const PatientUseTemplate = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
@@ -128,6 +141,7 @@ const PatientUseTemplate = () => {
   const [inputsAddon, setInputsAddon] = useState([]);
 
   const [isOpenPreview, setIsOpenPreview] = useState(false);
+  const [openDicomModal, setOpenDicomModal] = useState(false);
 
   const [htmlTranslate, setHtmlTranslate] = useState("");
   const [isTrans, setIsTrans] = useState("");
@@ -146,6 +160,52 @@ const PatientUseTemplate = () => {
   // useEffect(() => {
   //   setInputsAddonTrans(inputsAddon);
   // }, [inputsAddon]);
+
+  // Lắng nghe sự kiện "Chụp ảnh Key" từ tab PACS Viewer truyền sang
+  useEffect(() => {
+    const handleKeyImageMessage = (event) => {
+      const data = event.data;
+      if (
+        data &&
+        data.type === 'KEY_IMAGE_CAPTURED' &&
+        (!data.patientDiagnoseId || Number(data.patientDiagnoseId) === Number(id_patient_diagnose))
+      ) {
+        try {
+          const fileObj = dataURLtoFile(data.dataUrl, `key_image_${Date.now()}.png`);
+          const newImgItem = {
+            file: fileObj,
+            url: data.dataUrl,
+            rawUrl: data.dataUrl,
+            caption: data.caption || 'Ảnh key từ PACS Viewer',
+          };
+
+          setImageListForm((prev) => [...(prev || []), newImgItem]);
+          setImageListFormTrans((prev) => [...(prev || []), newImgItem]);
+          setImageList((prev) => [...(prev || []), newImgItem]);
+          setImageListTrans((prev) => [...(prev || []), newImgItem]);
+
+          message.success('Đã thêm ảnh key từ PACS vào Hình ảnh minh họa!');
+        } catch (e) {
+          console.error('Lỗi nhận ảnh key PACS:', e);
+        }
+      }
+    };
+
+    let channel;
+    try {
+      channel = new BroadcastChannel('homecare_pacs_channel');
+      channel.onmessage = handleKeyImageMessage;
+    } catch (e) {
+      console.warn('BroadcastChannel error', e);
+    }
+
+    window.addEventListener('message', handleKeyImageMessage);
+
+    return () => {
+      channel?.close();
+      window.removeEventListener('message', handleKeyImageMessage);
+    };
+  }, [id_patient_diagnose]);
 
   const handleTranslateInputs = async () => {
     setLoading(true);
@@ -805,6 +865,31 @@ const PatientUseTemplate = () => {
             </Title>
 
             <Title level={3}>Phiếu kết quả</Title>
+
+            <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
+              <Button
+                type="primary"
+                style={{ backgroundColor: '#0284c7', borderColor: '#0284c7' }}
+                onClick={() =>
+                  window.open(
+                    `/pacs/viewer?patientDiagnoseId=${patientDiagnose?.id || id_patient_diagnose}`,
+                    '_blank'
+                  )
+                }
+              >
+                Mở ảnh DICOM (PACS Viewer)
+              </Button>
+              <Button onClick={() => setOpenDicomModal(true)}>
+                Tải ảnh DICOM
+              </Button>
+            </div>
+
+            <DicomUploadModal
+              open={openDicomModal}
+              onClose={() => setOpenDicomModal(false)}
+              patientDiagnoseId={patientDiagnose?.id || id_patient_diagnose}
+              patientName={patientDiagnose?.name}
+            />
 
             <div style={{ marginBottom: 20 }}>
               <Select
