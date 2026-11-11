@@ -12,7 +12,9 @@ import {
   Card,
   Divider,
   ConfigProvider,
+  Upload,
 } from "antd";
+import { InboxOutlined } from "@ant-design/icons";
 import axios from "axios";
 import dayjs from "dayjs";
 import useVietnamAddress from "../../../hooks/useVietnamAddress";
@@ -42,6 +44,7 @@ const PatientFormPage = () => {
   const [initialValues, setInitialValues] = useState(null);
   const [idTemplateService, setIdTemplateService] = useState(null);
   const { confirmState, openConfirm } = useConfirmAction();
+  const [dicomFileList, setDicomFileList] = useState([]);
 
   const fetchClinics = async () => {
     try {
@@ -172,11 +175,28 @@ const PatientFormPage = () => {
           : "Tạo mới thất bại, vui lòng thử lại.",
         onConfirm: async () => {
           const payload = buildPayload(values);
+          let newPatientId = id;
           if (id) {
             await API_CALL.put(`/patient-diagnose/${id}`, payload);
           } else {
-            await API_CALL.post("/patient-diagnose", payload);
+            const res = await API_CALL.post("/patient-diagnose", payload);
+            newPatientId = res.data?.data?.id || res.data?.id;
           }
+
+          // Tải lên ảnh DICOM vào PACS nếu có chọn file
+          if (dicomFileList.length > 0 && newPatientId) {
+            try {
+              const formData = new FormData();
+              dicomFileList.forEach((file) => formData.append("files", file));
+              const apiEndpoint = import.meta.env.VITE_API_ENDPOINT || "http://localhost:3001";
+              await axios.post(`${apiEndpoint}/api/pacs/upload?patientDiagnoseId=${newPatientId}`, formData);
+              toast.success("Đã tải và lưu trữ ảnh DICOM vào hệ thống PACS!");
+            } catch (pacsErr) {
+              console.error("Lỗi tải DICOM vào PACS:", pacsErr);
+              toast.warn("Tạo ca thành công nhưng có lỗi khi tải file DICOM");
+            }
+          }
+
           navigate("/home/patients-diagnose");
         },
       });
@@ -603,6 +623,46 @@ const PatientFormPage = () => {
               </Select>
             </Form.Item>
           )}
+
+          {/* -------------------------------------------------------- */}
+          {/* HÌNH ẢNH DICOM (PACS)                                    */}
+          {/* -------------------------------------------------------- */}
+          <Divider orientation="left">
+            <span style={{ color: "#0284c7", fontWeight: "600", fontSize: "14px" }}>
+              HÌNH ẢNH CHẨN ĐOÁN DICOM (PACS)
+            </span>
+          </Divider>
+
+          <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
+            <Col span={24}>
+              <Form.Item label="Tải lên file DICOM (.dcm hoặc file nén .zip)">
+                <Upload.Dragger
+                  multiple
+                  fileList={dicomFileList}
+                  beforeUpload={(file) => {
+                    setDicomFileList((prev) => [...prev, file]);
+                    return false;
+                  }}
+                  onRemove={(file) => {
+                    setDicomFileList((prev) =>
+                      prev.filter((item) => item.uid !== file.uid)
+                    );
+                  }}
+                  accept=".dcm,.zip"
+                >
+                  <p className="ant-upload-drag-icon">
+                    <InboxOutlined style={{ color: "#0284c7", fontSize: "36px" }} />
+                  </p>
+                  <p className="ant-upload-text" style={{ fontWeight: "500" }}>
+                    Nhấp hoặc kéo thả file ảnh DICOM (.dcm) hoặc file nén (.zip) vào đây
+                  </p>
+                  <p className="ant-upload-hint" style={{ color: "#64748b", fontSize: "12px" }}>
+                    File DICOM tải lên sẽ được tự động lưu trữ vào hệ thống PACS và đồng bộ với ca bệnh ngay sau khi tạo mới.
+                  </p>
+                </Upload.Dragger>
+              </Form.Item>
+            </Col>
+          </Row>
 
           <Row justify="end" gutter={8}>
             <Col>
