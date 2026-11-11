@@ -185,6 +185,12 @@ export default function PacsViewerPage() {
     const currentData = dicomCache[currentIndex];
     if (!canvas || !currentData) return;
 
+    // 🎯 Crucial: Ensure annotation canvas pixel buffer strictly matches image canvas resolution
+    const targetW = currentData.meta?.columns || 512;
+    const targetH = currentData.meta?.rows || 512;
+    if (canvas.width !== targetW) canvas.width = targetW;
+    if (canvas.height !== targetH) canvas.height = targetH;
+
     renderAnnotationsToCanvas(
       canvas,
       annotations[currentIndex] || [],
@@ -193,18 +199,53 @@ export default function PacsViewerPage() {
     );
   }, [annotations, currentDrawing, currentIndex, dicomCache]);
 
-  // Convert Viewport Mouse Coordinates to DICOM Canvas Space
+  // Convert Viewport Mouse Coordinates to DICOM Canvas Space with full inverse transform
   const getCanvasCoordinates = (e) => {
     const canvas = imageCanvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
 
     const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
+    const W = canvas.width || 512;
+    const H = canvas.height || 512;
 
+    // Visual center of the transformed canvas on screen
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    // Mouse distance from the visual center on screen
+    const dx = e.clientX - centerX;
+    const dy = e.clientY - centerY;
+
+    // 1. Inverse Rotation
+    const rad = (-rotation * Math.PI) / 180;
+    const cosA = Math.cos(rad);
+    const sinA = Math.sin(rad);
+    let unrotX = dx * cosA - dy * sinA;
+    let unrotY = dx * sinA + dy * cosA;
+
+    // 2. Inverse Flip
+    if (flipH) unrotX = -unrotX;
+    if (flipV) unrotY = -unrotY;
+
+    // 3. Inverse Zoom and Screen Scale
+    // Unzoomed display size of canvas on screen
+    const displayW = rect.width / zoom;
+    const displayH = rect.height / zoom;
+
+    const isRotated90or270 = Math.abs(rotation % 180) === 90;
+    const effDisplayW = isRotated90or270 ? displayH : displayW;
+    const effDisplayH = isRotated90or270 ? displayW : displayH;
+
+    const scaleFactorX = W / (effDisplayW * zoom);
+    const scaleFactorY = H / (effDisplayH * zoom);
+
+    const canvasX = Math.round(W / 2 + unrotX * scaleFactorX);
+    const canvasY = Math.round(H / 2 + unrotY * scaleFactorY);
+
+    // Clamp to canvas boundaries
     return {
-      x: Math.round((e.clientX - rect.left) * scaleX),
-      y: Math.round((e.clientY - rect.top) * scaleY),
+      x: Math.max(0, Math.min(W, canvasX)),
+      y: Math.max(0, Math.min(H, canvasY)),
     };
   };
 
@@ -343,10 +384,15 @@ export default function PacsViewerPage() {
         activeTool === PACS_TOOLS.ROI_ELLIPSE ||
         activeTool === PACS_TOOLS.ROI_RECT)
     ) {
-      setAnnotations((prev) => ({
-        ...prev,
-        [currentIndex]: [...(prev[currentIndex] || []), currentDrawing],
-      }));
+      const [p1, p2] = currentDrawing.points;
+      const dx = (p1?.x || 0) - (p2?.x || 0);
+      const dy = (p1?.y || 0) - (p2?.y || 0);
+      if (Math.hypot(dx, dy) >= 3) {
+        setAnnotations((prev) => ({
+          ...prev,
+          [currentIndex]: [...(prev[currentIndex] || []), currentDrawing],
+        }));
+      }
       setCurrentDrawing(null);
     }
   };
@@ -379,7 +425,26 @@ export default function PacsViewerPage() {
   };
 
   const handleClearAnnotations = () => {
-    setAnnotations((prev) => ({ ...prev, [currentIndex]: [] }));
+    setAnnotations((prev) => {
+      const next = { ...prev, [currentIndex]: [] };
+      if (presentationStateKey) {
+        try {
+          const saved = JSON.parse(localStorage.getItem(presentationStateKey) || '{}');
+          saved.annotations = next;
+          localStorage.setItem(presentationStateKey, JSON.stringify(saved));
+        } catch (e) {}
+      }
+      return next;
+    });
+    message.success('Đã xóa tất cả đo đạc trên lát cắt này');
+  };
+
+  const handleClearAllAnnotations = () => {
+    setAnnotations({});
+    if (presentationStateKey) {
+      localStorage.removeItem(presentationStateKey);
+    }
+    message.success('Đã xóa toàn bộ số đo của ca khám');
   };
 
   // Apply Window/Level Preset

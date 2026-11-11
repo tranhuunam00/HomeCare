@@ -135,13 +135,20 @@ export function drawRoiRectAnnotation(ctx, ann) {
 
 /**
  * Clears and redraws all annotations on a target canvas.
+ * Ensures the annotation canvas pixel buffer strictly matches the underlying DICOM image dimensions.
  */
 export function renderAnnotationsToCanvas(canvas, annotations = [], currentDrawing = null, dimensions = {}) {
   if (!canvas) return;
-  const { width, height } = dimensions;
-  if (width && height) {
-    canvas.width = width;
-    canvas.height = height;
+
+  // Support both DICOM tags (columns, rows) and standard dimensions (width, height)
+  const targetWidth = dimensions.columns || dimensions.width || 512;
+  const targetHeight = dimensions.rows || dimensions.height || 512;
+
+  if (canvas.width !== targetWidth) {
+    canvas.width = targetWidth;
+  }
+  if (canvas.height !== targetHeight) {
+    canvas.height = targetHeight;
   }
 
   const ctx = canvas.getContext('2d');
