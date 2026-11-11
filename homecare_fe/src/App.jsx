@@ -122,8 +122,8 @@ function App() {
       doctor &&
       user?.id_role != USER_ROLE.ADMIN &&
       (isProfileIncomplete(doctor) ||
-        !printTemplateGlobal?.length ||
-        !getUsablePackageCodes(userPackages).length)
+        !printTemplateGlobal?.length)
+        // !getUsablePackageCodes(userPackages).length) // Tạm thời bỏ check gói
     ) {
       console.log("hehehe");
       setWizardOpen(true);

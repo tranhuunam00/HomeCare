@@ -353,7 +353,7 @@ Hãy đưa ra:
 
               <div className={styles.formGroup}>
                 <p>
-                  Tiến triển nhanh (tăng kích thước > 50% trong 6 tháng)
+                  Tiến triển nhanh (tăng kích thước &gt; 50% trong 6 tháng)
                   <span className={styles.required}>*</span>
                 </p>
                 <Select

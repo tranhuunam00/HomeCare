@@ -112,7 +112,7 @@ export default function CysticLesionSection({
                 </Col>
                 <Col span={24}>
                   <Radio value={false}>
-                    Không (nang có đường kính > 3 cm và/hoặc bệnh nhân đã mãn kinh)
+                    Không (nang có đường kính &gt; 3 cm và/hoặc bệnh nhân đã mãn kinh)
                   </Radio>
                 </Col>
               </Row>

@@ -754,12 +754,13 @@ const OnboardingWizard = ({ open, onClose, doctorId, is_use_onboard }) => {
         }
       }
 
-      if (current === 4 && usableCount === 0) {
-        toast.warning(
-          "Vui lòng đăng ký và được duyệt ít nhất 1 gói hoạt động.",
-        );
-        return;
-      }
+      // Tạm thời bỏ logic check gói
+      // if (current === 4 && usableCount === 0) {
+      //   toast.warning(
+      //     "Vui lòng đăng ký và được duyệt ít nhất 1 gói hoạt động.",
+      //   );
+      //   return;
+      // }
 
       if (current !== 2 || current !== 3) {
         const formData = new FormData();
@@ -871,7 +872,7 @@ const OnboardingWizard = ({ open, onClose, doctorId, is_use_onboard }) => {
               <Button
                 type="primary"
                 onClick={next}
-                disabled={current === 4 && usableCount === 0}
+                // disabled={current === 4 && usableCount === 0} // Tạm thời bỏ check gói
                 loading={loadingTemplate}
                 style={{ borderRadius: 6 }}
               >
