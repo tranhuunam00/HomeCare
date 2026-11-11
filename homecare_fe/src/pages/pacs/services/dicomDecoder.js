@@ -134,6 +134,7 @@ export function renderDicomToCanvas(canvas, rawPixels, meta, options = {}) {
   const windowCenter = options.windowCenter !== undefined ? options.windowCenter : meta.windowCenter;
   const windowWidth = options.windowWidth !== undefined ? options.windowWidth : meta.windowWidth;
   const invert = options.invert !== undefined ? options.invert : false;
+  const colorLut = options.colorLut || 'default'; // 'default', 'inverted', 'rainbow', 'hot_iron'
 
   canvas.width = columns;
   canvas.height = rows;
@@ -173,15 +174,43 @@ export function renderDicomToCanvas(canvas, rawPixels, meta, options = {}) {
       intensity = 255 - intensity;
     }
 
-    if (invert) {
+    if (invert || colorLut === 'inverted') {
       intensity = 255 - intensity;
     }
 
+    let r = intensity;
+    let g = intensity;
+    let b = intensity;
+
+    if (colorLut === 'rainbow') {
+      if (intensity < 64) {
+        r = 0;
+        g = Math.round(intensity * 4);
+        b = 255;
+      } else if (intensity < 128) {
+        r = 0;
+        g = 255;
+        b = Math.round(255 - (intensity - 64) * 4);
+      } else if (intensity < 192) {
+        r = Math.round((intensity - 128) * 4);
+        g = 255;
+        b = 0;
+      } else {
+        r = 255;
+        g = Math.round(255 - (intensity - 192) * 4);
+        b = 0;
+      }
+    } else if (colorLut === 'hot_iron') {
+      r = Math.min(255, Math.round(intensity * 1.5));
+      g = Math.min(255, Math.max(0, Math.round((intensity - 85) * 2)));
+      b = Math.min(255, Math.max(0, Math.round((intensity - 170) * 3)));
+    }
+
     const idx = i * 4;
-    data[idx] = intensity;     // R
-    data[idx + 1] = intensity; // G
-    data[idx + 2] = intensity; // B
-    data[idx + 3] = 255;       // Alpha
+    data[idx] = r;         // R
+    data[idx + 1] = g;     // G
+    data[idx + 2] = b;     // B
+    data[idx + 3] = 255;   // Alpha
   }
 
   ctx.putImageData(imageData, 0, 0);

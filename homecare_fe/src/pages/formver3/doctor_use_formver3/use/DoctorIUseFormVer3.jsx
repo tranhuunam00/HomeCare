@@ -13,7 +13,7 @@ import {
   Divider,
   Switch,
 } from "antd";
-import { QuestionCircleOutlined, ReloadOutlined } from "@ant-design/icons";
+import { QuestionCircleOutlined, ReloadOutlined, EyeOutlined } from "@ant-design/icons";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import styles from "./DoctorIUseFormVer3.module.scss";
@@ -66,6 +66,18 @@ import CustomSunEditor from "../../../../components/Suneditor/CustomSunEditor";
 const { Title } = Typography;
 const { TextArea } = Input;
 const { Option } = Select;
+
+function dataURLtoFile(dataurl, filename) {
+  const arr = dataurl.split(",");
+  const mime = arr[0].match(/:(.*?);/)?.[1] || "image/png";
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new File([u8arr], filename, { type: mime });
+}
 
 export default function DoctorUseDFormVer3({
   onFormChange,
@@ -140,6 +152,86 @@ export default function DoctorUseDFormVer3({
       setIdEdit(record.id);
     }
   }, [record?.id, idEdit]);
+
+  // Lắng nghe BroadcastChannel & postMessage & localStorage từ PACS Viewer khi bấm "Chụp ảnh key"
+  useEffect(() => {
+    const handleKeyImageMessage = (data) => {
+      if (!data || data.type !== "KEY_IMAGE_CAPTURED") return;
+
+      const incomingId = data.patient_diagnose_id || data.patientDiagnoseId;
+      const currentId = patientDiagnose?.id || selectedPatientDiagnose?.id || doctorUseFormVer3Id;
+      if (incomingId && currentId && String(incomingId) !== String(currentId)) {
+        return;
+      }
+
+      if (data.dataUrl) {
+        try {
+          const fileName = `pacs_key_${Date.now()}.png`;
+          const fileObj = dataURLtoFile(data.dataUrl, fileName);
+
+          setImageList((prev) => {
+            const currentList = Array.isArray(prev) ? [...prev] : [];
+            const emptyIdx = currentList.findIndex(
+              (item) => !item.url && !item.rawUrl && !item.file
+            );
+
+            const newItem = {
+              file: fileObj,
+              url: data.dataUrl,
+              rawUrl: data.dataUrl,
+              caption: data.caption || "Ảnh chụp PACS Viewer",
+            };
+
+            if (emptyIdx !== -1) {
+              currentList[emptyIdx] = newItem;
+              return [...currentList];
+            } else {
+              return [...currentList, newItem];
+            }
+          });
+
+          // Bật chế độ edit để bác sĩ lưu được ảnh vừa chụp
+          setIsEdit(true);
+          toast.success("Đã đồng bộ ảnh chụp từ PACS Viewer vào Hình ảnh minh họa!");
+        } catch (err) {
+          console.error("Lỗi khi đồng bộ ảnh key từ PACS:", err);
+        }
+      }
+    };
+
+    let bc;
+    try {
+      bc = new BroadcastChannel("homecare_pacs_channel");
+      bc.onmessage = (event) => {
+        handleKeyImageMessage(event.data);
+      };
+    } catch (e) {
+      console.warn("BroadcastChannel not supported", e);
+    }
+
+    const onWindowMessage = (event) => {
+      handleKeyImageMessage(event.data);
+    };
+    window.addEventListener("message", onWindowMessage);
+
+    const onStorageChange = (e) => {
+      if (e.key === "homecare_pacs_latest_key_image" && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue);
+          handleKeyImageMessage(parsed);
+        } catch (err) {
+          // ignore
+        }
+      }
+    };
+    window.addEventListener("storage", onStorageChange);
+
+    return () => {
+      if (bc) bc.close();
+      window.removeEventListener("message", onWindowMessage);
+      window.removeEventListener("storage", onStorageChange);
+    };
+  }, [patientDiagnose?.id, selectedPatientDiagnose?.id, doctorUseFormVer3Id]);
 
   // Sync trạng thái từ global context về local state để tránh stale status gây lỗi chuyển trạng thái
   useEffect(() => {
@@ -991,13 +1083,36 @@ export default function DoctorUseDFormVer3({
             diagnosisSummary={diagnosisSummary}
           />
 
-          <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
-            {translateLabel(
-              languageTranslate,
-              "illustrativeImages",
-              false,
-            ).toUpperCase()}
-          </Title>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              margin: "24px 0 16px",
+            }}
+          >
+            <Title level={4} style={{ color: "#2f6db8", margin: 0 }}>
+              {translateLabel(
+                languageTranslate,
+                "illustrativeImages",
+                false,
+              ).toUpperCase()}
+            </Title>
+            <Button
+              type="primary"
+              ghost
+              icon={<EyeOutlined />}
+              onClick={() => {
+                const targetId = patientDiagnose?.id || selectedPatientDiagnose?.id;
+                window.open(
+                  `/pacs/viewer?patientDiagnoseId=${targetId || ""}`,
+                  "_blank"
+                );
+              }}
+            >
+              Mở PACS Viewer (DICOM)
+            </Button>
+          </div>
 
           <Form.Item label="">
             <ImageWithCaptionInput
