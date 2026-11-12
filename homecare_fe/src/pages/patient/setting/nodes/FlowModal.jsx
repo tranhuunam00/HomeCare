@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Modal, Button, Space, Select, Divider, Input, Row, Col, Card, Tabs } from "antd";
+import { Modal, Button, Space, Select, Divider, Input, Tabs, Grid, Tag } from "antd";
+import { ReloadOutlined, CloseOutlined } from "@ant-design/icons";
 import { nanoid } from "nanoid";
 import {
   ReactFlow,
@@ -25,14 +26,177 @@ import { USER_ROLE } from "../../../../constant/app";
 import { toast } from "react-toastify";
 import DradsStateDiagram from "./DradsStateDiagram";
 import API_CALL from "../../../../services/axiosClient";
-import Title from "antd/es/skeleton/Title";
 import TextArea from "antd/es/input/TextArea";
+
+const { useBreakpoint } = Grid;
 
 const DEFAULT_NODE_STYLE = {
   background: "#ffffff",
   border: "#0b6b4f",
   text: "#000000",
 };
+
+const DEFAULT_DRADS_NODES = [
+  {
+    id: "step-his",
+    type: "custom",
+    position: { x: 40, y: 40 },
+    data: {
+      label: "Đồng bộ từ HIS",
+      style: { background: "#eff6ff", border: "#2563eb", text: "#1e3a8a" },
+      action: {
+        type: "notify",
+        payload: {
+          message: "Chỉ định chụp được đồng bộ tự động từ HIS/PACS vào danh sách hàng chờ Worklist.",
+        },
+      },
+    },
+  },
+  {
+    id: "step-manual",
+    type: "custom",
+    position: { x: 40, y: 150 },
+    data: {
+      label: "Nhập thủ công",
+      style: { background: "#eff6ff", border: "#2563eb", text: "#1e3a8a" },
+      action: { type: "navigate", payload: { mode: "preset", path: "/home/patients-diagnose/new", url: "" } },
+    },
+  },
+  {
+    id: "step-profile",
+    type: "custom",
+    position: { x: 280, y: 270 },
+    data: {
+      label: "Cập nhật thông tin, chữ ký",
+      style: { background: "#fefce8", border: "#ca8a04", text: "#713f12" },
+      action: { type: "navigate", payload: { mode: "preset", path: "/home/account", url: "" } },
+    },
+  },
+  {
+    id: "step-print-header",
+    type: "custom",
+    position: { x: 280, y: 370 },
+    data: {
+      label: "Cấu hình mẫu header in",
+      style: { background: "#fefce8", border: "#ca8a04", text: "#713f12" },
+      action: { type: "navigate", payload: { mode: "preset", path: "/home/templates-print", url: "" } },
+    },
+  },
+  {
+    id: "step-worklist",
+    type: "custom",
+    position: { x: 280, y: 95 },
+    data: {
+      label: "Danh sách worklist",
+      style: { background: "#ecfdf5", border: "#0b6b4f", text: "#064e3b" },
+      action: { type: "navigate", payload: { mode: "preset", path: "/home/patients-diagnose", url: "" } },
+    },
+  },
+  {
+    id: "step-claim",
+    type: "custom",
+    position: { x: 530, y: 95 },
+    data: {
+      label: "Nhận đọc ca",
+      style: { background: "#fff7ed", border: "#ea580c", text: "#7c2d12" },
+      action: {
+        type: "notify",
+        payload: {
+          message: "Bác sĩ chọn ca từ Worklist và nhận đọc ca để bắt đầu chẩn đoán.",
+        },
+      },
+    },
+  },
+  {
+    id: "step-read",
+    type: "custom",
+    position: { x: 760, y: 95 },
+    data: {
+      label: "Đọc và Lưu Nháp",
+      style: { background: "#fff7ed", border: "#ea580c", text: "#7c2d12" },
+      action: {
+        type: "notify",
+        payload: {
+          message: "Soạn thảo kết quả theo mẫu D-RADS, hệ thống tự động lưu nháp liên tục.",
+        },
+      },
+    },
+  },
+  {
+    id: "step-consult",
+    type: "custom",
+    position: { x: 760, y: 230 },
+    data: {
+      label: "Hội chẩn chuyên khoa",
+      style: { background: "#faf5ff", border: "#9333ea", text: "#581c87" },
+      action: {
+        type: "notify",
+        payload: {
+          message: "Với ca khó, bác sĩ có thể mời bác sĩ hội chẩn (BS2) cùng xem xét trước khi kết luận.",
+        },
+      },
+    },
+  },
+  {
+    id: "step-approve",
+    type: "custom",
+    position: { x: 1000, y: 95 },
+    data: {
+      label: "Phê duyệt",
+      style: { background: "#eef2ff", border: "#4f46e5", text: "#312e81" },
+      action: {
+        type: "notify",
+        payload: {
+          message: "Bác sĩ duyệt / Trưởng khoa rà soát nội dung và ký số phê duyệt kết quả.",
+        },
+      },
+    },
+  },
+  {
+    id: "step-print-send",
+    type: "custom",
+    position: { x: 1230, y: 40 },
+    data: {
+      label: "IN và gửi đến bệnh nhân",
+      style: { background: "#ecfdf5", border: "#10b981", text: "#064e3b" },
+      action: {
+        type: "notify",
+        payload: {
+          message: "In phiếu kết quả chuẩn mẫu bệnh viện hoặc gửi PDF trực tiếp đến bệnh nhân.",
+        },
+      },
+    },
+  },
+  {
+    id: "step-sync-his",
+    type: "custom",
+    position: { x: 1230, y: 150 },
+    data: {
+      label: "Đồng bộ lại HIS",
+      style: { background: "#ecfdf5", border: "#10b981", text: "#064e3b" },
+      action: {
+        type: "notify",
+        payload: {
+          message: "Kết quả và trạng thái hoàn tất được đồng bộ ngược về hệ thống HIS.",
+        },
+      },
+    },
+  },
+];
+
+const DEFAULT_DRADS_EDGES = [
+  { id: "e-his-wl", source: "step-his", target: "step-worklist", animated: true },
+  { id: "e-man-wl", source: "step-manual", target: "step-worklist", animated: true },
+  { id: "e-wl-claim", source: "step-worklist", target: "step-claim", animated: true },
+  { id: "e-prof-claim", source: "step-profile", target: "step-claim", animated: true },
+  { id: "e-hdr-claim", source: "step-print-header", target: "step-claim", animated: true },
+  { id: "e-claim-read", source: "step-claim", target: "step-read", animated: true },
+  { id: "e-read-consult", source: "step-read", target: "step-consult", animated: true },
+  { id: "e-consult-read", source: "step-consult", target: "step-read", animated: true },
+  { id: "e-read-approve", source: "step-read", target: "step-approve", animated: true },
+  { id: "e-app-print", source: "step-approve", target: "step-print-send", animated: true },
+  { id: "e-app-his", source: "step-approve", target: "step-sync-his", animated: true },
+];
 
 /* ================= SMALL UI ================= */
 const ColorPreview = ({ color, onClick }) => (
@@ -52,11 +216,14 @@ const ColorPreview = ({ color, onClick }) => (
 const FlowModal = ({ open, onClose }) => {
   const navigate = useNavigate();
   const { user } = useGlobalAuth();
+  const screens = useBreakpoint();
+  const isMobile = !screens.md;
+  const canEdit = user?.id_role === USER_ROLE.ADMIN;
 
   /* ================= STATE ================= */
-  const [mode, setMode] = useState("edit"); // edit | run
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [mode, setMode] = useState(canEdit ? "edit" : "run"); // edit | run
+  const [nodes, setNodes, onNodesChange] = useNodesState(DEFAULT_DRADS_NODES);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(DEFAULT_DRADS_EDGES);
   const [selectedNodeType, setSelectedNodeType] = useState("custom");
   const [selectedNodeId, setSelectedNodeId] = useState(null);
   const [flowName, setFlowName] = useState("FLOW-DRADS");
@@ -64,8 +231,6 @@ const FlowModal = ({ open, onClose }) => {
   const [openColor, setOpenColor] = useState(null); // background | border | null
   const [selectedEdgeId, setSelectedEdgeId] = useState(null);
   const [explanation, setExplanation] = useState(null);
-
-  const canEdit = user?.id_role === USER_ROLE.ADMIN;
 
   const selectedNode = useMemo(() => {
     const node = nodes.find((n) => n.id === selectedNodeId);
@@ -231,25 +396,34 @@ const FlowModal = ({ open, onClose }) => {
   /* ================= LOAD FLOW ================= */
   useEffect(() => {
     if (!open) return;
+    if (!canEdit) {
+      setMode("run");
+    }
 
     const fetchFlow = async () => {
       try {
-        const res = await API_CALL.get(`/flows/byName/${flowName}`);
-        const flow = res.data.data;
-        if (!flow) return;
-
-        setFlowId(flow.id);
-        setFlowName(flow.name);
-        setNodes(flow.nodes || []);
-        setEdges(flow.edges || []);
+        const res = await API_CALL.get(`/flows/byName/${flowName}`, {
+          silent: true,
+        });
+        const flow = res.data?.data;
+        if (flow && Array.isArray(flow.nodes) && flow.nodes.length > 0) {
+          setFlowId(flow.id);
+          setFlowName(flow.name || "FLOW-DRADS");
+          setNodes(flow.nodes);
+          setEdges(flow.edges || []);
+        } else {
+          setFlowId(flow?.id || null);
+          setNodes(DEFAULT_DRADS_NODES);
+          setEdges(DEFAULT_DRADS_EDGES);
+        }
       } catch {
-        setNodes([]);
-        setEdges([]);
+        setNodes(DEFAULT_DRADS_NODES);
+        setEdges(DEFAULT_DRADS_EDGES);
       }
     };
 
     fetchFlow();
-  }, [open]);
+  }, [open, canEdit]);
 
   return (
     <Modal
@@ -270,103 +444,128 @@ const FlowModal = ({ open, onClose }) => {
             children: (
               <>
                 {/* ===== TOOLBAR ===== */}
-                <Space wrap style={{ marginBottom: 12 }}>
+                <Space wrap size="small" style={{ marginBottom: 10, width: "100%" }}>
+                  {canEdit && (
+                    <Button
+                      size="small"
+                      type={mode === "edit" ? "primary" : "default"}
+                      onClick={() => setMode("edit")}
+                    >
+                      Chỉnh sửa
+                    </Button>
+                  )}
                   <Button
-                    type={mode === "edit" && canEdit ? "primary" : "default"}
-                    onClick={() => setMode("edit")}
-                    disabled={!canEdit}
-                  >
-                    Edit
-                  </Button>
-                  <Button
+                    size="small"
                     type={mode === "run" ? "primary" : "default"}
                     onClick={() => setMode("run")}
                   >
-                    Run
+                    Xem &amp; Chạy
                   </Button>
 
-                  <Divider type="vertical" />
+                  {mode === "run" && (
+                    <Tag color="green" style={{ margin: 0 }}>
+                      Bấm vào từng bước hoặc đường nối để xem hướng dẫn &amp; mở nhanh
+                    </Tag>
+                  )}
 
-                  <Select
-                    style={{ width: 200 }}
-                    value={selectedNodeType}
-                    onChange={setSelectedNodeType}
-                    options={NODE_OPTIONS}
-                    disabled={!canEdit || mode !== "edit"}
-                  />
+                  {canEdit && mode === "edit" && (
+                    <>
+                      <Divider type="vertical" />
 
-                  <Button
-                    type="primary"
-                    onClick={addNode}
-                    disabled={!canEdit || mode !== "edit"}
-                  >
-                    Add Node
-                  </Button>
+                      <Select
+                        size="small"
+                        style={{ width: isMobile ? 140 : 170 }}
+                        value={selectedNodeType}
+                        onChange={setSelectedNodeType}
+                        options={NODE_OPTIONS}
+                      />
 
-                  <Button
-                    danger
-                    disabled={!selectedNodeId || !canEdit || mode !== "edit"}
-                    onClick={() => {
-                      setNodes((nds) => nds.filter((n) => n.id !== selectedNodeId));
-                      setEdges((eds) =>
-                        eds.filter(
-                          (e) =>
-                            e.source !== selectedNodeId && e.target !== selectedNodeId,
-                        ),
-                      );
-                      setSelectedNodeId(null);
-                    }}
-                  >
-                    Delete Node
-                  </Button>
+                      <Button size="small" type="primary" onClick={addNode}>
+                        + Node
+                      </Button>
 
-                  <Button
-                    danger
-                    disabled={!selectedEdgeId || !canEdit || mode !== "edit"}
-                    onClick={() => {
-                      setEdges((eds) => eds.filter((e) => e.id !== selectedEdgeId));
-                      setSelectedEdgeId(null);
-                    }}
-                  >
-                    Delete Edge
-                  </Button>
+                      <Button
+                        size="small"
+                        danger
+                        disabled={!selectedNodeId}
+                        onClick={() => {
+                          setNodes((nds) => nds.filter((n) => n.id !== selectedNodeId));
+                          setEdges((eds) =>
+                            eds.filter(
+                              (e) =>
+                                e.source !== selectedNodeId && e.target !== selectedNodeId,
+                            ),
+                          );
+                          setSelectedNodeId(null);
+                        }}
+                      >
+                        Xóa Node
+                      </Button>
 
-                  <Input
-                    style={{ width: 220 }}
-                    value={flowName}
-                    onChange={(e) => setFlowName(e.target.value)}
-                    disabled={!canEdit}
-                  />
+                      <Button
+                        size="small"
+                        danger
+                        disabled={!selectedEdgeId}
+                        onClick={() => {
+                          setEdges((eds) => eds.filter((e) => e.id !== selectedEdgeId));
+                          setSelectedEdgeId(null);
+                        }}
+                      >
+                        Xóa Edge
+                      </Button>
 
-                  <Button
-                    type="primary"
-                    disabled={!canEdit || mode !== "edit"}
-                    onClick={async () => {
-                      const payload = {
-                        name: flowName,
-                        description: "Workflow D-RADS",
-                        nodes,
-                        edges,
-                        status: "draft",
-                      };
+                      <Button
+                        size="small"
+                        icon={<ReloadOutlined />}
+                        onClick={() => {
+                          setNodes(DEFAULT_DRADS_NODES);
+                          setEdges(DEFAULT_DRADS_EDGES);
+                          setSelectedNodeId(null);
+                          setSelectedEdgeId(null);
+                          toast.info("Đã nạp lại mẫu quy trình chuẩn D-RADS");
+                        }}
+                      >
+                        Mẫu chuẩn
+                      </Button>
 
-                      try {
-                        if (flowId) {
-                          await API_CALL.put(`/flows/${flowId}`, payload);
-                          toast.success("Cập nhật workflow thành công");
-                        } else {
-                          const res = await API_CALL.post("/flows", payload);
-                          setFlowId(res.data.data.id);
-                          toast.success("Tạo workflow thành công");
-                        }
-                        onClose?.();
-                      } catch {
-                        toast.error("Lưu workflow thất bại");
-                      }
-                    }}
-                  >
-                    {flowId ? "Cập nhật" : "Lưu"}
-                  </Button>
+                      <Input
+                        size="small"
+                        style={{ width: isMobile ? 130 : 170 }}
+                        value={flowName}
+                        onChange={(e) => setFlowName(e.target.value)}
+                      />
+
+                      <Button
+                        size="small"
+                        type="primary"
+                        onClick={async () => {
+                          const payload = {
+                            name: flowName,
+                            description: "Workflow D-RADS",
+                            nodes,
+                            edges,
+                            status: "draft",
+                          };
+
+                          try {
+                            if (flowId) {
+                              await API_CALL.put(`/flows/${flowId}`, payload);
+                              toast.success("Cập nhật workflow thành công");
+                            } else {
+                              const res = await API_CALL.post("/flows", payload);
+                              setFlowId(res.data.data.id);
+                              toast.success("Tạo workflow thành công");
+                            }
+                            onClose?.();
+                          } catch {
+                            toast.error("Lưu workflow thất bại");
+                          }
+                        }}
+                      >
+                        {flowId ? "Cập nhật" : "Lưu"}
+                      </Button>
+                    </>
+                  )}
                 </Space>
 
                 {/* ===== CONFIG PANEL ===== */}
@@ -374,17 +573,35 @@ const FlowModal = ({ open, onClose }) => {
                   <div
                     style={{
                       position: "fixed",
-                      right: 24,
-                      top: 110,
+                      right: isMobile ? 12 : 24,
+                      top: isMobile ? "auto" : 110,
+                      bottom: isMobile ? 12 : "auto",
                       zIndex: 20,
-                      width: 360,
+                      width: isMobile ? "calc(100vw - 24px)" : 340,
+                      maxHeight: isMobile ? "52vh" : "75vh",
+                      overflowY: "auto",
                       background: "#fff",
                       borderRadius: 12,
-                      boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+                      boxShadow: "0 8px 24px rgba(0,0,0,0.16)",
+                      border: "1px solid #e2e8f0",
                     }}
                   >
-                    <div style={{ padding: 14, borderBottom: "1px solid #f0f0f0" }}>
-                      <b>Node Configuration</b>
+                    <div
+                      style={{
+                        padding: "10px 14px",
+                        borderBottom: "1px solid #f0f0f0",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <b>Cấu hình bước</b>
+                      <Button
+                        size="small"
+                        type="text"
+                        icon={<CloseOutlined />}
+                        onClick={() => setSelectedNodeId(null)}
+                      />
                     </div>
 
                     <div style={{ padding: 14 }}>
@@ -557,7 +774,7 @@ const FlowModal = ({ open, onClose }) => {
                 )}
 
                 {/* ===== CANVAS ===== */}
-                <div style={{ height: "62vh" }}>
+                <div style={{ height: isMobile ? "58vh" : "66vh" }}>
                   <ReactFlow
                     nodes={nodes}
                     edges={edges}
@@ -574,8 +791,9 @@ const FlowModal = ({ open, onClose }) => {
                     nodesDraggable={mode === "edit" && canEdit}
                     nodesConnectable={mode === "edit" && canEdit}
                     fitView
+                    fitViewOptions={{ padding: 0.2 }}
                   >
-                    <MiniMap />
+                    {!isMobile && <MiniMap />}
                     <Controls />
                     <Background />
                   </ReactFlow>

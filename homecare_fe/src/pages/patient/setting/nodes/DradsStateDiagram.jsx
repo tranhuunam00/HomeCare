@@ -129,13 +129,15 @@ const DradsStateDiagram = () => {
           border: 1px solid var(--border-color);
           overflow: hidden;
           font-family: 'Outfit', sans-serif;
-          margin-top: 0; // Đã loại bỏ margin-top thừa
+          margin-top: 0;
         }
 
         .drads-state-diagram .diagram-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
+          flex-wrap: wrap;
+          gap: 8px;
           padding: 12px 20px;
           border-bottom: 1px solid var(--border-color);
           background: rgba(11, 11, 20, 0.4);
@@ -144,7 +146,29 @@ const DradsStateDiagram = () => {
         .drads-state-diagram .main-grid {
           display: grid;
           grid-template-columns: 1fr 360px;
-          height: 450px; // Thu nhỏ từ 600px xuống 450px
+          height: 450px;
+        }
+
+        @media (max-width: 768px) {
+          .drads-state-diagram .diagram-header {
+            padding: 10px 12px;
+          }
+
+          .drads-state-diagram .main-grid {
+            grid-template-columns: 1fr;
+            height: auto;
+          }
+
+          .drads-state-diagram .canvas-container {
+            height: 300px;
+          }
+
+          .drads-state-diagram .detail-panel {
+            border-left: none;
+            border-top: 1px solid var(--border-color);
+            padding: 14px;
+            max-height: 280px;
+          }
         }
 
         .drads-state-diagram .canvas-container {
