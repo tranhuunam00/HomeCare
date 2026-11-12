@@ -43,8 +43,6 @@ const ResizableTitle = (props) => {
         style={{
           ...restProps.style,
           width,
-          minWidth: width,
-          maxWidth: width,
         }}
       />
     </Resizable>

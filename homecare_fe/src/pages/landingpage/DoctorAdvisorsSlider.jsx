@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Slider from "react-slick";
 import { Avatar } from "antd";
+import { UserOutlined } from "@ant-design/icons";
 import styles from "./DoctorAdvisorsSlider.module.scss";
 
 const DoctorAdvisorsSlider = ({ doctors = [] }) => {
@@ -58,7 +59,8 @@ const DoctorAdvisorsSlider = ({ doctors = [] }) => {
               <div className={styles["avatar-wrapper"]}>
                 <Avatar
                   className={styles["avatar-wrapper-avatar"]}
-                  src={doc.avatar_url || "/default_doctor.png"}
+                  src={doc.avatar_url || undefined}
+                  icon={<UserOutlined />}
                   style={{
                     margin: "0 auto",
                     cursor: "pointer",
