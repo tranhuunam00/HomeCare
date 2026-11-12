@@ -8,7 +8,7 @@ import {
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 
-import { Button } from "antd";
+import { Button, Grid } from "antd";
 import CustomSteps from "../../components/CustomSteps/CustomSteps";
 import {
   PATIENT_DIAGNOSE_COLOR,
@@ -40,22 +40,28 @@ const FormVer3GroupProcessPatientDiagnoise = ({
   const { doctor, setPreviewOpen } = useGlobalAuth();
   const { transitionStatus } = usePatientDiagnoseStatus();
   const { confirmState, openConfirm } = useConfirmAction();
+  const screens = Grid.useBreakpoint();
+  const isMobile = !screens.md;
 
   return (
     <div>
       <div
         style={{
           position: "fixed",
-          zIndex: 3,
+          zIndex: isMobile ? 100 : 3,
           display: "flex",
           flexDirection: "row",
           background: "#ffffff",
           gap: 6,
-          width: "41vw",
+          width: isMobile ? "100%" : "41vw",
+          left: isMobile ? 0 : undefined,
+          right: isMobile ? 0 : undefined,
           bottom: 0,
+          boxSizing: "border-box",
+          overflowX: isMobile ? "auto" : undefined,
           borderTop: "1px solid #e2e8f0",
           boxShadow: "0 -2px 8px rgba(0,0,0,0.05)",
-          padding: "4px 8px",
+          padding: isMobile ? "6px 8px" : "4px 8px",
           alignItems: "center",
         }}
       >
