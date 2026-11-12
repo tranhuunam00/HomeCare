@@ -714,10 +714,11 @@ export default function DoctorUseDFormVer3({
 
   return (
     <div
+      className={styles.doctorFormWrap}
       style={{
         maxWidth: 1100,
         margin: "0 auto",
-        padding: isMobile ? "12px 6px 140px" : "30px 0 250px",
+        padding: isMobile ? "4px 4px 100px" : "30px 0 250px",
       }}
     >
       {loading ? (
@@ -727,7 +728,7 @@ export default function DoctorUseDFormVer3({
       ) : (
         <Form
           form={form}
-          size={isMobile ? "middle" : "middle"}
+          size={isMobile ? "small" : "middle"}
           layout={isMobile ? "vertical" : "horizontal"}
           labelAlign="left"
           labelCol={isMobile ? undefined : { flex: "0 0 180px" }}
@@ -772,12 +773,12 @@ export default function DoctorUseDFormVer3({
           )}
           <Divider /> */}
 
-          <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
+          <Title level={4} style={{ color: "#2f6db8", margin: isMobile ? "8px 0 6px" : "24px 0 16px" }}>
             {translateLabel(languageTranslate, "Kỹ thuật thực hiện", true)}
           </Title>
 
-          <Row gutter={16}>
-            <Col xs={24} md={9}>
+          <Row gutter={isMobile ? [8, 0] : 16}>
+            <Col xs={12} md={9}>
               <Form.Item
                 label={translateLabel(languageTranslate, "Chỉ định", false)}
                 name="id_template_service"
@@ -811,7 +812,7 @@ export default function DoctorUseDFormVer3({
               </Form.Item>
             </Col>
 
-            <Col xs={24} md={7}>
+            <Col xs={12} md={7}>
               <Form.Item
                 label={translateLabel(languageTranslate, "bodyPart", false)}
                 name="id_exam_part"
@@ -1030,8 +1031,8 @@ export default function DoctorUseDFormVer3({
               alignItems: "center",
               justifyContent: "space-between",
               flexWrap: "wrap",
-              gap: 12,
-              margin: "24px 0 12px",
+              gap: isMobile ? 6 : 12,
+              margin: isMobile ? "10px 0 8px" : "24px 0 12px",
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
@@ -1186,10 +1187,10 @@ export default function DoctorUseDFormVer3({
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              margin: "24px 0 16px",
+              margin: isMobile ? "12px 0 8px" : "24px 0 16px",
             }}
           >
-            <Title level={4} style={{ color: "#2f6db8", margin: 0 }}>
+            <Title level={4} style={{ color: "#2f6db8", margin: 0, fontSize: isMobile ? 14 : undefined }}>
               {translateLabel(
                 languageTranslate,
                 "illustrativeImages",
@@ -1197,6 +1198,7 @@ export default function DoctorUseDFormVer3({
               ).toUpperCase()}
             </Title>
             <Button
+              size={isMobile ? "small" : "middle"}
               type="primary"
               ghost
               icon={<EyeOutlined />}

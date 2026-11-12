@@ -4,3 +4,25 @@
   height: 100%;
   margin-bottom: 0;
 }
+
+.doctorFormWrap {
+  @media (max-width: 768px) {
+    :global(.ant-form-item) {
+      margin-bottom: 8px !important;
+    }
+
+    :global(.ant-form-item-label) {
+      padding-bottom: 2px !important;
+    }
+
+    :global(.ant-form-item-label > label) {
+      font-size: 12px !important;
+      height: auto !important;
+    }
+
+    :global(h4.ant-typography) {
+      margin: 10px 0 6px !important;
+      font-size: 14px !important;
+    }
+  }
+}

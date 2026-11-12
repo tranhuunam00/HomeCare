@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Modal, Table, Button } from "antd";
+import { Modal, Table, Button, Grid } from "antd";
 import dayjs from "dayjs";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
@@ -17,6 +17,8 @@ export default function TranslateListRecordsVer3({
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
   const navigate = useNavigate();
+  const screens = Grid.useBreakpoint();
+  const isMobile = !screens.md;
 
   useEffect(() => {
     if (!open || !id_patient_diagnose) return;
@@ -125,15 +127,19 @@ export default function TranslateListRecordsVer3({
       open={open}
       onCancel={onClose}
       footer={null}
-      width={900}
+      centered
+      width={isMobile ? "95vw" : 900}
+      styles={{ body: { padding: isMobile ? "10px 8px" : undefined } }}
       title="Danh sách bản dịch"
     >
       <Table
         rowKey="id"
+        size={isMobile ? "small" : "middle"}
         loading={loading}
         dataSource={data}
         columns={columns}
         pagination={false}
+        scroll={{ x: "max-content" }}
       />
     </Modal>
   );

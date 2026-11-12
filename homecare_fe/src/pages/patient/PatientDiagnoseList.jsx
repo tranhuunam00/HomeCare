@@ -18,6 +18,7 @@ import {
   Grid,
   Tooltip,
   Popover,
+  Modal,
 } from "antd";
 import {
   SettingOutlined,
@@ -95,7 +96,7 @@ const defaultVisibleKeys = [
 
 const STORAGE_KEY = "visibleColumns_patientDiagnose";
 
-const PatientMiniInfo = ({ patient, templateServices, examParts }) => {
+const PatientMiniInfo = ({ patient, templateServices, examParts, isMobile = false }) => {
   const displayData = {
     name: (patient?.name || "")?.toUpperCase(),
     gender: patient?.gender || "-",
@@ -118,13 +119,13 @@ const PatientMiniInfo = ({ patient, templateServices, examParts }) => {
   )?.name || "-";
 
   return (
-    <div style={{ width: 400, padding: "4px", fontFamily: "Inter, sans-serif" }}>
+    <div style={{ width: isMobile ? "100%" : 400, maxWidth: "100%", boxSizing: "border-box", padding: isMobile ? "0" : "4px", fontFamily: "Inter, sans-serif" }}>
       {/* Header gradient banner */}
       <div style={{ 
         background: "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)", 
-        padding: "12px 14px", 
+        padding: isMobile ? "10px 12px" : "12px 14px", 
         borderRadius: "6px", 
-        marginBottom: "12px",
+        marginBottom: "10px",
         border: "1px solid #bfdbfe"
       }}>
         <span style={{ color: "#2563eb", fontSize: "9px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.5px" }}>
@@ -133,7 +134,7 @@ const PatientMiniInfo = ({ patient, templateServices, examParts }) => {
         <h4 style={{ margin: "2px 0 6px 0", fontSize: "15px", fontWeight: "700", color: "#1e3a8a" }}>
           {displayData.name}
         </h4>
-        <div style={{ display: "flex", gap: "16px", fontSize: "11px", color: "#1e40af" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: isMobile ? "6px 14px" : "16px", fontSize: "11px", color: "#1e40af" }}>
           <span>Giới tính: <strong>{displayData.gender}</strong></span>
           <span>Năm sinh: <strong>{displayData.birth_year}</strong></span>
           <span>Tuổi: <strong>{displayData.age}</strong></span>
@@ -141,38 +142,38 @@ const PatientMiniInfo = ({ patient, templateServices, examParts }) => {
       </div>
 
       {/* Grid details */}
-      <Row gutter={[12, 10]} style={{ padding: "0 4px" }}>
-        <Col span={8}>
+      <Row gutter={[10, 8]} style={{ padding: "0 4px" }}>
+        <Col xs={12} md={8}>
           <span style={{ color: "#8c8c8c", display: "block", fontSize: "9px", textTransform: "uppercase", letterSpacing: "0.3px", marginBottom: 2 }}>PID</span>
-          <span style={{ fontSize: "11px", fontWeight: "600", color: "#262626" }}>{displayData.PID}</span>
+          <span style={{ fontSize: "11px", fontWeight: "600", color: "#262626", wordBreak: "break-word" }}>{displayData.PID}</span>
         </Col>
-        <Col span={8}>
+        <Col xs={12} md={8}>
           <span style={{ color: "#8c8c8c", display: "block", fontSize: "9px", textTransform: "uppercase", letterSpacing: "0.3px", marginBottom: 2 }}>SID</span>
           <span style={{ fontSize: "11px", fontWeight: "600", color: "#262626", wordBreak: "break-all", lineHeight: 1.1 }}>{displayData.SID}</span>
         </Col>
-        <Col span={8}>
+        <Col xs={12} md={8}>
           <span style={{ color: "#8c8c8c", display: "block", fontSize: "9px", textTransform: "uppercase", letterSpacing: "0.3px", marginBottom: 2 }}>CCCD</span>
-          <span style={{ fontSize: "11px", fontWeight: "600", color: "#262626" }}>{displayData.CCCD}</span>
+          <span style={{ fontSize: "11px", fontWeight: "600", color: "#262626", wordBreak: "break-word" }}>{displayData.CCCD}</span>
         </Col>
 
-        <Col span={8}>
+        <Col xs={12} md={8}>
           <span style={{ color: "#8c8c8c", display: "block", fontSize: "9px", textTransform: "uppercase", letterSpacing: "0.3px", marginBottom: 2 }}>Mã ca (ID)</span>
           <span style={{ fontSize: "11px", fontWeight: "600", color: "#262626" }}>{patient.id}</span>
         </Col>
-        <Col span={8}>
+        <Col xs={12} md={8}>
           <span style={{ color: "#8c8c8c", display: "block", fontSize: "9px", textTransform: "uppercase", letterSpacing: "0.3px", marginBottom: 2 }}>SĐT</span>
           <span style={{ fontSize: "11px", fontWeight: "600", color: "#262626" }}>{displayData.phone}</span>
         </Col>
-        <Col span={8}>
+        <Col xs={12} md={8}>
           <span style={{ color: "#8c8c8c", display: "block", fontSize: "9px", textTransform: "uppercase", letterSpacing: "0.3px", marginBottom: 2 }}>Email</span>
           <span style={{ fontSize: "11px", fontWeight: "600", color: "#262626", wordBreak: "break-all", lineHeight: 1.1 }}>{displayData.email}</span>
         </Col>
 
-        <Col span={12}>
+        <Col xs={12} md={12}>
           <span style={{ color: "#8c8c8c", display: "block", fontSize: "9px", textTransform: "uppercase", letterSpacing: "0.3px", marginBottom: 2 }}>Chỉ định</span>
           <span style={{ fontSize: "11px", fontWeight: "600", color: "#262626" }}>{indicationName}</span>
         </Col>
-        <Col span={12}>
+        <Col xs={12} md={12}>
           <span style={{ color: "#8c8c8c", display: "block", fontSize: "9px", textTransform: "uppercase", letterSpacing: "0.3px", marginBottom: 2 }}>Bộ phận khám</span>
           <span style={{ fontSize: "11px", fontWeight: "600", color: "#262626" }}>{examPartName}</span>
         </Col>
@@ -249,6 +250,7 @@ const PatientTablePage = ({ PID = null }) => {
   const screens = useBreakpoint();
 
   const deviceIsMobile = !screens.md;
+  const [openPatientInfoModal, setOpenPatientInfoModal] = useState(false);
 
   const [data, setData] = useState([]);
   const [sameCCCDData, setSameCCCDData] = useState([]);
@@ -1274,40 +1276,83 @@ const PatientTablePage = ({ PID = null }) => {
               }
             />
             {rightPanelMode === "reading" && (
-              <Popover
-                content={
-                  <PatientMiniInfo
-                    patient={selectedPatientDiagnose}
-                    templateServices={templateServices}
-                    examParts={examParts}
-                  />
-                }
-                title={
-                  <span style={{ fontSize: "12px", fontWeight: "600", color: "#1d4ed8" }}>
-                    Thông tin hành chính bệnh nhân
-                  </span>
-                }
-                trigger="click"
-                placement="bottomLeft"
-              >
-                <Button
-                  icon={<UserOutlined />}
-                  style={{
-                    marginLeft: deviceIsMobile ? 0 : 20,
-                    borderRadius: "4px",
-                    borderColor: "#3b82f6",
-                    color: "#1d4ed8",
-                    fontSize: "11px",
-                    height: "22px",
-                    padding: "0 8px",
-                    display: "flex",
-                    alignItems: "center",
-                    fontWeight: "500",
-                  }}
+              deviceIsMobile ? (
+                <>
+                  <Button
+                    icon={<UserOutlined />}
+                    onClick={() => setOpenPatientInfoModal(true)}
+                    style={{
+                      marginLeft: 0,
+                      borderRadius: "4px",
+                      borderColor: "#3b82f6",
+                      color: "#1d4ed8",
+                      fontSize: "11px",
+                      height: "22px",
+                      padding: "0 8px",
+                      display: "flex",
+                      alignItems: "center",
+                      fontWeight: "500",
+                    }}
+                  >
+                    Thông tin BN
+                  </Button>
+                  <Modal
+                    open={openPatientInfoModal}
+                    onCancel={() => setOpenPatientInfoModal(false)}
+                    footer={null}
+                    centered
+                    width="94vw"
+                    styles={{ body: { padding: "8px 4px", maxHeight: "75vh", overflowY: "auto" } }}
+                    title={
+                      <span style={{ fontSize: "13px", fontWeight: "600", color: "#1d4ed8" }}>
+                        Thông tin hành chính bệnh nhân
+                      </span>
+                    }
+                  >
+                    <PatientMiniInfo
+                      patient={selectedPatientDiagnose}
+                      templateServices={templateServices}
+                      examParts={examParts}
+                      isMobile={true}
+                    />
+                  </Modal>
+                </>
+              ) : (
+                <Popover
+                  content={
+                    <PatientMiniInfo
+                      patient={selectedPatientDiagnose}
+                      templateServices={templateServices}
+                      examParts={examParts}
+                    />
+                  }
+                  title={
+                    <span style={{ fontSize: "12px", fontWeight: "600", color: "#1d4ed8" }}>
+                      Thông tin hành chính bệnh nhân
+                    </span>
+                  }
+                  trigger="click"
+                  placement="bottomLeft"
                 >
-                  Thông tin BN
-                </Button>
-              </Popover>
+                  <Button
+                    icon={<UserOutlined />}
+                    style={{
+                      marginLeft: 20,
+                      borderRadius: "4px",
+                      borderColor: "#3b82f6",
+                      color: "#1d4ed8",
+                      fontSize: "11px",
+                      height: "22px",
+                      padding: "0 8px",
+                      display: "flex",
+                      alignItems: "center",
+                      fontWeight: "500",
+                    }}
+                  >
+                    Thông tin BN
+                  </Button>
+                </Popover>
+              )
             )}
           </div>
           <div>

@@ -1,7 +1,7 @@
 // src/components/ImageWithCaptionInput.jsx
 import React, { useEffect, useState } from "react";
 import { Upload, Input, Button, Row, Col } from "antd";
-import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
+import { PlusOutlined, UploadOutlined, DeleteOutlined } from "@ant-design/icons";
 
 const ImageWithCaptionInput = ({
   value = [],
@@ -61,42 +61,71 @@ const ImageWithCaptionInput = ({
 
   return (
     <div>
-      <Row gutter={[16, 16]}>
+      <Row gutter={[8, 8]}>
         {images.map((item, index) => (
-          <Col key={index} span={16} md={8}>
-            <div style={{ border: "1px solid #ccc", padding: 8 }}>
-              <Upload
-                showUploadList={false}
-                beforeUpload={(file) => handleImageChange(file, index)}
-                accept=".jpg,.jpeg,.png"
+          <Col key={index} xs={12} sm={12} md={8}>
+            <div
+              style={{
+                border: "1px solid #e2e8f0",
+                borderRadius: 8,
+                padding: 8,
+                background: "#f8fafc",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 4,
+                }}
               >
-                <Button disabled={disabled} icon={<UploadOutlined />}>
-                  Chọn ảnh
-                </Button>
-              </Upload>
+                <Upload
+                  showUploadList={false}
+                  beforeUpload={(file) => handleImageChange(file, index)}
+                  accept=".jpg,.jpeg,.png"
+                >
+                  <Button size="small" disabled={disabled} icon={<UploadOutlined />}>
+                    Chọn ảnh
+                  </Button>
+                </Upload>
+                <Button
+                  size="small"
+                  disabled={disabled}
+                  danger
+                  type="text"
+                  icon={<DeleteOutlined />}
+                  onClick={() => handleRemove(index)}
+                  title="Xóa ảnh"
+                />
+              </div>
               {item.url && (
                 <img
                   src={item.url}
                   alt="preview"
                   style={{
-                    width: 100,
-                    height: 100,
+                    width: "100%",
+                    height: 88,
                     objectFit: "cover",
-                    marginTop: 8,
+                    borderRadius: 6,
+                    marginTop: 6,
+                    display: "block",
                   }}
                 />
               )}
               <Input.TextArea
+                size="small"
                 disabled={disabled}
                 placeholder="Chú thích ảnh"
                 value={item.caption}
                 onChange={(e) => handleCaptionChange(e, index)}
-                autoSize={{ minRows: 1, maxRows: 6 }}
-                style={{ marginTop: 8 }}
+                autoSize={{ minRows: 1, maxRows: 3 }}
+                style={{ marginTop: 6, fontSize: 12 }}
               />
 
               {links && (
                 <Input.TextArea
+                  size="small"
                   placeholder="Link đính kèm"
                   value={links[index]}
                   onChange={(e) => {
@@ -104,27 +133,19 @@ const ImageWithCaptionInput = ({
                     newLink[index] = e.target.value;
                     setLinks(newLink);
                   }}
-                  rows={3}
-                  style={{ marginTop: 8 }}
+                  rows={2}
+                  style={{ marginTop: 6, fontSize: 12 }}
                 />
               )}
-              <Button
-                disabled={disabled}
-                danger
-                type="text"
-                onClick={() => handleRemove(index)}
-                style={{ marginTop: 4 }}
-              >
-                Xóa
-              </Button>
             </div>
           </Col>
         ))}
       </Row>
       <Button
+        size="small"
         icon={<PlusOutlined />}
         onClick={handleAddImage}
-        style={{ marginBottom: 12 }}
+        style={{ marginTop: 8, marginBottom: 8 }}
         disabled={images.length >= max || disabled}
       >
         Thêm ảnh
