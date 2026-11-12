@@ -80,6 +80,42 @@ export default function PacsViewerPage() {
 
   const [activeSeriesUid, setActiveSeriesUid] = useState(null);
 
+  // Auto-select the first series when loaded
+  useEffect(() => {
+    if (seriesList.length > 0 && (!activeSeriesUid || !seriesList.some((s) => s.seriesUid === activeSeriesUid))) {
+      setActiveSeriesUid(seriesList[0].seriesUid);
+    }
+  }, [seriesList, activeSeriesUid]);
+
+  // Active series and its slice global indices (keeps wheel/slider scoped to the selected series)
+  const activeSeries = useMemo(() => {
+    if (!seriesList.length) return null;
+    return seriesList.find((s) => s.seriesUid === activeSeriesUid) || seriesList[0];
+  }, [seriesList, activeSeriesUid]);
+
+  const activeSeriesIndices = useMemo(() => {
+    if (activeSeries?.instances?.length) {
+      return activeSeries.instances.map((inst) => inst.globalIndex);
+    }
+    return instances.map((_, idx) => idx);
+  }, [activeSeries, instances]);
+
+  const activeSlicePos = useMemo(() => {
+    const pos = activeSeriesIndices.indexOf(currentIndex);
+    return pos >= 0 ? pos : 0;
+  }, [activeSeriesIndices, currentIndex]);
+
+  const stepSeriesSlice = useCallback(
+    (delta) => {
+      if (activeSeriesIndices.length <= 1) return;
+      const pos = activeSeriesIndices.indexOf(currentIndex);
+      const curPos = pos >= 0 ? pos : 0;
+      const nextPos = Math.max(0, Math.min(activeSeriesIndices.length - 1, curPos + delta));
+      setCurrentIndex(activeSeriesIndices[nextPos]);
+    },
+    [activeSeriesIndices, currentIndex, setCurrentIndex]
+  );
+
   // Per-series thumbnail map: { [seriesUid]: dataUrl }
   const [seriesThumbnails, setSeriesThumbnails] = useState({});
   const [isExpanded, setIsExpanded] = useState(false);
@@ -517,15 +553,11 @@ export default function PacsViewerPage() {
     }
   };
 
-  // Wheel Handler: Cine Slice Navigation
+  // Wheel Handler: Cine Slice Navigation (scoped to active series)
   const handleWheel = (e) => {
     e.preventDefault();
-    if (instances.length <= 1) return;
-    if (e.deltaY > 0) {
-      setCurrentIndex((prev) => Math.min(prev + 1, instances.length - 1));
-    } else {
-      setCurrentIndex((prev) => Math.max(prev - 1, 0));
-    }
+    if (activeSeriesIndices.length <= 1) return;
+    stepSeriesSlice(e.deltaY > 0 ? 1 : -1);
   };
 
   // Zoom & Enlarge Helpers
@@ -614,19 +646,21 @@ export default function PacsViewerPage() {
         windowWidth,
       });
 
-      // 1. Broadcast across all frontend tabs
-      broadcastKeyImage({
-        patientDiagnoseId: patientDiagnoseId ? Number(patientDiagnoseId) : undefined,
-        patient_diagnose_id: patientDiagnoseId ? Number(patientDiagnoseId) : undefined,
-        dataUrl,
-        caption: captionText,
-        sliceIndex: currentIndex,
-        sopInstanceUid: instances[currentIndex]?.sopInstanceUid,
-        measurements: (annotations[currentIndex] || []).map((a) => ({
-          type: a.type,
-          value: a.valueText,
-        })),
-      });
+      // 1. Broadcast across all frontend tabs (only when linked to a patient)
+      if (patientDiagnoseId) {
+        broadcastKeyImage({
+          patientDiagnoseId: Number(patientDiagnoseId),
+          patient_diagnose_id: Number(patientDiagnoseId),
+          dataUrl,
+          caption: captionText,
+          sliceIndex: currentIndex,
+          sopInstanceUid: instances[currentIndex]?.sopInstanceUid,
+          measurements: (annotations[currentIndex] || []).map((a) => ({
+            type: a.type,
+            value: a.valueText,
+          })),
+        });
+      }
 
       // 2. Persist to PACS backend
       if (patientDiagnoseId) {
@@ -666,21 +700,21 @@ export default function PacsViewerPage() {
     }
   };
 
-  // Keyboard Shortcuts: Space / Ctrl+S for Key Image Capture, Arrows for Cine
+  // Keyboard Shortcuts: Space / Ctrl+S for Key Image Capture, Arrows for Cine (scoped to active series)
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.code === 'Space' || (e.ctrlKey && e.key.toLowerCase() === 's')) {
         e.preventDefault();
         handleCaptureKeyImage();
       } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-        setCurrentIndex((prev) => Math.min(prev + 1, instances.length - 1));
+        stepSeriesSlice(1);
       } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-        setCurrentIndex((prev) => Math.max(prev - 1, 0));
+        stepSeriesSlice(-1);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleCaptureKeyImage, instances.length]);
+  }, [handleCaptureKeyImage, stepSeriesSlice]);
 
   const currentMeta = dicomCache[currentIndex]?.meta;
 
@@ -839,9 +873,13 @@ export default function PacsViewerPage() {
               currentMeta={currentMeta}
               study={study}
               patientDiagnoseId={patientDiagnoseId}
-              currentIndex={currentIndex}
-              setCurrentIndex={setCurrentIndex}
-              totalSlices={instances.length}
+              seriesIndex={activeSeries?.seriesIndex || 1}
+              currentIndex={activeSlicePos}
+              setCurrentIndex={(nextPos) => {
+                const targetGlobal = activeSeriesIndices[nextPos];
+                if (targetGlobal !== undefined) setCurrentIndex(targetGlobal);
+              }}
+              totalSlices={activeSeriesIndices.length}
               colorLut={colorLut}
               setColorLut={setColorLut}
               windowWidth={windowWidth}

@@ -34,6 +34,7 @@ const FastSonoSelector = ({
   idTemplateService,
   idExamPart,
   examPartName = '',
+  serviceName = '',
   gender = '',
   isEdit = true,
   initialSelectedMap = null,
@@ -54,7 +55,10 @@ const FastSonoSelector = ({
     }
 
     setLoadingTemplate(true);
-    fetchClinicalTemplateByServiceAndPart(idTemplateService, idExamPart)
+    fetchClinicalTemplateByServiceAndPart(idTemplateService, idExamPart, {
+      examPartName,
+      serviceName,
+    })
       .then((tpl) => {
         if (!cancelled) {
           setActiveTemplate(tpl || null);
@@ -67,7 +71,7 @@ const FastSonoSelector = ({
     return () => {
       cancelled = true;
     };
-  }, [idTemplateService, idExamPart]);
+  }, [idTemplateService, idExamPart, examPartName, serviceName]);
 
   // Tab cơ quan đang hoạt động
   const [activeOrganKey, setActiveOrganKey] = useState(() => {
@@ -134,9 +138,14 @@ const FastSonoSelector = ({
       activeTemplate?.organs || [],
       selectedMap,
       activeTemplate?.classificationType,
-      selectedGrade
+      selectedGrade,
+      {
+        title: activeTemplate?.title,
+        examPartName,
+        serviceName,
+      }
     );
-  }, [activeTemplate?.organs, selectedMap, activeTemplate?.classificationType, selectedGrade]);
+  }, [activeTemplate?.organs, activeTemplate?.title, selectedMap, activeTemplate?.classificationType, selectedGrade, examPartName, serviceName]);
 
   // Đồng bộ ra ngoài cha mỗi khi lựa chọn thay đổi
   const currentTemplateCode =
@@ -272,7 +281,7 @@ const FastSonoSelector = ({
               className={`${styles.organTabBtn} ${isActive ? styles.activeTab : ''}`}
               onClick={() => setActiveOrganKey(organ.key)}
             >
-              <span>{organ.label}</span>
+              <span>{organ.label || organ.name || organ.title || organ.key}</span>
               {hasAbnormal && <span className={styles.abnormalDot} />}
             </button>
           );
@@ -284,7 +293,7 @@ const FastSonoSelector = ({
         <div className={styles.organContentSection}>
           <div className={styles.organHeaderRow}>
             <div className={styles.organTitle}>
-              <span>{currentOrgan.label}</span>
+              <span>{currentOrgan.label || currentOrgan.name || currentOrgan.title || currentOrgan.key}</span>
               {gender && (
                 <span className={styles.genderBadge}>
                   Đã lọc theo: {gender}
@@ -371,7 +380,7 @@ const FastSonoSelector = ({
       <div className={styles.narrativePreviewBox}>
         <div className={styles.previewHeader}>
           <span className={styles.previewTitle}>
-            Văn bản mô tả y khoa tự sinh (Live-injection)
+            Văn bản mô tả y khoa tự sinh
           </span>
           <div style={{ display: 'flex', gap: 6 }}>
             <Tooltip title="Sao chép văn bản mô tả">

@@ -22,7 +22,43 @@ import {
 const STORAGE_KEY = 'HOMECARE_5TIER_CLINICAL_TEMPLATES_V1';
 
 /**
- * Tự động tạo cấu hình 5 tầng chuẩn y khoa (Tầng 3, 4, 5) cho một exam_part của HomeCare
+ * Chuẩn hóa dữ liệu mẫu 5 tầng từ DB/Cache để đảm bảo organ.label & option.label luôn có giá trị
+ */
+export function normalizeClinicalTemplate(tpl) {
+  if (!tpl || typeof tpl !== 'object') return null;
+  const organs = Array.isArray(tpl.organs)
+    ? tpl.organs.map((organ, idx) => {
+        const resolvedLabel =
+          organ.label ||
+          organ.name ||
+          organ.title ||
+          organ.organName ||
+          organ.partName ||
+          organ.key ||
+          `Bộ phận ${idx + 1}`;
+        const options = Array.isArray(organ.options)
+          ? organ.options.map((opt) => ({
+              ...opt,
+              label: opt.label || opt.name || opt.title || opt.id || 'Lựa chọn',
+            }))
+          : [];
+        return {
+          ...organ,
+          key: organ.key || `ORGAN_${idx + 1}`,
+          label: resolvedLabel,
+          options,
+        };
+      })
+    : [];
+
+  return {
+    ...tpl,
+    organs,
+  };
+}
+
+/**
+ * Tự động tạo cấu hình 5 tầng chuẩn y khoa (Tầng 3, 4, 5) cho toàn bộ Phân hệ & Bộ phận
  * @param {Object} examPart { id, name, code, id_template_service }
  * @param {Object} templateService { id, name, code }
  * @returns {Object} 5-Tier Template
@@ -30,49 +66,327 @@ const STORAGE_KEY = 'HOMECARE_5TIER_CLINICAL_TEMPLATES_V1';
 export function generateDefault5TierForExamPart(examPart, templateService = {}) {
   if (!examPart) return null;
 
-  const partName = (examPart.name || '').toLowerCase();
-  const serviceName = (templateService.name || '').toLowerCase();
-  const code = examPart.code || `EP_${examPart.id}`;
+  const partRaw = examPart.name || 'Bộ phận';
+  const partName = partRaw.toLowerCase();
+  const serviceRaw = templateService.name || '';
+  const serviceName = serviceRaw.toLowerCase();
+  const code = examPart.code || `EP_${examPart.id || 'AUTO'}`;
 
-  // 1. Phân hệ Tuyến giáp
+  const isXray =
+    serviceName.includes('x quang') ||
+    serviceName.includes('x-quang') ||
+    serviceName.includes('xray') ||
+    partName.includes('x quang') ||
+    partName.includes('x-quang');
+  const isCT =
+    serviceName.includes('cắt lớp') ||
+    serviceName.includes('clvt') ||
+    /\bct\b/.test(serviceName) ||
+    partName.includes('cắt lớp') ||
+    /\bct\b/.test(partName);
+  const isMRI =
+    serviceName.includes('cộng hưởng từ') ||
+    serviceName.includes('mri') ||
+    serviceName.includes('cht') ||
+    partName.includes('cộng hưởng từ') ||
+    partName.includes('mri');
+
+  const baseMeta = {
+    code: `TPL_${code}`,
+    title: serviceRaw ? `${serviceRaw} - ${partRaw}` : partRaw,
+    id_template_service: examPart.id_template_service || templateService.id,
+    id_exam_part: examPart.id,
+    classificationType: CLASSIFICATION_TYPES.NONE,
+    hasClassification: false,
+  };
+
+  // === A. NHÓM X-QUANG ===
+  if (isXray) {
+    if (partName.includes('ngực') || partName.includes('phổi') || partName.includes('lồng ngực')) {
+      return {
+        ...baseMeta,
+        organs: [
+          {
+            key: 'LUNG_PARENCHYMA',
+            label: 'Nhu mô phổi',
+            defaultNormalText: 'Hai phế trường sáng đều, không thấy tổn thương thâm nhiễm hay nốt mờ khu trú.',
+            options: [
+              { id: 'NORMAL', label: 'Bình thường', isNormal: true, text: 'Hai phế trường sáng đều, không thấy tổn thương thâm nhiễm hay nốt mờ khu trú.', gender: 'ALL' },
+              { id: 'ALVEOLAR_OPACITY', label: 'Đám mờ phế nang', isNormal: false, text: 'Đám mờ không đồng nhất vùng đáy phổi, xóa mờ bờ tim/vòm hoành.', conclusion: 'Theo dõi viêm phổi / tổn thương phế nang.', gender: 'ALL' },
+              { id: 'INTERSTITIAL', label: 'Tổn thương mô kẽ', isNormal: false, text: 'Dày tổ chức kẽ dạng lưới - nốt nhỏ lan tỏa hai phế trường.', conclusion: 'Tổn thương mô kẽ hai phổi.', gender: 'ALL' },
+              { id: 'NODULE', label: 'Nốt mờ phổi', isNormal: false, text: 'Nốt mờ đơn độc ranh giới khá rõ ở nhu mô phổi.', conclusion: 'Nốt mờ phổi (đề nghị chụp CLVT lồng ngực kiểm tra).', gender: 'ALL' },
+              { id: 'FIBROSIS', label: 'Xơ phổi / Dải xơ', isNormal: false, text: 'Dải xơ mờ vùng đỉnh/đáy phổi, kéo nhẹ rốn phổi.', conclusion: 'Dải xơ phổi cũ.', gender: 'ALL' },
+            ],
+          },
+          {
+            key: 'PLEURA_MEDIASTINUM',
+            label: 'Màng phổi & Trung thất',
+            defaultNormalText: 'Góc sườn hoành hai bên nhọn, trung thất cân đối, bóng tim không to.',
+            options: [
+              { id: 'NORMAL', label: 'Bình thường', isNormal: true, text: 'Góc sườn hoành hai bên nhọn, trung thất cân đối, bóng tim không to.', gender: 'ALL' },
+              { id: 'PLEURAL_EFFUSION', label: 'Tràn dịch màng phổi', isNormal: false, text: 'Tù góc sườn hoành kèm hình mờ đồng nhất vùng thấp phổi (đường cong Damoiseau).', conclusion: 'Tràn dịch màng phổi.', gender: 'ALL' },
+              { id: 'PNEUMOTHORAX', label: 'Tràn khí màng phổi', isNormal: false, text: 'Khoảng sáng vô mạch ngoại vi, thấy rõ lá tạng màng phổi co cụm.', conclusion: 'Tràn khí màng phổi.', gender: 'ALL' },
+              { id: 'CARDIOMEGALY', label: 'Bóng tim to', isNormal: false, text: 'Chỉ số tim/lồng ngực > 0.5, cung thất trái giãn rộng.', conclusion: 'Bóng tim to.', gender: 'ALL' },
+            ],
+          },
+          {
+            key: 'THORACIC_CAGE',
+            label: 'Khung xương lồng ngực',
+            defaultNormalText: 'Các xương sườn, xương đòn và cột sống ngực liên tục, không thấy đường gãy.',
+            options: [
+              { id: 'NORMAL', label: 'Bình thường', isNormal: true, text: 'Các xương sườn, xương đòn và cột sống ngực liên tục, không thấy đường gãy.', gender: 'ALL' },
+              { id: 'RIB_FRACTURE', label: 'Gãy xương sườn', isNormal: false, text: 'Mất liên tục vỏ xương sườn, có đường sáng gãy xương.', conclusion: 'Gãy xương sườn.', gender: 'ALL' },
+            ],
+          },
+        ],
+      };
+    }
+
+    if (partName.includes('cột sống') || partName.includes('thắt lưng') || partName.includes('cổ')) {
+      return {
+        ...baseMeta,
+        organs: [
+          {
+            key: 'VERTEBRAE',
+            label: 'Thân đốt sống',
+            defaultNormalText: `Các thân đốt sống vùng ${partRaw} chiều cao bình thường, đậm độ xương đều, không thấy xẹp hay trượt đốt sống.`,
+            options: [
+              { id: 'NORMAL', label: 'Bình thường', isNormal: true, text: `Các thân đốt sống vùng ${partRaw} chiều cao bình thường, đậm độ xương đều, không thấy đường gãy hay xẹp đốt sống.`, gender: 'ALL' },
+              { id: 'OSTEOPHYTE', label: 'Gai xương thoái hóa', isNormal: false, text: `Mỏ gai xương bờ trước và bờ bên các thân đốt sống ${partRaw}.`, conclusion: `Thoái hóa cột sống ${partRaw}.`, gender: 'ALL' },
+              { id: 'COMPRESSION', label: 'Xẹp thân đốt sống', isNormal: false, text: `Giảm chiều cao thân đốt sống (hình chêm), đậm độ xương thay đổi.`, conclusion: `Xẹp thân đốt sống vùng ${partRaw}.`, gender: 'ALL' },
+              { id: 'SPONDYLOLISTHESIS', label: 'Trượt đốt sống', isNormal: false, text: `Di lệch thân đốt sống ra trước/sau so với đốt sống kế cận.`, conclusion: `Trượt đốt sống vùng ${partRaw}.`, gender: 'ALL' },
+            ],
+          },
+          {
+            key: 'DISC_SPACE',
+            label: 'Khe đĩa đệm & Khớp',
+            defaultNormalText: 'Các khe liên đốt sống rộng đều, diện khớp liên mấu bình thường.',
+            options: [
+              { id: 'NORMAL', label: 'Bình thường', isNormal: true, text: 'Các khe liên đốt sống rộng đều, không thấy hẹp khe đĩa đệm rõ rệt.', gender: 'ALL' },
+              { id: 'DISC_NARROWING', label: 'Hẹp khe đĩa đệm', isNormal: false, text: 'Hẹp khe liên đốt sống kèm xơ xương dưới sụn.', conclusion: `Hẹp khe đĩa đệm cột sống ${partRaw}.`, gender: 'ALL' },
+            ],
+          },
+          {
+            key: 'ALIGNMENT',
+            label: 'Trục & Phần mềm',
+            defaultNormalText: 'Trục cột sống thẳng, đường cong sinh lý bình thường, phần mềm cạnh sống không sưng nề.',
+            options: [
+              { id: 'NORMAL', label: 'Bình thường', isNormal: true, text: 'Trục cột sống thẳng, đường cong sinh lý bình thường, phần mềm cạnh sống không thấy bất thường.', gender: 'ALL' },
+              { id: 'STRAIGHTENING', label: 'Giảm/Mất ưỡn sinh lý', isNormal: false, text: 'Trục cột sống thẳng đơ, giảm đường cong sinh lý.', conclusion: 'Giảm đường cong sinh lý cột sống (theo dõi co cơ cạnh sống).', gender: 'ALL' },
+              { id: 'SCOLIOSIS', label: 'Vẹo cột sống', isNormal: false, text: 'Vẹo trục cột sống sang bên trên phim thẳng.', conclusion: `Vẹo cột sống vùng ${partRaw}.`, gender: 'ALL' },
+            ],
+          },
+        ],
+      };
+    }
+
+    if (partName.includes('xoang') || partName.includes('sọ') || partName.includes('mũi') || partName.includes('hàm')) {
+      return {
+        ...baseMeta,
+        organs: [
+          {
+            key: 'SINUSES',
+            label: 'Các xoang cạnh mũi',
+            defaultNormalText: 'Các xoang hàm, xoang trán và xoang sàng sáng đều, vách mũi thẳng.',
+            options: [
+              { id: 'NORMAL', label: 'Bình thường', isNormal: true, text: 'Các xoang hàm, xoang trán và xoang sàng sáng đều, thành xoang nhẵn.', gender: 'ALL' },
+              { id: 'SINUS_MUCOSA', label: 'Dày niêm mạc xoang', isNormal: false, text: 'Dày niêm mạc thành xoang hàm/trán, giảm độ sáng lòng xoang.', conclusion: 'Viêm dày niêm mạc xoang.', gender: 'ALL' },
+              { id: 'SINUS_FLUID', label: 'Mờ xoang / Mức dịch khí', isNormal: false, text: 'Mờ toàn bộ lòng xoang hoặc có mức dịch - khí trong xoang hàm.', conclusion: 'Viêm xoang cấp có dịch.', gender: 'ALL' },
+            ],
+          },
+          {
+            key: 'SKULL_BONE',
+            label: 'Xương sọ / Hàm mặt',
+            defaultNormalText: 'Bản xương sọ và xương hàm mặt liên tục, không thấy đường nứt/gãy xương.',
+            options: [
+              { id: 'NORMAL', label: 'Bình thường', isNormal: true, text: 'Vòm sọ và khối xương mặt liên tục, không thấy đường nứt hay khuyết xương.', gender: 'ALL' },
+              { id: 'FRACTURE', label: 'Đường nứt / Gãy xương', isNormal: false, text: 'Thấy đường sáng mất liên tục bản xương.', conclusion: `Nứt/Gãy xương vùng ${partRaw}.`, gender: 'ALL' },
+            ],
+          },
+        ],
+      };
+    }
+
+    if (partName.includes('bụng') || partName.includes('tiết niệu') || partName.includes('kub')) {
+      return {
+        ...baseMeta,
+        organs: [
+          {
+            key: 'BOWEL_GAS',
+            label: 'Bóng khí & Quai ruột',
+            defaultNormalText: 'Phân bố hơi trong khung đại tràng và ruột non bình thường, không thấy mức nước - hơi hay liềm hơi dưới hoành.',
+            options: [
+              { id: 'NORMAL', label: 'Bình thường', isNormal: true, text: 'Không thấy hình ảnh mức nước - hơi bệnh lý, không thấy liềm hơi dưới cơ hoành hai bên.', gender: 'ALL' },
+              { id: 'AIR_FLUID', label: 'Mức nước - hơi', isNormal: false, text: 'Nhiều quai ruột giãn kèm hình ảnh mức nước - hơi chân rộng/chân hẹp.', conclusion: 'Hình ảnh tắc ruột / bán tắc ruột.', gender: 'ALL' },
+              { id: 'FREE_AIR', label: 'Liềm hơi dưới hoành', isNormal: false, text: 'Hình ảnh liềm hơi tự do dưới vòm hoành phải/hai bên.', conclusion: 'Thủng tạng rỗng (liềm hơi dưới hoành).', gender: 'ALL' },
+            ],
+          },
+          {
+            key: 'CALCIFICATION',
+            label: 'Sỏi cản quang',
+            defaultNormalText: 'Không thấy hình cản quang bất thường vùng hệ tiết niệu và hạ sườn phải.',
+            options: [
+              { id: 'NORMAL', label: 'Không thấy sỏi', isNormal: true, text: 'Không thấy hình cản quang bất thường nghi sỏi trên đường đi hệ tiết niệu và túi mật.', gender: 'ALL' },
+              { id: 'RENAL_STONE', label: 'Sỏi cản quang thận/niệu quản', isNormal: false, text: 'Hình cản quang đậm độ vôi vùng hố thận / đường đi niệu quản.', conclusion: 'Hình cản quang nghi sỏi hệ tiết niệu.', gender: 'ALL' },
+            ],
+          },
+        ],
+      };
+    }
+
+    // X-quang Chi dưới / Chi trên / Khớp / Xương nói chung
+    return {
+      ...baseMeta,
+      organs: [
+        {
+          key: 'BONE',
+          label: 'Xương',
+          defaultNormalText: `Các xương vùng ${partRaw} hình dạng bình thường, đậm độ xương đều, vỏ xương liên tục, không thấy đường gãy xương hay ổ khuyết xương.`,
+          options: [
+            { id: 'NORMAL', label: 'Bình thường', isNormal: true, text: `Các xương vùng ${partRaw} hình dạng bình thường, đậm độ xương đều, vỏ xương liên tục, không thấy đường gãy xương hay ổ khuyết xương.`, gender: 'ALL' },
+            { id: 'FRACTURE', label: 'Đường gãy xương', isNormal: false, text: `Mất liên tục vỏ xương vùng ${partRaw}, có đường gãy xương rõ.`, conclusion: `Gãy xương vùng ${partRaw}.`, gender: 'ALL' },
+            { id: 'OSTEOPHYTE', label: 'Gai xương thoái hóa', isNormal: false, text: `Mỏ gai xương rìa khớp vùng ${partRaw}, đặc xương dưới sụn.`, conclusion: `Thoái hóa xương khớp vùng ${partRaw}.`, gender: 'ALL' },
+            { id: 'LYTIC_LESION', label: 'Ổ khuyết xương / Tiêu xương', isNormal: false, text: `Ghi nhận ổ khuyết xương ranh giới khá rõ vùng ${partRaw}.`, conclusion: `Tổn thương khuyết xương vùng ${partRaw} (đề nghị kiểm tra thêm).`, gender: 'ALL' },
+          ],
+        },
+        {
+          key: 'JOINT_SPACE',
+          label: 'Khe khớp',
+          defaultNormalText: `Khe khớp vùng ${partRaw} rộng đều, các diện khớp cân đối, không thấy trật khớp hay tổn thương dây chằng rõ rệt.`,
+          options: [
+            { id: 'NORMAL', label: 'Bình thường', isNormal: true, text: `Khe khớp vùng ${partRaw} rộng đều, các diện khớp cân đối, không thấy trật khớp hay hẹp khe khớp.`, gender: 'ALL' },
+            { id: 'JOINT_NARROW', label: 'Hẹp khe khớp', isNormal: false, text: `Hẹp không đều khe khớp vùng ${partRaw}, xơ xương dưới sụn.`, conclusion: `Hẹp khe khớp / Thoái hóa khớp vùng ${partRaw}.`, gender: 'ALL' },
+            { id: 'DISLOCATION', label: 'Trật khớp / Bán trật', isNormal: false, text: `Mất tương hợp diện khớp vùng ${partRaw}, di lệch đầu xương.`, conclusion: `Trật khớp vùng ${partRaw}.`, gender: 'ALL' },
+          ],
+        },
+        {
+          key: 'SOFT_TISSUE',
+          label: 'Phần mềm quanh khớp',
+          defaultNormalText: `Phần mềm quanh khớp vùng ${partRaw} bình thường, không thấy sưng nề, tụ dịch hay dị vật cản quang.`,
+          options: [
+            { id: 'NORMAL', label: 'Bình thường', isNormal: true, text: `Phần mềm quanh khớp vùng ${partRaw} bình thường, không thấy sưng nề, tụ dịch hay dị vật cản quang.`, gender: 'ALL' },
+            { id: 'SWELLING', label: 'Sưng nề phần mềm', isNormal: false, text: `Dày và tăng đậm độ mô mềm quanh khớp vùng ${partRaw}.`, conclusion: `Sưng nề phần mềm vùng ${partRaw}.`, gender: 'ALL' },
+            { id: 'FOREIGN_BODY', label: 'Dị vật cản quang', isNormal: false, text: `Hình ảnh dị vật cản quang nằm trong mô mềm vùng ${partRaw}.`, conclusion: `Dị vật cản quang phần mềm vùng ${partRaw}.`, gender: 'ALL' },
+          ],
+        },
+      ],
+    };
+  }
+
+  // === B. NHÓM CẮT LỚP VI TÍNH (CT / CLVT) ===
+  if (isCT) {
+    if (partName.includes('sọ') || partName.includes('não')) {
+      return {
+        ...baseMeta,
+        organs: [
+          {
+            key: 'BRAIN_PARENCHYMA',
+            label: 'Nhu mô não',
+            defaultNormalText: 'Nhu mô não trên và dưới lều tỷ trọng đồng nhất, ranh giới chất xám - chất trắng rõ, không thấy ổ xuất huyết hay nhồi máu cấp.',
+            options: [
+              { id: 'NORMAL', label: 'Bình thường', isNormal: true, text: 'Nhu mô não tỷ trọng đồng nhất, không thấy khối choán chỗ, ổ xuất huyết hay giảm tỷ trọng khu trú.', gender: 'ALL' },
+              { id: 'HEMORRHAGE', label: 'Xuất huyết não', isNormal: false, text: 'Ổ tăng tỷ trọng tự nhiên dạng máu tụ trong nhu mô não, có phù não xung quanh.', conclusion: 'Xuất huyết nhu mô não.', gender: 'ALL' },
+              { id: 'INFARCT', label: 'Nhồi máu não', isNormal: false, text: 'Vùng giảm tỷ trọng theo khu vực cấp máu động mạch não, xóa mờ rãnh cuộn não.', conclusion: 'Nhồi máu não.', gender: 'ALL' },
+            ],
+          },
+          {
+            key: 'VENTRICLES',
+            label: 'Não thất & Đường giữa',
+            defaultNormalText: 'Hệ thống não thất kích thước bình thường, đường giữa cân đối không di lệch.',
+            options: [
+              { id: 'NORMAL', label: 'Bình thường', isNormal: true, text: 'Hệ thống não thất đối xứng, các bể nền thông thoáng, đường giữa không lệch.', gender: 'ALL' },
+              { id: 'MIDLINE_SHIFT', label: 'Đè đẩy đường giữa', isNormal: false, text: 'Đè ép não thất bên và đẩy lệch đường giữa sang bên đối diện.', conclusion: 'Hiệu ứng choán chỗ gây đè đẩy đường giữa.', gender: 'ALL' },
+            ],
+          },
+          {
+            key: 'SKULL_SINUS',
+            label: 'Xương sọ & Xoang',
+            defaultNormalText: 'Bản xương sọ liên tục, các xoang cạnh mũi và xương chũm thông khí bình thường.',
+            options: [
+              { id: 'NORMAL', label: 'Bình thường', isNormal: true, text: 'Không thấy đường vỡ xương sọ, các xoang cạnh mũi sáng đều.', gender: 'ALL' },
+              { id: 'SKULL_FX', label: 'Vỡ xương sọ', isNormal: false, text: 'Đường mất liên tục bản xương sọ.', conclusion: 'Vỡ xương sọ.', gender: 'ALL' },
+            ],
+          },
+        ],
+      };
+    }
+
+    return {
+      ...baseMeta,
+      organs: [
+        {
+          key: 'MAIN_STRUCTURES',
+          label: `Cấu trúc ${partRaw}`,
+          defaultNormalText: `Các cấu trúc giải phẫu vùng ${partRaw} trên phim CLVT tỷ trọng bình thường, ranh giới rõ, không thấy khối bất thường.`,
+          options: [
+            { id: 'NORMAL', label: 'Bình thường', isNormal: true, text: `Các cấu trúc giải phẫu vùng ${partRaw} trên phim cắt lớp vi tính trong giới hạn bình thường, không thấy tổn thương khu trú.`, gender: 'ALL' },
+            { id: 'LESION', label: 'Tổn thương khu trú', isNormal: false, text: `Ghi nhận ổ tổn thương thay đổi tỷ trọng vùng ${partRaw}.`, conclusion: `Tổn thương khu trú vùng ${partRaw} trên CLVT.`, gender: 'ALL' },
+            { id: 'INFLAMMATION', label: 'Thâm nhiễm / Viêm', isNormal: false, text: `Thâm nhiễm mô mỡ và dày tổ chức vùng ${partRaw}.`, conclusion: `Theo dõi quá trình viêm vùng ${partRaw}.`, gender: 'ALL' },
+          ],
+        },
+        {
+          key: 'ADJACENT_TISSUE',
+          label: 'Mô lân cận & Hạch',
+          defaultNormalText: `Mô mềm và cấu trúc lân cận vùng ${partRaw} bình thường, không thấy hạch to bệnh lý hay dịch tự do.`,
+          options: [
+            { id: 'NORMAL', label: 'Bình thường', isNormal: true, text: `Không thấy hạch lớn bệnh lý hay tụ dịch bất thường vùng ${partRaw}.`, gender: 'ALL' },
+            { id: 'LYMPH_NODE', label: 'Hạch vùng lân cận', isNormal: false, text: `Một vài hạch nhỏ/lớn vùng ${partRaw}.`, conclusion: `Hạch vùng ${partRaw}.`, gender: 'ALL' },
+          ],
+        },
+      ],
+    };
+  }
+
+  // === C. NHÓM CỘNG HƯỞNG TỪ (MRI / CHT) ===
+  if (isMRI) {
+    return {
+      ...baseMeta,
+      organs: [
+        {
+          key: 'SIGNAL_PARENCHYMA',
+          label: `Nhu mô & Tín hiệu ${partRaw}`,
+          defaultNormalText: `Cấu trúc giải phẫu vùng ${partRaw} trên các chuỗi xung T1W, T2W, FLAIR/STIR tín hiệu đồng nhất, không thấy ổ tổn thương khu trú.`,
+          options: [
+            { id: 'NORMAL', label: 'Bình thường', isNormal: true, text: `Hình thái và tín hiệu các cấu trúc vùng ${partRaw} trên phim CHT trong giới hạn bình thường.`, gender: 'ALL' },
+            { id: 'EDEMA_SIGNAL', label: 'Tăng tín hiệu T2/STIR (Phù)', isNormal: false, text: `Ổ tăng tín hiệu trên T2W/STIR vùng ${partRaw} gợi ý phù nề / tổn thương.`, conclusion: `Tổn thương tăng tín hiệu vùng ${partRaw} trên CHT.`, gender: 'ALL' },
+            { id: 'DISC_HERNIA', label: 'Thoát vị / Lồi tổ chức', isNormal: false, text: `Khối lồi/thoát vị gây chèn ép cấu trúc lân cận vùng ${partRaw}.`, conclusion: `Thoát vị / chèn ép vùng ${partRaw}.`, gender: 'ALL' },
+          ],
+        },
+        {
+          key: 'SOFT_LIGAMENT',
+          label: 'Mô mềm & Mạch máu',
+          defaultNormalText: `Dây chằng, mô mềm và các nhánh mạch máu lớn vùng ${partRaw} liên tục, tín hiệu bình thường.`,
+          options: [
+            { id: 'NORMAL', label: 'Bình thường', isNormal: true, text: `Các cấu trúc phần mềm và mạch máu vùng ${partRaw} không thấy bất thường.`, gender: 'ALL' },
+            { id: 'EFFUSION', label: 'Tụ dịch / Phù phần mềm', isNormal: false, text: `Tăng tín hiệu dịch tụ vùng ${partRaw}.`, conclusion: `Tụ dịch vùng ${partRaw}.`, gender: 'ALL' },
+          ],
+        },
+      ],
+    };
+  }
+
+  // === D. NHÓM SIÊU ÂM ===
+  // 1. Tuyến giáp
   if (partName.includes('giáp') || partName.includes('thyroid')) {
     return {
       ...DEFAULT_CLINICAL_TEMPLATES.THYROID_TIRADS,
-      code: `TPL_${code}`,
-      title: examPart.name,
-      id_template_service: examPart.id_template_service,
-      id_exam_part: examPart.id,
+      ...baseMeta,
+      classificationType: CLASSIFICATION_TYPES.TIRADS,
+      hasClassification: true,
     };
   }
 
-  // 2. Phân hệ Tuyến vú
+  // 2. Tuyến vú
   if (partName.includes('vú') || partName.includes('breast')) {
     return {
       ...DEFAULT_CLINICAL_TEMPLATES.BREAST_BIRADS,
-      code: `TPL_${code}`,
-      title: examPart.name,
-      id_template_service: examPart.id_template_service,
-      id_exam_part: examPart.id,
+      ...baseMeta,
+      classificationType: CLASSIFICATION_TYPES.BIRADS,
+      hasClassification: true,
     };
   }
 
-  // 3. Phân hệ Siêu âm bụng tổng quát
-  if (
-    partName.includes('bụng') ||
-    partName.includes('abdomen') ||
-    partName.includes('tổng quát') ||
-    serviceName.includes('siêu âm')
-  ) {
-    return {
-      ...DEFAULT_CLINICAL_TEMPLATES.ABDOMEN,
-      code: `TPL_${code}`,
-      title: examPart.name,
-      id_template_service: examPart.id_template_service,
-      id_exam_part: examPart.id,
-    };
-  }
-
-  // 4. Phân hệ Sản phụ khoa (Tử cung, buồng trứng, tiểu khung)
+  // 3. Sản phụ khoa
   if (
     partName.includes('phụ khoa') ||
     partName.includes('tử cung') ||
@@ -80,10 +394,7 @@ export function generateDefault5TierForExamPart(examPart, templateService = {}) 
     partName.includes('tiểu khung')
   ) {
     return {
-      code: `TPL_${code}`,
-      title: examPart.name,
-      id_template_service: examPart.id_template_service,
-      id_exam_part: examPart.id,
+      ...baseMeta,
       classificationType: CLASSIFICATION_TYPES.ORADS,
       hasClassification: true,
       organs: [
@@ -131,41 +442,44 @@ export function generateDefault5TierForExamPart(examPart, templateService = {}) 
     };
   }
 
-  // 5. Tự động sinh theo cấu trúc cơ bản cho các exam_part khác
+  // 4. Bụng tổng quát
+  if (partName.includes('bụng') || partName.includes('abdomen') || partName.includes('tổng quát')) {
+    return {
+      ...DEFAULT_CLINICAL_TEMPLATES.ABDOMEN,
+      ...baseMeta,
+    };
+  }
+
+  // 5. Fallback chung cho các bộ phận Siêu âm khác (Tim, Mạch máu, Phần mềm, Khớp, Hạch...)
   return {
-    code: `TPL_${code}`,
-    title: examPart.name,
-    id_template_service: examPart.id_template_service,
-    id_exam_part: examPart.id,
-    classificationType: CLASSIFICATION_TYPES.NONE,
-    hasClassification: false,
+    ...baseMeta,
     organs: [
       {
-        key: `PART_${examPart.id}`,
-        label: examPart.name,
-        defaultNormalText: `${examPart.name} hình thái, cấu trúc và tín hiệu trên siêu âm trong giới hạn bình thường.`,
+        key: `PART_${examPart.id || 'MAIN'}`,
+        label: partRaw,
+        defaultNormalText: `${partRaw} hình thái, cấu trúc âm và tín hiệu Doppler trong giới hạn bình thường.`,
         options: [
           {
             id: 'NORMAL',
             label: 'Bình thường',
             isNormal: true,
-            text: `${examPart.name} hình thái, cấu trúc và tín hiệu trên siêu âm trong giới hạn bình thường, không thấy khối khu trú bất thường.`,
+            text: `${partRaw} hình thái, cấu trúc âm và tín hiệu trong giới hạn bình thường, không thấy khối khu trú bất thường.`,
             gender: 'ALL',
           },
           {
             id: 'ABNORMAL_MILD',
-            label: 'Bất thường nhẹ',
+            label: 'Viêm / Dày nhẹ tổ chức',
             isNormal: false,
-            text: `${examPart.name} có hình ảnh dày nhẹ tổ chức, ranh giới rõ.`,
-            conclusion: `Theo dõi biến đổi nhẹ tại ${examPart.name}.`,
+            text: `${partRaw} có hình ảnh dày nhẹ tổ chức hoặc tụ dịch lớp mỏng.`,
+            conclusion: `Theo dõi biến đổi nhẹ tại ${partRaw}.`,
             gender: 'ALL',
           },
           {
             id: 'ABNORMAL_LESION',
             label: 'Tổn thương khu trú',
             isNormal: false,
-            text: `${examPart.name} ghi nhận tổn thương khu trú không đồng nhất, đề nghị kết hợp lâm sàng.`,
-            conclusion: `Tổn thương khu trú tại ${examPart.name}.`,
+            text: `${partRaw} ghi nhận tổn thương khu trú ranh giới rõ/không rõ, đề nghị kết hợp lâm sàng.`,
+            conclusion: `Tổn thương khu trú tại ${partRaw}.`,
             gender: 'ALL',
           },
         ],
@@ -330,8 +644,14 @@ export const upsertClinicalTemplate = upsertClinicalTemplateToDB;
  * @param {number|string} idExamPart
  * @returns {Promise<Object|null>}
  */
-export async function fetchClinicalTemplateByServiceAndPart(idTemplateService, idExamPart) {
+export async function fetchClinicalTemplateByServiceAndPart(
+  idTemplateService,
+  idExamPart,
+  context = {}
+) {
   if (!idExamPart) return null;
+
+  const { examPartName = '', serviceName = '' } = context || {};
 
   try {
     const params = { id_exam_part: idExamPart };
@@ -341,14 +661,25 @@ export async function fetchClinicalTemplateByServiceAndPart(idTemplateService, i
     const res = await API_CALL.get('/clinical-templates', { params });
     const data = res?.data?.data || res?.data;
     if (Array.isArray(data) && data.length > 0) {
-      return data[0];
+      return normalizeClinicalTemplate(data[0]);
     }
-    // Backend trả rỗng -> không có mẫu trong DB cho Phân hệ & Bộ phận này
-    return null;
   } catch {
     // Fallback tìm chính xác trong local cache nếu mất kết nối API
-    return resolveClinicalTemplate({ idTemplateService, idExamPart });
+    const cachedMatch = resolveClinicalTemplate({ idTemplateService, idExamPart });
+    if (cachedMatch) return normalizeClinicalTemplate(cachedMatch);
   }
+
+  // Fallback tự động sinh cấu hình 5 tầng chuẩn y khoa theo Phân hệ & Bộ phận
+  if (examPartName || serviceName) {
+    return normalizeClinicalTemplate(
+      generateDefault5TierForExamPart(
+        { id: idExamPart, name: examPartName || `Bộ phận ${idExamPart}`, id_template_service: idTemplateService },
+        { id: idTemplateService, name: serviceName }
+      )
+    );
+  }
+
+  return null;
 }
 
 /**

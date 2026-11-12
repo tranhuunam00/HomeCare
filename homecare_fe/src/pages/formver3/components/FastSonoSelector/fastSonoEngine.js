@@ -119,6 +119,7 @@ export function generateBulletedNarrative(organs = [], selectedMap = {}, gender)
   const lines = [];
 
   for (const organ of organs) {
+    const organLabel = organ.label || organ.name || organ.title || organ.organName || organ.key || 'Bộ phận';
     // Lọc options theo giới tính
     const validOptions = filterOptionsByGender(organ.options || [], gender);
     const validOptionIds = new Set(validOptions.map((o) => o.id));
@@ -129,7 +130,7 @@ export function generateBulletedNarrative(organs = [], selectedMap = {}, gender)
     if (isOnlyNormal) {
       const normalOpt = organ.options?.find((o) => o.id === 'NORMAL');
       const text = normalOpt?.text || organ.defaultNormalText || 'Không thấy hình ảnh bất thường.';
-      lines.push(`• ${organ.label}: ${text}`);
+      lines.push(`• ${organLabel}: ${text}`);
     } else {
       const abnormalTexts = selectedIds
         .map((id) => {
@@ -139,9 +140,9 @@ export function generateBulletedNarrative(organs = [], selectedMap = {}, gender)
         .filter(Boolean);
 
       if (abnormalTexts.length > 0) {
-        lines.push(`• ${organ.label}: ${abnormalTexts.join('; ')}`);
+        lines.push(`• ${organLabel}: ${abnormalTexts.join('; ')}`);
       } else {
-        lines.push(`• ${organ.label}: ${organ.defaultNormalText || 'Bình thường.'}`);
+        lines.push(`• ${organLabel}: ${organ.defaultNormalText || 'Bình thường.'}`);
       }
     }
   }
@@ -172,7 +173,13 @@ export function generateHTMLNarrative(organs = [], selectedMap = {}, gender) {
  * @param {string} selectedGrade 
  * @returns {string}
  */
-export function generateConclusionText(organs = [], selectedMap = {}, classificationType = CLASSIFICATION_TYPES.NONE, selectedGrade = '') {
+export function generateConclusionText(
+  organs = [],
+  selectedMap = {},
+  classificationType = CLASSIFICATION_TYPES.NONE,
+  selectedGrade = '',
+  templateContext = {}
+) {
   if (!Array.isArray(organs)) return '';
 
   const conclusions = [];
@@ -197,7 +204,24 @@ export function generateConclusionText(organs = [], selectedMap = {}, classifica
   }
 
   if (conclusions.length === 0) {
-    return 'Hiện tại chưa phát hiện hình ảnh bất thường trên siêu âm.';
+    const ctxText = `${templateContext?.serviceName || ''} ${templateContext?.title || ''}`.toLowerCase();
+    const partName = templateContext?.examPartName || '';
+    if (!ctxText.trim() && !partName) {
+      return 'Hiện tại chưa phát hiện hình ảnh bất thường trên siêu âm.';
+    }
+
+    let modalityLabel = 'chẩn đoán hình ảnh';
+    if (ctxText.includes('x quang') || ctxText.includes('x-quang') || ctxText.includes('xray')) {
+      modalityLabel = 'X-quang';
+    } else if (ctxText.includes('cắt lớp') || ctxText.includes('clvt') || /\bct\b/.test(ctxText)) {
+      modalityLabel = 'cắt lớp vi tính';
+    } else if (ctxText.includes('cộng hưởng từ') || ctxText.includes('mri') || ctxText.includes('cht')) {
+      modalityLabel = 'cộng hưởng từ';
+    } else if (ctxText.includes('siêu âm') || ctxText.includes('ultrasound')) {
+      modalityLabel = 'siêu âm';
+    }
+
+    return `Hiện tại chưa phát hiện hình ảnh bất thường${partName ? ` vùng ${partName}` : ''} trên ${modalityLabel}.`;
   }
 
   return conclusions.join('\n');

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button, Tooltip, Dropdown, Upload } from 'antd';
 import {
   ZoomInOutlined,
@@ -38,6 +39,16 @@ export default function PacsTopNav({
   isExpanded = false,
   onToggleExpand,
 }) {
+  const navigate = useNavigate();
+
+  const handleClose = () => {
+    if (window.opener) {
+      window.close();
+    } else {
+      navigate(-1);
+    }
+  };
+
   const handleFullscreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen();
@@ -285,6 +296,7 @@ export default function PacsTopNav({
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         {onUploadDicom && (
           <Upload
+            multiple
             showUploadList={false}
             beforeUpload={onUploadDicom}
             accept=".dcm,.dicom,.zip,.pdf,.docx,.doc,.mp4,.png,.jpg,.jpeg"
@@ -332,11 +344,11 @@ export default function PacsTopNav({
           />
         </Tooltip>
 
-        <Tooltip title="Đóng cửa sổ">
+        <Tooltip title="Đóng / Quay lại">
           <Button
             size="small"
             icon={<CloseOutlined />}
-            onClick={() => window.close()}
+            onClick={handleClose}
             style={{ backgroundColor: '#131b2e', borderColor: '#1e293b', color: '#ef4444' }}
           />
         </Tooltip>

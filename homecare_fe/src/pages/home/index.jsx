@@ -60,7 +60,7 @@ const Sidebar = ({ collapsed, onNavigate }) => {
       icon: <Avatar src="/icons/pacs.png" size={avatarSize} />,
       label: "PACS",
       onClick: () => {
-        toast.info("✨ Tính năng sắp ra mắt!");
+        navigate("/pacs/viewer");
       },
     },
 

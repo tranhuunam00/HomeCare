@@ -49,6 +49,7 @@ export default function PacsViewport({
   currentMeta,
   study,
   patientDiagnoseId,
+  seriesIndex = 1,
   currentIndex,
   setCurrentIndex,
   totalSlices = 1,
@@ -415,6 +416,7 @@ export default function PacsViewport({
         currentMeta={currentMeta}
         study={study}
         patientDiagnoseId={patientDiagnoseId}
+        seriesIndex={seriesIndex}
         currentIndex={currentIndex}
         totalSlices={totalSlices}
         colorLut={colorLut}
@@ -451,11 +453,25 @@ export default function PacsViewport({
 
       {/* Empty State */}
       {!loading && instancesCount === 0 && (
-        <div style={{ textAlign: 'center', color: '#64748b' }}>
-          <p style={{ fontSize: '15px', marginBottom: 12 }}>Chưa có file ảnh DICOM cho ca này</p>
-          <Upload showUploadList={false} beforeUpload={onUploadDicom} accept=".dcm,.zip">
+        <div style={{ textAlign: 'center', color: '#94a3b8', padding: '0 16px' }}>
+          <p style={{ fontSize: '15px', marginBottom: 6, color: '#e2e8f0', fontWeight: 600 }}>
+            {patientDiagnoseId
+              ? 'Chưa có file ảnh DICOM cho ca này'
+              : 'Chế độ đọc PACS độc lập (Không liên kết bệnh nhân)'}
+          </p>
+          {!patientDiagnoseId && (
+            <p style={{ fontSize: '12px', marginBottom: 14, color: '#64748b' }}>
+              Chọn trực tiếp nhiều file .dcm / .dicom từ máy để xem và đo đạc ngay
+            </p>
+          )}
+          <Upload
+            multiple
+            showUploadList={false}
+            beforeUpload={onUploadDicom}
+            accept={patientDiagnoseId ? '.dcm,.dicom,.zip' : '.dcm,.dicom,.pdf,.png,.jpg,.jpeg,.mp4'}
+          >
             <Button type="primary" icon={<UploadOutlined />}>
-              Tải lên file DICOM (.dcm / .zip)
+              {patientDiagnoseId ? 'Tải lên file DICOM (.dcm / .zip)' : 'Mở file DICOM từ máy (.dcm)'}
             </Button>
           </Upload>
         </div>

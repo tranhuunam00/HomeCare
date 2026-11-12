@@ -5,6 +5,7 @@ export default function PacsCornerHud({
   currentMeta,
   study,
   patientDiagnoseId,
+  seriesIndex = 1,
   currentIndex = 0,
   totalSlices = 1,
   colorLut,
@@ -69,7 +70,7 @@ export default function PacsCornerHud({
           textShadow: '1px 1px 2px #000',
         }}
       >
-        <div>Series Index: 1</div>
+        <div>Series Index: {seriesIndex}</div>
         <div>
           Image: {currentIndex + 1}/{totalSlices}
         </div>

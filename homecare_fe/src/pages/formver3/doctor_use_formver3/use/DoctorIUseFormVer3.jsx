@@ -1094,15 +1094,15 @@ export default function DoctorUseDFormVer3({
                   options={[
                     {
                       label: isMobile
-                        ? (languageTranslate === "en" ? "Table" : "Bảng")
-                        : (languageTranslate === "en" ? "Structured table" : "Bảng cấu trúc"),
-                      value: "STRUCTURED_TABLE",
-                    },
-                    {
-                      label: isMobile
                         ? "Nhanh"
                         : (languageTranslate === "en" ? "Fast D-SONO" : "Chọn nhanh (D-SONO)"),
                       value: "FAST_SONO",
+                    },
+                    {
+                      label: isMobile
+                        ? (languageTranslate === "en" ? "Table" : "Bảng")
+                        : (languageTranslate === "en" ? "Structured table" : "Bảng cấu trúc"),
+                      value: "STRUCTURED_TABLE",
                     },
                     {
                       label: isMobile
@@ -1123,6 +1123,11 @@ export default function DoctorUseDFormVer3({
               examPartName={
                 examParts.find(
                   (ex) => ex.id == (selectedIDs.id_exam_part || form.getFieldValue("id_exam_part"))
+                )?.name || ""
+              }
+              serviceName={
+                templateServices?.find(
+                  (ts) => ts.id == (selectedIDs.id_template_service || form.getFieldValue("id_template_service"))
                 )?.name || ""
               }
               gender={patientDiagnose?.gender}

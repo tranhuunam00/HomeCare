@@ -47,6 +47,16 @@ export function usePacsStudy(patientDiagnoseId, apiEndpoint) {
   // Fetch Study Metadata & HomeCare PatientDiagnose Record
   const loadStudy = useCallback(async () => {
     if (!patientDiagnoseId) {
+      setPatientDiagnose(null);
+      setStudy((prev) =>
+        prev || {
+          patientName: 'Đọc độc lập (Local)',
+          patientId: 'LOCAL',
+          modality: 'DICOM',
+          studyDate: '',
+          attachedFiles: [],
+        }
+      );
       setLoading(false);
       return;
     }
@@ -123,6 +133,7 @@ export function usePacsStudy(patientDiagnoseId, apiEndpoint) {
       }
 
       const instance = instances[index];
+      if (instance?.isLocal) return;
       try {
         const res = await axios.get(
           `${apiEndpoint}/api/pacs/instances/${instance.sopInstanceUid}/file`,
@@ -149,8 +160,84 @@ export function usePacsStudy(patientDiagnoseId, apiEndpoint) {
     }
   }, [currentIndex, instances, loadInstance]);
 
-  // Upload handler for new DICOM files
+  // Upload handler for new DICOM files (or local-only reading when no patientDiagnoseId)
   const uploadDicom = async (file) => {
+    // Standalone Local Mode: read & decode directly in browser without linking to any patient
+    if (!patientDiagnoseId) {
+      const lowerName = (file.name || '').toLowerCase();
+      if (lowerName.endsWith('.zip')) {
+        message.warning('Chế độ đọc độc lập hỗ trợ chọn trực tiếp nhiều file .dcm / .dicom hoặc ảnh/PDF.');
+        return false;
+      }
+
+      const isAttachment = /\.(pdf|docx?|mp4|png|jpe?g|webp)$/i.test(lowerName);
+      if (isAttachment) {
+        const objectUrl = URL.createObjectURL(file);
+        setStudy((prev) => ({
+          ...(prev || { patientName: 'Đọc độc lập (Local)', patientId: 'LOCAL', modality: 'DICOM' }),
+          attachedFiles: [
+            ...(prev?.attachedFiles || []),
+            {
+              id: `local_att_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+              fileName: file.name,
+              fileUrl: objectUrl,
+              fileSize: file.size,
+              isLocal: true,
+            },
+          ],
+        }));
+        message.success(`Đã mở tệp cục bộ: ${file.name}`);
+        return false;
+      }
+
+      try {
+        const buffer = await file.arrayBuffer();
+        const parsed = parseDicomBuffer(buffer);
+        if (!parsed?.rawPixels) {
+          message.error(`Không thể giải mã pixel DICOM từ tệp: ${file.name}`);
+          return false;
+        }
+
+        const localInst = {
+          sopInstanceUid: parsed.meta?.sopInstanceUid || `local_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+          seriesInstanceUid: parsed.meta?.seriesInstanceUid || 'local_series_1',
+          seriesDescription: parsed.meta?.seriesDescription || 'Local DICOM',
+          modality: parsed.meta?.modality || 'DICOM',
+          fileName: file.name,
+          isLocal: true,
+        };
+
+        setInstances((prev) => {
+          const nextIdx = prev.length;
+          const nextList = [...prev, { ...localInst, instanceNumber: nextIdx + 1 }];
+          setDicomCache((cachePrev) => ({ ...cachePrev, [nextIdx]: parsed }));
+          if (nextIdx === 0) {
+            setCurrentIndex(0);
+            setWindowCenter(parsed.meta.windowCenter);
+            setWindowWidth(parsed.meta.windowWidth);
+          }
+          return nextList;
+        });
+
+        setStudy((prev) => ({
+          ...(prev || {}),
+          patientName:
+            prev?.patientName && prev.patientName !== 'Đọc độc lập (Local)'
+              ? prev.patientName
+              : parsed.meta?.patientName && parsed.meta.patientName !== 'Unknown' && parsed.meta.patientName !== 'Không xác định'
+              ? parsed.meta.patientName
+              : 'Đọc độc lập (Local)',
+          patientId: parsed.meta?.patientId || prev?.patientId || 'LOCAL',
+          modality: parsed.meta?.modality || prev?.modality || 'DICOM',
+          studyDate: parsed.meta?.studyDate || prev?.studyDate || '',
+        }));
+      } catch (err) {
+        console.error('Lỗi đọc DICOM cục bộ:', err);
+        message.error(`Không thể đọc tệp ${file.name}`);
+      }
+      return false;
+    }
+
     const formData = new FormData();
     formData.append('files', file);
 
