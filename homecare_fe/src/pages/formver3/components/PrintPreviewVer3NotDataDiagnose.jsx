@@ -342,22 +342,26 @@ const PrintPreviewVer3NotDataDiagnose = ({
                       .join(", ")}
                   />
                 </div>
-                <PrintItem
-                  label={translateLabel(
-                    languageTranslate,
-                    "phone",
-                    false,
-                  ).toUpperCase()}
-                  value={selectedPatientDiagnose?.phoneNumber}
-                />
-                <PrintItem
-                  label={translateLabel(
-                    languageTranslate,
-                    "patientId",
-                    false,
-                  ).toUpperCase()}
-                  value={selectedPatientDiagnose?.PID}
-                />
+                <div className={styles.adminFullRow}>
+                  <PrintItem
+                    label={translateLabel(
+                      languageTranslate,
+                      "phone",
+                      false,
+                    ).toUpperCase()}
+                    value={selectedPatientDiagnose?.phoneNumber}
+                  />
+                </div>
+                <div className={styles.adminFullRow}>
+                  <PrintItem
+                    label={translateLabel(
+                      languageTranslate,
+                      "patientId",
+                      false,
+                    ).toUpperCase()}
+                    value={selectedPatientDiagnose?.PID}
+                  />
+                </div>
                 <div className={styles.adminFullRow}>
                   <PrintItem
                     label={translateLabel(

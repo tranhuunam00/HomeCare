@@ -55,7 +55,7 @@ const Profile = () => {
   const [clinics, setClinics] = useState([]);
   const [authorizedClinics, setAuthorizedClinics] = useState([]);
   const [loading, setLoading] = useState(false);
-  const { user, doctor } = useGlobalAuth();
+  const { user, doctor, setDoctor } = useGlobalAuth();
   const { showSuccess, showError } = useToast();
   const eSignatureType = Form.useWatch("e_signature_url", form);
 
@@ -243,12 +243,12 @@ const Profile = () => {
   const onFinish = async (values) => {
     try {
       if (values.e_signature_url === "smartca") {
-        if (!values.credentialId) {
+        if (values.smartca_username && !values.credentialId) {
           showError("Vui lòng chọn Credential ID trước khi lưu chữ ký");
           return;
         }
 
-        if (!signVerified) {
+        if (values.smartca_username && !signVerified) {
           showError("Vui lòng kiểm tra SmartCA trước khi lưu");
           return;
         }
@@ -259,7 +259,11 @@ const Profile = () => {
         await API_CALL.del("/doctor-sign/delete");
       }
 
-      if (values.e_signature_url !== E_SIGNATURE_TYPES.NONE) {
+      if (
+        values.e_signature_url !== E_SIGNATURE_TYPES.NONE &&
+        values.smartca_username &&
+        signVerified
+      ) {
         await API_CALL.post("/doctor-sign/apply-sign", {
           username: values.smartca_username,
           password: values.smartca_password,
@@ -285,10 +289,25 @@ const Profile = () => {
       if (avatarFile) formData.append("avatar", avatarFile);
       if (signatureFile) formData.append("signature", signatureFile);
 
-      await API_CALL.put(`/doctor/${realId}`, formData, {
+      const updateRes = await API_CALL.put(`/doctor/${realId}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
+      const updatedDoctor = updateRes.data?.data;
+      if (updatedDoctor) {
+        setDoctor(updatedDoctor);
+        if (updatedDoctor.avatar_url) {
+          setAvatarUrl(updatedDoctor.avatar_url);
+        }
+        if (updatedDoctor.signature_url) {
+          setSignatureUrl(updatedDoctor.signature_url);
+        }
+      } else {
+        await fetchDoctorById(realId);
+      }
+
+      setAvatarFile(null);
+      setSignatureFile(null);
       showSuccess("Cập nhật thông tin & chữ ký thành công");
       setIsEditing(false);
     } catch (error) {
@@ -781,7 +800,11 @@ const Profile = () => {
             <Col>
               {isEditing && (
                 <Button
-                  disabled={eSignatureType === "smartca" && !signVerified}
+                  disabled={
+                    eSignatureType === "smartca" &&
+                    form.getFieldValue("smartca_username") &&
+                    !signVerified
+                  }
                   type="primary"
                   htmlType="submit"
                 >

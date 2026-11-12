@@ -61,18 +61,19 @@ const PrintHeaderFromCustom = ({ printTemplate }) => {
       ref={containerRef}
       style={{
         width: "100%",
-        height: Math.ceil(canvasHeight * scale),
-        overflow: "hidden",
-        marginBottom: 12,
+        overflowX: "auto",
+        overflowY: "hidden",
+        marginBottom: 16,
+        paddingBottom: 4,
       }}
     >
       <div
         style={{
           position: "relative",
           width: CANVAS_WIDTH,
+          minWidth: CANVAS_WIDTH,
           height: canvasHeight,
-          transform: `scale(${scale})`,
-          transformOrigin: "top left",
+          margin: "0 auto",
         }}
       >
         {blocks
