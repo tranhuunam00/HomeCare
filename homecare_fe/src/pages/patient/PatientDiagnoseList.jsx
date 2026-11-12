@@ -1154,13 +1154,14 @@ const PatientTablePage = ({ PID = null }) => {
           style={{
             padding: 0,
             flex: 1,
-            maxHeight: "115vh",
-            overflowY: "scroll",
+            width: deviceIsMobile ? "100%" : "auto",
+            maxHeight: deviceIsMobile ? "none" : "115vh",
+            overflowY: deviceIsMobile ? "visible" : "scroll",
           }}
         >
           <div
             style={{
-              position: "fixed",
+              position: deviceIsMobile ? "relative" : "fixed",
               zIndex: 3,
               display: "flex",
               flexWrap: "wrap",
@@ -1169,9 +1170,10 @@ const PatientTablePage = ({ PID = null }) => {
               borderBottom: "1px solid #e2e8f0",
               boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
               alignItems: "center",
-              padding: "4px 8px",
-              gap: "8px",
+              padding: "6px 8px",
+              gap: "6px",
               borderRadius: "4px",
+              marginBottom: deviceIsMobile ? 8 : 0,
             }}
           >
             <Button
@@ -1264,7 +1266,7 @@ const PatientTablePage = ({ PID = null }) => {
                 <Button
                   icon={<UserOutlined />}
                   style={{
-                    marginLeft: 20,
+                    marginLeft: deviceIsMobile ? 0 : 20,
                     borderRadius: "4px",
                     borderColor: "#3b82f6",
                     color: "#1d4ed8",

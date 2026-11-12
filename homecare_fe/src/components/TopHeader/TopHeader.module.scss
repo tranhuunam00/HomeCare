@@ -162,12 +162,22 @@
 }
 
 @media (max-width: 768px) {
+  .topHeader {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 40px;
+    width: 100%;
+    padding: 6px 8px;
+    gap: 6px;
+    justify-content: flex-start;
+  }
+
   .topHeader__right_name {
-    font-size: 8px;
+    font-size: 10px;
   }
 
   .topHeader__right {
-    margin-left: 12px;
+    margin-left: auto;
   }
 
   .topHeader__right_avatar {
