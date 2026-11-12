@@ -877,6 +877,10 @@ const PatientTablePage = ({ PID = null }) => {
         display: "flex",
         flexDirection: !deviceIsMobile ? "row" : "column",
         gap: !deviceIsMobile && selectedPatientDiagnose ? 0 : 8,
+        width: "100%",
+        maxWidth: "100%",
+        overflowX: deviceIsMobile ? "hidden" : undefined,
+        boxSizing: "border-box",
       }}
     >
       <div
