@@ -276,8 +276,8 @@ const PatientFormPage = () => {
           >
             {/* Họ tên + Giới tính + Năm sinh + Tuổi */}
             <h4 style={{ color: "#1677ff", margin: "4px 0 8px 0" }}>THÔNG TIN HÀNH CHÍNH</h4>
-          <Row gutter={24}>
-            <Col span={8}>
+          <Row gutter={[12, 0]}>
+            <Col xs={24} md={8}>
               <Form.Item
                 name="name"
                 label="Họ và tên"
@@ -292,7 +292,7 @@ const PatientFormPage = () => {
                 <Input />
               </Form.Item>
             </Col>
-            <Col span={4}>
+            <Col xs={8} md={4}>
               <Form.Item
                 name="gender"
                 label="Giới tính"
@@ -303,14 +303,14 @@ const PatientFormPage = () => {
                   },
                 ]}
               >
-                <Select placeholder="Chọn giới tính">
+                <Select placeholder="Chọn">
                   <Option value="Nam">Nam</Option>
                   <Option value="Nữ">Nữ</Option>
                   <Option value="Khác">Khác</Option>
                 </Select>
               </Form.Item>
             </Col>
-            <Col span={6}>
+            <Col xs={8} md={6}>
               <Form.Item
                 name="birth_year"
                 label="Năm sinh"
@@ -323,7 +323,7 @@ const PatientFormPage = () => {
               >
                 <Input
                   type="number"
-                  placeholder="Ví dụ: 1998"
+                  placeholder="VD: 1998"
                   onChange={(e) => {
                     const year = +e.target.value;
 
@@ -343,15 +343,15 @@ const PatientFormPage = () => {
               </Form.Item>
             </Col>
 
-            <Col span={6}>
+            <Col xs={8} md={6}>
               <Form.Item name="age" label="Tuổi">
                 <Input disabled />
               </Form.Item>
             </Col>
           </Row>
 
-          <Row gutter={16}>
-            <Col span={8}>
+          <Row gutter={[12, 0]}>
+            <Col xs={12} md={8}>
               <Form.Item
                 name="province"
                 label="Tỉnh/Thành phố"
@@ -363,7 +363,7 @@ const PatientFormPage = () => {
                 ]}
               >
                 <Select
-                  placeholder="Chọn Tỉnh / Thành phố"
+                  placeholder="Chọn Tỉnh / TP"
                   onChange={(val) => {
                     form.setFieldsValue({
                       province: val,
@@ -380,7 +380,7 @@ const PatientFormPage = () => {
                 </Select>
               </Form.Item>
             </Col>
-            <Col span={8}>
+            <Col xs={12} md={8}>
               <Form.Item
                 name="ward"
                 label="Phường/Xã"
@@ -407,14 +407,14 @@ const PatientFormPage = () => {
                 </Select>
               </Form.Item>
             </Col>
-            <Col span={8}>
+            <Col xs={24} md={8}>
               <Form.Item name="address" label="Chi tiết địa chỉ">
                 <Input placeholder="Nhập địa chỉ cụ thể (số nhà, ngõ...)" />
               </Form.Item>
             </Col>
           </Row>
-          <Row gutter={16}>
-            <Col span={8}>
+          <Row gutter={[12, 0]}>
+            <Col xs={12} md={8}>
               <Form.Item
                 name="phone"
                 label="Số điện thoại"
@@ -433,7 +433,7 @@ const PatientFormPage = () => {
                 <Input type="number" maxLength={10} />
               </Form.Item>
             </Col>
-            <Col span={8}>
+            <Col xs={12} md={8}>
               <Form.Item
                 name="email"
                 label="Email"
@@ -448,7 +448,7 @@ const PatientFormPage = () => {
                 <Input />
               </Form.Item>
             </Col>
-            <Col span={8}>
+            <Col xs={24} md={8}>
               <Form.Item
                 name="country"
                 label="Quốc tịch"
@@ -478,8 +478,8 @@ const PatientFormPage = () => {
               </Form.Item>
             </Col>
           </Row>
-          <Row gutter={16}>
-            <Col span={8}>
+          <Row gutter={[12, 0]}>
+            <Col xs={12} md={8}>
               <Form.Item
                 name="cccd"
                 label="CCCD"
@@ -493,7 +493,7 @@ const PatientFormPage = () => {
                 <Input placeholder="Nhập số CCCD / CMND" />
               </Form.Item>
             </Col>
-            <Col span={8}>
+            <Col xs={12} md={8}>
               <Form.Item
                 name="pid"
                 label="PID"
@@ -514,7 +514,7 @@ const PatientFormPage = () => {
                 />
               </Form.Item>
             </Col>
-            <Col span={8}>
+            <Col xs={24} md={8}>
               <Form.Item
                 name="sid"
                 label="SID"
@@ -530,13 +530,13 @@ const PatientFormPage = () => {
             </Col>
           </Row>
           <Divider style={{ margin: "8px 0" }} />
-          <div style={{ display: "flex", alignItems: "center", margin: "4px 0 8px 0", gap: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", margin: "4px 0 8px 0", gap: "4px 8px" }}>
             <h4 style={{ color: "#1677ff", margin: 0 }}>THÔNG TIN CHỈ ĐỊNH</h4>
 
             <ReloadTSAndExamPartsButton />
 
-            <span style={{ fontStyle: "italic", fontWeight: 400, fontSize: "11px", color: "#64748b" }}>
-              Nếu mục nhập chỉ định bị rỗng, vui lòng ấn nút reload bên trái để lấy lại thông tin
+            <span style={{ fontStyle: "italic", fontWeight: 400, fontSize: "11px", color: "#64748b", flexBasis: "100%" }}>
+              Nếu mục nhập chỉ định bị rỗng, vui lòng ấn nút reload bên trên để lấy lại thông tin
             </span>
           </div>
           <Row gutter={16}>
