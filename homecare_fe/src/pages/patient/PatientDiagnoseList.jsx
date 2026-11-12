@@ -736,37 +736,42 @@ const PatientTablePage = ({ PID = null }) => {
       cell: ResizableTitle,
     },
   };
+  const clampColWidth = (w) => Math.max(50, Math.min(600, Math.round(w)));
+
   const handleResize =
     (key) =>
       (e, { size }) => {
-        setCustomColumns((prev) => {
-          const next = prev.map((col) =>
+        const nextWidth = clampColWidth(size.width);
+        setCustomColumns((prev) =>
+          prev.map((col) =>
             col.key === key
               ? {
                 ...col,
-                width: size.width,
+                width: nextWidth,
               }
               : col,
-          );
+          ),
+        );
+      };
 
-          // save localStorage
-          const saved = JSON.parse(
-            localStorage.getItem(COLUMN_SETTING_STORAGE_KEY) || "{}",
-          );
+  const handleResizeStop =
+    (key) =>
+      (e, { size }) => {
+        const nextWidth = clampColWidth(size.width);
+        const saved = JSON.parse(
+          localStorage.getItem(COLUMN_SETTING_STORAGE_KEY) || "{}",
+        );
 
-          localStorage.setItem(
-            COLUMN_SETTING_STORAGE_KEY,
-            JSON.stringify({
-              ...saved,
-              widths: {
-                ...(saved.widths || {}),
-                [key]: size.width,
-              },
-            }),
-          );
-
-          return next;
-        });
+        localStorage.setItem(
+          COLUMN_SETTING_STORAGE_KEY,
+          JSON.stringify({
+            ...saved,
+            widths: {
+              ...(saved.widths || {}),
+              [key]: nextWidth,
+            },
+          }),
+        );
       };
 
   useEffect(() => {
@@ -815,18 +820,22 @@ const PatientTablePage = ({ PID = null }) => {
     () =>
       customColumns
         .filter((col) => !(deviceIsMobile && col.key === "stt"))
-        .map((col) => ({
-          ...col,
-          fixed: deviceIsMobile ? undefined : col.fixed,
-          width:
+        .map((col) => {
+          const resolvedWidth =
             deviceIsMobile && col.key === "name"
               ? Math.max(col.width || 0, 140)
-              : col.width,
-          onHeaderCell: () => ({
-            width: col.width,
-            onResize: handleResize(col.key),
-          }),
-        })),
+              : col.width;
+          return {
+            ...col,
+            fixed: deviceIsMobile ? undefined : col.fixed,
+            width: resolvedWidth,
+            onHeaderCell: () => ({
+              width: resolvedWidth,
+              onResize: handleResize(col.key),
+              onResizeStop: handleResizeStop(col.key),
+            }),
+          };
+        }),
     [customColumns, deviceIsMobile],
   );
 
