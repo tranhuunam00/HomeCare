@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Select, Button, Tooltip, message } from 'antd';
+import { Button, Empty, Spin, Tooltip, message } from 'antd';
 import {
   CheckCircleOutlined,
   WarningOutlined,
@@ -23,12 +23,8 @@ import {
   BIRADS_GRADES,
 } from './fastSono.constants';
 import {
-  getAllClinicalTemplates,
-  fetchClinicalTemplatesFromDB,
-  resolveClinicalTemplate,
+  fetchClinicalTemplateByServiceAndPart,
 } from '../../../../services/clinicalTemplateService';
-
-const { Option } = Select;
 
 /**
  * FastSonoSelector - Organism Component
@@ -46,44 +42,32 @@ const FastSonoSelector = ({
   onConclusionChange,
   onSelectedMapChange,
 }) => {
-  // 1. Tải danh sách tất cả các template lâm sàng hiện có (ưu tiên DB -> cache)
-  const [allTemplates, setAllTemplates] = useState(() => getAllClinicalTemplates());
+  // 1. Truy vấn trực tiếp mẫu 5 tầng theo Phân hệ (idTemplateService) và Bộ phận (idExamPart)
+  const [activeTemplate, setActiveTemplate] = useState(null);
+  const [loadingTemplate, setLoadingTemplate] = useState(false);
 
   useEffect(() => {
-    fetchClinicalTemplatesFromDB().then((dbList) => {
-      if (Array.isArray(dbList) && dbList.length > 0) {
-        setAllTemplates(dbList);
-      }
-    });
-  }, []);
-
-  // 2. Tìm template phù hợp nhất theo Tầng 1 (idTemplateService) và Tầng 2 (idExamPart / examPartName) của HomeCare
-  const matchedTemplate = useMemo(() => {
-    return (
-      resolveClinicalTemplate({
-        idTemplateService,
-        idExamPart,
-        examPartName,
-      }) || allTemplates[0]
-    );
-  }, [idTemplateService, idExamPart, examPartName, allTemplates]);
-
-  const [currentTemplateCode, setCurrentTemplateCode] = useState(
-    matchedTemplate?.code || 'ABDOMEN'
-  );
-
-  useEffect(() => {
-    if (matchedTemplate?.code && matchedTemplate.code !== currentTemplateCode) {
-      setCurrentTemplateCode(matchedTemplate.code);
+    let cancelled = false;
+    if (!idExamPart) {
+      setActiveTemplate(null);
+      return;
     }
-  }, [matchedTemplate]);
 
-  const activeTemplate = useMemo(() => {
-    return (
-      allTemplates.find((t) => t.code === currentTemplateCode) ||
-      allTemplates[0]
-    );
-  }, [allTemplates, currentTemplateCode]);
+    setLoadingTemplate(true);
+    fetchClinicalTemplateByServiceAndPart(idTemplateService, idExamPart)
+      .then((tpl) => {
+        if (!cancelled) {
+          setActiveTemplate(tpl || null);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingTemplate(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [idTemplateService, idExamPart]);
 
   // Tab cơ quan đang hoạt động
   const [activeOrganKey, setActiveOrganKey] = useState(() => {
@@ -206,40 +190,43 @@ const FastSonoSelector = ({
     }
   };
 
+  if (loadingTemplate) {
+    return (
+      <div className={styles.fastSonoContainer} style={{ alignItems: 'center', padding: 24 }}>
+        <Spin size="small" tip="Đang tải mẫu lâm sàng theo Phân hệ & Bộ phận..." />
+      </div>
+    );
+  }
+
+  if (!activeTemplate) {
+    return (
+      <div className={styles.fastSonoContainer} style={{ padding: 20 }}>
+        <Empty
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+          description={
+            <span style={{ color: '#64748b', fontSize: 13 }}>
+              {idExamPart
+                ? `Chưa có cấu hình chọn nhanh (D-SONO) cho bộ phận "${examPartName || idExamPart}".`
+                : 'Vui lòng chọn Phân hệ và Bộ phận thăm khám trước.'}
+            </span>
+          }
+        />
+      </div>
+    );
+  }
+
   return (
     <div className={styles.fastSonoContainer}>
-      {/* 1. Top Bar: Tên Mẫu Lâm Sàng (Tầng 1) & Badge Thống kê */}
+      {/* 1. Top Bar: Tên Mẫu Lâm Sàng theo Phân hệ & Bộ phận & Badge Thống kê */}
       <div className={styles.topBar}>
         <div className={styles.templateSelectGroup}>
           <span className={styles.templateLabel}>
             <ThunderboltOutlined style={{ color: '#0b6b4f', marginRight: 4 }} />
-            Mẫu lâm sàng (5 tầng):
+            Mẫu lâm sàng: <strong>{activeTemplate.title}</strong>
           </span>
-          <Select
-            value={currentTemplateCode}
-            style={{ minWidth: 230 }}
-            size="small"
-            disabled={!isEdit}
-            onChange={(val) => {
-              setCurrentTemplateCode(val);
-              const newTpl = allTemplates.find((t) => t.code === val);
-              if (newTpl) {
-                setSelectedMap(initDefaultSelectedMap(newTpl));
-                if (newTpl.organs?.length > 0) {
-                  setActiveOrganKey(newTpl.organs[0].key);
-                }
-              }
-            }}
-          >
-            {allTemplates.map((tpl) => (
-              <Option key={tpl.code} value={tpl.code}>
-                {tpl.title}
-              </Option>
-            ))}
-          </Select>
           {examPartName && (
             <span style={{ fontSize: 11, color: '#64748b', fontStyle: 'italic' }}>
-              (Gắn theo bộ phận: {examPartName})
+              (Bộ phận: {examPartName})
             </span>
           )}
         </div>

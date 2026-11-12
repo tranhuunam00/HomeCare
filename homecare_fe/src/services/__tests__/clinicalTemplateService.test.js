@@ -53,18 +53,17 @@ describe('clinicalTemplateService - 5-Tier Integration with HomeCare Tầng 1 & 
     expect(resolved.code).toBe('CUSTOM_EXAM_PART');
   });
 
-  it('phải tự động khớp thông minh theo tên bộ phận khám (Tầng 2 của HomeCare)', () => {
-    // Trường hợp tên có chữ 'giáp' -> THYROID_TIRADS
-    const thyroid = resolveClinicalTemplate({ examPartName: 'Siêu âm Tuyến giáp độ nét cao' });
-    expect(thyroid.code).toBe('THYROID_TIRADS');
+  it('trả về null nếu không có mẫu nào khớp với Phân hệ và Bộ phận đang chọn', () => {
+    const missing = resolveClinicalTemplate({
+      idTemplateService: 999,
+      idExamPart: 888,
+    });
+    expect(missing).toBeNull();
 
-    // Trường hợp tên có chữ 'vú' -> BREAST_BIRADS
-    const breast = resolveClinicalTemplate({ examPartName: 'Siêu âm 2 Tuyến vú tầm soát' });
-    expect(breast.code).toBe('BREAST_BIRADS');
-
-    // Trường hợp tên có chữ 'bụng' -> ABDOMEN
-    const abdomen = resolveClinicalTemplate({ examPartName: 'Khám Siêu âm Ổ bụng tổng quát' });
-    expect(abdomen.code).toBe('ABDOMEN');
+    const missingPart = resolveClinicalTemplate({
+      examPartName: 'Chi dưới',
+    });
+    expect(missingPart).toBeNull();
   });
 
   it('phải thêm mới hoặc cập nhật mẫu lâm sàng 5 tầng thành công', async () => {

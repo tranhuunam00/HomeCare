@@ -324,60 +324,63 @@ export async function upsertClinicalTemplateToDB(template) {
 export const upsertClinicalTemplate = upsertClinicalTemplateToDB;
 
 /**
- * Tìm mẫu 5 tầng phù hợp nhất theo id_template_service (Tầng 1) và id_exam_part (Tầng 2) của HomeCare
- * Nếu chưa có sẵn, tự động sinh mẫu 5 tầng chuẩn cho exam_part đó!
+ * Truy vấn trực tiếp mẫu 5 tầng từ Database theo Phân hệ (Tầng 1) và Bộ phận (Tầng 2)
+ * Nếu không có mẫu nào khớp, trả về null (không fallback sang mẫu khác).
+ * @param {number|string} idTemplateService
+ * @param {number|string} idExamPart
+ * @returns {Promise<Object|null>}
+ */
+export async function fetchClinicalTemplateByServiceAndPart(idTemplateService, idExamPart) {
+  if (!idExamPart) return null;
+
+  try {
+    const params = { id_exam_part: idExamPart };
+    if (idTemplateService) {
+      params.id_template_service = idTemplateService;
+    }
+    const res = await API_CALL.get('/clinical-templates', { params });
+    const data = res?.data?.data || res?.data;
+    if (Array.isArray(data) && data.length > 0) {
+      return data[0];
+    }
+    // Backend trả rỗng -> không có mẫu trong DB cho Phân hệ & Bộ phận này
+    return null;
+  } catch {
+    // Fallback tìm chính xác trong local cache nếu mất kết nối API
+    return resolveClinicalTemplate({ idTemplateService, idExamPart });
+  }
+}
+
+/**
+ * Tìm mẫu 5 tầng khớp chính xác theo id_template_service (Tầng 1) và id_exam_part (Tầng 2) của HomeCare.
+ * Nếu không có mẫu nào khớp, trả về null (không hiện mẫu của bộ phận khác).
  * @param {Object} params
  * @param {number|string} params.idTemplateService
  * @param {number|string} params.idExamPart
- * @param {string} params.examPartName
- * @param {Object} params.examPartObj
- * @returns {Object}
+ * @param {Array} [params.templatesList]
+ * @returns {Object|null}
  */
-export function resolveClinicalTemplate({ idTemplateService, idExamPart, examPartName, examPartObj }) {
-  const templates = getAllClinicalTemplates();
+export function resolveClinicalTemplate({ idTemplateService, idExamPart, templatesList }) {
+  if (!idExamPart) return null;
+  const templates = Array.isArray(templatesList) ? templatesList : getAllClinicalTemplates();
 
-  // 1. Khớp chính xác theo id_exam_part
-  if (idExamPart) {
-    const directMatch = templates.find((t) => String(t.id_exam_part) === String(idExamPart));
-    if (directMatch) return directMatch;
-  }
-
-  // 2. Khớp theo id_template_service + id_exam_part
-  if (idTemplateService && idExamPart) {
-    const serviceMatch = templates.find(
-      (t) => String(t.id_template_service) === String(idTemplateService) && String(t.id_exam_part) === String(idExamPart)
+  // 1. Khớp chính xác cả Phân hệ (Tầng 1) và Bộ phận (Tầng 2)
+  if (idTemplateService) {
+    const exactMatch = templates.find(
+      (t) =>
+        String(t.id_template_service) === String(idTemplateService) &&
+        String(t.id_exam_part) === String(idExamPart),
     );
-    if (serviceMatch) return serviceMatch;
+    if (exactMatch) return exactMatch;
   }
 
-  // 3. Khớp thông minh theo tên Bộ phận khám
-  if (examPartName && typeof examPartName === 'string') {
-    const nameLower = examPartName.toLowerCase();
-
-    if (nameLower.includes('giáp') || nameLower.includes('thyroid')) {
-      return templates.find((t) => t.code === 'THYROID_TIRADS') || templates[0];
-    }
-    if (nameLower.includes('vú') || nameLower.includes('breast')) {
-      return templates.find((t) => t.code === 'BREAST_BIRADS') || templates[0];
-    }
-    if (nameLower.includes('bụng') || nameLower.includes('abdomen') || nameLower.includes('tổng quát')) {
-      return templates.find((t) => t.code === 'ABDOMEN') || templates[0];
-    }
-
-    const titleMatch = templates.find((t) => t.title?.toLowerCase().includes(nameLower));
-    if (titleMatch) return titleMatch;
-  }
-
-  // 4. Nếu chưa có template nào khớp, tự động sinh mới theo thông tin exam_part!
-  if (examPartObj || examPartName) {
-    const generated = generateDefault5TierForExamPart(
-      examPartObj || { id: idExamPart, name: examPartName, id_template_service: idTemplateService },
-      { id: idTemplateService }
-    );
-    if (generated) return generated;
-  }
-
-  return templates[0] || null;
+  // 2. Khớp theo id_exam_part (trường hợp template không gắn id_template_service hoặc không truyền idTemplateService)
+  const partMatch = templates.find(
+    (t) =>
+      String(t.id_exam_part) === String(idExamPart) &&
+      (!idTemplateService || !t.id_template_service),
+  );
+  return partMatch || null;
 }
 
 /**
