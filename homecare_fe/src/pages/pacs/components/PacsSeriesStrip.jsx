@@ -6,6 +6,7 @@ export default function PacsSeriesStrip({
   seriesList = [],
   activeSeriesUid,
   onSelectSeries,
+  seriesThumbnails = {},
   thumbnailUrl,
   attachedFiles = [],
   activeAttachedFile,
@@ -81,10 +82,10 @@ export default function PacsSeriesStrip({
                   overflow: 'hidden',
                 }}
               >
-                {thumbnailUrl ? (
+                {seriesThumbnails[series.seriesUid] ? (
                   <img
-                    src={thumbnailUrl}
-                    alt="thumb"
+                    src={seriesThumbnails[series.seriesUid]}
+                    alt={series.title || 'thumb'}
                     style={{
                       width: '100%',
                       height: '100%',
@@ -92,7 +93,9 @@ export default function PacsSeriesStrip({
                     }}
                   />
                 ) : (
-                  <div style={{ color: '#64748b', fontSize: '10px' }}>DICOM</div>
+                  <div style={{ color: '#64748b', fontSize: '10px' }}>
+                    {series.modality || 'DICOM'}
+                  </div>
                 )}
 
                 {/* 3 Green Stack Lines at bottom right */}

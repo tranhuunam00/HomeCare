@@ -11,7 +11,10 @@ import {
   LinkOutlined,
   DisconnectOutlined,
   ExpandOutlined,
+  CompressOutlined,
   SlidersOutlined,
+  ZoomInOutlined,
+  ZoomOutOutlined,
 } from '@ant-design/icons';
 import PacsCornerHud from './PacsCornerHud';
 import { PACS_TOOLS } from '../constants/pacs.constants';
@@ -36,6 +39,11 @@ export default function PacsViewport({
   onMouseUp,
   onWheel,
   onReset,
+  onZoomIn,
+  onZoomOut,
+  onDoubleClickZoom,
+  isExpanded = false,
+  onToggleExpand,
   onCaptureKeyImage,
   onUploadDicom,
   currentMeta,
@@ -86,6 +94,7 @@ export default function PacsViewport({
   return (
     <div
       onClick={() => setActiveViewport(viewportIndex)}
+      onDoubleClick={onDoubleClickZoom}
       onWheel={onWheel}
       onMouseDown={onMouseDown}
       onMouseMove={onMouseMove}
@@ -132,11 +141,12 @@ export default function PacsViewport({
             whiteSpace: 'nowrap',
           }}
         >
-          <span>{study?.seriesDescription || currentMeta.seriesDescription || 'GA-20w0d'}</span>
-          <span>2.9/13.3cm/25Hz</span>
-          <span>AB 2-7/OB</span>
-          <span>Tls 0.4</span>
-          <span>MI 1.2</span>
+          <span>{study?.modality || currentMeta.modality || 'DICOM'}</span>
+          {(currentMeta.seriesDescription || study?.seriesDescription) && (
+            <span>{currentMeta.seriesDescription || study?.seriesDescription}</span>
+          )}
+          <span>{currentMeta.columns || 0}×{currentMeta.rows || 0}</span>
+          <span>Zoom {Math.round((zoom || 1) * 100)}%</span>
         </div>
       )}
 
@@ -222,9 +232,30 @@ export default function PacsViewport({
           </button>
         </Tooltip>
 
-        <Tooltip title="Toàn màn hình / Khung nhìn" placement="right">
+        <Tooltip title="Phóng to (+)" placement="right">
           <button
-            onClick={onReset}
+            onClick={(e) => {
+              e.stopPropagation();
+              onZoomIn?.();
+            }}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#38bdf8',
+              cursor: 'pointer',
+              padding: 4,
+            }}
+          >
+            <ZoomInOutlined />
+          </button>
+        </Tooltip>
+
+        <Tooltip title="Thu nhỏ (-)" placement="right">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onZoomOut?.();
+            }}
             style={{
               background: 'none',
               border: 'none',
@@ -233,7 +264,26 @@ export default function PacsViewport({
               padding: 4,
             }}
           >
-            <ExpandOutlined />
+            <ZoomOutOutlined />
+          </button>
+        </Tooltip>
+
+        <Tooltip title={isExpanded ? 'Thu gọn khung nhìn' : 'Mở rộng toàn khung nhìn'} placement="right">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleExpand?.();
+            }}
+            style={{
+              background: isExpanded ? '#0284c7' : 'none',
+              border: 'none',
+              borderRadius: 3,
+              color: isExpanded ? '#ffffff' : '#94a3b8',
+              cursor: 'pointer',
+              padding: 4,
+            }}
+          >
+            {isExpanded ? <CompressOutlined /> : <ExpandOutlined />}
           </button>
         </Tooltip>
       </div>

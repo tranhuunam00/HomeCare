@@ -2,6 +2,7 @@ import React from 'react';
 import { Button, Tooltip, Dropdown, Upload } from 'antd';
 import {
   ZoomInOutlined,
+  ZoomOutOutlined,
   DragOutlined,
   EyeOutlined,
   CameraOutlined,
@@ -9,6 +10,8 @@ import {
   CloseOutlined,
   UndoOutlined,
   FullscreenOutlined,
+  ExpandOutlined,
+  CompressOutlined,
   LineOutlined,
   SlidersOutlined,
   UploadOutlined,
@@ -28,6 +31,12 @@ export default function PacsTopNav({
   currentMeta,
   onOpenMpr,
   onUploadDicom,
+  zoom = 1,
+  onZoomIn,
+  onZoomOut,
+  onResetZoom,
+  isExpanded = false,
+  onToggleExpand,
 }) {
   const handleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -110,7 +119,43 @@ export default function PacsTopNav({
           </Button>
         </Tooltip>
 
-        <Tooltip title="Phóng to / Thu nhỏ (Zoom)">
+        <Tooltip title="Thu nhỏ (-)">
+          <Button
+            size="small"
+            icon={<ZoomOutOutlined />}
+            onClick={onZoomOut}
+            style={{ backgroundColor: '#131b2e', borderColor: '#1e293b', color: '#94a3b8' }}
+          />
+        </Tooltip>
+
+        <Tooltip title="Đặt lại tỷ lệ 100% (Nhấn để về 100%)">
+          <Button
+            size="small"
+            onClick={onResetZoom}
+            style={{
+              backgroundColor: '#131b2e',
+              borderColor: '#1e293b',
+              color: zoom !== 1 ? '#38bdf8' : '#94a3b8',
+              fontSize: '11px',
+              fontFamily: 'monospace',
+              padding: '0 6px',
+              minWidth: 44,
+            }}
+          >
+            {Math.round(zoom * 100)}%
+          </Button>
+        </Tooltip>
+
+        <Tooltip title="Phóng to (+)">
+          <Button
+            size="small"
+            icon={<ZoomInOutlined />}
+            onClick={onZoomIn}
+            style={{ backgroundColor: '#131b2e', borderColor: '#1e293b', color: '#94a3b8' }}
+          />
+        </Tooltip>
+
+        <Tooltip title="Công cụ kéo phóng to / thu nhỏ (Kéo chuột lên/xuống)">
           <Button
             size="small"
             type={activeTool === PACS_TOOLS.ZOOM ? 'primary' : 'default'}
@@ -121,8 +166,28 @@ export default function PacsTopNav({
                 ? { backgroundColor: '#131b2e', borderColor: '#1e293b', color: '#94a3b8' }
                 : {}
             }
-          />
+          >
+            Zoom
+          </Button>
         </Tooltip>
+
+        {onToggleExpand && (
+          <Tooltip title={isExpanded ? 'Thu gọn khung ảnh (Hiện thanh bên)' : 'Phóng to tối đa khung ảnh (Ẩn thanh bên)'}>
+            <Button
+              size="small"
+              type={isExpanded ? 'primary' : 'default'}
+              icon={isExpanded ? <CompressOutlined /> : <ExpandOutlined />}
+              onClick={onToggleExpand}
+              style={
+                !isExpanded
+                  ? { backgroundColor: '#131b2e', borderColor: '#1e293b', color: '#38bdf8' }
+                  : {}
+              }
+            >
+              {isExpanded ? 'Thu gọn' : 'Mở rộng'}
+            </Button>
+          </Tooltip>
+        )}
 
         <Tooltip title="Di chuyển ảnh (Pan)">
           <Button

@@ -2,10 +2,12 @@ import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { message } from 'antd';
 import { parseDicomBuffer } from '../services/dicomDecoder';
+import { calculateAge } from '../../formver3/formver3.constant';
 
 export function usePacsStudy(patientDiagnoseId, apiEndpoint) {
   const [loading, setLoading] = useState(true);
   const [study, setStudy] = useState(null);
+  const [patientDiagnose, setPatientDiagnose] = useState(null);
   const [instances, setInstances] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -42,7 +44,7 @@ export function usePacsStudy(patientDiagnoseId, apiEndpoint) {
     return token ? { Authorization: `Bearer ${token}` } : {};
   }, []);
 
-  // Fetch Study Metadata
+  // Fetch Study Metadata & HomeCare PatientDiagnose Record
   const loadStudy = useCallback(async () => {
     if (!patientDiagnoseId) {
       setLoading(false);
@@ -50,13 +52,48 @@ export function usePacsStudy(patientDiagnoseId, apiEndpoint) {
     }
     try {
       setLoading(true);
-      const res = await axios.get(`${apiEndpoint}/api/pacs/studies/${patientDiagnoseId}`, {
-        headers: getAuthHeaders(),
-      });
-      if (res.data?.success && res.data?.data) {
-        const raw = res.data.data;
+      const headers = getAuthHeaders();
+      const [studyResult, pdResult] = await Promise.allSettled([
+        axios.get(`${apiEndpoint}/api/pacs/studies/${patientDiagnoseId}`, { headers }),
+        axios.get(`${apiEndpoint}/api/patient-diagnose/${patientDiagnoseId}`, { headers }),
+      ]);
+
+      let pdData = null;
+      if (pdResult.status === 'fulfilled') {
+        const rawPd = pdResult.value?.data?.data;
+        pdData = rawPd?.data ? rawPd.data : rawPd || null;
+        setPatientDiagnose(pdData);
+      }
+
+      if (studyResult.status === 'fulfilled' && studyResult.value?.data?.success && studyResult.value?.data?.data) {
+        const raw = studyResult.value.data.data;
         const studyData = raw.data ? raw.data : raw;
-        setStudy(studyData);
+
+        const computedAge =
+          pdData && (pdData.dob || pdData.birth_year)
+            ? calculateAge(pdData.dob, pdData.birth_year)
+            : null;
+        const formattedCreatedAt = pdData?.createdAt
+          ? new Date(pdData.createdAt).toLocaleString('vi-VN', {
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit',
+            })
+          : '';
+
+        setStudy({
+          ...studyData,
+          patientName: pdData?.name || studyData.patientName || '',
+          patientId: pdData?.PID || studyData.patientId || String(patientDiagnoseId),
+          patientAge: computedAge !== null && computedAge !== undefined && computedAge !== '' ? `${computedAge} tuổi` : '',
+          patientBirthYear: pdData?.birth_year || '',
+          patientGender: pdData?.gender || '',
+          patientSid: pdData?.SID || '',
+          studyDate: formattedCreatedAt || studyData.studyDate || '',
+        });
+
         const sorted = (studyData.instances || []).sort(
           (a, b) => (a.instanceNumber || 0) - (b.instanceNumber || 0)
         );
@@ -185,6 +222,7 @@ export function usePacsStudy(patientDiagnoseId, apiEndpoint) {
   return {
     loading,
     study,
+    patientDiagnose,
     instances,
     currentIndex,
     setCurrentIndex,

@@ -34,11 +34,24 @@ export default function PacsCornerHud({
         <div>
           <strong>{study?.patientName || currentMeta.patientName || 'Bệnh nhân'}</strong>
         </div>
-        <div>Age: {currentMeta.age || '023Y'}</div>
+        {(study?.patientAge || study?.patientGender || currentMeta.age) && (
+          <div>
+            {[
+              study?.patientAge || currentMeta.age,
+              study?.patientGender,
+              study?.patientBirthYear ? `NS: ${study.patientBirthYear}` : '',
+            ]
+              .filter(Boolean)
+              .join(' • ')}
+          </div>
+        )}
         <div>PID: {study?.patientId || currentMeta.patientId || patientDiagnoseId}</div>
-        <div>{study?.studyDate || '2025-10-23 08:26:16'}</div>
-        <div>Laterality: L</div>
-        <div>ViewPosition: PA</div>
+        {study?.patientSid && <div>SID: {study.patientSid}</div>}
+        {(study?.studyDate || currentMeta.studyDate) && (
+          <div>{study?.studyDate || currentMeta.studyDate}</div>
+        )}
+        {currentMeta.laterality && <div>Laterality: {currentMeta.laterality}</div>}
+        {currentMeta.viewPosition && <div>ViewPosition: {currentMeta.viewPosition}</div>}
       </div>
 
       {/* Top-Right HUD */}
@@ -114,7 +127,7 @@ export default function PacsCornerHud({
           textShadow: '1px 1px 2px #000',
         }}
       >
-        <div>Zoom: {zoom.toFixed(2)}</div>
+        <div>Zoom: {Math.round(zoom * 100)}% ({zoom.toFixed(2)}x)</div>
         <div>
           WW/WL: {Math.round(windowWidth)}/{Math.round(windowCenter)}
         </div>

@@ -123,10 +123,10 @@ export default function PacsSidebar({
                   borderRadius: 2,
                 }}
               >
-                {study?.modality || 'US'}
+                {study?.modality || 'DICOM'}
               </span>
-              <span style={{ fontSize: '10px', color: '#cbd5e1' }}>
-                {study?.studyDate || '2025-10-23'}
+              <span style={{ fontSize: '10px', color: '#cbd5e1', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {study?.studyDate || ''}
               </span>
               <span
                 style={{
@@ -147,7 +147,13 @@ export default function PacsSidebar({
               <div style={{ color: '#f8fafc', fontWeight: '600' }}>
                 {study?.patientName || 'Bệnh nhân'}
               </div>
+              {(study?.patientAge || study?.patientGender) && (
+                <div>
+                  {[study?.patientAge, study?.patientGender].filter(Boolean).join(' • ')}
+                </div>
+              )}
               <div>PID: {study?.patientId || patientDiagnoseId}</div>
+              {study?.patientSid && <div>SID: {study.patientSid}</div>}
               <div>File: DICOM ({instances.length} slices)</div>
             </div>
           </div>

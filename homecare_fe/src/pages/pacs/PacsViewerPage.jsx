@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { message } from 'antd';
-import { renderDicomToCanvas } from './services/dicomDecoder';
+import { parseDicomBuffer, renderDicomToCanvas } from './services/dicomDecoder';
 import { usePacsStudy } from './hooks/usePacsStudy';
 import PacsTopNav from './components/PacsTopNav';
 import PacsSidebar from './components/PacsSidebar';
@@ -80,8 +80,9 @@ export default function PacsViewerPage() {
 
   const [activeSeriesUid, setActiveSeriesUid] = useState(null);
 
-  // Thumbnail URL generated from active DICOM canvas for the series card
-  const [seriesThumbnailUrl, setSeriesThumbnailUrl] = useState('');
+  // Per-series thumbnail map: { [seriesUid]: dataUrl }
+  const [seriesThumbnails, setSeriesThumbnails] = useState({});
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // Key Image Capture Alert State (Clear feedback & Shutter Flash for doctor)
   const [captureAlert, setCaptureAlert] = useState({
@@ -234,15 +235,69 @@ export default function PacsViewerPage() {
       colorLut,
     });
 
-    // Update series thumbnail from canvas
-    if (currentIndex === 0 || !seriesThumbnailUrl) {
+    // Update thumbnail strictly for the series that owns currentIndex
+    const activeInst = instances[currentIndex];
+    const ownerSeriesUid = activeInst?.seriesInstanceUid || 'default_series';
+    if (!seriesThumbnails[ownerSeriesUid]) {
       try {
-        setSeriesThumbnailUrl(canvas.toDataURL('image/jpeg', 0.7));
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+        setSeriesThumbnails((prev) =>
+          prev[ownerSeriesUid] ? prev : { ...prev, [ownerSeriesUid]: dataUrl }
+        );
       } catch (e) {
         // ignore
       }
     }
-  }, [dicomCache, currentIndex, windowCenter, windowWidth, invert, colorLut, seriesThumbnailUrl]);
+  }, [dicomCache, currentIndex, windowCenter, windowWidth, invert, colorLut, instances, seriesThumbnails]);
+
+  // Pre-generate real thumbnails for every series from its own first instance
+  useEffect(() => {
+    if (!seriesList || seriesList.length === 0) return;
+    let cancelled = false;
+
+    const generateMissingSeriesThumbs = async () => {
+      const headers = getAuthHeaders();
+      for (const series of seriesList) {
+        if (cancelled) return;
+        const firstInst = series.instances?.[0];
+        if (!firstInst || seriesThumbnails[series.seriesUid]) continue;
+
+        try {
+          let parsed = dicomCache[firstInst.globalIndex];
+          if (!parsed) {
+            const res = await axios.get(
+              `${apiEndpoint}/api/pacs/instances/${firstInst.sopInstanceUid}/file`,
+              { responseType: 'arraybuffer', headers }
+            );
+            if (cancelled) return;
+            parsed = parseDicomBuffer(res.data);
+            setDicomCache((prev) =>
+              prev[firstInst.globalIndex] ? prev : { ...prev, [firstInst.globalIndex]: parsed }
+            );
+          }
+
+          if (parsed?.rawPixels && !cancelled) {
+            const offscreen = document.createElement('canvas');
+            renderDicomToCanvas(offscreen, parsed.rawPixels, parsed.meta, {
+              windowCenter: parsed.meta.windowCenter,
+              windowWidth: parsed.meta.windowWidth,
+              invert: false,
+              colorLut: 'default',
+            });
+            const thumbUrl = offscreen.toDataURL('image/jpeg', 0.65);
+            setSeriesThumbnails((prev) => ({ ...prev, [series.seriesUid]: thumbUrl }));
+          }
+        } catch (err) {
+          console.warn('Không thể tạo thumbnail cho series:', series.seriesUid, err?.message);
+        }
+      }
+    };
+
+    generateMissingSeriesThumbs();
+    return () => {
+      cancelled = true;
+    };
+  }, [seriesList, apiEndpoint, getAuthHeaders]);
 
   // Redraw Overlay Annotations Canvas
   useEffect(() => {
@@ -473,6 +528,22 @@ export default function PacsViewerPage() {
     }
   };
 
+  // Zoom & Enlarge Helpers
+  const handleZoomIn = () => setZoom((prev) => Math.min(10, Number((prev * 1.25).toFixed(2))));
+  const handleZoomOut = () => setZoom((prev) => Math.max(0.2, Number((prev / 1.25).toFixed(2))));
+  const handleResetZoom = () => {
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
+  };
+  const handleDoubleClickZoom = () => {
+    if (zoom > 1.05) {
+      setZoom(1);
+      setPan({ x: 0, y: 0 });
+    } else {
+      setZoom(2);
+    }
+  };
+
   // Reset Transformations
   const handleReset = () => {
     setZoom(1);
@@ -662,48 +733,58 @@ export default function PacsViewerPage() {
         currentMeta={currentMeta}
         onOpenMpr={() => setMprOpen(true)}
         onUploadDicom={uploadDicom}
+        zoom={zoom}
+        onZoomIn={handleZoomIn}
+        onZoomOut={handleZoomOut}
+        onResetZoom={handleResetZoom}
+        isExpanded={isExpanded}
+        onToggleExpand={() => setIsExpanded((prev) => !prev)}
       />
 
       {/* Main Body */}
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
         {/* Column 1: Left Tool Sidebar */}
-        <PacsSidebar
-          study={study}
-          instances={instances}
-          currentIndex={currentIndex}
-          patientDiagnoseId={patientDiagnoseId}
-          layout={layout}
-          setLayout={setLayout}
-          activeTool={activeTool}
-          setActiveTool={setActiveTool}
-          onClearAnnotations={handleClearAnnotations}
-          onUploadDicom={uploadDicom}
-          onReloadStudy={loadStudy}
-          flipH={flipH}
-          setFlipH={setFlipH}
-          flipV={flipV}
-          setFlipV={setFlipV}
-          rotation={rotation}
-          setRotation={setRotation}
-          onReset={handleReset}
-          onOpenMpr={() => setMprOpen(true)}
-        />
+        {!isExpanded && (
+          <PacsSidebar
+            study={study}
+            instances={instances}
+            currentIndex={currentIndex}
+            patientDiagnoseId={patientDiagnoseId}
+            layout={layout}
+            setLayout={setLayout}
+            activeTool={activeTool}
+            setActiveTool={setActiveTool}
+            onClearAnnotations={handleClearAnnotations}
+            onUploadDicom={uploadDicom}
+            onReloadStudy={loadStudy}
+            flipH={flipH}
+            setFlipH={setFlipH}
+            flipV={flipV}
+            setFlipV={setFlipV}
+            rotation={rotation}
+            setRotation={setRotation}
+            onReset={handleReset}
+            onOpenMpr={() => setMprOpen(true)}
+          />
+        )}
 
         {/* Column 2: Series & Files Strip (As in Image 2 - Supports Multiple Files/Series) */}
-        <PacsSeriesStrip
-          seriesList={seriesList}
-          activeSeriesUid={activeSeriesUid}
-          onSelectSeries={(uid) => {
-            setActiveAttachedFile(null);
-            handleSelectSeries(uid);
-          }}
-          thumbnailUrl={seriesThumbnailUrl}
-          attachedFiles={study?.attachedFiles || []}
-          activeAttachedFile={activeAttachedFile}
-          onSelectAttachedFile={(file) => {
-            setActiveAttachedFile(file);
-          }}
-        />
+        {!isExpanded && (
+          <PacsSeriesStrip
+            seriesList={seriesList}
+            activeSeriesUid={activeSeriesUid}
+            onSelectSeries={(uid) => {
+              setActiveAttachedFile(null);
+              handleSelectSeries(uid);
+            }}
+            seriesThumbnails={seriesThumbnails}
+            attachedFiles={study?.attachedFiles || []}
+            activeAttachedFile={activeAttachedFile}
+            onSelectAttachedFile={(file) => {
+              setActiveAttachedFile(file);
+            }}
+          />
+        )}
 
         {/* Column 3: Main Stage - Either Embedded Attachment Viewer (Ảnh 1) or DICOM Multi-Viewport Grid (Ảnh 2) */}
         {activeAttachedFile ? (
@@ -748,6 +829,11 @@ export default function PacsViewerPage() {
               onMouseUp={handleMouseUp}
               onWheel={handleWheel}
               onReset={handleReset}
+              onZoomIn={handleZoomIn}
+              onZoomOut={handleZoomOut}
+              onDoubleClickZoom={handleDoubleClickZoom}
+              isExpanded={isExpanded}
+              onToggleExpand={() => setIsExpanded((prev) => !prev)}
               onCaptureKeyImage={handleCaptureKeyImage}
               onUploadDicom={uploadDicom}
               currentMeta={currentMeta}
@@ -845,8 +931,8 @@ export default function PacsViewerPage() {
         setDicomCache={setDicomCache}
         apiEndpoint={apiEndpoint}
         getAuthHeaders={getAuthHeaders}
-        patientName={study?.patientName || 'Lê Văn Út'}
-        modality={study?.modality || 'MR'}
+        patientName={study?.patientName || 'Bệnh nhân'}
+        modality={study?.modality || 'DICOM'}
       />
     </div>
   );
