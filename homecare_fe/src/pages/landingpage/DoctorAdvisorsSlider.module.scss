@@ -140,6 +140,14 @@ $bg-light-fade: rgba(11, 107, 79, 0.08);
 }
 
 @media (max-width: 768px) {
+  .slider-slide {
+    padding: 0 6px;
+  }
+  .doctor-card {
+    padding: 16px 10px;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
   .avatar-wrapper-avatar {
     width: 70px;
     height: 70px;

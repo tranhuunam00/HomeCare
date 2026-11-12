@@ -107,9 +107,9 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
           alt="logo"
         />
         {!collapsed && <span className={styles.topHeader__title}>D-RADS</span>}
-        <Tooltip title={collapsed ? "Mở rộng menu" : "Thu nhỏ menu"}>
+        <Tooltip title={collapsed ? "Mở rộng menu" : "Thu nhỏ menu"} trigger={["hover"]}>
           <MenuOutlined
-            style={{ marginLeft: 16, cursor: "pointer" }}
+            style={{ marginLeft: 12, cursor: "pointer" }}
             onClick={toggleSidebar}
             className={styles.topHeader__toggleIcon}
           />

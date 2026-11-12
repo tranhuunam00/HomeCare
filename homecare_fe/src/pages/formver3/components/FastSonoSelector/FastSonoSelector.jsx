@@ -139,6 +139,11 @@ const FastSonoSelector = ({
   }, [activeTemplate?.organs, selectedMap, activeTemplate?.classificationType, selectedGrade]);
 
   // Đồng bộ ra ngoài cha mỗi khi lựa chọn thay đổi
+  const currentTemplateCode =
+    activeTemplate?.templateCode ||
+    activeTemplate?.code ||
+    (idExamPart ? String(idExamPart) : "");
+
   const isFirstMount = useRef(true);
   useEffect(() => {
     if (isFirstMount.current) {

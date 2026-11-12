@@ -461,12 +461,23 @@ $bg-light-fade: rgba(11, 107, 79, 0.08);
 
     &__cta {
       .cta-card {
-        padding: 32px 20px;
+        padding: 28px 16px;
         h3 {
-          font-size: 22px;
+          font-size: 20px;
         }
         p {
-          font-size: 14px;
+          font-size: 13.5px;
+          margin-bottom: 20px;
+        }
+        .contact-btn {
+          width: 100%;
+          max-width: 100%;
+          height: auto !important;
+          min-height: 44px !important;
+          padding: 10px 14px !important;
+          font-size: 13px !important;
+          white-space: normal !important;
+          line-height: 1.35 !important;
         }
       }
     }

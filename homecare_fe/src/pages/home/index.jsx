@@ -297,7 +297,16 @@ const Home = () => {
   const renderWorkListSidebarFilters = (isCollapsed) => {
     if (!isOnWorkList) return null;
     return (
-      <div style={{ padding: isCollapsed ? "0" : "0 12px", width: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <div
+        style={{
+          padding: isCollapsed ? "0" : "0 12px",
+          width: "100%",
+          boxSizing: "border-box",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
         {isCollapsed ? (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, width: "100%", padding: "4px 0" }}>
             <Tooltip title={`Lọc ca tôi tham gia (${counts.myReceivedCount || 0})`} placement="right">
