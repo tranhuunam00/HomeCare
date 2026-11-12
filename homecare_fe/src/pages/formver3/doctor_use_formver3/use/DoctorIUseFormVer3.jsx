@@ -727,6 +727,7 @@ export default function DoctorUseDFormVer3({
       ) : (
         <Form
           form={form}
+          size={isMobile ? "middle" : "middle"}
           layout={isMobile ? "vertical" : "horizontal"}
           labelAlign="left"
           labelCol={isMobile ? undefined : { flex: "0 0 180px" }}
@@ -851,7 +852,7 @@ export default function DoctorUseDFormVer3({
               </Form.Item>
             </Col>
 
-            <Col xs={24} md={6}>
+            <Col xs={20} md={6}>
               <Form.Item
                 label={translateLabel(languageTranslate, "language", false)}
                 name="language"
@@ -873,7 +874,7 @@ export default function DoctorUseDFormVer3({
                 </Select>
               </Form.Item>
             </Col>
-            <Col xs={2} md={1}>
+            <Col xs={4} md={1} style={{ display: "flex", alignItems: "center", paddingTop: isMobile ? 22 : 0 }}>
               <Tooltip title="Tải lại phân hệ & bộ phận">
                 <Button
                   icon={<ReloadOutlined />}
@@ -1095,15 +1096,21 @@ export default function DoctorUseDFormVer3({
                   }}
                   options={[
                     {
-                      label: languageTranslate === "en" ? "Structured table" : "Bảng cấu trúc",
+                      label: isMobile
+                        ? (languageTranslate === "en" ? "Table" : "Bảng")
+                        : (languageTranslate === "en" ? "Structured table" : "Bảng cấu trúc"),
                       value: "STRUCTURED_TABLE",
                     },
                     {
-                      label: languageTranslate === "en" ? "⚡ Fast D-SONO" : "⚡ Chọn nhanh (D-SONO)",
+                      label: isMobile
+                        ? "⚡ Nhanh"
+                        : (languageTranslate === "en" ? "⚡ Fast D-SONO" : "⚡ Chọn nhanh (D-SONO)"),
                       value: "FAST_SONO",
                     },
                     {
-                      label: languageTranslate === "en" ? "Free text" : "Văn bản tự do",
+                      label: isMobile
+                        ? (languageTranslate === "en" ? "Text" : "Tự do")
+                        : (languageTranslate === "en" ? "Free text" : "Văn bản tự do"),
                       value: "FREE_TEXT",
                     },
                   ]}

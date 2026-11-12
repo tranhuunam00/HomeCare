@@ -810,14 +810,21 @@ const PatientTablePage = ({ PID = null }) => {
 
   const mergedColumns = useMemo(
     () =>
-      customColumns.map((col) => ({
-        ...col,
-        onHeaderCell: () => ({
-          width: col.width,
-          onResize: handleResize(col.key),
-        }),
-      })),
-    [customColumns],
+      customColumns
+        .filter((col) => !(deviceIsMobile && col.key === "stt"))
+        .map((col) => ({
+          ...col,
+          fixed: deviceIsMobile ? undefined : col.fixed,
+          width:
+            deviceIsMobile && col.key === "name"
+              ? Math.max(col.width || 0, 140)
+              : col.width,
+          onHeaderCell: () => ({
+            width: col.width,
+            onResize: handleResize(col.key),
+          }),
+        })),
+    [customColumns, deviceIsMobile],
   );
 
   const onCheckandCreate = async (forceEditMode = false) => {
@@ -872,6 +879,7 @@ const PatientTablePage = ({ PID = null }) => {
     >
       <div
         style={{
+          display: deviceIsMobile && selectedPatientDiagnose ? "none" : "block",
           padding: 0,
           width: !deviceIsMobile && selectedPatientDiagnose ? `${leftWidth}%` : "100%",
           flexShrink: 0,
@@ -1106,9 +1114,7 @@ const PatientTablePage = ({ PID = null }) => {
                 style={{ marginTop: 8 }}
                 onRow={(record) => ({
                   onClick: () => {
-                    !deviceIsMobile
-                      ? setSelectedPatientDiagnose(record)
-                      : navigate(`/home/patients-diagnose/${record.id}`);
+                    setSelectedPatientDiagnose(record);
                   },
                   style: { cursor: "pointer", background: "#fafafa" },
                 })}
@@ -1153,6 +1159,7 @@ const PatientTablePage = ({ PID = null }) => {
         <div
           style={{
             padding: 0,
+            paddingBottom: deviceIsMobile ? 96 : 0,
             flex: 1,
             width: deviceIsMobile ? "100%" : "auto",
             maxHeight: deviceIsMobile ? "none" : "115vh",
@@ -1176,6 +1183,26 @@ const PatientTablePage = ({ PID = null }) => {
               marginBottom: deviceIsMobile ? 8 : 0,
             }}
           >
+            {deviceIsMobile && (
+              <Button
+                size="small"
+                style={{
+                  borderRadius: "4px",
+                  borderColor: "#cbd5e1",
+                  color: "#334155",
+                  fontSize: "11px",
+                  height: "24px",
+                  padding: "0 8px",
+                  fontWeight: "600",
+                }}
+                onClick={() => {
+                  setSelectedPatientDiagnose(null);
+                  setRightPanelMode("detail");
+                }}
+              >
+                ← Danh sách
+              </Button>
+            )}
             <Button
               type="primary"
               ghost

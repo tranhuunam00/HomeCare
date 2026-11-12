@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Input, Radio, Button, Row, Col } from "antd";
+import { Input, Radio, Button, Row, Col, Grid } from "antd";
 import styles from "./ImagingStructureTable.module.scss";
 import TextArea from "antd/es/input/TextArea";
 import { formatIndentedList } from "../formver3.constant";
@@ -20,6 +20,8 @@ const ImagingStructureTable = ({
   const { confirmState, openConfirm } = useConfirmAction();
   const [autoSync, setAutoSync] = useState(true);
   const isFirstSyncRef = useRef(true);
+  const screens = Grid.useBreakpoint();
+  const isMobile = screens.md === false;
 
   const debounceRef = useRef(null);
 
@@ -74,48 +76,33 @@ const ImagingStructureTable = ({
 
   return (
     <div>
-      <div style={{ width: "100%", overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
-        <table className={styles.imagingTable}>
-        <thead>
-          <tr>
-            <th></th>
-            <th></th>
-            <th>Bình thường</th>
-            <th>Bất thường</th>
-            <th></th>
-          </tr>
-        </thead>
-
-        <tbody>
+      {isMobile ? (
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {rows.map((row, idx) => (
-            <tr key={row.id}>
-              <td>{idx + 1}</td>
-
-              <td>
+            <div
+              key={row.id}
+              style={{
+                border: "1px solid #e2e8f0",
+                borderRadius: 8,
+                padding: 8,
+                background: row.status === "abnormal" ? "#fffbeb" : "#ffffff",
+                display: "flex",
+                flexDirection: "column",
+                gap: 6,
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <span style={{ fontSize: 12, fontWeight: 600, color: "#64748b", minWidth: 18 }}>
+                  {idx + 1}.
+                </span>
                 <Input
+                  size="small"
+                  style={{ flex: 1 }}
+                  placeholder="Tên cơ quan / cấu trúc..."
                   disabled={!isEdit}
                   value={row.name}
                   onChange={(e) => updateRow(idx, "name", e.target.value)}
                 />
-              </td>
-
-              <td style={{ textAlign: "center" }}>
-                <Radio
-                  checked={row.status === "normal"}
-                  disabled={!isEdit}
-                  onChange={() => updateRow(idx, "status", "normal")}
-                />
-              </td>
-
-              <td style={{ textAlign: "center" }}>
-                <Radio
-                  checked={row.status === "abnormal"}
-                  disabled={!isEdit}
-                  onChange={() => updateRow(idx, "status", "abnormal")}
-                />
-              </td>
-
-              <td style={{ textAlign: "center" }}>
                 <Button
                   danger
                   size="small"
@@ -124,12 +111,84 @@ const ImagingStructureTable = ({
                 >
                   Xóa
                 </Button>
-              </td>
-            </tr>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 16, paddingLeft: 24 }}>
+                <Radio
+                  checked={row.status === "normal"}
+                  disabled={!isEdit}
+                  onChange={() => updateRow(idx, "status", "normal")}
+                >
+                  <span style={{ fontSize: 12, color: "#0b6b4f", fontWeight: 500 }}>Bình thường</span>
+                </Radio>
+                <Radio
+                  checked={row.status === "abnormal"}
+                  disabled={!isEdit}
+                  onChange={() => updateRow(idx, "status", "abnormal")}
+                >
+                  <span style={{ fontSize: 12, color: "#b45309", fontWeight: 500 }}>Bất thường</span>
+                </Radio>
+              </div>
+            </div>
           ))}
-        </tbody>
-      </table>
-      </div>
+        </div>
+      ) : (
+        <div style={{ width: "100%", overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+          <table className={styles.imagingTable}>
+            <thead>
+              <tr>
+                <th></th>
+                <th></th>
+                <th>Bình thường</th>
+                <th>Bất thường</th>
+                <th></th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {rows.map((row, idx) => (
+                <tr key={row.id}>
+                  <td>{idx + 1}</td>
+
+                  <td>
+                    <Input
+                      disabled={!isEdit}
+                      value={row.name}
+                      onChange={(e) => updateRow(idx, "name", e.target.value)}
+                    />
+                  </td>
+
+                  <td style={{ textAlign: "center" }}>
+                    <Radio
+                      checked={row.status === "normal"}
+                      disabled={!isEdit}
+                      onChange={() => updateRow(idx, "status", "normal")}
+                    />
+                  </td>
+
+                  <td style={{ textAlign: "center" }}>
+                    <Radio
+                      checked={row.status === "abnormal"}
+                      disabled={!isEdit}
+                      onChange={() => updateRow(idx, "status", "abnormal")}
+                    />
+                  </td>
+
+                  <td style={{ textAlign: "center" }}>
+                    <Button
+                      danger
+                      size="small"
+                      disabled={!isEdit || rows.length === 1}
+                      onClick={() => handleDelete(row.id)}
+                    >
+                      Xóa
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
       <Button
         type="link"
         disabled={!isEdit}
