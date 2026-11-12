@@ -16,6 +16,7 @@ import {
   AppstoreOutlined,
   ApartmentOutlined,
   UserAddOutlined,
+  UserOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
@@ -54,6 +55,7 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
   } = useGlobalAuth();
   const { showWarning } = useToast();
   const navigate = useNavigate();
+  const [avatarError, setAvatarError] = useState(false);
 
   const showRightDrawer = () => setRightDrawerVisible(true);
   const closeRightDrawer = () => setRightDrawerVisible(false);
@@ -292,14 +294,22 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
           <div style={{ display: "flex", alignItems: "center" }}>
             <Avatar
               className={styles.topHeader__right_avatar}
+              icon={<UserOutlined />}
               style={{
-                backgroundColor: "#d9d9d9",
+                backgroundColor:
+                  doctor?.avatar_url && !avatarError ? "#e2e8f0" : "#0b6b4f",
+                color: "#ffffff",
                 cursor: "pointer",
               }}
               src={
-                doctor?.avatar_url ||
-                "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+                doctor?.avatar_url && !avatarError
+                  ? doctor.avatar_url
+                  : undefined
               }
+              onError={() => {
+                setAvatarError(true);
+                return false;
+              }}
             />
             <div
               className={styles.topHeader__right_name}
