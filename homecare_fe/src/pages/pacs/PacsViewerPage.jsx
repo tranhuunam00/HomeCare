@@ -784,6 +784,8 @@ export default function PacsViewerPage() {
             currentMeta={activeAttachedFile ? null : currentMeta}
             instances={instances}
             currentIndex={currentIndex}
+            activeSliceIndex={activeSlicePos}
+            activeSeriesTotal={activeSeriesIndices.length}
             patientDiagnoseId={patientDiagnoseId}
             layout={layout}
             setLayout={setLayout}

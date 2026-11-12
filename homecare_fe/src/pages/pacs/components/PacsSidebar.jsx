@@ -16,6 +16,8 @@ export default function PacsSidebar({
   currentMeta,
   instances = [],
   currentIndex = 0,
+  activeSliceIndex,
+  activeSeriesTotal,
   patientDiagnoseId,
   layout,
   setLayout,
@@ -43,6 +45,9 @@ export default function PacsSidebar({
   const toggleSection = (section) => {
     setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
   };
+
+  const displaySlicePos = activeSliceIndex !== undefined ? activeSliceIndex : currentIndex;
+  const displaySliceTotal = activeSeriesTotal !== undefined ? activeSeriesTotal : instances.length;
 
   return (
     <div
@@ -142,7 +147,7 @@ export default function PacsSidebar({
                   borderRadius: 2,
                 }}
               >
-                {currentIndex + 1}/{instances.length}
+                {displaySlicePos + 1}/{displaySliceTotal}
               </span>
             </div>
 
@@ -172,7 +177,7 @@ export default function PacsSidebar({
               {!currentMeta && study?.dbPatient?.patientSid && (
                 <div>SID: {study.dbPatient.patientSid}</div>
               )}
-              <div>File: DICOM ({instances.length} slices)</div>
+              <div>File: DICOM ({displaySliceTotal} {displaySliceTotal === 1 ? 'slice' : 'slices'})</div>
             </div>
           </div>
         )}
