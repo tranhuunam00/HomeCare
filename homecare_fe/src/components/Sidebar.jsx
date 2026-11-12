@@ -91,6 +91,7 @@ const SidebarMenu = ({ onSelect, selected }) => {
       children: [
         { key: "home/template_services", label: "Dịch vụ" },
         { key: "home/exam-parts", label: "Bộ phận thăm khám" },
+        { key: "home/clinical-templates", label: "Mẫu lâm sàng (5 tầng)" },
       ],
     },
 

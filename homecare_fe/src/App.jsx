@@ -99,6 +99,7 @@ import OvarycancerForm from "./pages/advance/cancer/OvaryCancer/OvarycancerForm"
 import CervixcancerForm from "./pages/advance/cancer/CervixCancer/CervixcancerForm";
 import ProstatecancerForm from "./pages/advance/cancer/Prostate/ProstatecancerForm";
 import AuditLogsList from "./pages/audit-logs/AuditLogsList";
+import Admin5TierTemplate from "./pages/admin_5tier_template/Admin5TierTemplate";
 
 function App() {
   useAuthInitializer();
@@ -287,6 +288,7 @@ function App() {
           />
           <Route path="template_services" element={<TemplateServiceList />} />
           <Route path="exam-parts" element={<ExamPartList />} />
+          <Route path="clinical-templates" element={<Admin5TierTemplate />} />
 
           <Route
             path="/home/templates/view/:id"

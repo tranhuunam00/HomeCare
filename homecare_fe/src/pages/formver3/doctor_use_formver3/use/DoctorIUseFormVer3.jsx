@@ -12,6 +12,7 @@ import {
   Modal,
   Divider,
   Switch,
+  Segmented,
 } from "antd";
 import { QuestionCircleOutlined, ReloadOutlined, EyeOutlined } from "@ant-design/icons";
 import { useNavigate, useParams } from "react-router-dom";
@@ -62,6 +63,7 @@ import ImagingStructureTextTable from "../../components/ImagingStructureTextTabl
 import TranslateListRecordsVer3 from "../../components/TranslateListRecordsVer3.jsx";
 import useLatestDoctorUseFormVer3 from "../../useLatestDoctorUseFormVer3.js";
 import CustomSunEditor from "../../../../components/Suneditor/CustomSunEditor";
+import FastSonoSelector from "../../components/FastSonoSelector/FastSonoSelector.jsx";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -77,6 +79,47 @@ function dataURLtoFile(dataurl, filename) {
     u8arr[n] = bstr.charCodeAt(n);
   }
   return new File([u8arr], filename, { type: mime });
+}
+
+export function parseImageDescriptionState(rawDescription) {
+  try {
+    const parsed = JSON.parse(rawDescription || "[]");
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      if (parsed.isFastSono) {
+        return {
+          mode: "FAST_SONO",
+          isFreeText: true,
+          content: parsed.text || "",
+          fastSonoData: parsed.fastSonoData || { selectedMap: null, grade: "", templateCode: "" },
+          rows: DEFAULT_IMAGING_ROWS,
+        };
+      }
+      if (parsed.isFreeText) {
+        return {
+          mode: "FREE_TEXT",
+          isFreeText: true,
+          content: parsed.text || "",
+          fastSonoData: { selectedMap: null, grade: "", templateCode: "" },
+          rows: DEFAULT_IMAGING_ROWS,
+        };
+      }
+    } else if (Array.isArray(parsed) && parsed.length) {
+      return {
+        mode: "STRUCTURED_TABLE",
+        isFreeText: false,
+        content: "",
+        fastSonoData: { selectedMap: null, grade: "", templateCode: "" },
+        rows: parsed,
+      };
+    }
+  } catch {}
+  return {
+    mode: "STRUCTURED_TABLE",
+    isFreeText: false,
+    content: "",
+    fastSonoData: { selectedMap: null, grade: "", templateCode: "" },
+    rows: DEFAULT_IMAGING_ROWS,
+  };
 }
 
 export default function DoctorUseDFormVer3({
@@ -138,7 +181,10 @@ export default function DoctorUseDFormVer3({
   });
 
   const [imagingRows, setImagingRows] = useState(DEFAULT_IMAGING_ROWS);
-  // isFreeText: chế độ văn bản tự do (SunEditor) thay cho bảng cấu trúc
+  // imagingMode: 'STRUCTURED_TABLE' (Bảng cấu trúc) | 'FAST_SONO' (Chọn nhanh D-SONO 5 tầng) | 'FREE_TEXT' (Văn bản tự do)
+  const [imagingMode, setImagingMode] = useState("STRUCTURED_TABLE");
+  const [fastSonoData, setFastSonoData] = useState({ selectedMap: null, grade: "", templateCode: "" });
+  // isFreeText: chế độ văn bản tự do (SunEditor hoặc D-SONO text) thay cho bảng cấu trúc
   const [isFreeText, setIsFreeText] = useState(false);
   const [freeTextContent, setFreeTextContent] = useState("");
 
@@ -250,23 +296,12 @@ export default function DoctorUseDFormVer3({
   useEffect(() => {
     if (formVer3 && !idEdit) {
       form.setFieldsValue(buildFormVer3Values(formVer3));
-      try {
-        const parsed = JSON.parse(formVer3.imageDescription || "[]");
-        if (parsed && typeof parsed === "object" && !Array.isArray(parsed) && parsed.isFreeText) {
-          // Template mặc định văn bản tự do
-          setIsFreeText(true);
-          setFreeTextContent(parsed.text || "");
-        } else if (Array.isArray(parsed) && parsed.length) {
-          setIsFreeText(false);
-          setImagingRows(parsed);
-        } else {
-          setIsFreeText(false);
-          setImagingRows(DEFAULT_IMAGING_ROWS);
-        }
-      } catch {
-        setIsFreeText(false);
-        setImagingRows(DEFAULT_IMAGING_ROWS);
-      }
+      const parsedState = parseImageDescriptionState(formVer3.imageDescription);
+      setImagingMode(parsedState.mode);
+      setIsFreeText(parsedState.isFreeText);
+      setFreeTextContent(parsedState.content);
+      setFastSonoData(parsedState.fastSonoData);
+      setImagingRows(parsedState.rows);
     }
   }, [formVer3, idEdit]);
   const abnormalFindings = useMemo(() => {
@@ -453,24 +488,14 @@ export default function DoctorUseDFormVer3({
 
           setImageList(descImages);
 
-          try {
-            const parsed = JSON.parse(
-              doctorUseFormVer3Server.imageDescription || "[]",
-            );
-            if (parsed && typeof parsed === "object" && !Array.isArray(parsed) && parsed.isFreeText) {
-              setIsFreeText(true);
-              setFreeTextContent(parsed.text || "");
-            } else if (Array.isArray(parsed) && parsed.length) {
-              setIsFreeText(false);
-              setImagingRows(parsed);
-            } else {
-              setIsFreeText(false);
-              setImagingRows(DEFAULT_IMAGING_ROWS);
-            }
-          } catch {
-            setIsFreeText(false);
-            setImagingRows(DEFAULT_IMAGING_ROWS);
-          }
+          const parsedState = parseImageDescriptionState(
+            doctorUseFormVer3Server.imageDescription,
+          );
+          setImagingMode(parsedState.mode);
+          setIsFreeText(parsedState.isFreeText);
+          setFreeTextContent(parsedState.content);
+          setFastSonoData(parsedState.fastSonoData);
+          setImagingRows(parsedState.rows);
           setFormVer3(doctorUseFormVer3Server?.id_formver3_formver3);
           setInitialSnap({
             formValues: form.getFieldsValue(),
@@ -539,9 +564,20 @@ export default function DoctorUseDFormVer3({
   const onFinish = async (values) => {
     try {
       // Serialize imageDescription theo mode
-      const imageDescriptionJson = isFreeText
-        ? JSON.stringify({ isFreeText: true, text: freeTextContent })
-        : undefined; // undefined → buildFormData sẽ dùng imagingRows
+      let imageDescriptionJson = undefined;
+      if (imagingMode === "FAST_SONO") {
+        imageDescriptionJson = JSON.stringify({
+          isFreeText: true,
+          isFastSono: true,
+          text: freeTextContent,
+          fastSonoData,
+        });
+      } else if (imagingMode === "FREE_TEXT") {
+        imageDescriptionJson = JSON.stringify({
+          isFreeText: true,
+          text: freeTextContent,
+        });
+      }
 
       const formPayload = buildFormDataDoctorUseFormVer3(values, {
         id_patient_diagnose: patientDiagnose?.id,
@@ -896,22 +932,14 @@ export default function DoctorUseDFormVer3({
                         form.setFieldsValue(buildFormVer3Values(templateData));
 
                         // Phân tích trạng thái tự do (free text) của template mới
-                        try {
-                          const parsed = JSON.parse(templateData.imageDescription || "[]");
-                          if (parsed && typeof parsed === "object" && !Array.isArray(parsed) && parsed.isFreeText) {
-                            setIsFreeText(true);
-                            setFreeTextContent(parsed.text || "");
-                          } else if (Array.isArray(parsed) && parsed.length) {
-                            setIsFreeText(false);
-                            setImagingRows(parsed);
-                          } else {
-                            setIsFreeText(false);
-                            setImagingRows(DEFAULT_IMAGING_ROWS);
-                          }
-                        } catch {
-                          setIsFreeText(false);
-                          setImagingRows(DEFAULT_IMAGING_ROWS);
-                        }
+                        const parsedState = parseImageDescriptionState(
+                          templateData.imageDescription,
+                        );
+                        setImagingMode(parsedState.mode);
+                        setIsFreeText(parsedState.isFreeText);
+                        setFreeTextContent(parsedState.content);
+                        setFastSonoData(parsedState.fastSonoData);
+                        setImagingRows(parsedState.rows);
                       }
                     } catch (e) {
                       toast.error("Không tải được dữ liệu. Vui lòng thử lại.");
@@ -993,9 +1021,18 @@ export default function DoctorUseDFormVer3({
             languageTranslate={languageTranslate}
           />
 
-          {/* === MÔ TẢ HÌNH ẢNH - Toggle chế độ === */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", margin: "24px 0 12px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          {/* === MÔ TẢ HÌNH ẢNH - Toggle 3 chế độ (Bảng cấu trúc / ⚡ Chọn nhanh D-SONO / Văn bản tự do) === */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: 12,
+              margin: "24px 0 12px",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
               <Title level={4} style={{ color: "#2f6db8", margin: 0 }}>
                 {isCanThiepGroup
                   ? translateLabel(languageTranslate, "QUY TRÌNH THỦ THUẬT", false).toUpperCase()
@@ -1007,47 +1044,98 @@ export default function DoctorUseDFormVer3({
                   padding: "2px 8px",
                   borderRadius: 12,
                   fontWeight: 600,
-                  backgroundColor: isFreeText ? "#e6f7ff" : "#f9f0ff",
-                  color: isFreeText ? "#096dd9" : "#531dab",
-                  border: isFreeText ? "1px solid #91d5ff" : "1px solid #d3adf7",
+                  backgroundColor:
+                    imagingMode === "FAST_SONO"
+                      ? "#f0fdf4"
+                      : imagingMode === "FREE_TEXT"
+                      ? "#e6f7ff"
+                      : "#f9f0ff",
+                  color:
+                    imagingMode === "FAST_SONO"
+                      ? "#0b6b4f"
+                      : imagingMode === "FREE_TEXT"
+                      ? "#096dd9"
+                      : "#531dab",
+                  border:
+                    imagingMode === "FAST_SONO"
+                      ? "1px solid #bbf7d0"
+                      : imagingMode === "FREE_TEXT"
+                      ? "1px solid #91d5ff"
+                      : "1px solid #d3adf7",
                   display: "inline-block",
                 }}
               >
-                {isFreeText
+                {imagingMode === "FAST_SONO"
+                  ? "⚡ Chọn nhanh D-SONO (5 tầng)"
+                  : imagingMode === "FREE_TEXT"
                   ? (languageTranslate === "en" ? "Free text" : "Văn bản tự do")
                   : (languageTranslate === "en" ? "Structured table" : "Bảng cấu trúc")}
               </span>
             </div>
+
             {isEdit && (
-              <Tooltip
-                title={isFreeText
-                  ? (languageTranslate === "en" ? "Switch to structured table" : "Chuyển sang chế độ bảng cấu trúc")
-                  : (languageTranslate === "en" ? "Switch to free text (editor)" : "Chuyển sang văn bản tự do (soạn thảo)")}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 12, color: "#888" }}>
-                    {languageTranslate === "en" ? "Free text" : "Văn bản tự do"}
-                  </span>
-                  <Switch
-                    checked={isFreeText}
-                    size="small"
-                    onChange={(checked) => {
-                      setIsFreeText(checked);
-                      if (checked) {
-                        // Tự động chuyển đổi bảng cấu trúc hiện có sang văn bản tự do nếu editor đang trống
-                        if (!freeTextContent || freeTextContent === "<p><br></p>" || freeTextContent === "") {
-                          const convertedHTML = generateTextFromStructuredRows(imagingRows, languageTranslate);
-                          setFreeTextContent(convertedHTML);
-                        }
-                      }
-                    }}
-                  />
-                </div>
-              </Tooltip>
+              <Segmented
+                size="middle"
+                value={imagingMode}
+                onChange={(val) => {
+                  setImagingMode(val);
+                  if (val === "FREE_TEXT") {
+                    setIsFreeText(true);
+                    if (!freeTextContent || freeTextContent === "<p><br></p>" || freeTextContent === "") {
+                      const convertedHTML = generateTextFromStructuredRows(imagingRows, languageTranslate);
+                      setFreeTextContent(convertedHTML);
+                    }
+                  } else if (val === "FAST_SONO") {
+                    setIsFreeText(true);
+                  } else {
+                    setIsFreeText(false);
+                  }
+                }}
+                options={[
+                  {
+                    label: languageTranslate === "en" ? "Structured table" : "Bảng cấu trúc",
+                    value: "STRUCTURED_TABLE",
+                  },
+                  {
+                    label: languageTranslate === "en" ? "⚡ Fast D-SONO" : "⚡ Chọn nhanh (D-SONO)",
+                    value: "FAST_SONO",
+                  },
+                  {
+                    label: languageTranslate === "en" ? "Free text" : "Văn bản tự do",
+                    value: "FREE_TEXT",
+                  },
+                ]}
+              />
             )}
           </div>
 
-          {isFreeText ? (
+          {imagingMode === "FAST_SONO" ? (
+            <FastSonoSelector
+              idTemplateService={selectedIDs.id_template_service || form.getFieldValue("id_template_service")}
+              idExamPart={selectedIDs.id_exam_part || form.getFieldValue("id_exam_part")}
+              examPartName={
+                examParts.find(
+                  (ex) => ex.id == (selectedIDs.id_exam_part || form.getFieldValue("id_exam_part"))
+                )?.name || ""
+              }
+              gender={patientDiagnose?.gender}
+              isEdit={isEdit}
+              initialSelectedMap={fastSonoData.selectedMap}
+              initialGrade={fastSonoData.grade}
+              onNarrativeChange={(plainText, htmlText) => {
+                setFreeTextContent(htmlText);
+              }}
+              onConclusionChange={(conclusionText) => {
+                setDiagnosisSummary(conclusionText);
+                form.setFieldsValue({
+                  imagingDiagnosisSummary: conclusionText,
+                });
+              }}
+              onSelectedMapChange={(selectedMap, grade, templateCode) => {
+                setFastSonoData({ selectedMap, grade, templateCode });
+              }}
+            />
+          ) : imagingMode === "FREE_TEXT" ? (
             // Chế độ văn bản tự do: SunEditor full features
             <div style={{ border: "1px solid #e5e7eb", borderRadius: 6, overflow: "hidden" }}>
               <CustomSunEditor
