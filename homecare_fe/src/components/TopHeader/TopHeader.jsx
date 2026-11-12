@@ -115,6 +115,7 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
           />
         </Tooltip>
       </div>
+      <div className={styles.topHeader__mobileBreak0} />
       <Tooltip title="Quy trình">
         <Button
           className={styles.topHeader__workflowBtn}
@@ -251,6 +252,7 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
           ))}
         </Select>
       )}
+      {isOnWorkList && <div className={styles.topHeader__mobileBreak2} />}
       <Button
         className={styles.topHeader__addBtn}
         type="primary"
@@ -301,6 +303,7 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
       >
         Import
       </Button>
+      <div className={styles.topHeader__mobileBreak1} />
 
       {/* --- Right side --- */}
       <div className={styles.topHeader__right}>
