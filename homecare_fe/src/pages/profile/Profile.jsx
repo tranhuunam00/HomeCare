@@ -15,7 +15,7 @@ import {
   Spin,
   Tag,
 } from "antd";
-import { UploadOutlined, EditOutlined } from "@ant-design/icons";
+import { UploadOutlined, EditOutlined, UserOutlined } from "@ant-design/icons";
 import { useParams } from "react-router-dom";
 import styles from "./Profile.module.scss";
 import API_CALL from "../../services/axiosClient";
@@ -561,7 +561,7 @@ const Profile = () => {
                 </div>
               )}
 
-              <Col span={6} className={styles.signatureSection}>
+              <Col xs={24} sm={12} md={10} className={styles.signatureSection}>
                 <Form.Item
                   label="Chữ ký"
                   name="signature"
@@ -575,13 +575,34 @@ const Profile = () => {
                       },
                     },
                   ]}
+                  style={{ width: "100%", marginBottom: 12 }}
                 >
-                  <>
-                    <img
-                      src={signatureUrl || "http://suneditor.com/docs/cat.jpg"}
-                      alt="Chữ ký"
-                      className={styles.signature}
-                    />
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+                    {signatureUrl ? (
+                      <img
+                        src={signatureUrl}
+                        alt="Chữ ký"
+                        className={styles.signature}
+                      />
+                    ) : (
+                      <div
+                        style={{
+                          width: "100%",
+                          maxWidth: 260,
+                          height: 110,
+                          borderRadius: 8,
+                          border: "1px dashed #cbd5e1",
+                          background: "#f8fafc",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          color: "#94a3b8",
+                          fontSize: 12,
+                        }}
+                      >
+                        Chưa có chữ ký
+                      </div>
+                    )}
                     <Upload
                       accept=".jpg,.jpeg,.png"
                       showUploadList={false}
@@ -592,11 +613,11 @@ const Profile = () => {
                         Đổi chữ ký
                       </Button>
                     </Upload>
-                  </>
+                  </div>
                 </Form.Item>
               </Col>
             </Col>
-            <Col span={6} className={styles.avatarSection}>
+            <Col xs={24} md={6} className={styles.avatarSection}>
               <Form.Item
                 label="Ảnh đại diện"
                 name="avatar"
@@ -610,11 +631,13 @@ const Profile = () => {
                     },
                   },
                 ]}
+                style={{ width: "100%", marginBottom: 12 }}
               >
-                <>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
                   <Avatar
-                    size={120}
-                    src={avatarUrl ?? "https://i.pravatar.cc/300"}
+                    size={110}
+                    src={avatarUrl || undefined}
+                    icon={<UserOutlined />}
                     className={styles.avatar}
                   />
                   <Upload
@@ -627,7 +650,7 @@ const Profile = () => {
                       Đổi Ảnh Đại Diện
                     </Button>
                   </Upload>
-                </>
+                </div>
               </Form.Item>
             </Col>
           </Row>
@@ -657,8 +680,8 @@ const Profile = () => {
           </Form.Item>
 
           {eSignatureType === "smartca" && (
-            <Row gutter={16}>
-              <Col span={6}>
+            <Row gutter={[12, 8]} align="bottom">
+              <Col xs={24} sm={12} md={8}>
                 <Form.Item
                   label="SmartCA Username"
                   name="smartca_username"
@@ -668,6 +691,7 @@ const Profile = () => {
                       message: "Vui lòng nhập username SmartCA",
                     },
                   ]}
+                  style={{ marginBottom: 8 }}
                 >
                   <Input
                     disabled={!isEditing}
@@ -676,7 +700,7 @@ const Profile = () => {
                 </Form.Item>
               </Col>
 
-              <Col span={6}>
+              <Col xs={24} sm={12} md={8}>
                 <Form.Item
                   label="SmartCA Password"
                   name="smartca_password"
@@ -686,6 +710,7 @@ const Profile = () => {
                       message: "Vui lòng nhập password SmartCA",
                     },
                   ]}
+                  style={{ marginBottom: 8 }}
                 >
                   <Input.Password
                     disabled={!isEditing}
@@ -694,13 +719,22 @@ const Profile = () => {
                 </Form.Item>
               </Col>
 
-              <Col span={4} style={{ display: "flex", alignItems: "center" }}>
+              <Col
+                xs={24}
+                md={8}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  marginBottom: 8,
+                  flexWrap: "wrap",
+                }}
+              >
                 <Button
                   type="primary"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('"ehe"', "ehe");
                     handleCheckSmartCA();
                   }}
                   disabled={!isEditing}
@@ -710,11 +744,11 @@ const Profile = () => {
                 </Button>
 
                 {signVerified ? (
-                  <Text type="success" style={{ marginLeft: 8 }}>
+                  <Text type="success" style={{ whiteSpace: "nowrap" }}>
                     ✔ OK
                   </Text>
                 ) : (
-                  <Text type="danger" style={{ marginLeft: 8 }}>
+                  <Text type="danger" style={{ whiteSpace: "nowrap" }}>
                     ✖ Not verified
                   </Text>
                 )}
@@ -722,8 +756,8 @@ const Profile = () => {
             </Row>
           )}
           {signVerified && credentialOptions.length > 0 && (
-            <Row gutter={16} style={{ marginTop: 12 }}>
-              <Col span={12}>
+            <Row gutter={12} style={{ marginTop: 12 }}>
+              <Col xs={24} sm={16} md={12}>
                 <Form.Item
                   label="Credential ID"
                   name="credentialId"
