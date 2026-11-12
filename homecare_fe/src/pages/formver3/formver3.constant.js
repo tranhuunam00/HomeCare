@@ -257,8 +257,8 @@ export function buildFormDataDoctorUseFormVer3(values, extra) {
   if (extra?.id_patient_diagnose)
     fd.append("id_patient_diagnose", extra?.id_patient_diagnose);
 
-  if (extra?.formVer3)
-    fd.append("id_formver3", String(extra.formVer3.id ?? ""));
+  if (extra?.formVer3?.id)
+    fd.append("id_formver3", String(extra.formVer3.id));
 
   if (extra?.imageDescriptionJson !== undefined) {
     // isFreeText mode: truyền sẵn chuỗi JSON
@@ -275,7 +275,6 @@ export function buildFormDataDoctorUseFormVer3(values, extra) {
   fd.append("id_exam_part", String(values.id_exam_part ?? ""));
   fd.append("id_print_template", String(values.id_print_template ?? ""));
 
-  fd.append("language", values.language);
   fd.append("implementMethod", values.implementMethod || "");
   fd.append("contrastInjection", values.contrastInjection);
   fd.append("imageQuatity", values.imageQuatity);

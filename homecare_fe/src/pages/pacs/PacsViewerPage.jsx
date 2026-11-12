@@ -636,8 +636,8 @@ export default function PacsViewerPage() {
         imgCanvas: imageCanvasRef.current,
         annCanvas: annotationCanvasRef.current,
         metadata: {
-          patientName: study?.patientName || dicomCache[currentIndex]?.meta?.patientName,
-          patientId: study?.patientId || dicomCache[currentIndex]?.meta?.patientId || patientDiagnoseId,
+          patientName: dicomCache[currentIndex]?.meta?.patientName || study?.dbPatient?.patientName || '',
+          patientId: dicomCache[currentIndex]?.meta?.patientId || study?.dbPatient?.patientId || '',
         },
         measurements: annotations[currentIndex] || [],
         currentIndex,
@@ -781,6 +781,7 @@ export default function PacsViewerPage() {
         {!isExpanded && (
           <PacsSidebar
             study={study}
+            currentMeta={activeAttachedFile ? null : currentMeta}
             instances={instances}
             currentIndex={currentIndex}
             patientDiagnoseId={patientDiagnoseId}
@@ -969,8 +970,8 @@ export default function PacsViewerPage() {
         setDicomCache={setDicomCache}
         apiEndpoint={apiEndpoint}
         getAuthHeaders={getAuthHeaders}
-        patientName={study?.patientName || 'Bệnh nhân'}
-        modality={study?.modality || 'DICOM'}
+        patientName={currentMeta?.patientName || study?.dbPatient?.patientName || ''}
+        modality={currentMeta?.modality || study?.modality || ''}
       />
     </div>
   );

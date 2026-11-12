@@ -32,25 +32,27 @@ export default function PacsCornerHud({
           textShadow: '1px 1px 2px #000',
         }}
       >
-        <div>
-          <strong>{study?.patientName || currentMeta.patientName || 'Bệnh nhân'}</strong>
-        </div>
-        {(study?.patientAge || study?.patientGender || currentMeta.age) && (
+        {currentMeta.patientName && (
+          <div>
+            <strong>{currentMeta.patientName}</strong>
+          </div>
+        )}
+        {(currentMeta.patientAge || currentMeta.patientSex || currentMeta.patientBirthDate) && (
           <div>
             {[
-              study?.patientAge || currentMeta.age,
-              study?.patientGender,
-              study?.patientBirthYear ? `NS: ${study.patientBirthYear}` : '',
+              currentMeta.patientAge ? `Age: ${currentMeta.patientAge}` : '',
+              currentMeta.patientSex,
+              currentMeta.patientBirthDate ? `DOB: ${currentMeta.patientBirthDate}` : '',
             ]
               .filter(Boolean)
               .join(' • ')}
           </div>
         )}
-        <div>PID: {study?.patientId || currentMeta.patientId || patientDiagnoseId}</div>
-        {study?.patientSid && <div>SID: {study.patientSid}</div>}
-        {(study?.studyDate || currentMeta.studyDate) && (
-          <div>{study?.studyDate || currentMeta.studyDate}</div>
+        {currentMeta.patientId && <div>PID: {currentMeta.patientId}</div>}
+        {(currentMeta.studyDate || currentMeta.studyTime) && (
+          <div>{[currentMeta.studyDate, currentMeta.studyTime].filter(Boolean).join(' ')}</div>
         )}
+        {currentMeta.institutionName && <div>{currentMeta.institutionName}</div>}
         {currentMeta.laterality && <div>Laterality: {currentMeta.laterality}</div>}
         {currentMeta.viewPosition && <div>ViewPosition: {currentMeta.viewPosition}</div>}
       </div>

@@ -44,17 +44,18 @@ export function usePacsStudy(patientDiagnoseId, apiEndpoint) {
     return token ? { Authorization: `Bearer ${token}` } : {};
   }, []);
 
-  // Fetch Study Metadata & HomeCare PatientDiagnose Record
+  // Fetch Study Metadata & HomeCare PatientDiagnose Record (DB is fallback ONLY for non-DICOM)
   const loadStudy = useCallback(async () => {
     if (!patientDiagnoseId) {
       setPatientDiagnose(null);
       setStudy((prev) =>
         prev || {
-          patientName: 'Đọc độc lập (Local)',
-          patientId: 'LOCAL',
-          modality: 'DICOM',
+          patientName: '',
+          patientId: '',
+          modality: '',
           studyDate: '',
           attachedFiles: [],
+          dbPatient: null,
         }
       );
       setLoading(false);
@@ -75,33 +76,42 @@ export function usePacsStudy(patientDiagnoseId, apiEndpoint) {
         setPatientDiagnose(pdData);
       }
 
+      const computedAge =
+        pdData && (pdData.dob || pdData.birth_year)
+          ? calculateAge(pdData.dob, pdData.birth_year)
+          : null;
+      const formattedCreatedAt = pdData?.createdAt
+        ? new Date(pdData.createdAt).toLocaleString('vi-VN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+          })
+        : '';
+
+      const dbPatient = pdData
+        ? {
+            patientName: pdData.name || '',
+            patientId: pdData.PID || '',
+            patientAge:
+              computedAge !== null && computedAge !== undefined && computedAge !== ''
+                ? `${computedAge} tuổi`
+                : '',
+            patientBirthYear: pdData.birth_year || '',
+            patientGender: pdData.gender || '',
+            patientSid: pdData.SID || '',
+            studyDate: formattedCreatedAt || '',
+          }
+        : null;
+
       if (studyResult.status === 'fulfilled' && studyResult.value?.data?.success && studyResult.value?.data?.data) {
         const raw = studyResult.value.data.data;
         const studyData = raw.data ? raw.data : raw;
 
-        const computedAge =
-          pdData && (pdData.dob || pdData.birth_year)
-            ? calculateAge(pdData.dob, pdData.birth_year)
-            : null;
-        const formattedCreatedAt = pdData?.createdAt
-          ? new Date(pdData.createdAt).toLocaleString('vi-VN', {
-              year: 'numeric',
-              month: '2-digit',
-              day: '2-digit',
-              hour: '2-digit',
-              minute: '2-digit',
-            })
-          : '';
-
         setStudy({
           ...studyData,
-          patientName: pdData?.name || studyData.patientName || '',
-          patientId: pdData?.PID || studyData.patientId || String(patientDiagnoseId),
-          patientAge: computedAge !== null && computedAge !== undefined && computedAge !== '' ? `${computedAge} tuổi` : '',
-          patientBirthYear: pdData?.birth_year || '',
-          patientGender: pdData?.gender || '',
-          patientSid: pdData?.SID || '',
-          studyDate: formattedCreatedAt || studyData.studyDate || '',
+          dbPatient,
         });
 
         const sorted = (studyData.instances || []).sort(
@@ -109,6 +119,15 @@ export function usePacsStudy(patientDiagnoseId, apiEndpoint) {
         );
         setInstances(sorted);
         setCurrentIndex(0);
+      } else if (dbPatient) {
+        setStudy({
+          patientName: '',
+          patientId: '',
+          modality: '',
+          studyDate: '',
+          attachedFiles: [],
+          dbPatient,
+        });
       }
     } catch (err) {
       console.warn('Chưa có dữ liệu study cho ca này:', err);
@@ -221,14 +240,9 @@ export function usePacsStudy(patientDiagnoseId, apiEndpoint) {
 
         setStudy((prev) => ({
           ...(prev || {}),
-          patientName:
-            prev?.patientName && prev.patientName !== 'Đọc độc lập (Local)'
-              ? prev.patientName
-              : parsed.meta?.patientName && parsed.meta.patientName !== 'Unknown' && parsed.meta.patientName !== 'Không xác định'
-              ? parsed.meta.patientName
-              : 'Đọc độc lập (Local)',
-          patientId: parsed.meta?.patientId || prev?.patientId || 'LOCAL',
-          modality: parsed.meta?.modality || prev?.modality || 'DICOM',
+          patientName: parsed.meta?.patientName || prev?.patientName || '',
+          patientId: parsed.meta?.patientId || prev?.patientId || '',
+          modality: parsed.meta?.modality || prev?.modality || '',
           studyDate: parsed.meta?.studyDate || prev?.studyDate || '',
         }));
       } catch (err) {

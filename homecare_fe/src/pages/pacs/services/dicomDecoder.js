@@ -12,14 +12,21 @@ export function parseDicomBuffer(arrayBuffer) {
   } catch (err) {
     return {
       meta: {
-        patientName: 'Không xác định',
+        patientName: '',
         patientId: '',
+        patientBirthDate: '',
+        patientSex: '',
+        patientAge: '',
         studyDate: '',
-        modality: 'OT',
+        studyTime: '',
+        modality: '',
         studyInstanceUid: '',
         seriesInstanceUid: '',
         sopInstanceUid: '',
         seriesDescription: '',
+        laterality: '',
+        viewPosition: '',
+        institutionName: '',
         rows: 512,
         columns: 512,
         bitsAllocated: 16,
@@ -36,15 +43,35 @@ export function parseDicomBuffer(arrayBuffer) {
     };
   }
 
-  // 1. Extract Metadata Tags
-  const patientName = dataSet.string('x00100010') || 'Unknown';
-  const patientId = dataSet.string('x00100020') || '';
-  const studyDate = dataSet.string('x00080020') || '';
-  const modality = dataSet.string('x00080060') || 'OT';
-  const studyInstanceUid = dataSet.string('x0020000d') || '';
-  const seriesInstanceUid = dataSet.string('x0020000e') || '';
-  const sopInstanceUid = dataSet.string('x00080018') || '';
-  const seriesDescription = dataSet.string('x0008103e') || '';
+  // 1. Extract Metadata Tags (Strictly from DICOM header; leave empty if absent)
+  const rawPatientName = (dataSet.string('x00100010') || '').trim();
+  const patientName = rawPatientName && rawPatientName !== 'Unknown' ? rawPatientName : '';
+  const patientId = (dataSet.string('x00100020') || '').trim();
+  const patientBirthDate = (dataSet.string('x00100030') || '').trim();
+  const rawSex = (dataSet.string('x00100040') || '').trim().toUpperCase();
+  const patientSex =
+    rawSex === 'M' ? 'Nam' : rawSex === 'F' ? 'Nữ' : rawSex === 'O' ? 'Khác' : rawSex;
+  const patientAge = (dataSet.string('x00101010') || '').trim();
+
+  const rawStudyDate = (dataSet.string('x00080020') || '').trim();
+  const studyDate =
+    rawStudyDate.length === 8
+      ? `${rawStudyDate.slice(0, 4)}-${rawStudyDate.slice(4, 6)}-${rawStudyDate.slice(6, 8)}`
+      : rawStudyDate;
+  const rawStudyTime = (dataSet.string('x00080030') || '').trim();
+  const studyTime =
+    rawStudyTime.length >= 6
+      ? `${rawStudyTime.slice(0, 2)}:${rawStudyTime.slice(2, 4)}:${rawStudyTime.slice(4, 6)}`
+      : rawStudyTime;
+
+  const modality = (dataSet.string('x00080060') || '').trim();
+  const studyInstanceUid = (dataSet.string('x0020000d') || '').trim();
+  const seriesInstanceUid = (dataSet.string('x0020000e') || '').trim();
+  const sopInstanceUid = (dataSet.string('x00080018') || '').trim();
+  const seriesDescription = (dataSet.string('x0008103e') || '').trim();
+  const laterality = (dataSet.string('x00200060') || '').trim();
+  const viewPosition = (dataSet.string('x00185101') || '').trim();
+  const institutionName = (dataSet.string('x00080080') || '').trim();
 
   const rows = dataSet.uint16('x00280010') || 512;
   const columns = dataSet.uint16('x00280011') || 512;
@@ -104,12 +131,19 @@ export function parseDicomBuffer(arrayBuffer) {
     meta: {
       patientName,
       patientId,
+      patientBirthDate,
+      patientSex,
+      patientAge,
       studyDate,
+      studyTime,
       modality,
       studyInstanceUid,
       seriesInstanceUid,
       sopInstanceUid,
       seriesDescription,
+      laterality,
+      viewPosition,
+      institutionName,
       rows,
       columns,
       bitsAllocated,

@@ -13,6 +13,7 @@ import { VIEWER_LAYOUTS, PACS_TOOLS } from '../constants/pacs.constants';
 
 export default function PacsSidebar({
   study,
+  currentMeta,
   instances = [],
   currentIndex = 0,
   patientDiagnoseId,
@@ -113,20 +114,22 @@ export default function PacsSidebar({
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-              <span
-                style={{
-                  backgroundColor: '#b45309',
-                  color: '#fff',
-                  fontSize: '10px',
-                  fontWeight: '700',
-                  padding: '1px 4px',
-                  borderRadius: 2,
-                }}
-              >
-                {study?.modality || 'DICOM'}
-              </span>
+              {(currentMeta?.modality || study?.modality) && (
+                <span
+                  style={{
+                    backgroundColor: '#b45309',
+                    color: '#fff',
+                    fontSize: '10px',
+                    fontWeight: '700',
+                    padding: '1px 4px',
+                    borderRadius: 2,
+                  }}
+                >
+                  {currentMeta?.modality || study?.modality}
+                </span>
+              )}
               <span style={{ fontSize: '10px', color: '#cbd5e1', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {study?.studyDate || ''}
+                {currentMeta ? currentMeta.studyDate || '' : study?.dbPatient?.studyDate || study?.studyDate || ''}
               </span>
               <span
                 style={{
@@ -144,16 +147,31 @@ export default function PacsSidebar({
             </div>
 
             <div style={{ fontSize: '10px', color: '#94a3b8', lineHeight: '14px' }}>
-              <div style={{ color: '#f8fafc', fontWeight: '600' }}>
-                {study?.patientName || 'Bệnh nhân'}
-              </div>
-              {(study?.patientAge || study?.patientGender) && (
-                <div>
-                  {[study?.patientAge, study?.patientGender].filter(Boolean).join(' • ')}
+              {(currentMeta ? currentMeta.patientName : study?.dbPatient?.patientName || study?.patientName) && (
+                <div style={{ color: '#f8fafc', fontWeight: '600' }}>
+                  {currentMeta ? currentMeta.patientName : study?.dbPatient?.patientName || study?.patientName}
                 </div>
               )}
-              <div>PID: {study?.patientId || patientDiagnoseId}</div>
-              {study?.patientSid && <div>SID: {study.patientSid}</div>}
+              {(currentMeta
+                ? currentMeta.patientAge || currentMeta.patientSex
+                : study?.dbPatient?.patientAge || study?.dbPatient?.patientGender) && (
+                <div>
+                  {(currentMeta
+                    ? [currentMeta.patientAge, currentMeta.patientSex]
+                    : [study?.dbPatient?.patientAge, study?.dbPatient?.patientGender]
+                  )
+                    .filter(Boolean)
+                    .join(' • ')}
+                </div>
+              )}
+              {(currentMeta ? currentMeta.patientId : study?.dbPatient?.patientId || study?.patientId) && (
+                <div>
+                  PID: {currentMeta ? currentMeta.patientId : study?.dbPatient?.patientId || study?.patientId}
+                </div>
+              )}
+              {!currentMeta && study?.dbPatient?.patientSid && (
+                <div>SID: {study.dbPatient.patientSid}</div>
+              )}
               <div>File: DICOM ({instances.length} slices)</div>
             </div>
           </div>

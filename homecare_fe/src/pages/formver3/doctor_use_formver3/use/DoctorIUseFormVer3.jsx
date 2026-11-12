@@ -890,9 +890,14 @@ export default function DoctorUseDFormVer3({
                   false,
                 )}
                 name="id_formver3_name"
-                rules={[{ required: true, message: "Chọn tên mẫu" }]}
+                rules={
+                  imagingMode === "FAST_SONO" || imagingMode === "FREE_TEXT"
+                    ? []
+                    : [{ required: true, message: "Chọn tên mẫu" }]
+                }
               >
                 <Select
+                  allowClear
                   disabled={
                     !isEdit ||
                     !selectedIDs.id_template_service ||
@@ -902,6 +907,8 @@ export default function DoctorUseDFormVer3({
                     !selectedIDs.id_template_service ||
                     !selectedIDs.id_exam_part
                       ? "Chọn Phân hệ & Bộ phận trước"
+                      : imagingMode === "FAST_SONO" || imagingMode === "FREE_TEXT"
+                      ? "Không bắt buộc (đã có đọc nhanh / tự do)"
                       : "Chọn tên mẫu"
                   }
                   showSearch
