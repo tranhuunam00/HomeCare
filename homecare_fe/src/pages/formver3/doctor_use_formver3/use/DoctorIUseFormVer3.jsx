@@ -582,33 +582,10 @@ export default function DoctorUseDFormVer3({
         });
       }
 
-      let resolvedFormVer3 = formVer3;
-      if (!resolvedFormVer3?.id) {
-        if (filteredFormVer3Names?.length > 0) {
-          const firstRes = await API_CALL.get(
-            `/formVer3?id_formver3_name=${filteredFormVer3Names[0].id}`,
-          );
-          resolvedFormVer3 =
-            firstRes?.data?.data?.items?.[0] || firstRes?.data?.data?.[0] || null;
-        }
-        if (!resolvedFormVer3?.id && values.id_exam_part) {
-          const partRes = await API_CALL.get(`/formVer3`, {
-            params: { id_exam_part: values.id_exam_part, limit: 1 },
-          });
-          resolvedFormVer3 =
-            partRes?.data?.data?.items?.[0] || partRes?.data?.data?.[0] || null;
-        }
-        if (!resolvedFormVer3?.id) {
-          const anyRes = await API_CALL.get(`/formVer3`, { params: { limit: 1 } });
-          resolvedFormVer3 =
-            anyRes?.data?.data?.items?.[0] || anyRes?.data?.data?.[0] || null;
-        }
-      }
-
       const formPayload = buildFormDataDoctorUseFormVer3(values, {
         id_patient_diagnose: patientDiagnose?.id,
         imageList,
-        formVer3: resolvedFormVer3,
+        formVer3,
         imagingRows: isFreeText ? undefined : imagingRows,
         abnormalFindings: isFreeText ? [] : abnormalFindings,
         imageDescriptionJson,
