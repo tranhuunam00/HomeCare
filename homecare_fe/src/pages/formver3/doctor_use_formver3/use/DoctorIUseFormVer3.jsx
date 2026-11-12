@@ -65,6 +65,7 @@ import TranslateListRecordsVer3 from "../../components/TranslateListRecordsVer3.
 import useLatestDoctorUseFormVer3 from "../../useLatestDoctorUseFormVer3.js";
 import CustomSunEditor from "../../../../components/Suneditor/CustomSunEditor";
 import FastSonoSelector from "../../components/FastSonoSelector/FastSonoSelector.jsx";
+import VoiceCursorDictation from "../../components/VoiceCursorDictation.jsx";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -1485,6 +1486,7 @@ export default function DoctorUseDFormVer3({
               // }
             />
           }
+          <VoiceCursorDictation form={form} isMobile={isMobile} />
         </Form>
       )}
 

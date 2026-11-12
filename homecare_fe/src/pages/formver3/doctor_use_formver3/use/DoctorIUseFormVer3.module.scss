@@ -30,10 +30,60 @@
     max-width: 100%;
     overflow-x: hidden;
     box-sizing: border-box;
-    padding: 6px 10px 100px !important;
+    padding: 8px 10px 120px !important;
 
     :global(h4.ant-typography) {
-      font-size: 14px !important;
+      font-size: 15px !important;
+      margin: 14px 0 8px !important;
+    }
+
+    :global(.ant-form-item) {
+      margin-bottom: 12px !important;
+    }
+
+    :global(.ant-form-item-label > label) {
+      font-size: 13.5px !important;
+      font-weight: 600 !important;
+      color: #1e293b !important;
+      height: auto !important;
+      margin-bottom: 4px !important;
+    }
+
+    :global(.ant-input),
+    :global(.ant-input-affix-wrapper) {
+      min-height: 42px !important;
+      font-size: 15px !important;
+      border-radius: 8px !important;
+      padding: 8px 12px !important;
+      line-height: 1.4 !important;
+    }
+
+    :global(.ant-select-single:not(.ant-select-customize-input) .ant-select-selector) {
+      min-height: 42px !important;
+      height: 42px !important;
+      border-radius: 8px !important;
+      padding: 2px 11px !important;
+      display: flex !important;
+      align-items: center !important;
+    }
+
+    :global(.ant-select-selection-item),
+    :global(.ant-select-selection-placeholder) {
+      font-size: 14.5px !important;
+      line-height: 38px !important;
+    }
+
+    :global(.ant-input-textarea textarea),
+    :global(textarea.ant-input) {
+      min-height: 72px !important;
+      font-size: 15px !important;
+      line-height: 1.5 !important;
+      border-radius: 8px !important;
+      padding: 10px 12px !important;
+    }
+
+    :global(.ant-btn) {
+      border-radius: 8px !important;
     }
   }
 }

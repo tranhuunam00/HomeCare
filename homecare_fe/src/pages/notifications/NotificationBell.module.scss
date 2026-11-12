@@ -31,11 +31,18 @@
 /* ---- Dropdown Panel ---- */
 .panel {
   width: 400px;
+  max-width: calc(100vw - 24px);
   background: #fff;
   border-radius: 16px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 4px 16px rgba(0, 0, 0, 0.08);
   overflow: hidden;
   border: 1px solid rgba(0, 0, 0, 0.06);
+
+  @media screen and (max-width: 600px) {
+    width: calc(100vw - 20px) !important;
+    max-width: calc(100vw - 20px) !important;
+    border-radius: 12px;
+  }
 }
 
 /* ---- Header ---- */

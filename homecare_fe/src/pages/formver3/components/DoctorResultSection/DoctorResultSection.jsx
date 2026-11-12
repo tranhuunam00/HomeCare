@@ -75,18 +75,23 @@ const DoctorResultSection = ({
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "center",
+                alignItems: "center",
+                padding: "4px 8px",
               }}
             >
-              {doctor.signature_url && (
-                <div style={{ display: "flex", justifyContent: "center" }}>
-                  <img
-                    src={doctor.signature_url}
-                    alt=""
-                    style={{
-                      height: 80,
-                      objectFit: "contain",
-                    }}
-                  />
+              {doctor.signature_url ? (
+                <img
+                  src={doctor.signature_url}
+                  alt="Chữ ký"
+                  style={{
+                    maxHeight: 75,
+                    maxWidth: "90%",
+                    objectFit: "contain",
+                  }}
+                />
+              ) : (
+                <div style={{ color: "#9ca3af", fontSize: 11, fontStyle: "italic" }}>
+                  Chữ ký bác sĩ
                 </div>
               )}
             </div>
@@ -98,18 +103,26 @@ const DoctorResultSection = ({
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
+                padding: "4px 8px",
               }}
             >
-              <img
-                src={doctor.avatar_url}
-                alt=""
-                style={{
-                  height: 80,
-                  objectFit: "cover",
-                  borderRadius: 4,
-                  border: "1px solid #d1d5db",
-                }}
-              />
+              {doctor.avatar_url ? (
+                <img
+                  src={doctor.avatar_url}
+                  alt="Ảnh bác sĩ"
+                  style={{
+                    height: 75,
+                    width: 75,
+                    objectFit: "cover",
+                    borderRadius: 4,
+                    border: "1px solid #d1d5db",
+                  }}
+                />
+              ) : (
+                <div style={{ color: "#9ca3af", fontSize: 11, fontStyle: "italic" }}>
+                  Ảnh đại diện
+                </div>
+              )}
             </div>
           </div>
 

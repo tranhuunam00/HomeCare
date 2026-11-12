@@ -57,6 +57,10 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
   const navigate = useNavigate();
   const [avatarError, setAvatarError] = useState(false);
 
+  React.useEffect(() => {
+    setAvatarError(false);
+  }, [doctor?.avatar_url]);
+
   const showRightDrawer = () => setRightDrawerVisible(true);
   const closeRightDrawer = () => setRightDrawerVisible(false);
 

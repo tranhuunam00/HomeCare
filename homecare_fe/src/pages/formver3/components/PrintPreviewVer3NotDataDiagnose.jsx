@@ -221,15 +221,27 @@ const PrintPreviewVer3NotDataDiagnose = ({
           bodyPadding={0}
         >
           {isUse && (
-            <PrintHeaderFromCustom
-              printTemplate={printTemplate}
-              fallback={
+            <>
+              {/* Trên mobile hiển thị responsive header, vừa vặn không phải kéo ngang */}
+              <div className={styles.mobileOnlyHeader}>
                 <LegacyPrintHeader
                   printTemplate={printTemplate}
                   languageTranslate={languageTranslate}
                 />
-              }
-            />
+              </div>
+              {/* Trên Desktop và khi In (@media print) hiển thị chuẩn Custom Canvas */}
+              <div className={styles.desktopPrintHeader}>
+                <PrintHeaderFromCustom
+                  printTemplate={printTemplate}
+                  fallback={
+                    <LegacyPrintHeader
+                      printTemplate={printTemplate}
+                      languageTranslate={languageTranslate}
+                    />
+                  }
+                />
+              </div>
+            </>
           )}
 
           {!isOnLyContent && (
@@ -342,46 +354,38 @@ const PrintPreviewVer3NotDataDiagnose = ({
                       .join(", ")}
                   />
                 </div>
-                <div className={styles.adminFullRow}>
-                  <PrintItem
-                    label={translateLabel(
-                      languageTranslate,
-                      "phone",
-                      false,
-                    ).toUpperCase()}
-                    value={selectedPatientDiagnose?.phoneNumber}
-                  />
-                </div>
-                <div className={styles.adminFullRow}>
-                  <PrintItem
-                    label={translateLabel(
-                      languageTranslate,
-                      "patientId",
-                      false,
-                    ).toUpperCase()}
-                    value={selectedPatientDiagnose?.PID}
-                  />
-                </div>
-                <div className={styles.adminFullRow}>
-                  <PrintItem
-                    label={translateLabel(
-                      languageTranslate,
-                      "email",
-                      false,
-                    ).toUpperCase()}
-                    value={selectedPatientDiagnose?.email}
-                  />
-                </div>
-                <div className={styles.adminFullRow}>
-                  <PrintItem
-                    label={translateLabel(
-                      languageTranslate,
-                      "sid",
-                      false,
-                    ).toUpperCase()}
-                    value={selectedPatientDiagnose?.SID}
-                  />
-                </div>
+                <PrintItem
+                  label={translateLabel(
+                    languageTranslate,
+                    "phone",
+                    false,
+                  ).toUpperCase()}
+                  value={selectedPatientDiagnose?.phoneNumber}
+                />
+                <PrintItem
+                  label={translateLabel(
+                    languageTranslate,
+                    "patientId",
+                    false,
+                  ).toUpperCase()}
+                  value={selectedPatientDiagnose?.PID}
+                />
+                <PrintItem
+                  label={translateLabel(
+                    languageTranslate,
+                    "email",
+                    false,
+                  ).toUpperCase()}
+                  value={selectedPatientDiagnose?.email}
+                />
+                <PrintItem
+                  label={translateLabel(
+                    languageTranslate,
+                    "sid",
+                    false,
+                  ).toUpperCase()}
+                  value={selectedPatientDiagnose?.SID}
+                />
                 <div className={styles.adminFullRow}>
                   <PrintItem
                     label={translateLabel(
@@ -936,10 +940,24 @@ const PrintPreviewVer3NotDataDiagnose = ({
             languageTranslate={languageTranslate}
             translateLabel={translateLabel}
             consultingDoctor={
-              selectedPatientDiagnose.id_consulting_doctor_doctor
+              selectedPatientDiagnose?.id_consulting_doctor_doctor ||
+              patientDiagnose?.id_consulting_doctor_doctor
             }
-            readingDoctor={selectedPatientDiagnose?.id_receive_doctor_doctor}
-            createdAt={formSnapshot.createdAt}
+            readingDoctor={{
+              ...doctor,
+              ...(selectedPatientDiagnose?.id_receive_doctor_doctor ||
+                patientDiagnose?.id_receive_doctor_doctor ||
+                {}),
+              avatar_url:
+                selectedPatientDiagnose?.id_receive_doctor_doctor?.avatar_url ||
+                patientDiagnose?.id_receive_doctor_doctor?.avatar_url ||
+                doctor?.avatar_url,
+              signature_url:
+                selectedPatientDiagnose?.id_receive_doctor_doctor?.signature_url ||
+                patientDiagnose?.id_receive_doctor_doctor?.signature_url ||
+                doctor?.signature_url,
+            }}
+            createdAt={formSnapshot?.createdAt}
           />
         </Card>
       </div>

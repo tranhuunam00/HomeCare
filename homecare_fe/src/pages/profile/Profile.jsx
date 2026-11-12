@@ -205,16 +205,19 @@ const Profile = () => {
       const res = await API_CALL.get(`/doctor/${id}`);
       const data = res.data.data;
 
-      console.log("data?.avatar_url", data?.avatar_url);
-      setAvatarUrl(data?.avatar_url);
-      setSignatureUrl(data.signature_url);
-      form.setFieldsValue({
-        ...data,
-        dob: data.dob ? dayjs(data.dob, "YYYY-MM-DD") : null,
-        email: data.id_user_user.email,
-        academic_title: data.academic_title,
-        degree: data.degree,
-      });
+      if (data) {
+        setAvatarUrl(data?.avatar_url);
+        setSignatureUrl(data?.signature_url);
+        setDoctor(data);
+        storage.set("DOCTOR", data);
+        form.setFieldsValue({
+          ...data,
+          dob: data.dob ? dayjs(data.dob, "YYYY-MM-DD") : null,
+          email: data?.id_user_user?.email,
+          academic_title: data.academic_title,
+          degree: data.degree,
+        });
+      }
     } catch (err) {
       console.error("Lỗi khi lấy thông tin bác sĩ theo ID:", err);
       showError("Không thể lấy dữ liệu bác sĩ");
@@ -243,14 +246,8 @@ const Profile = () => {
   const onFinish = async (values) => {
     try {
       if (values.e_signature_url === "smartca") {
-        if (values.smartca_username && !values.credentialId) {
-          showError("Vui lòng chọn Credential ID trước khi lưu chữ ký");
-          return;
-        }
-
         if (values.smartca_username && !signVerified) {
-          showError("Vui lòng kiểm tra SmartCA trước khi lưu");
-          return;
+          showWarning("Chưa kiểm tra SmartCA thành công, chữ ký số SmartCA tạm thời chưa kích hoạt.");
         }
       }
       setLoading(true);
@@ -262,7 +259,8 @@ const Profile = () => {
       if (
         values.e_signature_url !== E_SIGNATURE_TYPES.NONE &&
         values.smartca_username &&
-        signVerified
+        signVerified &&
+        values.credentialId
       ) {
         await API_CALL.post("/doctor-sign/apply-sign", {
           username: values.smartca_username,
@@ -296,6 +294,7 @@ const Profile = () => {
       const updatedDoctor = updateRes.data?.data;
       if (updatedDoctor) {
         setDoctor(updatedDoctor);
+        storage.set("DOCTOR", updatedDoctor);
         if (updatedDoctor.avatar_url) {
           setAvatarUrl(updatedDoctor.avatar_url);
         }
@@ -800,13 +799,9 @@ const Profile = () => {
             <Col>
               {isEditing && (
                 <Button
-                  disabled={
-                    eSignatureType === "smartca" &&
-                    form.getFieldValue("smartca_username") &&
-                    !signVerified
-                  }
                   type="primary"
                   htmlType="submit"
+                  loading={loading}
                 >
                   Lưu thay đổi
                 </Button>

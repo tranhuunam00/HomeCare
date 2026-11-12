@@ -21,7 +21,7 @@
 .adminGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px 20px;
+  gap: 6px 24px;
 }
 
 .adminFullRow {
@@ -50,10 +50,27 @@
   align-items: flex-start;
 }
 
+.mobileOnlyHeader {
+  display: none;
+}
+
+.desktopPrintHeader {
+  display: block;
+}
+
 @media screen and (max-width: 768px) {
+  .mobileOnlyHeader {
+    display: block;
+    margin-bottom: 12px;
+  }
+
+  .desktopPrintHeader {
+    display: none;
+  }
+
   .adminGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 3px 10px;
+    grid-template-columns: 1fr;
+    gap: 4px;
   }
 
   .techRow {
@@ -128,5 +145,14 @@
       word-break: break-word !important;
       overflow-wrap: anywhere !important;
     }
+  }
+}
+
+@media print {
+  .mobileOnlyHeader {
+    display: none !important;
+  }
+  .desktopPrintHeader {
+    display: block !important;
   }
 }

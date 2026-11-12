@@ -232,6 +232,20 @@ export const GlobalAuthProvider = ({ children }) => {
     };
   }, [user?.id, token]);
 
+  // Luôn đồng bộ profile bác sĩ mới nhất từ database (avatar_url, signature_url, chức danh)
+  useEffect(() => {
+    if (!token || !doctor?.id) return;
+    API_CALL.get(`/doctor/${doctor.id}`, { silent: true })
+      .then((res) => {
+        const fresh = res?.data?.data;
+        if (fresh && (fresh.avatar_url !== doctor.avatar_url || fresh.signature_url !== doctor.signature_url || fresh.full_name !== doctor.full_name)) {
+          setDoctor((prev) => ({ ...prev, ...fresh }));
+          storage.set("DOCTOR", { ...doctor, ...fresh });
+        }
+      })
+      .catch((err) => console.log("Refresh doctor profile error:", err));
+  }, [token, doctor?.id]);
+
   useEffect(() => {
     if (!token) return;
     fetchCounts(filterPatient);

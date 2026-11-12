@@ -209,8 +209,9 @@ const NotificationBell = () => {
       onOpenChange={(open) => setVisible(open)}
       placement="bottomRight"
       arrow={false}
+      overlayStyle={{ maxWidth: "calc(100vw - 16px)" }}
     >
-      <Tooltip title="Thông báo">
+      <Tooltip title={visible ? "" : "Thông báo"}>
         <Badge count={unreadCount} overflowCount={99} size="small">
           <div className={styles.bellWrap}>
             <BellOutlined className={styles.bellIcon} />
