@@ -130,6 +130,7 @@ const Sidebar = ({ collapsed }) => {
           children: [
             { key: "/home/template_services", label: "Phân hệ" },
             { key: "/home/exam-parts", label: "Bộ phận" },
+            { key: "/home/clinical-templates", label: "Mẫu lâm sàng (5 tầng)" },
           ],
         },
         user?.id_role === USER_ROLE.ADMIN && {
