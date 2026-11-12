@@ -39,9 +39,10 @@ const { Option } = Select;
 const Admin5TierTemplate = () => {
   const { templateServices, examParts } = useGlobalAuth();
 
-  // 1. Danh sách Template 5 Tầng
+  // 1. Danh sách Template 5 Tầng (lưu DB) + Phân hệ (Cấp 1) + Bộ phận (Cấp 2)
   const [templates, setTemplates] = useState([]);
-  const [selectedTemplateCode, setSelectedTemplateCode] = useState('');
+  const [selectedServiceId, setSelectedServiceId] = useState(null);
+  const [selectedExamPartId, setSelectedExamPartId] = useState(null);
   const [selectedOrganKey, setSelectedOrganKey] = useState('');
   const [selectedOptionId, setSelectedOptionId] = useState('');
 
@@ -81,17 +82,6 @@ const Admin5TierTemplate = () => {
     try {
       const list = await fetchClinicalTemplatesFromDB();
       setTemplates(list);
-      if (list.length > 0 && !selectedTemplateCode) {
-        setSelectedTemplateCode(list[0].code);
-        if (list[0].organs?.length > 0) {
-          setSelectedOrganKey(list[0].organs[0].key);
-          if (list[0].organs[0].options?.length > 0) {
-            const firstOpt = list[0].organs[0].options[0];
-            setSelectedOptionId(firstOpt.id);
-            setEditingOption({ ...firstOpt });
-          }
-        }
-      }
     } finally {
       setLoading(false);
     }
@@ -100,6 +90,45 @@ const Admin5TierTemplate = () => {
   useEffect(() => {
     reloadTemplates();
   }, []);
+
+  // Tự động chọn Phân hệ đầu tiên (Cấp 1)
+  useEffect(() => {
+    if (templateServices?.length > 0 && !selectedServiceId) {
+      setSelectedServiceId(templateServices[0].id);
+    }
+  }, [templateServices, selectedServiceId]);
+
+  // Danh sách Bộ phận thuộc Phân hệ đang chọn (Cấp 2)
+  const filteredExamParts = useMemo(() => {
+    if (!examParts || !selectedServiceId) return [];
+    return examParts.filter(
+      (ep) => String(ep.id_template_service) === String(selectedServiceId),
+    );
+  }, [examParts, selectedServiceId]);
+
+  // Tự động chọn Bộ phận đầu tiên khi đổi Phân hệ
+  useEffect(() => {
+    if (filteredExamParts.length > 0) {
+      const stillExists = filteredExamParts.some(
+        (ep) => String(ep.id) === String(selectedExamPartId),
+      );
+      if (!stillExists) {
+        setSelectedExamPartId(filteredExamParts[0].id);
+      }
+    } else {
+      setSelectedExamPartId(null);
+    }
+  }, [filteredExamParts, selectedExamPartId]);
+
+  const activeService = useMemo(
+    () => templateServices?.find((s) => String(s.id) === String(selectedServiceId)) || null,
+    [templateServices, selectedServiceId],
+  );
+
+  const activeExamPart = useMemo(
+    () => filteredExamParts.find((ep) => String(ep.id) === String(selectedExamPartId)) || null,
+    [filteredExamParts, selectedExamPartId],
+  );
 
   // Tự động sinh đầy đủ Tầng 3, 4, 5 cho các bộ phận (exam_parts) của HomeCare
   const handleAutoGenerateForAllExamParts = async () => {
@@ -128,18 +157,38 @@ const Admin5TierTemplate = () => {
     }
   };
 
-  // Template đang chọn (Tầng 1)
+  // Mẫu 5 tầng gắn với Bộ phận đang chọn (nếu DB chưa có thì dùng bản sinh mặc định để sửa & lưu)
   const activeTemplate = useMemo(() => {
-    return templates.find((t) => t.code === selectedTemplateCode) || templates[0];
-  }, [templates, selectedTemplateCode]);
+    if (!activeExamPart) return null;
+    const expectedCode = `TPL_${activeExamPart.code || `EP_${activeExamPart.id}`}`;
+    const found = templates.find(
+      (t) =>
+        (t.id_exam_part && String(t.id_exam_part) === String(activeExamPart.id)) ||
+        t.code === expectedCode,
+    );
+    return found || generateDefault5TierForExamPart(activeExamPart, activeService || {});
+  }, [templates, activeExamPart, activeService]);
 
-  // Bộ phận đang chọn (Tầng 2)
+  // Cơ quan / Nhóm trong Bộ phận đang chọn
   const activeOrgan = useMemo(() => {
     return (
       activeTemplate?.organs?.find((o) => o.key === selectedOrganKey) ||
-      activeTemplate?.organs?.[0]
+      activeTemplate?.organs?.[0] ||
+      null
     );
   }, [activeTemplate, selectedOrganKey]);
+
+  // Helper cập nhật state + lưu vào DB (kể cả khi mẫu trước đó là bản nháp tự sinh)
+  const persistTemplateUpdate = async (updatedTemplate) => {
+    if (!updatedTemplate?.code) return;
+    setTemplates((prev) => {
+      const exists = prev.some((t) => t.code === updatedTemplate.code);
+      return exists
+        ? prev.map((t) => (t.code === updatedTemplate.code ? updatedTemplate : t))
+        : [...prev, updatedTemplate];
+    });
+    await upsertClinicalTemplateToDB(updatedTemplate);
+  };
 
   // Khi chuyển template hoặc cơ quan, tự động cập nhật editingOption
   useEffect(() => {
@@ -195,19 +244,13 @@ const Admin5TierTemplate = () => {
     });
 
     const updatedTemplate = { ...activeTemplate, organs: updatedOrgans };
-
-    const updatedTemplates = templates.map((tpl) => {
-      if (tpl.code !== activeTemplate.code) return tpl;
-      return updatedTemplate;
-    });
-
-    setTemplates(updatedTemplates);
-    await upsertClinicalTemplateToDB(updatedTemplate);
+    await persistTemplateUpdate(updatedTemplate);
     message.success('Đã lưu bền vững câu mô tả & kết luận tự sinh vào Database HomeCare!');
   };
 
-  // Thêm dạng kết quả (Tầng 3) VÀO DATABASE HOMECARE
+  // Thêm dạng kết quả / mẫu bệnh (Cấp 3) VÀO DATABASE HOMECARE
   const handleAddOption = async () => {
+    if (!activeTemplate || !activeOrgan) return;
     if (!newOptionForm.label || !newOptionForm.text) {
       message.error('Vui lòng nhập tên nút bấm và câu mô tả!');
       return;
@@ -226,52 +269,38 @@ const Admin5TierTemplate = () => {
       gender: newOptionForm.gender || 'ALL',
     };
 
-    let updatedTemplate = null;
-    const updatedTemplates = templates.map((tpl) => {
-      if (tpl.code !== activeTemplate.code) return tpl;
-      const updatedOrgans = tpl.organs.map((org) => {
-        if (org.key !== activeOrgan.key) return org;
-        return { ...org, options: [...org.options, newOpt] };
-      });
-      updatedTemplate = { ...tpl, organs: updatedOrgans };
-      return updatedTemplate;
+    const updatedOrgans = activeTemplate.organs.map((org) => {
+      if (org.key !== activeOrgan.key) return org;
+      return { ...org, options: [...(org.options || []), newOpt] };
     });
+    const updatedTemplate = { ...activeTemplate, organs: updatedOrgans };
 
-    setTemplates(updatedTemplates);
-    if (updatedTemplate) {
-      await upsertClinicalTemplateToDB(updatedTemplate);
-    }
+    await persistTemplateUpdate(updatedTemplate);
     setSelectedOptionId(generatedId);
     setEditingOption(newOpt);
     setIsAddOptionModalOpen(false);
     setNewOptionForm({ id: '', label: '', isNormal: false, text: '', conclusion: '', gender: 'ALL' });
-    message.success('Đã thêm dạng kết quả mới và lưu vào Database HomeCare!');
+    message.success('Đã thêm mẫu bệnh mới và lưu vào Database HomeCare!');
   };
 
-  // Xóa dạng kết quả VÀO DATABASE HOMECARE
+  // Xóa dạng kết quả / mẫu bệnh VÀO DATABASE HOMECARE
   const handleDeleteOption = async (optionId) => {
-    let updatedTemplate = null;
-    const updatedTemplates = templates.map((tpl) => {
-      if (tpl.code !== activeTemplate.code) return tpl;
-      const updatedOrgans = tpl.organs.map((org) => {
-        if (org.key !== activeOrgan.key) return org;
-        return { ...org, options: org.options.filter((o) => o.id !== optionId) };
-      });
-      updatedTemplate = { ...tpl, organs: updatedOrgans };
-      return updatedTemplate;
+    if (!activeTemplate || !activeOrgan) return;
+    const updatedOrgans = activeTemplate.organs.map((org) => {
+      if (org.key !== activeOrgan.key) return org;
+      return { ...org, options: org.options.filter((o) => o.id !== optionId) };
     });
+    const updatedTemplate = { ...activeTemplate, organs: updatedOrgans };
 
-    setTemplates(updatedTemplates);
-    if (updatedTemplate) {
-      await upsertClinicalTemplateToDB(updatedTemplate);
-    }
-    message.success('Đã xóa dạng kết quả và cập nhật Database!');
+    await persistTemplateUpdate(updatedTemplate);
+    message.success('Đã xóa mẫu bệnh và cập nhật Database!');
   };
 
-  // Thêm bộ phận (Tầng 2) VÀO DATABASE HOMECARE
+  // Thêm cơ quan / nhóm trong bộ phận VÀO DATABASE HOMECARE
   const handleAddOrgan = async () => {
+    if (!activeTemplate) return;
     if (!newOrganForm.label) {
-      message.error('Vui lòng nhập tên bộ phận!');
+      message.error('Vui lòng nhập tên cơ quan / nhóm!');
       return;
     }
 
@@ -297,41 +326,29 @@ const Admin5TierTemplate = () => {
       ],
     };
 
-    let updatedTemplate = null;
-    const updatedTemplates = templates.map((tpl) => {
-      if (tpl.code !== activeTemplate.code) return tpl;
-      updatedTemplate = { ...tpl, organs: [...(tpl.organs || []), newOrgan] };
-      return updatedTemplate;
-    });
+    const updatedTemplate = {
+      ...activeTemplate,
+      organs: [...(activeTemplate.organs || []), newOrgan],
+    };
 
-    setTemplates(updatedTemplates);
-    if (updatedTemplate) {
-      await upsertClinicalTemplateToDB(updatedTemplate);
-    }
+    await persistTemplateUpdate(updatedTemplate);
     setSelectedOrganKey(generatedKey);
     setIsAddOrganModalOpen(false);
     setNewOrganForm({ key: '', label: '', defaultNormalText: '' });
-    message.success('Đã thêm bộ phận mới và lưu Database!');
+    message.success('Đã thêm cơ quan mới và lưu Database!');
   };
 
   // Cập nhật thang điểm (Tầng 4) VÀO DATABASE HOMECARE
   const handleSaveClassification = async () => {
+    if (!activeTemplate) return;
     const hasClass = selectedClassification !== CLASSIFICATION_TYPES.NONE;
-    let updatedTemplate = null;
-    const updatedTemplates = templates.map((tpl) => {
-      if (tpl.code !== activeTemplate.code) return tpl;
-      updatedTemplate = {
-        ...tpl,
-        classificationType: selectedClassification,
-        hasClassification: hasClass,
-      };
-      return updatedTemplate;
-    });
+    const updatedTemplate = {
+      ...activeTemplate,
+      classificationType: selectedClassification,
+      hasClassification: hasClass,
+    };
 
-    setTemplates(updatedTemplates);
-    if (updatedTemplate) {
-      await upsertClinicalTemplateToDB(updatedTemplate);
-    }
+    await persistTemplateUpdate(updatedTemplate);
     setIsClassificationModalOpen(false);
     message.success('Đã cập nhật thang điểm phân loại và lưu Database!');
   };
@@ -367,56 +384,39 @@ const Admin5TierTemplate = () => {
 
       {/* 4 Cột Phả Hệ */}
       <div className={styles.columnsGrid}>
-        {/* CỘT 1: MẪU CHỈ ĐỊNH / DỊCH VỤ (TẦNG 1) */}
+        {/* CỘT 1: PHÂN HỆ (CẤP 1) */}
         <div className={styles.colCard}>
           <div className={styles.colHeader}>
             <span className={styles.colTitle}>
-              1. MẪU DỊCH VỤ ({templates.length})
+              1. PHÂN HỆ ({templateServices?.length || 0})
             </span>
           </div>
 
           <div className={styles.itemsList}>
-            {templates.map((tpl) => {
-              const isSelected = tpl.code === activeTemplate?.code;
+            {(templateServices || []).map((service) => {
+              const isSelected = String(service.id) === String(selectedServiceId);
+              const partCount = (examParts || []).filter(
+                (ep) => String(ep.id_template_service) === String(service.id),
+              ).length;
               return (
                 <div
-                  key={tpl.code}
+                  key={service.id}
                   className={`${styles.itemCard} ${isSelected ? styles.activeItem : ''}`}
                   onClick={() => {
-                    setSelectedTemplateCode(tpl.code);
-                    if (tpl.organs?.length > 0) {
-                      setSelectedOrganKey(tpl.organs[0].key);
-                    }
+                    setSelectedServiceId(service.id);
+                    setSelectedOrganKey('');
                   }}
                 >
                   <div className={styles.itemTitle}>
-                    <span>{tpl.title}</span>
-                    <Tag color="cyan" style={{ fontSize: 10, margin: 0 }}>
-                      {tpl.code}
-                    </Tag>
-                  </div>
-                  <div className={styles.itemSub}>
-                    {tpl.organs?.length || 0} bộ phận thăm khám
-                    {tpl.hasClassification && (
-                      <Tag color="orange" style={{ marginLeft: 6, fontSize: 10 }}>
-                        {tpl.classificationType}
+                    <span>{service.name}</span>
+                    {service.code && (
+                      <Tag color="cyan" style={{ fontSize: 10, margin: 0 }}>
+                        {service.code}
                       </Tag>
                     )}
                   </div>
-                  <div style={{ display: 'flex', gap: 4, marginTop: 4 }}>
-                    <Button
-                      size="small"
-                      type="link"
-                      icon={<SettingOutlined />}
-                      style={{ padding: 0, fontSize: 11 }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedClassification(tpl.classificationType || CLASSIFICATION_TYPES.NONE);
-                        setIsClassificationModalOpen(true);
-                      }}
-                    >
-                      Cài thang điểm
-                    </Button>
+                  <div className={styles.itemSub}>
+                    {partCount} bộ phận thăm khám
                   </div>
                 </div>
               );
@@ -424,63 +424,136 @@ const Admin5TierTemplate = () => {
           </div>
         </div>
 
-        {/* CỘT 2: BỘ PHẬN TRONG MẪU (TẦNG 2) */}
+        {/* CỘT 2: BỘ PHẬN THUỘC PHÂN HỆ (CẤP 2) */}
         <div className={styles.colCard}>
           <div className={styles.colHeader}>
             <span className={styles.colTitle}>
-              2. BỘ PHẬN ({activeTemplate?.organs?.length || 0})
+              2. BỘ PHẬN ({filteredExamParts.length})
             </span>
-            <Button
-              type="primary"
-              size="small"
-              icon={<PlusOutlined />}
-              style={{ background: '#0b6b4f', borderColor: '#0b6b4f' }}
-              onClick={() => setIsAddOrganModalOpen(true)}
-            >
-              Thêm
-            </Button>
           </div>
 
           <div className={styles.itemsList}>
-            {activeTemplate?.organs?.map((organ) => {
-              const isSelected = organ.key === activeOrgan?.key;
+            {filteredExamParts.map((ep) => {
+              const isSelected = String(ep.id) === String(selectedExamPartId);
+              const expectedCode = `TPL_${ep.code || `EP_${ep.id}`}`;
+              const savedTpl = templates.find(
+                (t) =>
+                  (t.id_exam_part && String(t.id_exam_part) === String(ep.id)) ||
+                  t.code === expectedCode,
+              );
+              const optionCount = (savedTpl?.organs || []).reduce(
+                (sum, org) => sum + (org.options?.length || 0),
+                0,
+              );
               return (
                 <div
-                  key={organ.key}
+                  key={ep.id}
                   className={`${styles.itemCard} ${isSelected ? styles.activeItem : ''}`}
-                  onClick={() => setSelectedOrganKey(organ.key)}
+                  onClick={() => {
+                    setSelectedExamPartId(ep.id);
+                    setSelectedOrganKey('');
+                  }}
                 >
                   <div className={styles.itemTitle}>
-                    <span>{organ.label}</span>
-                    <span style={{ fontSize: 11, color: '#94a3b8' }}>
-                      {organ.options?.length || 0} dạng
-                    </span>
+                    <span>{ep.name}</span>
+                    <Tag color={savedTpl ? 'green' : 'default'} style={{ fontSize: 10, margin: 0 }}>
+                      {savedTpl ? `${optionCount} mẫu` : 'Mặc định'}
+                    </Tag>
                   </div>
                   <div className={styles.itemSub}>
-                    Mặc định: "{organ.defaultNormalText?.slice(0, 40)}..."
+                    {savedTpl?.hasClassification && (
+                      <Tag color="orange" style={{ fontSize: 10, marginRight: 6 }}>
+                        {savedTpl.classificationType}
+                      </Tag>
+                    )}
+                    {isSelected && activeTemplate && (
+                      <Button
+                        size="small"
+                        type="link"
+                        icon={<SettingOutlined />}
+                        style={{ padding: 0, fontSize: 11, height: 'auto' }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedClassification(
+                            activeTemplate.classificationType || CLASSIFICATION_TYPES.NONE,
+                          );
+                          setIsClassificationModalOpen(true);
+                        }}
+                      >
+                        Cài thang điểm
+                      </Button>
+                    )}
                   </div>
                 </div>
               );
             })}
+            {filteredExamParts.length === 0 && (
+              <div style={{ color: '#94a3b8', fontSize: 12, padding: 12, textAlign: 'center' }}>
+                Phân hệ này chưa có bộ phận nào
+              </div>
+            )}
           </div>
         </div>
 
-        {/* CỘT 3: DẠNG KẾT QUẢ / CHIPS CỦA BỘ PHẬN (TẦNG 3) */}
+        {/* CỘT 3: MẪU BỆNH / CƠ QUAN THUỘC BỘ PHẬN (CẤP 3) */}
         <div className={styles.colCard}>
           <div className={styles.colHeader}>
             <span className={styles.colTitle}>
-              3. DẠNG KẾT QUẢ ({activeOrgan?.options?.length || 0})
+              3. MẪU BỆNH ({activeOrgan?.options?.length || 0})
             </span>
-            <Button
-              type="primary"
-              size="small"
-              icon={<PlusOutlined />}
-              style={{ background: '#0b6b4f', borderColor: '#0b6b4f' }}
-              onClick={() => setIsAddOptionModalOpen(true)}
-            >
-              Thêm
-            </Button>
+            <div style={{ display: 'flex', gap: 4 }}>
+              <Button
+                size="small"
+                icon={<PlusOutlined />}
+                disabled={!activeTemplate}
+                onClick={() => setIsAddOrganModalOpen(true)}
+              >
+                Cơ quan
+              </Button>
+              <Button
+                type="primary"
+                size="small"
+                icon={<PlusOutlined />}
+                disabled={!activeOrgan}
+                style={{ background: '#0b6b4f', borderColor: '#0b6b4f' }}
+                onClick={() => setIsAddOptionModalOpen(true)}
+              >
+                Mẫu bệnh
+              </Button>
+            </div>
           </div>
+
+          {activeTemplate?.organs?.length > 1 && (
+            <div
+              style={{
+                display: 'flex',
+                gap: 4,
+                overflowX: 'auto',
+                paddingBottom: 6,
+                marginBottom: 4,
+                borderBottom: '1px solid #f1f5f9',
+              }}
+            >
+              {activeTemplate.organs.map((org) => {
+                const isOrgActive = org.key === activeOrgan?.key;
+                return (
+                  <Button
+                    key={org.key}
+                    size="small"
+                    type={isOrgActive ? 'primary' : 'default'}
+                    style={
+                      isOrgActive
+                        ? { background: '#0b6b4f', borderColor: '#0b6b4f', fontSize: 11 }
+                        : { fontSize: 11 }
+                    }
+                    onClick={() => setSelectedOrganKey(org.key)}
+                  >
+                    {org.label} ({org.options?.length || 0})
+                  </Button>
+                );
+              })}
+            </div>
+          )}
 
           <div className={styles.itemsList}>
             {activeOrgan?.options?.map((opt) => {
@@ -533,7 +606,7 @@ const Admin5TierTemplate = () => {
                 Cấu hình Câu mô tả & Kết luận tự sinh (Tầng 5)
               </span>
               <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>
-                {activeTemplate?.title} → {activeOrgan?.label} → {editingOption.label || 'Chưa chọn'}
+                {activeService?.name} → {activeExamPart?.name} → {activeOrgan?.label} → {editingOption.label || 'Chưa chọn'}
               </div>
             </div>
             {editingOption.isNormal ? (
