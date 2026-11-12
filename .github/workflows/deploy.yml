@@ -10,12 +10,7 @@ jobs:
   deploy:
     name: Deploy to Server
     runs-on: ubuntu-latest
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      contains(github.event.head_commit.message, 'release') ||
-      contains(github.event.head_commit.message, 'Release') ||
-      contains(github.event.head_commit.message, 'RELEASE')
-    
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -28,6 +23,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT || 22 }}
           script: |
+            set -e
             # Source user profiles and NVM to load node/npm/pm2 into the shell environment
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
