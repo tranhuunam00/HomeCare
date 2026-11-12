@@ -172,16 +172,67 @@
     justify-content: flex-start;
   }
 
-  .topHeader__right_name {
-    font-size: 10px;
+  .topHeader__left {
+    order: 0;
   }
 
   .topHeader__right {
+    order: 0;
     margin-left: auto;
   }
 
+  .topHeader__right_name {
+    font-size: 10px;
+    max-width: 96px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .topHeader__right_avatar {
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
+  }
+
+  .topHeader__workflowBtn {
+    order: 1;
+  }
+
+  .topHeader__caseCount {
+    order: 1;
+  }
+
+  .topHeader__addBtn {
+    order: 1;
+    margin-left: auto;
+  }
+
+  .topHeader__importBtn {
+    order: 1;
+  }
+
+  .topHeader__filterService {
+    order: 2;
+    flex: 1 1 44%;
+    width: auto !important;
+  }
+
+  .topHeader__filterClinic {
+    order: 2;
+    flex: 1 1 50%;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+
+  .topHeader__filterPid {
+    order: 3;
+    flex: 1 1 32%;
+    width: auto !important;
+  }
+
+  .topHeader__filterName {
+    order: 3;
+    flex: 1 1 60%;
+    width: auto !important;
   }
 }

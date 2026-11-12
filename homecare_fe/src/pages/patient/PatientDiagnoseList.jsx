@@ -908,8 +908,11 @@ const PatientTablePage = ({ PID = null }) => {
               display: "flex",
               alignItems: "center",
               gap: "4px",
-              flexWrap: "wrap",
-              width: deviceIsMobile ? "100%" : "auto",
+              flexWrap: deviceIsMobile ? "nowrap" : "wrap",
+              flex: deviceIsMobile ? "1 1 0" : undefined,
+              minWidth: 0,
+              overflowX: deviceIsMobile ? "auto" : undefined,
+              scrollbarWidth: "none",
             }}
           >
             {DATE_OPTIONS.map(({ label, value }) => {
@@ -929,9 +932,10 @@ const PatientTablePage = ({ PID = null }) => {
                     });
                   }}
                   style={{
-                    fontSize: "12px",
-                    height: 28,
-                    padding: "0 10px",
+                    fontSize: deviceIsMobile ? "11px" : "12px",
+                    height: deviceIsMobile ? 26 : 28,
+                    padding: deviceIsMobile ? "0 8px" : "0 10px",
+                    flexShrink: 0,
                     borderRadius: "4px",
                     border: isActive ? "1px solid #2563eb" : "1px solid #e2e8f0",
                     background: isActive ? "#2563eb" : "#f8fafc",

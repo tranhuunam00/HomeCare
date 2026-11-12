@@ -115,6 +115,7 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
       </div>
       <Tooltip title="Quy trình">
         <Button
+          className={styles.topHeader__workflowBtn}
           size="small"
           icon={<ApartmentOutlined />}
           style={{
@@ -138,13 +139,14 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
         </Button>
       </Tooltip>
       {isOnWorkList && (
-        <span style={{ fontSize: "12px", fontWeight: "600", color: "#334155", whiteSpace: "nowrap" }}>
+        <span className={styles.topHeader__caseCount} style={{ fontSize: "12px", fontWeight: "600", color: "#334155", whiteSpace: "nowrap" }}>
           Số Ca = {totalPatient}
         </span>
       )}
 
       {isOnWorkList && (
         <Select
+          className={styles.topHeader__filterService}
           size="small"
           allowClear
           style={{ width: 130, height: 28 }}
@@ -167,6 +169,7 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
       )}
       {isOnWorkList && (
         <Input
+          className={styles.topHeader__filterPid}
           placeholder="PID"
           size="small"
           onChange={(e) =>
@@ -185,6 +188,7 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
       )}
       {isOnWorkList && (
         <Input
+          className={styles.topHeader__filterName}
           placeholder="Họ tên bệnh nhân"
           size="small"
           onChange={(e) =>
@@ -203,6 +207,7 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
       )}
       {isOnWorkList && (
         <Select
+          className={styles.topHeader__filterClinic}
           mode="multiple"
           size="small"
           style={{ minWidth: 160, maxWidth: 240, height: 28 }}
@@ -226,6 +231,7 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
         </Select>
       )}
       <Button
+        className={styles.topHeader__addBtn}
         type="primary"
         size="small"
         style={{
@@ -250,6 +256,7 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
         Thêm
       </Button>
       <Button
+        className={styles.topHeader__importBtn}
         type="primary"
         size="small"
         style={{
