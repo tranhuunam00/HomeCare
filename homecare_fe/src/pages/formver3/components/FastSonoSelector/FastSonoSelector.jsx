@@ -111,10 +111,12 @@ const FastSonoSelector = ({
     );
   }, [activeTemplate, activeOrganKey]);
 
-  // Lọc options theo giới tính bệnh nhân
+  // Lọc options theo giới tính bệnh nhân (fallback toàn bộ options nếu lọc ra rỗng)
   const visibleOptions = useMemo(() => {
     if (!currentOrgan) return [];
-    return filterOptionsByGender(currentOrgan.options || [], gender);
+    const rawOptions = currentOrgan.options || [];
+    const filtered = filterOptionsByGender(rawOptions, gender);
+    return filtered.length > 0 ? filtered : rawOptions;
   }, [currentOrgan, gender]);
 
   const currentSelectedIds = selectedMap[currentOrgan?.key || ''] || ['NORMAL'];

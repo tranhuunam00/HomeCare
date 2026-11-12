@@ -21,35 +21,119 @@ import {
 
 const STORAGE_KEY = 'HOMECARE_5TIER_CLINICAL_TEMPLATES_V1';
 
+function buildFallbackOptionsForOrgan(organLabel, defaultNormalText = '') {
+  const safeLabel = organLabel || 'Bộ phận';
+  const normalText =
+    defaultNormalText ||
+    `${safeLabel} hình thái, cấu trúc và tín hiệu trong giới hạn bình thường, không thấy tổn thương khu trú.`;
+  return [
+    {
+      id: 'NORMAL',
+      label: 'Bình thường',
+      isNormal: true,
+      text: normalText,
+      gender: 'ALL',
+    },
+    {
+      id: 'INFLAMMATION_EDEMA',
+      label: 'Viêm / Phù nề nhẹ',
+      isNormal: false,
+      text: `${safeLabel} có hình ảnh dày nhẹ tổ chức / phù nề, ranh giới rõ.`,
+      conclusion: `Theo dõi biến đổi viêm / phù nề nhẹ tại ${safeLabel}.`,
+      gender: 'ALL',
+    },
+    {
+      id: 'DEGENERATION',
+      label: 'Thoái hóa / Biến đổi mạn',
+      isNormal: false,
+      text: `${safeLabel} có dấu hiệu thoái hóa hoặc biến đổi cấu trúc mạn tính.`,
+      conclusion: `Biến đổi thoái hóa tại ${safeLabel}.`,
+      gender: 'ALL',
+    },
+    {
+      id: 'FOCAL_LESION',
+      label: 'Tổn thương khu trú',
+      isNormal: false,
+      text: `${safeLabel} ghi nhận tổn thương khu trú bất thường, đề nghị kết hợp lâm sàng.`,
+      conclusion: `Tổn thương khu trú tại ${safeLabel}.`,
+      gender: 'ALL',
+    },
+  ];
+}
+
 /**
- * Chuẩn hóa dữ liệu mẫu 5 tầng từ DB/Cache để đảm bảo organ.label & option.label luôn có giá trị
+ * Chuẩn hóa dữ liệu mẫu 5 tầng từ DB/Cache để đảm bảo organ.label & option.label & options (cấp 3) luôn đầy đủ
  */
-export function normalizeClinicalTemplate(tpl) {
+export function normalizeClinicalTemplate(tpl, fallbackContext = {}) {
   if (!tpl || typeof tpl !== 'object') return null;
-  const organs = Array.isArray(tpl.organs)
-    ? tpl.organs.map((organ, idx) => {
-        const resolvedLabel =
-          organ.label ||
-          organ.name ||
-          organ.title ||
-          organ.organName ||
-          organ.partName ||
-          organ.key ||
-          `Bộ phận ${idx + 1}`;
-        const options = Array.isArray(organ.options)
-          ? organ.options.map((opt) => ({
-              ...opt,
-              label: opt.label || opt.name || opt.title || opt.id || 'Lựa chọn',
-            }))
-          : [];
-        return {
-          ...organ,
-          key: organ.key || `ORGAN_${idx + 1}`,
-          label: resolvedLabel,
-          options,
-        };
-      })
-    : [];
+
+  const partName = fallbackContext.examPartName || tpl.title || 'Bộ phận';
+  const serviceName = fallbackContext.serviceName || tpl.title || '';
+  const generatedDefault = generateDefault5TierForExamPart(
+    {
+      id: tpl.id_exam_part || fallbackContext.idExamPart || 'AUTO',
+      name: partName,
+      id_template_service: tpl.id_template_service || fallbackContext.idTemplateService,
+    },
+    {
+      id: tpl.id_template_service || fallbackContext.idTemplateService,
+      name: serviceName,
+    }
+  );
+
+  const rawOrgans = Array.isArray(tpl.organs) && tpl.organs.length > 0
+    ? tpl.organs
+    : generatedDefault?.organs || [];
+
+  const organs = rawOrgans.map((organ, idx) => {
+    const resolvedLabel =
+      organ.label ||
+      organ.name ||
+      organ.title ||
+      organ.organName ||
+      organ.partName ||
+      organ.key ||
+      `Bộ phận ${idx + 1}`;
+
+    let options = Array.isArray(organ.options)
+      ? organ.options.map((opt) => ({
+          ...opt,
+          label: opt.label || opt.name || opt.title || opt.id || 'Lựa chọn',
+        }))
+      : [];
+
+    // Nếu organ từ DB chưa có options cấp 3 -> tự động phủ từ mẫu chuẩn theo từ khóa hoặc sinh mặc định
+    if (options.length === 0) {
+      const lowerLabel = resolvedLabel.toLowerCase();
+      const matchedDefaultOrgan =
+        generatedDefault?.organs?.find((dOrg) => {
+          const dLabel = (dOrg.label || '').toLowerCase();
+          return (
+            dOrg.key === organ.key ||
+            dLabel === lowerLabel ||
+            (lowerLabel.includes('xương') && dLabel.includes('xương')) ||
+            (lowerLabel.includes('khớp') && dLabel.includes('khớp')) ||
+            (lowerLabel.includes('phần mềm') && dLabel.includes('phần mềm')) ||
+            (lowerLabel.includes('phổi') && dLabel.includes('phổi')) ||
+            (lowerLabel.includes('màng phổi') && dLabel.includes('màng phổi')) ||
+            (lowerLabel.includes('đốt sống') && dLabel.includes('đốt sống')) ||
+            (lowerLabel.includes('đĩa đệm') && dLabel.includes('đĩa đệm'))
+          );
+        }) || generatedDefault?.organs?.[idx];
+
+      options =
+        matchedDefaultOrgan?.options?.length > 0
+          ? matchedDefaultOrgan.options
+          : buildFallbackOptionsForOrgan(resolvedLabel, organ.defaultNormalText);
+    }
+
+    return {
+      ...organ,
+      key: organ.key || `ORGAN_${idx + 1}`,
+      label: resolvedLabel,
+      options,
+    };
+  });
 
   return {
     ...tpl,
@@ -661,12 +745,24 @@ export async function fetchClinicalTemplateByServiceAndPart(
     const res = await API_CALL.get('/clinical-templates', { params });
     const data = res?.data?.data || res?.data;
     if (Array.isArray(data) && data.length > 0) {
-      return normalizeClinicalTemplate(data[0]);
+      return normalizeClinicalTemplate(data[0], {
+        idTemplateService,
+        idExamPart,
+        examPartName,
+        serviceName,
+      });
     }
   } catch {
     // Fallback tìm chính xác trong local cache nếu mất kết nối API
     const cachedMatch = resolveClinicalTemplate({ idTemplateService, idExamPart });
-    if (cachedMatch) return normalizeClinicalTemplate(cachedMatch);
+    if (cachedMatch) {
+      return normalizeClinicalTemplate(cachedMatch, {
+        idTemplateService,
+        idExamPart,
+        examPartName,
+        serviceName,
+      });
+    }
   }
 
   // Fallback tự động sinh cấu hình 5 tầng chuẩn y khoa theo Phân hệ & Bộ phận

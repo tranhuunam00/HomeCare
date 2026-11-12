@@ -92,14 +92,16 @@ export function filterOptionsByGender(options = [], gender) {
   const normalizedGender = (gender || '').trim().toLowerCase();
 
   return options.filter((opt) => {
-    const optGender = (opt.gender || 'ALL').toUpperCase();
-    if (optGender === 'ALL') return true;
-
-    if (normalizedGender === 'nam' || normalizedGender === 'male') {
-      return optGender === 'MALE';
+    const optGender = (opt.gender || 'ALL').trim().toUpperCase();
+    if (!optGender || optGender === 'ALL' || optGender === 'BOTH' || optGender === 'ANY' || optGender === 'CẢ HAI') {
+      return true;
     }
-    if (normalizedGender === 'nữ' || normalizedGender === 'nu' || normalizedGender === 'female') {
-      return optGender === 'FEMALE';
+
+    if (normalizedGender === 'nam' || normalizedGender === 'male' || normalizedGender === 'm') {
+      return optGender === 'MALE' || optGender === 'NAM' || optGender === 'M';
+    }
+    if (normalizedGender === 'nữ' || normalizedGender === 'nu' || normalizedGender === 'female' || normalizedGender === 'f') {
+      return optGender === 'FEMALE' || optGender === 'NỮ' || optGender === 'NU' || optGender === 'F';
     }
 
     return true;
