@@ -25,6 +25,7 @@ import {
   DeleteOutlined,
   CopyOutlined,
   EditOutlined,
+  EyeOutlined,
   ApartmentOutlined,
   UploadOutlined,
   UserOutlined,
