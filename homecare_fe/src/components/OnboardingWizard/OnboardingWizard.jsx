@@ -14,6 +14,7 @@ import {
   Descriptions,
   Row,
   Col,
+  Grid,
 } from "antd";
 import { UploadOutlined, PlusOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
@@ -52,6 +53,9 @@ const STATUS_ICONS = {
 const { Option } = Select;
 
 const OnboardingWizard = ({ open, onClose, doctorId, is_use_onboard }) => {
+  const screens = Grid.useBreakpoint();
+  const isMobile = !screens.md;
+
   const [current, setCurrent] = useState(0);
   const [form] = Form.useForm();
   const [avatarFile, setAvatarFile] = useState(null);
@@ -213,38 +217,41 @@ const OnboardingWizard = ({ open, onClose, doctorId, is_use_onboard }) => {
     {
       title: "Hồ sơ bác sĩ",
       content: (
-        <Row gutter={16}>
-          <Col span={14}>
+        <Row gutter={[12, 8]}>
+          <Col xs={24} sm={14}>
             <Form.Item
               label="Họ và tên"
               name="full_name"
               rules={[{ required: true, message: "Vui lòng nhập họ tên" }]}
+              style={{ marginBottom: 10 }}
             >
-              <Input placeholder="Nhập họ và tên bác sĩ" style={{ borderRadius: 6 }} />
+              <Input placeholder="Nhập họ và tên bác sĩ" style={{ borderRadius: 6, minHeight: 38 }} />
             </Form.Item>
           </Col>
-          <Col span={10}>
+          <Col xs={24} sm={10}>
             <Form.Item
               label="Giới tính"
               name="gender"
               rules={[{ required: true, message: "Vui lòng chọn giới tính" }]}
+              style={{ marginBottom: 10 }}
             >
-              <Select placeholder="Chọn giới tính" style={{ borderRadius: 6 }}>
+              <Select placeholder="Chọn giới tính" style={{ borderRadius: 6, minHeight: 38 }}>
                 <Option value="Nam">Nam</Option>
                 <Option value="Nữ">Nữ</Option>
               </Select>
             </Form.Item>
           </Col>
-          <Col span={12}>
+          <Col xs={24} sm={12}>
             <Form.Item
               label="Ngày sinh"
               name="dob"
               rules={[{ required: true, message: "Vui lòng chọn ngày sinh" }]}
+              style={{ marginBottom: 10 }}
             >
-              <DatePicker format="DD-MM-YYYY" style={{ width: "100%", borderRadius: 6 }} placeholder="Chọn ngày sinh" />
+              <DatePicker format="DD-MM-YYYY" style={{ width: "100%", borderRadius: 6, minHeight: 38 }} placeholder="Chọn ngày sinh" />
             </Form.Item>
           </Col>
-          <Col span={12}>
+          <Col xs={24} sm={12}>
             <Form.Item
               label="Số điện thoại"
               name="phone_number"
@@ -252,8 +259,9 @@ const OnboardingWizard = ({ open, onClose, doctorId, is_use_onboard }) => {
                 { required: true, message: "Vui lòng nhập số điện thoại" },
                 { pattern: /^[0-9]{9,11}$/, message: "Số điện thoại không hợp lệ" }
               ]}
+              style={{ marginBottom: 10 }}
             >
-              <Input placeholder="Nhập số điện thoại liên hệ" style={{ borderRadius: 6 }} />
+              <Input placeholder="Nhập số điện thoại liên hệ" style={{ borderRadius: 6, minHeight: 38 }} />
             </Form.Item>
           </Col>
         </Row>
@@ -262,10 +270,10 @@ const OnboardingWizard = ({ open, onClose, doctorId, is_use_onboard }) => {
     {
       title: "Thông tin bổ sung",
       content: (
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item label="Học hàm" name="academic_title">
-              <Select allowClear placeholder="Chọn học hàm" style={{ borderRadius: 6 }}>
+        <Row gutter={[12, 8]}>
+          <Col xs={24} sm={12}>
+            <Form.Item label="Học hàm" name="academic_title" style={{ marginBottom: 10 }}>
+              <Select allowClear placeholder="Chọn học hàm" style={{ borderRadius: 6, minHeight: 38 }}>
                 {ACADEMIC_TITLES.map((item) => (
                   <Option key={item.value} value={item.value}>
                     {item.label}
@@ -274,9 +282,9 @@ const OnboardingWizard = ({ open, onClose, doctorId, is_use_onboard }) => {
               </Select>
             </Form.Item>
           </Col>
-          <Col span={12}>
-            <Form.Item label="Học vị" name="degree">
-              <Select allowClear placeholder="Chọn học vị" style={{ borderRadius: 6 }}>
+          <Col xs={24} sm={12}>
+            <Form.Item label="Học vị" name="degree" style={{ marginBottom: 10 }}>
+              <Select allowClear placeholder="Chọn học vị" style={{ borderRadius: 6, minHeight: 38 }}>
                 {DEGREES.map((item) => (
                   <Option key={item.value} value={item.value}>
                     {item.label}
@@ -285,12 +293,12 @@ const OnboardingWizard = ({ open, onClose, doctorId, is_use_onboard }) => {
               </Select>
             </Form.Item>
           </Col>
-          <Col span={24}>
-            <Form.Item label="Mô tả / Giới thiệu bản thân" name="description">
+          <Col xs={24}>
+            <Form.Item label="Mô tả / Giới thiệu bản thân" name="description" style={{ marginBottom: 10 }}>
               <Input.TextArea placeholder="Nhập một vài dòng giới thiệu về chuyên môn hoặc kinh nghiệm..." rows={3} style={{ borderRadius: 6 }} />
             </Form.Item>
           </Col>
-          <Col span={24}>
+          <Col xs={24}>
             <div style={{ 
               background: "#f8fafc", 
               border: "1px solid #e2e8f0", 
@@ -802,42 +810,63 @@ const OnboardingWizard = ({ open, onClose, doctorId, is_use_onboard }) => {
   return (
     <Modal
       open={open}
-      closable={false}
+      closable={true}
+      onCancel={onClose}
       footer={null}
       width={1000}
       bodyStyle={{ padding: 0 }}
       styles={{ body: { padding: 0 } }}
-      style={{ top: 40 }}
+      style={{ top: isMobile ? 12 : 40, maxWidth: "calc(100vw - 16px)", margin: "0 auto" }}
     >
       {/* Gradient Header Banner */}
       <div style={{
         background: "linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)",
-        padding: "16px 24px",
+        padding: isMobile ? "12px 16px" : "16px 24px",
         borderTopLeftRadius: "8px",
         borderTopRightRadius: "8px",
         color: "#ffffff"
       }}>
-        <h3 style={{ margin: 0, color: "#ffffff", fontSize: "16px", fontWeight: "700" }}>
+        <h3 style={{ margin: 0, color: "#ffffff", fontSize: isMobile ? "15px" : "16px", fontWeight: "700" }}>
           Thiết lập tài khoản HomeCare
         </h3>
-        <p style={{ margin: "4px 0 0 0", color: "#bfdbfe", fontSize: "12px" }}>
+        <p style={{ margin: "4px 0 0 0", color: "#bfdbfe", fontSize: isMobile ? "11px" : "12px" }}>
           Hoàn thành cấu hình thông tin ban đầu để sẵn sàng nhận và đọc kết quả ca bệnh
         </p>
       </div>
 
-      <Row style={{ minHeight: "460px" }}>
-        {/* Left column: Steps tracker */}
-        <Col span={7} style={{ background: "#f8fafc", padding: "24px 16px", borderRight: "1px solid #e2e8f0" }}>
-          <Steps
-            direction="vertical"
-            current={current}
-            size="small"
-            items={steps.map((s) => ({ title: s.title }))}
-          />
-        </Col>
+      {isMobile && (
+        <div style={{
+          background: "#f8fafc",
+          padding: "10px 16px",
+          borderBottom: "1px solid #e2e8f0",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}>
+          <span style={{ fontSize: 13, fontWeight: 700, color: "#1e3a8a" }}>
+            Bước {current + 1}/{steps.length}: {steps[current].title}
+          </span>
+          <span style={{ fontSize: 12, color: "#64748b", fontWeight: 600 }}>
+            {Math.round(((current + 1) / steps.length) * 100)}%
+          </span>
+        </div>
+      )}
+
+      <Row style={{ minHeight: isMobile ? "auto" : "460px" }}>
+        {/* Left column: Steps tracker (chỉ hiện trên tablet / desktop) */}
+        {!isMobile && (
+          <Col md={7} style={{ background: "#f8fafc", padding: "24px 16px", borderRight: "1px solid #e2e8f0" }}>
+            <Steps
+              direction="vertical"
+              current={current}
+              size="small"
+              items={steps.map((s) => ({ title: s.title }))}
+            />
+          </Col>
+        )}
 
         {/* Right column: Form Content */}
-        <Col span={17} style={{ padding: "24px 32px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+        <Col xs={24} md={17} style={{ padding: isMobile ? "16px" : "24px 32px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #f1f5f9", paddingBottom: 8, marginBottom: 16 }}>
               <h3 style={{ color: "#1e3a8a", margin: 0, fontSize: "14px", fontWeight: "600" }}>
@@ -862,7 +891,7 @@ const OnboardingWizard = ({ open, onClose, doctorId, is_use_onboard }) => {
           </div>
 
           {/* Footer buttons */}
-          <div style={{ marginTop: 24, textAlign: "right", borderTop: "1px solid #f1f5f9", paddingTop: 16 }}>
+          <div style={{ marginTop: 20, textAlign: "right", borderTop: "1px solid #f1f5f9", paddingTop: 14 }}>
             {current > 0 && current < steps.length - 1 && (
               <Button style={{ marginRight: 8, borderRadius: 6 }} onClick={prev}>
                 Quay lại

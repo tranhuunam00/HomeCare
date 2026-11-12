@@ -65,18 +65,24 @@ const DoctorResultSection = ({
             style={{
               display: "flex",
               borderBottom: "1px solid #cfd4dc",
-              minHeight: 52,
+              height: 72,
+              maxHeight: 72,
+              minHeight: 72,
+              overflow: "hidden",
             }}
           >
             <div
               style={{
                 flex: 1,
+                height: 72,
+                maxHeight: 72,
                 borderRight: "1px solid #cfd4dc",
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "center",
                 alignItems: "center",
-                padding: "4px 8px",
+                padding: "2px 8px",
+                overflow: "hidden",
               }}
             >
               {doctor.signature_url ? (
@@ -84,9 +90,12 @@ const DoctorResultSection = ({
                   src={doctor.signature_url}
                   alt="Chữ ký"
                   style={{
-                    maxHeight: 75,
+                    maxHeight: 58,
                     maxWidth: "90%",
+                    width: "auto",
+                    height: "auto",
                     objectFit: "contain",
+                    display: "block",
                   }}
                 />
               ) : (
@@ -99,11 +108,14 @@ const DoctorResultSection = ({
             <div
               style={{
                 flex: 1,
+                height: 72,
+                maxHeight: 72,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                padding: "4px 8px",
+                padding: "2px 8px",
+                overflow: "hidden",
               }}
             >
               {doctor.avatar_url ? (
@@ -111,11 +123,16 @@ const DoctorResultSection = ({
                   src={doctor.avatar_url}
                   alt="Ảnh bác sĩ"
                   style={{
-                    height: 75,
-                    width: 75,
+                    width: 58,
+                    height: 58,
+                    minWidth: 58,
+                    minHeight: 58,
+                    maxWidth: 58,
+                    maxHeight: 58,
                     objectFit: "cover",
                     borderRadius: 4,
                     border: "1px solid #d1d5db",
+                    display: "block",
                   }}
                 />
               ) : (

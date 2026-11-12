@@ -28,6 +28,25 @@
   }
 }
 
+:global(.ant-dropdown).notificationDropdownOverlay {
+  @media screen and (max-width: 600px) {
+    position: fixed !important;
+    top: 56px !important;
+    left: 8px !important;
+    right: 8px !important;
+    width: auto !important;
+    max-width: calc(100vw - 16px) !important;
+    transform: none !important;
+
+    .panel {
+      width: 100% !important;
+      max-width: 100% !important;
+      border-radius: 14px;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.2);
+    }
+  }
+}
+
 /* ---- Dropdown Panel ---- */
 .panel {
   width: 400px;
@@ -37,12 +56,6 @@
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 4px 16px rgba(0, 0, 0, 0.08);
   overflow: hidden;
   border: 1px solid rgba(0, 0, 0, 0.06);
-
-  @media screen and (max-width: 600px) {
-    width: calc(100vw - 20px) !important;
-    max-width: calc(100vw - 20px) !important;
-    border-radius: 12px;
-  }
 }
 
 /* ---- Header ---- */

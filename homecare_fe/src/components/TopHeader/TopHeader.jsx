@@ -353,9 +353,7 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
         </Dropdown>
 
         {/* Bell notification */}
-        <Tooltip title="Thông báo">
-          <NotificationBell />
-        </Tooltip>
+        <NotificationBell />
 
         {/* App icon mở Drawer */}
         <AppstoreOutlined

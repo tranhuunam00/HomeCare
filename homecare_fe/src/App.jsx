@@ -107,32 +107,28 @@ function App() {
   const [wizardOpen, setWizardOpen] = useState(false);
 
   const isProfileIncomplete = (doc) => {
-    if (!doc) return true;
-    return (
-      !doc.full_name ||
-      !doc.dob ||
-      !doc.gender ||
-      !doc.phone_number ||
-      !doc.id_clinic ||
-      !doc.avatar_url ||
-      !doc.signature_url
-    );
+    if (!doc) return false;
+    // Chỉ kích hoạt wizard nếu bác sĩ hoàn toàn mới chưa thiết lập họ tên hoặc chưa chọn phòng khám
+    return !doc.full_name || !doc.id_clinic;
   };
 
   useEffect(() => {
+    const isDismissed = sessionStorage.getItem("HOMECARE_WIZARD_DISMISSED") === "true";
+    if (isDismissed) {
+      setWizardOpen(false);
+      return;
+    }
+
     if (
       doctor &&
       user?.id_role != USER_ROLE.ADMIN &&
-      (isProfileIncomplete(doctor) ||
-        !printTemplateGlobal?.length)
-        // !getUsablePackageCodes(userPackages).length) // Tạm thời bỏ check gói
+      isProfileIncomplete(doctor)
     ) {
-      console.log("hehehe");
       setWizardOpen(true);
     } else {
       setWizardOpen(false);
     }
-  }, [doctor, printTemplateGlobal, userPackages]);
+  }, [doctor?.id, doctor?.full_name, doctor?.id_clinic]);
 
   return (
     <BrowserRouter>
@@ -346,7 +342,10 @@ function App() {
       </Routes>
       <OnboardingWizard
         open={wizardOpen}
-        onClose={() => setWizardOpen(false)}
+        onClose={() => {
+          setWizardOpen(false);
+          sessionStorage.setItem("HOMECARE_WIZARD_DISMISSED", "true");
+        }}
         doctorId={doctor?.id}
         API={API_CALL}
       />
