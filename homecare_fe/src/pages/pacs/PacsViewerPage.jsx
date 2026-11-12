@@ -7,6 +7,7 @@ import { usePacsStudy } from './hooks/usePacsStudy';
 import PacsTopNav from './components/PacsTopNav';
 import PacsSidebar from './components/PacsSidebar';
 import PacsSeriesStrip from './components/PacsSeriesStrip';
+import PacsSliceStrip from './components/PacsSliceStrip';
 import PacsViewport from './components/PacsViewport';
 import PacsCaptureAlert from './components/PacsCaptureAlert';
 import PacsUploadAlert from './components/PacsUploadAlert';
@@ -118,6 +119,9 @@ export default function PacsViewerPage() {
 
   // Per-series thumbnail map: { [seriesUid]: dataUrl }
   const [seriesThumbnails, setSeriesThumbnails] = useState({});
+  // Per-slice thumbnail map: { [globalIndex]: dataUrl }
+  const [sliceThumbnails, setSliceThumbnails] = useState({});
+  const [rightSliceStripOpen, setRightSliceStripOpen] = useState(true);
   const [isExpanded, setIsExpanded] = useState(false);
 
   // Key Image Capture Alert State (Clear feedback & Shutter Flash for doctor)
@@ -152,6 +156,10 @@ export default function PacsViewerPage() {
   // Annotations per slice: { [sliceIndex]: Array<Measurement> }
   const [annotations, setAnnotations] = useState({});
   const [currentDrawing, setCurrentDrawing] = useState(null);
+
+  useEffect(() => {
+    setCurrentDrawing(null);
+  }, [activeTool, currentIndex]);
 
   // 🏥 Medical Standard (DICOM Presentation State - GSPS):
   // Persist doctor's annotations & display parameters across page reloads on both PACS Server and local cache
@@ -274,17 +282,84 @@ export default function PacsViewerPage() {
     // Update thumbnail strictly for the series that owns currentIndex
     const activeInst = instances[currentIndex];
     const ownerSeriesUid = activeInst?.seriesInstanceUid || 'default_series';
-    if (!seriesThumbnails[ownerSeriesUid]) {
+    if (!seriesThumbnails[ownerSeriesUid] || !sliceThumbnails[currentIndex]) {
       try {
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-        setSeriesThumbnails((prev) =>
-          prev[ownerSeriesUid] ? prev : { ...prev, [ownerSeriesUid]: dataUrl }
-        );
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.65);
+        if (!seriesThumbnails[ownerSeriesUid]) {
+          setSeriesThumbnails((prev) =>
+            prev[ownerSeriesUid] ? prev : { ...prev, [ownerSeriesUid]: dataUrl }
+          );
+        }
+        if (!sliceThumbnails[currentIndex]) {
+          setSliceThumbnails((prev) =>
+            prev[currentIndex] ? prev : { ...prev, [currentIndex]: dataUrl }
+          );
+        }
       } catch (e) {
         // ignore
       }
     }
-  }, [dicomCache, currentIndex, windowCenter, windowWidth, invert, colorLut, instances, seriesThumbnails]);
+  }, [
+    dicomCache,
+    currentIndex,
+    windowCenter,
+    windowWidth,
+    invert,
+    colorLut,
+    instances,
+    seriesThumbnails,
+    sliceThumbnails,
+  ]);
+
+  // Pre-generate thumbnails for every slice in the currently active series when right strip is open
+  useEffect(() => {
+    if (!rightSliceStripOpen || !activeSeries?.instances?.length) return;
+    let cancelled = false;
+
+    const generateActiveSeriesSliceThumbs = async () => {
+      const headers = getAuthHeaders();
+      for (const inst of activeSeries.instances) {
+        if (cancelled) return;
+        if (sliceThumbnails[inst.globalIndex]) continue;
+
+        try {
+          let parsed = dicomCache[inst.globalIndex];
+          if (!parsed) {
+            const res = await axios.get(
+              `${apiEndpoint}/api/pacs/instances/${inst.sopInstanceUid}/file`,
+              { responseType: 'arraybuffer', headers }
+            );
+            if (cancelled) return;
+            parsed = parseDicomBuffer(res.data);
+            setDicomCache((prev) =>
+              prev[inst.globalIndex] ? prev : { ...prev, [inst.globalIndex]: parsed }
+            );
+          }
+
+          if (parsed?.rawPixels && !cancelled) {
+            const offscreen = document.createElement('canvas');
+            renderDicomToCanvas(offscreen, parsed.rawPixels, parsed.meta, {
+              windowCenter: parsed.meta.windowCenter,
+              windowWidth: parsed.meta.windowWidth,
+              invert: false,
+              colorLut: 'default',
+            });
+            const thumbUrl = offscreen.toDataURL('image/jpeg', 0.55);
+            setSliceThumbnails((prev) =>
+              prev[inst.globalIndex] ? prev : { ...prev, [inst.globalIndex]: thumbUrl }
+            );
+          }
+        } catch (err) {
+          console.warn('Không thể tạo thumbnail lát cắt:', inst.sopInstanceUid, err?.message);
+        }
+      }
+    };
+
+    generateActiveSeriesSliceThumbs();
+    return () => {
+      cancelled = true;
+    };
+  }, [rightSliceStripOpen, activeSeries, apiEndpoint, getAuthHeaders]);
 
   // Pre-generate real thumbnails for every series from its own first instance
   useEffect(() => {
@@ -435,7 +510,7 @@ export default function PacsViewerPage() {
         valueText: '0.0 mm',
       });
     } else if (activeTool === PACS_TOOLS.ANGLE) {
-      if (!currentDrawing) {
+      if (!currentDrawing || currentDrawing.type !== 'angle') {
         setCurrentDrawing({
           id: Date.now(),
           type: 'angle',
@@ -443,20 +518,31 @@ export default function PacsViewerPage() {
           valueText: '',
         });
       } else if (currentDrawing.points.length === 2) {
+        const [p1] = currentDrawing.points;
+        if (Math.hypot(coords.x - p1.x, coords.y - p1.y) >= 3) {
+          setCurrentDrawing({
+            ...currentDrawing,
+            points: [p1, coords, coords],
+            valueText: '0.0°',
+          });
+        }
+      } else if (currentDrawing.points.length === 3) {
         const [p1, p2] = currentDrawing.points;
-        const angleDeg = calculateAngle(p1, p2, coords);
-        setAnnotations((prev) => ({
-          ...prev,
-          [currentIndex]: [
-            ...(prev[currentIndex] || []),
-            {
-              ...currentDrawing,
-              points: [p1, p2, coords],
-              valueText: formatMeasurement('angle', angleDeg),
-            },
-          ],
-        }));
-        setCurrentDrawing(null);
+        if (Math.hypot(coords.x - p2.x, coords.y - p2.y) >= 3) {
+          const angleDeg = calculateAngle(p1, p2, coords);
+          setAnnotations((prev) => ({
+            ...prev,
+            [currentIndex]: [
+              ...(prev[currentIndex] || []),
+              {
+                ...currentDrawing,
+                points: [p1, p2, coords],
+                valueText: formatMeasurement('angle', angleDeg),
+              },
+            ],
+          }));
+          setCurrentDrawing(null);
+        }
       }
     } else if (activeTool === PACS_TOOLS.ROI_ELLIPSE) {
       setCurrentDrawing({
@@ -477,33 +563,55 @@ export default function PacsViewerPage() {
 
   // Mouse Move Handler
   const handleMouseMove = (e) => {
-    if (!isInteracting.current) return;
+    const isAnglePreview =
+      activeTool === PACS_TOOLS.ANGLE && currentDrawing?.type === 'angle';
+    if (!isInteracting.current && !isAnglePreview) return;
 
-    const dx = e.clientX - startPos.current.x;
-    const dy = e.clientY - startPos.current.y;
+    if (isInteracting.current) {
+      const dx = e.clientX - startPos.current.x;
+      const dy = e.clientY - startPos.current.y;
 
-    if (e.buttons === 4 || activeTool === PACS_TOOLS.PAN) {
-      setPan({ x: startPan.current.x + dx, y: startPan.current.y + dy });
-      return;
-    }
+      if (e.buttons === 4 || activeTool === PACS_TOOLS.PAN) {
+        setPan({ x: startPan.current.x + dx, y: startPan.current.y + dy });
+        return;
+      }
 
-    if (e.buttons === 2 || activeTool === PACS_TOOLS.WW_WL) {
-      const sensitivity = 2.0;
-      setWindowWidth((prev) => Math.max(1, Math.round(startWW.current.ww + dx * sensitivity)));
-      setWindowCenter((prev) => Math.round(startWW.current.wl - dy * sensitivity));
-      return;
-    }
+      if (e.buttons === 2 || activeTool === PACS_TOOLS.WW_WL) {
+        const sensitivity = 2.0;
+        setWindowWidth((prev) => Math.max(1, Math.round(startWW.current.ww + dx * sensitivity)));
+        setWindowCenter((prev) => Math.round(startWW.current.wl - dy * sensitivity));
+        return;
+      }
 
-    if (activeTool === PACS_TOOLS.ZOOM) {
-      const zoomFactor = 1 - dy * 0.01;
-      setZoom((prev) => Math.max(0.1, Math.min(10, prev * zoomFactor)));
-      startPos.current = { x: e.clientX, y: e.clientY };
-      return;
+      if (activeTool === PACS_TOOLS.ZOOM) {
+        const zoomFactor = 1 - dy * 0.01;
+        setZoom((prev) => Math.max(0.1, Math.min(10, prev * zoomFactor)));
+        startPos.current = { x: e.clientX, y: e.clientY };
+        return;
+      }
     }
 
     const coords = getCanvasCoordinates(e);
     const currentData = dicomCache[currentIndex];
     const pixelSpacing = currentData?.meta?.pixelSpacing || [1.0, 1.0];
+
+    if (isAnglePreview) {
+      if (currentDrawing.points.length === 2) {
+        setCurrentDrawing({
+          ...currentDrawing,
+          points: [currentDrawing.points[0], coords],
+        });
+      } else if (currentDrawing.points.length === 3) {
+        const [p1, p2] = currentDrawing.points;
+        const angleDeg = calculateAngle(p1, p2, coords);
+        setCurrentDrawing({
+          ...currentDrawing,
+          points: [p1, p2, coords],
+          valueText: formatMeasurement('angle', angleDeg),
+        });
+      }
+      return;
+    }
 
     if (activeTool === PACS_TOOLS.LENGTH && currentDrawing) {
       const dist = calculateDistance(currentDrawing.points[0], coords, pixelSpacing);
@@ -533,6 +641,22 @@ export default function PacsViewerPage() {
   const handleMouseUp = () => {
     if (!isInteracting.current) return;
     isInteracting.current = false;
+
+    if (
+      activeTool === PACS_TOOLS.ANGLE &&
+      currentDrawing?.type === 'angle' &&
+      currentDrawing.points.length === 2
+    ) {
+      const [p1, p2] = currentDrawing.points;
+      if (Math.hypot((p2?.x || 0) - (p1?.x || 0), (p2?.y || 0) - (p1?.y || 0)) >= 6) {
+        setCurrentDrawing({
+          ...currentDrawing,
+          points: [p1, p2, p2],
+          valueText: '0.0°',
+        });
+      }
+      return;
+    }
 
     if (
       currentDrawing &&
@@ -960,6 +1084,19 @@ export default function PacsViewerPage() {
               </div>
             )}
           </div>
+        )}
+
+        {/* Column 4: Right-side scrollable slice strip for the active series/cluster */}
+        {!activeAttachedFile && (
+          <PacsSliceStrip
+            isOpen={rightSliceStripOpen}
+            onToggleOpen={() => setRightSliceStripOpen((prev) => !prev)}
+            activeSeries={activeSeries}
+            currentIndex={currentIndex}
+            activeSlicePos={activeSlicePos}
+            sliceThumbnails={sliceThumbnails}
+            onSelectSlice={(globalIdx) => setCurrentIndex(globalIdx)}
+          />
         )}
       </div>
 
