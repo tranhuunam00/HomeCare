@@ -556,8 +556,8 @@ const Home = () => {
             style={{
               padding: deviceIsMobile ? 6 : 8,
               background: "#fff",
+              flex: 1,
               minWidth: 0,
-              width: "100%",
               overflowX: "clip",
             }}
           >

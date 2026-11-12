@@ -167,14 +167,17 @@
   overflow-y: auto;
 }
 
+/* Prevent horizontal page overflow globally */
+html,
+body,
+#root {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
 /* Global mobile responsive safeguards across all pages & Ant Design widgets */
 @media (max-width: 768px) {
-  html,
-  body,
-  #root {
-    max-width: 100%;
-    overflow-x: clip;
-  }
 
   .ant-table-wrapper {
     max-width: 100%;

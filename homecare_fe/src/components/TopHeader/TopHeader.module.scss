@@ -2,12 +2,16 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 40px;
-  padding: 0;
+  flex-wrap: wrap;
+  min-height: 40px;
+  height: auto;
+  padding: 4px 10px;
   background: #f8f9fa;
   box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
-  width: calc(100vw - 20px);
-  gap: 8px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  gap: 6px;
 }
 
 .topHeader__left {
@@ -154,6 +158,10 @@
 
 .topHeader__right_name {
   font-size: 12px;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .topHeader__right_avatar {
