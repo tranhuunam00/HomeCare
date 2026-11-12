@@ -202,10 +202,28 @@ export default function DoctorUseDFormVer3({
     }
   }, [record?.id, idEdit]);
 
+  const processedKeyEventIdsRef = useRef(new Set());
+  const isEditRef = useRef(false);
+
   // Lắng nghe BroadcastChannel & postMessage & localStorage từ PACS Viewer khi bấm "Chụp ảnh key"
   useEffect(() => {
     const handleKeyImageMessage = (data) => {
       if (!data || data.type !== "KEY_IMAGE_CAPTURED") return;
+
+      // Chỉ đồng bộ khi bác sĩ đang ở trạng thái sửa (Sửa đọc, Sửa duyệt, Tạo mới / Đang sửa)
+      if (!isEditRef.current) return;
+
+      const eventKey =
+        data.eventId ||
+        `${data.timestamp || ""}_${data.caption || ""}_${data.dataUrl?.slice(-32) || ""}`;
+      if (processedKeyEventIdsRef.current.has(eventKey)) {
+        return;
+      }
+      processedKeyEventIdsRef.current.add(eventKey);
+      if (processedKeyEventIdsRef.current.size > 50) {
+        const firstKey = processedKeyEventIdsRef.current.values().next().value;
+        processedKeyEventIdsRef.current.delete(firstKey);
+      }
 
       const incomingId = data.patient_diagnose_id || data.patientDiagnoseId;
       const currentId = patientDiagnose?.id || selectedPatientDiagnose?.id || doctorUseFormVer3Id;
@@ -239,8 +257,6 @@ export default function DoctorUseDFormVer3({
             }
           });
 
-          // Bật chế độ edit để bác sĩ lưu được ảnh vừa chụp
-          setIsEdit(true);
           toast.success("Đã đồng bộ ảnh chụp từ PACS Viewer vào Hình ảnh minh họa!");
         } catch (err) {
           console.error("Lỗi khi đồng bộ ảnh key từ PACS:", err);
@@ -550,6 +566,10 @@ export default function DoctorUseDFormVer3({
   const [loading, setLoading] = useState();
 
   const [isEdit, setIsEdit] = useState(initEditMode || !idEdit);
+
+  useEffect(() => {
+    isEditRef.current = isEdit;
+  }, [isEdit]);
 
   useEffect(() => {
     setIsEdit(initEditMode || !idEdit);

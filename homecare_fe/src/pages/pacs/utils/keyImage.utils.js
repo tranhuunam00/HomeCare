@@ -73,6 +73,7 @@ export function broadcastKeyImage(payload) {
   const fullPayload = {
     ...payload,
     type: PACS_CHANNELS.EVENT_KEY_IMAGE_CAPTURED,
+    eventId: `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
     timestamp: Date.now(),
   };
 
