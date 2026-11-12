@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   getHeaderTemplate,
   mapHeaderInfoToBlocks,
@@ -8,6 +8,9 @@ const CANVAS_WIDTH = 794;
 const CANVAS_HEIGHT = 180;
 
 const PrintHeaderFromCustom = ({ printTemplate }) => {
+  const containerRef = useRef(null);
+  const [scale, setScale] = useState(1);
+
   const blocks = useMemo(() => {
     if (!printTemplate) return [];
 
@@ -32,17 +35,44 @@ const PrintHeaderFromCustom = ({ printTemplate }) => {
     );
   }, [blocks]);
 
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const updateScale = () => {
+      const w = el.clientWidth;
+      if (w > 0) {
+        setScale(Math.min(1, w / CANVAS_WIDTH));
+      }
+    };
+
+    updateScale();
+    if (typeof ResizeObserver !== "undefined") {
+      const ro = new ResizeObserver(updateScale);
+      ro.observe(el);
+      return () => ro.disconnect();
+    }
+  }, [blocks.length]);
+
   if (!blocks?.length) return null;
 
   return (
-    <div style={{ width: "100%", overflowX: "auto", marginBottom: 16 }}>
+    <div
+      ref={containerRef}
+      style={{
+        width: "100%",
+        height: Math.ceil(canvasHeight * scale),
+        overflow: "hidden",
+        marginBottom: 12,
+      }}
+    >
       <div
         style={{
           position: "relative",
           width: CANVAS_WIDTH,
-          maxWidth: "100%",
           height: canvasHeight,
-          margin: "0 auto",
+          transform: `scale(${scale})`,
+          transformOrigin: "top left",
         }}
       >
         {blocks

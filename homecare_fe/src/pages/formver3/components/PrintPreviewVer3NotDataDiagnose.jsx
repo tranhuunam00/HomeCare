@@ -353,27 +353,31 @@ const PrintPreviewVer3NotDataDiagnose = ({
                 <PrintItem
                   label={translateLabel(
                     languageTranslate,
-                    "email",
-                    false,
-                  ).toUpperCase()}
-                  value={selectedPatientDiagnose?.email}
-                />
-                <PrintItem
-                  label={translateLabel(
-                    languageTranslate,
                     "patientId",
                     false,
                   ).toUpperCase()}
                   value={selectedPatientDiagnose?.PID}
                 />
-                <PrintItem
-                  label={translateLabel(
-                    languageTranslate,
-                    "sid",
-                    false,
-                  ).toUpperCase()}
-                  value={selectedPatientDiagnose?.SID}
-                />
+                <div className={styles.adminFullRow}>
+                  <PrintItem
+                    label={translateLabel(
+                      languageTranslate,
+                      "email",
+                      false,
+                    ).toUpperCase()}
+                    value={selectedPatientDiagnose?.email}
+                  />
+                </div>
+                <div className={styles.adminFullRow}>
+                  <PrintItem
+                    label={translateLabel(
+                      languageTranslate,
+                      "sid",
+                      false,
+                    ).toUpperCase()}
+                    value={selectedPatientDiagnose?.SID}
+                  />
+                </div>
                 <div className={styles.adminFullRow}>
                   <PrintItem
                     label={translateLabel(
@@ -613,23 +617,6 @@ const PrintPreviewVer3NotDataDiagnose = ({
                     false,
                   ).toUpperCase()}
             </h3>
-            <span
-              className="no-print"
-              style={{
-                fontSize: 10,
-                padding: "2px 6px",
-                borderRadius: 4,
-                fontWeight: 500,
-                backgroundColor: isFreeText ? "#e6f7ff" : "#f9f0ff",
-                color: isFreeText ? "#096dd9" : "#531dab",
-                border: isFreeText ? "1px solid #91d5ff" : "1px solid #d3adf7",
-                display: "inline-block",
-              }}
-            >
-              {isFreeText
-                ? (languageTranslate === "en" ? "Free text" : "Văn bản tự do")
-                : (languageTranslate === "en" ? "Structured table" : "Bảng cấu trúc")}
-            </span>
           </div>
 
           {isFreeText ? (
