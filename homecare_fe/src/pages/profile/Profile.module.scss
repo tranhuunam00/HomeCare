@@ -65,3 +65,46 @@
     width: 300px;
   }
 }
+
+@media (max-width: 768px) {
+  .profileContainer {
+    padding: 12px;
+  }
+
+  .profileTitle {
+    margin-bottom: 12px;
+    font-size: 18px !important;
+  }
+
+  .profileTitleWrapper {
+    margin-bottom: 10px;
+  }
+
+  .sectionTitle {
+    margin-top: 16px;
+    margin-bottom: 10px;
+  }
+
+  .avatarSection {
+    margin-top: 12px;
+  }
+
+  .signatureSection {
+    margin: 12px 0;
+    margin-left: 0;
+
+    img {
+      width: 100%;
+      max-width: 280px;
+      height: auto;
+    }
+  }
+
+  .profileContainer :global(.ant-tag) {
+    white-space: normal;
+    height: auto;
+    line-height: 1.4;
+    padding: 4px 8px;
+    max-width: 100%;
+  }
+}

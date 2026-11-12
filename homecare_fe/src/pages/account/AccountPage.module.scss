@@ -12,6 +12,36 @@
   gap: 24px;
 }
 
+.account-page__sidebarMenu {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.account-page__content-child {
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #334155;
+  transition: background 0.2s ease, color 0.2s ease;
+
+  &:hover {
+    background: #eff6ff;
+    color: #1d4ed8;
+  }
+}
+
+.account-page__content-child--active {
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
 .account-page__sidebar {
   width: 200px;
 
@@ -38,6 +68,7 @@
   flex-direction: column;
   gap: 16px;
   flex: 1;
+  min-width: 0;
 }
 
 .account-page__card {
@@ -136,11 +167,46 @@
     }
   }
 }
-.account-page__content-child {
-  padding: 10px;
-  border-bottom: 1px solid #ccc;
-  cursor: pointer;
-  &:hover {
-    background-color: #666;
+@media (max-width: 768px) {
+  .account-page {
+    padding: 10px 8px;
+  }
+
+  .account-page__tabs :global(.ant-tabs-nav) {
+    margin-bottom: 10px;
+  }
+
+  .account-page__content {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .account-page__sidebarMenu {
+    flex-direction: row;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+
+  .account-page__content-child {
+    white-space: nowrap;
+    padding: 6px 10px;
+    font-size: 12px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    flex-shrink: 0;
+  }
+
+  .account-page__content-child--active {
+    background: #eff6ff;
+    border-color: #93c5fd;
+    color: #1d4ed8;
+  }
+
+  .account-page__details {
+    width: 100%;
+    min-width: 0;
   }
 }

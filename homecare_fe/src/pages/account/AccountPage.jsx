@@ -38,18 +38,21 @@ const AccountPage = () => {
       <Tabs defaultActiveKey="1" className={styles["account-page__tabs"]}>
         <TabPane tab="Dịch vụ" key="1">
           <div className={styles["account-page__content"]}>
-            <div style={{ display: "flex", flexDirection: "column" }}>
+            <div className={styles["account-page__sidebarMenu"]}>
               <div
-                className={styles["account-page__content-child"]}
+                className={`${styles["account-page__content-child"]} ${selectedMenu === "profile" ? styles["account-page__content-child--active"] : ""}`}
                 onClick={() => setSelectedMenu("profile")}
               >
                 <UserOutlined /> Hồ sơ cá nhân
               </div>
-              <div className={styles["account-page__content-child"]}>
+              <div
+                className={`${styles["account-page__content-child"]} ${selectedMenu === "notifications" ? styles["account-page__content-child--active"] : ""}`}
+                onClick={() => setSelectedMenu("notifications")}
+              >
                 <SettingOutlined /> Thông báo
               </div>
               <div
-                className={styles["account-page__content-child"]}
+                className={`${styles["account-page__content-child"]} ${selectedMenu === "password" ? styles["account-page__content-child--active"] : ""}`}
                 onClick={() => setSelectedMenu("password")}
               >
                 <KeyOutlined /> Đổi mật khẩu

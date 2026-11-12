@@ -346,10 +346,10 @@ const Profile = () => {
           onFinish={onFinish}
           className={styles.boldLabel}
         >
-          <Row gutter={24}>
-            <Col span={18}>
-              <Row gutter={16}>
-                <Col span={10}>
+          <Row gutter={[16, 12]}>
+            <Col xs={24} md={18}>
+              <Row gutter={12}>
+                <Col xs={24} md={10}>
                   <Form.Item
                     label="Họ và tên"
                     name="full_name"
@@ -365,7 +365,7 @@ const Profile = () => {
                     )}
                   </Form.Item>
                 </Col>
-                <Col span={4}>
+                <Col xs={12} md={4}>
                   <Form.Item
                     label="Ngày sinh"
                     name="dob"
@@ -391,7 +391,7 @@ const Profile = () => {
                     )}
                   </Form.Item>
                 </Col>
-                <Col span={4}>
+                <Col xs={12} md={4}>
                   <Form.Item
                     label="Giới tính"
                     name="gender"
@@ -411,8 +411,8 @@ const Profile = () => {
                   </Form.Item>
                 </Col>
               </Row>
-              <Row gutter={16}>
-                <Col span={12}>
+              <Row gutter={12}>
+                <Col xs={24} sm={12}>
                   <Form.Item
                     label="Email"
                     name="email"
@@ -434,7 +434,7 @@ const Profile = () => {
                     )}
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col xs={24} sm={12}>
                   <Form.Item
                     label="Số điện thoại"
                     name="phone_number"
@@ -455,8 +455,8 @@ const Profile = () => {
                 </Col>
               </Row>
 
-              <Row gutter={16}>
-                <Col span={12}>
+              <Row gutter={12}>
+                <Col xs={12} sm={12}>
                   <Form.Item label="Học hàm" name="academic_title" style={{ marginBottom: 12 }}>
                     {isEditing ? (
                       <Select placeholder="Chọn học hàm">
@@ -477,7 +477,7 @@ const Profile = () => {
                   </Form.Item>
                 </Col>
 
-                <Col span={12}>
+                <Col xs={12} sm={12}>
                   <Form.Item label="Học vị" name="degree" style={{ marginBottom: 12 }}>
                     {isEditing ? (
                       <Select placeholder="Chọn học vị">

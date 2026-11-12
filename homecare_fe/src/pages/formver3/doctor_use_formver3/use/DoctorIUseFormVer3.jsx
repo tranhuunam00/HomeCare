@@ -1069,7 +1069,7 @@ export default function DoctorUseDFormVer3({
                 }}
               >
                 {imagingMode === "FAST_SONO"
-                  ? "⚡ Chọn nhanh D-SONO (5 tầng)"
+                  ? "Chọn nhanh D-SONO (5 tầng)"
                   : imagingMode === "FREE_TEXT"
                   ? (languageTranslate === "en" ? "Free text" : "Văn bản tự do")
                   : (languageTranslate === "en" ? "Structured table" : "Bảng cấu trúc")}
@@ -1104,8 +1104,8 @@ export default function DoctorUseDFormVer3({
                     },
                     {
                       label: isMobile
-                        ? "⚡ Nhanh"
-                        : (languageTranslate === "en" ? "⚡ Fast D-SONO" : "⚡ Chọn nhanh (D-SONO)"),
+                        ? "Nhanh"
+                        : (languageTranslate === "en" ? "Fast D-SONO" : "Chọn nhanh (D-SONO)"),
                       value: "FAST_SONO",
                     },
                     {
