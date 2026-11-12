@@ -728,11 +728,8 @@ export default function DoctorUseDFormVer3({
       ) : (
         <Form
           form={form}
-          size={isMobile ? "small" : "middle"}
-          layout={isMobile ? "vertical" : "horizontal"}
-          labelAlign="left"
-          labelCol={isMobile ? undefined : { flex: "0 0 180px" }}
-          wrapperCol={isMobile ? undefined : { flex: "1 0 0" }}
+          size="small"
+          layout="vertical"
           colon={false}
           onFinish={onFinish}
           requiredMark={(label, { required }) =>
@@ -773,17 +770,16 @@ export default function DoctorUseDFormVer3({
           )}
           <Divider /> */}
 
-          <Title level={4} style={{ color: "#2f6db8", margin: isMobile ? "8px 0 6px" : "24px 0 16px" }}>
+          <Title level={4} style={{ color: "#2f6db8", margin: isMobile ? "6px 0" : "6px 0 8px", fontSize: 15 }}>
             {translateLabel(languageTranslate, "Kỹ thuật thực hiện", true)}
           </Title>
 
-          <Row gutter={isMobile ? [8, 0] : 16}>
-            <Col xs={12} md={9}>
+          <Row gutter={[8, 0]}>
+            <Col xs={12} md={8}>
               <Form.Item
                 label={translateLabel(languageTranslate, "Chỉ định", false)}
                 name="id_template_service"
                 rules={[{ required: true, message: "Chọn kỹ thuật" }]}
-                labelCol={isMobile ? undefined : { flex: "0 0 90px" }}
               >
                 <Select
                   placeholder="Chọn chỉ định"
@@ -812,12 +808,11 @@ export default function DoctorUseDFormVer3({
               </Form.Item>
             </Col>
 
-            <Col xs={12} md={7}>
+            <Col xs={12} md={8}>
               <Form.Item
                 label={translateLabel(languageTranslate, "bodyPart", false)}
                 name="id_exam_part"
                 rules={[{ required: true, message: "Chọn bộ phận" }]}
-                labelCol={isMobile ? undefined : { flex: "0 0 90px" }}
               >
                 <Select
                   placeholder="Chọn bộ phận thăm khám"
@@ -853,12 +848,11 @@ export default function DoctorUseDFormVer3({
               </Form.Item>
             </Col>
 
-            <Col xs={20} md={6}>
+            <Col xs={20} md={7}>
               <Form.Item
                 label={translateLabel(languageTranslate, "language", false)}
                 name="language"
                 rules={[{ required: true }]}
-                labelCol={isMobile ? undefined : { flex: "0 0 90px" }}
               >
                 <Select disabled={!isEdit} placeholder="VI / EN">
                   {LANGUAGE_OPTIONS.map((opt) => (
@@ -875,9 +869,10 @@ export default function DoctorUseDFormVer3({
                 </Select>
               </Form.Item>
             </Col>
-            <Col xs={4} md={1} style={{ display: "flex", alignItems: "center", paddingTop: isMobile ? 22 : 0 }}>
+            <Col xs={4} md={1} style={{ display: "flex", alignItems: "flex-start", paddingTop: 22 }}>
               <Tooltip title="Tải lại phân hệ & bộ phận">
                 <Button
+                  size="small"
                   icon={<ReloadOutlined />}
                   loading={reloading}
                   onClick={reloadTemplateAndExamPart}
@@ -886,10 +881,9 @@ export default function DoctorUseDFormVer3({
             </Col>
           </Row>
 
-          <Row gutter={12} align="middle">
-            <Col xs={20} md={22}>
+          <Row gutter={[8, 0]}>
+            <Col xs={20} md={11}>
               <Form.Item
-                labelCol={isMobile ? undefined : { flex: "0 0 270px" }}
                 label={translateLabel(
                   languageTranslate,
                   "resultTemplate",
@@ -959,9 +953,10 @@ export default function DoctorUseDFormVer3({
                 </Select>
               </Form.Item>
             </Col>
-            <Col xs={4} md={2}>
+            <Col xs={4} md={1} style={{ display: "flex", alignItems: "flex-start", paddingTop: 22 }}>
               <Tooltip title="Tải lại danh sách tên mẫu">
                 <Button
+                  size="small"
                   icon={<ReloadOutlined />}
                   disabled={
                     !selectedIDs.id_template_service ||
@@ -980,36 +975,37 @@ export default function DoctorUseDFormVer3({
                 />
               </Tooltip>
             </Col>
+            <Col xs={24} md={12}>
+              <Form.Item
+                label={translateLabel(languageTranslate, "resultPrint", false)}
+                name="id_print_template"
+                rules={[{ required: true, message: "Chọn mẫu in" }]}
+              >
+                <Select
+                  disabled={!isEdit}
+                  showSearch
+                  allowClear
+                  style={{ width: "100%" }}
+                  placeholder="Chọn mẫu in"
+                  optionFilterProp="children"
+                  onChange={(val) => {
+                    const printT = printTemplateList.find((t) => t.id == val);
+                    setPrintTemplate(printT);
+                    form.setFieldsValue({ id_print_template: printT?.id });
+                  }}
+                  filterOption={(input, option) =>
+                    option?.children?.toLowerCase()?.includes(input.toLowerCase())
+                  }
+                >
+                  {printTemplateList.map((tpl) => (
+                    <Option key={tpl.id} value={tpl.id}>
+                      {tpl.name}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
           </Row>
-          <Form.Item
-            label={translateLabel(languageTranslate, "resultPrint", false)}
-            name="id_print_template"
-            rules={[{ required: true, message: "Chọn mẫu in" }]}
-            labelCol={isMobile ? undefined : { flex: "0 0 270px" }}
-          >
-            <Select
-              disabled={!isEdit}
-              showSearch
-              allowClear
-              style={{ width: "100%" }}
-              placeholder="Chọn mẫu in"
-              optionFilterProp="children"
-              onChange={(val) => {
-                const printT = printTemplateList.find((t) => t.id == val);
-                setPrintTemplate(printT);
-                form.setFieldsValue({ id_print_template: printT?.id });
-              }}
-              filterOption={(input, option) =>
-                option?.children?.toLowerCase()?.includes(input.toLowerCase())
-              }
-            >
-              {printTemplateList.map((tpl) => (
-                <Option key={tpl.id} value={tpl.id}>
-                  {tpl.name}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
 
           <Form.Item name="implementMethod" label="" tooltip="Short text">
             <TextArea

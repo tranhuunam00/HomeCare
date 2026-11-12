@@ -6,27 +6,33 @@
 }
 
 .doctorFormWrap {
+  padding: 8px 14px 80px !important;
+
+  :global(.ant-form-item) {
+    margin-bottom: 8px !important;
+  }
+
+  :global(.ant-form-item-label) {
+    padding-bottom: 2px !important;
+  }
+
+  :global(.ant-form-item-label > label) {
+    font-size: 12px !important;
+    height: auto !important;
+  }
+
+  :global(h4.ant-typography) {
+    margin: 10px 0 6px !important;
+    font-size: 15px !important;
+  }
+
   @media (max-width: 768px) {
     max-width: 100%;
     overflow-x: hidden;
     box-sizing: border-box;
     padding: 6px 10px 100px !important;
 
-    :global(.ant-form-item) {
-      margin-bottom: 8px !important;
-    }
-
-    :global(.ant-form-item-label) {
-      padding-bottom: 2px !important;
-    }
-
-    :global(.ant-form-item-label > label) {
-      font-size: 12px !important;
-      height: auto !important;
-    }
-
     :global(h4.ant-typography) {
-      margin: 10px 0 6px !important;
       font-size: 14px !important;
     }
   }

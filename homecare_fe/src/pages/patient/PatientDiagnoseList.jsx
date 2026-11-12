@@ -1178,8 +1178,9 @@ const PatientTablePage = ({ PID = null }) => {
         >
           <div
             style={{
-              position: deviceIsMobile ? "relative" : "fixed",
-              zIndex: 3,
+              position: "sticky",
+              top: 0,
+              zIndex: 10,
               display: "flex",
               flexWrap: "wrap",
               maxWidth: "100%",
@@ -1190,7 +1191,7 @@ const PatientTablePage = ({ PID = null }) => {
               padding: "6px 8px",
               gap: "6px",
               borderRadius: "4px",
-              marginBottom: deviceIsMobile ? 8 : 0,
+              marginBottom: deviceIsMobile ? 8 : 4,
             }}
           >
             {deviceIsMobile && (
