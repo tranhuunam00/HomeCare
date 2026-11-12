@@ -142,10 +142,8 @@ export default function PacsViewport({
             whiteSpace: 'nowrap',
           }}
         >
-          <span>{study?.modality || currentMeta.modality || 'DICOM'}</span>
-          {(currentMeta.seriesDescription || study?.seriesDescription) && (
-            <span>{currentMeta.seriesDescription || study?.seriesDescription}</span>
-          )}
+          {currentMeta.modality && <span>{currentMeta.modality}</span>}
+          {currentMeta.seriesDescription && <span>{currentMeta.seriesDescription}</span>}
           <span>{currentMeta.columns || 0}×{currentMeta.rows || 0}</span>
           <span>Zoom {Math.round((zoom || 1) * 100)}%</span>
         </div>
