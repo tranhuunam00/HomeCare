@@ -39,24 +39,17 @@ const LoginPage = () => {
           display: "flex",
           backgroundColor: "#f0f2f5",
           justifyContent: "center",
-          width: "100vw",
-          height: "100vh",
+          alignItems: "center",
+          width: "100%",
+          minHeight: "100vh",
+          padding: "80px 16px 24px",
+          boxSizing: "border-box",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center" }}>
-          {/* <div
-          style={{
-            backgroundImage: "url('/banner.jpg')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            width: 500,
-            height: 500,
-          }}
-        /> */}
+        <div style={{ width: "100%", maxWidth: 460 }}>
           <Card
             style={{
-              width: 500,
-              padding: 24,
+              width: "100%",
               borderRadius: 10,
               boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
             }}

@@ -50,21 +50,22 @@ const RegisterPage = () => {
           display: "flex",
           backgroundColor: "#f0f2f5",
           justifyContent: "center",
-          width: "100vw",
-          paddingTop: 120,
+          alignItems: "flex-start",
+          width: "100%",
+          minHeight: "100vh",
+          padding: "80px 16px 32px",
+          boxSizing: "border-box",
         }}
       >
         <div
           style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
+            width: "100%",
+            maxWidth: 520,
           }}
         >
           <Card
             style={{
-              maxWidth: 1000,
-              padding: 24,
+              width: "100%",
               borderRadius: 10,
               boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
             }}

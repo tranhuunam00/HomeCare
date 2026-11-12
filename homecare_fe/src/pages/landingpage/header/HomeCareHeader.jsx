@@ -27,7 +27,7 @@ const HomeCareHeader = () => {
       <div className={styles.homecareHeader}>
         <div className={styles.headerContainer}>
           {/* LEFT: LOGO */}
-          <div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <Tooltip title="Truy cập trang chủ HomeCare" placement="bottom">
               <img
                 src="/logo_home_care.png"

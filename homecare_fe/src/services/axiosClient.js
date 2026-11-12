@@ -90,7 +90,16 @@ const withErrorToast =
     try {
       return await fn(...args);
     } catch (err) {
-      toast.error(err?.response?.data?.message || defaultMsg);
+      const hasSilentFlag = args.some(
+        (arg) => arg && typeof arg === "object" && arg.silent === true,
+      );
+      const isUnauthBackground =
+        err?.response?.status === 401 && !localStorage.getItem("TOKEN");
+
+      if (!hasSilentFlag && !isUnauthBackground) {
+        const msg = err?.response?.data?.message || defaultMsg;
+        toast.error(msg, { toastId: msg });
+      }
       throw err;
     }
   };

@@ -84,7 +84,10 @@ export const GlobalAuthProvider = ({ children }) => {
       if (activeFilters.PID) params.PID = activeFilters.PID;
       if (activeFilters.SID) params.SID = activeFilters.SID;
 
-      const res = await API_CALL.get("/patient-diagnose/counts", { params });
+      const res = await API_CALL.get("/patient-diagnose/counts", {
+        params,
+        silent: true,
+      });
       const responseData = res?.data?.data !== undefined ? res.data.data : res?.data;
       console.log("=== fetchCounts response ===", responseData);
       if (responseData) {

@@ -201,11 +201,19 @@ $bg-light: rgba(11, 107, 79, 0.08);
 
 @media (max-width: 768px) {
   .homecareHeader {
-    padding: 0 16px;
+    padding: 0;
+  }
+
+  .headerContainer {
+    padding: 0 12px;
   }
 
   .logo {
-    height: 32px;
+    height: 30px;
+  }
+
+  .header {
+    display: none;
   }
 
   .menu {
@@ -213,6 +221,17 @@ $bg-light: rgba(11, 107, 79, 0.08);
   }
 
   .mobileMenuButton {
-    display: block;
+    display: flex;
+    align-items: center;
+  }
+
+  .authButtons {
+    gap: 6px;
+
+    button {
+      height: 32px;
+      font-size: 12px;
+      padding: 0 10px;
+    }
   }
 }
