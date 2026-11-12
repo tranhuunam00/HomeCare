@@ -174,46 +174,47 @@ const DoctorResultSection = ({
   };
 
   return (
-    <div style={{}}>
+    <div style={{ marginTop: 16 }}>
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "1fr 1fr",
+          gridTemplateColumns: hasConsultingDoctor
+            ? "repeat(auto-fit, minmax(260px, 1fr))"
+            : "1fr",
           border: "1px solid #cfd4dc",
         }}
       >
         {/* LEFT */}
-        <div
-          style={{
-            borderRight: "1px solid #cfd4dc",
-            visibility: hasConsultingDoctor ? "visible" : "hidden",
-          }}
-        >
-          {hasConsultingDoctor && (
-            <>
-              <h3
-                style={{
-                  textAlign: "center",
-                  padding: 6,
-                  fontWeight: 750,
-                  color: "rgb(47, 109, 184)",
-                  fontSize: 15,
-                }}
-              >
-                {translateLabel(languageTranslate, "BAC SI HOI CHAN", false)}
-              </h3>
+        {hasConsultingDoctor && (
+          <div
+            style={{
+              borderRight: "1px solid #cfd4dc",
+            }}
+          >
+            <h3
+              style={{
+                textAlign: "center",
+                padding: 6,
+                margin: 0,
+                fontWeight: 750,
+                color: "rgb(47, 109, 184)",
+                fontSize: 15,
+              }}
+            >
+              {translateLabel(languageTranslate, "BAC SI HOI CHAN", false)}
+            </h3>
 
-              {renderDoctorInfo(consultingDoctor)}
-            </>
-          )}
-        </div>
+            {renderDoctorInfo(consultingDoctor)}
+          </div>
+        )}
 
         {/* RIGHT */}
-        <div style={{ borderLeft: "1px solid #ccc" }}>
+        <div>
           <h3
             style={{
               textAlign: "center",
               padding: 6,
+              margin: 0,
               fontWeight: 750,
               color: "rgb(47, 109, 184)",
               fontSize: 15,
@@ -222,7 +223,7 @@ const DoctorResultSection = ({
             {translateLabel(languageTranslate, "BAC SI DOC KET QUA", false)}
           </h3>
 
-          {renderDoctorInfo(readingDoctor, true)}
+          {renderDoctorInfo(readingDoctor, true, !hasConsultingDoctor)}
         </div>
       </div>
     </div>

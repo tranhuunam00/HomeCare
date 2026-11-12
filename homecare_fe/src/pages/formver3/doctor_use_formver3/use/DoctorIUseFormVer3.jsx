@@ -1522,8 +1522,11 @@ export default function DoctorUseDFormVer3({
             isUse={isUse}
             doctor={initialSnap?.apiData?.id_receive_doctor_doctor}
             printTemplate={
+              printTemplateList?.find(
+                (t) => t.id == form.getFieldValue("id_print_template"),
+              ) ||
               printTemplate ||
-              initialSnap.apiData?.id_print_template_print_template
+              initialSnap?.apiData?.id_print_template_print_template
             }
             languageTranslate={languageTranslate}
             setPreviewOpen={setPreviewOpen}

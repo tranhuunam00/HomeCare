@@ -12,7 +12,11 @@ import FormActionBar from "../../formver2/component/FormActionBar";
 import { handlePrint } from "../../formver2/utils";
 import PrintHeaderFromCustom from "../../products/TemplatePrint/print/PrintHeaderFromCustom";
 import LegacyPrintHeader from "../../products/TemplatePrint/print/LegacyPrintHeader";
-import { CAN_THIEP_GROUP_CODE, examPartName } from "../formver3.constant";
+import {
+  CAN_THIEP_GROUP_CODE,
+  cleanOptionalStr,
+  examPartName,
+} from "../formver3.constant";
 import { PAGE_PADDING_RIGHT } from "../../products/TemplatePrint/Setting/constant.setting.print";
 import DoctorResultSection from "./DoctorResultSection/DoctorResultSection";
 import API_CALL from "../../../services/axiosClient";
@@ -100,8 +104,8 @@ const PrintPreviewVer3NotDataDiagnose = ({
       style={{
         display: "inline-flex",
         alignItems: "center",
-        marginRight: 24,
         fontSize: 15,
+        lineHeight: 1.35,
         ...stylesCustom,
         ...styleCustomParent,
       }}
@@ -110,9 +114,11 @@ const PrintPreviewVer3NotDataDiagnose = ({
         style={{
           width: 16,
           height: 16,
+          minWidth: 16,
+          flexShrink: 0,
           borderRadius: "50%",
           border: "2px solid #368df7ff",
-          display: "flex",
+          display: "inline-flex",
           alignItems: "center",
           justifyContent: "center",
           marginRight: 6,
@@ -124,7 +130,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
       >
         {checked ? "✓" : ""}
       </span>
-      {label}
+      <span>{label}</span>
     </span>
   );
 
@@ -138,6 +144,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
           padding: 0,
           marginRight: 10,
           minWidth: minWidth,
+          flexShrink: 0,
           ...styleCustomParent,
         }}
       >
@@ -147,12 +154,13 @@ const PrintPreviewVer3NotDataDiagnose = ({
   };
 
   const PrintItem = ({ label, value, minWidth, valueStyle }) => {
-    if (!value) return null;
+    const cleanVal = cleanOptionalStr(value);
+    if (!cleanVal) return null;
     return (
       <div
         className={styles.printItem}
         style={{
-          marginBottom: 6,
+          marginBottom: 4,
           display: "flex",
           alignItems: "flex-start",
         }}
@@ -164,11 +172,12 @@ const PrintPreviewVer3NotDataDiagnose = ({
             margin: 0,
             padding: 0,
             whiteSpace: "pre-wrap",
+            wordBreak: "break-word",
             ...valueStyle,
             ...styleCustomParent,
           }}
         >
-          {value || ""}
+          {cleanVal}
         </p>
       </div>
     );
@@ -280,7 +289,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                 ).toUpperCase()}
               </h3>
 
-              <div className={styles.infoRow} style={{ display: "flex", justifyContent: "space-between" }}>
+              <div className={styles.adminGrid}>
                 <PrintItem
                   label={translateLabel(
                     languageTranslate,
@@ -303,36 +312,11 @@ const PrintPreviewVer3NotDataDiagnose = ({
                     "age",
                     false,
                   ).toUpperCase()}
-                  value={selectedPatientDiagnose?.birth_year}
-                />
-              </div>
-              <div className={styles.infoRow} style={{ display: "flex", justifyContent: "space-between" }}>
-                <PrintItem
-                  label={translateLabel(
-                    languageTranslate,
-                    "address",
-                    false,
-                  ).toUpperCase()}
-                  value={selectedPatientDiagnose?.address}
-                />
-              </div>
-              <div className={styles.infoRow} style={{ display: "flex", justifyContent: "space-between" }}>
-                <PrintItem
-                  label={translateLabel(
-                    languageTranslate,
-                    "district",
-                    false,
-                  ).toUpperCase()}
-                  value={wardName}
-                />
-
-                <PrintItem
-                  label={translateLabel(
-                    languageTranslate,
-                    "province",
-                    false,
-                  ).toUpperCase()}
-                  value={provinceName}
+                  value={
+                    selectedPatientDiagnose?.birth_year
+                      ? `${Math.max(0, new Date().getFullYear() - Number(selectedPatientDiagnose.birth_year))} (${selectedPatientDiagnose.birth_year})`
+                      : ""
+                  }
                 />
                 <PrintItem
                   label={translateLabel(
@@ -342,9 +326,22 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   ).toUpperCase()}
                   value={selectedPatientDiagnose?.countryCode}
                 />
-              </div>
-
-              <div className={styles.infoRow} style={{ display: "flex", justifyContent: "space-between" }}>
+                <div className={styles.adminFullRow}>
+                  <PrintItem
+                    label={translateLabel(
+                      languageTranslate,
+                      "address",
+                      false,
+                    ).toUpperCase()}
+                    value={[
+                      selectedPatientDiagnose?.address,
+                      wardName,
+                      provinceName,
+                    ]
+                      .filter(Boolean)
+                      .join(", ")}
+                  />
+                </div>
                 <PrintItem
                   label={translateLabel(
                     languageTranslate,
@@ -361,8 +358,6 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   ).toUpperCase()}
                   value={selectedPatientDiagnose?.email}
                 />
-              </div>
-              <div className={styles.infoRow} style={{ display: "flex", justifyContent: "space-between" }}>
                 <PrintItem
                   label={translateLabel(
                     languageTranslate,
@@ -379,16 +374,16 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   ).toUpperCase()}
                   value={selectedPatientDiagnose?.SID}
                 />
-              </div>
-              <div className={styles.infoRow} style={{ display: "flex", justifyContent: "space-between" }}>
-                <PrintItem
-                  label={translateLabel(
-                    languageTranslate,
-                    "clinical",
-                    false,
-                  ).toUpperCase()}
-                  value={selectedPatientDiagnose?.Indication}
-                />
+                <div className={styles.adminFullRow}>
+                  <PrintItem
+                    label={translateLabel(
+                      languageTranslate,
+                      "clinical",
+                      false,
+                    ).toUpperCase()}
+                    value={selectedPatientDiagnose?.Indication}
+                  />
+                </div>
               </div>
             </>
           )}
@@ -430,7 +425,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
             )}
             value={formSnapshot.implementMethod}
           />
-          <div style={{ display: "flex", marginBottom: 4 }}>
+          <div className={styles.techRow}>
             <TextLabel
               label={translateLabel(
                 languageTranslate,
@@ -440,37 +435,38 @@ const PrintPreviewVer3NotDataDiagnose = ({
               minWidth={160}
             />
 
-            {!isOnLyContent ? (
-              <>
-                <PrintRadio
-                  checked={formSnapshot?.contrastInjection === "no"}
-                  label={translateLabel(languageTranslate, "no", false)}
-                  stylesCustom={{ width: 120 }}
-                />
-                <PrintRadio
-                  checked={formSnapshot?.contrastInjection === "yes"}
-                  label={translateLabel(languageTranslate, "yes", false)}
-                />
-              </>
-            ) : (
-              <>
-                {formSnapshot?.contrastInjection === "no" && (
+            <div className={styles.radioGroup}>
+              {!isOnLyContent ? (
+                <>
                   <PrintRadio
-                    checked
+                    checked={formSnapshot?.contrastInjection === "no"}
                     label={translateLabel(languageTranslate, "no", false)}
                   />
-                )}
-                {formSnapshot?.contrastInjection === "yes" && (
                   <PrintRadio
-                    checked
+                    checked={formSnapshot?.contrastInjection === "yes"}
                     label={translateLabel(languageTranslate, "yes", false)}
                   />
-                )}
-              </>
-            )}
+                </>
+              ) : (
+                <>
+                  {formSnapshot?.contrastInjection === "no" && (
+                    <PrintRadio
+                      checked
+                      label={translateLabel(languageTranslate, "no", false)}
+                    />
+                  )}
+                  {formSnapshot?.contrastInjection === "yes" && (
+                    <PrintRadio
+                      checked
+                      label={translateLabel(languageTranslate, "yes", false)}
+                    />
+                  )}
+                </>
+              )}
+            </div>
           </div>
 
-          <div style={{ display: "flex", marginBottom: 4 }}>
+          <div className={styles.techRow}>
             <TextLabel
               label={translateLabel(
                 languageTranslate,
@@ -480,68 +476,68 @@ const PrintPreviewVer3NotDataDiagnose = ({
               minWidth={160}
             />
 
-            {!isOnLyContent ? (
-              <>
-                <PrintRadio
-                  checked={formSnapshot?.imageQuatity === "good"}
-                  label={translateLabel(
-                    languageTranslate,
-                    "Đạt yêu cầu",
-                    false,
-                  )}
-                  stylesCustom={{ width: 120 }}
-                />
-                <PrintRadio
-                  checked={formSnapshot?.imageQuatity === "limited"}
-                  label={translateLabel(
-                    languageTranslate,
-                    "Đạt yêu cầu, có hạn chế",
-                    false,
-                  )}
-                  stylesCustom={{ width: 200 }}
-                />
-                <PrintRadio
-                  checked={formSnapshot?.imageQuatity === "bad"}
-                  label={translateLabel(languageTranslate, "Không đạt", false)}
-                />
-              </>
-            ) : (
-              <>
-                {formSnapshot?.imageQuatity === "good" && (
+            <div className={styles.radioGroup}>
+              {!isOnLyContent ? (
+                <>
                   <PrintRadio
-                    checked
+                    checked={formSnapshot?.imageQuatity === "good"}
                     label={translateLabel(
                       languageTranslate,
                       "Đạt yêu cầu",
                       false,
                     )}
                   />
-                )}
-                {formSnapshot?.imageQuatity === "limited" && (
                   <PrintRadio
-                    checked
+                    checked={formSnapshot?.imageQuatity === "limited"}
                     label={translateLabel(
                       languageTranslate,
                       "Đạt yêu cầu, có hạn chế",
                       false,
                     )}
                   />
-                )}
-                {formSnapshot?.imageQuatity === "bad" && (
                   <PrintRadio
-                    checked
-                    label={translateLabel(
-                      languageTranslate,
-                      "Không đạt",
-                      false,
-                    )}
+                    checked={formSnapshot?.imageQuatity === "bad"}
+                    label={translateLabel(languageTranslate, "Không đạt", false)}
                   />
-                )}
-              </>
-            )}
+                </>
+              ) : (
+                <>
+                  {formSnapshot?.imageQuatity === "good" && (
+                    <PrintRadio
+                      checked
+                      label={translateLabel(
+                        languageTranslate,
+                        "Đạt yêu cầu",
+                        false,
+                      )}
+                    />
+                  )}
+                  {formSnapshot?.imageQuatity === "limited" && (
+                    <PrintRadio
+                      checked
+                      label={translateLabel(
+                        languageTranslate,
+                        "Đạt yêu cầu, có hạn chế",
+                        false,
+                      )}
+                    />
+                  )}
+                  {formSnapshot?.imageQuatity === "bad" && (
+                    <PrintRadio
+                      checked
+                      label={translateLabel(
+                        languageTranslate,
+                        "Không đạt",
+                        false,
+                      )}
+                    />
+                  )}
+                </>
+              )}
+            </div>
           </div>
 
-          <div style={{ display: "flex", marginBottom: 4 }}>
+          <div className={styles.techRow}>
             <TextLabel
               label={translateLabel(
                 languageTranslate,
@@ -551,24 +547,23 @@ const PrintPreviewVer3NotDataDiagnose = ({
               minWidth={160}
             />
 
-            {!isOnLyContent ? (
-              <>
-                <PrintRadio
-                  checked={formSnapshot?.additionalAction === "no"}
-                  label={translateLabel(languageTranslate, "no", false)}
-                  stylesCustom={{ width: 120 }}
-                />
-                <PrintRadio
-                  checked={formSnapshot?.additionalAction === "extra"}
-                  label={translateLabel(languageTranslate, "Chụp thêm", false)}
-                  stylesCustom={{ width: 200 }}
-                />
-                <PrintRadio
-                  checked={formSnapshot?.additionalAction === "redo"}
-                  label={translateLabel(languageTranslate, "Chụp lại", false)}
-                />
-              </>
-            ) : (
+            <div className={styles.radioGroup}>
+              {!isOnLyContent ? (
+                <>
+                  <PrintRadio
+                    checked={formSnapshot?.additionalAction === "no"}
+                    label={translateLabel(languageTranslate, "no", false)}
+                  />
+                  <PrintRadio
+                    checked={formSnapshot?.additionalAction === "extra"}
+                    label={translateLabel(languageTranslate, "Chụp thêm", false)}
+                  />
+                  <PrintRadio
+                    checked={formSnapshot?.additionalAction === "redo"}
+                    label={translateLabel(languageTranslate, "Chụp lại", false)}
+                  />
+                </>
+              ) : (
               <>
                 {formSnapshot?.additionalAction === "no" && (
                   <PrintRadio
@@ -594,6 +589,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                 )}
               </>
             )}
+            </div>
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 20, marginBottom: 4 }}>
@@ -824,17 +820,15 @@ const PrintPreviewVer3NotDataDiagnose = ({
             value={formSnapshot?.imagingDiagnosisSummary}
             valueStyle={{ fontWeight: "bold", fontSize: 15 }}
           />
-          {formSnapshot?.phan_do_loai && (
-            <PrintItem
-              minWidth={160}
-              label={translateLabel(
-                languageTranslate,
-                "gradingClassification",
-                false,
-              )}
-              value={formSnapshot?.phan_do_loai}
-            />
-          )}
+          <PrintItem
+            minWidth={160}
+            label={translateLabel(
+              languageTranslate,
+              "gradingClassification",
+              false,
+            )}
+            value={formSnapshot?.phan_do_loai}
+          />
           <PrintItem
             minWidth={160}
             label={translateLabel(

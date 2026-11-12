@@ -5,6 +5,9 @@ import {
 } from "../../constant/app";
 import { toast } from "react-toastify";
 
+export const cleanOptionalStr = (v) =>
+  v === undefined || v === null || v === "undefined" || v === "null" ? "" : v;
+
 export const IMAGE_QUALITY_OPTIONS = [
   { value: "good", label: "Đạt yêu cầu" },
   { value: "limited", label: "Đạt yêu cầu, có hạn chế" },
@@ -187,16 +190,16 @@ export const buildDradv3FormValues = ({
     id_exam_part:
       doctorUseFormVer3?.id_exam_part ?? patientDiagnose.id_exam_part,
 
-    ket_luan: doctorUseFormVer3?.ket_luan ?? "",
-    khuyen_nghi: doctorUseFormVer3?.recommendation ?? "",
-    icd10: doctorUseFormVer3?.icd10_classification ?? "",
-    implementMethod: doctorUseFormVer3?.implementMethod ?? "",
-    contrastInjection: doctorUseFormVer3?.contrastInjection ?? "",
-    imageQuatity: doctorUseFormVer3?.imageQuatity ?? "",
-    additionalAction: doctorUseFormVer3?.addtionalImpletement ?? "",
-    phan_do_loai: doctorUseFormVer3?.classify,
-    chan_doan_phan_biet: doctorUseFormVer3?.DifferenceDiagnostic,
-    imagingDiagnosisSummary: doctorUseFormVer3?.imagingDiagnosisSummary || "",
+    ket_luan: cleanOptionalStr(doctorUseFormVer3?.ket_luan),
+    khuyen_nghi: cleanOptionalStr(doctorUseFormVer3?.recommendation),
+    icd10: cleanOptionalStr(doctorUseFormVer3?.icd10_classification),
+    implementMethod: cleanOptionalStr(doctorUseFormVer3?.implementMethod),
+    contrastInjection: cleanOptionalStr(doctorUseFormVer3?.contrastInjection),
+    imageQuatity: cleanOptionalStr(doctorUseFormVer3?.imageQuatity),
+    additionalAction: cleanOptionalStr(doctorUseFormVer3?.addtionalImpletement),
+    phan_do_loai: cleanOptionalStr(doctorUseFormVer3?.classify),
+    chan_doan_phan_biet: cleanOptionalStr(doctorUseFormVer3?.DifferenceDiagnostic),
+    imagingDiagnosisSummary: cleanOptionalStr(doctorUseFormVer3?.imagingDiagnosisSummary),
     language: doctorUseFormVer3?.language || "vi",
   };
 };
@@ -217,18 +220,18 @@ export const buildFormVer3Values = (data) => {
 
     // --- kỹ thuật ---
     advancedSample: data?.advanced_sample ? "yes" : "no",
-    contrastInjection: data?.contrastInjection,
-    imageQuatity: data?.imageQuatity,
-    additionalAction: data?.addtionalImpletement,
+    contrastInjection: cleanOptionalStr(data?.contrastInjection),
+    imageQuatity: cleanOptionalStr(data?.imageQuatity),
+    additionalAction: cleanOptionalStr(data?.addtionalImpletement),
 
-    implementMethod: data?.implementMethod,
+    implementMethod: cleanOptionalStr(data?.implementMethod),
 
     // --- chẩn đoán ---
-    icd10: data?.icd10_classification,
-    phan_do_loai: data?.classify,
-    chan_doan_phan_biet: data?.DifferenceDiagnostic,
-    khuyen_nghi: data?.recommendation,
-    imagingDiagnosisSummary: data.imagingDiagnosisSummary || "",
+    icd10: cleanOptionalStr(data?.icd10_classification),
+    phan_do_loai: cleanOptionalStr(data?.classify),
+    chan_doan_phan_biet: cleanOptionalStr(data?.DifferenceDiagnostic),
+    khuyen_nghi: cleanOptionalStr(data?.recommendation),
+    imagingDiagnosisSummary: cleanOptionalStr(data?.imagingDiagnosisSummary),
   };
 };
 
@@ -275,13 +278,13 @@ export function buildFormDataDoctorUseFormVer3(values, extra) {
   fd.append("id_exam_part", String(values.id_exam_part ?? ""));
   fd.append("id_print_template", String(values.id_print_template ?? ""));
 
-  fd.append("implementMethod", values.implementMethod || "");
-  fd.append("contrastInjection", values.contrastInjection);
-  fd.append("imageQuatity", values.imageQuatity);
+  fd.append("implementMethod", cleanOptionalStr(values.implementMethod));
+  fd.append("contrastInjection", cleanOptionalStr(values.contrastInjection));
+  fd.append("imageQuatity", cleanOptionalStr(values.imageQuatity));
 
-  fd.append("addtionalImpletement", values.additionalAction);
-  fd.append("DifferenceDiagnostic", values.chan_doan_phan_biet);
-  fd.append("classify", values.phan_do_loai);
+  fd.append("addtionalImpletement", cleanOptionalStr(values.additionalAction));
+  fd.append("DifferenceDiagnostic", cleanOptionalStr(values.chan_doan_phan_biet));
+  fd.append("classify", cleanOptionalStr(values.phan_do_loai));
 
   fd.append("recommendation", values.khuyen_nghi ?? "");
   fd.append("icd10_classification", values.icd10 ?? "");

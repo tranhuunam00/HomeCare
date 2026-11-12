@@ -35,13 +35,14 @@ const PrintHeaderFromCustom = ({ printTemplate }) => {
   if (!blocks?.length) return null;
 
   return (
-    <>
+    <div style={{ width: "100%", overflowX: "auto", marginBottom: 16 }}>
       <div
         style={{
           position: "relative",
           width: CANVAS_WIDTH,
+          maxWidth: "100%",
           height: canvasHeight,
-          margin: "0 auto 20px",
+          margin: "0 auto",
         }}
       >
         {blocks
@@ -96,7 +97,7 @@ const PrintHeaderFromCustom = ({ printTemplate }) => {
             </div>
           ))}
       </div>
-    </>
+    </div>
   );
 };
 
