@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Card,
   Row,
@@ -55,6 +56,9 @@ const PatientDiagnoiseDetailPage = ({
   onOpenReading,
   setDoctorUseFormVer3Id,
 }) => {
+  const { id: routeId } = useParams();
+  const navigate = useNavigate();
+
   const {
     examParts,
     templateServices,
@@ -63,14 +67,25 @@ const PatientDiagnoiseDetailPage = ({
     languageTranslate,
   } = useGlobalAuth();
 
+  useEffect(() => {
+    if (routeId && (!selectedPatientDiagnose || String(selectedPatientDiagnose.id) !== String(routeId))) {
+      API_CALL.get(`/patient-diagnose/${routeId}`)
+        .then((res) => {
+          const data = res?.data?.data || res?.data;
+          if (data?.id) setSelectedPatientDiagnose(data);
+        })
+        .catch(() => {});
+    }
+  }, [routeId]);
+
   const { record: latestVer3 } = useLatestDoctorUseFormVer3(
     selectedPatientDiagnose?.id,
     languageTranslate,
   );
 
   useEffect(() => {
-    setDoctorUseFormVer3Id(latestVer3?.id);
-  }, latestVer3);
+    setDoctorUseFormVer3Id?.(latestVer3?.id);
+  }, [latestVer3?.id, setDoctorUseFormVer3Id]);
 
   const { provinces, setSelectedProvince } = useVietnamAddress();
 
@@ -130,7 +145,13 @@ const PatientDiagnoiseDetailPage = ({
                 <Button
                   type="primary"
                   size="small"
-                  onClick={() => onOpenReading(true)}
+                  onClick={() => {
+                    if (onOpenReading) {
+                      onOpenReading(true);
+                    } else {
+                      navigate(`/home/form-drad-v3/use/patient-diagnose/${selectedPatientDiagnose.id}`);
+                    }
+                  }}
                   icon={<EditOutlined />}
                 >
                   Sửa đọc
@@ -141,7 +162,10 @@ const PatientDiagnoiseDetailPage = ({
                 size="small"
                 type="text"
                 style={{ color: "red" }}
-                onClick={() => setSelectedPatientDiagnose(null)}
+                onClick={() => {
+                  setSelectedPatientDiagnose(null);
+                  if (routeId) navigate("/home/patients-diagnose");
+                }}
               >
                 X
               </Button>
