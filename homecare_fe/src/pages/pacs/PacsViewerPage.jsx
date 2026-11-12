@@ -101,6 +101,12 @@ export default function PacsViewerPage() {
     return instances.map((_, idx) => idx);
   }, [activeSeries, instances]);
 
+  const activeSeriesInstances = useMemo(() => {
+    return activeSeries?.instances || [];
+  }, [activeSeries]);
+
+  const canBuild3D = activeSeriesInstances.length > 20;
+
   const activeSlicePos = useMemo(() => {
     const pos = activeSeriesIndices.indexOf(currentIndex);
     return pos >= 0 ? pos : 0;
@@ -138,6 +144,16 @@ export default function PacsViewerPage() {
 
   // 3D Volume Rendering & Multi-Planar Reconstruction (MPR) modal state
   const [mprOpen, setMprOpen] = useState(false);
+
+  const handleOpenMpr = useCallback(() => {
+    if (activeSeriesInstances.length <= 20) {
+      message.warning(
+        `Nhóm đang chọn chỉ có ${activeSeriesInstances.length} ảnh. Cần trên 20 ảnh trong cùng 1 nhóm để dựng 3D / MPR.`
+      );
+      return;
+    }
+    setMprOpen(true);
+  }, [activeSeriesInstances.length]);
 
   // Layout mode: '1x1' | '1x2' | '2x1' | '2x2'
   const [layout, setLayout] = useState('1x1');
@@ -889,7 +905,9 @@ export default function PacsViewerPage() {
         onCaptureKeyImage={handleCaptureKeyImage}
         onApplyPreset={handleApplyPreset}
         currentMeta={currentMeta}
-        onOpenMpr={() => setMprOpen(true)}
+        onOpenMpr={handleOpenMpr}
+        canBuild3D={canBuild3D}
+        activeSeriesSliceCount={activeSeriesInstances.length}
         onUploadDicom={uploadDicom}
         zoom={zoom}
         onZoomIn={handleZoomIn}
@@ -925,7 +943,9 @@ export default function PacsViewerPage() {
             rotation={rotation}
             setRotation={setRotation}
             onReset={handleReset}
-            onOpenMpr={() => setMprOpen(true)}
+            onOpenMpr={handleOpenMpr}
+            canBuild3D={canBuild3D}
+            activeSeriesSliceCount={activeSeriesInstances.length}
           />
         )}
 
@@ -1104,13 +1124,13 @@ export default function PacsViewerPage() {
       <PacsMprModal
         open={mprOpen}
         onClose={() => setMprOpen(false)}
-        instances={instances}
+        instances={activeSeriesInstances}
         dicomCache={dicomCache}
         setDicomCache={setDicomCache}
         apiEndpoint={apiEndpoint}
         getAuthHeaders={getAuthHeaders}
         patientName={currentMeta?.patientName || study?.dbPatient?.patientName || ''}
-        modality={currentMeta?.modality || study?.modality || ''}
+        modality={currentMeta?.modality || activeSeries?.modality || study?.modality || ''}
       />
     </div>
   );

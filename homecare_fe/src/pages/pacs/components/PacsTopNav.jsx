@@ -31,6 +31,8 @@ export default function PacsTopNav({
   onApplyPreset,
   currentMeta,
   onOpenMpr,
+  canBuild3D = false,
+  activeSeriesSliceCount = 0,
   onUploadDicom,
   zoom = 1,
   onZoomIn,
@@ -250,32 +252,46 @@ export default function PacsTopNav({
           />
         </Tooltip>
 
-        <Tooltip title="Dựng hình đa mặt phẳng (MPR: Axial, Sagittal, Coronal)">
+        <Tooltip
+          title={
+            canBuild3D
+              ? 'Dựng hình đa mặt phẳng (MPR: Axial, Sagittal, Coronal)'
+              : `Cần trên 20 ảnh trong nhóm đang chọn để dựng MPR (hiện có ${activeSeriesSliceCount} ảnh)`
+          }
+        >
           <Button
             size="small"
             onClick={onOpenMpr}
             style={{
-              backgroundColor: '#1e3a8a',
-              borderColor: '#38bdf8',
-              color: '#38bdf8',
+              backgroundColor: canBuild3D ? '#1e3a8a' : '#0f172a',
+              borderColor: canBuild3D ? '#38bdf8' : '#334155',
+              color: canBuild3D ? '#38bdf8' : '#64748b',
               fontWeight: '700',
               fontSize: '11px',
+              opacity: canBuild3D ? 1 : 0.65,
             }}
           >
             MPR
           </Button>
         </Tooltip>
 
-        <Tooltip title="Dựng hình 3D (3D Volume Rendering / MIP)">
+        <Tooltip
+          title={
+            canBuild3D
+              ? 'Dựng hình 3D (3D Volume Rendering / MIP)'
+              : `Cần trên 20 ảnh trong nhóm đang chọn để dựng 3D (hiện có ${activeSeriesSliceCount} ảnh)`
+          }
+        >
           <Button
             size="small"
             onClick={onOpenMpr}
             style={{
-              backgroundColor: '#581c87',
-              borderColor: '#c084fc',
-              color: '#c084fc',
+              backgroundColor: canBuild3D ? '#581c87' : '#0f172a',
+              borderColor: canBuild3D ? '#c084fc' : '#334155',
+              color: canBuild3D ? '#c084fc' : '#64748b',
               fontWeight: '700',
               fontSize: '11px',
+              opacity: canBuild3D ? 1 : 0.65,
             }}
           >
             3D

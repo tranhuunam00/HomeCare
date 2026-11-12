@@ -39,14 +39,12 @@ export default function PacsMprModal({
     setLocalCache((prev) => ({ ...prev, ...dicomCache }));
   }, [dicomCache]);
 
-  // Slices in current multi-slice volume
+  // Slices strictly in the selected series/group
   const validSlices = useMemo(() => {
-    return Object.keys(localCache)
-      .map(Number)
-      .sort((a, b) => a - b)
-      .map((idx) => localCache[idx])
+    return instances
+      .map((inst, idx) => localCache[inst?.globalIndex ?? idx])
       .filter((item) => item && item.rawPixels && item.meta);
-  }, [localCache]);
+  }, [instances, localCache]);
 
   const numSlices = validSlices.length;
   const sampleMeta = validSlices[0]?.meta || {};
@@ -74,17 +72,18 @@ export default function PacsMprModal({
   const coronalCanvasRef = useRef(null);
   const volumeCanvasRef = useRef(null);
 
-  // Background fetch of all missing slices when modal opens
+  // Background fetch of all missing slices in the active series when modal opens
   useEffect(() => {
-    if (!open || instances.length === 0) return;
+    if (!open || instances.length <= 20) return;
 
     let isCancelled = false;
 
     const fetchAllSlices = async () => {
       const missingIndices = [];
       instances.forEach((inst, idx) => {
-        if (!localCache[idx]?.rawPixels) {
-          missingIndices.push({ index: idx, instance: inst });
+        const cacheKey = inst?.globalIndex ?? idx;
+        if (!localCache[cacheKey]?.rawPixels) {
+          missingIndices.push({ cacheKey, instance: inst });
         }
       });
 
@@ -114,7 +113,7 @@ export default function PacsMprModal({
         const chunk = missingIndices.slice(i, i + batchSize);
 
         await Promise.all(
-          chunk.map(async ({ index, instance }) => {
+          chunk.map(async ({ cacheKey, instance }) => {
             try {
               const res = await axios.get(
                 `${apiEndpoint}/api/pacs/instances/${instance.sopInstanceUid}/file`,
@@ -124,10 +123,10 @@ export default function PacsMprModal({
                 }
               );
               const parsed = parseDicomBuffer(res.data);
-              newSlices[index] = parsed;
+              newSlices[cacheKey] = parsed;
               completed++;
             } catch (err) {
-              console.warn(`Lỗi tải lát cắt #${index}:`, err);
+              console.warn(`Lỗi tải lát cắt #${cacheKey}:`, err);
             }
           })
         );

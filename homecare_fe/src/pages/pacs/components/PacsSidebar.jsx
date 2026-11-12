@@ -34,6 +34,8 @@ export default function PacsSidebar({
   setRotation,
   onReset,
   onOpenMpr,
+  canBuild3D = false,
+  activeSeriesSliceCount = 0,
 }) {
   const [expandedSections, setExpandedSections] = useState({
     measure: true,
@@ -392,38 +394,58 @@ export default function PacsSidebar({
 
         {expandedSections.advance && (
           <div style={{ padding: '6px 8px', display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <button
-              onClick={onOpenMpr}
-              style={{
-                padding: '6px 8px',
-                textAlign: 'left',
-                borderRadius: 3,
-                border: '1px solid #334155',
-                backgroundColor: '#1e293b',
-                color: '#38bdf8',
-                cursor: 'pointer',
-                fontSize: '11px',
-                fontWeight: '600',
-              }}
+            <Tooltip
+              title={
+                canBuild3D
+                  ? 'Dựng hình 3D theo nhóm đang chọn'
+                  : `Cần trên 20 ảnh trong nhóm đang chọn (hiện có ${activeSeriesSliceCount})`
+              }
+              placement="right"
             >
-              3D Volume View
-            </button>
-            <button
-              onClick={onOpenMpr}
-              style={{
-                padding: '6px 8px',
-                textAlign: 'left',
-                borderRadius: 3,
-                border: '1px solid #334155',
-                backgroundColor: '#1e293b',
-                color: '#4ade80',
-                cursor: 'pointer',
-                fontSize: '11px',
-                fontWeight: '600',
-              }}
+              <button
+                onClick={onOpenMpr}
+                style={{
+                  padding: '6px 8px',
+                  textAlign: 'left',
+                  borderRadius: 3,
+                  border: '1px solid #334155',
+                  backgroundColor: canBuild3D ? '#1e293b' : '#0f172a',
+                  color: canBuild3D ? '#38bdf8' : '#64748b',
+                  cursor: canBuild3D ? 'pointer' : 'not-allowed',
+                  fontSize: '11px',
+                  fontWeight: '600',
+                  opacity: canBuild3D ? 1 : 0.65,
+                }}
+              >
+                3D Volume View
+              </button>
+            </Tooltip>
+            <Tooltip
+              title={
+                canBuild3D
+                  ? 'Dựng hình đa mặt phẳng theo nhóm đang chọn'
+                  : `Cần trên 20 ảnh trong nhóm đang chọn (hiện có ${activeSeriesSliceCount})`
+              }
+              placement="right"
             >
-              MPR Reconstruct
-            </button>
+              <button
+                onClick={onOpenMpr}
+                style={{
+                  padding: '6px 8px',
+                  textAlign: 'left',
+                  borderRadius: 3,
+                  border: '1px solid #334155',
+                  backgroundColor: canBuild3D ? '#1e293b' : '#0f172a',
+                  color: canBuild3D ? '#4ade80' : '#64748b',
+                  cursor: canBuild3D ? 'pointer' : 'not-allowed',
+                  fontSize: '11px',
+                  fontWeight: '600',
+                  opacity: canBuild3D ? 1 : 0.65,
+                }}
+              >
+                MPR Reconstruct
+              </button>
+            </Tooltip>
           </div>
         )}
       </div>
