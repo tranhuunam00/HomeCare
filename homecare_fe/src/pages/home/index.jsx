@@ -291,8 +291,14 @@ const Home = () => {
   } = useGlobalAuth();
   const [logo, setLogo] = useState("/logo_home_care.png");
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
   const screens = useBreakpoint();
   const deviceIsMobile = !screens.md;
+  const isWorkListRoute =
+    location.pathname === "/home" ||
+    location.pathname === "/home/" ||
+    location.pathname === "/home/patients-diagnose";
 
   const renderWorkListSidebarFilters = (isCollapsed) => {
     if (!isOnWorkList) return null;
@@ -570,6 +576,41 @@ const Home = () => {
               overflowX: "clip",
             }}
           >
+            {deviceIsMobile && !isWorkListRoute && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  marginBottom: 8,
+                  paddingBottom: 6,
+                  borderBottom: "1px solid #f1f5f9",
+                }}
+              >
+                <Button
+                  size="small"
+                  icon={<ArrowLeftOutlined />}
+                  onClick={() => {
+                    if (window.history.length > 1) {
+                      navigate(-1);
+                    } else {
+                      navigate("/home/patients-diagnose");
+                    }
+                  }}
+                  style={{ fontSize: 12, fontWeight: 500, borderRadius: 6 }}
+                >
+                  Quay lại
+                </Button>
+                <Button
+                  size="small"
+                  type="link"
+                  onClick={() => navigate("/home/patients-diagnose")}
+                  style={{ fontSize: 12, padding: 0, color: "#0b6b4f", fontWeight: 600 }}
+                >
+                  Worklist
+                </Button>
+              </div>
+            )}
             <Outlet />
           </Content>
         </>
