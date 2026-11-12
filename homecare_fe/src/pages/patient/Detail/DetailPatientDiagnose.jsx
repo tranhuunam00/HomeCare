@@ -148,39 +148,37 @@ const PatientDiagnoiseDetailPage = ({
             </Space>
           }
         >
-          <Row gutter={[24, 12]} style={{ padding: "4px 2px" }}>
+          <Row gutter={[16, 12]} style={{ padding: "4px 2px" }}>
             {/* Row 1: Demographics */}
-            <Col span={8}>
+            <Col xs={24} sm={12} md={8}>
               <InfoItem label="Họ và tên">{displayData.name}</InfoItem>
             </Col>
-            <Col span={4}>
+            <Col xs={8} sm={4} md={4}>
               <InfoItem label="Giới tính">{displayData.gender}</InfoItem>
             </Col>
-            <Col span={6}>
+            <Col xs={8} sm={4} md={6}>
               <InfoItem label="Năm sinh">{displayData.birth_year}</InfoItem>
             </Col>
-            <Col span={6}>
+            <Col xs={8} sm={4} md={6}>
               <InfoItem label="Tuổi">{displayData.age}</InfoItem>
             </Col>
 
-
-
             {/* Row 2: Identifiers */}
-            <Col span={2}>
+            <Col xs={8} sm={4} md={2}>
               <InfoItem label="ID">{selectedPatientDiagnose.id}</InfoItem>
             </Col>
-            <Col span={6}>
+            <Col xs={16} sm={8} md={6}>
               <InfoItem label="PID">{displayData.PID}</InfoItem>
             </Col>
-            <Col span={10}>
+            <Col xs={12} sm={6} md={10}>
               <InfoItem label="SID">{displayData.SID}</InfoItem>
             </Col>
-            <Col span={6}>
+            <Col xs={12} sm={6} md={6}>
               <InfoItem label="CCCD">{displayData.CCCD}</InfoItem>
             </Col>
 
             {/* Row 3: Status & Contact */}
-            <Col span={4}>
+            <Col xs={12} sm={6} md={4}>
               <div style={{ marginBottom: 6 }}>
                 <div style={{ fontSize: '10px', color: '#8c8c8c', textTransform: 'uppercase', letterSpacing: '0.3px', marginBottom: 2 }}>
                   Trạng thái
@@ -193,28 +191,28 @@ const PatientDiagnoiseDetailPage = ({
                 </Tag>
               </div>
             </Col>
-            <Col span={6}>
+            <Col xs={12} sm={6} md={6}>
               <InfoItem label="SĐT">{displayData.phone}</InfoItem>
             </Col>
-            <Col span={10}>
+            <Col xs={14} sm={8} md={10}>
               <InfoItem label="Email">{displayData.email}</InfoItem>
             </Col>
-            <Col span={4}>
+            <Col xs={10} sm={4} md={4}>
               <InfoItem label="Quốc tịch">{displayData.countryCode}</InfoItem>
             </Col>
 
             {/* Row 4: Timestamps & Indications */}
-            <Col span={6}>
+            <Col xs={12} sm={6} md={6}>
               <InfoItem label="Ngày tạo">
                 {dayjs(selectedPatientDiagnose.createdAt).format("HH:mm DD/MM/YYYY")}
               </InfoItem>
             </Col>
-            <Col span={6}>
+            <Col xs={12} sm={6} md={6}>
               <InfoItem label="Cập nhật gần nhất">
                 {displayData.updatedAt ? dayjs(displayData.updatedAt).format("HH:mm DD/MM/YYYY") : "-"}
               </InfoItem>
             </Col>
-            <Col span={6}>
+            <Col xs={12} sm={6} md={6}>
               <InfoItem label="Chỉ định">
                 {
                   templateServices?.find(
@@ -223,7 +221,7 @@ const PatientDiagnoiseDetailPage = ({
                 }
               </InfoItem>
             </Col>
-            <Col span={6}>
+            <Col xs={12} sm={6} md={6}>
               <InfoItem label="Bộ phận thăm khám">
                 {examParts?.find((t) => t.id == displayData.id_exam_part)?.name || "-"}
               </InfoItem>

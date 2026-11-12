@@ -74,8 +74,8 @@ const ImagingStructureTable = ({
 
   return (
     <div>
-      {" "}
-      <table className={styles.imagingTable}>
+      <div style={{ width: "100%", overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+        <table className={styles.imagingTable}>
         <thead>
           <tr>
             <th></th>
@@ -129,6 +129,7 @@ const ImagingStructureTable = ({
           ))}
         </tbody>
       </table>
+      </div>
       <Button
         type="link"
         disabled={!isEdit}
@@ -155,12 +156,12 @@ const ImagingStructureTable = ({
           {rows
             .filter((r) => r.status === "abnormal")
             .map((row, idx) => (
-              <Row key={row.id} gutter={8} style={{ marginTop: 8 }}>
-                <Col span={1} style={{ fontSize: "12px", color: "#6b7280", paddingTop: "5px" }}>{idx + 1}</Col>
-                <Col span={6} style={{ fontSize: "12px", fontWeight: "600", color: "#1f2937", lineHeight: "1.4", paddingTop: "5px" }}>
+              <Row key={row.id} gutter={[8, 6]} style={{ marginTop: 8 }}>
+                <Col xs={2} md={1} style={{ fontSize: "12px", color: "#6b7280", paddingTop: "5px" }}>{idx + 1}</Col>
+                <Col xs={22} md={6} style={{ fontSize: "12px", fontWeight: "600", color: "#1f2937", lineHeight: "1.4", paddingTop: "5px" }}>
                   {row.name}
                 </Col>
-                <Col span={17}>
+                <Col xs={24} md={17}>
                   <TextArea
                     disabled={!isEdit}
                     placeholder="Nhập mô tả bất thường..."

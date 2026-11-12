@@ -13,6 +13,7 @@ import {
   Divider,
   Switch,
   Segmented,
+  Grid,
 } from "antd";
 import { QuestionCircleOutlined, ReloadOutlined, EyeOutlined } from "@ant-design/icons";
 import { useNavigate, useParams } from "react-router-dom";
@@ -149,6 +150,8 @@ export default function DoctorUseDFormVer3({
   const printSourceRef = useRef(null);
   const { transitionStatus } = usePatientDiagnoseStatus();
   const { confirmState, openConfirm } = useConfirmAction();
+  const screens = Grid.useBreakpoint();
+  const isMobile = screens.md === false;
 
   const [reloading, setReloading] = useState(false);
   const [signModalOpen, setSignModalOpen] = useState(false);
@@ -714,9 +717,7 @@ export default function DoctorUseDFormVer3({
       style={{
         maxWidth: 1100,
         margin: "0 auto",
-        padding: 0,
-        paddingBottom: 250,
-        paddingTop: 30,
+        padding: isMobile ? "12px 6px 140px" : "30px 0 250px",
       }}
     >
       {loading ? (
@@ -726,10 +727,10 @@ export default function DoctorUseDFormVer3({
       ) : (
         <Form
           form={form}
-          layout="horizontal"
+          layout={isMobile ? "vertical" : "horizontal"}
           labelAlign="left"
-          labelCol={{ flex: "0 0 180px" }}
-          wrapperCol={{ flex: "1 0 0" }}
+          labelCol={isMobile ? undefined : { flex: "0 0 180px" }}
+          wrapperCol={isMobile ? undefined : { flex: "1 0 0" }}
           colon={false}
           onFinish={onFinish}
           requiredMark={(label, { required }) =>
@@ -780,7 +781,7 @@ export default function DoctorUseDFormVer3({
                 label={translateLabel(languageTranslate, "Chỉ định", false)}
                 name="id_template_service"
                 rules={[{ required: true, message: "Chọn kỹ thuật" }]}
-                labelCol={{ flex: "0 0 90px" }}
+                labelCol={isMobile ? undefined : { flex: "0 0 90px" }}
               >
                 <Select
                   placeholder="Chọn chỉ định"
@@ -814,7 +815,7 @@ export default function DoctorUseDFormVer3({
                 label={translateLabel(languageTranslate, "bodyPart", false)}
                 name="id_exam_part"
                 rules={[{ required: true, message: "Chọn bộ phận" }]}
-                labelCol={{ flex: "0 0 90px" }}
+                labelCol={isMobile ? undefined : { flex: "0 0 90px" }}
               >
                 <Select
                   placeholder="Chọn bộ phận thăm khám"
@@ -855,7 +856,7 @@ export default function DoctorUseDFormVer3({
                 label={translateLabel(languageTranslate, "language", false)}
                 name="language"
                 rules={[{ required: true }]}
-                labelCol={{ flex: "0 0 90px" }}
+                labelCol={isMobile ? undefined : { flex: "0 0 90px" }}
               >
                 <Select disabled={!isEdit} placeholder="VI / EN">
                   {LANGUAGE_OPTIONS.map((opt) => (
@@ -883,10 +884,10 @@ export default function DoctorUseDFormVer3({
             </Col>
           </Row>
 
-          <Row gutter={16}>
-            <Col span={22}>
+          <Row gutter={12} align="middle">
+            <Col xs={20} md={22}>
               <Form.Item
-                labelCol={{ flex: "0 0 270px" }}
+                labelCol={isMobile ? undefined : { flex: "0 0 270px" }}
                 label={translateLabel(
                   languageTranslate,
                   "resultTemplate",
@@ -956,7 +957,7 @@ export default function DoctorUseDFormVer3({
                 </Select>
               </Form.Item>
             </Col>
-            <Col span={2}>
+            <Col xs={4} md={2}>
               <Tooltip title="Tải lại danh sách tên mẫu">
                 <Button
                   icon={<ReloadOutlined />}
@@ -982,7 +983,7 @@ export default function DoctorUseDFormVer3({
             label={translateLabel(languageTranslate, "resultPrint", false)}
             name="id_print_template"
             rules={[{ required: true, message: "Chọn mẫu in" }]}
-            labelCol={{ flex: "0 0 270px" }}
+            labelCol={isMobile ? undefined : { flex: "0 0 270px" }}
           >
             <Select
               disabled={!isEdit}
@@ -1074,38 +1075,40 @@ export default function DoctorUseDFormVer3({
             </div>
 
             {isEdit && (
-              <Segmented
-                size="middle"
-                value={imagingMode}
-                onChange={(val) => {
-                  setImagingMode(val);
-                  if (val === "FREE_TEXT") {
-                    setIsFreeText(true);
-                    if (!freeTextContent || freeTextContent === "<p><br></p>" || freeTextContent === "") {
-                      const convertedHTML = generateTextFromStructuredRows(imagingRows, languageTranslate);
-                      setFreeTextContent(convertedHTML);
+              <div style={{ maxWidth: "100%", overflowX: "auto" }}>
+                <Segmented
+                  size={isMobile ? "small" : "middle"}
+                  value={imagingMode}
+                  onChange={(val) => {
+                    setImagingMode(val);
+                    if (val === "FREE_TEXT") {
+                      setIsFreeText(true);
+                      if (!freeTextContent || freeTextContent === "<p><br></p>" || freeTextContent === "") {
+                        const convertedHTML = generateTextFromStructuredRows(imagingRows, languageTranslate);
+                        setFreeTextContent(convertedHTML);
+                      }
+                    } else if (val === "FAST_SONO") {
+                      setIsFreeText(true);
+                    } else {
+                      setIsFreeText(false);
                     }
-                  } else if (val === "FAST_SONO") {
-                    setIsFreeText(true);
-                  } else {
-                    setIsFreeText(false);
-                  }
-                }}
-                options={[
-                  {
-                    label: languageTranslate === "en" ? "Structured table" : "Bảng cấu trúc",
-                    value: "STRUCTURED_TABLE",
-                  },
-                  {
-                    label: languageTranslate === "en" ? "⚡ Fast D-SONO" : "⚡ Chọn nhanh (D-SONO)",
-                    value: "FAST_SONO",
-                  },
-                  {
-                    label: languageTranslate === "en" ? "Free text" : "Văn bản tự do",
-                    value: "FREE_TEXT",
-                  },
-                ]}
-              />
+                  }}
+                  options={[
+                    {
+                      label: languageTranslate === "en" ? "Structured table" : "Bảng cấu trúc",
+                      value: "STRUCTURED_TABLE",
+                    },
+                    {
+                      label: languageTranslate === "en" ? "⚡ Fast D-SONO" : "⚡ Chọn nhanh (D-SONO)",
+                      value: "FAST_SONO",
+                    },
+                    {
+                      label: languageTranslate === "en" ? "Free text" : "Văn bản tự do",
+                      value: "FREE_TEXT",
+                    },
+                  ]}
+                />
+              </div>
             )}
           </div>
 

@@ -73,4 +73,26 @@
   :global(.ant-radio-inner::after) {
     background-color: #4ea1ff;
   }
+
+  @media (max-width: 768px) {
+    font-size: 12px;
+
+    th,
+    td {
+      padding: 4px;
+    }
+
+    th:first-child,
+    td:first-child {
+      width: 28px;
+    }
+
+    th:nth-child(3),
+    th:nth-child(4),
+    td:nth-child(3),
+    td:nth-child(4) {
+      width: 58px;
+      font-size: 10px;
+    }
+  }
 }
