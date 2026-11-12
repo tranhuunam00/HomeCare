@@ -1470,7 +1470,8 @@ export default function DoctorUseDFormVer3({
         open={previewOpen}
         onCancel={() => setPreviewOpen(false)}
         footer={null}
-        width={1100}
+        centered
+        width={isMobile ? "96vw" : 1100}
         destroyOnClose={false} // ⭐ BẮT BUỘC
         afterOpenChange={(open) => {
           if (

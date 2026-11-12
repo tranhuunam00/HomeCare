@@ -150,6 +150,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
     if (!value) return null;
     return (
       <div
+        className={styles.printItem}
         style={{
           marginBottom: 6,
           display: "flex",
@@ -279,7 +280,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                 ).toUpperCase()}
               </h3>
 
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <div className={styles.infoRow} style={{ display: "flex", justifyContent: "space-between" }}>
                 <PrintItem
                   label={translateLabel(
                     languageTranslate,
@@ -305,7 +306,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   value={selectedPatientDiagnose?.birth_year}
                 />
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <div className={styles.infoRow} style={{ display: "flex", justifyContent: "space-between" }}>
                 <PrintItem
                   label={translateLabel(
                     languageTranslate,
@@ -315,7 +316,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   value={selectedPatientDiagnose?.address}
                 />
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <div className={styles.infoRow} style={{ display: "flex", justifyContent: "space-between" }}>
                 <PrintItem
                   label={translateLabel(
                     languageTranslate,
@@ -343,7 +344,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                 />
               </div>
 
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <div className={styles.infoRow} style={{ display: "flex", justifyContent: "space-between" }}>
                 <PrintItem
                   label={translateLabel(
                     languageTranslate,
@@ -361,7 +362,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   value={selectedPatientDiagnose?.email}
                 />
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <div className={styles.infoRow} style={{ display: "flex", justifyContent: "space-between" }}>
                 <PrintItem
                   label={translateLabel(
                     languageTranslate,
@@ -379,7 +380,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   value={selectedPatientDiagnose?.SID}
                 />
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <div className={styles.infoRow} style={{ display: "flex", justifyContent: "space-between" }}>
                 <PrintItem
                   label={translateLabel(
                     languageTranslate,
