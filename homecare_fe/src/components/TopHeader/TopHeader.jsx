@@ -151,7 +151,7 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
           className={styles.topHeader__filterService}
           size="small"
           allowClear
-          style={{ width: 130, height: 28 }}
+          style={{ width: 118, height: 28 }}
           popupMatchSelectWidth={false}
           value={pendingFilters.id_template_service}
           placeholder="Phân hệ"
@@ -180,7 +180,26 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
           allowClear
           value={pendingFilters?.PID}
           style={{
-            width: 100,
+            width: 86,
+            height: 28,
+            fontSize: "12px",
+            borderRadius: "4px",
+            borderColor: "#cbd5e1",
+          }}
+        />
+      )}
+      {isOnWorkList && (
+        <Input
+          className={styles.topHeader__filterSid}
+          placeholder="SID"
+          size="small"
+          onChange={(e) =>
+            setPendingFilters({ ...pendingFilters, SID: e.target.value })
+          }
+          allowClear
+          value={pendingFilters?.SID}
+          style={{
+            width: 96,
             height: 28,
             fontSize: "12px",
             borderRadius: "4px",
@@ -199,7 +218,7 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
           allowClear
           value={pendingFilters?.name}
           style={{
-            width: 140,
+            width: 130,
             height: 28,
             fontSize: "12px",
             borderRadius: "4px",
@@ -212,7 +231,7 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
           className={styles.topHeader__filterClinic}
           mode="multiple"
           size="small"
-          style={{ minWidth: 160, maxWidth: 240, height: 28 }}
+          style={{ minWidth: 145, maxWidth: 195, height: 28 }}
           allowClear
           showSearch
           popupMatchSelectWidth={false}
