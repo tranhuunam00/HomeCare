@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import axios from 'axios';
 import { message } from 'antd';
-import { parseDicomBuffer, renderDicomToCanvas } from './services/dicomDecoder';
+import { renderDicomToCanvas } from './services/dicomDecoder';
 import { usePacsStudy } from './hooks/usePacsStudy';
+import { usePacsThumbnails } from './hooks/usePacsThumbnails';
+import { usePacsInteraction } from './hooks/usePacsInteraction';
+import { usePacsPresentationState } from './hooks/usePacsPresentationState';
 import PacsTopNav from './components/PacsTopNav';
 import PacsSidebar from './components/PacsSidebar';
 import PacsSeriesStrip from './components/PacsSeriesStrip';
@@ -13,16 +15,6 @@ import PacsCaptureAlert from './components/PacsCaptureAlert';
 import PacsUploadAlert from './components/PacsUploadAlert';
 import PacsAttachmentViewer from './components/PacsAttachmentViewer';
 import PacsMprModal from './components/PacsMprModal';
-import { PACS_TOOLS } from './constants/pacs.constants';
-import {
-  calculateDistance,
-  calculateAngle,
-  calculateEllipseArea,
-  calculateRectArea,
-  formatMeasurement,
-} from './utils/measurement.utils';
-import { renderAnnotationsToCanvas } from './utils/annotation.renderer';
-import { generateKeyImageSnapshot, broadcastKeyImage } from './utils/keyImage.utils';
 
 export default function PacsViewerPage() {
   const [searchParams] = useSearchParams();
@@ -38,7 +30,6 @@ export default function PacsViewerPage() {
     return envUrl || 'http://localhost:3001';
   }, []);
 
-  // Custom hook: Data access and DICOM loading
   const {
     loading,
     study,
@@ -58,10 +49,8 @@ export default function PacsViewerPage() {
     getAuthHeaders,
   } = usePacsStudy(patientDiagnoseId, apiEndpoint);
 
-  // Group instances into Series (Supports multiple files / multiple series per patient)
   const seriesList = useMemo(() => {
     if (!instances || instances.length === 0) return [];
-
     const map = new Map();
     instances.forEach((inst, idx) => {
       const key = inst.seriesInstanceUid || 'default_series';
@@ -75,20 +64,17 @@ export default function PacsViewerPage() {
       }
       map.get(key).instances.push({ ...inst, globalIndex: idx });
     });
-
     return Array.from(map.values());
   }, [instances]);
 
   const [activeSeriesUid, setActiveSeriesUid] = useState(null);
 
-  // Auto-select the first series when loaded
   useEffect(() => {
     if (seriesList.length > 0 && (!activeSeriesUid || !seriesList.some((s) => s.seriesUid === activeSeriesUid))) {
       setActiveSeriesUid(seriesList[0].seriesUid);
     }
   }, [seriesList, activeSeriesUid]);
 
-  // Active series and its slice global indices (keeps wheel/slider scoped to the selected series)
   const activeSeries = useMemo(() => {
     if (!seriesList.length) return null;
     return seriesList.find((s) => s.seriesUid === activeSeriesUid) || seriesList[0];
@@ -101,10 +87,7 @@ export default function PacsViewerPage() {
     return instances.map((_, idx) => idx);
   }, [activeSeries, instances]);
 
-  const activeSeriesInstances = useMemo(() => {
-    return activeSeries?.instances || [];
-  }, [activeSeries]);
-
+  const activeSeriesInstances = useMemo(() => activeSeries?.instances || [], [activeSeries]);
   const canBuild3D = activeSeriesInstances.length > 20;
 
   const activeSlicePos = useMemo(() => {
@@ -123,30 +106,13 @@ export default function PacsViewerPage() {
     [activeSeriesIndices, currentIndex, setCurrentIndex]
   );
 
-  // Per-series thumbnail map: { [seriesUid]: dataUrl }
-  const [seriesThumbnails, setSeriesThumbnails] = useState({});
-  // Per-slice thumbnail map: { [globalIndex]: dataUrl }
-  const [sliceThumbnails, setSliceThumbnails] = useState({});
   const [leftSeriesStripOpen, setLeftSeriesStripOpen] = useState(true);
   const [rightSliceStripOpen, setRightSliceStripOpen] = useState(true);
   const [isExpanded, setIsExpanded] = useState(false);
-
-  // Key Image Capture Alert State (Clear feedback & Shutter Flash for doctor)
-  const [captureAlert, setCaptureAlert] = useState({
-    open: false,
-    dataUrl: '',
-    caption: '',
-    sliceIndex: 1,
-    totalSlices: 1,
-  });
-
-  // Active non-DICOM attached file (PDF report, Word docx, Video mp4) for embedded viewing (Ảnh 1)
   const [activeAttachedFile, setActiveAttachedFile] = useState(null);
-
-  // 3D Volume Rendering & Multi-Planar Reconstruction (MPR) modal state
   const [mprOpen, setMprOpen] = useState(false);
 
-  // Cine Loop Player (Auto-playback for Ultrasound, DSA Angiography, CT/MRI multi-slice series)
+  // Cine Loop Player
   const [isPlayingCine, setIsPlayingCine] = useState(false);
   const [cineFps, setCineFps] = useState(10);
 
@@ -172,134 +138,95 @@ export default function PacsViewerPage() {
     setMprOpen(true);
   }, [activeSeriesInstances.length]);
 
-  // Layout mode: '1x1' | '1x2' | '2x1' | '2x2'
   const [layout, setLayout] = useState('1x1');
   const [activeViewport, setActiveViewport] = useState(0);
-
-  // Active Tool & Canvas Transforms
-  const [activeTool, setActiveTool] = useState(PACS_TOOLS.LENGTH);
-  const [zoom, setZoom] = useState(1);
-  const [pan, setPan] = useState({ x: 0, y: 0 });
-  const [rotation, setRotation] = useState(0);
-  const [flipH, setFlipH] = useState(false);
-  const [flipV, setFlipV] = useState(false);
   const [invert, setInvert] = useState(false);
   const [colorLut, setColorLut] = useState('default');
-
-  // Annotations per slice: { [sliceIndex]: Array<Measurement> }
-  const [annotations, setAnnotations] = useState({});
-  const [currentDrawing, setCurrentDrawing] = useState(null);
-
-  useEffect(() => {
-    setCurrentDrawing(null);
-  }, [activeTool, currentIndex]);
-
-  // 🏥 Medical Standard (DICOM Presentation State - GSPS):
-  // Persist doctor's annotations & display parameters across page reloads on both PACS Server and local cache
-  const presentationStateKey = patientDiagnoseId ? `pacs_presentation_state_${patientDiagnoseId}` : null;
-
-  // Restore presentation state from PACS Server on load (with localStorage fallback)
-  useEffect(() => {
-    if (!patientDiagnoseId) return;
-
-    let isMounted = true;
-    const fetchServerState = async () => {
-      try {
-        const token = localStorage.getItem('TOKEN');
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        const res = await axios.get(`${apiEndpoint}/api/pacs/presentation-state/${patientDiagnoseId}`, { headers });
-        const serverPS = res.data?.data?.data || res.data?.data;
-
-        if (isMounted && serverPS) {
-          if (serverPS.annotations && Object.keys(serverPS.annotations).length > 0) {
-            setAnnotations(serverPS.annotations);
-          }
-          if (serverPS.windowCenter !== undefined) setWindowCenter(serverPS.windowCenter);
-          if (serverPS.windowWidth !== undefined) setWindowWidth(serverPS.windowWidth);
-          if (serverPS.colorLut) setColorLut(serverPS.colorLut);
-          if (serverPS.invert !== undefined) setInvert(serverPS.invert);
-          return;
-        }
-      } catch (err) {
-        console.warn('Lỗi tải Presentation State từ server, chuyển sang đọc bộ nhớ cục bộ:', err.message);
-      }
-
-      // Local storage fallback
-      if (isMounted && presentationStateKey) {
-        try {
-          const saved = localStorage.getItem(presentationStateKey);
-          if (saved) {
-            const parsed = JSON.parse(saved);
-            if (parsed.annotations) setAnnotations(parsed.annotations);
-            if (parsed.windowCenter !== undefined) setWindowCenter(parsed.windowCenter);
-            if (parsed.windowWidth !== undefined) setWindowWidth(parsed.windowWidth);
-            if (parsed.colorLut) setColorLut(parsed.colorLut);
-            if (parsed.invert !== undefined) setInvert(parsed.invert);
-          }
-        } catch (e) {
-          console.warn('Lỗi khôi phục trạng thái cục bộ:', e);
-        }
-      }
-    };
-
-    fetchServerState();
-    return () => {
-      isMounted = false;
-    };
-  }, [patientDiagnoseId, apiEndpoint, presentationStateKey, setWindowCenter, setWindowWidth]);
-
-  // Auto-save presentation state to both localStorage and PACS Server (debounced)
-  const saveTimeoutRef = useRef(null);
-  useEffect(() => {
-    if (!patientDiagnoseId) return;
-
-    const stateToSave = {
-      patientDiagnoseId: Number(patientDiagnoseId),
-      annotations,
-      windowCenter,
-      windowWidth,
-      colorLut,
-      invert,
-      updatedAt: new Date().toISOString(),
-    };
-
-    // 1. Instant local persistence
-    if (presentationStateKey) {
-      try {
-        localStorage.setItem(presentationStateKey, JSON.stringify(stateToSave));
-      } catch (e) {}
-    }
-
-    // 2. Debounced PACS Server persistence (save 800ms after user finishes measuring)
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-    saveTimeoutRef.current = setTimeout(async () => {
-      try {
-        const token = localStorage.getItem('TOKEN');
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        await axios.post(`${apiEndpoint}/api/pacs/presentation-state`, stateToSave, { headers });
-      } catch (err) {
-        console.warn('Lưu trạng thái lên PACS Server thất bại:', err.message);
-      }
-    }, 800);
-
-    return () => {
-      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
-    };
-  }, [patientDiagnoseId, presentationStateKey, annotations, windowCenter, windowWidth, colorLut, invert, apiEndpoint]);
-
-  // Canvas Refs
   const imageCanvasRef = useRef(null);
   const annotationCanvasRef = useRef(null);
 
-  // Interaction tracking
-  const isInteracting = useRef(false);
-  const startPos = useRef({ x: 0, y: 0 });
-  const startPan = useRef({ x: 0, y: 0 });
-  const startWW = useRef({ ww: 255, wl: 128 });
+  const { seriesThumbnails, setSeriesThumbnails, sliceThumbnails, setSliceThumbnails } = usePacsThumbnails({
+    seriesList,
+    activeSeries,
+    dicomCache,
+    setDicomCache,
+    rightSliceStripOpen,
+    apiEndpoint,
+    getAuthHeaders,
+  });
 
-  // Redraw DICOM Pixel Canvas when pixels or rendering parameters change
+  const {
+    activeTool,
+    setActiveTool,
+    zoom,
+    setZoom,
+    pan,
+    setPan,
+    rotation,
+    setRotation,
+    flipH,
+    setFlipH,
+    flipV,
+    setFlipV,
+    annotations,
+    setAnnotations,
+    isInteracting,
+    handleMouseDown,
+    handleMouseMove,
+    handleMouseUp,
+    handleWheel,
+    handleZoomIn,
+    handleZoomOut,
+    handleResetZoom,
+    handleDoubleClickZoom,
+    handleReset,
+    handleClearAnnotations,
+    handleApplyPreset,
+  } = usePacsInteraction({
+    dicomCache,
+    currentIndex,
+    windowCenter,
+    setWindowCenter,
+    windowWidth,
+    setWindowWidth,
+    invert,
+    setInvert,
+    colorLut,
+    setColorLut,
+    activeSeriesIndices,
+    stepSeriesSlice,
+    imageCanvasRef,
+    annotationCanvasRef,
+    presentationStateKey: patientDiagnoseId ? `pacs_presentation_state_${patientDiagnoseId}` : null,
+  });
+
+  const {
+    captureAlert,
+    setCaptureAlert,
+    handleCaptureKeyImage,
+  } = usePacsPresentationState({
+    patientDiagnoseId,
+    apiEndpoint,
+    getAuthHeaders,
+    annotations,
+    setAnnotations,
+    windowCenter,
+    setWindowCenter,
+    windowWidth,
+    setWindowWidth,
+    colorLut,
+    setColorLut,
+    invert,
+    setInvert,
+    imageCanvasRef,
+    annotationCanvasRef,
+    dicomCache,
+    currentIndex,
+    instances,
+    study,
+  });
+
+  // Redraw DICOM Pixel Canvas
   useEffect(() => {
     const currentData = dicomCache[currentIndex];
     const canvas = imageCanvasRef.current;
@@ -312,557 +239,25 @@ export default function PacsViewerPage() {
       colorLut,
     });
 
-    // Update thumbnail strictly for the series that owns currentIndex
     const activeInst = instances[currentIndex];
     const ownerSeriesUid = activeInst?.seriesInstanceUid || 'default_series';
     if (!seriesThumbnails[ownerSeriesUid] || !sliceThumbnails[currentIndex]) {
       try {
         const dataUrl = canvas.toDataURL('image/jpeg', 0.65);
         if (!seriesThumbnails[ownerSeriesUid]) {
-          setSeriesThumbnails((prev) =>
-            prev[ownerSeriesUid] ? prev : { ...prev, [ownerSeriesUid]: dataUrl }
-          );
+          setSeriesThumbnails((prev) => (prev[ownerSeriesUid] ? prev : { ...prev, [ownerSeriesUid]: dataUrl }));
         }
         if (!sliceThumbnails[currentIndex]) {
-          setSliceThumbnails((prev) =>
-            prev[currentIndex] ? prev : { ...prev, [currentIndex]: dataUrl }
-          );
+          setSliceThumbnails((prev) => (prev[currentIndex] ? prev : { ...prev, [currentIndex]: dataUrl }));
         }
-      } catch (e) {
-        // ignore
-      }
+      } catch (e) {}
     }
-  }, [
-    dicomCache,
-    currentIndex,
-    windowCenter,
-    windowWidth,
-    invert,
-    colorLut,
-    instances,
-    seriesThumbnails,
-    sliceThumbnails,
-  ]);
+  }, [dicomCache, currentIndex, windowCenter, windowWidth, invert, colorLut, instances, seriesThumbnails, sliceThumbnails, setSeriesThumbnails, setSliceThumbnails]);
 
-  // Pre-generate thumbnails for every slice in the currently active series when right strip is open
-  useEffect(() => {
-    if (!rightSliceStripOpen || !activeSeries?.instances?.length) return;
-    let cancelled = false;
-
-    const generateActiveSeriesSliceThumbs = async () => {
-      const headers = getAuthHeaders();
-      for (const inst of activeSeries.instances) {
-        if (cancelled) return;
-        if (sliceThumbnails[inst.globalIndex]) continue;
-
-        try {
-          let parsed = dicomCache[inst.globalIndex];
-          if (!parsed) {
-            const res = await axios.get(
-              `${apiEndpoint}/api/pacs/instances/${inst.sopInstanceUid}/file`,
-              { responseType: 'arraybuffer', headers }
-            );
-            if (cancelled) return;
-            parsed = parseDicomBuffer(res.data);
-            setDicomCache((prev) =>
-              prev[inst.globalIndex] ? prev : { ...prev, [inst.globalIndex]: parsed }
-            );
-          }
-
-          if (parsed?.rawPixels && !cancelled) {
-            const offscreen = document.createElement('canvas');
-            renderDicomToCanvas(offscreen, parsed.rawPixels, parsed.meta, {
-              windowCenter: parsed.meta.windowCenter,
-              windowWidth: parsed.meta.windowWidth,
-              invert: false,
-              colorLut: 'default',
-            });
-            const thumbUrl = offscreen.toDataURL('image/jpeg', 0.55);
-            setSliceThumbnails((prev) =>
-              prev[inst.globalIndex] ? prev : { ...prev, [inst.globalIndex]: thumbUrl }
-            );
-          }
-        } catch (err) {
-          console.warn('Không thể tạo thumbnail lát cắt:', inst.sopInstanceUid, err?.message);
-        }
-      }
-    };
-
-    generateActiveSeriesSliceThumbs();
-    return () => {
-      cancelled = true;
-    };
-  }, [rightSliceStripOpen, activeSeries, apiEndpoint, getAuthHeaders]);
-
-  // Pre-generate real thumbnails for every series from its own first instance
-  useEffect(() => {
-    if (!seriesList || seriesList.length === 0) return;
-    let cancelled = false;
-
-    const generateMissingSeriesThumbs = async () => {
-      const headers = getAuthHeaders();
-      for (const series of seriesList) {
-        if (cancelled) return;
-        const firstInst = series.instances?.[0];
-        if (!firstInst || seriesThumbnails[series.seriesUid]) continue;
-
-        try {
-          let parsed = dicomCache[firstInst.globalIndex];
-          if (!parsed) {
-            const res = await axios.get(
-              `${apiEndpoint}/api/pacs/instances/${firstInst.sopInstanceUid}/file`,
-              { responseType: 'arraybuffer', headers }
-            );
-            if (cancelled) return;
-            parsed = parseDicomBuffer(res.data);
-            setDicomCache((prev) =>
-              prev[firstInst.globalIndex] ? prev : { ...prev, [firstInst.globalIndex]: parsed }
-            );
-          }
-
-          if (parsed?.rawPixels && !cancelled) {
-            const offscreen = document.createElement('canvas');
-            renderDicomToCanvas(offscreen, parsed.rawPixels, parsed.meta, {
-              windowCenter: parsed.meta.windowCenter,
-              windowWidth: parsed.meta.windowWidth,
-              invert: false,
-              colorLut: 'default',
-            });
-            const thumbUrl = offscreen.toDataURL('image/jpeg', 0.65);
-            setSeriesThumbnails((prev) => ({ ...prev, [series.seriesUid]: thumbUrl }));
-          }
-        } catch (err) {
-          console.warn('Không thể tạo thumbnail cho series:', series.seriesUid, err?.message);
-        }
-      }
-    };
-
-    generateMissingSeriesThumbs();
-    return () => {
-      cancelled = true;
-    };
-  }, [seriesList, apiEndpoint, getAuthHeaders]);
-
-  // Redraw Overlay Annotations Canvas
-  useEffect(() => {
-    const canvas = annotationCanvasRef.current;
-    const currentData = dicomCache[currentIndex];
-    if (!canvas || !currentData) return;
-
-    // 🎯 Crucial: Ensure annotation canvas pixel buffer strictly matches image canvas resolution
-    const targetW = currentData.meta?.columns || 512;
-    const targetH = currentData.meta?.rows || 512;
-    if (canvas.width !== targetW) canvas.width = targetW;
-    if (canvas.height !== targetH) canvas.height = targetH;
-
-    renderAnnotationsToCanvas(
-      canvas,
-      annotations[currentIndex] || [],
-      currentDrawing,
-      currentData.meta
-    );
-  }, [annotations, currentDrawing, currentIndex, dicomCache]);
-
-  // Convert Viewport Mouse Coordinates to DICOM Canvas Space with full inverse transform
-  const getCanvasCoordinates = (e) => {
-    const canvas = imageCanvasRef.current;
-    if (!canvas) return { x: 0, y: 0 };
-
-    const rect = canvas.getBoundingClientRect();
-    const W = canvas.width || 512;
-    const H = canvas.height || 512;
-
-    // Visual center of the transformed canvas on screen
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-
-    // Mouse distance from the visual center on screen
-    const dx = e.clientX - centerX;
-    const dy = e.clientY - centerY;
-
-    // 1. Inverse Rotation
-    const rad = (-rotation * Math.PI) / 180;
-    const cosA = Math.cos(rad);
-    const sinA = Math.sin(rad);
-    let unrotX = dx * cosA - dy * sinA;
-    let unrotY = dx * sinA + dy * cosA;
-
-    // 2. Inverse Flip
-    if (flipH) unrotX = -unrotX;
-    if (flipV) unrotY = -unrotY;
-
-    // 3. Inverse Zoom and Screen Scale
-    // Unzoomed display size of canvas on screen
-    const displayW = rect.width / zoom;
-    const displayH = rect.height / zoom;
-
-    const isRotated90or270 = Math.abs(rotation % 180) === 90;
-    const effDisplayW = isRotated90or270 ? displayH : displayW;
-    const effDisplayH = isRotated90or270 ? displayW : displayH;
-
-    const scaleFactorX = W / (effDisplayW * zoom);
-    const scaleFactorY = H / (effDisplayH * zoom);
-
-    const canvasX = Math.round(W / 2 + unrotX * scaleFactorX);
-    const canvasY = Math.round(H / 2 + unrotY * scaleFactorY);
-
-    // Clamp to canvas boundaries
-    return {
-      x: Math.max(0, Math.min(W, canvasX)),
-      y: Math.max(0, Math.min(H, canvasY)),
-    };
-  };
-
-  // Select Series from Strip
-  const handleSelectSeries = (seriesUid) => {
-    setActiveSeriesUid(seriesUid);
-    const targetSeries = seriesList.find((s) => s.seriesUid === seriesUid);
-    if (targetSeries && targetSeries.instances?.length > 0) {
-      setCurrentIndex(targetSeries.instances[0].globalIndex);
-    }
-  };
-
-  // Mouse Down Handler
-  const handleMouseDown = (e) => {
-    if (e.button !== 0 && e.button !== 1 && e.button !== 2) return;
-    isInteracting.current = true;
-    startPos.current = { x: e.clientX, y: e.clientY };
-    startPan.current = { ...pan };
-    startWW.current = { ww: windowWidth, wl: windowCenter };
-
-    if (e.button === 1 || activeTool === PACS_TOOLS.PAN) return;
-    if (e.button === 2 || activeTool === PACS_TOOLS.WW_WL) return;
-
-    const coords = getCanvasCoordinates(e);
-
-    if (activeTool === PACS_TOOLS.LENGTH) {
-      setCurrentDrawing({
-        id: Date.now(),
-        type: 'length',
-        points: [coords, coords],
-        valueText: '0.0 mm',
-      });
-    } else if (activeTool === PACS_TOOLS.ANGLE) {
-      if (!currentDrawing || currentDrawing.type !== 'angle') {
-        setCurrentDrawing({
-          id: Date.now(),
-          type: 'angle',
-          points: [coords, coords],
-          valueText: '',
-        });
-      } else if (currentDrawing.points.length === 2) {
-        const [p1] = currentDrawing.points;
-        if (Math.hypot(coords.x - p1.x, coords.y - p1.y) >= 3) {
-          setCurrentDrawing({
-            ...currentDrawing,
-            points: [p1, coords, coords],
-            valueText: '0.0°',
-          });
-        }
-      } else if (currentDrawing.points.length === 3) {
-        const [p1, p2] = currentDrawing.points;
-        if (Math.hypot(coords.x - p2.x, coords.y - p2.y) >= 3) {
-          const angleDeg = calculateAngle(p1, p2, coords);
-          setAnnotations((prev) => ({
-            ...prev,
-            [currentIndex]: [
-              ...(prev[currentIndex] || []),
-              {
-                ...currentDrawing,
-                points: [p1, p2, coords],
-                valueText: formatMeasurement('angle', angleDeg),
-              },
-            ],
-          }));
-          setCurrentDrawing(null);
-        }
-      }
-    } else if (activeTool === PACS_TOOLS.ROI_ELLIPSE) {
-      setCurrentDrawing({
-        id: Date.now(),
-        type: 'roi_ellipse',
-        points: [coords, coords],
-        valueText: '0.0 mm²',
-      });
-    } else if (activeTool === PACS_TOOLS.ROI_RECT) {
-      setCurrentDrawing({
-        id: Date.now(),
-        type: 'roi_rect',
-        points: [coords, coords],
-        valueText: '0.0 mm²',
-      });
-    }
-  };
-
-  // Mouse Move Handler
-  const handleMouseMove = (e) => {
-    const isAnglePreview =
-      activeTool === PACS_TOOLS.ANGLE && currentDrawing?.type === 'angle';
-    if (!isInteracting.current && !isAnglePreview) return;
-
-    if (isInteracting.current) {
-      const dx = e.clientX - startPos.current.x;
-      const dy = e.clientY - startPos.current.y;
-
-      if (e.buttons === 4 || activeTool === PACS_TOOLS.PAN) {
-        setPan({ x: startPan.current.x + dx, y: startPan.current.y + dy });
-        return;
-      }
-
-      if (e.buttons === 2 || activeTool === PACS_TOOLS.WW_WL) {
-        const sensitivity = 2.0;
-        setWindowWidth((prev) => Math.max(1, Math.round(startWW.current.ww + dx * sensitivity)));
-        setWindowCenter((prev) => Math.round(startWW.current.wl - dy * sensitivity));
-        return;
-      }
-
-      if (activeTool === PACS_TOOLS.ZOOM) {
-        const zoomFactor = 1 - dy * 0.01;
-        setZoom((prev) => Math.max(0.1, Math.min(10, prev * zoomFactor)));
-        startPos.current = { x: e.clientX, y: e.clientY };
-        return;
-      }
-    }
-
-    const coords = getCanvasCoordinates(e);
-    const currentData = dicomCache[currentIndex];
-    const pixelSpacing = currentData?.meta?.pixelSpacing || [1.0, 1.0];
-
-    if (isAnglePreview) {
-      if (currentDrawing.points.length === 2) {
-        setCurrentDrawing({
-          ...currentDrawing,
-          points: [currentDrawing.points[0], coords],
-        });
-      } else if (currentDrawing.points.length === 3) {
-        const [p1, p2] = currentDrawing.points;
-        const angleDeg = calculateAngle(p1, p2, coords);
-        setCurrentDrawing({
-          ...currentDrawing,
-          points: [p1, p2, coords],
-          valueText: formatMeasurement('angle', angleDeg),
-        });
-      }
-      return;
-    }
-
-    if (activeTool === PACS_TOOLS.LENGTH && currentDrawing) {
-      const dist = calculateDistance(currentDrawing.points[0], coords, pixelSpacing);
-      setCurrentDrawing({
-        ...currentDrawing,
-        points: [currentDrawing.points[0], coords],
-        valueText: formatMeasurement('length', dist),
-      });
-    } else if (activeTool === PACS_TOOLS.ROI_ELLIPSE && currentDrawing) {
-      const area = calculateEllipseArea(currentDrawing.points[0], coords, pixelSpacing);
-      setCurrentDrawing({
-        ...currentDrawing,
-        points: [currentDrawing.points[0], coords],
-        valueText: formatMeasurement('roi_ellipse', area),
-      });
-    } else if (activeTool === PACS_TOOLS.ROI_RECT && currentDrawing) {
-      const area = calculateRectArea(currentDrawing.points[0], coords, pixelSpacing);
-      setCurrentDrawing({
-        ...currentDrawing,
-        points: [currentDrawing.points[0], coords],
-        valueText: formatMeasurement('roi_rect', area),
-      });
-    }
-  };
-
-  // Mouse Up Handler
-  const handleMouseUp = () => {
-    if (!isInteracting.current) return;
-    isInteracting.current = false;
-
-    if (
-      activeTool === PACS_TOOLS.ANGLE &&
-      currentDrawing?.type === 'angle' &&
-      currentDrawing.points.length === 2
-    ) {
-      const [p1, p2] = currentDrawing.points;
-      if (Math.hypot((p2?.x || 0) - (p1?.x || 0), (p2?.y || 0) - (p1?.y || 0)) >= 6) {
-        setCurrentDrawing({
-          ...currentDrawing,
-          points: [p1, p2, p2],
-          valueText: '0.0°',
-        });
-      }
-      return;
-    }
-
-    if (
-      currentDrawing &&
-      (activeTool === PACS_TOOLS.LENGTH ||
-        activeTool === PACS_TOOLS.ROI_ELLIPSE ||
-        activeTool === PACS_TOOLS.ROI_RECT)
-    ) {
-      const [p1, p2] = currentDrawing.points;
-      const dx = (p1?.x || 0) - (p2?.x || 0);
-      const dy = (p1?.y || 0) - (p2?.y || 0);
-      if (Math.hypot(dx, dy) >= 3) {
-        setAnnotations((prev) => ({
-          ...prev,
-          [currentIndex]: [...(prev[currentIndex] || []), currentDrawing],
-        }));
-      }
-      setCurrentDrawing(null);
-    }
-  };
-
-  // Wheel Handler: Cine Slice Navigation (scoped to active series)
-  const handleWheel = (e) => {
-    e.preventDefault();
-    if (activeSeriesIndices.length <= 1) return;
-    stepSeriesSlice(e.deltaY > 0 ? 1 : -1);
-  };
-
-  // Zoom & Enlarge Helpers
-  const handleZoomIn = () => setZoom((prev) => Math.min(10, Number((prev * 1.25).toFixed(2))));
-  const handleZoomOut = () => setZoom((prev) => Math.max(0.2, Number((prev / 1.25).toFixed(2))));
-  const handleResetZoom = () => {
-    setZoom(1);
-    setPan({ x: 0, y: 0 });
-  };
-  const handleDoubleClickZoom = () => {
-    if (zoom > 1.05) {
-      setZoom(1);
-      setPan({ x: 0, y: 0 });
-    } else {
-      setZoom(2);
-    }
-  };
-
-  // Reset Transformations
-  const handleReset = () => {
-    setZoom(1);
-    setPan({ x: 0, y: 0 });
-    setRotation(0);
-    setFlipH(false);
-    setFlipV(false);
-    setInvert(false);
-    setColorLut('default');
-    const currentData = dicomCache[currentIndex];
-    if (currentData) {
-      setWindowCenter(currentData.meta.windowCenter);
-      setWindowWidth(currentData.meta.windowWidth);
-    }
-  };
-
-  const handleClearAnnotations = () => {
-    setAnnotations((prev) => {
-      const next = { ...prev, [currentIndex]: [] };
-      if (presentationStateKey) {
-        try {
-          const saved = JSON.parse(localStorage.getItem(presentationStateKey) || '{}');
-          saved.annotations = next;
-          localStorage.setItem(presentationStateKey, JSON.stringify(saved));
-        } catch (e) {}
-      }
-      return next;
-    });
-    message.success('Đã xóa tất cả đo đạc trên lát cắt này');
-  };
-
-  const handleClearAllAnnotations = () => {
-    setAnnotations({});
-    if (presentationStateKey) {
-      localStorage.removeItem(presentationStateKey);
-    }
-    message.success('Đã xóa toàn bộ số đo của ca khám');
-  };
-
-  // Apply Window/Level Preset
-  const handleApplyPreset = (preset) => {
-    if (preset.ww && preset.wl) {
-      setWindowWidth(preset.ww);
-      setWindowCenter(preset.wl);
-    } else {
-      const currentData = dicomCache[currentIndex];
-      if (currentData) {
-        setWindowWidth(currentData.meta.windowWidth);
-        setWindowCenter(currentData.meta.windowCenter);
-      }
-    }
-  };
-
-  // KEY IMAGE CAPTURE (Chụp ảnh Key & Hiển thị thông báo + Shutter Flash rõ ràng)
-  const handleCaptureKeyImage = async () => {
-    try {
-      const { dataUrl, captionText, measurementsSummary } = generateKeyImageSnapshot({
-        imgCanvas: imageCanvasRef.current,
-        annCanvas: annotationCanvasRef.current,
-        metadata: {
-          patientName: dicomCache[currentIndex]?.meta?.patientName || study?.dbPatient?.patientName || '',
-          patientId: dicomCache[currentIndex]?.meta?.patientId || study?.dbPatient?.patientId || '',
-        },
-        measurements: annotations[currentIndex] || [],
-        currentIndex,
-        totalSlices: instances.length,
-        windowCenter,
-        windowWidth,
-      });
-
-      // 1. Broadcast across all frontend tabs (only when linked to a patient)
-      if (patientDiagnoseId) {
-        broadcastKeyImage({
-          patientDiagnoseId: Number(patientDiagnoseId),
-          patient_diagnose_id: Number(patientDiagnoseId),
-          dataUrl,
-          caption: captionText,
-          sliceIndex: currentIndex,
-          sopInstanceUid: instances[currentIndex]?.sopInstanceUid,
-          measurements: (annotations[currentIndex] || []).map((a) => ({
-            type: a.type,
-            value: a.valueText,
-          })),
-        });
-      }
-
-      // 2. Persist to PACS backend
-      if (patientDiagnoseId) {
-        await axios.post(
-          `${apiEndpoint}/api/pacs/key-image`,
-          {
-            patientDiagnoseId: Number(patientDiagnoseId),
-            imageBase64: dataUrl,
-            caption: captionText,
-            sliceIndex: currentIndex,
-            sopInstanceUid: instances[currentIndex]?.sopInstanceUid,
-            measurements: (annotations[currentIndex] || []).map((a) => ({
-              type: a.type,
-              value: a.valueText,
-            })),
-          },
-          { headers: getAuthHeaders() }
-        );
-      }
-
-      // 3. Trigger Flash Effect and Prominent Success Alert Modal
-      setCaptureAlert({
-        open: true,
-        dataUrl,
-        caption: captionText,
-        sliceIndex: currentIndex + 1,
-        totalSlices: instances.length,
-      });
-
-      // Auto close alert after 4 seconds
-      setTimeout(() => {
-        setCaptureAlert((prev) => ({ ...prev, open: false }));
-      }, 4000);
-    } catch (err) {
-      console.error('Lỗi chụp ảnh Key:', err);
-      message.error('Không thể chụp ảnh Key: ' + (err.message || 'Lỗi không xác định'));
-    }
-  };
-
-  // Keyboard Shortcuts: Space / Ctrl+S (Key Image), Arrows (Slice Navigation), 'I' (Invert), 'C' (Cine Loop)
+  // Keyboard Shortcuts: Space / Ctrl+S (Key Image), Arrows (Slices), 'I' (Invert), 'C' (Cine)
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Ignore when user is typing in input or textarea
       if (['INPUT', 'TEXTAREA'].includes(e.target?.tagName)) return;
-
       if (e.code === 'Space' || (e.ctrlKey && e.key.toLowerCase() === 's')) {
         e.preventDefault();
         handleCaptureKeyImage();
@@ -878,7 +273,7 @@ export default function PacsViewerPage() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleCaptureKeyImage, stepSeriesSlice]);
+  }, [handleCaptureKeyImage, stepSeriesSlice, setInvert]);
 
   const currentMeta = dicomCache[currentIndex]?.meta;
 
@@ -896,7 +291,6 @@ export default function PacsViewerPage() {
         position: 'relative',
       }}
     >
-      {/* Visual Camera Flash & Prominent Success Alert */}
       <PacsCaptureAlert
         open={captureAlert.open}
         onClose={() => setCaptureAlert((prev) => ({ ...prev, open: false }))}
@@ -904,9 +298,9 @@ export default function PacsViewerPage() {
         caption={captureAlert.caption}
         sliceIndex={captureAlert.sliceIndex}
         totalSlices={captureAlert.totalSlices}
+        patientDiagnoseId={patientDiagnoseId}
       />
 
-      {/* Prominent DICOM & Document Upload Notification Toast */}
       <PacsUploadAlert
         status={uploadState.status}
         fileName={uploadState.fileName}
@@ -917,7 +311,6 @@ export default function PacsViewerPage() {
         onClose={resetUploadState}
       />
 
-      {/* Top Navbar */}
       <PacsTopNav
         activeTool={activeTool}
         setActiveTool={setActiveTool}
@@ -946,9 +339,7 @@ export default function PacsViewerPage() {
         totalSlices={activeSeriesIndices.length}
       />
 
-      {/* Main Body */}
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-        {/* Column 1: Left Tool Sidebar */}
         {!isExpanded && (
           <PacsSidebar
             study={study}
@@ -978,7 +369,6 @@ export default function PacsViewerPage() {
           />
         )}
 
-        {/* Column 2: Series & Files Strip (Supports Multiple Files/Series & Collapsible) */}
         {!isExpanded && (
           <PacsSeriesStrip
             isOpen={leftSeriesStripOpen}
@@ -987,18 +377,17 @@ export default function PacsViewerPage() {
             activeSeriesUid={activeSeriesUid}
             onSelectSeries={(uid) => {
               setActiveAttachedFile(null);
-              handleSelectSeries(uid);
+              setActiveSeriesUid(uid);
+              const target = seriesList.find((s) => s.seriesUid === uid);
+              if (target?.instances?.length) setCurrentIndex(target.instances[0].globalIndex);
             }}
             seriesThumbnails={seriesThumbnails}
             attachedFiles={study?.attachedFiles || []}
             activeAttachedFile={activeAttachedFile}
-            onSelectAttachedFile={(file) => {
-              setActiveAttachedFile(file);
-            }}
+            onSelectAttachedFile={setActiveAttachedFile}
           />
         )}
 
-        {/* Column 3: Main Stage - Either Embedded Attachment Viewer (Ảnh 1) or DICOM Multi-Viewport Grid (Ảnh 2) */}
         {activeAttachedFile ? (
           <PacsAttachmentViewer
             file={activeAttachedFile}
@@ -1020,7 +409,6 @@ export default function PacsViewerPage() {
               overflow: 'hidden',
             }}
           >
-            {/* Main Viewport Pane */}
             <PacsViewport
               viewportIndex={0}
               activeViewport={activeViewport}
@@ -1065,79 +453,17 @@ export default function PacsViewerPage() {
               instancesCount={instances.length}
             />
 
-            {/* Comparison Viewport Pane (When 1x2 or 2x2 layout is active) */}
             {(layout === '1x2' || layout === '2x1' || layout === '2x2') && (
               <div
                 onClick={() => setActiveViewport(1)}
-                style={{
-                  position: 'relative',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  backgroundColor: '#000000',
-                  overflow: 'hidden',
-                  border: activeViewport === 1 ? '1.5px solid #f59e0b' : '1.5px solid #1e293b',
-                }}
+                style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: '#000', overflow: 'hidden', border: activeViewport === 1 ? '1.5px solid #f59e0b' : '1.5px solid #1e293b' }}
               >
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: 8,
-                    left: 10,
-                    color: '#94a3b8',
-                    fontSize: '11px',
-                    fontFamily: 'monospace',
-                    lineHeight: '15px',
-                  }}
-                >
-                  <div>Age: Invalid date</div>
-                  <div>00:::00</div>
-                  <div>Laterality:</div>
-                  <div>ImageLaterality:</div>
-                  <div>ViewPosition:</div>
-                </div>
-
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: 8,
-                    right: 12,
-                    color: '#94a3b8',
-                    fontSize: '11px',
-                    fontFamily: 'monospace',
-                    lineHeight: '15px',
-                    textAlign: 'right',
-                  }}
-                >
-                  <div>Series Index: 2</div>
-                  <div>Image: 1/{instances.length || 1}</div>
-                </div>
-
-                <div style={{ color: '#475569', fontSize: '12px' }}>
-                  Khung so sánh (Kéo series khác hoặc lặp lại lát cắt)
-                </div>
-
-                <div
-                  style={{
-                    position: 'absolute',
-                    bottom: 8,
-                    right: 12,
-                    color: '#94a3b8',
-                    fontSize: '11px',
-                    fontFamily: 'monospace',
-                    lineHeight: '15px',
-                    textAlign: 'right',
-                  }}
-                >
-                  <div>Zoom: 0.59</div>
-                  <div>WW/WL: 255/128</div>
-                </div>
+                <div style={{ color: '#475569', fontSize: '12px' }}>Khung so sánh (Kéo series khác hoặc lặp lại lát cắt)</div>
               </div>
             )}
           </div>
         )}
 
-        {/* Column 4: Right-side scrollable slice strip for the active series/cluster */}
         {!activeAttachedFile && (
           <PacsSliceStrip
             isOpen={rightSliceStripOpen}
@@ -1151,7 +477,6 @@ export default function PacsViewerPage() {
         )}
       </div>
 
-      {/* 3D Volume & Multi-Planar Reconstruction (MPR) Modal */}
       <PacsMprModal
         open={mprOpen}
         onClose={() => setMprOpen(false)}
