@@ -191,6 +191,26 @@ export default function useDoctorFormData({
     }
   }, [selectedPatientDiagnose?.id, idEdit]);
 
+  // Tự fill mẫu in nếu chưa chọn (lần đọc đầu): ưu tiên mẫu khớp phân hệ của ca → mẫu active → mẫu đầu tiên
+  useEffect(() => {
+    if (loading || !patientDiagnose || !printTemplateList?.length) return;
+    const current = form.getFieldValue("id_print_template");
+    const existing = current && printTemplateList.find((t) => t.id == current);
+    if (existing) {
+      if (!printTemplate || printTemplate.id != existing.id) setPrintTemplate(existing);
+      return;
+    }
+    const active = printTemplateList.filter((t) => t.is_active !== false);
+    const pool = active.length ? active : printTemplateList;
+    const picked =
+      pool.find((t) => t.id_template_service && t.id_template_service == patientDiagnose.id_template_service) ||
+      pool[0];
+    if (picked) {
+      form.setFieldsValue({ id_print_template: picked.id });
+      setPrintTemplate(picked);
+    }
+  }, [loading, patientDiagnose, printTemplateList]);
+
   // Select form template
   const handleFormVer3Select = async (id_formver3_name) => {
     try {

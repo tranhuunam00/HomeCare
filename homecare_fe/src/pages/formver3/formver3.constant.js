@@ -190,6 +190,8 @@ export const buildDradv3FormValues = ({
     id_exam_part:
       doctorUseFormVer3?.id_exam_part ?? patientDiagnose.id_exam_part,
 
+    id_print_template: doctorUseFormVer3?.id_print_template ?? undefined,
+
     ket_luan: cleanOptionalStr(doctorUseFormVer3?.ket_luan),
     khuyen_nghi: cleanOptionalStr(doctorUseFormVer3?.recommendation),
     icd10: cleanOptionalStr(doctorUseFormVer3?.icd10_classification),

@@ -18,6 +18,7 @@ export default function IllustrativeImagesSection({
   const targetId = patientDiagnose?.id || selectedPatientDiagnose?.id;
 
   const handleOpenPacsViewer = () => {
+    if (!targetId) return;
     window.open(
       `/pacs/viewer?patientDiagnoseId=${targetId || ""}`,
       "_blank"
@@ -47,6 +48,7 @@ export default function IllustrativeImagesSection({
           ghost
           icon={<EyeOutlined />}
           onClick={handleOpenPacsViewer}
+          disabled={!targetId}
         >
           Mở D-PACS Viewer
         </Button>

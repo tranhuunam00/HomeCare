@@ -345,6 +345,18 @@ export default function DoctorUseDFormVer3({
           layout="vertical"
           colon={false}
           onFinish={onFinish}
+          scrollToFirstError={{ behavior: "smooth", block: "center" }}
+          onFinishFailed={({ errorFields }) => {
+            pendingAction.current = null;
+            const msgs = (errorFields || [])
+              .map((f) => f.errors?.[0])
+              .filter(Boolean);
+            toast.error(
+              msgs.length
+                ? `Chưa lưu được, thiếu thông tin: ${msgs.join("; ")}`
+                : "Chưa lưu được, vui lòng kiểm tra lại các trường bắt buộc"
+            );
+          }}
           requiredMark={(label, { required }) =>
             required ? (
               <span>
@@ -458,6 +470,11 @@ export default function DoctorUseDFormVer3({
             imageList={imageList}
             setImageList={setImageList}
             isEdit={isEdit}
+            isMobile={isMobile}
+            patientDiagnose={patientDiagnose}
+            selectedPatientDiagnose={selectedPatientDiagnose}
+            languageTranslate={languageTranslate}
+            translateLabel={translateLabel}
           />
 
           <FormActionBar
