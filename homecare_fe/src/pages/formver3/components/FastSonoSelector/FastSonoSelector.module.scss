@@ -388,36 +388,3 @@
   }
 }
 
-.hotkeysHelpBar {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  font-size: 11px;
-  color: #64748b;
-  background: #f8fafc;
-  border: 1px dashed #cbd5e1;
-  border-radius: 6px;
-  padding: 4px 10px;
-  margin-top: 4px;
-
-  .hotkeyItem {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-
-    kbd {
-      display: inline-block;
-      padding: 1px 5px;
-      font-size: 10px;
-      font-weight: 600;
-      color: #1e293b;
-      background: #ffffff;
-      border: 1px solid #cbd5e1;
-      border-radius: 3px;
-      box-shadow: 0 1px 1px rgba(0, 0, 0, 0.08);
-      font-family: inherit;
-    }
-  }
-}
-

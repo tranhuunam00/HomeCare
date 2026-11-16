@@ -17,6 +17,8 @@ import {
   generateBulletedNarrative,
   generateConclusionText,
   generateHTMLNarrative,
+  generateSingleOrganNarrative,
+  updateOrganInNarrative,
 } from './fastSonoEngine';
 import {
   CLASSIFICATION_TYPES,
@@ -239,12 +241,25 @@ const FastSonoSelector = ({
   // Xử lý khi bấm nút chip
   const handleToggleChip = (optionId) => {
     if (!isEdit || !currentOrgan) return;
-    setIsManualEdit(false);
     const nextSelected = toggleFindingOption(currentSelectedIds, currentOrgan, optionId);
+
+    // Cập nhật selectedMap cho cơ quan hiện tại
     setSelectedMap((prev) => ({
       ...prev,
       [currentOrgan.key]: nextSelected,
     }));
+
+    // Nếu bác sĩ đang ở chế độ sửa tay: Cập nhật thông minh cho đúng cơ quan này, bảo vệ 100% các đoạn sửa tay khác
+    if (isManualEdit && userEditedNarrative) {
+      const organLabel = currentOrgan.label || currentOrgan.name || currentOrgan.title || currentOrgan.key || 'Bộ phận';
+      const newOrganNarrative = generateSingleOrganNarrative(currentOrgan, nextSelected, gender);
+      const updatedText = updateOrganInNarrative(userEditedNarrative, organLabel, newOrganNarrative);
+
+      setUserEditedNarrative(updatedText);
+      if (onNarrativeChange) {
+        onNarrativeChange(updatedText, convertPlainTextToHTML(updatedText), true);
+      }
+    }
   };
 
   // Đặt lại tất cả các cơ quan về Bình thường
@@ -608,19 +623,6 @@ const FastSonoSelector = ({
           * Chạm vào nút hoặc bấm phím số [1..9] để tự sinh mô tả y khoa chuẩn.
         </span>
       </div>
-
-      {/* 7. Quick Hotkeys Bar */}
-      {isEdit && (
-        <div className={styles.hotkeysHelpBar}>
-          <span style={{ fontWeight: 600, color: '#334155' }}>⌨ Phím tắt:</span>
-          <span className={styles.hotkeyItem}><kbd>1..9</kbd> Chọn nhanh chip</span>
-          <span className={styles.hotkeyItem}><kbd>←</kbd><kbd>→</kbd> Đổi cơ quan</span>
-          <span className={styles.hotkeyItem}><kbd>Alt+Enter</kbd> Bắn kết luận</span>
-          <span className={styles.hotkeyItem}><kbd>Alt+R</kbd> Về bình thường</span>
-          <span className={styles.hotkeyItem}><kbd>Ctrl+S</kbd> Lưu nháp</span>
-          <span className={styles.hotkeyItem}><kbd>Alt+D</kbd> Đọc xong</span>
-        </div>
-      )}
     </div>
   );
 };

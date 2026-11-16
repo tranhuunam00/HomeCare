@@ -109,6 +109,69 @@ export function filterOptionsByGender(options = [], gender) {
 }
 
 /**
+ * Sinh câu mô tả cho 1 cơ quan đơn lẻ
+ * @param {Object} organ 
+ * @param {Array<string>} selectedIds 
+ * @param {string} gender 
+ * @returns {string}
+ */
+export function generateSingleOrganNarrative(organ, selectedIds = ['NORMAL'], gender) {
+  if (!organ) return '';
+  const organLabel = organ.label || organ.name || organ.title || organ.organName || organ.key || 'Bộ phận';
+  const validOptions = filterOptionsByGender(organ.options || [], gender);
+  const validOptionIds = new Set(validOptions.map((o) => o.id));
+  const validSelectedIds = (selectedIds || ['NORMAL']).filter((id) => validOptionIds.has(id));
+  const isOnlyNormal = validSelectedIds.length === 0 || (validSelectedIds.length === 1 && validSelectedIds[0] === 'NORMAL');
+
+  if (isOnlyNormal) {
+    const normalOpt = organ.options?.find((o) => o.id === 'NORMAL');
+    const text = normalOpt?.text || organ.defaultNormalText || 'Không thấy hình ảnh bất thường.';
+    return `• ${organLabel}: ${text}`;
+  } else {
+    const abnormalTexts = validSelectedIds
+      .map((id) => {
+        const opt = organ.options?.find((o) => o.id === id);
+        return opt?.text;
+      })
+      .filter(Boolean);
+
+    if (abnormalTexts.length > 0) {
+      return `• ${organLabel}: ${abnormalTexts.join('; ')}`;
+    } else {
+      return `• ${organLabel}: ${organ.defaultNormalText || 'Bình thường.'}`;
+    }
+  }
+}
+
+/**
+ * Cập nhật thông minh một cơ quan vào văn bản đã sửa tay của bác sĩ
+ * Giữ nguyên vẹn toàn bộ các cơ quan khác và các chữ sửa tay của bác sĩ
+ * @param {string} currentNarrative 
+ * @param {string} organLabel 
+ * @param {string} newOrganNarrative 
+ * @returns {string}
+ */
+export function updateOrganInNarrative(currentNarrative, organLabel, newOrganNarrative) {
+  if (!currentNarrative || typeof currentNarrative !== 'string') {
+    return newOrganNarrative;
+  }
+
+  const escapedLabel = organLabel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const bulletRegex = new RegExp(`(•\\s*${escapedLabel}:[\\s\\S]*?)(?=(?:\\n\\s*•)|$)`, 'i');
+
+  if (bulletRegex.test(currentNarrative)) {
+    return currentNarrative.replace(bulletRegex, newOrganNarrative.trim());
+  }
+
+  const plainRegex = new RegExp(`(${escapedLabel}:[\\s\\S]*?)(?=(?:\\n\\s*[•\\w]+:)|$)`, 'i');
+  if (plainRegex.test(currentNarrative)) {
+    return currentNarrative.replace(plainRegex, newOrganNarrative.trim());
+  }
+
+  return currentNarrative.trim() + '\n\n' + newOrganNarrative.trim();
+}
+
+/**
  * Tự động sinh văn bản mô tả hình ảnh dạng bullet y khoa chuẩn
  * @param {Array} organs 
  * @param {Record<string, string[]>} selectedMap 
@@ -117,39 +180,9 @@ export function filterOptionsByGender(options = [], gender) {
  */
 export function generateBulletedNarrative(organs = [], selectedMap = {}, gender) {
   if (!Array.isArray(organs) || organs.length === 0) return '';
-
-  const lines = [];
-
-  for (const organ of organs) {
-    const organLabel = organ.label || organ.name || organ.title || organ.organName || organ.key || 'Bộ phận';
-    // Lọc options theo giới tính
-    const validOptions = filterOptionsByGender(organ.options || [], gender);
-    const validOptionIds = new Set(validOptions.map((o) => o.id));
-
-    const selectedIds = (selectedMap[organ.key] || ['NORMAL']).filter((id) => validOptionIds.has(id));
-    const isOnlyNormal = selectedIds.length === 0 || (selectedIds.length === 1 && selectedIds[0] === 'NORMAL');
-
-    if (isOnlyNormal) {
-      const normalOpt = organ.options?.find((o) => o.id === 'NORMAL');
-      const text = normalOpt?.text || organ.defaultNormalText || 'Không thấy hình ảnh bất thường.';
-      lines.push(`• ${organLabel}: ${text}`);
-    } else {
-      const abnormalTexts = selectedIds
-        .map((id) => {
-          const opt = organ.options?.find((o) => o.id === id);
-          return opt?.text;
-        })
-        .filter(Boolean);
-
-      if (abnormalTexts.length > 0) {
-        lines.push(`• ${organLabel}: ${abnormalTexts.join('; ')}`);
-      } else {
-        lines.push(`• ${organLabel}: ${organ.defaultNormalText || 'Bình thường.'}`);
-      }
-    }
-  }
-
-  return lines.join('\n\n');
+  return organs
+    .map((organ) => generateSingleOrganNarrative(organ, selectedMap[organ.key], gender))
+    .join('\n\n');
 }
 
 /**

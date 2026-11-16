@@ -14,8 +14,18 @@ import {
   Switch,
   Segmented,
   Grid,
+  Checkbox,
+  Tag,
+  Avatar,
 } from "antd";
-import { QuestionCircleOutlined, ReloadOutlined, EyeOutlined } from "@ant-design/icons";
+import {
+  QuestionCircleOutlined,
+  ReloadOutlined,
+  EyeOutlined,
+  UserOutlined,
+  TeamOutlined,
+  SafetyCertificateOutlined,
+} from "@ant-design/icons";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import styles from "./DoctorIUseFormVer3.module.scss";
@@ -38,7 +48,6 @@ import FormActionBar, {
   KEY_ACTION_BUTTON,
 } from "../../../formver2/component/FormActionBar.jsx";
 import PatientInfoSection from "../../../doctor_use_form_ver2/use/items/PatientInfoForm";
-import ImageWithCaptionInput from "../../../products/ImageWithCaptionInput/ImageWithCaptionInput";
 import HistoryModal from "../../../doctor_use_form_ver2/use/items/HistoryModal";
 import TranslateListRecords from "../../../doctor_use_form_ver2/use/items/TranslateListRecords";
 import SmartCASignModal from "../../../doctor_use_form_ver2/SmartCASignModal/SmartCASignModal";
@@ -56,80 +65,29 @@ import {
   generateTextFromStructuredRows,
 } from "../../formver3.constant";
 import AdvancedSampleSection from "../../components/AdvancedSampleSection";
-import ImagingStructureTable from "../../components/ImagingStructureTable3.jsx";
 import ImagingDiagnosisSection from "../../components/ImagingDiagnosisSection";
-import PrintPreviewVer3NotDataDiagnose from "../../components/PrintPreviewVer3NotDataDiagnose.jsx";
 import { handlePrint } from "../../../formver2/utils.js";
-import ImagingStructureTextTable from "../../components/ImagingStructureTextTable.jsx";
 import TranslateListRecordsVer3 from "../../components/TranslateListRecordsVer3.jsx";
 import useLatestDoctorUseFormVer3 from "../../useLatestDoctorUseFormVer3.js";
-import CustomSunEditor from "../../../../components/Suneditor/CustomSunEditor";
-import FastSonoSelector from "../../components/FastSonoSelector/FastSonoSelector.jsx";
 import VoiceCursorDictation from "../../components/VoiceCursorDictation.jsx";
+
+import CaseDoctorsSection from "../components/CaseDoctorsSection";
+import ProcedureSection from "../components/ProcedureSection";
+import ImagingFindingsSection from "../components/ImagingFindingsSection";
+import IllustrativeImagesSection from "../components/IllustrativeImagesSection";
+import PrintPreviewModal from "../components/PrintPreviewModal";
+import useDoctorFormHotkeys from "../hooks/useDoctorFormHotkeys";
+import {
+  parseImageDescriptionState,
+  dataURLtoFile,
+  DEFAULT_FAST_SONO_DATA,
+} from "../doctorUseFormVer3.utils";
+
+export { parseImageDescriptionState };
 
 const { Title } = Typography;
 const { TextArea } = Input;
 const { Option } = Select;
-
-function dataURLtoFile(dataurl, filename) {
-  const arr = dataurl.split(",");
-  const mime = arr[0].match(/:(.*?);/)?.[1] || "image/png";
-  const bstr = atob(arr[1]);
-  let n = bstr.length;
-  const u8arr = new Uint8Array(n);
-  while (n--) {
-    u8arr[n] = bstr.charCodeAt(n);
-  }
-  return new File([u8arr], filename, { type: mime });
-}
-
-export function parseImageDescriptionState(rawDescription) {
-  try {
-    const parsed = JSON.parse(rawDescription || "[]");
-    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-      if (parsed.isFastSono) {
-        return {
-          mode: "FAST_SONO",
-          isFreeText: true,
-          content: parsed.text || "",
-          fastSonoData: parsed.fastSonoData || {
-            selectedMap: null,
-            grade: "",
-            templateCode: "",
-            isManualEdited: false,
-            plainNarrative: "",
-            abnormalCodes: [],
-          },
-          rows: DEFAULT_IMAGING_ROWS,
-        };
-      }
-      if (parsed.isFreeText) {
-        return {
-          mode: "FREE_TEXT",
-          isFreeText: true,
-          content: parsed.text || "",
-          fastSonoData: { selectedMap: null, grade: "", templateCode: "", isManualEdited: false },
-          rows: DEFAULT_IMAGING_ROWS,
-        };
-      }
-    } else if (Array.isArray(parsed) && parsed.length) {
-      return {
-        mode: "STRUCTURED_TABLE",
-        isFreeText: false,
-        content: "",
-        fastSonoData: { selectedMap: null, grade: "", templateCode: "", isManualEdited: false },
-        rows: parsed,
-      };
-    }
-  } catch {}
-  return {
-    mode: "STRUCTURED_TABLE",
-    isFreeText: false,
-    content: "",
-    fastSonoData: { selectedMap: null, grade: "", templateCode: "", isManualEdited: false },
-    rows: DEFAULT_IMAGING_ROWS,
-  };
-}
 
 export default function DoctorUseDFormVer3({
   onFormChange,
@@ -138,9 +96,24 @@ export default function DoctorUseDFormVer3({
   onStatusChange,
   onOpenConsultation,
   initEditMode = false,
+  onNextPatient,
 }) {
   const printRef = useRef(null);
   const [form] = Form.useForm();
+  const [autoAdvanceNextCase, setAutoAdvanceNextCase] = useState(() => {
+    try {
+      return localStorage.getItem("HC_AUTO_ADVANCE_NEXT_CASE") === "true";
+    } catch {
+      return false;
+    }
+  });
+
+  const handleToggleAutoAdvance = (checked) => {
+    setAutoAdvanceNextCase(checked);
+    try {
+      localStorage.setItem("HC_AUTO_ADVANCE_NEXT_CASE", String(checked));
+    } catch {}
+  };
   const {
     examParts,
     templateServices,
@@ -190,6 +163,36 @@ export default function DoctorUseDFormVer3({
     id_exam_part: null,
     id_formver3_name: null,
   });
+
+  // Thông tin 3 dạng bác sĩ trong ca khám (Đọc ca, Hội chẩn, Duyệt kết quả)
+  const readingDoctor = useMemo(() => {
+    return (
+      patientDiagnose?.id_doctor_in_processing_doctor ||
+      initialSnap?.apiData?.id_doctor_doctor ||
+      (patientDiagnose?.id_doctor_in_processing === doctor?.id ? doctor : null) ||
+      patientDiagnose?.id_receive_doctor_doctor ||
+      (patientDiagnose?.status === PATIENT_DIAGNOSE_STATUS_CODE.IN_PROCESSING ? doctor : null)
+    );
+  }, [patientDiagnose, initialSnap?.apiData, doctor]);
+
+  const consultingDoctor = useMemo(() => {
+    return (
+      patientDiagnose?.id_consulting_doctor_doctor ||
+      selectedPatientDiagnose?.id_consulting_doctor_doctor ||
+      null
+    );
+  }, [patientDiagnose, selectedPatientDiagnose]);
+
+  const verifyDoctor = useMemo(() => {
+    return (
+      patientDiagnose?.id_verify_doctor_doctor ||
+      selectedPatientDiagnose?.id_verify_doctor_doctor ||
+      null
+    );
+  }, [patientDiagnose, selectedPatientDiagnose]);
+
+  const activeDoctorsCount = [readingDoctor, consultingDoctor, verifyDoctor].filter(Boolean).length;
+  const doctorColSpan = activeDoctorsCount === 1 ? 24 : activeDoctorsCount === 2 ? 12 : 8;
 
   const [imagingRows, setImagingRows] = useState(DEFAULT_IMAGING_ROWS);
   // imagingMode: 'STRUCTURED_TABLE' (Bảng cấu trúc) | 'FAST_SONO' (Chọn nhanh D-SONO 5 tầng) | 'FREE_TEXT' (Văn bản tự do)
@@ -590,64 +593,58 @@ export default function DoctorUseDFormVer3({
     setIsEdit(initEditMode || !idEdit);
   }, [initEditMode, idEdit]);
 
-  // Xử lý xác nhận chuyển trạng thái ĐỌC XONG (dùng chung cho click nút và phím tắt Alt+D)
+  // Xử lý xác nhận chuyển trạng thái ĐỌC XONG (Tự động Lưu + Đọc xong 1 chạm [Alt+D])
   const handleDocXong = () => {
     if (!patientDiagnose?.id) return;
-    openConfirm({
-      title: "Xác nhận đọc xong [Alt+D]",
-      message: "Bạn có chắc muốn chuyển sang trạng thái ĐỌC XONG? Lưu ý, nhớ lưu lại trước khi chuyển trạng thái!",
-      onConfirm: () =>
-        transitionStatus({
-          patientDiagnoseId: patientDiagnose.id,
-          newStatus: PATIENT_DIAGNOSE_STATUS_CODE.READ_DONE,
-          successMessage: "Đã chuyển sang trạng thái ĐỌC XONG",
-          localSetState: setPatientDiagnose,
-          onStatusChange,
-        }),
-    });
+
+    if (isEdit) {
+      openConfirm({
+        title: "Xác nhận đọc xong [Alt+D]",
+        message: "Hệ thống sẽ TỰ ĐỘNG LƯU kết quả chẩn đoán và chuyển sang trạng thái ĐỌC XONG. Bạn có muốn tiếp tục?",
+        onConfirm: () => {
+          pendingAction.current = "SAVE_THEN_READ_DONE";
+          form.submit();
+        },
+      });
+    } else {
+      openConfirm({
+        title: "Xác nhận đọc xong [Alt+D]",
+        message: "Bạn có chắc muốn chuyển ca này sang trạng thái ĐỌC XONG?",
+        onConfirm: () =>
+          transitionStatus({
+            patientDiagnoseId: patientDiagnose.id,
+            newStatus: PATIENT_DIAGNOSE_STATUS_CODE.READ_DONE,
+            successMessage: "Đã chuyển sang trạng thái ĐỌC XONG",
+            localSetState: setPatientDiagnose,
+            onStatusChange: (status) => {
+              onStatusChange && onStatusChange(status);
+              if (autoAdvanceNextCase && onNextPatient) {
+                setTimeout(() => {
+                  onNextPatient();
+                }, 400);
+              }
+            },
+          }),
+      });
+    }
   };
 
   // Bộ lắng nghe phím tắt toàn cục cho màn hình đọc ca lâm sàng
-  useEffect(() => {
-    const handleGlobalKeyDown = (e) => {
-      // 1. Ctrl + S (hoặc Cmd + S trên Mac): Lưu đọc tức thì
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
-        e.preventDefault();
-        if (!isEditRef.current) {
-          setIsEdit(true);
-          toast.info("Đã bật chế độ chỉnh sửa");
-          return;
-        }
-        pendingAction.current = KEY_ACTION_BUTTON.save;
-        form.submit();
+  useDoctorFormHotkeys({
+    onSave: () => {
+      if (!isEditRef.current) {
+        setIsEdit(true);
+        toast.info("Đã bật chế độ chỉnh sửa");
         return;
       }
-
-      // 2. Alt + D: Đọc xong
-      if (e.altKey && e.key.toLowerCase() === "d") {
-        e.preventDefault();
-        handleDocXong();
-        return;
-      }
-
-      // 3. Alt + P: Mở / Đóng Preview
-      if (e.altKey && e.key.toLowerCase() === "p") {
-        e.preventDefault();
-        setPreviewOpen((prev) => !prev);
-        return;
-      }
-
-      // 4. Esc: Đóng popup xem trước
-      if (e.key === "Escape") {
-        if (previewOpen) {
-          setPreviewOpen(false);
-        }
-      }
-    };
-
-    window.addEventListener("keydown", handleGlobalKeyDown);
-    return () => window.removeEventListener("keydown", handleGlobalKeyDown);
-  }, [form, previewOpen, patientDiagnose?.id]);
+      pendingAction.current = KEY_ACTION_BUTTON.save;
+      form.submit();
+    },
+    onReadDone: handleDocXong,
+    onTogglePreview: () => setPreviewOpen((prev) => !prev),
+    onClosePreview: () => setPreviewOpen(false),
+    isPreviewOpen: previewOpen,
+  });
 
   const filteredExamParts = useMemo(() => {
     if (!selectedIDs.id_template_service) return [];
@@ -657,6 +654,38 @@ export default function DoctorUseDFormVer3({
         Number(selectedIDs.id_template_service),
     );
   }, [examParts, selectedIDs]);
+
+  const handleFormVer3Select = async (id_formver3_name) => {
+    try {
+      setLoading(true);
+      const res = await API_CALL.get(
+        `/formVer3?id_formver3_name=${id_formver3_name}`,
+      );
+      const templateData = res.data?.data?.items?.[0] || res.data?.data?.[0];
+      if (templateData) {
+        setFormVer3(templateData);
+        setSelectedIDs((prev) => ({
+          ...prev,
+          id_formver3_name: id_formver3_name,
+        }));
+
+        form.setFieldsValue(buildFormVer3Values(templateData));
+
+        const parsedState = parseImageDescriptionState(
+          templateData.imageDescription,
+        );
+        setImagingMode(parsedState.mode);
+        setIsFreeText(parsedState.isFreeText);
+        setFreeTextContent(parsedState.content);
+        setFastSonoData(parsedState.fastSonoData);
+        setImagingRows(parsedState.rows);
+      }
+    } catch (e) {
+      toast.error("Không tải được dữ liệu. Vui lòng thử lại.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const onFinish = async (values) => {
     try {
@@ -690,9 +719,11 @@ export default function DoctorUseDFormVer3({
         abnormalFindings: isFreeText ? [] : abnormalFindings,
         imageDescriptionJson,
       });
+      const currentAction = pendingAction.current;
       if (
-        pendingAction.current === KEY_ACTION_BUTTON.save ||
-        pendingAction.current === KEY_ACTION_BUTTON.save_duyet
+        currentAction === KEY_ACTION_BUTTON.save ||
+        currentAction === KEY_ACTION_BUTTON.save_duyet ||
+        currentAction === "SAVE_THEN_READ_DONE"
       ) {
         const res = await API_CALL.postForm(`/doctorUseFormVer3`, formPayload, {
           headers: { "Content-Type": "multipart/form-data" },
@@ -710,9 +741,24 @@ export default function DoctorUseDFormVer3({
             apiData: newData,
           });
 
-          // navigate(`/home/doctor-use-formver3/detail/${newData.id}`, {
-          //   replace: true,
-          // });
+          // Nếu là luồng Tự động Lưu + Đọc xong 1 chạm [Alt+D]
+          if (currentAction === "SAVE_THEN_READ_DONE") {
+            await transitionStatus({
+              patientDiagnoseId: patientDiagnose.id,
+              newStatus: PATIENT_DIAGNOSE_STATUS_CODE.READ_DONE,
+              successMessage: "Đã lưu kết quả và chuyển sang trạng thái ĐỌC XONG thành công!",
+              localSetState: setPatientDiagnose,
+              onStatusChange: (status) => {
+                onStatusChange && onStatusChange(status);
+                if (autoAdvanceNextCase && onNextPatient) {
+                  setTimeout(() => {
+                    onNextPatient();
+                  }, 400);
+                }
+              },
+            });
+            return;
+          }
         } else {
           toast.warning("Lưu thành công nhưng không nhận được ID");
         }
@@ -870,447 +916,75 @@ export default function DoctorUseDFormVer3({
           )}
           <Divider /> */}
 
-          <div
-            style={{
-              background: "#f8fafc",
-              border: "1px solid #e2e8f0",
-              borderRadius: 8,
-              padding: isMobile ? "10px 12px 6px" : "14px 16px 8px",
-              marginBottom: 16,
+          {/* 1. Khối thông tin 3 dạng Bác sĩ trong ca (Bác sĩ đọc, Bác sĩ hội chẩn, Bác sĩ duyệt) */}
+          <CaseDoctorsSection
+            readingDoctor={readingDoctor}
+            consultingDoctor={consultingDoctor}
+            verifyDoctor={verifyDoctor}
+            isMobile={isMobile}
+          />
+
+          {/* 2. Khối Kỹ thuật thực hiện */}
+          <ProcedureSection
+            form={form}
+            isEdit={isEdit}
+            isMobile={isMobile}
+            languageTranslate={languageTranslate}
+            translateLabel={translateLabel}
+            reloading={reloading}
+            onReload={() => {
+              reloadTemplateAndExamPart();
+              if (selectedIDs.id_template_service && selectedIDs.id_exam_part) {
+                fetchDataFormver3Names();
+              }
             }}
-          >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: 10,
-              }}
-            >
-              <Title level={4} style={{ color: "#2f6db8", margin: 0, fontSize: 15, fontWeight: 700 }}>
-                {translateLabel(languageTranslate, "Kỹ thuật thực hiện", true)}
-              </Title>
-              <Tooltip title="Làm mới danh mục (Phân hệ, Bộ phận, Mẫu)">
-                <Button
-                  size="small"
-                  type="text"
-                  icon={<ReloadOutlined style={{ color: "#2563eb" }} />}
-                  loading={reloading}
-                  onClick={() => {
-                    reloadTemplateAndExamPart();
-                    if (selectedIDs.id_template_service && selectedIDs.id_exam_part) {
-                      fetchDataFormver3Names();
-                    }
-                  }}
-                  style={{ color: "#2563eb", fontWeight: 500, fontSize: 12 }}
-                >
-                  Làm mới danh mục
-                </Button>
-              </Tooltip>
-            </div>
-
-            <Row gutter={[12, 4]}>
-              <Col xs={24} sm={12} md={8}>
-                <Form.Item
-                  label={<span style={{ fontWeight: 600, fontSize: 13 }}>{translateLabel(languageTranslate, "Chỉ định", false)}</span>}
-                  name="id_template_service"
-                  rules={[{ required: true, message: "Chọn kỹ thuật" }]}
-                  style={{ marginBottom: 12 }}
-                >
-                  <Select
-                    size="middle"
-                    placeholder="Chọn chỉ định"
-                    disabled={!isEdit || patientDiagnose?.id}
-                    allowClear
-                    style={{ width: "100%", fontSize: 13 }}
-                    onChange={(value) => {
-                      form.setFieldsValue({
-                        id_exam_part: undefined,
-                        id_formver3_name: undefined,
-                      });
-                      setSelectedIDs((prev) => ({
-                        ...prev,
-                        id_template_service: value,
-                        id_exam_part: null,
-                        id_formver3_name: null,
-                      }));
-                      setFilteredFormVer3Names([]);
-                    }}
-                  >
-                    {sortTemplateServices(templateServices).map((s) => (
-                      <Option key={s.id} value={s.id}>
-                        {getServiceLabel(s, languageTranslate)}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              </Col>
-
-              <Col xs={24} sm={12} md={8}>
-                <Form.Item
-                  label={<span style={{ fontWeight: 600, fontSize: 13 }}>{translateLabel(languageTranslate, "bodyPart", false)}</span>}
-                  name="id_exam_part"
-                  rules={[{ required: true, message: "Chọn bộ phận" }]}
-                  style={{ marginBottom: 12 }}
-                >
-                  <Select
-                    size="middle"
-                    placeholder="Chọn bộ phận thăm khám"
-                    disabled={
-                      !isEdit ||
-                      !selectedIDs.id_template_service ||
-                      patientDiagnose?.id
-                    }
-                    allowClear
-                    style={{ width: "100%", fontSize: 13 }}
-                    onChange={(value) => {
-                      form.setFieldsValue({ id_formver3_name: undefined });
-                      setSelectedIDs((prev) => ({
-                        ...prev,
-                        id_exam_part: value,
-                        id_formver3_name: null,
-                      }));
-                      setFilteredFormVer3Names([]);
-                    }}
-                    notFoundContent={
-                      selectedIDs.id_template_service
-                        ? "Không có bộ phận cho phân hệ này"
-                        : "Chọn Phân hệ trước"
-                    }
-                  >
-                    {filteredExamParts
-                      .sort((a, b) => (a.name > b.name ? 1 : -1))
-                      .map((s) => (
-                        <Option key={s.id} value={s.id}>
-                          {getServiceLabel(s, languageTranslate)}
-                        </Option>
-                      ))}
-                  </Select>
-                </Form.Item>
-              </Col>
-
-              <Col xs={24} sm={12} md={8}>
-                <Form.Item
-                  label={<span style={{ fontWeight: 600, fontSize: 13 }}>{translateLabel(languageTranslate, "language", false)}</span>}
-                  name="language"
-                  rules={[{ required: true }]}
-                  style={{ marginBottom: 12 }}
-                >
-                  <Select size="middle" disabled={!isEdit} placeholder="VI / EN" style={{ width: "100%", fontSize: 13 }}>
-                    {LANGUAGE_OPTIONS.map((opt) => (
-                      <Option
-                        key={opt.value}
-                        value={opt.value}
-                        disabled={
-                          idEdit || (!idEdit && !["vi", "en"].includes(opt.value))
-                        }
-                      >
-                        {opt.label}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              </Col>
-            </Row>
-
-            <Row gutter={[12, 4]}>
-              <Col xs={24} sm={12} md={12}>
-                <Form.Item
-                  label={<span style={{ fontWeight: 600, fontSize: 13 }}>{translateLabel(languageTranslate, "resultTemplate", false)}</span>}
-                  name="id_formver3_name"
-                  rules={
-                    imagingMode === "FAST_SONO" || imagingMode === "FREE_TEXT"
-                      ? []
-                      : [{ required: true, message: "Chọn tên mẫu" }]
-                  }
-                  style={{ marginBottom: 12 }}
-                >
-                  <Select
-                    size="middle"
-                    allowClear
-                    disabled={
-                      !isEdit ||
-                      !selectedIDs.id_template_service ||
-                      !selectedIDs.id_exam_part
-                    }
-                    style={{ width: "100%", fontSize: 13 }}
-                    placeholder={
-                      !selectedIDs.id_template_service ||
-                      !selectedIDs.id_exam_part
-                        ? "Chọn Phân hệ & Bộ phận trước"
-                        : imagingMode === "FAST_SONO" || imagingMode === "FREE_TEXT"
-                        ? "Không bắt buộc (đã có đọc nhanh / tự do)"
-                        : "Chọn tên mẫu"
-                    }
-                    showSearch
-                    optionFilterProp="children"
-                    notFoundContent={
-                      selectedIDs.id_template_service && selectedIDs.id_exam_part
-                        ? "Không có tên mẫu phù hợp"
-                        : "Chưa đủ điều kiện để chọn"
-                    }
-                    onChange={async (id_formver3_name) => {
-                      try {
-                        setLoading(true);
-                        const res = await API_CALL.get(
-                          `/formVer3?id_formver3_name=${id_formver3_name}`,
-                        );
-                        const templateData = res.data?.data?.items?.[0] || res.data?.data?.[0];
-                        if (templateData) {
-                          setFormVer3(templateData);
-                          setSelectedIDs((prev) => ({
-                            ...prev,
-                            id_formver3_name: id_formver3_name,
-                          }));
-
-                          form.setFieldsValue(buildFormVer3Values(templateData));
-
-                          const parsedState = parseImageDescriptionState(
-                            templateData.imageDescription,
-                          );
-                          setImagingMode(parsedState.mode);
-                          setIsFreeText(parsedState.isFreeText);
-                          setFreeTextContent(parsedState.content);
-                          setFastSonoData(parsedState.fastSonoData);
-                          setImagingRows(parsedState.rows);
-                        }
-                      } catch (e) {
-                        toast.error("Không tải được dữ liệu. Vui lòng thử lại.");
-                      } finally {
-                        setLoading(false);
-                      }
-                    }}
-                  >
-                    {filteredFormVer3Names.map((item) => (
-                      <Option key={item.id} value={item.id}>
-                        {item.name}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              </Col>
-
-              <Col xs={24} sm={12} md={12}>
-                <Form.Item
-                  label={<span style={{ fontWeight: 600, fontSize: 13 }}>{translateLabel(languageTranslate, "resultPrint", false)}</span>}
-                  name="id_print_template"
-                  rules={[{ required: true, message: "Chọn mẫu in" }]}
-                  style={{ marginBottom: 12 }}
-                >
-                  <Select
-                    size="middle"
-                    disabled={!isEdit}
-                    showSearch
-                    allowClear
-                    style={{ width: "100%", fontSize: 13 }}
-                    placeholder="Chọn mẫu in"
-                    optionFilterProp="children"
-                    onChange={(val) => {
-                      const printT = printTemplateList.find((t) => t.id == val);
-                      setPrintTemplate(printT);
-                      form.setFieldsValue({ id_print_template: printT?.id });
-                    }}
-                    filterOption={(input, option) =>
-                      option?.children?.toLowerCase()?.includes(input.toLowerCase())
-                    }
-                  >
-                    {printTemplateList.map((tpl) => (
-                      <Option key={tpl.id} value={tpl.id}>
-                        {tpl.name}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              </Col>
-            </Row>
-
-            <Form.Item
-              name="implementMethod"
-              label={<span style={{ fontWeight: 600, fontSize: 13 }}>{languageTranslate === "en" ? "Procedure description" : "Quy trình kỹ thuật thực hiện"}</span>}
-              tooltip="Mô tả kỹ thuật chụp / chiếu / can thiệp (tùy chọn)"
-              style={{ marginBottom: 6 }}
-            >
-              <TextArea
-                disabled={!isEdit}
-                autoSize={{ minRows: 2, maxRows: 6 }}
-                style={{ fontSize: 13, borderRadius: 6 }}
-                placeholder="Nhập mô tả quy trình kỹ thuật..."
-              />
-            </Form.Item>
-          </div>
+            templateServices={templateServices}
+            sortTemplateServices={sortTemplateServices}
+            getServiceLabel={getServiceLabel}
+            selectedIDs={selectedIDs}
+            setSelectedIDs={setSelectedIDs}
+            filteredExamParts={filteredExamParts}
+            setFilteredFormVer3Names={setFilteredFormVer3Names}
+            filteredFormVer3Names={filteredFormVer3Names}
+            imagingMode={imagingMode}
+            patientDiagnose={patientDiagnose}
+            idEdit={idEdit}
+            printTemplateList={printTemplateList}
+            setPrintTemplate={setPrintTemplate}
+            onFormVer3Select={handleFormVer3Select}
+            LANGUAGE_OPTIONS={LANGUAGE_OPTIONS}
+          />
           <AdvancedSampleSection
             isEdit={isEdit}
             isAdvanceSample={false}
             languageTranslate={languageTranslate}
           />
 
-          {/* === MÔ TẢ HÌNH ẢNH - Toggle 3 chế độ (Bảng cấu trúc / ⚡ Chọn nhanh D-SONO / Văn bản tự do) === */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              flexWrap: "wrap",
-              gap: isMobile ? 6 : 12,
-              margin: isMobile ? "10px 0 8px" : "24px 0 12px",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-              <Title level={4} style={{ color: "#2f6db8", margin: 0 }}>
-                {isCanThiepGroup
-                  ? translateLabel(languageTranslate, "QUY TRÌNH THỦ THUẬT", false).toUpperCase()
-                  : translateLabel(languageTranslate, "imagingFindings", false).toUpperCase()}
-              </Title>
-              <span
-                style={{
-                  fontSize: 10,
-                  padding: "2px 8px",
-                  borderRadius: 12,
-                  fontWeight: 600,
-                  backgroundColor:
-                    imagingMode === "FAST_SONO"
-                      ? "#f0fdf4"
-                      : imagingMode === "FREE_TEXT"
-                      ? "#e6f7ff"
-                      : "#f9f0ff",
-                  color:
-                    imagingMode === "FAST_SONO"
-                      ? "#0b6b4f"
-                      : imagingMode === "FREE_TEXT"
-                      ? "#096dd9"
-                      : "#531dab",
-                  border:
-                    imagingMode === "FAST_SONO"
-                      ? "1px solid #bbf7d0"
-                      : imagingMode === "FREE_TEXT"
-                      ? "1px solid #91d5ff"
-                      : "1px solid #d3adf7",
-                  display: "inline-block",
-                }}
-              >
-                {imagingMode === "FAST_SONO"
-                  ? "Chọn nhanh D-SONO (5 tầng)"
-                  : imagingMode === "FREE_TEXT"
-                  ? (languageTranslate === "en" ? "Free text" : "Văn bản tự do")
-                  : (languageTranslate === "en" ? "Structured table" : "Bảng cấu trúc")}
-              </span>
-            </div>
+          <ImagingFindingsSection
+            isMobile={isMobile}
+            isEdit={isEdit}
+            isCanThiepGroup={isCanThiepGroup}
+            languageTranslate={languageTranslate}
+            translateLabel={translateLabel}
+            imagingMode={imagingMode}
+            setImagingMode={setImagingMode}
+            setIsFreeText={setIsFreeText}
+            freeTextContent={freeTextContent}
+            setFreeTextContent={setFreeTextContent}
+            generateTextFromStructuredRows={generateTextFromStructuredRows}
+            imagingRows={imagingRows}
+            setImagingRows={setImagingRows}
+            selectedIDs={selectedIDs}
+            form={form}
+            examParts={examParts}
+            templateServices={templateServices}
+            patientDiagnose={patientDiagnose}
+            fastSonoData={fastSonoData}
+            setFastSonoData={setFastSonoData}
+            setDiagnosisSummary={setDiagnosisSummary}
+            abnormalFindings={abnormalFindings}
+          />
 
-            {isEdit && (
-              <div style={{ maxWidth: "100%", overflowX: "auto" }}>
-                <Segmented
-                  size={isMobile ? "small" : "middle"}
-                  value={imagingMode}
-                  onChange={(val) => {
-                    setImagingMode(val);
-                    if (val === "FREE_TEXT") {
-                      setIsFreeText(true);
-                      if (!freeTextContent || freeTextContent === "<p><br></p>" || freeTextContent === "") {
-                        const convertedHTML = generateTextFromStructuredRows(imagingRows, languageTranslate);
-                        setFreeTextContent(convertedHTML);
-                      }
-                    } else if (val === "FAST_SONO") {
-                      setIsFreeText(true);
-                    } else {
-                      setIsFreeText(false);
-                    }
-                  }}
-                  options={[
-                    {
-                      label: isMobile
-                        ? "Nhanh"
-                        : (languageTranslate === "en" ? "Fast D-SONO" : "Chọn nhanh (D-SONO)"),
-                      value: "FAST_SONO",
-                    },
-                    {
-                      label: isMobile
-                        ? (languageTranslate === "en" ? "Table" : "Bảng")
-                        : (languageTranslate === "en" ? "Structured table" : "Bảng cấu trúc"),
-                      value: "STRUCTURED_TABLE",
-                    },
-                    {
-                      label: isMobile
-                        ? (languageTranslate === "en" ? "Text" : "Tự do")
-                        : (languageTranslate === "en" ? "Free text" : "Văn bản tự do"),
-                      value: "FREE_TEXT",
-                    },
-                  ]}
-                />
-              </div>
-            )}
-          </div>
-
-          {imagingMode === "FAST_SONO" ? (
-            <FastSonoSelector
-              idTemplateService={selectedIDs.id_template_service || form.getFieldValue("id_template_service")}
-              idExamPart={selectedIDs.id_exam_part || form.getFieldValue("id_exam_part")}
-              examPartName={
-                examParts.find(
-                  (ex) => ex.id == (selectedIDs.id_exam_part || form.getFieldValue("id_exam_part"))
-                )?.name || ""
-              }
-              serviceName={
-                templateServices?.find(
-                  (ts) => ts.id == (selectedIDs.id_template_service || form.getFieldValue("id_template_service"))
-                )?.name || ""
-              }
-              gender={patientDiagnose?.gender}
-              isEdit={isEdit}
-              initialSelectedMap={fastSonoData?.selectedMap}
-              initialGrade={fastSonoData?.grade}
-              initialNarrativeText={fastSonoData?.plainNarrative || freeTextContent}
-              isManualEdited={fastSonoData?.isManualEdited}
-              onNarrativeChange={(plainText, htmlText, isManual) => {
-                setFreeTextContent(htmlText);
-                setFastSonoData((prev) => ({
-                  ...prev,
-                  isManualEdited: isManual,
-                  plainNarrative: plainText,
-                }));
-              }}
-              onConclusionChange={(conclusionText) => {
-                setDiagnosisSummary(conclusionText);
-                form.setFieldsValue({
-                  imagingDiagnosisSummary: conclusionText,
-                });
-              }}
-              onSelectedMapChange={(selectedMap, grade, templateCode, abnormalCodes) => {
-                setFastSonoData((prev) => ({
-                  ...prev,
-                  selectedMap,
-                  grade,
-                  templateCode,
-                  abnormalCodes: abnormalCodes || [],
-                }));
-              }}
-            />
-          ) : imagingMode === "FREE_TEXT" ? (
-            // Chế độ văn bản tự do: SunEditor full features
-            <div style={{ border: "1px solid #e5e7eb", borderRadius: 6, overflow: "hidden" }}>
-              <CustomSunEditor
-                value={freeTextContent}
-                onChange={setFreeTextContent}
-                disabled={!isEdit}
-              />
-            </div>
-          ) : isCanThiepGroup ? (
-            <ImagingStructureTextTable
-              rows={imagingRows}
-              setRows={setImagingRows}
-              isEdit={isEdit}
-              languageTranslate={languageTranslate}
-            />
-          ) : (
-            <ImagingStructureTable
-              rows={imagingRows}
-              setRows={setImagingRows}
-              isEdit={isEdit}
-              setDiagnosisSummary={setDiagnosisSummary}
-              abnormalFindings={abnormalFindings}
-              form={form}
-              languageTranslate={languageTranslate}
-            />
-          )}
           <ImagingDiagnosisSection
             isEdit={isEdit}
             form={form}
@@ -1320,48 +994,40 @@ export default function DoctorUseDFormVer3({
             diagnosisSummary={diagnosisSummary}
           />
 
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              margin: isMobile ? "12px 0 8px" : "24px 0 16px",
-            }}
-          >
-            <Title level={4} style={{ color: "#2f6db8", margin: 0, fontSize: isMobile ? 14 : undefined }}>
-              {translateLabel(
-                languageTranslate,
-                "illustrativeImages",
-                false,
-              ).toUpperCase()}
-            </Title>
-            <Button
-              size={isMobile ? "small" : "middle"}
-              type="primary"
-              ghost
-              icon={<EyeOutlined />}
-              onClick={() => {
-                const targetId = patientDiagnose?.id || selectedPatientDiagnose?.id;
-                window.open(
-                  `/pacs/viewer?patientDiagnoseId=${targetId || ""}`,
-                  "_blank"
-                );
+          <IllustrativeImagesSection
+            isMobile={isMobile}
+            isEdit={isEdit}
+            languageTranslate={languageTranslate}
+            translateLabel={translateLabel}
+            patientDiagnose={patientDiagnose}
+            selectedPatientDiagnose={selectedPatientDiagnose}
+            imageList={imageList}
+            setImageList={setImageList}
+          />
+
+          {/* Tùy chọn Tự động chuyển ca tiếp theo */}
+          {onNextPatient && (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                alignItems: "center",
+                marginBottom: 10,
+                padding: "6px 12px",
+                background: "#f8fafc",
+                borderRadius: 6,
+                border: "1px dashed #cbd5e1",
               }}
             >
-              Mở D-PACS Viewer
-            </Button>
-          </div>
-
-          <Form.Item label="">
-            <ImageWithCaptionInput
-              disabled={!isEdit}
-              max={6}
-              value={imageList}
-              onChange={setImageList}
-              valueTrans={imageList}
-              onChangeTrans={setImageList}
-            />
-          </Form.Item>
+              <Checkbox
+                checked={autoAdvanceNextCase}
+                onChange={(e) => handleToggleAutoAdvance(e.target.checked)}
+                style={{ fontSize: 13, color: "#1e293b", fontWeight: 500 }}
+              >
+                ⏭ Tự động chuyển sang ca chờ đọc tiếp theo sau khi [Đọc xong]
+              </Checkbox>
+            </div>
+          )}
 
           {/* Action bar */}
           {
@@ -1592,67 +1258,31 @@ export default function DoctorUseDFormVer3({
         id_doctor_use_form_ver3={idEdit}
       />
 
-      <Modal
+      <PrintPreviewModal
         open={previewOpen}
         onCancel={() => setPreviewOpen(false)}
-        footer={null}
-        centered
-        width={isMobile ? "96vw" : 1100}
-        destroyOnClose={false} // ⭐ BẮT BUỘC
-        afterOpenChange={(open) => {
-          if (
-            open &&
-            is_print === "true" &&
-            printSourceRef.current !== "manual" // 👈 CHẶN IN LẠI
-          ) {
-            setTimeout(() => {
-              if (printRef.current) {
-                handlePrint(printRef);
-              }
-            }, 300);
-          }
-        }}
-        styles={{
-          content: {
-            padding: 0,
-          },
-        }}
-      >
-        <div ref={printRef}>
-          <PrintPreviewVer3NotDataDiagnose
-            approvalStatus={status}
-            imagingRows={isFreeText ? [] : imagingRows}
-            isFreeText={isFreeText}
-            freeTextContent={freeTextContent}
-            formSnapshot={{
-              ...form.getFieldsValue(),
-              createdAt: initialSnap?.apiData?.createdAt,
-            }}
-            selectedExamPart={examParts?.find(
-              (ex) => ex.id == form.getFieldValue("id_exam_part"),
-            )}
-            selectedTemplateService={templateServices?.find(
-              (ex) => ex.id == form.getFieldValue("id_template_service"),
-            )}
-            initialSnap={initialSnap}
-            editId={idEdit}
-            imageList={imageList}
-            isUse={isUse}
-            doctor={initialSnap?.apiData?.id_receive_doctor_doctor}
-            printTemplate={
-              printTemplateList?.find(
-                (t) => t.id == form.getFieldValue("id_print_template"),
-              ) ||
-              printTemplate ||
-              initialSnap?.apiData?.id_print_template_print_template
-            }
-            languageTranslate={languageTranslate}
-            setPreviewOpen={setPreviewOpen}
-            is_print={is_print}
-            patientDiagnose={patientDiagnose}
-          />
-        </div>
-      </Modal>
+        isMobile={isMobile}
+        printRef={printRef}
+        printSourceRef={printSourceRef}
+        is_print={is_print}
+        handlePrint={handlePrint}
+        status={status}
+        imagingRows={imagingRows}
+        isFreeText={isFreeText}
+        freeTextContent={freeTextContent}
+        form={form}
+        initialSnap={initialSnap}
+        examParts={examParts}
+        templateServices={templateServices}
+        idEdit={idEdit}
+        imageList={imageList}
+        isUse={isUse}
+        printTemplateList={printTemplateList}
+        printTemplate={printTemplate}
+        languageTranslate={languageTranslate}
+        setPreviewOpen={setPreviewOpen}
+        patientDiagnose={patientDiagnose}
+      />
       <ConfirmActionModal {...confirmState} />
     </div>
   );
