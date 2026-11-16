@@ -222,7 +222,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
           style={{ padding: !isOnLyContent ? PAGE_PADDING_RIGHT : 0 }}
           bodyPadding={0}
         >
-          {isUse && (
+          {!isOnLyContent && isUse && (
             <>
               {/* Trên mobile hiển thị responsive header, vừa vặn không phải kéo ngang */}
               <div className={styles.mobileOnlyHeader}>
