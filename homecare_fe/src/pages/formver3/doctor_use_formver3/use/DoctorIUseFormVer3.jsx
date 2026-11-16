@@ -14,7 +14,7 @@ import {
   Switch,
   Segmented,
   Grid,
-  Checkbox,
+  Alert,
   Tag,
   Avatar,
 } from "antd";
@@ -96,28 +96,14 @@ export default function DoctorUseDFormVer3({
   onStatusChange,
   onOpenConsultation,
   initEditMode = false,
-  onNextPatient,
 }) {
   const printRef = useRef(null);
   const [form] = Form.useForm();
-  const [autoAdvanceNextCase, setAutoAdvanceNextCase] = useState(() => {
-    try {
-      return localStorage.getItem("HC_AUTO_ADVANCE_NEXT_CASE") === "true";
-    } catch {
-      return false;
-    }
-  });
-
-  const handleToggleAutoAdvance = (checked) => {
-    setAutoAdvanceNextCase(checked);
-    try {
-      localStorage.setItem("HC_AUTO_ADVANCE_NEXT_CASE", String(checked));
-    } catch {}
-  };
   const {
     examParts,
     templateServices,
     doctor,
+    user,
     setExamParts,
     setTemplateServices,
     selectedPatientDiagnose,
@@ -190,6 +176,26 @@ export default function DoctorUseDFormVer3({
       null
     );
   }, [patientDiagnose, selectedPatientDiagnose]);
+
+  const isAdmin = user?.id_role == USER_ROLE.ADMIN;
+  const inProcessingDoctorId =
+    patientDiagnose?.id_doctor_in_processing ||
+    patientDiagnose?.id_receive_doctor;
+  const inProcessingDoctorName =
+    readingDoctor?.name ||
+    readingDoctor?.full_name ||
+    patientDiagnose?.id_doctor_in_processing_doctor?.name ||
+    patientDiagnose?.id_doctor_in_processing_doctor?.full_name ||
+    patientDiagnose?.id_receive_doctor_doctor?.name ||
+    patientDiagnose?.id_receive_doctor_doctor?.full_name ||
+    "bác sĩ khác";
+
+  // Kiểm tra quyền đọc / sửa đọc của bác sĩ hiện tại
+  const hasReadingPermission = useMemo(() => {
+    if (isAdmin) return true;
+    if (!inProcessingDoctorId) return true;
+    return doctor?.id && inProcessingDoctorId == doctor.id;
+  }, [isAdmin, inProcessingDoctorId, doctor?.id]);
 
   const activeDoctorsCount = [readingDoctor, consultingDoctor, verifyDoctor].filter(Boolean).length;
   const doctorColSpan = activeDoctorsCount === 1 ? 24 : activeDoctorsCount === 2 ? 12 : 8;
@@ -583,19 +589,31 @@ export default function DoctorUseDFormVer3({
 
   const [loading, setLoading] = useState();
 
-  const [isEdit, setIsEdit] = useState(initEditMode || !idEdit);
+  const [isEdit, setIsEdit] = useState(
+    hasReadingPermission ? initEditMode || !idEdit : false
+  );
 
   useEffect(() => {
     isEditRef.current = isEdit;
   }, [isEdit]);
 
   useEffect(() => {
-    setIsEdit(initEditMode || !idEdit);
-  }, [initEditMode, idEdit]);
+    if (!hasReadingPermission) {
+      setIsEdit(false);
+    } else {
+      setIsEdit(initEditMode || !idEdit);
+    }
+  }, [initEditMode, idEdit, hasReadingPermission]);
 
   // Xử lý xác nhận chuyển trạng thái ĐỌC XONG (Tự động Lưu + Đọc xong 1 chạm [Alt+D])
   const handleDocXong = () => {
     if (!patientDiagnose?.id) return;
+    if (!hasReadingPermission) {
+      toast.error(
+        `Bạn không có quyền chuyển trạng thái ca này vì do Bác sĩ ${inProcessingDoctorName} phụ trách đọc.`
+      );
+      return;
+    }
 
     if (isEdit) {
       openConfirm({
@@ -616,14 +634,7 @@ export default function DoctorUseDFormVer3({
             newStatus: PATIENT_DIAGNOSE_STATUS_CODE.READ_DONE,
             successMessage: "Đã chuyển sang trạng thái ĐỌC XONG",
             localSetState: setPatientDiagnose,
-            onStatusChange: (status) => {
-              onStatusChange && onStatusChange(status);
-              if (autoAdvanceNextCase && onNextPatient) {
-                setTimeout(() => {
-                  onNextPatient();
-                }, 400);
-              }
-            },
+            onStatusChange,
           }),
       });
     }
@@ -632,6 +643,12 @@ export default function DoctorUseDFormVer3({
   // Bộ lắng nghe phím tắt toàn cục cho màn hình đọc ca lâm sàng
   useDoctorFormHotkeys({
     onSave: () => {
+      if (!hasReadingPermission) {
+        toast.error(
+          `Bạn không có quyền chỉnh sửa ca này vì do Bác sĩ ${inProcessingDoctorName} phụ trách đọc.`
+        );
+        return;
+      }
       if (!isEditRef.current) {
         setIsEdit(true);
         toast.info("Đã bật chế độ chỉnh sửa");
@@ -640,7 +657,15 @@ export default function DoctorUseDFormVer3({
       pendingAction.current = KEY_ACTION_BUTTON.save;
       form.submit();
     },
-    onReadDone: handleDocXong,
+    onReadDone: () => {
+      if (!hasReadingPermission) {
+        toast.error(
+          `Bạn không có quyền chuyển trạng thái ca này vì do Bác sĩ ${inProcessingDoctorName} phụ trách đọc.`
+        );
+        return;
+      }
+      handleDocXong();
+    },
     onTogglePreview: () => setPreviewOpen((prev) => !prev),
     onClosePreview: () => setPreviewOpen(false),
     isPreviewOpen: previewOpen,
@@ -748,14 +773,7 @@ export default function DoctorUseDFormVer3({
               newStatus: PATIENT_DIAGNOSE_STATUS_CODE.READ_DONE,
               successMessage: "Đã lưu kết quả và chuyển sang trạng thái ĐỌC XONG thành công!",
               localSetState: setPatientDiagnose,
-              onStatusChange: (status) => {
-                onStatusChange && onStatusChange(status);
-                if (autoAdvanceNextCase && onNextPatient) {
-                  setTimeout(() => {
-                    onNextPatient();
-                  }, 400);
-                }
-              },
+              onStatusChange,
             });
             return;
           }
@@ -899,6 +917,30 @@ export default function DoctorUseDFormVer3({
             });
           }}
         >
+          {/* Thông báo chi tiết khi bác sĩ không có quyền chỉnh sửa ca bệnh */}
+          {!hasReadingPermission && inProcessingDoctorId && (
+            <Alert
+              type="warning"
+              showIcon
+              banner
+              message={
+                <span style={{ fontWeight: 600, fontSize: 13 }}>
+                  CHẾ ĐỘ XEM: Ca bệnh này đang được phụ trách bởi {inProcessingDoctorName}
+                </span>
+              }
+              description={
+                <span style={{ fontSize: 12 }}>
+                  Theo quy định chuyên môn, chỉ Bác sĩ được phân công phụ trách đọc (<strong>{inProcessingDoctorName}</strong>) hoặc Quản trị viên mới có quyền nhập kết quả, sửa đọc hoặc chuyển trạng thái của ca này. Bạn đang ở chế độ xem an toàn để không làm ảnh hưởng đến dữ liệu ca bệnh.
+                </span>
+              }
+              style={{
+                marginBottom: 16,
+                borderRadius: 8,
+                border: "1px solid #ffd591",
+                background: "#fffbe6",
+              }}
+            />
+          )}
           {/* <Title level={4} style={{ color: "#2f6db8", margin: "24px 0 16px" }}>
             {translateLabel(languageTranslate, "administrativeInfo")}
           </Title>
@@ -1005,30 +1047,6 @@ export default function DoctorUseDFormVer3({
             setImageList={setImageList}
           />
 
-          {/* Tùy chọn Tự động chuyển ca tiếp theo */}
-          {onNextPatient && (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "flex-end",
-                alignItems: "center",
-                marginBottom: 10,
-                padding: "6px 12px",
-                background: "#f8fafc",
-                borderRadius: 6,
-                border: "1px dashed #cbd5e1",
-              }}
-            >
-              <Checkbox
-                checked={autoAdvanceNextCase}
-                onChange={(e) => handleToggleAutoAdvance(e.target.checked)}
-                style={{ fontSize: 13, color: "#1e293b", fontWeight: 500 }}
-              >
-                ⏭ Tự động chuyển sang ca chờ đọc tiếp theo sau khi [Đọc xong]
-              </Checkbox>
-            </div>
-          )}
-
           {/* Action bar */}
           {
             <FormActionBar
@@ -1080,6 +1098,12 @@ export default function DoctorUseDFormVer3({
               onPreview={() => setPreviewOpen(!previewOpen)}
               isEdit={isEdit}
               onEdit={async () => {
+                if (!hasReadingPermission) {
+                  toast.error(
+                    `Bạn không có quyền sửa ca này vì do Bác sĩ ${inProcessingDoctorName} phụ trách đọc.`
+                  );
+                  return;
+                }
                 setIsEdit(!isEdit);
                 if (
                   patientDiagnose?.status ===

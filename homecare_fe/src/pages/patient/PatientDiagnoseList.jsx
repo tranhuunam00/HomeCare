@@ -880,38 +880,6 @@ const PatientTablePage = ({ PID = null }) => {
     fetchPatientsByChosen();
   };
 
-  const handleNextPatient = () => {
-    if (!data || data.length === 0) return;
-    const currentId = selectedPatientDiagnose?.id;
-    const currentIdx = data.findIndex((item) => item.id === currentId);
-
-    // Tìm ca tiếp theo trong danh sách có trạng thái Đang đọc hoặc Chờ đọc
-    const candidates = [
-      ...data.slice(currentIdx + 1),
-      ...data.slice(0, currentIdx > -1 ? currentIdx : 0),
-    ];
-
-    const nextPatient = candidates.find(
-      (item) =>
-        item.id !== currentId &&
-        (item.status === PATIENT_DIAGNOSE_STATUS_CODE.IN_PROCESSING ||
-          item.status === PATIENT_DIAGNOSE_STATUS_CODE.WAIT_PROCESS ||
-          item.status === 2 ||
-          item.status === 1),
-    );
-
-    if (nextPatient) {
-      setSelectedPatientDiagnose(nextPatient);
-      setInitEditMode(true);
-      setRightPanelMode("reading");
-      toast.success(
-        `Đã chuyển sang ca tiếp theo: ${nextPatient.name || "ID " + nextPatient.id}`,
-      );
-    } else {
-      toast.info("Đã hoàn tất tất cả ca chờ đọc trong danh sách!");
-    }
-  };
-
   return (
     <div
       ref={containerRef}
@@ -1589,7 +1557,6 @@ const PatientTablePage = ({ PID = null }) => {
                 onStatusChange={handleStatusChange}
                 onOpenConsultation={() => setOpenConsultationModal(true)}
                 initEditMode={initEditMode}
-                onNextPatient={handleNextPatient}
               />
             )}
           </div>

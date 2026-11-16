@@ -331,12 +331,11 @@ export default function FormActionBar({
         break;
 
       case PATIENT_DIAGNOSE_STATUS_CODE.IN_PROCESSING:
+        const hasAssignedProcessingDoctor = !!(id_doctor_in_processing || id_receive_doctor);
         const canEditProcessing =
           isAdmin ||
-          !doctor?.id ||
-          !id_doctor_in_processing ||
-          id_doctor_in_processing == doctor?.id ||
-          id_receive_doctor == doctor?.id;
+          !hasAssignedProcessingDoctor ||
+          (doctor?.id && (id_doctor_in_processing == doctor.id || id_receive_doctor == doctor.id));
 
         if (!canEditProcessing) {
           keys = [KEY_ACTION_BUTTON.exit];
@@ -355,12 +354,11 @@ export default function FormActionBar({
         break;
 
       case PATIENT_DIAGNOSE_STATUS_CODE.READ_DONE:
+        const hasAssignedReadDoctor = !!(id_doctor_in_processing || id_receive_doctor);
         const canActReadDone =
           isAdmin ||
-          !doctor?.id ||
-          !id_doctor_in_processing ||
-          id_doctor_in_processing == doctor?.id ||
-          id_receive_doctor == doctor?.id;
+          !hasAssignedReadDoctor ||
+          (doctor?.id && (id_doctor_in_processing == doctor.id || id_receive_doctor == doctor.id));
 
         if (!canActReadDone) {
           keys = [KEY_ACTION_BUTTON.exit];

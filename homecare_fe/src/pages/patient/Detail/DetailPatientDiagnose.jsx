@@ -13,6 +13,7 @@ import {
   Grid,
   Table,
   Space,
+  Tooltip,
 } from "antd";
 import dayjs from "dayjs";
 import useVietnamAddress from "../../../hooks/useVietnamAddress";
@@ -29,6 +30,7 @@ import { useGlobalAuth } from "../../../contexts/AuthContext";
 import GroupProcessPatientDiagnoiseFormVer2 from "../../../components/GroupProcessPatientDiagnoiseFormVer2";
 import {
   EditOutlined,
+  EyeOutlined,
   DeleteOutlined,
   CopyOutlined,
   ArrowLeftOutlined,
@@ -65,7 +67,26 @@ const PatientDiagnoiseDetailPage = ({
     selectedPatientDiagnose,
     setSelectedPatientDiagnose,
     languageTranslate,
+    doctor,
+    user,
   } = useGlobalAuth();
+
+  const isAdmin = user?.id_role == USER_ROLE.ADMIN;
+  const inProcessingDoctorId =
+    selectedPatientDiagnose?.id_doctor_in_processing ||
+    selectedPatientDiagnose?.id_receive_doctor;
+  const inProcessingDoctorName =
+    selectedPatientDiagnose?.id_doctor_in_processing_doctor?.name ||
+    selectedPatientDiagnose?.id_doctor_in_processing_doctor?.full_name ||
+    selectedPatientDiagnose?.id_receive_doctor_doctor?.name ||
+    selectedPatientDiagnose?.id_receive_doctor_doctor?.full_name ||
+    "bác sĩ khác";
+
+  // Kiểm tra quyền sửa đọc ca bệnh
+  const hasReadingPermission =
+    isAdmin ||
+    !inProcessingDoctorId ||
+    inProcessingDoctorId == doctor?.id;
 
   useEffect(() => {
     if (routeId && (!selectedPatientDiagnose || String(selectedPatientDiagnose.id) !== String(routeId))) {
@@ -142,20 +163,55 @@ const PatientDiagnoiseDetailPage = ({
             <Space>
               {(selectedPatientDiagnose.status === PATIENT_DIAGNOSE_STATUS_CODE.IN_PROCESSING ||
                 selectedPatientDiagnose.status === PATIENT_DIAGNOSE_STATUS_CODE.READ_DONE) && (
-                <Button
-                  type="primary"
-                  size="small"
-                  onClick={() => {
-                    if (onOpenReading) {
-                      onOpenReading(true);
-                    } else {
-                      navigate(`/home/form-drad-v3/use/patient-diagnose/${selectedPatientDiagnose.id}`);
-                    }
-                  }}
-                  icon={<EditOutlined />}
-                >
-                  Sửa đọc
-                </Button>
+                <>
+                  {hasReadingPermission ? (
+                    <Button
+                      type="primary"
+                      size="small"
+                      onClick={() => {
+                        if (onOpenReading) {
+                          onOpenReading(true);
+                        } else {
+                          navigate(`/home/form-drad-v3/use/patient-diagnose/${selectedPatientDiagnose.id}`);
+                        }
+                      }}
+                      icon={<EditOutlined />}
+                    >
+                      Sửa đọc
+                    </Button>
+                  ) : (
+                    <>
+                      <Tooltip
+                        title={`Ca bệnh này đang được phụ trách bởi Bác sĩ ${inProcessingDoctorName}. Bạn không có quyền chỉnh sửa, chỉ có thể xem.`}
+                      >
+                        <span>
+                          <Button
+                            size="small"
+                            disabled
+                            icon={<EditOutlined />}
+                          >
+                            Sửa đọc
+                          </Button>
+                        </span>
+                      </Tooltip>
+                      <Button
+                        type="primary"
+                        ghost
+                        size="small"
+                        onClick={() => {
+                          if (onOpenReading) {
+                            onOpenReading(false); // Chế độ chỉ xem
+                          } else {
+                            navigate(`/home/form-drad-v3/use/patient-diagnose/${selectedPatientDiagnose.id}`);
+                          }
+                        }}
+                        icon={<EyeOutlined />}
+                      >
+                        Xem ca
+                      </Button>
+                    </>
+                  )}
+                </>
               )}
 
               <Button
