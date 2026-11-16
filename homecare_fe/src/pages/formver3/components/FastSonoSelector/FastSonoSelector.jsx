@@ -421,10 +421,7 @@ const FastSonoSelector = ({
       {/* 5. Câu mô tả & Kết luận tự sinh (Tầng 5 - Live-injection) */}
       <div className={styles.narrativePreviewBox}>
         <div className={styles.previewHeader}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span className={styles.previewTitle}>
-              Văn bản mô tả y khoa tự sinh
-            </span>
+          <div>
             {isManualEdit && (
               <Tooltip title="Văn bản đã được bác sĩ trực tiếp chỉnh sửa">
                 <Tag color="orange" style={{ fontSize: 11, margin: 0, padding: '0 6px', lineHeight: '20px' }}>
@@ -476,12 +473,12 @@ const FastSonoSelector = ({
           style={{
             fontSize: 14,
             lineHeight: 1.6,
-            borderRadius: 8,
+            borderRadius: 6,
             color: '#1e293b',
             background: '#ffffff',
-            padding: '10px 12px',
+            padding: '6px 10px',
           }}
-          placeholder="Văn bản mô tả y khoa tự sinh sẽ xuất hiện tại đây..."
+          placeholder="Nội dung mô tả y khoa..."
         />
       </div>
 

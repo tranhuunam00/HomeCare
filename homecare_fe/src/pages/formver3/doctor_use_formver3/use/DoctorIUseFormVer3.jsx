@@ -833,7 +833,7 @@ export default function DoctorUseDFormVer3({
             <Row gutter={[12, 4]}>
               <Col xs={24} sm={12} md={8}>
                 <Form.Item
-                  label={<span style={{ fontWeight: 600, fontSize: 13 }}>{translateLabel(languageTranslate, "Chỉ định", false)} <span style={{ color: "red" }}>*</span></span>}
+                  label={<span style={{ fontWeight: 600, fontSize: 13 }}>{translateLabel(languageTranslate, "Chỉ định", false)}</span>}
                   name="id_template_service"
                   rules={[{ required: true, message: "Chọn kỹ thuật" }]}
                   style={{ marginBottom: 12 }}
@@ -869,7 +869,7 @@ export default function DoctorUseDFormVer3({
 
               <Col xs={24} sm={12} md={8}>
                 <Form.Item
-                  label={<span style={{ fontWeight: 600, fontSize: 13 }}>{translateLabel(languageTranslate, "bodyPart", false)} <span style={{ color: "red" }}>*</span></span>}
+                  label={<span style={{ fontWeight: 600, fontSize: 13 }}>{translateLabel(languageTranslate, "bodyPart", false)}</span>}
                   name="id_exam_part"
                   rules={[{ required: true, message: "Chọn bộ phận" }]}
                   style={{ marginBottom: 12 }}
@@ -912,7 +912,7 @@ export default function DoctorUseDFormVer3({
 
               <Col xs={24} sm={12} md={8}>
                 <Form.Item
-                  label={<span style={{ fontWeight: 600, fontSize: 13 }}>{translateLabel(languageTranslate, "language", false)} <span style={{ color: "red" }}>*</span></span>}
+                  label={<span style={{ fontWeight: 600, fontSize: 13 }}>{translateLabel(languageTranslate, "language", false)}</span>}
                   name="language"
                   rules={[{ required: true }]}
                   style={{ marginBottom: 12 }}
@@ -1013,7 +1013,7 @@ export default function DoctorUseDFormVer3({
 
               <Col xs={24} sm={12} md={12}>
                 <Form.Item
-                  label={<span style={{ fontWeight: 600, fontSize: 13 }}>{translateLabel(languageTranslate, "resultPrint", false)} <span style={{ color: "red" }}>*</span></span>}
+                  label={<span style={{ fontWeight: 600, fontSize: 13 }}>{translateLabel(languageTranslate, "resultPrint", false)}</span>}
                   name="id_print_template"
                   rules={[{ required: true, message: "Chọn mẫu in" }]}
                   style={{ marginBottom: 12 }}
@@ -1047,7 +1047,7 @@ export default function DoctorUseDFormVer3({
 
             <Form.Item
               name="implementMethod"
-              label={<span style={{ fontWeight: 600, fontSize: 13 }}>{translateLabel(languageTranslate, "procedureDesc", false) || "Quy trình kỹ thuật thực hiện"}</span>}
+              label={<span style={{ fontWeight: 600, fontSize: 13 }}>{languageTranslate === "en" ? "Procedure description" : "Quy trình kỹ thuật thực hiện"}</span>}
               tooltip="Mô tả kỹ thuật chụp / chiếu / can thiệp (tùy chọn)"
               style={{ marginBottom: 6 }}
             >

@@ -321,34 +321,33 @@
 .narrativePreviewBox {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  padding: 12px;
+  border-radius: 8px;
+  padding: 6px 8px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
+
+  @media (max-width: 768px) {
+    padding: 4px;
+    border-radius: 6px;
+    gap: 4px;
+  }
 
   .previewHeader {
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
-    gap: 8px;
-
-    .previewTitle {
-      font-size: 13px;
-      font-weight: 700;
-      color: #334155;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
+    gap: 6px;
+    padding: 2px 2px;
   }
 
   .previewBody {
     background: #ffffff;
     border: 1px solid #cbd5e1;
     border-radius: 8px;
-    padding: 10px 12px;
-    font-size: 12px;
+    padding: 8px 10px;
+    font-size: 13px;
     color: #1e293b;
     line-height: 1.6;
     max-height: 220px;
