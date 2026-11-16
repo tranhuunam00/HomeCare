@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
-import API_CALL from "../../../../../services/axiosClient";
+import API_CALL from "../../../../services/axiosClient";
 import {
   DEFAULT_IMAGING_ROWS,
   buildDradv3FormValues,
   buildFormVer3Values,
-} from "../../../formver3.constant";
+} from "../../formver3.constant";
 import { parseImageDescriptionState } from "../doctorUseFormVer3.utils";
 
 export default function useDoctorFormData({
