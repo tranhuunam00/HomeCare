@@ -11,6 +11,7 @@ import PacsSidebar from './components/PacsSidebar';
 import PacsSeriesStrip from './components/PacsSeriesStrip';
 import PacsSliceStrip from './components/PacsSliceStrip';
 import PacsViewport from './components/PacsViewport';
+import PacsMultiViewportGrid from './components/PacsMultiViewportGrid';
 import PacsCaptureAlert from './components/PacsCaptureAlert';
 import PacsUploadAlert from './components/PacsUploadAlert';
 import PacsAttachmentViewer from './components/PacsAttachmentViewer';
@@ -395,73 +396,71 @@ export default function PacsViewerPage() {
             apiEndpoint={apiEndpoint}
             token={localStorage.getItem('TOKEN') || ''}
           />
-        ) : (
-          <div
-            style={{
-              flex: 1,
-              backgroundColor: '#000000',
-              display: 'grid',
-              gridTemplateColumns: layout === '1x2' || layout === '2x2' ? '1fr 1fr' : '1fr',
-              gridTemplateRows: layout === '2x1' || layout === '2x2' ? '1fr 1fr' : '1fr',
-              gap: 2,
-              padding: 2,
-              position: 'relative',
-              overflow: 'hidden',
+        ) : layout === '1x1' ? (
+          <PacsViewport
+            viewportIndex={0}
+            activeViewport={activeViewport}
+            setActiveViewport={setActiveViewport}
+            loading={loading}
+            imageCanvasRef={imageCanvasRef}
+            annotationCanvasRef={annotationCanvasRef}
+            pan={pan}
+            zoom={zoom}
+            rotation={rotation}
+            flipH={flipH}
+            flipV={flipV}
+            activeTool={activeTool}
+            setActiveTool={setActiveTool}
+            isInteracting={isInteracting}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onWheel={handleWheel}
+            onReset={handleReset}
+            onZoomIn={handleZoomIn}
+            onZoomOut={handleZoomOut}
+            onDoubleClickZoom={handleDoubleClickZoom}
+            isExpanded={isExpanded}
+            onToggleExpand={() => setIsExpanded((prev) => !prev)}
+            onCaptureKeyImage={handleCaptureKeyImage}
+            onUploadDicom={uploadDicom}
+            currentMeta={currentMeta}
+            study={study}
+            patientDiagnoseId={patientDiagnoseId}
+            seriesIndex={activeSeries?.seriesIndex || 1}
+            currentIndex={activeSlicePos}
+            setCurrentIndex={(nextPos) => {
+              const targetGlobal = activeSeriesIndices[nextPos];
+              if (targetGlobal !== undefined) setCurrentIndex(targetGlobal);
             }}
-          >
-            <PacsViewport
-              viewportIndex={0}
-              activeViewport={activeViewport}
-              setActiveViewport={setActiveViewport}
-              loading={loading}
-              imageCanvasRef={imageCanvasRef}
-              annotationCanvasRef={annotationCanvasRef}
-              pan={pan}
-              zoom={zoom}
-              rotation={rotation}
-              flipH={flipH}
-              flipV={flipV}
-              activeTool={activeTool}
-              setActiveTool={setActiveTool}
-              isInteracting={isInteracting}
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onWheel={handleWheel}
-              onReset={handleReset}
-              onZoomIn={handleZoomIn}
-              onZoomOut={handleZoomOut}
-              onDoubleClickZoom={handleDoubleClickZoom}
-              isExpanded={isExpanded}
-              onToggleExpand={() => setIsExpanded((prev) => !prev)}
-              onCaptureKeyImage={handleCaptureKeyImage}
-              onUploadDicom={uploadDicom}
-              currentMeta={currentMeta}
-              study={study}
-              patientDiagnoseId={patientDiagnoseId}
-              seriesIndex={activeSeries?.seriesIndex || 1}
-              currentIndex={activeSlicePos}
-              setCurrentIndex={(nextPos) => {
-                const targetGlobal = activeSeriesIndices[nextPos];
-                if (targetGlobal !== undefined) setCurrentIndex(targetGlobal);
-              }}
-              totalSlices={activeSeriesIndices.length}
-              colorLut={colorLut}
-              setColorLut={setColorLut}
-              windowWidth={windowWidth}
-              windowCenter={windowCenter}
-              instancesCount={instances.length}
-            />
-
-            {(layout === '1x2' || layout === '2x1' || layout === '2x2') && (
-              <div
-                onClick={() => setActiveViewport(1)}
-                style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: '#000', overflow: 'hidden', border: activeViewport === 1 ? '1.5px solid #f59e0b' : '1.5px solid #1e293b' }}
-              >
-                <div style={{ color: '#475569', fontSize: '12px' }}>Khung so sánh (Kéo series khác hoặc lặp lại lát cắt)</div>
-              </div>
-            )}
-          </div>
+            totalSlices={activeSeriesIndices.length}
+            colorLut={colorLut}
+            setColorLut={setColorLut}
+            windowWidth={windowWidth}
+            windowCenter={windowCenter}
+            instancesCount={instances.length}
+          />
+        ) : (
+          <PacsMultiViewportGrid
+            layout={layout}
+            seriesList={seriesList}
+            instances={instances}
+            dicomCache={dicomCache}
+            activeViewport={activeViewport}
+            setActiveViewport={setActiveViewport}
+            activeTool={activeTool}
+            windowCenter={windowCenter}
+            windowWidth={windowWidth}
+            invert={invert}
+            colorLut={colorLut}
+            patientName={study?.patientName}
+            patientId={study?.patientId}
+            study={study}
+            onMaximizeTo1x1={(seriesUid) => {
+              if (seriesUid) setActiveSeriesUid(seriesUid);
+              setLayout('1x1');
+            }}
+          />
         )}
 
         {!activeAttachedFile && (
