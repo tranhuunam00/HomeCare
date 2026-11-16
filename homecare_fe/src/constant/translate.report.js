@@ -2347,3 +2347,12 @@ export const TRANSLATE_MULTI_REPORT = {
     Result_Report: "Taflen ganlyniadau",
   },
 };
+
+export const translateLabel = (lang = "vi", key, uppercase = true) => {
+  try {
+    let text = TRANSLATE_MULTI_REPORT?.[lang]?.[key] || key || "";
+    return uppercase ? String(text).toUpperCase() : String(text);
+  } catch {
+    return String(key || "");
+  }
+};

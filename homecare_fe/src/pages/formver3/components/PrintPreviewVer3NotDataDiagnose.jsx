@@ -1,7 +1,16 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Button, Card, Divider, Image } from "antd";
 
-import { translateLabel } from "../../../constant/app";
+import { translateLabel } from "../../../constant/translate.report";
+
+const safeTranslate = (lang = "vi", key = "", uppercase = true) => {
+  try {
+    if (typeof translateLabel === "function") {
+      return safeTranslate(lang, key, uppercase);
+    }
+  } catch (err) {}
+  return uppercase ? String(key || "").toUpperCase() : String(key || "");
+};
 
 import styles from "./PrintPreviewVer3NotDataDiagnose.module.scss";
 import "suneditor/dist/css/suneditor.min.css";
@@ -235,7 +244,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                 padding: 0,
               }}
             >
-              {translateLabel(
+              {safeTranslate(
                 languageTranslate,
                 "Result_Report",
                 false,
@@ -276,7 +285,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   marginTop: 20,
                 }}
               >
-                {translateLabel(
+                {safeTranslate(
                   languageTranslate,
                   "administrativeInfo",
                   false,
@@ -285,7 +294,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
 
               <div className={styles.adminGrid}>
                 <PrintItem
-                  label={translateLabel(
+                  label={safeTranslate(
                     languageTranslate,
                     "fullName",
                     false,
@@ -293,7 +302,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   value={currentPatient?.name}
                 />
                 <PrintItem
-                  label={translateLabel(
+                  label={safeTranslate(
                     languageTranslate,
                     "gender",
                     false,
@@ -301,7 +310,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   value={currentPatient?.gender}
                 />
                 <PrintItem
-                  label={translateLabel(
+                  label={safeTranslate(
                     languageTranslate,
                     "age",
                     false,
@@ -313,7 +322,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   }
                 />
                 <PrintItem
-                  label={translateLabel(
+                  label={safeTranslate(
                     languageTranslate,
                     "nationality",
                     false,
@@ -322,7 +331,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                 />
                 <div className={styles.adminFullRow}>
                   <PrintItem
-                    label={translateLabel(
+                    label={safeTranslate(
                       languageTranslate,
                       "address",
                       false,
@@ -337,7 +346,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   />
                 </div>
                 <PrintItem
-                  label={translateLabel(
+                  label={safeTranslate(
                     languageTranslate,
                     "phone",
                     false,
@@ -345,7 +354,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   value={currentPatient?.phoneNumber}
                 />
                 <PrintItem
-                  label={translateLabel(
+                  label={safeTranslate(
                     languageTranslate,
                     "patientId",
                     false,
@@ -353,7 +362,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   value={currentPatient?.PID}
                 />
                 <PrintItem
-                  label={translateLabel(
+                  label={safeTranslate(
                     languageTranslate,
                     "email",
                     false,
@@ -361,7 +370,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   value={currentPatient?.email}
                 />
                 <PrintItem
-                  label={translateLabel(
+                  label={safeTranslate(
                     languageTranslate,
                     "sid",
                     false,
@@ -370,7 +379,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                 />
                 <div className={styles.adminFullRow}>
                   <PrintItem
-                    label={translateLabel(
+                    label={safeTranslate(
                       languageTranslate,
                       "clinical",
                       false,
@@ -392,13 +401,13 @@ const PrintPreviewVer3NotDataDiagnose = ({
                 marginTop: 20,
               }}
             >
-              {translateLabel(languageTranslate, "QUY TRÌNH KỸ THUẬT", true)}
+              {safeTranslate(languageTranslate, "QUY TRÌNH KỸ THUẬT", true)}
             </h3>
           )}
           {!isOnLyContent && (
             <PrintItem
               minWidth={160}
-              label={translateLabel(languageTranslate, "Chỉ định", false)}
+              label={safeTranslate(languageTranslate, "Chỉ định", false)}
               value={
                 examPartName(
                   selectedTemplateService,
@@ -412,7 +421,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
 
           <PrintItem
             minWidth={160}
-            label={translateLabel(
+            label={safeTranslate(
               languageTranslate,
               "Kỹ thuật thực hiện",
               false,
@@ -421,7 +430,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
           />
           <div className={styles.techRow}>
             <TextLabel
-              label={translateLabel(
+              label={safeTranslate(
                 languageTranslate,
                 "Tiêm thuốc đối quang",
                 false,
@@ -434,11 +443,11 @@ const PrintPreviewVer3NotDataDiagnose = ({
                 <>
                   <PrintRadio
                     checked={formSnapshot?.contrastInjection === "no"}
-                    label={translateLabel(languageTranslate, "no", false)}
+                    label={safeTranslate(languageTranslate, "no", false)}
                   />
                   <PrintRadio
                     checked={formSnapshot?.contrastInjection === "yes"}
-                    label={translateLabel(languageTranslate, "yes", false)}
+                    label={safeTranslate(languageTranslate, "yes", false)}
                   />
                 </>
               ) : (
@@ -446,13 +455,13 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   {formSnapshot?.contrastInjection === "no" && (
                     <PrintRadio
                       checked
-                      label={translateLabel(languageTranslate, "no", false)}
+                      label={safeTranslate(languageTranslate, "no", false)}
                     />
                   )}
                   {formSnapshot?.contrastInjection === "yes" && (
                     <PrintRadio
                       checked
-                      label={translateLabel(languageTranslate, "yes", false)}
+                      label={safeTranslate(languageTranslate, "yes", false)}
                     />
                   )}
                 </>
@@ -462,7 +471,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
 
           <div className={styles.techRow}>
             <TextLabel
-              label={translateLabel(
+              label={safeTranslate(
                 languageTranslate,
                 "Chất lượng hình ảnh",
                 false,
@@ -475,7 +484,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                 <>
                   <PrintRadio
                     checked={formSnapshot?.imageQuatity === "good"}
-                    label={translateLabel(
+                    label={safeTranslate(
                       languageTranslate,
                       "Đạt yêu cầu",
                       false,
@@ -483,7 +492,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   />
                   <PrintRadio
                     checked={formSnapshot?.imageQuatity === "limited"}
-                    label={translateLabel(
+                    label={safeTranslate(
                       languageTranslate,
                       "Đạt yêu cầu, có hạn chế",
                       false,
@@ -491,7 +500,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   />
                   <PrintRadio
                     checked={formSnapshot?.imageQuatity === "bad"}
-                    label={translateLabel(languageTranslate, "Không đạt", false)}
+                    label={safeTranslate(languageTranslate, "Không đạt", false)}
                   />
                 </>
               ) : (
@@ -499,7 +508,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   {formSnapshot?.imageQuatity === "good" && (
                     <PrintRadio
                       checked
-                      label={translateLabel(
+                      label={safeTranslate(
                         languageTranslate,
                         "Đạt yêu cầu",
                         false,
@@ -509,7 +518,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   {formSnapshot?.imageQuatity === "limited" && (
                     <PrintRadio
                       checked
-                      label={translateLabel(
+                      label={safeTranslate(
                         languageTranslate,
                         "Đạt yêu cầu, có hạn chế",
                         false,
@@ -519,7 +528,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   {formSnapshot?.imageQuatity === "bad" && (
                     <PrintRadio
                       checked
-                      label={translateLabel(
+                      label={safeTranslate(
                         languageTranslate,
                         "Không đạt",
                         false,
@@ -533,7 +542,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
 
           <div className={styles.techRow}>
             <TextLabel
-              label={translateLabel(
+              label={safeTranslate(
                 languageTranslate,
                 "Thực hiện bổ sung",
                 false,
@@ -546,15 +555,15 @@ const PrintPreviewVer3NotDataDiagnose = ({
                 <>
                   <PrintRadio
                     checked={formSnapshot?.additionalAction === "no"}
-                    label={translateLabel(languageTranslate, "no", false)}
+                    label={safeTranslate(languageTranslate, "no", false)}
                   />
                   <PrintRadio
                     checked={formSnapshot?.additionalAction === "extra"}
-                    label={translateLabel(languageTranslate, "Chụp thêm", false)}
+                    label={safeTranslate(languageTranslate, "Chụp thêm", false)}
                   />
                   <PrintRadio
                     checked={formSnapshot?.additionalAction === "redo"}
-                    label={translateLabel(languageTranslate, "Chụp lại", false)}
+                    label={safeTranslate(languageTranslate, "Chụp lại", false)}
                   />
                 </>
               ) : (
@@ -562,13 +571,13 @@ const PrintPreviewVer3NotDataDiagnose = ({
                 {formSnapshot?.additionalAction === "no" && (
                   <PrintRadio
                     checked
-                    label={translateLabel(languageTranslate, "no", false)}
+                    label={safeTranslate(languageTranslate, "no", false)}
                   />
                 )}
                 {formSnapshot?.additionalAction === "extra" && (
                   <PrintRadio
                     checked
-                    label={translateLabel(
+                    label={safeTranslate(
                       languageTranslate,
                       "Chụp thêm",
                       false,
@@ -578,7 +587,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                 {formSnapshot?.additionalAction === "redo" && (
                   <PrintRadio
                     checked
-                    label={translateLabel(languageTranslate, "Chụp lại", false)}
+                    label={safeTranslate(languageTranslate, "Chụp lại", false)}
                   />
                 )}
               </>
@@ -596,12 +605,12 @@ const PrintPreviewVer3NotDataDiagnose = ({
               }}
             >
               {isCanThiepGroup
-                ? translateLabel(
+                ? safeTranslate(
                     languageTranslate,
                     "QUY TRÌNH THỦ THUẬT",
                     false,
                   ).toUpperCase()
-                : translateLabel(
+                : safeTranslate(
                     languageTranslate,
                     "imagingFindings",
                     false,
@@ -640,7 +649,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
 
                   {isCanThiepGroup ? (
                     <th style={thUnderline}>
-                      {translateLabel(languageTranslate, "Mô tả", false)}
+                      {safeTranslate(languageTranslate, "Mô tả", false)}
                     </th>
                   ) : (
                     <>
@@ -656,7 +665,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                           ...styleCustomParent,
                         }}
                       >
-                        {translateLabel(languageTranslate, "Bình thường", false)}
+                        {safeTranslate(languageTranslate, "Bình thường", false)}
                       </th>
                       <th
                         style={{
@@ -670,7 +679,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                           ...styleCustomParent,
                         }}
                       >
-                        {translateLabel(languageTranslate, "Bất thường", false)}
+                        {safeTranslate(languageTranslate, "Bất thường", false)}
                       </th>
                     </>
                   )}
@@ -729,7 +738,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                   fontSize: 16,
                 }}
               >
-                {translateLabel(languageTranslate, "Mô tả chi tiết", true)}
+                {safeTranslate(languageTranslate, "Mô tả chi tiết", true)}
               </h3>
 
               <ul
@@ -771,7 +780,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
               marginTop: 20,
             }}
           >
-            {translateLabel(
+            {safeTranslate(
               languageTranslate,
               "impression",
               false,
@@ -789,7 +798,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
           </p>
           <PrintItem
             minWidth={160}
-            label={translateLabel(
+            label={safeTranslate(
               languageTranslate,
               "Chẩn đoán hình ảnh",
               false,
@@ -799,7 +808,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
           />
           <PrintItem
             minWidth={160}
-            label={translateLabel(
+            label={safeTranslate(
               languageTranslate,
               "gradingClassification",
               false,
@@ -808,7 +817,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
           />
           <PrintItem
             minWidth={160}
-            label={translateLabel(
+            label={safeTranslate(
               languageTranslate,
               "differentialDiagnosis",
               false,
@@ -827,7 +836,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                 marginTop: 20,
               }}
             >
-              {translateLabel(
+              {safeTranslate(
                 languageTranslate,
                 "recommendationsCounseling",
                 false,
@@ -857,7 +866,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                 }}
               >
                 {imageList.length
-                  ? translateLabel(
+                  ? safeTranslate(
                       languageTranslate,
                       "illustrativeImages",
                       false,

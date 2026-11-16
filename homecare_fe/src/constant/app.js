@@ -229,10 +229,7 @@ export const TRANSLATE_LANGUAGE = {
   ENG: "en",
 };
 
-export const translateLabel = (lang = "vi", key, uppercase = true) => {
-  let text = TRANSLATE_MULTI_REPORT?.[lang]?.[key] || key;
-  return uppercase ? text.toUpperCase() : text;
-};
+export { translateLabel } from "./translate.report";
 
 export const sortTemplateServices = (templateServices = []) => {
   const priorityOrder = [

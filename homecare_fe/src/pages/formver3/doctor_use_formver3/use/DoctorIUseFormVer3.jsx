@@ -435,7 +435,13 @@ export default function DoctorUseDFormVer3({
             selectedPatientDiagnose={selectedPatientDiagnose}
           />
 
-          <ImagingDiagnosisSection form={form} isEdit={isEdit} />
+          <ImagingDiagnosisSection
+            form={form}
+            isEdit={isEdit}
+            languageTranslate={languageTranslate}
+            diagnosisSummary={diagnosisSummary}
+            setDiagnosisSummary={setDiagnosisSummary}
+          />
 
           <FormActionBar
             isEdit={isEdit}

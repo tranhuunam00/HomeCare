@@ -1,28 +1,39 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Form, Input, Tooltip, Typography } from "antd";
 import { QuestionCircleOutlined } from "@ant-design/icons";
+import { translateLabel as defaultTranslateLabel } from "../../../constant/translate.report";
 
 const { Title } = Typography;
 const { TextArea } = Input;
 
 const ImagingDiagnosisSection = ({
   isEdit = true,
-  languageTranslate,
+  languageTranslate = "vi",
   translateLabel,
   form,
   diagnosisSummary,
   setDiagnosisSummary,
 }) => {
   const debounceRef = useRef(null);
+  const t = typeof translateLabel === "function" ? translateLabel : defaultTranslateLabel;
+  const safeT = (key, uppercase = false) => {
+    try {
+      const res = t(languageTranslate || "vi", key, uppercase);
+      return uppercase ? String(res || "").toUpperCase() : String(res || "");
+    } catch {
+      return uppercase ? String(key || "").toUpperCase() : String(key || "");
+    }
+  };
+
   return (
     <>
       <Title level={4} style={{ color: "#2f6db8", margin: "20px 0 12px", fontSize: 15, fontWeight: 700 }}>
-        {translateLabel(languageTranslate, "impression", false).toUpperCase()}
+        {safeT("impression", true)}
       </Title>
       {/* Chẩn đoán hình ảnh */}
 
       <Form.Item
-        label={<span style={{ fontWeight: 600, fontSize: 13 }}>{translateLabel(languageTranslate, "Chẩn đoán hình ảnh", false)}</span>}
+        label={<span style={{ fontWeight: 600, fontSize: 13 }}>{safeT("Chẩn đoán hình ảnh", false)}</span>}
         name="imagingDiagnosisSummary"
         tooltip="Có thể chỉnh sửa, tóm tắt từ các bất thường"
         style={{ marginBottom: 14 }}
@@ -60,11 +71,7 @@ const ImagingDiagnosisSection = ({
 
       {/* Phân độ / phân loại */}
       <Form.Item
-        label={<span style={{ fontWeight: 600, fontSize: 13 }}>{translateLabel(
-          languageTranslate,
-          "gradingClassification",
-          false,
-        )}</span>}
+        label={<span style={{ fontWeight: 600, fontSize: 13 }}>{safeT("gradingClassification", false)}</span>}
         name="phan_do_loai"
         style={{ marginBottom: 14 }}
       >
@@ -78,11 +85,7 @@ const ImagingDiagnosisSection = ({
 
       {/* Chẩn đoán phân biệt */}
       <Form.Item
-        label={<span style={{ fontWeight: 600, fontSize: 13 }}>{translateLabel(
-          languageTranslate,
-          "differentialDiagnosis",
-          false,
-        )}</span>}
+        label={<span style={{ fontWeight: 600, fontSize: 13 }}>{safeT("differentialDiagnosis", false)}</span>}
         name="chan_doan_phan_biet"
         style={{ marginBottom: 14 }}
       >
@@ -104,11 +107,7 @@ const ImagingDiagnosisSection = ({
           fontWeight: 700,
         }}
       >
-        {translateLabel(
-          languageTranslate,
-          "recommendationsCounseling",
-          false,
-        ).toUpperCase()}
+        {safeT("recommendationsCounseling", false).toUpperCase()}
       </Title>
 
       <Form.Item name="khuyen_nghi" tooltip="Có thể tích hợp ChatGPT D-RADS" style={{ marginBottom: 14 }}>
