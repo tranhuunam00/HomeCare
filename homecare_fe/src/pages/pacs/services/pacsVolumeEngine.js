@@ -3,6 +3,20 @@
  * Computes isotropic Axial, Coronal, Sagittal slices and Ray-Casted Shaded Volume Rendering (SVR/SSD).
  */
 
+export function normalizePixel(rawVal, meta) {
+  if (!meta) return Math.min(255, Math.max(0, rawVal));
+  const slope = meta.rescaleSlope !== undefined ? meta.rescaleSlope : 1;
+  const intercept = meta.rescaleIntercept !== undefined ? meta.rescaleIntercept : 0;
+  const wc = meta.windowCenter !== undefined ? meta.windowCenter : 128;
+  const ww = Math.max(1, meta.windowWidth !== undefined ? meta.windowWidth : 255);
+  const hu = rawVal * slope + intercept;
+  const low = wc - ww / 2;
+  let val = Math.round(((hu - low) * 255) / ww);
+  if (val < 0) val = 0;
+  else if (val > 255) val = 255;
+  return val;
+}
+
 export function getVoxelValue(validSlices, numSlices, cols, rows, x, y, zFloat) {
   if (numSlices <= 0 || !validSlices) return 0;
   const clampedX = Math.max(0, Math.min(cols - 1, x));
@@ -13,16 +27,18 @@ export function getVoxelValue(validSlices, numSlices, cols, rows, x, y, zFloat) 
   const z1 = Math.min(numSlices - 1, z0 + 1);
   const t = clampedZ - z0;
 
-  const slice0 = validSlices[z0]?.rawPixels;
-  const slice1 = validSlices[z1]?.rawPixels;
-  if (!slice0) return 0;
+  const slice0 = validSlices[z0];
+  const slice1 = validSlices[z1];
+  if (!slice0?.rawPixels) return 0;
 
   const idx = Math.floor(clampedY) * cols + Math.floor(clampedX);
-  const px0 = slice0[idx] || 0;
-  if (t === 0 || !slice1) return px0;
-
-  const px1 = slice1[idx] || 0;
-  return (1 - t) * px0 + t * px1;
+  const px0 = slice0.rawPixels[idx] || 0;
+  let rawInterp = px0;
+  if (t !== 0 && slice1?.rawPixels) {
+    const px1 = slice1.rawPixels[idx] || 0;
+    rawInterp = (1 - t) * px0 + t * px1;
+  }
+  return normalizePixel(rawInterp, slice0.meta);
 }
 
 export function renderAxialCanvas(canvas, validSlices, crosshair, cols, rows, numSlices, renderRes = 320) {
@@ -41,7 +57,7 @@ export function renderAxialCanvas(canvas, validSlices, crosshair, cols, rows, nu
     const srcY = Math.floor((sy / renderRes) * rows);
     for (let sx = 0; sx < renderRes; sx++) {
       const srcX = Math.floor((sx / renderRes) * cols);
-      const val = Math.min(255, Math.max(0, pixels[srcY * cols + srcX] || 0));
+      const val = normalizePixel(pixels[srcY * cols + srcX] || 0, slice.meta);
       const outIdx = (sy * renderRes + sx) * 4;
       imgData.data[outIdx] = val;
       imgData.data[outIdx + 1] = val;
@@ -217,7 +233,10 @@ export function renderVolume3DCanvas(
   const rdz = cosY * cosX;
 
   // Proportional Z physical aspect ratio (defaults to isotropic head/body volume)
-  const aspectZ = Math.min(1.4, Math.max(0.65, (numSlices * 4.8) / rows));
+  const sampleMeta = validSlices[0]?.meta || {};
+  const spacingZ = sampleMeta.sliceThickness || sampleMeta.spacingBetweenSlices || 1.25;
+  const spacingX = (sampleMeta.pixelSpacing && sampleMeta.pixelSpacing[0]) ? sampleMeta.pixelSpacing[0] : 0.75;
+  const aspectZ = Math.min(2.5, Math.max(0.4, (numSlices * spacingZ) / (rows * spacingX)));
 
   // Ray-AABB Bounding Box [-1, 1] x [-1, 1] x [-aspectZ, aspectZ]
   const invRdx = 1 / (Math.abs(rdx) < 1e-6 ? 1e-6 : rdx);
