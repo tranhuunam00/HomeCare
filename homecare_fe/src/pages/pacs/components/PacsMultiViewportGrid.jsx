@@ -332,6 +332,16 @@ export default function PacsMultiViewportGrid({
    * không có hình học (X-quang) = cùng bước nhảy, khác hướng cắt = giữ nguyên (đã có đường tham chiếu).
    */
   const lastActive = useRef({ viewport: -1, globalIdx: -1, seriesUid: null, pos: 0 });
+  // Cần căn lại toàn bộ các ô theo ô đang chọn: lúc vào lưới, bật đồng bộ, đổi bố cục, đổi series của 1 ô
+  const needAlignRef = useRef(true);
+  const [alignTick, setAlignTick] = useState(0);
+  const requestAlign = useCallback(() => {
+    needAlignRef.current = true;
+    setAlignTick((t) => t + 1);
+  }, []);
+  useEffect(() => {
+    if (sync.scroll) requestAlign();
+  }, [sync.scroll, cellCount, requestAlign]);
   useEffect(() => {
     const loc = locateGlobal.get(currentIndex);
     if (!loc) return;
@@ -341,7 +351,9 @@ export default function PacsMultiViewportGrid({
     const next = prevCells.slice();
     if (next[av].seriesUid !== loc.seriesUid || next[av].slicePos !== loc.pos) next[av] = { ...next[av], seriesUid: loc.seriesUid, slicePos: loc.pos };
 
-    if (moved && sync.scroll) {
+    const align = needAlignRef.current;
+    needAlignRef.current = false;
+    if ((moved || align) && sync.scroll) {
       const srcInsts = instsOf(loc.seriesUid);
       const srcGeom = getPlaneGeometry(bestMeta(dicomCache[currentIndex], srcInsts[loc.pos]));
       const delta = last.seriesUid === loc.seriesUid ? loc.pos - last.pos : 0;
@@ -354,7 +366,7 @@ export default function PacsMultiViewportGrid({
         const tgtGeom = getPlaneGeometry(insts[0]);
         if (c.seriesUid !== loc.seriesUid && srcGeom && tgtGeom) {
           if (areParallel(srcGeom, tgtGeom)) pos = findNearestSlice(insts, planeCenter(srcGeom), srcGeom)?.index ?? null;
-        } else if (delta) {
+        } else if (delta && moved) {
           pos = Math.max(0, Math.min(insts.length - 1, c.slicePos + delta));
         }
         if (pos !== null && pos !== c.slicePos) next[j] = { ...c, slicePos: pos };
@@ -364,7 +376,7 @@ export default function PacsMultiViewportGrid({
     if (next.some((c, i) => c !== prevCells[i])) setCells(next);
     // dicomCache chỉ dùng để lấy hình học chính xác hơn - không cần chạy lại khi cache đổi
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentIndex, av, cellCount, locateGlobal, instsOf, sync.scroll]);
+  }, [currentIndex, av, cellCount, locateGlobal, instsOf, sync.scroll, alignTick]);
 
   useEffect(() => {
     if (activeViewport >= cellCount) setActiveViewport?.(0);
@@ -440,8 +452,9 @@ export default function PacsMultiViewportGrid({
         onActiveViewChange?.(DEFAULT_VIEW);
         onActiveSliceChange?.(s.instances[pos].globalIndex);
       }
+      requestAlign(); // ô vừa đổi series -> về đúng vị trí (mm) của ô đang chọn
     },
-    [seriesByUid, av, onActiveViewChange, onActiveSliceChange]
+    [seriesByUid, av, onActiveViewChange, onActiveSliceChange, requestAlign]
   );
 
   /* ---------- Đường tham chiếu từ lát của ô đang chọn ---------- */
@@ -497,7 +510,7 @@ export default function PacsMultiViewportGrid({
   return (
     <div style={{ flex: 1, minWidth: 0, minHeight: 0, display: 'grid', gap: 2, padding: 2, backgroundColor: '#020617', ...gridStyle }}>
       {/* Ô đang chọn: khung nhìn đầy đủ. key cố định -> chỉ đổi vị trí, không mount lại canvas */}
-      <div key="active" style={cellFrame(av, true)}>
+      <div key="active" data-pacs-cell={av} data-active="1" style={cellFrame(av, true)}>
         <CellHeader {...headerProps(av)} />
         <div style={{ flex: 1, minHeight: 0, display: 'flex' }}>{activeViewportElement}</div>
       </div>
@@ -510,7 +523,7 @@ export default function PacsMultiViewportGrid({
         const inst = insts[pos];
         const g = inst?.globalIndex;
         return (
-          <div key={`cell-${i}`} style={cellFrame(i, false)}>
+          <div key={`cell-${i}`} data-pacs-cell={i} style={cellFrame(i, false)}>
             <CellHeader {...headerProps(i)} />
             <PassiveCell
               index={i}

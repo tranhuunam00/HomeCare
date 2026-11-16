@@ -36,15 +36,21 @@ jobs:
             cd HomeCare || { echo "Directory not found!"; exit 1; }
             
             echo "=== Pulling latest changes from git ==="
+            # Server chỉ để deploy: đưa mã nguồn về ĐÚNG bản trên origin/main.
+            # (git pull từng bị chặn vì npm install trên server sửa package-lock.json.)
+            # reset --hard chỉ đụng file được git theo dõi; .env, node_modules, dist... không bị ảnh hưởng.
             git fetch origin main
-            git checkout main
-            git pull origin main
+            git checkout -f main
+            git reset --hard origin/main
             
             echo "=== Navigating to homecare_fe ==="
             cd homecare_fe || { echo "homecare_fe directory not found!"; exit 1; }
             
             echo "=== Installing frontend dependencies ==="
-            npm install --no-audit --no-fund
+            # npm ci cài đúng theo package-lock.json và KHÔNG sửa lockfile; lock lệch package.json thì mới dùng install
+            npm ci --no-audit --no-fund || npm install --no-audit --no-fund
+            # Giữ cây git sạch cho lần deploy sau
+            git checkout -- package-lock.json || true
             
             echo "=== Building frontend ==="
             npm run build

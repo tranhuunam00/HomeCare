@@ -8,7 +8,7 @@ import PacsSidebarMeasurements from './sidebar/PacsSidebarMeasurements';
 
 const SYNC_OPTIONS = [
   { key: 'scroll', label: 'Đồng bộ cuộn', hint: 'Cùng hướng cắt: theo vị trí (mm)' },
-  { key: 'refLines', label: 'Đường tham chiếu', hint: 'Vị trí lát đang xem trên ô khác' },
+  { key: 'refLines', label: 'Đường tham chiếu', hint: 'Chỉ hiện khi ô kia KHÁC hướng cắt (Axial ↔ Coronal/Sagittal)' },
   { key: 'window', label: 'Đồng bộ WW/WL', hint: 'Các series cùng modality' },
   { key: 'zoomPan', label: 'Đồng bộ zoom / kéo' },
 ];
