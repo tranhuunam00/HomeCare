@@ -229,13 +229,13 @@ const PatientTablePage = ({ PID = null }) => {
   }, [filters, page, limit]);
 
   useEffect(() => {
-    if (selectedPatientDiagnose) {
+    if (selectedPatientDiagnose?.id) {
       fetchPatientsByChosen();
       setCollapsed(true);
     } else {
       setCollapsed(false);
     }
-  }, [selectedPatientDiagnose]);
+  }, [selectedPatientDiagnose?.id, selectedPatientDiagnose?.CCCD, selectedPatientDiagnose?.PID]);
 
   const handleSaveColumnSettings = ({ orderedKeys, visibleKeys: newVisibleKeys, widths }) => {
     localStorage.setItem(COLUMN_SETTING_STORAGE_KEY, JSON.stringify({ orderedKeys, visibleKeys: newVisibleKeys, widths }));

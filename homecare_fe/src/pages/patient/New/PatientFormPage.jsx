@@ -198,11 +198,15 @@ const PatientFormPage = () => {
                   "Content-Type": "multipart/form-data",
                   ...(token ? { Authorization: `Bearer ${token}` } : {}),
                 },
+                timeout: 900000,
+                maxContentLength: Infinity,
+                maxBodyLength: Infinity,
               });
               toast.success("Đã tải và lưu trữ ảnh DICOM vào hệ thống PACS!");
             } catch (pacsErr) {
               console.error("Lỗi tải DICOM vào PACS:", pacsErr);
-              toast.warn("Tạo ca thành công nhưng có lỗi khi tải file DICOM");
+              const pacsMsg = pacsErr.response?.data?.message || pacsErr.message || "";
+              toast.warn(`Tạo ca thành công nhưng có lỗi khi tải file DICOM: ${pacsMsg}`);
             }
           }
 

@@ -315,6 +315,9 @@ export function usePacsStudy(patientDiagnoseId, apiEndpoint) {
             'Content-Type': 'multipart/form-data',
             ...getAuthHeaders(),
           },
+          timeout: 900000,
+          maxContentLength: Infinity,
+          maxBodyLength: Infinity,
           onUploadProgress: (progressEvent) => {
             if (progressEvent.total) {
               const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
@@ -348,8 +351,18 @@ export function usePacsStudy(patientDiagnoseId, apiEndpoint) {
 
       await loadStudy();
     } catch (err) {
-      const errorMsg =
-        err.response?.data?.message || err.message || 'Lỗi kết nối máy chủ PACS';
+      let errorMsg = err.response?.data?.message;
+      if (!errorMsg) {
+        if (err.response?.status === 413) {
+          errorMsg = 'Tệp tải lên vượt quá giới hạn dung lượng máy chủ (413 Payload Too Large).';
+        } else if (err.code === 'ECONNABORTED' || err.message?.includes('timeout')) {
+          errorMsg = 'Quá thời gian tải tệp lên máy chủ PACS (Timeout). Vui lòng thử lại.';
+        } else if (err.message === 'Network Error') {
+          errorMsg = 'Lỗi kết nối mạng hoặc máy chủ PACS (Network Error). Hãy đảm bảo máy chủ PACS đang hoạt động và cho phép tải tệp lớn.';
+        } else {
+          errorMsg = err.message || 'Lỗi kết nối máy chủ PACS';
+        }
+      }
       setUploadState({
         status: 'error',
         fileName: file.name,

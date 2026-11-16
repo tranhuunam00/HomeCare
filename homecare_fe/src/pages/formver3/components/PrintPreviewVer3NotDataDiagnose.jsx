@@ -198,7 +198,13 @@ const PrintPreviewVer3NotDataDiagnose = ({
     : false;
 
   useEffect(() => {
-    setSelectedProvince(selectedPatientDiagnose?.province_code);
+    if (selectedPatientDiagnose?.province_code) {
+      setSelectedProvince((prev) =>
+        prev === selectedPatientDiagnose.province_code
+          ? prev
+          : selectedPatientDiagnose.province_code
+      );
+    }
   }, [selectedPatientDiagnose?.province_code]);
 
   const provinceName =
@@ -210,8 +216,6 @@ const PrintPreviewVer3NotDataDiagnose = ({
     selectedPatientDiagnose?.ward_code;
 
   const abnormalRows = imagingRows?.filter((row) => row.status === "abnormal");
-
-  console.log("selectedPatientDiagnose", selectedPatientDiagnose);
 
   return (
     <div>

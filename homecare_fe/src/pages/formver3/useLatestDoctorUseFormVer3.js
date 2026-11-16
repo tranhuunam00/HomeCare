@@ -32,7 +32,8 @@ export default function useLatestDoctorUseFormVer3(
         const rows = res?.data?.data?.data || [];
 
         const uniqueLanguages = [...new Set(rows.map((item) => item.language))];
-        setNumberLanguageDoctorUseFormV3(uniqueLanguages.length);
+        const langCount = uniqueLanguages.length;
+        setNumberLanguageDoctorUseFormV3((prev) => (prev === langCount ? prev : langCount));
 
         const filteredRows = language
           ? rows.filter((item) => item.language === language)

@@ -105,17 +105,21 @@ const PatientDiagnoiseDetailPage = ({
   );
 
   useEffect(() => {
-    setDoctorUseFormVer3Id?.(latestVer3?.id);
+    if (latestVer3?.id) {
+      setDoctorUseFormVer3Id?.((prev) => (prev === latestVer3.id ? prev : latestVer3.id));
+    }
   }, [latestVer3?.id, setDoctorUseFormVer3Id]);
 
   const { provinces, setSelectedProvince } = useVietnamAddress();
 
   // Set tỉnh/huyện/xã dựa trên data
   useEffect(() => {
-    if (selectedPatientDiagnose && provinces.length > 0) {
-      setSelectedProvince(selectedPatientDiagnose.province_code);
+    if (selectedPatientDiagnose?.province_code && provinces.length > 0) {
+      setSelectedProvince((prev) =>
+        prev === selectedPatientDiagnose.province_code ? prev : selectedPatientDiagnose.province_code
+      );
     }
-  }, [selectedPatientDiagnose, provinces]);
+  }, [selectedPatientDiagnose?.province_code, provinces.length]);
 
   if (!selectedPatientDiagnose) return <Spin />;
   // console.log("data", data);

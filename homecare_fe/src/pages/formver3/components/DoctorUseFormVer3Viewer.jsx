@@ -13,7 +13,6 @@ export default function DoctorUseFormVer3Viewer({
   id_doctor_use_formver3,
   patientDiagnoise,
 }) {
-  console.log("patientDiagnoise", patientDiagnoise);
   const { examParts, templateServices, doctor } = useGlobalAuth();
 
   const [loading, setLoading] = useState(true);
@@ -112,7 +111,7 @@ export default function DoctorUseFormVer3Viewer({
     if (id_doctor_use_formver3) {
       fetchPreviewData();
     }
-  }, [id_doctor_use_formver3, examParts, templateServices]);
+  }, [id_doctor_use_formver3]);
 
   if (loading) {
     return (
