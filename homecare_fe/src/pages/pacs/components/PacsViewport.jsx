@@ -14,9 +14,14 @@ import {
   RadiusSettingOutlined,
   ColumnWidthOutlined,
   ApartmentOutlined,
+  SearchOutlined,
 } from '@ant-design/icons';
 import PacsViewportOverlay from './PacsViewportOverlay';
 import { PACS_TOOLS } from '../constants/pacs.constants';
+import { screenToImage } from '../utils/viewportMapping';
+
+const LENS_SIZE = 220;
+const LENS_ZOOM = 2.5;
 
 const toolBtn = (active, accent = '#38bdf8') => ({
   width: 30,
@@ -96,6 +101,8 @@ export default function PacsViewport({
   const sliderTrackRef = useRef(null);
   const draggingSlider = useRef(false);
   const [displaySize, setDisplaySize] = useState({ width: 0, height: 0 });
+  const lensRef = useRef(null);
+  const [lens, setLens] = useState(null); // { left, top } trong khung nhìn khi đang dùng kính lúp
 
   // Khớp ảnh vào khung nhìn theo TỈ LỆ VẬT LÝ (cột×spacingCột : hàng×spacingHàng)
   const dimCols = imageDims?.columns;
@@ -141,6 +148,66 @@ export default function PacsViewport({
     return () => el.removeEventListener('wheel', handler);
   }, []);
 
+  /**
+   * Kính lúp: phóng đại ×2.5 vùng quanh con trỏ, vẽ trực tiếp từ canvas ảnh gốc (không phải ảnh chụp màn hình)
+   * nên giữ đúng độ phân giải; áp cùng xoay/lật/tỉ lệ pixel như khung nhìn chính.
+   */
+  const drawLens = (clientX, clientY) => {
+    const img = imageCanvasRef.current;
+    const lc = lensRef.current;
+    const box = containerRef.current?.getBoundingClientRect();
+    if (!img || !lc || !box || !img.offsetWidth) return;
+    const rect = img.getBoundingClientRect();
+    const cfg = {
+      centerX: rect.left + rect.width / 2,
+      centerY: rect.top + rect.height / 2,
+      layoutW: img.offsetWidth,
+      layoutH: img.offsetHeight,
+      W: img.width,
+      H: img.height,
+      zoom,
+      rotation,
+      flipH,
+      flipV,
+    };
+    const p = screenToImage({ clientX, clientY }, cfg);
+    const dpr = window.devicePixelRatio || 1;
+    const size = Math.round(LENS_SIZE * dpr);
+    if (lc.width !== size) lc.width = size;
+    if (lc.height !== size) lc.height = size;
+    const ctx = lc.getContext('2d');
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, size, size);
+    ctx.imageSmoothingEnabled = isSmooth;
+    ctx.translate(size / 2, size / 2);
+    ctx.rotate((rotation * Math.PI) / 180);
+    ctx.scale(flipH ? -1 : 1, flipV ? -1 : 1);
+    ctx.scale(((cfg.layoutW * zoom) / cfg.W) * LENS_ZOOM * dpr, ((cfg.layoutH * zoom) / cfg.H) * LENS_ZOOM * dpr);
+    ctx.drawImage(img, -p.x, -p.y);
+    const ann = annotationCanvasRef.current;
+    if (ann?.width) ctx.drawImage(ann, -p.x, -p.y, cfg.W, cfg.H);
+    setLens({ left: clientX - box.left, top: clientY - box.top });
+  };
+
+  const isMagnify = activeTool === PACS_TOOLS.MAGNIFY;
+  const handleMouseDownWrap = (e) => {
+    if (isMagnify && e.button === 0) {
+      setActiveViewport(viewportIndex);
+      drawLens(e.clientX, e.clientY);
+      const move = (ev) => drawLens(ev.clientX, ev.clientY);
+      const up = () => {
+        setLens(null);
+        window.removeEventListener('mousemove', move);
+        window.removeEventListener('mouseup', up);
+      };
+      window.addEventListener('mousemove', move);
+      window.addEventListener('mouseup', up);
+      return;
+    }
+    onMouseDown?.(e);
+  };
+
   const getCursor = () => {
     switch (activeTool) {
       case PACS_TOOLS.PAN:
@@ -154,6 +221,8 @@ export default function PacsViewport({
         return 'ns-resize';
       case PACS_TOOLS.ZOOM:
         return 'zoom-in';
+      case PACS_TOOLS.MAGNIFY:
+        return lens ? 'none' : 'zoom-in';
       default:
         return 'default';
     }
@@ -191,8 +260,8 @@ export default function PacsViewport({
       ref={containerRef}
       onClick={() => setActiveViewport(viewportIndex)}
       onDoubleClick={onDoubleClickZoom}
-      onMouseDown={onMouseDown}
-      onMouseMove={onMouseMove}
+      onMouseDown={handleMouseDownWrap}
+      onMouseMove={isMagnify ? undefined : onMouseMove}
       onMouseUp={onMouseUp}
       onMouseLeave={onMouseLeave}
       onContextMenu={(e) => e.preventDefault()}
@@ -244,6 +313,24 @@ export default function PacsViewport({
         />
       </div>
 
+      {/* Kính lúp */}
+      <canvas
+        ref={lensRef}
+        style={{
+          position: 'absolute',
+          left: (lens?.left ?? 0) - LENS_SIZE / 2,
+          top: (lens?.top ?? 0) - LENS_SIZE / 2,
+          width: LENS_SIZE,
+          height: LENS_SIZE,
+          borderRadius: '50%',
+          border: '2px solid rgba(56, 189, 248, 0.9)',
+          boxShadow: '0 6px 24px rgba(0,0,0,0.7)',
+          pointerEvents: 'none',
+          zIndex: 25,
+          display: lens ? 'block' : 'none',
+        }}
+      />
+
       {overlayProps && instancesCount > 0 && (
         <PacsViewportOverlay
           {...overlayProps}
@@ -266,6 +353,11 @@ export default function PacsViewport({
           <Tooltip title="Chỉnh WW/WL · chuột phải kéo" placement="right">
             <button onClick={stop(() => setActiveTool(PACS_TOOLS.WW_WL))} style={toolBtn(activeTool === PACS_TOOLS.WW_WL)}>
               <SlidersOutlined />
+            </button>
+          </Tooltip>
+          <Tooltip title={`Kính lúp ×${LENS_ZOOM} · giữ chuột trái (M)`} placement="right">
+            <button onClick={stop(() => setActiveTool(PACS_TOOLS.MAGNIFY))} style={toolBtn(isMagnify)}>
+              <SearchOutlined />
             </button>
           </Tooltip>
           <div style={divider} />

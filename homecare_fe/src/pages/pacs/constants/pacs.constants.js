@@ -27,12 +27,33 @@ export const COLOR_LUTS = [
   { value: 'hot_iron', label: 'Hot Iron' },
 ];
 
+/**
+ * Bố cục khung nhìn. key "RxC" = R hàng x C cột (giữ quy ước cũ: 1x2 = 2 ô cạnh nhau).
+ * `areas` (tuỳ chọn) dùng grid-template-areas cho bố cục không đều (1 ô lớn + ô nhỏ).
+ */
 export const VIEWER_LAYOUTS = [
   { key: '1x1', label: '1x1', cols: 1, rows: 1 },
   { key: '1x2', label: '1x2', cols: 2, rows: 1 },
   { key: '2x1', label: '2x1', cols: 1, rows: 2 },
   { key: '2x2', label: '2x2', cols: 2, rows: 2 },
+  { key: '1x3', label: '1x3', cols: 3, rows: 1 },
+  { key: '2x3', label: '2x3', cols: 3, rows: 2 },
+  { key: '3x3', label: '3x3', cols: 3, rows: 3 },
+  { key: '1+2', label: '1+2', cols: 2, rows: 2, areas: ['a b', 'a c'], title: '1 ô lớn bên trái + 2 ô bên phải' },
+  { key: '1+3', label: '1+3', cols: 3, rows: 3, areas: ['a a b', 'a a c', 'a a d'], title: '1 ô lớn + 3 ô nhỏ bên phải' },
+  { key: '2+1', label: '2+1', cols: 2, rows: 2, areas: ['a b', 'c c'], title: '2 ô trên + 1 ô rộng bên dưới' },
 ];
+
+export const MAX_VIEWPORTS = 9;
+
+/** Số ô của 1 bố cục */
+export function getLayoutCellCount(layout) {
+  if (!layout) return 1;
+  if (layout.areas) return new Set(layout.areas.join(' ').split(/\s+/)).size;
+  return layout.cols * layout.rows;
+}
+
+export const findLayout = (key) => VIEWER_LAYOUTS.find((l) => l.key === key) || VIEWER_LAYOUTS[0];
 
 export const PACS_TOOLS = {
   SELECT: 'select',
@@ -43,6 +64,7 @@ export const PACS_TOOLS = {
   PAN: 'pan',
   ZOOM: 'zoom',
   WW_WL: 'ww_wl',
+  MAGNIFY: 'magnify',
 };
 
 export const PACS_CHANNELS = {

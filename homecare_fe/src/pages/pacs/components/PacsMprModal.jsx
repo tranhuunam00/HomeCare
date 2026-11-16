@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Modal, Progress } from 'antd';
-import { CloseOutlined, LoadingOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { LoadingOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import { decodeDicomBuffer } from '../services/dicomDecoder';
 import PacsMprToolbar from './mpr/PacsMprToolbar';
@@ -222,7 +222,8 @@ export default function PacsMprModal({
       width="96vw"
       style={{ top: '2vh', padding: 0 }}
       styles={{ body: { padding: 0, height: '94vh', display: 'flex', flexDirection: 'column', backgroundColor: '#000' } }}
-      closeIcon={<CloseOutlined style={{ color: '#fff', fontSize: 16 }} />}
+      closable={false}
+      rootClassName="pacs-root pacs-mpr-modal"
       destroyOnClose
     >
       <div
@@ -244,6 +245,7 @@ export default function PacsMprModal({
           onReset3D={handleReset3D}
           isControlsMinimized={isControlsMinimized}
           setIsControlsMinimized={setIsControlsMinimized}
+          onClose={onClose}
         />
 
         {volumeInfo && (

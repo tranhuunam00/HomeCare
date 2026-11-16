@@ -8,6 +8,7 @@ import { usePacsInteraction } from './hooks/usePacsInteraction';
 import { usePacsPresentationState } from './hooks/usePacsPresentationState';
 import PacsTopNav from './components/PacsTopNav';
 import PacsSidebar from './components/PacsSidebar';
+import './pacs.css';
 import PacsSeriesStrip from './components/PacsSeriesStrip';
 import PacsSliceStrip from './components/PacsSliceStrip';
 import PacsViewport from './components/PacsViewport';
@@ -154,6 +155,8 @@ export default function PacsViewerPage() {
   }, [canBuild3D, activeSeriesInstances.length]);
 
   const [layout, setLayout] = useState('1x1');
+  const [sync, setSync] = useState({ scroll: true, refLines: true, window: false, zoomPan: false });
+  const changeSync = useCallback((patch) => setSync((prev) => ({ ...prev, ...patch })), []);
   const [activeViewport, setActiveViewport] = useState(0);
   const [invert, setInvert] = useState(false);
   const [colorLut, setColorLut] = useState('default');
@@ -226,7 +229,7 @@ export default function PacsViewerPage() {
     presentationStateKey: patientDiagnoseId ? `pacs_presentation_state_${patientDiagnoseId}` : null,
   });
 
-  const { captureAlert, setCaptureAlert, handleCaptureKeyImage } = usePacsPresentationState({
+  const { captureAlert, setCaptureAlert, handleCaptureKeyImage, saveStatus } = usePacsPresentationState({
     patientDiagnoseId,
     apiEndpoint,
     getAuthHeaders,
@@ -355,6 +358,8 @@ export default function PacsViewerPage() {
         setActiveTool(PACS_TOOLS.WW_WL);
       } else if (key === 'p') {
         setActiveTool(PACS_TOOLS.PAN);
+      } else if (key === 'm') {
+        setActiveTool(PACS_TOOLS.MAGNIFY);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -385,6 +390,7 @@ export default function PacsViewerPage() {
     invert,
     probe,
     measurementCount: (annotations[currentKey] || []).length,
+    saveStatus,
   };
 
   // Sidebar/TopNav: meta hiện tại (đủ để hiện preset DICOM, modality)
@@ -392,6 +398,7 @@ export default function PacsViewerPage() {
 
   return (
     <div
+      className="pacs-root"
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -454,6 +461,10 @@ export default function PacsViewerPage() {
         totalSlices={activeSeriesIndices.length}
       />
 
+      {(saveStatus?.state === 'error' || saveStatus?.state === 'offline-restore') && (
+        <Alert type={saveStatus.state === 'error' ? 'error' : 'warning'} showIcon banner message={saveStatus.message} />
+      )}
+
       {authError && (
         <Alert
           type="error"
@@ -479,7 +490,10 @@ export default function PacsViewerPage() {
             activeSeriesTotal={activeSeriesIndices.length}
             patientDiagnoseId={patientDiagnoseId}
             layout={layout}
-            setLayout={setLayout}
+            setLayout={(k) => {
+              setLayout(k);
+              if (k === '1x1') setActiveViewport(0);
+            }}
             activeTool={activeTool}
             setActiveTool={setActiveTool}
             onClearAnnotations={handleClearAnnotations}
@@ -495,6 +509,8 @@ export default function PacsViewerPage() {
             onOpenMpr={handleOpenMpr}
             canBuild3D={canBuild3D}
             activeSeriesSliceCount={activeSeriesInstances.length}
+            sync={sync}
+            onChangeSync={changeSync}
           />
         )}
 
@@ -573,26 +589,23 @@ export default function PacsViewerPage() {
           <PacsMultiViewportGrid
             layout={layout}
             seriesList={seriesList}
-            instances={instances}
             dicomCache={dicomCache}
             previewCache={previewCache}
             requestInstance={requestInstance}
             voiBySeries={voiBySeries}
+            setVoiBySeries={setVoiBySeries}
             activeViewport={activeViewport}
             setActiveViewport={setActiveViewport}
             activeTool={activeTool}
-            windowCenter={windowCenter}
-            windowWidth={windowWidth}
             invert={invert}
             colorLut={colorLut}
             isSmooth={isSmooth}
-            onToggleSmooth={() => setIsSmooth((p) => !p)}
-            patientName={study?.dbPatient?.patientName || study?.patientName}
-            patientId={study?.dbPatient?.patientId || study?.patientId}
-            study={study}
-            onMaximizeTo1x1={(seriesUid) => {
-              const target = seriesList.find((s) => s.seriesUid === seriesUid);
-              if (target?.instances?.length) setCurrentIndex(target.instances[0].globalIndex);
+            currentIndex={currentIndex}
+            onActiveSliceChange={setCurrentIndex}
+            sync={sync}
+            onMaximize={(globalIdx) => {
+              setCurrentIndex(globalIdx);
+              setActiveViewport(0);
               setLayout('1x1');
             }}
           />

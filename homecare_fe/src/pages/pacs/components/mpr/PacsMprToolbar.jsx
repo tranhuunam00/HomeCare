@@ -7,6 +7,7 @@ import {
   FullscreenOutlined,
   UpOutlined,
   DownOutlined,
+  CloseOutlined,
 } from '@ant-design/icons';
 
 export default function PacsMprToolbar({
@@ -24,6 +25,7 @@ export default function PacsMprToolbar({
   onReset3D,
   isControlsMinimized = false,
   setIsControlsMinimized,
+  onClose,
 }) {
   return (
     <div
@@ -132,19 +134,25 @@ export default function PacsMprToolbar({
         </div>
       )}
 
-      {/* Nút Thu gọn / Mở rộng Controls */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        <Tooltip title={isControlsMinimized ? 'Mở rộng bảng công cụ' : 'Thu gọn thanh công cụ để mở rộng ảnh'}>
-          <Button
-            size="small"
-            type="text"
-            icon={isControlsMinimized ? <DownOutlined style={{ color: '#38bdf8' }} /> : <UpOutlined style={{ color: '#94a3b8' }} />}
+      {/* Thu gọn thanh công cụ + Đóng (đặt cùng nhóm, không chồng lên nút đóng mặc định của Modal) */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+        <Tooltip title={isControlsMinimized ? 'Hiện thanh công cụ' : 'Thu gọn thanh công cụ để mở rộng ảnh'}>
+          <button
+            type="button"
+            className="pacs-mpr-head-btn"
             onClick={() => setIsControlsMinimized((prev) => !prev)}
-            style={{ backgroundColor: isControlsMinimized ? '#1e293b' : 'transparent' }}
+            aria-label={isControlsMinimized ? 'Hiện thanh công cụ' : 'Thu gọn thanh công cụ'}
           >
-            {isControlsMinimized ? 'Hiện công cụ' : ''}
-          </Button>
+            {isControlsMinimized ? <DownOutlined /> : <UpOutlined />}
+          </button>
         </Tooltip>
+        {onClose && (
+          <Tooltip title="Đóng (Esc)">
+            <button type="button" className="pacs-mpr-head-btn is-close" onClick={onClose} aria-label="Đóng">
+              <CloseOutlined />
+            </button>
+          </Tooltip>
+        )}
       </div>
     </div>
   );

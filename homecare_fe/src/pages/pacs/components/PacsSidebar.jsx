@@ -1,9 +1,17 @@
 import React, { useState } from 'react';
-import { Tooltip } from 'antd';
+import { Tooltip, Switch } from 'antd';
 import { DownOutlined, RightOutlined } from '@ant-design/icons';
 import { VIEWER_LAYOUTS } from '../constants/pacs.constants';
+import LayoutIcon from './LayoutIcon';
 import PacsSidebarHistory from './sidebar/PacsSidebarHistory';
 import PacsSidebarMeasurements from './sidebar/PacsSidebarMeasurements';
+
+const SYNC_OPTIONS = [
+  { key: 'scroll', label: 'Đồng bộ cuộn', hint: 'Cùng hướng cắt: theo vị trí (mm)' },
+  { key: 'refLines', label: 'Đường tham chiếu', hint: 'Vị trí lát đang xem trên ô khác' },
+  { key: 'window', label: 'Đồng bộ WW/WL', hint: 'Các series cùng modality' },
+  { key: 'zoomPan', label: 'Đồng bộ zoom / kéo' },
+];
 
 export default function PacsSidebar({
   study,
@@ -12,7 +20,6 @@ export default function PacsSidebar({
   currentIndex = 0,
   activeSliceIndex,
   activeSeriesTotal,
-  patientDiagnoseId,
   layout,
   setLayout,
   activeTool,
@@ -30,12 +37,14 @@ export default function PacsSidebar({
   onOpenMpr,
   canBuild3D = false,
   activeSeriesSliceCount = 0,
+  sync = {},
+  onChangeSync,
 }) {
   const [expandedSections, setExpandedSections] = useState({
     measure: true,
     advance: false,
     image: true,
-    sync: false,
+    sync: true,
   });
 
   const toggleSection = (section) => {
@@ -74,24 +83,19 @@ export default function PacsSidebar({
         <div style={{ fontWeight: '700', color: '#94a3b8', fontSize: '11px', marginBottom: 6, textTransform: 'uppercase' }}>
           Layout
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 4 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 3 }}>
           {VIEWER_LAYOUTS.map((item) => (
-            <button
-              key={item.key}
-              onClick={() => setLayout(item.key)}
-              style={{
-                backgroundColor: layout === item.key ? '#1e3a8a' : '#111827',
-                border: layout === item.key ? '1px solid #38bdf8' : '1px solid #1e293b',
-                color: layout === item.key ? '#38bdf8' : '#94a3b8',
-                padding: '4px 0',
-                fontSize: '11px',
-                fontWeight: '600',
-                borderRadius: 3,
-                cursor: 'pointer',
-              }}
-            >
-              {item.label}
-            </button>
+            <Tooltip key={item.key} title={item.title || `${item.rows} hàng × ${item.cols} cột`} placement="bottom" mouseEnterDelay={0.4}>
+              <button
+                type="button"
+                onClick={() => setLayout(item.key)}
+                className={`pacs-layout-btn${layout === item.key ? ' is-active' : ''}`}
+                aria-pressed={layout === item.key}
+              >
+                <LayoutIcon layout={item} />
+                {item.label}
+              </button>
+            </Tooltip>
           ))}
         </div>
       </div>
@@ -289,13 +293,17 @@ export default function PacsSidebar({
         </div>
 
         {expandedSections.sync && (
-          <div style={{ padding: '6px 8px', display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <label style={{ fontSize: '11px', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 6 }}>
-              <input type="checkbox" defaultChecked /> Đồng bộ cuộn Cine
-            </label>
-            <label style={{ fontSize: '11px', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 6 }}>
-              <input type="checkbox" defaultChecked /> Đồng bộ cửa sổ WW/WL
-            </label>
+          <div style={{ padding: '4px 8px 8px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {SYNC_OPTIONS.map((o) => (
+              <label key={o.key} className="pacs-switch-row">
+                <span>
+                  {o.label}
+                  {o.hint && <span className="hint">{o.hint}</span>}
+                </span>
+                <Switch size="small" checked={!!sync[o.key]} onChange={(v) => onChangeSync?.({ [o.key]: v })} />
+              </label>
+            ))}
+            {layout === '1x1' && <div style={{ fontSize: 9.5, color: '#64748b', marginTop: 2 }}>Áp dụng khi xem nhiều ô (chọn bố cục ở trên).</div>}
           </div>
         )}
       </div>

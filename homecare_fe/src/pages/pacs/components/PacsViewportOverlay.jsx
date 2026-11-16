@@ -62,6 +62,15 @@ function niceScaleLength(mmPerScreenPx) {
   return { mm, px: mm / mmPerScreenPx };
 }
 
+const SAVE_LABELS = {
+  saving: 'Đang lưu số đo…',
+  retrying: 'Đang thử lưu lại…',
+  saved: 'Đã lưu số đo lên máy chủ',
+  error: 'CHƯA LƯU được số đo',
+  'offline-restore': 'Chưa tải được số đo từ máy chủ',
+};
+const SAVE_COLORS = { saving: '#94a3b8', retrying: '#fbbf24', saved: '#4ade80', error: '#f87171', 'offline-restore': '#fbbf24' };
+
 export default function PacsViewportOverlay({
   meta,
   instance,
@@ -84,6 +93,7 @@ export default function PacsViewportOverlay({
   probe,
   displaySize, // { width, height } kích thước layout ảnh (px) trước zoom
   measurementCount = 0,
+  saveStatus,
 }) {
   const db = study?.dbPatient;
   const m = meta || {};
@@ -235,6 +245,12 @@ export default function PacsViewportOverlay({
           </div>
         )}
         {measurementCount > 0 && <div style={{ opacity: 0.75 }}>{measurementCount} số đo trên lát này</div>}
+        {saveStatus && saveStatus.state !== 'idle' && (
+          <div style={{ color: SAVE_COLORS[saveStatus.state] || '#94a3b8' }} title={saveStatus.message || ''}>
+            ● {SAVE_LABELS[saveStatus.state] || ''}
+            {saveStatus.state === 'saved' && saveStatus.at ? ` ${new Date(saveStatus.at).toLocaleTimeString('vi-VN')}` : ''}
+          </div>
+        )}
       </div>
 
       {/* ===== Nhãn hướng giải phẫu ===== */}

@@ -1,0 +1,159 @@
+/* ===== PACS viewer: kiểu dùng chung ===== */
+
+/*
+ * Viền trắng quanh nút sau khi bấm: trình duyệt bật :focus-visible vì viewer dùng nhiều phím tắt
+ * (đã gõ phím -> mọi lần focus sau đều bị coi là "focus bằng bàn phím"). Bỏ viền mặc định,
+ * thay bằng vòng xanh mảnh chỉ khi thật sự điều hướng bằng Tab.
+ */
+.pacs-root button:focus,
+.pacs-root .ant-btn:focus,
+.pacs-root .ant-radio-button-wrapper:focus-within {
+  outline: none !important;
+}
+.pacs-root button:focus-visible,
+.pacs-root .ant-btn:focus-visible {
+  outline: 1px solid rgba(56, 189, 248, 0.7) !important;
+  outline-offset: 1px;
+}
+.pacs-root .ant-btn-text:not(:disabled):hover {
+  background: rgba(148, 163, 184, 0.12);
+}
+
+/* Nút chọn bố cục: biểu tượng lưới thu nhỏ */
+.pacs-layout-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 5px 0 3px;
+  background: #111827;
+  border: 1px solid #1e293b;
+  border-radius: 4px;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 9.5px;
+  font-weight: 600;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+.pacs-layout-btn:hover {
+  border-color: #334155;
+  color: #e2e8f0;
+}
+.pacs-layout-btn.is-active {
+  background: rgba(14, 165, 233, 0.16);
+  border-color: #38bdf8;
+  color: #38bdf8;
+}
+.pacs-layout-icon {
+  display: grid;
+  gap: 1.5px;
+  width: 26px;
+  height: 18px;
+}
+.pacs-layout-icon > i {
+  display: block;
+  background: currentColor;
+  opacity: 0.55;
+  border-radius: 1px;
+}
+.pacs-layout-btn.is-active .pacs-layout-icon > i {
+  opacity: 0.9;
+}
+
+/* Công tắc đồng bộ trong sidebar */
+.pacs-switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 3px 2px;
+  font-size: 11px;
+  color: #cbd5e1;
+  cursor: pointer;
+}
+.pacs-switch-row .hint {
+  display: block;
+  font-size: 9.5px;
+  color: #64748b;
+}
+
+/* Ô lưới */
+.pacs-cell-series-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 70%;
+  min-width: 0;
+  padding: 1px 6px;
+  background: transparent;
+  border: 1px solid #334155;
+  border-radius: 3px;
+  color: #e2e8f0;
+  font-size: 10.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.pacs-cell-series-btn:hover {
+  border-color: #38bdf8;
+}
+.pacs-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 3px;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 11px;
+}
+.pacs-icon-btn:hover {
+  color: #e2e8f0;
+  background: rgba(148, 163, 184, 0.14);
+}
+.pacs-cell-scroll {
+  position: absolute;
+  right: 4px;
+  top: 22px;
+  bottom: 22px;
+  width: 8px;
+  border-radius: 4px;
+  background: rgba(30, 41, 59, 0.55);
+  cursor: pointer;
+  z-index: 5;
+}
+
+/* Modal MPR/3D: nền tối liền khối, không viền trắng */
+.pacs-mpr-modal .ant-modal-content {
+  padding: 0 !important;
+  background: #000 !important;
+  overflow: hidden;
+  border-radius: 8px;
+}
+.pacs-mpr-head-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: #94a3b8;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+.pacs-mpr-head-btn:hover {
+  background: #1e293b;
+  color: #e2e8f0;
+}
+.pacs-mpr-head-btn.is-close:hover {
+  background: #7f1d1d;
+  color: #fff;
+}
