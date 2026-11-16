@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import API_CALL from "../../../../services/axiosClient";
+import { useGlobalAuth } from "../../../../contexts/AuthContext";
 import {
   DEFAULT_IMAGING_ROWS,
   buildDradv3FormValues,
@@ -16,6 +17,7 @@ export default function useDoctorFormData({
   setLanguageTransslate,
   setSelectedProvince,
 }) {
+  const { printTemplateGlobal, doctor } = useGlobalAuth();
   const [loading, setLoading] = useState(false);
   const [idEdit, setIdEdit] = useState(doctorUseFormVer3Id);
   const [patientDiagnose, setPatientDiagnose] = useState(null);
@@ -46,6 +48,32 @@ export default function useDoctorFormData({
     apiData: null,
     patientDiagnose: null,
   });
+
+  // Fetch print templates
+  useEffect(() => {
+    if (Array.isArray(printTemplateGlobal) && printTemplateGlobal.length > 0) {
+      setPrintTemplateList(printTemplateGlobal);
+    }
+    const fetchTemplates = async () => {
+      try {
+        const clinicId = doctor?.id_clinic;
+        const res = await API_CALL.get("/print-template", {
+          params: {
+            page: 1,
+            limit: 1000,
+            ...(clinicId ? { id_clinic: clinicId } : {}),
+          },
+        });
+        const list = res.data?.data?.data || res.data?.data || [];
+        if (Array.isArray(list) && list.length > 0) {
+          setPrintTemplateList(list);
+        }
+      } catch (e) {
+        console.error("fetch print templates error", e);
+      }
+    };
+    fetchTemplates();
+  }, [doctor?.id_clinic, printTemplateGlobal]);
 
   // Fetch formver3 names
   useEffect(() => {

@@ -171,11 +171,7 @@ export default function ProcedureSection({
           <Form.Item
             label={<span style={{ fontWeight: 600, fontSize: 13 }}>{translateLabel ? translateLabel(languageTranslate, "resultTemplate", false) : "Mẫu đọc kết quả"}</span>}
             name="id_formver3_name"
-            rules={
-              imagingMode === "FAST_SONO" || imagingMode === "FREE_TEXT"
-                ? []
-                : [{ required: true, message: "Chọn tên mẫu" }]
-            }
+            rules={[]}
             style={{ marginBottom: 12 }}
           >
             <Select

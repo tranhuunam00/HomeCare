@@ -23,7 +23,9 @@ import FormActionBar, {
 } from "../../../formver2/component/FormActionBar.jsx";
 import {
   buildFormDataDoctorUseFormVer3,
+  LANGUAGE_OPTIONS,
 } from "../../formver3.constant";
+import { translateLabel } from "../../../../constant/translate.report";
 import AdvancedSampleSection from "../../components/AdvancedSampleSection";
 import ImagingDiagnosisSection from "../../components/ImagingDiagnosisSection";
 import { handlePrint } from "../../../formver2/utils.js";
@@ -388,6 +390,12 @@ export default function DoctorUseDFormVer3({
             filteredFormVer3Names={filteredFormVer3Names}
             selectedIDs={selectedIDs}
             setSelectedIDs={setSelectedIDs}
+            printTemplateList={printTemplateList}
+            setPrintTemplate={setPrintTemplate}
+            languageTranslate={languageTranslate}
+            translateLabel={translateLabel}
+            idEdit={idEdit}
+            LANGUAGE_OPTIONS={LANGUAGE_OPTIONS}
             onReloadTemplateAndExamPart={async () => {
               try {
                 setReloading(true);
@@ -406,6 +414,13 @@ export default function DoctorUseDFormVer3({
             }}
             reloading={reloading}
             onFormVer3Select={handleFormVer3Select}
+          />
+
+          {/* Tiêm thuốc đối quang đặt trên phần mô tả hình ảnh */}
+          <AdvancedSampleSection
+            form={form}
+            isEdit={isEdit}
+            selectedPatientDiagnose={selectedPatientDiagnose}
           />
 
           <ImagingFindingsSection
@@ -428,12 +443,6 @@ export default function DoctorUseDFormVer3({
             imageList={imageList}
             setImageList={setImageList}
             isEdit={isEdit}
-          />
-
-          <AdvancedSampleSection
-            form={form}
-            isEdit={isEdit}
-            selectedPatientDiagnose={selectedPatientDiagnose}
           />
 
           <ImagingDiagnosisSection
