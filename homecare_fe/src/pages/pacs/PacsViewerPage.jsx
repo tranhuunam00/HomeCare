@@ -227,6 +227,7 @@ export default function PacsViewerPage() {
     imageCanvasRef,
     annotationCanvasRef,
     presentationStateKey: patientDiagnoseId ? `pacs_presentation_state_${patientDiagnoseId}` : null,
+    redrawKey: layout,
   });
 
   const { captureAlert, setCaptureAlert, handleCaptureKeyImage, saveStatus } = usePacsPresentationState({
@@ -287,7 +288,8 @@ export default function PacsViewerPage() {
     // Chưa có dữ liệu cho lát này -> xoá trắng, KHÔNG để lại ảnh của lát trước dưới số lát mới
     const ctx = canvas.getContext('2d');
     ctx?.clearRect(0, 0, canvas.width, canvas.height);
-  }, [hasFull, currentFull, currentPreview, currentIndex, instances, windowCenter, windowWidth, invert, colorLut, isSmooth]);
+    // layout: chuyển 1x1 <-> lưới làm canvas được tạo mới -> vẽ lại
+  }, [hasFull, currentFull, currentPreview, currentIndex, instances, windowCenter, windowWidth, invert, colorLut, isSmooth, layout]);
 
   // Kích thước ma trận ảnh cho bố cục khung nhìn (có trước khi ảnh gốc về nhờ metadata máy chủ)
   const imageDims = useMemo(() => {
@@ -367,10 +369,27 @@ export default function PacsViewerPage() {
   }, [handleCaptureKeyImage, handleUndoAnnotation, stepSeriesSlice, handleApplyPreset, handleReset, setActiveTool, setCurrentDrawing, currentMeta?.modality]);
 
   // Đổi series -> về khung nhìn chuẩn (giữ nguyên số đo và WW/WL riêng của từng series)
+  // (Lưới nhiều ô tự quản khung nhìn từng ô -> không reset ở đây)
+  const layoutRef = useRef(layout);
+  layoutRef.current = layout;
   useEffect(() => {
+    if (layoutRef.current !== '1x1') return;
     setPan({ x: 0, y: 0 });
     setZoom(1);
   }, [activeSeriesUid, setPan, setZoom]);
+
+  // Khung nhìn của ô đang chọn (zoom/pan/xoay/lật) - lưới cất/nạp khi đổi ô
+  const activeView = useMemo(() => ({ zoom, pan, rotation, flipH, flipV }), [zoom, pan, rotation, flipH, flipV]);
+  const applyActiveView = useCallback(
+    (v) => {
+      setZoom(v.zoom ?? 1);
+      setPan(v.pan || { x: 0, y: 0 });
+      setRotation(v.rotation || 0);
+      setFlipH(!!v.flipH);
+      setFlipV(!!v.flipV);
+    },
+    [setZoom, setPan, setRotation, setFlipH, setFlipV]
+  );
 
   const seriesLabel = activeSeries ? activeSeries.title : '';
   const overlayProps = {
@@ -395,6 +414,51 @@ export default function PacsViewerPage() {
 
   // Sidebar/TopNav: meta hiện tại (đủ để hiện preset DICOM, modality)
   const navMeta = currentMeta || (currentInstance ? { modality: currentInstance.modality, windowPresets: currentInstance.windowPresets || [] } : null);
+
+  const mainViewportElement = (
+    <PacsViewport
+        viewportIndex={layout === '1x1' ? 0 : activeViewport}
+        activeViewport={activeViewport}
+        setActiveViewport={setActiveViewport}
+        loading={loading}
+        imageCanvasRef={imageCanvasRef}
+        annotationCanvasRef={annotationCanvasRef}
+        pan={pan}
+        zoom={zoom}
+        rotation={rotation}
+        flipH={flipH}
+        flipV={flipV}
+        isSmooth={isSmooth}
+        activeTool={activeTool}
+        setActiveTool={setActiveTool}
+        isInteracting={isInteracting}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
+        onWheel={handleWheel}
+        onZoomIn={handleZoomIn}
+        onZoomOut={handleZoomOut}
+        onZoomActualPixels={handleZoomActualPixels}
+        onUndo={handleUndoAnnotation}
+        onDoubleClickZoom={handleDoubleClickZoom}
+        isExpanded={isExpanded}
+      compact={layout !== '1x1'}
+        onToggleExpand={() => setIsExpanded((prev) => !prev)}
+        onCaptureKeyImage={handleCaptureKeyImage}
+        onUploadDicom={uploadDicom}
+        patientDiagnoseId={patientDiagnoseId}
+        currentIndex={activeSlicePos}
+        setCurrentIndex={(nextPos) => {
+          const targetGlobal = activeSeriesIndices[nextPos];
+          if (targetGlobal !== undefined) setCurrentIndex(targetGlobal);
+        }}
+        totalSlices={activeSeriesIndices.length}
+        instancesCount={instances.length}
+        imageDims={imageDims}
+        overlayProps={overlayProps}
+      />
+  );
 
   return (
     <div
@@ -544,47 +608,7 @@ export default function PacsViewerPage() {
             token={localStorage.getItem('TOKEN') || ''}
           />
         ) : layout === '1x1' ? (
-          <PacsViewport
-            viewportIndex={0}
-            activeViewport={activeViewport}
-            setActiveViewport={setActiveViewport}
-            loading={loading}
-            imageCanvasRef={imageCanvasRef}
-            annotationCanvasRef={annotationCanvasRef}
-            pan={pan}
-            zoom={zoom}
-            rotation={rotation}
-            flipH={flipH}
-            flipV={flipV}
-            isSmooth={isSmooth}
-            activeTool={activeTool}
-            setActiveTool={setActiveTool}
-            isInteracting={isInteracting}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseLeave}
-            onWheel={handleWheel}
-            onZoomIn={handleZoomIn}
-            onZoomOut={handleZoomOut}
-            onZoomActualPixels={handleZoomActualPixels}
-            onUndo={handleUndoAnnotation}
-            onDoubleClickZoom={handleDoubleClickZoom}
-            isExpanded={isExpanded}
-            onToggleExpand={() => setIsExpanded((prev) => !prev)}
-            onCaptureKeyImage={handleCaptureKeyImage}
-            onUploadDicom={uploadDicom}
-            patientDiagnoseId={patientDiagnoseId}
-            currentIndex={activeSlicePos}
-            setCurrentIndex={(nextPos) => {
-              const targetGlobal = activeSeriesIndices[nextPos];
-              if (targetGlobal !== undefined) setCurrentIndex(targetGlobal);
-            }}
-            totalSlices={activeSeriesIndices.length}
-            instancesCount={instances.length}
-            imageDims={imageDims}
-            overlayProps={overlayProps}
-          />
+          mainViewportElement
         ) : (
           <PacsMultiViewportGrid
             layout={layout}
@@ -596,17 +620,21 @@ export default function PacsViewerPage() {
             setVoiBySeries={setVoiBySeries}
             activeViewport={activeViewport}
             setActiveViewport={setActiveViewport}
-            activeTool={activeTool}
             invert={invert}
             colorLut={colorLut}
             isSmooth={isSmooth}
             currentIndex={currentIndex}
             onActiveSliceChange={setCurrentIndex}
             sync={sync}
-            onMaximize={(globalIdx) => {
+            annotations={annotations}
+            activeView={activeView}
+            onActiveViewChange={applyActiveView}
+            activeViewportElement={mainViewportElement}
+            onMaximize={(globalIdx, view) => {
               setCurrentIndex(globalIdx);
               setActiveViewport(0);
               setLayout('1x1');
+              if (view) applyActiveView(view);
             }}
           />
         )}

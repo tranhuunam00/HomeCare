@@ -95,6 +95,7 @@ export default function PacsViewport({
   imageDims, // { columns, rows, pixelSpacing }
   overlayProps,
   onDisplaySizeChange,
+  compact = false, // trong lưới nhiều ô: ẩn 2 thanh công cụ dọc (dùng thanh trên + sidebar)
 }) {
   const isActive = activeViewport === viewportIndex;
   const containerRef = useRef(null);
@@ -118,8 +119,8 @@ export default function PacsViewport({
       if (!cols || !rows) return;
       const physW = cols * (spacingCol || 1);
       const physH = rows * (spacingRow || 1);
-      const availW = Math.max(50, el.clientWidth - 96); // chừa chỗ thanh công cụ 2 bên
-      const availH = Math.max(50, el.clientHeight - 24);
+      const availW = Math.max(50, el.clientWidth - (compact ? 24 : 96)); // chừa chỗ thanh công cụ 2 bên
+      const availH = Math.max(50, el.clientHeight - (compact ? 8 : 24));
       const fit = Math.min(availW / physW, availH / physH);
       const next = { width: Math.round(physW * fit), height: Math.round(physH * fit) };
       setDisplaySize((prev) => (prev.width === next.width && prev.height === next.height ? prev : next));
@@ -128,7 +129,7 @@ export default function PacsViewport({
     const ro = new ResizeObserver(compute);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [dimCols, dimRows, spacingRow, spacingCol]);
+  }, [dimCols, dimRows, spacingRow, spacingCol, compact]);
 
   useEffect(() => {
     onDisplaySizeChange?.(displaySize);
@@ -274,7 +275,7 @@ export default function PacsViewport({
         alignItems: 'center',
         backgroundColor: '#000',
         overflow: 'hidden',
-        outline: isActive ? '1.5px solid rgba(245, 158, 11, 0.85)' : '1px solid #111827',
+        outline: compact ? 'none' : isActive ? '1.5px solid rgba(245, 158, 11, 0.85)' : '1px solid #111827',
         outlineOffset: -1.5,
         cursor: getCursor(),
         userSelect: 'none',
@@ -343,7 +344,7 @@ export default function PacsViewport({
       )}
 
       {/* Thanh công cụ trái: điều hướng & hiển thị */}
-      {instancesCount > 0 && (
+      {instancesCount > 0 && !compact && (
         <div style={{ ...toolbarBox, left: 8 }} onMouseDown={(e) => e.stopPropagation()}>
           <Tooltip title="Kéo ảnh (Pan) · chuột giữa" placement="right">
             <button onClick={stop(() => setActiveTool(PACS_TOOLS.PAN))} style={toolBtn(activeTool === PACS_TOOLS.PAN)}>
@@ -386,7 +387,7 @@ export default function PacsViewport({
       )}
 
       {/* Thanh công cụ phải: đo đạc */}
-      {instancesCount > 0 && (
+      {instancesCount > 0 && !compact && (
         <div style={{ ...toolbarBox, right: 26 }} onMouseDown={(e) => e.stopPropagation()}>
           <Tooltip title="Đo khoảng cách" placement="left">
             <button onClick={stop(() => setActiveTool(PACS_TOOLS.LENGTH))} style={toolBtn(activeTool === PACS_TOOLS.LENGTH, '#22c55e')}>
@@ -434,8 +435,8 @@ export default function PacsViewport({
           style={{
             position: 'absolute',
             right: 6,
-            top: 48,
-            bottom: 48,
+            top: compact ? 12 : 48,
+            bottom: compact ? 12 : 48,
             width: 12,
             background: 'rgba(30, 41, 59, 0.55)',
             borderRadius: 6,

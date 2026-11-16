@@ -33,6 +33,7 @@ export function usePacsInteraction({
   imageCanvasRef,
   annotationCanvasRef,
   presentationStateKey,
+  redrawKey,
 }) {
   const [activeTool, setActiveTool] = useState(PACS_TOOLS.LENGTH);
   const [zoom, setZoom] = useState(1);
@@ -75,7 +76,7 @@ export function usePacsInteraction({
     const canvas = annotationCanvasRef.current;
     if (!canvas || !meta) return;
     renderAnnotationsToCanvas(canvas, annotations[currentKey] || [], currentDrawing, meta, getImageToScreenScale());
-  }, [annotations, currentDrawing, currentKey, meta, annotationCanvasRef, getImageToScreenScale]);
+  }, [annotations, currentDrawing, currentKey, meta, annotationCanvasRef, getImageToScreenScale, redrawKey]);
 
   /**
    * Toạ độ chuột -> toạ độ pixel ảnh (không làm tròn, giữ độ chính xác dưới pixel).
@@ -285,6 +286,10 @@ export function usePacsInteraction({
     handleMouseUp();
   };
 
+  const wheelAccRef = useRef(0);
+  const wheelRafRef = useRef(null);
+  const stepRef = useRef(stepSeriesSlice);
+  stepRef.current = stepSeriesSlice;
   const handleWheel = (e) => {
     if (e.ctrlKey) {
       e.preventDefault?.();
@@ -292,7 +297,15 @@ export function usePacsInteraction({
       return;
     }
     if (activeSeriesIndices.length <= 1) return;
-    stepSeriesSlice(e.deltaY > 0 ? 1 : -1);
+    // Gộp nhiều nấc cuộn trong 1 khung hình thành 1 lần đổi lát (touchpad bắn 60-120 sự kiện/giây)
+    wheelAccRef.current += e.deltaY > 0 ? 1 : -1;
+    if (wheelRafRef.current) return;
+    wheelRafRef.current = requestAnimationFrame(() => {
+      wheelRafRef.current = null;
+      const steps = wheelAccRef.current;
+      wheelAccRef.current = 0;
+      if (steps) stepRef.current(steps);
+    });
   };
 
   const handleZoomIn = () => setZoom((prev) => Math.min(16, Number((prev * 1.25).toFixed(3))));

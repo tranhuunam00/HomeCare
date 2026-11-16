@@ -104,8 +104,21 @@ export function usePacsStudy(patientDiagnoseId, apiEndpoint) {
     return next;
   }, []);
 
-  const scheduleFlush = useCallback(() => {
-    if (flushTimerRef.current) return;
+  /**
+   * Gộp ảnh tải xong rồi mới cập nhật state: mỗi lần cập nhật = render lại cả trang.
+   * Ảnh ĐANG HIỂN THỊ (ưu tiên 0 / lát hiện tại) -> cập nhật ngay (~1 khung hình);
+   * ảnh tải trước (prefetch) -> gộp 250 ms/lần. Trước đây 16 ms/lần => ~60 lần render/giây khi tải trước, gây giật.
+   */
+  const urgentRef = useRef(new Set());
+  const flushDueRef = useRef(0);
+  const scheduleFlush = useCallback((urgent = false) => {
+    const delay = urgent ? 16 : 250;
+    const due = Date.now() + delay;
+    if (flushTimerRef.current) {
+      if (due >= flushDueRef.current) return;
+      clearTimeout(flushTimerRef.current);
+    }
+    flushDueRef.current = due;
     flushTimerRef.current = setTimeout(() => {
       flushTimerRef.current = null;
       const full = pendingFullRef.current;
@@ -144,11 +157,11 @@ export function usePacsStudy(patientDiagnoseId, apiEndpoint) {
         if (!decoded?.decodeInfo?.ok) {
           setLoadErrors((e) => ({ ...e, [index]: decoded?.decodeInfo?.reason || 'Không giải mã được ảnh' }));
         }
-        scheduleFlush();
+        scheduleFlush(urgentRef.current.delete(index) || index === currentIndexRef.current);
       },
       onPreviewLoaded: (index, bitmap) => {
         pendingPreviewRef.current[index] = bitmap;
-        scheduleFlush();
+        scheduleFlush(urgentRef.current.has(index) || index === currentIndexRef.current);
       },
       onError: (index, err) => {
         if (err?.status === 401) setAuthError(true);
@@ -277,7 +290,9 @@ export function usePacsStudy(patientDiagnoseId, apiEndpoint) {
   /** Yêu cầu tải ngay 1 lát bất kỳ (lưới đa khung nhìn, MPR) */
   const requestInstance = useCallback((index, priority = 0) => {
     const inst = instancesRef.current[index];
-    if (inst) loaderRef.current?.request(index, inst, priority);
+    if (!inst) return;
+    if (priority <= 1) urgentRef.current.add(index); // đang hiện trên màn hình (ô lưới)
+    loaderRef.current?.request(index, inst, priority);
   }, []);
 
   /* ---------------- WW/WL theo series ---------------- */
