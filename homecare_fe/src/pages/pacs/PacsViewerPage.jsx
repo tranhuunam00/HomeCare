@@ -56,10 +56,13 @@ export default function PacsViewerPage() {
     instances.forEach((inst, idx) => {
       const key = inst.seriesInstanceUid || 'default_series';
       if (!map.has(key)) {
+        const title = (inst.modality === 'NDCM' || inst.isNonDicom)
+          ? (inst.seriesDescription || 'Ảnh nội soi / Vết mổ (NDCM)')
+          : (inst.fileName?.replace(/\.dcm$/i, '') || inst.seriesDescription || `upload_${idx + 1}`);
         map.set(key, {
           seriesUid: key,
           seriesIndex: map.size + 1,
-          title: inst.fileName?.replace(/\.dcm$/i, '') || inst.seriesDescription || `upload_${idx + 1}`,
+          title,
           instances: [],
         });
       }
@@ -69,6 +72,7 @@ export default function PacsViewerPage() {
   }, [instances]);
 
   const [activeSeriesUid, setActiveSeriesUid] = useState(null);
+  const [isSmooth, setIsSmooth] = useState(true);
 
   useEffect(() => {
     if (seriesList.length > 0 && (!activeSeriesUid || !seriesList.some((s) => s.seriesUid === activeSeriesUid))) {
@@ -238,6 +242,7 @@ export default function PacsViewerPage() {
       windowWidth,
       invert,
       colorLut,
+      isSmooth,
     });
 
     const activeInst = instances[currentIndex];
@@ -253,9 +258,9 @@ export default function PacsViewerPage() {
         }
       } catch (e) {}
     }
-  }, [dicomCache, currentIndex, windowCenter, windowWidth, invert, colorLut, instances, seriesThumbnails, sliceThumbnails, setSeriesThumbnails, setSliceThumbnails]);
+  }, [dicomCache, currentIndex, windowCenter, windowWidth, invert, colorLut, isSmooth, instances, seriesThumbnails, sliceThumbnails, setSeriesThumbnails, setSliceThumbnails]);
 
-  // Keyboard Shortcuts: Space / Ctrl+S (Key Image), Arrows (Slices), 'I' (Invert), 'C' (Cine)
+  // Keyboard Shortcuts: Space / Ctrl+S (Key Image), Arrows (Slices), 'I' (Invert), 'C' (Cine), 'B' (Smooth)
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (['INPUT', 'TEXTAREA'].includes(e.target?.tagName)) return;
@@ -268,6 +273,8 @@ export default function PacsViewerPage() {
         stepSeriesSlice(-1);
       } else if (e.key.toLowerCase() === 'i' && !e.ctrlKey && !e.altKey) {
         setInvert((prev) => !prev);
+      } else if (e.key.toLowerCase() === 'b' && !e.ctrlKey && !e.altKey) {
+        setIsSmooth((prev) => !prev);
       } else if (e.key.toLowerCase() === 'c' && !e.ctrlKey && !e.altKey) {
         setIsPlayingCine((prev) => !prev);
       }
@@ -313,30 +320,19 @@ export default function PacsViewerPage() {
       />
 
       <PacsTopNav
-        activeTool={activeTool}
-        setActiveTool={setActiveTool}
-        invert={invert}
-        setInvert={setInvert}
-        rotation={rotation}
-        setRotation={setRotation}
-        onReset={handleReset}
-        onCaptureKeyImage={handleCaptureKeyImage}
-        onApplyPreset={handleApplyPreset}
-        currentMeta={currentMeta}
-        onOpenMpr={handleOpenMpr}
-        canBuild3D={canBuild3D}
+        activeTool={activeTool} setActiveTool={setActiveTool}
+        invert={invert} setInvert={setInvert}
+        rotation={rotation} setRotation={setRotation}
+        isSmooth={isSmooth} onToggleSmooth={() => setIsSmooth((p) => !p)}
+        onReset={handleReset} onCaptureKeyImage={handleCaptureKeyImage}
+        onApplyPreset={handleApplyPreset} currentMeta={currentMeta}
+        onOpenMpr={handleOpenMpr} canBuild3D={canBuild3D}
         activeSeriesSliceCount={activeSeriesInstances.length}
         onUploadDicom={uploadDicom}
-        zoom={zoom}
-        onZoomIn={handleZoomIn}
-        onZoomOut={handleZoomOut}
-        onResetZoom={handleResetZoom}
-        isExpanded={isExpanded}
-        onToggleExpand={() => setIsExpanded((prev) => !prev)}
-        isPlayingCine={isPlayingCine}
-        onToggleCine={() => setIsPlayingCine((prev) => !prev)}
-        cineFps={cineFps}
-        onChangeCineFps={setCineFps}
+        zoom={zoom} onZoomIn={handleZoomIn} onZoomOut={handleZoomOut} onResetZoom={handleResetZoom}
+        isExpanded={isExpanded} onToggleExpand={() => setIsExpanded((prev) => !prev)}
+        isPlayingCine={isPlayingCine} onToggleCine={() => setIsPlayingCine((prev) => !prev)}
+        cineFps={cineFps} onChangeCineFps={setCineFps}
         totalSlices={activeSeriesIndices.length}
       />
 
@@ -409,6 +405,8 @@ export default function PacsViewerPage() {
             rotation={rotation}
             flipH={flipH}
             flipV={flipV}
+            isSmooth={isSmooth}
+            onToggleSmooth={() => setIsSmooth((p) => !p)}
             activeTool={activeTool}
             setActiveTool={setActiveTool}
             isInteracting={isInteracting}
@@ -453,6 +451,8 @@ export default function PacsViewerPage() {
             windowWidth={windowWidth}
             invert={invert}
             colorLut={colorLut}
+            isSmooth={isSmooth}
+            onToggleSmooth={() => setIsSmooth((p) => !p)}
             patientName={study?.patientName}
             patientId={study?.patientId}
             study={study}

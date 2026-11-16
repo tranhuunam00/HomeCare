@@ -47,6 +47,8 @@ export default function PacsTopNav({
   cineFps = 10,
   onChangeCineFps,
   totalSlices = 1,
+  isSmooth = true,
+  onToggleSmooth,
 }) {
   const navigate = useNavigate();
 
@@ -249,6 +251,24 @@ export default function PacsTopNav({
             }}
           />
         </Tooltip>
+
+        {onToggleSmooth && (
+          <Tooltip title={isSmooth ? "Đang bật làm mịn Bilinear (Phím B để chuyển pixel gốc)" : "Đang xem điểm ảnh gốc Pixelated (Phím B để bật làm mịn)"}>
+            <Button
+              size="small"
+              onClick={onToggleSmooth}
+              style={{
+                backgroundColor: isSmooth ? '#0284c7' : '#131b2e',
+                borderColor: isSmooth ? '#38bdf8' : '#1e293b',
+                color: isSmooth ? '#fff' : '#94a3b8',
+                fontSize: '11px',
+                fontWeight: '600',
+              }}
+            >
+              {isSmooth ? '✨ Mịn' : '🔲 Gốc'}
+            </Button>
+          </Tooltip>
+        )}
 
         {/* Cine Loop Player for Ultrasound, DSA, and CT/MRI multi-slice series */}
         {totalSlices > 1 && onToggleCine && (

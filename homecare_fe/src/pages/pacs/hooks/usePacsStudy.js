@@ -153,6 +153,48 @@ export function usePacsStudy(patientDiagnoseId, apiEndpoint) {
 
       const instance = instances[index];
       if (instance?.isLocal) return;
+
+      // Hỗ trợ Non-DICOM (NDCM): Tải ảnh nội soi / siêu âm / vết mổ trực tiếp
+      if (instance?.modality === 'NDCM' || instance?.isNonDicom) {
+        try {
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.src = `${apiEndpoint}/api/pacs/instances/${instance.sopInstanceUid}/file`;
+          await new Promise((resolve, reject) => {
+            img.onload = resolve;
+            img.onerror = () => reject(new Error('Lỗi tải ảnh Non-DICOM'));
+          });
+          const item = {
+            meta: {
+              patientName: study?.patientName || '',
+              patientId: study?.patientId || '',
+              studyDate: study?.studyDate || '',
+              modality: 'NDCM',
+              seriesDescription: instance.fileName || 'Ảnh nội soi / Vết mổ (NDCM)',
+              sopInstanceUid: instance.sopInstanceUid,
+              seriesInstanceUid: instance.seriesInstanceUid,
+              rows: instance.rows || img.naturalHeight || 512,
+              columns: instance.columns || img.naturalWidth || 512,
+              windowCenter: 128,
+              windowWidth: 255,
+              pixelSpacing: [1.0, 1.0],
+              rescaleSlope: 1,
+              rescaleIntercept: 0,
+              isNonDicom: true,
+            },
+            rawPixels: img,
+          };
+          setDicomCache((prev) => ({ ...prev, [index]: item }));
+          setWindowCenter(128);
+          setWindowWidth(255);
+          return;
+        } catch (err) {
+          console.error('Lỗi tải ảnh Non-DICOM:', err);
+          message.error(`Không thể tải ảnh lát cắt #${index + 1}`);
+          return;
+        }
+      }
+
       try {
         const res = await axios.get(
           `${apiEndpoint}/api/pacs/instances/${instance.sopInstanceUid}/file`,

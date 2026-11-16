@@ -26,6 +26,8 @@ export default function PacsMultiViewportGrid({
   patientId = '',
   study = null,
   onMaximizeTo1x1,
+  isSmooth = true,
+  onToggleSmooth,
 }) {
   // Number of viewports needed
   const cellCount = layout === '2x2' ? 4 : 2;
@@ -103,10 +105,11 @@ export default function PacsMultiViewportGrid({
           windowWidth,
           invert,
           colorLut,
+          isSmooth,
         });
       }
     }
-  }, [cellsState, cellCount, dicomCache, getCellInstances, windowCenter, windowWidth, invert, colorLut]);
+  }, [cellsState, cellCount, dicomCache, getCellInstances, windowCenter, windowWidth, invert, colorLut, isSmooth]);
 
   // Handle Wheel on a viewport
   const handleCellWheel = (e, viewportIdx) => {
@@ -216,6 +219,23 @@ export default function PacsMultiViewportGrid({
             {syncScroll ? '🔗 Đồng bộ cuộn: BẬT' : 'Liên kết cuộn: TẮT'}
           </Button>
         </Tooltip>
+
+        {onToggleSmooth && (
+          <Tooltip title={isSmooth ? "Đang bật làm mịn Bilinear (Nhấp để xem điểm ảnh gốc)" : "Đang xem điểm ảnh gốc Pixelated (Nhấp để làm mịn Bilinear)"}>
+            <Button
+              size="small"
+              onClick={onToggleSmooth}
+              style={{
+                fontSize: '11px',
+                backgroundColor: isSmooth ? '#0284c7' : '#1e293b',
+                borderColor: isSmooth ? '#38bdf8' : '#334155',
+                color: '#ffffff',
+              }}
+            >
+              {isSmooth ? '✨ Mịn (Bilinear)' : '🔲 Gốc (Pixel)'}
+            </Button>
+          </Tooltip>
+        )}
 
         <span style={{ fontSize: '10px', color: '#94a3b8', fontFamily: 'monospace' }}>
           Bố cục: {layout}
@@ -364,7 +384,7 @@ export default function PacsMultiViewportGrid({
                     display: 'block',
                     maxWidth: '85%',
                     maxHeight: '85%',
-                    imageRendering: 'pixelated',
+                    imageRendering: isSmooth ? 'auto' : 'pixelated',
                   }}
                 />
               </div>

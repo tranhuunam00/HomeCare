@@ -14,7 +14,7 @@ export function usePacsThumbnails({
   const [seriesThumbnails, setSeriesThumbnails] = useState({});
   const [sliceThumbnails, setSliceThumbnails] = useState({});
 
-  // Pre-generate thumbnails for every slice in the currently active series when right strip is open
+  // Tầng 3: Tải nhanh Thumbnail (~1.4KB) cho các lát cắt trong active series
   useEffect(() => {
     if (!rightSliceStripOpen || !activeSeries?.instances?.length) return;
     let cancelled = false;
@@ -26,6 +26,26 @@ export function usePacsThumbnails({
         if (sliceThumbnails[inst.globalIndex]) continue;
 
         try {
+          // Ưu tiên 1: Tải trực tiếp Thumbnail Tầng 3 từ backend PACS (chỉ ~1.4KB)
+          try {
+            const thumbRes = await axios.get(
+              `${apiEndpoint}/api/pacs/instances/${inst.sopInstanceUid}/thumbnail`,
+              { responseType: 'blob', headers, timeout: 3000 }
+            );
+            if (thumbRes.status === 200 && thumbRes.data) {
+              const objectUrl = URL.createObjectURL(thumbRes.data);
+              if (!cancelled) {
+                setSliceThumbnails((prev) =>
+                  prev[inst.globalIndex] ? prev : { ...prev, [inst.globalIndex]: objectUrl }
+                );
+                continue;
+              }
+            }
+          } catch (e) {
+            // Fallback sang tự decode nếu instance cũ chưa có thumbnail sinh sẵn
+          }
+
+          // Ưu tiên 2: Giải mã cục bộ từ DCM cache / file gốc
           let parsed = dicomCache[inst.globalIndex];
           if (!parsed) {
             const res = await axios.get(
@@ -64,7 +84,7 @@ export function usePacsThumbnails({
     };
   }, [rightSliceStripOpen, activeSeries, apiEndpoint, getAuthHeaders, dicomCache, setDicomCache, sliceThumbnails]);
 
-  // Pre-generate real thumbnails for every series from its own first instance
+  // Tầng 3: Tải nhanh Thumbnail đại diện cho từng Series
   useEffect(() => {
     if (!seriesList || seriesList.length === 0) return;
     let cancelled = false;
@@ -77,6 +97,24 @@ export function usePacsThumbnails({
         if (!firstInst || seriesThumbnails[series.seriesUid]) continue;
 
         try {
+          // Ưu tiên 1: Tải nhanh Thumbnail Tầng 3 (~1.4KB)
+          try {
+            const thumbRes = await axios.get(
+              `${apiEndpoint}/api/pacs/instances/${firstInst.sopInstanceUid}/thumbnail`,
+              { responseType: 'blob', headers, timeout: 3000 }
+            );
+            if (thumbRes.status === 200 && thumbRes.data) {
+              const objectUrl = URL.createObjectURL(thumbRes.data);
+              if (!cancelled) {
+                setSeriesThumbnails((prev) =>
+                  prev[series.seriesUid] ? prev : { ...prev, [series.seriesUid]: objectUrl }
+                );
+                continue;
+              }
+            }
+          } catch (e) {}
+
+          // Ưu tiên 2: Tải và decode file gốc
           let parsed = dicomCache[firstInst.globalIndex];
           if (!parsed) {
             const res = await axios.get(

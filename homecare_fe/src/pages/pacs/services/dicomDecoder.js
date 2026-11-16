@@ -174,6 +174,27 @@ export function renderDicomToCanvas(canvas, rawPixels, meta, options = {}) {
   canvas.height = rows;
 
   const ctx = canvas.getContext('2d');
+
+  if (rawPixels instanceof HTMLImageElement || rawPixels instanceof ImageBitmap) {
+    canvas.width = columns || rawPixels.naturalWidth || rawPixels.width;
+    canvas.height = rows || rawPixels.naturalHeight || rawPixels.height;
+    const isSmooth = options.isSmooth !== undefined ? options.isSmooth : true;
+    ctx.imageSmoothingEnabled = isSmooth;
+    if (isSmooth) ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(rawPixels, 0, 0, canvas.width, canvas.height);
+    if (invert) {
+      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const d = imgData.data;
+      for (let j = 0; j < d.length; j += 4) {
+        d[j] = 255 - d[j];
+        d[j + 1] = 255 - d[j + 1];
+        d[j + 2] = 255 - d[j + 2];
+      }
+      ctx.putImageData(imgData, 0, 0);
+    }
+    return;
+  }
+
   const imageData = ctx.createImageData(columns, rows);
   const data = imageData.data;
 
@@ -188,7 +209,14 @@ export function renderDicomToCanvas(canvas, rawPixels, meta, options = {}) {
   const halfWidth = windowWidth / 2;
   const low = windowCenter - halfWidth;
   const high = windowCenter + halfWidth;
+  const invWidth = 255 / Math.max(1, windowWidth);
   const isMonochrome1 = photometricInterpretation === 'MONOCHROME1';
+  const isSmooth = options.isSmooth !== undefined ? options.isSmooth : true;
+
+  ctx.imageSmoothingEnabled = isSmooth;
+  if (isSmooth) {
+    ctx.imageSmoothingQuality = 'high';
+  }
 
   for (let i = 0; i < numPixels; i++) {
     const rawVal = rawPixels[i];
@@ -201,7 +229,7 @@ export function renderDicomToCanvas(canvas, rawPixels, meta, options = {}) {
     } else if (hu >= high) {
       intensity = 255;
     } else {
-      intensity = ((hu - low) / windowWidth) * 255;
+      intensity = Math.round((hu - low) * invWidth);
     }
 
     if (isMonochrome1) {

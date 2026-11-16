@@ -58,6 +58,7 @@ export default function PacsViewport({
   windowWidth,
   windowCenter,
   instancesCount = 0,
+  isSmooth = true,
 }) {
   const isActive = activeViewport === viewportIndex;
   const sliderTrackRef = useRef(null);
@@ -165,7 +166,7 @@ export default function PacsViewport({
             display: 'block',
             maxWidth: '85vh',
             maxHeight: '85vh',
-            imageRendering: 'pixelated',
+            imageRendering: isSmooth ? 'auto' : 'pixelated',
           }}
         />
 
