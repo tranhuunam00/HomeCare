@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { Tag, Space, Button, Tooltip } from 'antd';
 import { EyeOutlined, EditOutlined, DeleteOutlined, CopyOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
@@ -20,6 +20,11 @@ export default function usePatientDiagnoseColumns({
   handleDelete,
   handleClone,
 }) {
+  // Giữ handler mới nhất trong ref để allColumns không bị tạo lại mỗi render
+  // (handleDelete/handleClone là hàm inline ở component cha -> đổi reference mỗi render -> vòng lặp setState)
+  const handlersRef = useRef({ handleDelete, handleClone });
+  handlersRef.current = { handleDelete, handleClone };
+
   const allColumns = useMemo(
     () => [
       {
@@ -197,7 +202,7 @@ export default function usePatientDiagnoseColumns({
                 danger
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleDelete(record.id);
+                  handlersRef.current.handleDelete?.(record.id);
                 }}
               />
               <Button
@@ -205,14 +210,14 @@ export default function usePatientDiagnoseColumns({
                 type="text"
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleClone(record);
+                  handlersRef.current.handleClone?.(record);
                 }}
               />
             </Space>
           ),
       },
     ],
-    [user, clinicsAll, examParts, templateServices, page, navigate, handleDelete, handleClone]
+    [user, clinicsAll, examParts, templateServices, page, navigate]
   );
 
   return allColumns;

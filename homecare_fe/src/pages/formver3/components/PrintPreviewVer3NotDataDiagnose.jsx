@@ -209,7 +209,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
           bordered={false}
           className={styles.a4Page}
           style={{ padding: !isOnLyContent ? PAGE_PADDING_RIGHT : 0 }}
-          bodyPadding={0}
+          styles={{ body: { padding: 0 } }}
         >
           {!isOnLyContent && isUse && (
             /* Trên Desktop và khi In (@media print) hiển thị Header chuẩn. Trên mobile màn hình ẩn để tinh gọn. */
