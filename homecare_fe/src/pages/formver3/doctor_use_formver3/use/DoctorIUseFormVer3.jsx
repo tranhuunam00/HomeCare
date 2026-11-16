@@ -23,8 +23,11 @@ import FormActionBar, {
 } from "../../../formver2/component/FormActionBar.jsx";
 import {
   buildFormDataDoctorUseFormVer3,
+  buildDradv3FormValues,
+  DEFAULT_IMAGING_ROWS,
   LANGUAGE_OPTIONS,
 } from "../../formver3.constant";
+import { parseImageDescriptionState } from "../doctorUseFormVer3.utils";
 import { translateLabel } from "../../../../constant/translate.report";
 import AdvancedSampleSection from "../../components/AdvancedSampleSection";
 import ImagingDiagnosisSection from "../../components/ImagingDiagnosisSection";
@@ -36,6 +39,7 @@ import ProcedureSection from "../components/ProcedureSection";
 import ImagingFindingsSection from "../components/ImagingFindingsSection";
 import IllustrativeImagesSection from "../components/IllustrativeImagesSection";
 import DoctorFormModals from "../components/DoctorFormModals";
+import VoiceCursorDictation from "../../components/VoiceCursorDictation.jsx";
 import useDoctorFormHotkeys from "../hooks/useDoctorFormHotkeys";
 import useDoctorFormData from "../hooks/useDoctorFormData";
 import usePacsKeyImageReceiver from "../hooks/usePacsKeyImageReceiver";
@@ -310,6 +314,94 @@ export default function DoctorUseDFormVer3({
     }
   };
 
+  const restoreFromSnapshot = () => {
+    openConfirm({
+      title: "Xác nhận hoàn tác",
+      message: "Toàn bộ dữ liệu sẽ quay về trạng thái gốc từ hệ thống. Bạn có chắc muốn hoàn tác?",
+      onConfirm: () => {
+        if (!idEdit) {
+          const patientSnap = initialSnap?.patientDiagnose;
+          if (!patientSnap) {
+            toast.error("Không tìm thấy dữ liệu bệnh nhân gốc");
+            return;
+          }
+          form.resetFields();
+          form.setFieldsValue(
+            buildDradv3FormValues({ patientDiagnose: patientSnap, doctorUseFormVer3: null })
+          );
+          setImageList([{}, {}, {}]);
+          setImagingRows(DEFAULT_IMAGING_ROWS);
+          setFormVer3(null);
+          toast.success("Đã reset form tạo mới");
+          return;
+        }
+        const apiData = initialSnap?.apiData;
+        if (!apiData) return;
+        const formValues = buildDradv3FormValues({
+          doctorUseFormVer3: apiData,
+          patientDiagnose: apiData.id_patient_diagnose_patient_diagnose || patientDiagnose,
+        });
+        formValues.id_formver3_name = apiData.id_formver3_formver3?.id_formver3_name;
+        form.setFieldsValue(formValues);
+        const parsed = parseImageDescriptionState(apiData.imageDescription);
+        setImagingMode(parsed.mode);
+        setIsFreeText(parsed.isFreeText);
+        setFreeTextContent(parsed.content);
+        setFastSonoData(parsed.fastSonoData);
+        setImagingRows(parsed.rows);
+        setImageList(
+          apiData.image_doctor_use_form_ver3s
+            ?.filter((x) => x.kind === "hinh_anh_mo_ta" || x.kind === "desc")
+            ?.map((x) => ({ url: x.url, caption: x.desc || "", rawUrl: x.url, file: undefined })) || []
+        );
+        setFormVer3(apiData.id_formver3_formver3);
+        toast.success("Đã hoàn tác về dữ liệu gốc từ hệ thống");
+      },
+    });
+  };
+
+  const handleTranslateEn = async () => {
+    if (!idEdit) {
+      toast.warning("Chưa có form để dịch");
+      return;
+    }
+    const doTranslate = async () => {
+      try {
+        setLoading(true);
+        const res = await API_CALL.post(`/doctorUseFormVer3/${idEdit}/translate`);
+        const newRecord = res?.data?.data || res?.data;
+        toast.success("Tạo bản dịch tiếng Anh thành công. Vui lòng vào phần Các Bản Dịch để kiểm tra");
+        if (newRecord?.id) setIdEdit(newRecord.id);
+      } catch (error) {
+        toast.error(error?.response?.data?.message || "Không thể tạo bản dịch tiếng Anh");
+      } finally {
+        setLoading(false);
+      }
+    };
+    try {
+      const res = await API_CALL.get("/doctorUseFormVer3", {
+        params: { id_patient_diagnose: selectedPatientDiagnose?.id, language: "en", page: 1, limit: 1 },
+      });
+      const enRecords = res?.data?.data?.data || [];
+      openConfirm(
+        enRecords.length > 0
+          ? {
+              title: "Xác nhận tạo bản dịch",
+              message:
+                "Đã tồn tại bản dịch tiếng Anh.\n\nBạn có thể xem trong mục 'CÁC BẢN DỊCH'.\n\nBạn có muốn tạo thêm một bản dịch mới không?",
+              onConfirm: doTranslate,
+            }
+          : {
+              title: "Xác nhận dịch",
+              message: "Bạn có chắc chắn muốn tạo bản dịch tiếng Anh cho kết quả này không?",
+              onConfirm: doTranslate,
+            }
+      );
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Không thể tạo bản dịch tiếng Anh");
+    }
+  };
+
   const onApprove = async () => {
     if (isEdit) {
       toast.warning("Vui lòng lưu lại trước khi phê duyệt");
@@ -478,29 +570,135 @@ export default function DoctorUseDFormVer3({
           />
 
           <FormActionBar
+            patientDiagnose={patientDiagnose}
+            languageTranslate={languageTranslate}
+            editId={idEdit}
             isEdit={isEdit}
-            onEdit={() => {
+            onSign={() => setSignModalOpen(true)}
+            onConsultation={onOpenConsultation}
+            onTuChoiConsultation={() => {
+              openConfirm({
+                title: "Xác nhận từ chối hội chẩn",
+                message: "Bạn có chắc muốn từ chối hội chẩn? Nếu từ chối, ca sẽ rollback về trạng thái ĐANG ĐỌC của Bác sĩ chính.",
+                onConfirm: () =>
+                  transitionStatus({
+                    patientDiagnoseId: patientDiagnose.id,
+                    newStatus: PATIENT_DIAGNOSE_STATUS_CODE.IN_PROCESSING,
+                    successMessage: "Từ chối hội chẩn thành công",
+                    localSetState: setPatientDiagnose,
+                    onStatusChange,
+                    additionalPayload: { is_consultation_reject: true },
+                  }),
+              });
+            }}
+            onPrint={() => {
+              printSourceRef.current = "manual";
+              setPreviewOpen(true);
+              setTimeout(() => {
+                if (printRef.current) handlePrint(printRef);
+              }, 300);
+            }}
+            onExit={() => setSelectedPatientDiagnose(null)}
+            onApprove={onApprove}
+            onAction={(key) => {
+              if (!hasReadingPermission) {
+                toast.error(`Bạn không có quyền chỉnh sửa ca này vì do Bác sĩ ${inProcessingDoctorName} phụ trách đọc.`);
+                return;
+              }
+              openConfirm({
+                title: "Xác nhận lưu",
+                message: "Bạn có chắc muốn lưu lại dữ liệu không?",
+                onConfirm: () => {
+                  pendingAction.current = key;
+                  form.submit();
+                },
+              });
+            }}
+            onReset={restoreFromSnapshot}
+            onPreview={() => setPreviewOpen((prev) => !prev)}
+            onEdit={async () => {
               if (!hasReadingPermission) {
                 toast.error(`Bạn không có quyền sửa ca này vì do Bác sĩ ${inProcessingDoctorName} phụ trách đọc.`);
                 return;
               }
-              setIsEdit(true);
+              setIsEdit(!isEdit);
+              if (patientDiagnose?.status === PATIENT_DIAGNOSE_STATUS_CODE.READ_DONE) {
+                await transitionStatus({
+                  patientDiagnoseId: patientDiagnose.id,
+                  newStatus: PATIENT_DIAGNOSE_STATUS_CODE.IN_PROCESSING,
+                  successMessage: "Đã chuyển sang trạng thái ĐANG ĐỌC",
+                  localSetState: setPatientDiagnose,
+                  onStatusChange,
+                });
+              }
             }}
-            onCancel={() => setIsEdit(false)}
-            onSave={() => {
-              pendingAction.current = KEY_ACTION_BUTTON.save;
-              form.submit();
+            onEditDuyet={async () => {
+              setIsEdit(!isEdit);
+              if (patientDiagnose?.status === PATIENT_DIAGNOSE_STATUS_CODE.VERIFIED) {
+                await transitionStatus({
+                  patientDiagnoseId: patientDiagnose.id,
+                  newStatus: PATIENT_DIAGNOSE_STATUS_CODE.WAIT_VERIFY,
+                  successMessage: null,
+                  localSetState: setPatientDiagnose,
+                  onStatusChange,
+                });
+              }
             }}
-            onReadDone={handleDocXong}
-            onApprove={onApprove}
-            patientDiagnose={patientDiagnose}
-            doctor={doctor}
-            onOpenSignModal={() => setSignModalOpen(true)}
-            onOpenConsultation={onOpenConsultation}
-            onStatusChange={onStatusChange}
-            setPatientDiagnose={setPatientDiagnose}
-            onOpenPreview={() => setPreviewOpen(true)}
+            onDocXong={handleDocXong}
+            onHuyDoc={() => {
+              const newStatus = patientDiagnose.id_consulting_doctor
+                ? PATIENT_DIAGNOSE_STATUS_CODE.CONSULTATION
+                : PATIENT_DIAGNOSE_STATUS_CODE.NEW;
+              const newStatusLabel =
+                newStatus === PATIENT_DIAGNOSE_STATUS_CODE.CONSULTATION ? "Hội Chẩn" : "Mới";
+              openConfirm({
+                title: "Xác nhận hủy đọc",
+                message: `Bạn có chắc muốn chuyển về trạng thái ${newStatusLabel}?`,
+                onConfirm: () =>
+                  transitionStatus({
+                    patientDiagnoseId: patientDiagnose.id,
+                    newStatus,
+                    successMessage: `Đã về trạng thái ${newStatusLabel}`,
+                    localSetState: setPatientDiagnose,
+                    onStatusChange,
+                  }),
+              });
+            }}
+            onNhanDuyet={() =>
+              transitionStatus({
+                patientDiagnoseId: patientDiagnose.id,
+                newStatus: PATIENT_DIAGNOSE_STATUS_CODE.WAIT_VERIFY,
+                successMessage: null,
+                localSetState: setPatientDiagnose,
+                onStatusChange,
+              })
+            }
+            onHuyDuyet={() =>
+              transitionStatus({
+                patientDiagnoseId: patientDiagnose.id,
+                newStatus: PATIENT_DIAGNOSE_STATUS_CODE.READ_DONE,
+                successMessage: null,
+                localSetState: setPatientDiagnose,
+                onStatusChange,
+              })
+            }
+            onTraCa={() => {
+              openConfirm({
+                title: "Xác nhận trả ca",
+                message: "Bạn có chắc chắn muốn từ chối duyệt và trả ca này về trạng thái Đang đọc?",
+                onConfirm: () =>
+                  transitionStatus({
+                    patientDiagnoseId: patientDiagnose.id,
+                    newStatus: PATIENT_DIAGNOSE_STATUS_CODE.IN_PROCESSING,
+                    successMessage: "Đã trả ca về trạng thái ĐANG ĐỌC",
+                    localSetState: setPatientDiagnose,
+                    onStatusChange,
+                  }),
+              });
+            }}
+            onTranslate={handleTranslateEn}
           />
+          <VoiceCursorDictation form={form} isMobile={isMobile} />
         </Form>
       )}
 
@@ -517,7 +715,7 @@ export default function DoctorUseDFormVer3({
         setPrintTemplate={setPrintTemplate}
         previewOpen={previewOpen}
         setPreviewOpen={setPreviewOpen}
-        onPrint={() => handlePrint(printSourceRef.current)}
+        onPrint={() => handlePrint(printRef)}
         signModalOpen={signModalOpen}
         setSignModalOpen={setSignModalOpen}
         confirmState={confirmState}

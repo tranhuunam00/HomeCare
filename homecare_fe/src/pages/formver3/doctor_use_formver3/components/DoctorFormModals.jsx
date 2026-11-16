@@ -1,6 +1,4 @@
 import React from "react";
-import HistoryModal from "../../../doctor_use_form_ver2/use/items/HistoryModal";
-import TranslateListRecordsVer3 from "../../components/TranslateListRecordsVer3.jsx";
 import SmartCASignModal from "../../../doctor_use_form_ver2/SmartCASignModal/SmartCASignModal";
 import ConfirmActionModal from "../../../../components/ConfirmActionModal/ConfirmActionModal";
 import PrintPreviewModal from "./PrintPreviewModal";
@@ -66,16 +64,8 @@ export default function DoctorFormModals({
 
       <SmartCASignModal
         open={signModalOpen}
-        onCancel={() => setSignModalOpen(false)}
-        patientDiagnose={patientDiagnose}
-        idDoctorUseFormVer3={idEdit}
-      />
-
-      <HistoryModal patientDiagnoseId={patientDiagnose?.id} />
-
-      <TranslateListRecordsVer3
-        patientDiagnoseId={patientDiagnose?.id}
-        doctorUseFormVer3Id={idEdit}
+        onClose={() => setSignModalOpen(false)}
+        id_doctor_use_form_ver3={idEdit}
       />
 
       <ConfirmActionModal {...confirmState} />
