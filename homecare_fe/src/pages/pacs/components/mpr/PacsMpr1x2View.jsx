@@ -1,23 +1,61 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Radio, Slider } from 'antd';
+import {
+  renderAxialCanvas,
+  renderCoronalCanvas,
+  renderSagittalCanvas,
+  renderVolume3DCanvas,
+} from '../../services/pacsVolumeEngine';
 
 export default function PacsMpr1x2View({
-  volumeCanvasRef,
-  axialCanvasRef,
-  coronalCanvasRef,
-  sagittalCanvasRef,
+  validSlices = [],
   rot3D,
   crosshair,
   setCrosshair,
-  active2DPlane,
+  active2DPlane = 'AXIAL',
   setActive2DPlane,
-  cols,
-  rows,
-  numSlices,
+  cols = 256,
+  rows = 256,
+  numSlices = 1,
+  threshold3D = 35,
+  colorMode3D = 'bone_shaded',
   onMouseDown3D,
   onMouseMove3D,
   onMouseUp3D,
+  isDragging3D = false,
 }) {
+  const volumeCanvasRef = useRef(null);
+  const axialCanvasRef = useRef(null);
+  const coronalCanvasRef = useRef(null);
+  const sagittalCanvasRef = useRef(null);
+
+  // Paint 3D Volume View
+  useEffect(() => {
+    renderVolume3DCanvas(
+      volumeCanvasRef.current,
+      validSlices,
+      rot3D,
+      threshold3D,
+      colorMode3D,
+      cols,
+      rows,
+      numSlices,
+      320,
+      isDragging3D
+    );
+  }, [validSlices, rot3D, threshold3D, colorMode3D, cols, rows, numSlices, isDragging3D]);
+
+  // Paint 2D Views
+  useEffect(() => {
+    if (active2DPlane === 'AXIAL') {
+      renderAxialCanvas(axialCanvasRef.current, validSlices, crosshair, cols, rows, numSlices, 340);
+    } else if (active2DPlane === 'CORONAL') {
+      renderCoronalCanvas(coronalCanvasRef.current, validSlices, crosshair, cols, rows, numSlices, 340);
+    } else {
+      renderSagittalCanvas(sagittalCanvasRef.current, validSlices, crosshair, cols, rows, numSlices, 340);
+    }
+  }, [active2DPlane, validSlices, crosshair, cols, rows, numSlices]);
+
   return (
     <div
       style={{
@@ -25,9 +63,10 @@ export default function PacsMpr1x2View({
         display: 'grid',
         gridTemplateColumns: '1fr 1fr',
         gridTemplateRows: '1fr',
-        gap: 4,
-        padding: 4,
+        gap: 6,
+        padding: 6,
         backgroundColor: '#000000',
+        minHeight: 0,
       }}
     >
       {/* VIEWPORT 3D VOLUME RENDERING (Bên trái) */}
@@ -38,8 +77,9 @@ export default function PacsMpr1x2View({
           position: 'relative',
           display: 'flex',
           flexDirection: 'column',
-          cursor: 'grab',
+          cursor: isDragging3D ? 'grabbing' : 'grab',
           overflow: 'hidden',
+          borderRadius: 4,
         }}
         onMouseDown={onMouseDown3D}
         onMouseMove={onMouseMove3D}
@@ -108,9 +148,10 @@ export default function PacsMpr1x2View({
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
+          borderRadius: 4,
         }}
       >
-        {/* Header của Viewport 2D: Cho phép đổi mặt cắt */}
+        {/* Header của Viewport 2D */}
         <div
           style={{
             position: 'absolute',
@@ -147,6 +188,23 @@ export default function PacsMpr1x2View({
           </span>
         </div>
 
+        {/* 10cm Reference Scale Bar */}
+        <div
+          style={{
+            position: 'absolute',
+            right: 12,
+            bottom: 45,
+            zIndex: 10,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            pointerEvents: 'none',
+          }}
+        >
+          <div style={{ width: 2, height: 60, backgroundColor: '#94a3b8' }} />
+          <span style={{ fontSize: '9px', color: '#94a3b8', marginTop: 2 }}>10cm</span>
+        </div>
+
         <div
           style={{
             flex: 1,
@@ -158,33 +216,48 @@ export default function PacsMpr1x2View({
           }}
         >
           <canvas
-            ref={
-              active2DPlane === 'AXIAL'
-                ? axialCanvasRef
-                : active2DPlane === 'CORONAL'
-                ? coronalCanvasRef
-                : sagittalCanvasRef
-            }
+            ref={axialCanvasRef}
             style={{
+              display: active2DPlane === 'AXIAL' ? 'block' : 'none',
               width: '96%',
               height: '96%',
               objectFit: 'contain',
             }}
             onClick={(e) => {
               const rect = e.currentTarget.getBoundingClientRect();
-              if (active2DPlane === 'AXIAL') {
-                const x = Math.round(((e.clientX - rect.left) / rect.width) * cols);
-                const y = Math.round(((e.clientY - rect.top) / rect.height) * rows);
-                setCrosshair((prev) => ({ ...prev, x, y }));
-              } else if (active2DPlane === 'CORONAL') {
-                const x = Math.round(((e.clientX - rect.left) / rect.width) * cols);
-                const z = Math.round(((e.clientY - rect.top) / rect.height) * Math.max(1, numSlices - 1));
-                setCrosshair((prev) => ({ ...prev, x, z }));
-              } else {
-                const y = Math.round(((e.clientX - rect.left) / rect.width) * rows);
-                const z = Math.round(((e.clientY - rect.top) / rect.height) * Math.max(1, numSlices - 1));
-                setCrosshair((prev) => ({ ...prev, y, z }));
-              }
+              const x = Math.round(((e.clientX - rect.left) / rect.width) * cols);
+              const y = Math.round(((e.clientY - rect.top) / rect.height) * rows);
+              setCrosshair((prev) => ({ ...prev, x, y }));
+            }}
+          />
+          <canvas
+            ref={coronalCanvasRef}
+            style={{
+              display: active2DPlane === 'CORONAL' ? 'block' : 'none',
+              width: '96%',
+              height: '96%',
+              objectFit: 'contain',
+            }}
+            onClick={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              const x = Math.round(((e.clientX - rect.left) / rect.width) * cols);
+              const z = Math.round(((e.clientY - rect.top) / rect.height) * Math.max(1, numSlices - 1));
+              setCrosshair((prev) => ({ ...prev, x, z }));
+            }}
+          />
+          <canvas
+            ref={sagittalCanvasRef}
+            style={{
+              display: active2DPlane === 'SAGITTAL' ? 'block' : 'none',
+              width: '96%',
+              height: '96%',
+              objectFit: 'contain',
+            }}
+            onClick={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              const y = Math.round(((e.clientX - rect.left) / rect.width) * rows);
+              const z = Math.round(((e.clientY - rect.top) / rect.height) * Math.max(1, numSlices - 1));
+              setCrosshair((prev) => ({ ...prev, y, z }));
             }}
           />
         </div>

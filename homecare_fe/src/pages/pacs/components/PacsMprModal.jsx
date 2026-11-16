@@ -1,14 +1,8 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Modal, Progress } from 'antd';
 import { CloseOutlined, LoadingOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import { parseDicomBuffer } from '../services/dicomDecoder';
-import {
-  renderAxialCanvas,
-  renderCoronalCanvas,
-  renderSagittalCanvas,
-  renderVolume3DCanvas,
-} from '../services/pacsVolumeEngine';
 import PacsMprToolbar from './mpr/PacsMprToolbar';
 import PacsMpr1x2View from './mpr/PacsMpr1x2View';
 import PacsMpr2x2View from './mpr/PacsMpr2x2View';
@@ -16,7 +10,7 @@ import PacsMpr3DMaxView from './mpr/PacsMpr3DMaxView';
 
 /**
  * VR-PACS 3D Volume & Multi-Planar Reconstruction (MPR) Tool
- * Computes isotropic Axial, Sagittal, Coronal planes and 3D Volume MIP from CT/MRI slices.
+ * Computes isotropic Axial, Sagittal, Coronal planes and 3D Ray-Casted Shaded Volume Rendering.
  */
 export default function PacsMprModal({
   open,
@@ -52,7 +46,6 @@ export default function PacsMprModal({
   const sampleMeta = validSlices[0]?.meta || {};
   const rows = sampleMeta.rows || 256;
   const cols = sampleMeta.columns || 256;
-  const RENDER_RES = 320;
 
   const [layoutMode, setLayoutMode] = useState('1x2');
   const [active2DPlane, setActive2DPlane] = useState('AXIAL');
@@ -62,11 +55,7 @@ export default function PacsMprModal({
   const [rot3D, setRot3D] = useState({ angleX: 18, angleY: 35 });
   const [threshold3D, setThreshold3D] = useState(modality === 'MR' ? 25 : 35);
   const [colorMode3D, setColorMode3D] = useState('bone_shaded');
-
-  const axialCanvasRef = useRef(null);
-  const sagittalCanvasRef = useRef(null);
-  const coronalCanvasRef = useRef(null);
-  const volumeCanvasRef = useRef(null);
+  const [isDragging3D, setIsDragging3D] = useState(false);
 
   // Background fetch missing slices
   useEffect(() => {
@@ -143,7 +132,7 @@ export default function PacsMprModal({
     };
   }, [open, instances, apiEndpoint, getAuthHeaders, setDicomCache]);
 
-  // Synchronize crosshairs
+  // Synchronize crosshairs to center on slices loaded
   useEffect(() => {
     if (numSlices > 0) {
       setCrosshair({
@@ -154,57 +143,28 @@ export default function PacsMprModal({
     }
   }, [numSlices, cols, rows]);
 
-  // Render 2D Views
-  useEffect(() => {
-    renderAxialCanvas(axialCanvasRef.current, validSlices, crosshair, cols, rows, numSlices, RENDER_RES);
-  }, [crosshair, validSlices, cols, rows, numSlices]);
-
-  useEffect(() => {
-    renderCoronalCanvas(coronalCanvasRef.current, validSlices, crosshair, cols, rows, numSlices, RENDER_RES);
-  }, [crosshair, validSlices, cols, rows, numSlices]);
-
-  useEffect(() => {
-    renderSagittalCanvas(sagittalCanvasRef.current, validSlices, crosshair, cols, rows, numSlices, RENDER_RES);
-  }, [crosshair, validSlices, cols, rows, numSlices]);
-
-  // Render 3D Volume View
-  useEffect(() => {
-    renderVolume3DCanvas(
-      volumeCanvasRef.current,
-      validSlices,
-      rot3D,
-      threshold3D,
-      colorMode3D,
-      cols,
-      rows,
-      numSlices,
-      RENDER_RES
-    );
-  }, [validSlices, rot3D, threshold3D, colorMode3D, cols, rows, numSlices]);
-
-  // 3D Mouse Drag
-  const isDragging3D = useRef(false);
+  // 3D Mouse Drag handling
   const lastMousePos = useRef({ x: 0, y: 0 });
 
   const handleMouseDown3D = (e) => {
-    isDragging3D.current = true;
+    setIsDragging3D(true);
     lastMousePos.current = { x: e.clientX, y: e.clientY };
   };
 
   const handleMouseMove3D = (e) => {
-    if (!isDragging3D.current) return;
+    if (!isDragging3D) return;
     const dx = e.clientX - lastMousePos.current.x;
     const dy = e.clientY - lastMousePos.current.y;
     lastMousePos.current = { x: e.clientX, y: e.clientY };
 
     setRot3D((prev) => ({
-      angleY: (prev.angleY + dx * 0.8) % 360,
-      angleX: Math.max(-85, Math.min(85, prev.angleX - dy * 0.8)),
+      angleY: (prev.angleY + dx * 0.9) % 360,
+      angleX: Math.max(-85, Math.min(85, prev.angleX - dy * 0.9)),
     }));
   };
 
   const handleMouseUp3D = () => {
-    isDragging3D.current = false;
+    setIsDragging3D(false);
   };
 
   const handleReset3D = () => {
@@ -231,7 +191,10 @@ export default function PacsMprModal({
       closeIcon={<CloseOutlined style={{ color: '#fff', fontSize: 16 }} />}
       destroyOnClose
     >
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+      <div
+        style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}
+        onMouseUp={handleMouseUp3D}
+      >
         <PacsMprToolbar
           patientName={patientName}
           modality={modality}
@@ -325,10 +288,7 @@ export default function PacsMprModal({
           </div>
         ) : layoutMode === '1x2' ? (
           <PacsMpr1x2View
-            volumeCanvasRef={volumeCanvasRef}
-            axialCanvasRef={axialCanvasRef}
-            coronalCanvasRef={coronalCanvasRef}
-            sagittalCanvasRef={sagittalCanvasRef}
+            validSlices={validSlices}
             rot3D={rot3D}
             crosshair={crosshair}
             setCrosshair={setCrosshair}
@@ -337,33 +297,42 @@ export default function PacsMprModal({
             cols={cols}
             rows={rows}
             numSlices={numSlices}
+            threshold3D={threshold3D}
+            colorMode3D={colorMode3D}
             onMouseDown3D={handleMouseDown3D}
             onMouseMove3D={handleMouseMove3D}
             onMouseUp3D={handleMouseUp3D}
+            isDragging3D={isDragging3D}
           />
         ) : layoutMode === '3D_MAX' ? (
           <PacsMpr3DMaxView
-            volumeCanvasRef={volumeCanvasRef}
+            validSlices={validSlices}
             rot3D={rot3D}
+            cols={cols}
+            rows={rows}
+            numSlices={numSlices}
+            threshold3D={threshold3D}
+            colorMode3D={colorMode3D}
             onMouseDown3D={handleMouseDown3D}
             onMouseMove3D={handleMouseMove3D}
-            onMouseUp={handleMouseUp3D}
+            onMouseUp3D={handleMouseUp3D}
+            isDragging3D={isDragging3D}
           />
         ) : (
           <PacsMpr2x2View
-            axialCanvasRef={axialCanvasRef}
-            sagittalCanvasRef={sagittalCanvasRef}
-            coronalCanvasRef={coronalCanvasRef}
-            volumeCanvasRef={volumeCanvasRef}
+            validSlices={validSlices}
             crosshair={crosshair}
             setCrosshair={setCrosshair}
             cols={cols}
             rows={rows}
             numSlices={numSlices}
             rot3D={rot3D}
+            threshold3D={threshold3D}
+            colorMode3D={colorMode3D}
             onMouseDown3D={handleMouseDown3D}
             onMouseMove3D={handleMouseMove3D}
-            onMouseUp={handleMouseUp3D}
+            onMouseUp3D={handleMouseUp3D}
+            isDragging3D={isDragging3D}
           />
         )}
       </div>

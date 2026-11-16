@@ -1,12 +1,36 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
+import { renderVolume3DCanvas } from '../../services/pacsVolumeEngine';
 
 export default function PacsMpr3DMaxView({
-  volumeCanvasRef,
+  validSlices = [],
   rot3D,
+  cols = 256,
+  rows = 256,
+  numSlices = 1,
+  threshold3D = 35,
+  colorMode3D = 'bone_shaded',
   onMouseDown3D,
   onMouseMove3D,
   onMouseUp3D,
+  isDragging3D = false,
 }) {
+  const volumeCanvasRef = useRef(null);
+
+  useEffect(() => {
+    renderVolume3DCanvas(
+      volumeCanvasRef.current,
+      validSlices,
+      rot3D,
+      threshold3D,
+      colorMode3D,
+      cols,
+      rows,
+      numSlices,
+      480,
+      isDragging3D
+    );
+  }, [validSlices, rot3D, threshold3D, colorMode3D, cols, rows, numSlices, isDragging3D]);
+
   return (
     <div
       style={{
@@ -16,8 +40,9 @@ export default function PacsMpr3DMaxView({
         position: 'relative',
         display: 'flex',
         flexDirection: 'column',
-        cursor: 'grab',
+        cursor: isDragging3D ? 'grabbing' : 'grab',
         overflow: 'hidden',
+        minHeight: 0,
       }}
       onMouseDown={onMouseDown3D}
       onMouseMove={onMouseMove3D}
@@ -70,7 +95,7 @@ export default function PacsMpr3DMaxView({
           fontFamily: 'monospace',
           backgroundColor: 'rgba(10, 15, 29, 0.75)',
           padding: '3px 8px',
-          borderRadius: 4,
+          borderRadius: 3,
         }}
       >
         Xoay: X={Math.round(rot3D.angleX)}° | Y={Math.round(rot3D.angleY)}°

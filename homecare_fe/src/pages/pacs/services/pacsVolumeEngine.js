@@ -1,11 +1,14 @@
 /**
  * 3D Volume Rendering & Multi-Planar Reconstruction (MPR) Graphics Engine
- * Computes isotropic Axial, Coronal, Sagittal slices and Shaded Volume Rendering (SVR/SSD).
+ * Computes isotropic Axial, Coronal, Sagittal slices and Ray-Casted Shaded Volume Rendering (SVR/SSD).
  */
 
-export function getVoxelValue(validSlices, numSlices, cols, x, y, zFloat) {
-  if (numSlices <= 0) return 0;
+export function getVoxelValue(validSlices, numSlices, cols, rows, x, y, zFloat) {
+  if (numSlices <= 0 || !validSlices) return 0;
+  const clampedX = Math.max(0, Math.min(cols - 1, x));
+  const clampedY = Math.max(0, Math.min(rows - 1, y));
   const clampedZ = Math.max(0, Math.min(numSlices - 1, zFloat));
+
   const z0 = Math.floor(clampedZ);
   const z1 = Math.min(numSlices - 1, z0 + 1);
   const t = clampedZ - z0;
@@ -14,15 +17,16 @@ export function getVoxelValue(validSlices, numSlices, cols, x, y, zFloat) {
   const slice1 = validSlices[z1]?.rawPixels;
   if (!slice0) return 0;
 
-  const px0 = slice0[y * cols + x] || 0;
+  const idx = Math.floor(clampedY) * cols + Math.floor(clampedX);
+  const px0 = slice0[idx] || 0;
   if (t === 0 || !slice1) return px0;
 
-  const px1 = slice1[y * cols + x] || 0;
+  const px1 = slice1[idx] || 0;
   return (1 - t) * px0 + t * px1;
 }
 
 export function renderAxialCanvas(canvas, validSlices, crosshair, cols, rows, numSlices, renderRes = 320) {
-  if (!canvas || numSlices === 0) return;
+  if (!canvas || numSlices === 0 || !validSlices) return;
   const ctx = canvas.getContext('2d');
   const zIdx = Math.max(0, Math.min(crosshair.z, numSlices - 1));
   const slice = validSlices[zIdx];
@@ -63,10 +67,19 @@ export function renderAxialCanvas(canvas, validSlices, crosshair, cols, rows, nu
   ctx.moveTo(0, screenY);
   ctx.lineTo(renderRes, screenY);
   ctx.stroke();
+
+  // Anatomical Markers: A (Top), P (Bottom), R (Left), L (Right)
+  ctx.setLineDash([]);
+  ctx.font = 'bold 12px sans-serif';
+  ctx.fillStyle = '#38bdf8';
+  ctx.fillText('A', renderRes / 2 - 4, 16);
+  ctx.fillText('P', renderRes / 2 - 4, renderRes - 6);
+  ctx.fillText('R', 6, renderRes / 2 + 4);
+  ctx.fillText('L', renderRes - 16, renderRes / 2 + 4);
 }
 
 export function renderCoronalCanvas(canvas, validSlices, crosshair, cols, rows, numSlices, renderRes = 320) {
-  if (!canvas || numSlices === 0) return;
+  if (!canvas || numSlices === 0 || !validSlices) return;
   const ctx = canvas.getContext('2d');
   canvas.width = renderRes;
   canvas.height = renderRes;
@@ -78,7 +91,7 @@ export function renderCoronalCanvas(canvas, validSlices, crosshair, cols, rows, 
     const zFloat = zNorm * (numSlices - 1);
     for (let sx = 0; sx < renderRes; sx++) {
       const srcX = Math.floor((sx / renderRes) * cols);
-      const val = Math.min(255, Math.max(0, getVoxelValue(validSlices, numSlices, cols, srcX, targetY, zFloat)));
+      const val = Math.min(255, Math.max(0, getVoxelValue(validSlices, numSlices, cols, rows, srcX, targetY, zFloat)));
       const outIdx = (sz * renderRes + sx) * 4;
       imgData.data[outIdx] = val;
       imgData.data[outIdx + 1] = val;
@@ -104,10 +117,19 @@ export function renderCoronalCanvas(canvas, validSlices, crosshair, cols, rows, 
   ctx.moveTo(0, screenZ);
   ctx.lineTo(renderRes, screenZ);
   ctx.stroke();
+
+  // Markers: S (Top), I (Bottom), R (Left), L (Right)
+  ctx.setLineDash([]);
+  ctx.font = 'bold 12px sans-serif';
+  ctx.fillStyle = '#10b981';
+  ctx.fillText('S', renderRes / 2 - 4, 16);
+  ctx.fillText('I', renderRes / 2 - 4, renderRes - 6);
+  ctx.fillText('R', 6, renderRes / 2 + 4);
+  ctx.fillText('L', renderRes - 16, renderRes / 2 + 4);
 }
 
 export function renderSagittalCanvas(canvas, validSlices, crosshair, cols, rows, numSlices, renderRes = 320) {
-  if (!canvas || numSlices === 0) return;
+  if (!canvas || numSlices === 0 || !validSlices) return;
   const ctx = canvas.getContext('2d');
   canvas.width = renderRes;
   canvas.height = renderRes;
@@ -119,7 +141,7 @@ export function renderSagittalCanvas(canvas, validSlices, crosshair, cols, rows,
     const zFloat = zNorm * (numSlices - 1);
     for (let sy = 0; sy < renderRes; sy++) {
       const srcY = Math.floor((sy / renderRes) * rows);
-      const val = Math.min(255, Math.max(0, getVoxelValue(validSlices, numSlices, cols, targetX, srcY, zFloat)));
+      const val = Math.min(255, Math.max(0, getVoxelValue(validSlices, numSlices, cols, rows, targetX, srcY, zFloat)));
       const outIdx = (sz * renderRes + sy) * 4;
       imgData.data[outIdx] = val;
       imgData.data[outIdx + 1] = val;
@@ -145,8 +167,21 @@ export function renderSagittalCanvas(canvas, validSlices, crosshair, cols, rows,
   ctx.moveTo(0, screenZ);
   ctx.lineTo(renderRes, screenZ);
   ctx.stroke();
+
+  // Markers: S (Top), I (Bottom), A (Left), P (Right)
+  ctx.setLineDash([]);
+  ctx.font = 'bold 12px sans-serif';
+  ctx.fillStyle = '#f59e0b';
+  ctx.fillText('S', renderRes / 2 - 4, 16);
+  ctx.fillText('I', renderRes / 2 - 4, renderRes - 6);
+  ctx.fillText('A', 6, renderRes / 2 + 4);
+  ctx.fillText('P', renderRes - 16, renderRes / 2 + 4);
 }
 
+/**
+ * 3D Iso-Surface Ray-Casting & Shaded Surface Display Engine (SVR/SSD)
+ * Eliminates slice gaps and contour artifacts via trilinear volumetric ray marching.
+ */
 export function renderVolume3DCanvas(
   canvas,
   validSlices,
@@ -156,158 +191,164 @@ export function renderVolume3DCanvas(
   cols,
   rows,
   numSlices,
-  renderRes = 320
+  renderRes = 300,
+  isFastDrag = false
 ) {
-  if (!canvas || numSlices === 0) return;
+  if (!canvas || numSlices === 0 || !validSlices) return;
   const ctx = canvas.getContext('2d');
-  canvas.width = renderRes;
-  canvas.height = renderRes;
+
+  const actualRes = isFastDrag ? 150 : Math.min(renderRes, 300);
+  canvas.width = actualRes;
+  canvas.height = actualRes;
 
   ctx.fillStyle = '#05070e';
-  ctx.fillRect(0, 0, renderRes, renderRes);
+  ctx.fillRect(0, 0, actualRes, actualRes);
 
-  const imgData = ctx.createImageData(renderRes, renderRes);
+  const imgData = ctx.createImageData(actualRes, actualRes);
+
   const radY = (rot3D.angleY * Math.PI) / 180;
   const radX = (rot3D.angleX * Math.PI) / 180;
-  const cosY = Math.cos(radY);
-  const sinY = Math.sin(radY);
-  const cosX = Math.cos(radX);
-  const sinX = Math.sin(radX);
+  const cosY = Math.cos(radY), sinY = Math.sin(radY);
+  const cosX = Math.cos(radX), sinX = Math.sin(radX);
 
-  const depthScale = numSlices >= 32 ? 1 : Math.max(1, Math.min(8, 64 / Math.max(1, numSlices)));
-  const centerX = cols / 2;
-  const centerY = rows / 2;
-  const centerZ = numSlices / 2;
+  // Camera Ray Direction in World Space
+  const rdx = sinY * cosX;
+  const rdy = -sinX;
+  const rdz = cosY * cosX;
 
-  const zStep = Math.max(1, Math.floor(numSlices / 56));
-  const isShadedMode =
-    colorMode3D === 'bone_shaded' ||
-    colorMode3D === 'vascular' ||
-    colorMode3D === 'soft_tissue';
+  // Proportional Z physical aspect ratio (defaults to isotropic head/body volume)
+  const aspectZ = Math.min(1.4, Math.max(0.65, (numSlices * 4.8) / rows));
 
-  const zBuffer = new Float32Array(renderRes * renderRes);
-  zBuffer.fill(-999999);
+  // Ray-AABB Bounding Box [-1, 1] x [-1, 1] x [-aspectZ, aspectZ]
+  const invRdx = 1 / (Math.abs(rdx) < 1e-6 ? 1e-6 : rdx);
+  const invRdy = 1 / (Math.abs(rdy) < 1e-6 ? 1e-6 : rdy);
+  const invRdz = 1 / (Math.abs(rdz) < 1e-6 ? 1e-6 : rdz);
 
-  // Light Direction: Upper-right-front
-  const lightX = 0.45;
-  const lightY = -0.6;
-  const lightZ = 0.65;
-  const lightLen = Math.sqrt(lightX * lightX + lightY * lightY + lightZ * lightZ) || 1;
-  const lx = lightX / lightLen;
-  const ly = lightY / lightLen;
-  const lz = lightZ / lightLen;
+  // Light Direction: Upper-Right-Front (World Space)
+  const lx = 0.55, ly = -0.55, lz = 0.62;
+  const lLen = Math.sqrt(lx * lx + ly * ly + lz * lz) || 1;
+  const nlx = lx / lLen, nly = ly / lLen, nlz = lz / lLen;
 
-  for (let z = 0; z < numSlices; z += zStep) {
-    const slicePixels = validSlices[z]?.rawPixels;
-    if (!slicePixels) continue;
+  const isMIP = colorMode3D === 'bone' || colorMode3D === 'grayscale' || colorMode3D === 'rainbow';
+  const rayStep = isFastDrag ? 0.032 : 0.016;
 
-    const zRel = (z - centerZ) * depthScale;
-    const prevSlice = validSlices[Math.max(0, z - zStep)]?.rawPixels;
-    const nextSlice = validSlices[Math.min(numSlices - 1, z + zStep)]?.rawPixels;
+  for (let py = 0; py < actualRes; py++) {
+    const v = (py / actualRes - 0.5) * 2;
+    for (let px = 0; px < actualRes; px++) {
+      const u = (px / actualRes - 0.5) * 2;
 
-    for (let y = 0; y < rows; y += 2) {
-      const yRel = y - centerY;
-      const yOffset = y * cols;
+      // Ray Origin in World Space
+      const ox = u * cosY - v * sinX * sinY - rdx * 1.6;
+      const oy = v * cosX - rdy * 1.6;
+      const oz = u * sinY + v * sinX * cosY - rdz * 1.6;
 
-      for (let x = 0; x < cols; x += 2) {
-        const val = slicePixels[yOffset + x] || 0;
-        if (val < threshold3D) continue;
+      // Ray-AABB intersection
+      const t1 = (-1 - ox) * invRdx, t2 = (1 - ox) * invRdx;
+      const t3 = (-1 - oy) * invRdy, t4 = (1 - oy) * invRdy;
+      const t5 = (-aspectZ - oz) * invRdz, t6 = (aspectZ - oz) * invRdz;
 
-        const xRel = x - centerX;
+      const tmin = Math.max(Math.min(t1, t2), Math.min(t3, t4), Math.min(t5, t6));
+      const tmax = Math.min(Math.max(t1, t2), Math.max(t3, t4), Math.max(t5, t6));
 
-        const rotX1 = xRel * cosY - zRel * sinY;
-        const rotZ1 = xRel * sinY + zRel * cosY;
+      if (tmax <= tmin || tmax <= 0) continue;
 
-        const rotY2 = yRel * cosX - rotZ1 * sinX;
-        const rotZ2 = yRel * sinX + rotZ1 * cosX;
+      let t = Math.max(0, tmin);
+      const tend = tmax;
+      const pixelIdx = (py * actualRes + px) * 4;
+      let maxMIPVal = 0;
 
-        const projX = Math.round(renderRes / 2 + (rotX1 * renderRes) / (cols * 1.25));
-        const projY = Math.round(renderRes / 2 + (rotY2 * renderRes) / (rows * 1.25));
+      while (t < tend) {
+        const wx = ox + t * rdx;
+        const wy = oy + t * rdy;
+        const wz = oz + t * rdz;
+        t += rayStep;
 
-        if (projX >= 0 && projX < renderRes && projY >= 0 && projY < renderRes) {
-          const pixelIdx = projY * renderRes + projX;
-          const idx = pixelIdx * 4;
+        const vx = ((wx + 1) * 0.5) * (cols - 1);
+        const vy = ((wy + 1) * 0.5) * (rows - 1);
+        const vz = ((wz / aspectZ + 1) * 0.5) * (numSlices - 1);
 
-          if (isShadedMode) {
-            if (rotZ2 > zBuffer[pixelIdx]) {
-              zBuffer[pixelIdx] = rotZ2;
+        const val = getVoxelValue(validSlices, numSlices, cols, rows, vx, vy, vz);
 
-              // Surface Gradient Normal
-              const gx = (slicePixels[yOffset + Math.min(cols - 1, x + 2)] || val) - (slicePixels[yOffset + Math.max(0, x - 2)] || val);
-              const gy = (slicePixels[Math.min(rows - 1, y + 2) * cols + x] || val) - (slicePixels[Math.max(0, y - 2) * cols + x] || val);
-              const gz = (nextSlice ? nextSlice[yOffset + x] || val : val) - (prevSlice ? prevSlice[yOffset + x] || val : val);
-
-              const nx1 = gx * cosY - gz * sinY;
-              const nz1 = gx * sinY + gz * cosY;
-              const ny2 = gy * cosX - nz1 * sinX;
-              const nz2 = gy * sinX + nz1 * cosX;
-
-              const nLen = Math.sqrt(nx1 * nx1 + ny2 * ny2 + nz2 * nz2) || 1;
-              const nx = nx1 / nLen;
-              const ny = ny2 / nLen;
-              const nz = Math.abs(nz2 / nLen);
-
-              // Phong Lighting Model
-              const dot = Math.max(0, nx * lx + ny * ly + nz * lz);
-              const diffuse = dot;
-              const specular = Math.pow(Math.max(0, nz), 18) * 0.45;
-              const shade = Math.min(1.5, 0.35 + 0.65 * diffuse + specular);
-
-              if (colorMode3D === 'bone_shaded') {
-                imgData.data[idx] = Math.min(255, Math.floor((val * 1.08 + 40) * shade));
-                imgData.data[idx + 1] = Math.min(255, Math.floor((val * 0.94 + 28) * shade));
-                imgData.data[idx + 2] = Math.min(255, Math.floor((val * 0.76 + 18) * shade));
-              } else if (colorMode3D === 'vascular') {
-                imgData.data[idx] = Math.min(255, Math.floor((val * 1.35 + 40) * shade));
-                imgData.data[idx + 1] = Math.min(255, Math.floor((val * 0.45) * shade));
-                imgData.data[idx + 2] = Math.min(255, Math.floor((val * 0.25) * shade));
-              } else if (colorMode3D === 'soft_tissue') {
-                imgData.data[idx] = Math.min(255, Math.floor((val * 1.1 + 45) * shade));
-                imgData.data[idx + 1] = Math.min(255, Math.floor((val * 0.75 + 25) * shade));
-                imgData.data[idx + 2] = Math.min(255, Math.floor((val * 0.65 + 15) * shade));
-              }
-              imgData.data[idx + 3] = 255;
-            }
-          } else {
-            // MIP Mode
-            const currentR = imgData.data[idx];
-            if (val > currentR) {
-              if (colorMode3D === 'bone') {
-                imgData.data[idx] = Math.min(255, val * 1.15);
-                imgData.data[idx + 1] = Math.min(255, val * 0.88);
-                imgData.data[idx + 2] = Math.min(255, val * 0.58);
-              } else if (colorMode3D === 'rainbow') {
-                const norm = val / 255;
-                imgData.data[idx] = Math.min(255, Math.floor(Math.sin(norm * Math.PI) * 255));
-                imgData.data[idx + 1] = Math.min(255, Math.floor(Math.sin((norm + 0.33) * Math.PI) * 255));
-                imgData.data[idx + 2] = Math.min(255, Math.floor(Math.sin((norm + 0.66) * Math.PI) * 255));
-              } else {
-                imgData.data[idx] = val;
-                imgData.data[idx + 1] = val;
-                imgData.data[idx + 2] = val;
-              }
-              imgData.data[idx + 3] = 255;
-            }
+        if (isMIP) {
+          if (val > maxMIPVal && val >= threshold3D) {
+            maxMIPVal = val;
           }
+        } else if (val >= threshold3D) {
+          // HIT SURFACE: Compute gradient normal
+          const deltaX = 1.2;
+          const deltaY = 1.2;
+          const deltaZ = 0.8;
+
+          const gx = getVoxelValue(validSlices, numSlices, cols, rows, vx + deltaX, vy, vz) -
+                     getVoxelValue(validSlices, numSlices, cols, rows, vx - deltaX, vy, vz);
+          const gy = getVoxelValue(validSlices, numSlices, cols, rows, vx, vy + deltaY, vz) -
+                     getVoxelValue(validSlices, numSlices, cols, rows, vx - deltaY, vz);
+          const gz = (getVoxelValue(validSlices, numSlices, cols, rows, vx, vy, vz + deltaZ) -
+                      getVoxelValue(validSlices, numSlices, cols, rows, vx, vy, vz - deltaZ)) / aspectZ;
+
+          const gLen = Math.sqrt(gx * gx + gy * gy + gz * gz) || 1;
+          const nx = -gx / gLen;
+          const ny = -gy / gLen;
+          const nz = -gz / gLen;
+
+          // Phong lighting
+          const dot = Math.max(0, nx * nlx + ny * nly + nz * nlz);
+          const diffuse = dot;
+          // Halfway specular
+          const hx = nlx - rdx, hy = nly - rdy, hz = nlz - rdz;
+          const hLen = Math.sqrt(hx * hx + hy * hy + hz * hz) || 1;
+          const specDot = Math.max(0, nx * (hx / hLen) + ny * (hy / hLen) + nz * (hz / hLen));
+          const specular = Math.pow(specDot, 14) * 0.42;
+
+          const shade = Math.min(1.4, 0.28 + 0.72 * diffuse + specular);
+
+          if (colorMode3D === 'bone_shaded') {
+            // Ivory Bone Tone (Matching Clinical CT PACS reference)
+            imgData.data[pixelIdx] = Math.min(255, Math.floor((val * 0.95 + 65) * shade * 1.05));
+            imgData.data[pixelIdx + 1] = Math.min(255, Math.floor((val * 0.85 + 48) * shade * 0.96));
+            imgData.data[pixelIdx + 2] = Math.min(255, Math.floor((val * 0.65 + 32) * shade * 0.82));
+          } else if (colorMode3D === 'vascular') {
+            imgData.data[pixelIdx] = Math.min(255, Math.floor((val * 1.25 + 50) * shade * 1.1));
+            imgData.data[pixelIdx + 1] = Math.min(255, Math.floor((val * 0.42) * shade));
+            imgData.data[pixelIdx + 2] = Math.min(255, Math.floor((val * 0.2) * shade));
+          } else {
+            // Soft tissue / Skin
+            imgData.data[pixelIdx] = Math.min(255, Math.floor((val * 1.05 + 55) * shade * 1.0));
+            imgData.data[pixelIdx + 1] = Math.min(255, Math.floor((val * 0.72 + 35) * shade * 0.85));
+            imgData.data[pixelIdx + 2] = Math.min(255, Math.floor((val * 0.6 + 25) * shade * 0.75));
+          }
+          imgData.data[pixelIdx + 3] = 255;
+          break;
         }
+      }
+
+      if (isMIP && maxMIPVal > 0) {
+        if (colorMode3D === 'bone') {
+          imgData.data[pixelIdx] = Math.min(255, maxMIPVal * 1.15);
+          imgData.data[pixelIdx + 1] = Math.min(255, maxMIPVal * 0.88);
+          imgData.data[pixelIdx + 2] = Math.min(255, maxMIPVal * 0.58);
+        } else if (colorMode3D === 'rainbow') {
+          const norm = maxMIPVal / 255;
+          imgData.data[pixelIdx] = Math.min(255, Math.floor(Math.sin(norm * Math.PI) * 255));
+          imgData.data[pixelIdx + 1] = Math.min(255, Math.floor(Math.sin((norm + 0.33) * Math.PI) * 255));
+          imgData.data[pixelIdx + 2] = Math.min(255, Math.floor(Math.sin((norm + 0.66) * Math.PI) * 255));
+        } else {
+          imgData.data[pixelIdx] = maxMIPVal;
+          imgData.data[pixelIdx + 1] = maxMIPVal;
+          imgData.data[pixelIdx + 2] = maxMIPVal;
+        }
+        imgData.data[pixelIdx + 3] = 255;
       }
     }
   }
 
   ctx.putImageData(imgData, 0, 0);
 
-  // Overlay Watermark
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-  ctx.font = '11px monospace';
-  const modeLabel =
-    colorMode3D === 'bone_shaded'
-      ? '3D BONE SHADED VR'
-      : colorMode3D === 'vascular'
-      ? '3D VASCULAR ANGIO'
-      : colorMode3D === 'soft_tissue'
-      ? '3D SOFT TISSUE'
-      : `3D MIP (${colorMode3D.toUpperCase()})`;
-  ctx.fillText(modeLabel, 10, 20);
-  ctx.fillText(`SLICES: ${numSlices}`, 10, 36);
-  ctx.fillText(`ISO-VOXEL: ${cols}x${rows}x${numSlices}`, 10, 52);
+  // Anatomical Cues: RA (Right-Anterior), LP (Left-Posterior), S (Superior), I (Inferior)
+  ctx.font = 'italic bold 13px serif';
+  ctx.fillStyle = '#f8fafc';
+  ctx.fillText('S', actualRes / 2 - 4, 18);
+  ctx.fillText('I', actualRes / 2 - 4, actualRes - 8);
+  ctx.fillText('RA', 12, actualRes / 2 + 4);
+  ctx.fillText('LP', actualRes - 30, actualRes / 2 + 4);
 }
