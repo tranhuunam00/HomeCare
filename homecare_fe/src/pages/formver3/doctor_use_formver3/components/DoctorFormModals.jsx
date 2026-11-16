@@ -25,13 +25,23 @@ export default function DoctorFormModals({
   openConfirm,
   languageTranslate,
   printSourceRef,
+  printRef,
+  handlePrint,
+  form,
+  initialSnap,
+  examParts,
+  templateServices,
+  isMobile,
+  is_print,
 }) {
   return (
     <>
       <PrintPreviewModal
         open={previewOpen}
         onCancel={() => setPreviewOpen(false)}
+        setPreviewOpen={setPreviewOpen}
         patientDiagnose={patientDiagnose}
+        status={patientDiagnose?.status}
         idEdit={idEdit}
         formValues={formValues}
         imageList={imageList}
@@ -43,6 +53,15 @@ export default function DoctorFormModals({
         setPrintTemplate={setPrintTemplate}
         onPrint={onPrint}
         printSourceRef={printSourceRef}
+        printRef={printRef}
+        handlePrint={handlePrint}
+        form={form}
+        initialSnap={initialSnap}
+        examParts={examParts}
+        templateServices={templateServices}
+        languageTranslate={languageTranslate || "vi"}
+        isMobile={isMobile}
+        is_print={is_print}
       />
 
       <SmartCASignModal

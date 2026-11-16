@@ -6,7 +6,7 @@ import { translateLabel } from "../../../constant/translate.report";
 const safeTranslate = (lang = "vi", key = "", uppercase = true) => {
   try {
     if (typeof translateLabel === "function") {
-      return safeTranslate(lang, key, uppercase);
+      return translateLabel(lang, key, uppercase);
     }
   } catch (err) {}
   return uppercase ? String(key || "").toUpperCase() : String(key || "");

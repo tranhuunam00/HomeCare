@@ -65,6 +65,7 @@ export default function DoctorUseDFormVer3({
   } = useGlobalAuth();
 
   const printSourceRef = useRef(null);
+  const printRef = useRef(null);
   const { transitionStatus } = usePatientDiagnoseStatus();
   const { confirmState, openConfirm } = useConfirmAction();
   const screens = Grid.useBreakpoint();
@@ -119,11 +120,16 @@ export default function DoctorUseDFormVer3({
     form.getFieldValue("imagingDiagnosisSummary")
   );
 
-  const readingDoctor = patientDiagnose?.reading_doctor || null;
-  const consultingDoctor = patientDiagnose?.consulting_doctor || null;
-  const verifyDoctor = patientDiagnose?.verify_doctor || null;
+  // BE (GET /patient-diagnose/:id) trả về association theo alias Sequelize
+  const readingDoctor =
+    patientDiagnose?.id_doctor_in_processing_doctor || patientDiagnose?.reading_doctor || null;
+  const consultingDoctor =
+    patientDiagnose?.id_consulting_doctor_doctor || patientDiagnose?.consulting_doctor || null;
+  const verifyDoctor =
+    patientDiagnose?.id_verify_doctor_doctor || patientDiagnose?.verify_doctor || null;
 
-  const inProcessingDoctorId = readingDoctor?.id || patientDiagnose?.id_doctor_read || null;
+  const inProcessingDoctorId =
+    readingDoctor?.id || patientDiagnose?.id_doctor_in_processing || null;
   const inProcessingDoctorName = readingDoctor?.full_name || readingDoctor?.username || "khác";
 
   const isCurrentDoctorInProcessing = useMemo(() => {
@@ -439,18 +445,19 @@ export default function DoctorUseDFormVer3({
             setDiagnosisSummary={setDiagnosisSummary}
           />
 
-          <IllustrativeImagesSection
-            imageList={imageList}
-            setImageList={setImageList}
-            isEdit={isEdit}
-          />
-
           <ImagingDiagnosisSection
             form={form}
             isEdit={isEdit}
             languageTranslate={languageTranslate}
             diagnosisSummary={diagnosisSummary}
             setDiagnosisSummary={setDiagnosisSummary}
+          />
+
+          {/* Hình ảnh minh họa đặt ở cuối form */}
+          <IllustrativeImagesSection
+            imageList={imageList}
+            setImageList={setImageList}
+            isEdit={isEdit}
           />
 
           <FormActionBar
@@ -500,6 +507,14 @@ export default function DoctorUseDFormVer3({
         openConfirm={openConfirm}
         languageTranslate={languageTranslate}
         printSourceRef={printSourceRef}
+        printRef={printRef}
+        handlePrint={handlePrint}
+        form={form}
+        initialSnap={initialSnap}
+        examParts={examParts}
+        templateServices={templateServices}
+        isMobile={isMobile}
+        is_print={is_print}
       />
     </div>
   );
