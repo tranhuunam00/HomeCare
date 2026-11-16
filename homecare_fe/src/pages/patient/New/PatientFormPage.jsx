@@ -205,7 +205,12 @@ const PatientFormPage = () => {
               toast.success("Đã tải và lưu trữ ảnh DICOM vào hệ thống PACS!");
             } catch (pacsErr) {
               console.error("Lỗi tải DICOM vào PACS:", pacsErr);
-              const pacsMsg = pacsErr.response?.data?.message || pacsErr.message || "";
+              const totalMb = dicomFileList.reduce((s, f) => s + (f.size || 0), 0) / 1048576;
+              // 413 từ nginx không kèm header CORS -> trình duyệt chỉ thấy "Network Error"
+              const pacsMsg =
+                pacsErr.response?.status === 413 || (!pacsErr.response && totalMb > 19)
+                  ? `Dung lượng ${totalMb.toFixed(0)} MB vượt giới hạn tải lên của máy chủ (proxy nginx). Liên hệ quản trị để nâng client_max_body_size.`
+                  : pacsErr.response?.data?.message || pacsErr.message || "";
               toast.warn(`Tạo ca thành công nhưng có lỗi khi tải file DICOM: ${pacsMsg}`);
             }
           }
