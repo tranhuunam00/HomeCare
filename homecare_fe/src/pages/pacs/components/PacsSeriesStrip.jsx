@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Tooltip } from 'antd';
 import { FileWordOutlined, FilePdfOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons';
 
-export default function PacsSeriesStrip({
+function PacsSeriesStrip({
   isOpen = true,
   onToggleOpen,
   seriesList = [],
@@ -410,3 +410,4 @@ export default function PacsSeriesStrip({
   );
 }
 
+export default memo(PacsSeriesStrip);

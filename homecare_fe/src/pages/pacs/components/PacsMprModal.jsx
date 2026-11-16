@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Modal, Progress } from 'antd';
 import { LoadingOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import axios from 'axios';
-import { decodeDicomBuffer } from '../services/dicomDecoder';
+import { decodeInWorker } from '../services/decodeWorkerPool';
 import PacsMprToolbar from './mpr/PacsMprToolbar';
 import PacsMpr1x2View from './mpr/PacsMpr1x2View';
 import PacsMpr2x2View from './mpr/PacsMpr2x2View';
@@ -96,9 +96,11 @@ export default function PacsMprModal({
         percent: Math.round(((instances.length - missingIndices.length) / instances.length) * 100),
       });
 
-      const batchSize = 4;
+      // Tải/giải mã song song nhiều hơn (giải mã đã ra khỏi luồng giao diện); cập nhật state theo lô lớn
+      const batchSize = 8;
+      const COMMIT_EVERY = 32;
       let completed = instances.length - missingIndices.length;
-      const newSlices = {};
+      let newSlices = {};
 
       for (let i = 0; i < missingIndices.length; i += batchSize) {
         if (isCancelled) break;
@@ -111,7 +113,8 @@ export default function PacsMprModal({
                 `${apiEndpoint}/api/pacs/instances/${instance.sopInstanceUid}/file${caseId ? `?patientDiagnoseId=${encodeURIComponent(caseId)}` : ''}`,
                 { responseType: 'arraybuffer', headers: getAuthHeaders() }
               );
-              const parsed = await decodeDicomBuffer(res.data, instance.frameIndex || 0);
+              // Giải nén trong Web Worker; buffer tải riêng cho MPR -> chuyển hẳn (không copy)
+              const parsed = await decodeInWorker(res.data, instance.frameIndex || 0, { transfer: true });
               // Lát không giải mã chính xác được -> không đưa vào khối dựng hình
               if (parsed?.rawPixels && parsed.decodeInfo?.ok !== false && !parsed.meta?.isColor) {
                 newSlices[cacheKey] = parsed;
@@ -123,10 +126,13 @@ export default function PacsMprModal({
           })
         );
 
-        if (!isCancelled) {
-          setLocalCache((prev) => ({ ...prev, ...newSlices }));
+        const isLast = i + batchSize >= missingIndices.length;
+        if (!isCancelled && (isLast || Object.keys(newSlices).length >= COMMIT_EVERY)) {
+          const commit = newSlices;
+          newSlices = {};
+          setLocalCache((prev) => ({ ...prev, ...commit }));
           if (setDicomCache) {
-            setDicomCache((prev) => ({ ...prev, ...newSlices }));
+            setDicomCache((prev) => ({ ...prev, ...commit }));
           }
           setDownloadProgress({
             loading: completed < instances.length,

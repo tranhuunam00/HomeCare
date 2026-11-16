@@ -19,6 +19,8 @@ import PacsAttachmentViewer from './components/PacsAttachmentViewer';
 import PacsMprModal from './components/PacsMprModal';
 import { PACS_TOOLS, WW_WL_PRESETS } from './constants/pacs.constants';
 
+const EMPTY_LIST = Object.freeze([]);
+
 const seriesTitle = (inst, idx) => {
   if (inst.modality === 'NDCM' || inst.isNonDicom) return inst.seriesDescription || 'Ảnh nội soi / siêu âm (Non-DICOM)';
   const num = Number.isFinite(inst.seriesNumber) ? `S${inst.seriesNumber}` : `S${idx}`;
@@ -253,6 +255,22 @@ export default function PacsViewerPage() {
     legacyOrderKeys,
     study,
   });
+
+  /* ---------------- Callback ổn định cho các dải ảnh (memo) ---------------- */
+  const toggleLeftStrip = useCallback(() => setLeftSeriesStripOpen((prev) => !prev), []);
+  const toggleRightStrip = useCallback(() => setRightSliceStripOpen((prev) => !prev), []);
+  const handleSelectSeries = useCallback(
+    (uid) => {
+      setActiveAttachedFile(null);
+      const target = seriesList.find((s) => s.seriesUid === uid);
+      if (target?.instances?.length) {
+        // Mở series ở lát giữa (thường là vùng giải phẫu chính)
+        setCurrentIndex(target.instances[Math.floor((target.instances.length - 1) / 2)].globalIndex);
+      }
+      setActiveSeriesUid(uid);
+    },
+    [seriesList, setCurrentIndex]
+  );
 
   /* ---------------- Vẽ ảnh ---------------- */
   const currentFull = dicomCache[currentIndex];
@@ -581,20 +599,12 @@ export default function PacsViewerPage() {
         {!isExpanded && (
           <PacsSeriesStrip
             isOpen={leftSeriesStripOpen}
-            onToggleOpen={() => setLeftSeriesStripOpen((prev) => !prev)}
+            onToggleOpen={toggleLeftStrip}
             seriesList={seriesList}
             activeSeriesUid={activeSeriesUid}
-            onSelectSeries={(uid) => {
-              setActiveAttachedFile(null);
-              const target = seriesList.find((s) => s.seriesUid === uid);
-              if (target?.instances?.length) {
-                // Mở series ở lát giữa (thường là vùng giải phẫu chính)
-                setCurrentIndex(target.instances[Math.floor((target.instances.length - 1) / 2)].globalIndex);
-              }
-              setActiveSeriesUid(uid);
-            }}
+            onSelectSeries={handleSelectSeries}
             seriesThumbnails={seriesThumbnails}
-            attachedFiles={study?.attachedFiles || []}
+            attachedFiles={study?.attachedFiles || EMPTY_LIST}
             activeAttachedFile={activeAttachedFile}
             onSelectAttachedFile={setActiveAttachedFile}
           />
@@ -642,12 +652,12 @@ export default function PacsViewerPage() {
         {!activeAttachedFile && (
           <PacsSliceStrip
             isOpen={rightSliceStripOpen}
-            onToggleOpen={() => setRightSliceStripOpen((prev) => !prev)}
+            onToggleOpen={toggleRightStrip}
             activeSeries={activeSeries}
             currentIndex={currentIndex}
             activeSlicePos={activeSlicePos}
             sliceThumbnails={sliceThumbnails}
-            onSelectSlice={(globalIdx) => setCurrentIndex(globalIdx)}
+            onSelectSlice={setCurrentIndex}
           />
         )}
       </div>

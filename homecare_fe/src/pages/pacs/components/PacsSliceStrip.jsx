@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { memo, useEffect, useRef } from 'react';
 import { Tooltip } from 'antd';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 
@@ -6,7 +6,7 @@ import { LeftOutlined, RightOutlined } from '@ant-design/icons';
  * Right-side scrollable slice thumbnail strip scoped to the active series/cluster.
  * Includes a collapse/expand toggle button so the doctor can hide or show it anytime.
  */
-export default function PacsSliceStrip({
+function PacsSliceStrip({
   isOpen = true,
   onToggleOpen,
   activeSeries,
@@ -18,12 +18,23 @@ export default function PacsSliceStrip({
   const seriesInstances = activeSeries?.instances || [];
   const activeItemRef = useRef(null);
 
+  // Cuộn nhanh 250 lát: KHÔNG dùng smooth (animation chồng nhau gây giật), gom 1 lần/khung hình,
+  // chỉ cuộn khi ô đang chọn ra khỏi vùng nhìn thấy
+  const scrollRafRef = useRef(null);
   useEffect(() => {
-    if (!isOpen || !activeItemRef.current) return;
-    activeItemRef.current.scrollIntoView({
-      block: 'nearest',
-      behavior: 'smooth',
+    if (!isOpen) return undefined;
+    if (scrollRafRef.current) cancelAnimationFrame(scrollRafRef.current);
+    scrollRafRef.current = requestAnimationFrame(() => {
+      scrollRafRef.current = null;
+      const el = activeItemRef.current;
+      const box = el?.parentElement;
+      if (!el || !box) return;
+      const top = el.offsetTop; // khung cuộn là position: relative
+      if (top < box.scrollTop || top + el.offsetHeight > box.scrollTop + box.clientHeight) {
+        box.scrollTop = top - box.clientHeight / 2 + el.offsetHeight / 2;
+      }
     });
+    return () => scrollRafRef.current && cancelAnimationFrame(scrollRafRef.current);
   }, [currentIndex, isOpen]);
 
   if (!isOpen) {
@@ -138,6 +149,7 @@ export default function PacsSliceStrip({
       <div
         style={{
           flex: 1,
+          position: 'relative',
           overflowY: 'auto',
           padding: '6px',
           display: 'flex',
@@ -145,69 +157,17 @@ export default function PacsSliceStrip({
           gap: 6,
         }}
       >
-        {seriesInstances.map((inst, idx) => {
-          const isSelected = inst.globalIndex === currentIndex;
-          const thumbSrc = sliceThumbnails[inst.globalIndex];
-
-          return (
-            <div
-              key={inst.sopInstanceUid || `${inst.globalIndex}-${idx}`}
-              ref={isSelected ? activeItemRef : null}
-              onClick={() => onSelectSlice(inst.globalIndex)}
-              style={{
-                width: '100%',
-                height: 82,
-                flexShrink: 0,
-                backgroundColor: '#000000',
-                border: isSelected ? '2px solid #f59e0b' : '1px solid #1e293b',
-                borderRadius: 4,
-                cursor: 'pointer',
-                position: 'relative',
-                overflow: 'hidden',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: isSelected ? '0 0 8px rgba(245, 158, 11, 0.35)' : 'none',
-              }}
-            >
-              {thumbSrc ? (
-                <img
-                  src={thumbSrc}
-                  alt={`Ảnh ${idx + 1}`}
-                  draggable={false}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'contain',
-                  }}
-                />
-              ) : (
-                <span style={{ color: '#64748b', fontSize: '10px', fontFamily: 'monospace' }}>
-                  #{idx + 1}
-                </span>
-              )}
-
-              {/* Slice index badge */}
-              <span
-                style={{
-                  position: 'absolute',
-                  bottom: 3,
-                  right: 4,
-                  backgroundColor: isSelected ? '#f59e0b' : 'rgba(15, 23, 42, 0.85)',
-                  color: isSelected ? '#000000' : '#e2e8f0',
-                  fontSize: '10px',
-                  fontWeight: 700,
-                  padding: '0 4px',
-                  borderRadius: 2,
-                  lineHeight: '14px',
-                  fontFamily: 'monospace',
-                }}
-              >
-                {idx + 1}
-              </span>
-            </div>
-          );
-        })}
+        {seriesInstances.map((inst, idx) => (
+          <SliceItem
+            key={inst.sopInstanceUid ? `${inst.sopInstanceUid}#${inst.frameIndex || 0}` : `${inst.globalIndex}-${idx}`}
+            globalIndex={inst.globalIndex}
+            idx={idx}
+            isSelected={inst.globalIndex === currentIndex}
+            thumbSrc={sliceThumbnails[inst.globalIndex]}
+            onSelectSlice={onSelectSlice}
+            itemRef={inst.globalIndex === currentIndex ? activeItemRef : null}
+          />
+        ))}
 
         {seriesInstances.length === 0 && (
           <div style={{ color: '#64748b', fontSize: '11px', textAlign: 'center', marginTop: 16 }}>
@@ -219,3 +179,60 @@ export default function PacsSliceStrip({
   );
 }
 
+const SliceItem = memo(function SliceItem({ globalIndex, idx, isSelected, thumbSrc, onSelectSlice, itemRef }) {
+  return (
+    <div
+      ref={itemRef}
+      onClick={() => onSelectSlice(globalIndex)}
+      style={{
+        width: '100%',
+        height: 82,
+        flexShrink: 0,
+        backgroundColor: '#000000',
+        border: isSelected ? '2px solid #f59e0b' : '1px solid #1e293b',
+        borderRadius: 4,
+        cursor: 'pointer',
+        position: 'relative',
+        overflow: 'hidden',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        boxShadow: isSelected ? '0 0 8px rgba(245, 158, 11, 0.35)' : 'none',
+        contentVisibility: 'auto',
+        containIntrinsicSize: '82px',
+      }}
+    >
+      {thumbSrc ? (
+        <img
+          src={thumbSrc}
+          alt={`Ảnh ${idx + 1}`}
+          draggable={false}
+          loading="lazy"
+          decoding="async"
+          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+        />
+      ) : (
+        <span style={{ color: '#64748b', fontSize: '10px', fontFamily: 'monospace' }}>#{idx + 1}</span>
+      )}
+      <span
+        style={{
+          position: 'absolute',
+          bottom: 3,
+          right: 4,
+          backgroundColor: isSelected ? '#f59e0b' : 'rgba(15, 23, 42, 0.85)',
+          color: isSelected ? '#000000' : '#e2e8f0',
+          fontSize: '10px',
+          fontWeight: 700,
+          padding: '0 4px',
+          borderRadius: 2,
+          lineHeight: '14px',
+          fontFamily: 'monospace',
+        }}
+      >
+        {idx + 1}
+      </span>
+    </div>
+  );
+});
+
+export default memo(PacsSliceStrip);

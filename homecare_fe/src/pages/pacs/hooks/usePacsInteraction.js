@@ -199,6 +199,24 @@ export function usePacsInteraction({
     });
   };
 
+  // Kéo Pan / WW-WL: chuột bắn 100-1000 sự kiện/giây -> gom 1 lần setState / khung hình
+  const dragPendingRef = useRef(null);
+  const dragRafRef = useRef(null);
+  const flushDrag = () => {
+    dragRafRef.current = null;
+    const p = dragPendingRef.current;
+    dragPendingRef.current = null;
+    if (!p) return;
+    if (p.pan) setPan(p.pan);
+    if (p.ww !== undefined) setWindowWidth(p.ww);
+    if (p.wl !== undefined) setWindowCenter(p.wl);
+  };
+  const scheduleDrag = (patch) => {
+    dragPendingRef.current = { ...(dragPendingRef.current || {}), ...patch };
+    if (!dragRafRef.current) dragRafRef.current = requestAnimationFrame(flushDrag);
+  };
+  useEffect(() => () => dragRafRef.current && cancelAnimationFrame(dragRafRef.current), []);
+
   const handleMouseMove = (e) => {
     updateProbe(e);
     const isAnglePreview = activeTool === PACS_TOOLS.ANGLE && currentDrawing?.type === 'angle';
@@ -209,7 +227,7 @@ export function usePacsInteraction({
       const dy = e.clientY - startPos.current.y;
 
       if (e.buttons === 4 || activeTool === PACS_TOOLS.PAN) {
-        setPan({ x: startPan.current.x + dx, y: startPan.current.y + dy });
+        scheduleDrag({ pan: { x: startPan.current.x + dx, y: startPan.current.y + dy } });
         return;
       }
 
@@ -217,8 +235,10 @@ export function usePacsInteraction({
         // Độ nhạy theo dải giá trị ảnh: CT (~4000 HU) và X-quang 15-bit (~32000) đều kéo mượt
         const range = meta && Number.isFinite(meta.maxPixelValue) ? meta.maxPixelValue - meta.minPixelValue : 1024;
         const sensitivity = Math.max(1, range / 600);
-        setWindowWidth(Math.max(1, Math.round(startWW.current.ww + dx * sensitivity)));
-        setWindowCenter(Math.round(startWW.current.wl - dy * sensitivity));
+        scheduleDrag({
+          ww: Math.max(1, Math.round(startWW.current.ww + dx * sensitivity)),
+          wl: Math.round(startWW.current.wl - dy * sensitivity),
+        });
         return;
       }
 
@@ -262,6 +282,10 @@ export function usePacsInteraction({
   const handleMouseUp = () => {
     if (!isInteracting.current) return;
     isInteracting.current = false;
+    if (dragRafRef.current) {
+      cancelAnimationFrame(dragRafRef.current);
+      flushDrag();
+    }
 
     if (activeTool === PACS_TOOLS.ANGLE && currentDrawing?.type === 'angle' && currentDrawing.points.length === 2) {
       const [p1, p2] = currentDrawing.points;

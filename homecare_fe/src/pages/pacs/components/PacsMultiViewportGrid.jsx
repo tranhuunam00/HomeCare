@@ -14,7 +14,7 @@ const DEFAULT_VIEW = Object.freeze({ zoom: 1, pan: { x: 0, y: 0 }, rotation: 0, 
 const bestMeta = (cached, inst) => (cached?.meta ? { ...inst, ...cached.meta } : inst);
 
 /** Thanh tiêu đề ô: chọn series, số lát, phóng to 1x1 */
-function CellHeader({ index, isActive, seriesList, seriesTitle, slicePos, sliceTotal, onChangeSeries, onMaximize }) {
+const CellHeader = memo(function CellHeader({ index, isActive, seriesList, seriesTitle, slicePos, sliceTotal, onChangeSeries, onMaximize }) {
   const items = useMemo(
     () =>
       seriesList.map((s) => ({
@@ -60,7 +60,7 @@ function CellHeader({ index, isActive, seriesList, seriesTitle, slicePos, sliceT
       </Tooltip>
     </div>
   );
-}
+});
 
 /**
  * Ô KHÔNG được chọn: chỉ hiển thị (nhẹ) - ảnh, số đo đã lưu, đường tham chiếu, HUD.
@@ -398,13 +398,28 @@ export default function PacsMultiViewportGrid({
     [av, instsOf, globalOf, setActiveViewport, onActiveSliceChange]
   );
 
-  // Ưu tiên tải lát đang hiện ở các ô
+  // Ưu tiên tải lát đang hiện ở các ô + tải trước vài lát lân cận của ô phụ (cuộn đồng bộ không phải đứng chờ)
+  const PASSIVE_PREFETCH_RADIUS = 6;
   useEffect(() => {
     for (let i = 0; i < cellCount; i++) {
       const g = globalOf(cells[i]);
       if (g !== undefined && !dicomCache[g]) requestInstance?.(g, i === av ? 0 : 1);
     }
-  }, [cells, cellCount, dicomCache, globalOf, requestInstance, av]);
+    const t = setTimeout(() => {
+      for (let i = 0; i < cellCount; i++) {
+        if (i === av) continue; // ô đang chọn đã có bộ tải theo lát hiện tại
+        const insts = instsOf(cells[i]?.seriesUid);
+        const pos = cells[i]?.slicePos || 0;
+        for (let d = 1; d <= PASSIVE_PREFETCH_RADIUS; d++) {
+          for (const p of [pos + d, pos - d]) {
+            const g = insts[p]?.globalIndex;
+            if (g !== undefined && !dicomCache[g]) requestInstance?.(g, 100 + d);
+          }
+        }
+      }
+    }, 60);
+    return () => clearTimeout(t);
+  }, [cells, cellCount, dicomCache, globalOf, instsOf, requestInstance, av]);
 
   /* ---------- Đồng bộ WW/WL giữa các series cùng modality ---------- */
   const activeUid = cells[av]?.seriesUid;

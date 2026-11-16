@@ -647,6 +647,50 @@ function buildMonoLut(meta, windowCenter, windowWidth, invert, colorLut) {
 }
 
 /**
+ * Tái sử dụng ImageData theo từng canvas: ảnh X-quang 3000x2500 = 30MB/lần cấp phát -> GC giật khi kéo WW/WL.
+ * putImageData ghi đè toàn bộ nên không cần xoá bộ đệm cũ.
+ */
+const imageDataByCanvas = new WeakMap();
+function getReusableImageData(canvas, ctx, columns, rows) {
+  const cached = imageDataByCanvas.get(canvas);
+  if (cached && cached.width === columns && cached.height === rows) return cached;
+  const img = ctx.createImageData(columns, rows);
+  imageDataByCanvas.set(canvas, img);
+  return img;
+}
+
+/**
+ * LUT theo (meta, WW/WL, invert, màu): cuộn qua lát cùng series, lưới 2x2 nhiều ô cùng cửa sổ
+ * -> dùng lại LUT thay vì dựng lại (dải 16-bit = 65k phần tử mỗi lần).
+ */
+const LUT_CACHE_MAX = 24;
+const lutCache = new Map();
+function getCachedMonoLut(meta, windowCenter, windowWidth, invert, colorLut) {
+  const key = [
+    meta.minStoredValue,
+    meta.maxStoredValue,
+    meta.rescaleSlope,
+    meta.rescaleIntercept,
+    meta.photometricInterpretation,
+    meta.voiLutFunction,
+    windowCenter,
+    windowWidth,
+    invert ? 1 : 0,
+    colorLut,
+  ].join('|');
+  const hit = lutCache.get(key);
+  if (hit !== undefined) {
+    lutCache.delete(key);
+    lutCache.set(key, hit); // LRU
+    return hit;
+  }
+  const built = buildMonoLut(meta, windowCenter, windowWidth, invert, colorLut);
+  lutCache.set(key, built);
+  if (lutCache.size > LUT_CACHE_MAX) lutCache.delete(lutCache.keys().next().value);
+  return built;
+}
+
+/**
  * Vẽ ảnh DICOM (đã giải mã) lên canvas với WW/WL hiện tại.
  * Canvas luôn có kích thước = ma trận ảnh gốc (1 pixel canvas = 1 pixel DICOM) -> đo đạc chính xác.
  */
@@ -690,7 +734,7 @@ export function renderImageToCanvas(canvas, rawPixels, meta, options = {}) {
     return;
   }
 
-  const imageData = ctx.createImageData(columns, rows);
+  const imageData = getReusableImageData(canvas, ctx, columns, rows);
   const n = rows * columns;
 
   if (meta.isColor) {
@@ -706,7 +750,7 @@ export function renderImageToCanvas(canvas, rawPixels, meta, options = {}) {
     return;
   }
 
-  const lutInfo = buildMonoLut(meta, windowCenter, windowWidth, invert, colorLut);
+  const lutInfo = getCachedMonoLut(meta, windowCenter, windowWidth, invert, colorLut);
   const out32 = new Uint32Array(imageData.data.buffer);
   if (lutInfo) {
     const { lut, minS } = lutInfo;

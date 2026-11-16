@@ -1,4 +1,4 @@
-import { decodeDicom } from './dicomImageCore';
+import { decodeInWorker } from './decodeWorkerPool';
 
 /**
  * BỘ TẢI ẢNH PACS THEO MỨC ƯU TIÊN
@@ -13,6 +13,7 @@ import { decodeDicom } from './dicomImageCore';
 
 const DEFAULT_FULL_CONCURRENCY = 4;
 const DEFAULT_PREVIEW_CONCURRENCY = 6;
+const PINNED_TTL = 3000; // ms
 const MULTIFRAME_BUFFER_LIMIT = 400 * 1024 * 1024; // giữ buffer file multi-frame tối đa ~400MB
 
 export function makeInstanceKey(inst) {
@@ -34,9 +35,17 @@ class PriorityQueue {
     this.pump();
   }
 
-  /** Giữ lại các job còn cần, bỏ job xa không còn liên quan */
+  /**
+   * Giữ lại các job còn cần, bỏ job xa không còn liên quan.
+   * Job yêu cầu trực tiếp (ô lưới, MPR) được giữ thêm PINNED_TTL ms dù không thuộc series đang xem.
+   */
   retain(keys) {
-    for (const k of this.pending.keys()) if (!keys.has(k)) this.pending.delete(k);
+    const now = Date.now();
+    for (const [k, v] of this.pending) {
+      if (keys.has(k)) continue;
+      if (v.job?.pinnedAt && now - v.job.pinnedAt < PINNED_TTL) continue;
+      this.pending.delete(k);
+    }
   }
 
   clear() {
@@ -161,7 +170,11 @@ export function createPacsImageLoader({
         decoded = await loadNonDicom(inst);
       } else {
         const buf = await getFileBuffer(inst);
-        decoded = await decodeDicom(buf, inst.frameIndex || 0);
+        // Ảnh 1 frame tải từ máy chủ: buffer không dùng lại -> chuyển hẳn sang worker (không copy).
+        // Multi-frame / file cục bộ: buffer còn dùng cho frame khác -> worker nhận bản sao.
+        const canTransfer = (inst.numberOfFrames || 1) <= 1 && !localBuffers.has(inst.sopInstanceUid);
+        if (canTransfer) fileBuffers.delete(inst.sopInstanceUid);
+        decoded = await decodeInWorker(buf, inst.frameIndex || 0, { transfer: canTransfer });
       }
       if (disposed) return;
       doneFull.add(key);
@@ -231,7 +244,7 @@ export function createPacsImageLoader({
     request(index, inst, priority = 0) {
       const key = makeInstanceKey(inst);
       if (doneFull.has(key) || failed.has(key)) return;
-      fullQueue.push(key, { index, inst }, priority);
+      fullQueue.push(key, { index, inst, pinnedAt: Date.now() }, priority);
     },
 
     /** Cho phép tải lại (sau khi bị huỷ khỏi cache vì giới hạn bộ nhớ) */

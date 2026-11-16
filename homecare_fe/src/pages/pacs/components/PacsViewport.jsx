@@ -236,8 +236,11 @@ export default function PacsViewport({
     setCurrentIndex(Math.round(ratio * (totalSlices - 1)));
   };
 
+  // Đăng ký 1 lần (trước đây gỡ/gắn lại listener của window ở MỖI lần render)
+  const seekSliderRef = useRef(seekSlider);
+  seekSliderRef.current = seekSlider;
   useEffect(() => {
-    const move = (e) => draggingSlider.current && seekSlider(e.clientY);
+    const move = (e) => draggingSlider.current && seekSliderRef.current(e.clientY);
     const up = () => {
       draggingSlider.current = false;
     };
@@ -247,7 +250,7 @@ export default function PacsViewport({
       window.removeEventListener('mousemove', move);
       window.removeEventListener('mouseup', up);
     };
-  });
+  }, []);
 
   const sliderPercent = totalSlices > 1 ? (currentIndex / (totalSlices - 1)) * 100 : 0;
   const stop = (fn) => (e) => {

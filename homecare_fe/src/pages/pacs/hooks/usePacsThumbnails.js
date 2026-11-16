@@ -13,6 +13,21 @@ export function usePacsThumbnails({ caseId, seriesList, activeSeries, rightSlice
   const requestedRef = useRef(new Set());
   const urlsRef = useRef([]);
 
+  // Gom kết quả thumbnail: 250 lát = 250 lần setState = 250 lần render cả trang -> gộp ~150ms/lần
+  const pendingSliceRef = useRef({});
+  const flushTimerRef = useRef(null);
+  const queueSliceThumb = (globalIndex, url) => {
+    pendingSliceRef.current[globalIndex] = url;
+    if (flushTimerRef.current) return;
+    flushTimerRef.current = setTimeout(() => {
+      flushTimerRef.current = null;
+      const batch = pendingSliceRef.current;
+      pendingSliceRef.current = {};
+      if (Object.keys(batch).length) setSliceThumbnails((prev) => ({ ...prev, ...batch }));
+    }, 150);
+  };
+  useEffect(() => () => flushTimerRef.current && clearTimeout(flushTimerRef.current), []);
+
   const fetchThumb = async (sop) => {
     const res = await fetch(`${apiEndpoint}/api/pacs/instances/${encodeURIComponent(sop)}/thumbnail${caseId ? `?patientDiagnoseId=${encodeURIComponent(caseId)}` : ''}`, {
       headers: getAuthHeaders(),
@@ -33,6 +48,7 @@ export function usePacsThumbnails({ caseId, seriesList, activeSeries, rightSlice
     // Chỉ thu hồi URL cũ khi đã thay bằng danh sách mới
     urlsRef.current.forEach((u) => URL.revokeObjectURL(u));
     urlsRef.current = [];
+    pendingSliceRef.current = {};
     setSeriesThumbnails({});
     setSliceThumbnails({});
   }, [signature]);
@@ -85,7 +101,7 @@ export function usePacsThumbnails({ caseId, seriesList, activeSeries, rightSlice
         requestedRef.current.add(reqKey);
         try {
           const url = await fetchThumb(inst.sopInstanceUid);
-          if (!cancelled) setSliceThumbnails((prev) => ({ ...prev, [inst.globalIndex]: url }));
+          if (!cancelled) queueSliceThumb(inst.globalIndex, url);
         } catch {
           requestedRef.current.delete(reqKey);
         }
