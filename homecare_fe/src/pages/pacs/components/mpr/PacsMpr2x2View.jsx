@@ -5,6 +5,7 @@ import {
   renderCoronalCanvas,
   renderSagittalCanvas,
   renderVolume3DCanvas,
+  mprEventToVoxel,
 } from '../../services/pacsVolumeEngine';
 
 export default function PacsMpr2x2View({
@@ -110,10 +111,9 @@ export default function PacsMpr2x2View({
               objectFit: 'contain',
             }}
             onClick={(e) => {
-              const rect = e.currentTarget.getBoundingClientRect();
-              const x = Math.round(((e.clientX - rect.left) / rect.width) * cols);
-              const y = Math.round(((e.clientY - rect.top) / rect.height) * rows);
-              setCrosshair((prev) => ({ ...prev, x, y }));
+              // Toạ độ chính xác kể cả khi ảnh có viền (object-fit: contain) và tỉ lệ vật lý khác 1:1
+              const v = mprEventToVoxel(e, 'AXIAL', validSlices);
+              setCrosshair((prev) => ({ ...prev, ...v }));
             }}
           />
         </div>
@@ -175,10 +175,9 @@ export default function PacsMpr2x2View({
               objectFit: 'contain',
             }}
             onClick={(e) => {
-              const rect = e.currentTarget.getBoundingClientRect();
-              const y = Math.round(((e.clientX - rect.left) / rect.width) * rows);
-              const z = Math.round(((e.clientY - rect.top) / rect.height) * Math.max(1, numSlices - 1));
-              setCrosshair((prev) => ({ ...prev, y, z }));
+              // Toạ độ chính xác kể cả khi ảnh có viền (object-fit: contain) và tỉ lệ vật lý khác 1:1
+              const v = mprEventToVoxel(e, 'SAGITTAL', validSlices);
+              setCrosshair((prev) => ({ ...prev, ...v }));
             }}
           />
         </div>
@@ -240,10 +239,9 @@ export default function PacsMpr2x2View({
               objectFit: 'contain',
             }}
             onClick={(e) => {
-              const rect = e.currentTarget.getBoundingClientRect();
-              const x = Math.round(((e.clientX - rect.left) / rect.width) * cols);
-              const z = Math.round(((e.clientY - rect.top) / rect.height) * Math.max(1, numSlices - 1));
-              setCrosshair((prev) => ({ ...prev, x, z }));
+              // Toạ độ chính xác kể cả khi ảnh có viền (object-fit: contain) và tỉ lệ vật lý khác 1:1
+              const v = mprEventToVoxel(e, 'CORONAL', validSlices);
+              setCrosshair((prev) => ({ ...prev, ...v }));
             }}
           />
         </div>

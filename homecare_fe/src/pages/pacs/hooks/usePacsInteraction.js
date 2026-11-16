@@ -9,6 +9,7 @@ import {
   formatMeasurement,
 } from '../utils/measurement.utils';
 import { renderAnnotationsToCanvas } from '../utils/annotation.renderer';
+import { screenToImage } from '../utils/viewportMapping';
 import { computeRoiStats, getPixelValue, getPixelValueUnit } from '../services/dicomImageCore';
 
 /**
@@ -87,20 +88,18 @@ export function usePacsInteraction({
       const rect = canvas.getBoundingClientRect();
       const W = canvas.width;
       const H = canvas.height;
-      const dx = e.clientX - (rect.left + rect.width / 2);
-      const dy = e.clientY - (rect.top + rect.height / 2);
-      // Đảo xoay
-      const rad = (-rotation * Math.PI) / 180;
-      let ux = dx * Math.cos(rad) - dy * Math.sin(rad);
-      let uy = dx * Math.sin(rad) + dy * Math.cos(rad);
-      // Đảo lật
-      if (flipH) ux = -ux;
-      if (flipV) uy = -uy;
-      // Đảo zoom + tỉ lệ hiển thị
-      const sx = W / (canvas.offsetWidth * zoom);
-      const sy = H / (canvas.offsetHeight * zoom);
-      const x = W / 2 + ux * sx;
-      const y = H / 2 + uy * sy;
+      const { x, y } = screenToImage(e, {
+        centerX: rect.left + rect.width / 2,
+        centerY: rect.top + rect.height / 2,
+        layoutW: canvas.offsetWidth,
+        layoutH: canvas.offsetHeight,
+        W,
+        H,
+        zoom,
+        rotation,
+        flipH,
+        flipV,
+      });
       return { x: Math.max(0, Math.min(W, x)), y: Math.max(0, Math.min(H, y)), inside: x >= 0 && y >= 0 && x < W && y < H };
     },
     [imageCanvasRef, rotation, flipH, flipV, zoom]

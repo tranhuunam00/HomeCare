@@ -161,6 +161,7 @@ export default function PacsViewerPage() {
   const annotationCanvasRef = useRef(null);
 
   const { seriesThumbnails, sliceThumbnails } = usePacsThumbnails({
+    caseId: patientDiagnoseId,
     seriesList,
     activeSeries,
     rightSliceStripOpen,
@@ -618,6 +619,7 @@ export default function PacsViewerPage() {
         setDicomCache={setDicomCache}
         apiEndpoint={apiEndpoint}
         getAuthHeaders={getAuthHeaders}
+        caseId={patientDiagnoseId}
         patientName={study?.dbPatient?.patientName || currentMeta?.patientName || ''}
         modality={currentMeta?.modality || activeSeries?.modality || study?.modality || ''}
       />

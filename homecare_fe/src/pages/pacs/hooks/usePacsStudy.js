@@ -135,6 +135,7 @@ export function usePacsStudy(patientDiagnoseId, apiEndpoint) {
   /* ---------------- Bộ tải ảnh ---------------- */
   useEffect(() => {
     const loader = createPacsImageLoader({
+      caseId: patientDiagnoseId,
       apiEndpoint,
       getAuthHeaders,
       onFullLoaded: (index, decoded) => {
@@ -159,7 +160,7 @@ export function usePacsStudy(patientDiagnoseId, apiEndpoint) {
       loader.dispose();
       if (loaderRef.current === loader) loaderRef.current = null;
     };
-  }, [apiEndpoint, getAuthHeaders, scheduleFlush]);
+  }, [apiEndpoint, patientDiagnoseId, getAuthHeaders, scheduleFlush]);
 
   /* ---------------- Tải thông tin ca chụp ---------------- */
   const loadStudy = useCallback(async () => {

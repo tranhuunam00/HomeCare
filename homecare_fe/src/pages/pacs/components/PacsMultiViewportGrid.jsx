@@ -18,8 +18,6 @@ export default function PacsMultiViewportGrid({
   activeViewport = 0,
   setActiveViewport,
   activeTool = PACS_TOOLS.PAN,
-  windowCenter = 40,
-  windowWidth = 400,
   invert = false,
   colorLut = 'default',
   patientName = '',

@@ -807,7 +807,8 @@ export function computeRoiStats(rawPixels, meta, shape, p1, p2) {
 
 /* ======================= Hướng giải phẫu (Orientation) ======================= */
 
-function vectorToLabel(v) {
+/** Nhãn hướng giải phẫu (L/R, A/P, H/F) cho 1 vector trong hệ toạ độ bệnh nhân LPS */
+export function vectorToLabel(v) {
   if (!v) return '';
   const comps = [
     { axis: 0, val: v[0], pos: 'L', neg: 'R' },
@@ -823,7 +824,7 @@ function vectorToLabel(v) {
 }
 
 const OPPOSITE = { L: 'R', R: 'L', A: 'P', P: 'A', H: 'F', F: 'H', S: 'I', I: 'S' };
-const oppositeLabel = (label) => (label || '').split('').map((c) => OPPOSITE[c] || c).join('');
+export const oppositeLabel = (label) => (label || '').split('').map((c) => OPPOSITE[c] || c).join('');
 
 /**
  * Nhãn hướng 4 cạnh ảnh (chưa xoay/lật) từ ImageOrientationPatient hoặc PatientOrientation.

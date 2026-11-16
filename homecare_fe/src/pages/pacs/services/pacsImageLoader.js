@@ -67,6 +67,7 @@ class PriorityQueue {
 }
 
 export function createPacsImageLoader({
+  caseId,
   apiEndpoint,
   getAuthHeaders,
   onFullLoaded,
@@ -81,9 +82,16 @@ export function createPacsImageLoader({
   const doneFull = new Set();
   const donePreview = new Set();
   const failed = new Set();
+  const retries = new Map(); // key -> số lần đã thử lại
+  const MAX_RETRIES = 3;
   let disposed = false;
 
+  // Lỗi tạm thời (mất mạng, 429, 5xx) -> thử lại với khoảng chờ tăng dần
+  const isRetryable = (err) => !err?.status || err.status === 429 || err.status >= 500;
+
   const authHeaders = () => (getAuthHeaders ? getAuthHeaders() : {});
+  // Gửi kèm ca bệnh để máy chủ lấy đúng file của ca (1 bộ DICOM có thể gắn vào nhiều ca)
+  const caseQuery = caseId ? `?patientDiagnoseId=${encodeURIComponent(caseId)}` : '';
 
   async function fetchArrayBuffer(url) {
     const res = await fetch(url, { headers: authHeaders() });
@@ -99,7 +107,7 @@ export function createPacsImageLoader({
     const sop = inst.sopInstanceUid;
     if (localBuffers.has(sop)) return Promise.resolve(localBuffers.get(sop));
     if (fileBuffers.has(sop)) return fileBuffers.get(sop);
-    const p = fetchArrayBuffer(`${apiEndpoint}/api/pacs/instances/${encodeURIComponent(sop)}/file`);
+    const p = fetchArrayBuffer(`${apiEndpoint}/api/pacs/instances/${encodeURIComponent(sop)}/file${caseQuery}`);
     fileBuffers.set(sop, p);
     p.then((buf) => {
       if ((inst.numberOfFrames || 1) > 1) {
@@ -122,7 +130,7 @@ export function createPacsImageLoader({
   }
 
   async function loadNonDicom(inst) {
-    const buf = localBuffers.get(inst.sopInstanceUid) || (await fetchArrayBuffer(`${apiEndpoint}/api/pacs/instances/${encodeURIComponent(inst.sopInstanceUid)}/file`));
+    const buf = localBuffers.get(inst.sopInstanceUid) || (await fetchArrayBuffer(`${apiEndpoint}/api/pacs/instances/${encodeURIComponent(inst.sopInstanceUid)}/file${caseQuery}`));
     const bitmap = await createImageBitmap(new Blob([buf]));
     return {
       meta: {
@@ -159,6 +167,12 @@ export function createPacsImageLoader({
       doneFull.add(key);
       onFullLoaded?.(index, decoded, key);
     } catch (err) {
+      const attempt = retries.get(key) || 0;
+      if (!disposed && isRetryable(err) && attempt < MAX_RETRIES) {
+        retries.set(key, attempt + 1);
+        setTimeout(() => !disposed && !doneFull.has(key) && fullQueue.push(key, { index, inst }, 1000 + attempt), 600 * 2 ** attempt);
+        return;
+      }
       failed.add(key);
       onError?.(index, err, key);
     }
@@ -169,7 +183,7 @@ export function createPacsImageLoader({
     if (inst.isLocal || inst.isNonDicom || (inst.frameIndex || 0) > 0) return; // preview chỉ có cho frame đầu
     if (inst.previewStatus && inst.previewStatus !== 'ok') return;
     try {
-      const res = await fetch(`${apiEndpoint}/api/pacs/instances/${encodeURIComponent(inst.sopInstanceUid)}/web`, { headers: authHeaders() });
+      const res = await fetch(`${apiEndpoint}/api/pacs/instances/${encodeURIComponent(inst.sopInstanceUid)}/web${caseQuery}`, { headers: authHeaders() });
       if (!res.ok) return;
       const bitmap = await createImageBitmap(await res.blob());
       if (disposed || doneFull.has(key)) {
@@ -228,6 +242,7 @@ export function createPacsImageLoader({
 
     retryFailed() {
       failed.clear();
+      retries.clear();
     },
 
     isFailed(key) {

@@ -17,7 +17,9 @@ export default function PacsMprToolbar({
   setLayoutMode,
   colorMode3D = 'bone_shaded',
   setColorMode3D,
-  threshold3D = 35,
+  threshold3D = 300,
+  thresholdRange,
+  thresholdUnit,
   setThreshold3D,
   onReset3D,
   isControlsMinimized = false,
@@ -101,14 +103,16 @@ export default function PacsMprToolbar({
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '11px', color: '#cbd5e1' }}>
             <span style={{ color: '#94a3b8' }}>Ngưỡng HU:</span>
             <Slider
-              min={5}
-              max={150}
+              min={thresholdRange?.[0] ?? -1000}
+              max={thresholdRange?.[1] ?? 2000}
+              step={10}
               value={threshold3D}
               onChange={setThreshold3D}
-              style={{ width: 80 }}
+              style={{ width: 110 }}
+              tooltip={{ formatter: (v) => `${v} ${thresholdUnit || 'HU'}` }}
             />
             <span style={{ fontFamily: 'monospace', color: '#38bdf8', minWidth: 22 }}>
-              {threshold3D}
+              {threshold3D} {thresholdUnit || 'HU'}
             </span>
           </div>
 

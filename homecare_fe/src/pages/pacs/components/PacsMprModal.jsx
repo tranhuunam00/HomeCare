@@ -7,6 +7,11 @@ import PacsMprToolbar from './mpr/PacsMprToolbar';
 import PacsMpr1x2View from './mpr/PacsMpr1x2View';
 import PacsMpr2x2View from './mpr/PacsMpr2x2View';
 import PacsMpr3DMaxView from './mpr/PacsMpr3DMaxView';
+import { describeVolume, getVolumeValueRange } from '../services/pacsVolumeEngine';
+
+// Ngưỡng bề mặt mặc định (HU) theo preset 3D cho CT
+const CT_THRESHOLDS = { bone_shaded: 300, vascular: 180, soft_tissue: -400, bone: 200, grayscale: -1000, rainbow: -1000 };
+const DEFAULT_ROT = { angleX: 0, angleY: 0 }; // nhìn thẳng từ phía trước, đầu hướng lên
 
 /**
  * VR-PACS 3D Volume & Multi-Planar Reconstruction (MPR) Tool
@@ -20,6 +25,7 @@ export default function PacsMprModal({
   setDicomCache,
   apiEndpoint = 'http://localhost:3001',
   getAuthHeaders = () => ({}),
+  caseId,
   patientName = 'Bệnh nhân',
   modality = 'MR',
 }) {
@@ -36,10 +42,16 @@ export default function PacsMprModal({
     setLocalCache((prev) => ({ ...prev, ...dicomCache }));
   }, [dicomCache]);
 
+  // Giữ nguyên tham chiếu mảng khi các lát không đổi -> khối voxel không bị dựng lại khi viewer tải nền series khác
+  const validSlicesRef = useRef([]);
   const validSlices = useMemo(() => {
-    return instances
+    const next = instances
       .map((inst, idx) => localCache[inst?.globalIndex ?? idx])
       .filter((item) => item && item.rawPixels && item.meta && item.decodeInfo?.ok !== false && !item.meta.isColor);
+    const prev = validSlicesRef.current;
+    if (prev.length === next.length && next.every((x, i) => x === prev[i])) return prev;
+    validSlicesRef.current = next;
+    return next;
   }, [instances, localCache]);
 
   const numSlices = validSlices.length;
@@ -48,13 +60,14 @@ export default function PacsMprModal({
   const cols = sampleMeta.columns || 256;
 
   const [layoutMode, setLayoutMode] = useState('1x2');
+
   const [active2DPlane, setActive2DPlane] = useState('AXIAL');
   const [isControlsMinimized, setIsControlsMinimized] = useState(false);
 
   const [crosshair, setCrosshair] = useState({ x: 128, y: 128, z: 0 });
-  const [rot3D, setRot3D] = useState({ angleX: 18, angleY: 35 });
-  const [threshold3D, setThreshold3D] = useState(modality === 'MR' ? 25 : 35);
-  const [colorMode3D, setColorMode3D] = useState('bone_shaded');
+  const [rot3D, setRot3D] = useState(DEFAULT_ROT);
+  const [threshold3D, setThreshold3D] = useState(CT_THRESHOLDS.bone_shaded);
+  const [colorMode3D, setColorMode3DRaw] = useState('bone_shaded');
   const [isDragging3D, setIsDragging3D] = useState(false);
 
   // Background fetch missing slices
@@ -95,7 +108,7 @@ export default function PacsMprModal({
           chunk.map(async ({ cacheKey, instance }) => {
             try {
               const res = await axios.get(
-                `${apiEndpoint}/api/pacs/instances/${instance.sopInstanceUid}/file`,
+                `${apiEndpoint}/api/pacs/instances/${instance.sopInstanceUid}/file${caseId ? `?patientDiagnoseId=${encodeURIComponent(caseId)}` : ''}`,
                 { responseType: 'arraybuffer', headers: getAuthHeaders() }
               );
               const parsed = await decodeDicomBuffer(res.data, instance.frameIndex || 0);
@@ -133,7 +146,7 @@ export default function PacsMprModal({
     return () => {
       isCancelled = true;
     };
-  }, [open, instances, apiEndpoint, getAuthHeaders, setDicomCache]);
+  }, [open, instances, apiEndpoint, caseId, getAuthHeaders, setDicomCache]); // eslint-disable-line react-hooks/exhaustive-deps -- localCache chỉ đọc lúc mở
 
   // Synchronize crosshairs to center on slices loaded
   useEffect(() => {
@@ -171,8 +184,7 @@ export default function PacsMprModal({
   };
 
   const handleReset3D = () => {
-    setRot3D({ angleX: 18, angleY: 35 });
-    setThreshold3D(modality === 'MR' ? 25 : 35);
+    setRot3D(DEFAULT_ROT);
     setColorMode3D('bone_shaded');
     if (numSlices > 0) {
       setCrosshair({
@@ -182,6 +194,25 @@ export default function PacsMprModal({
       });
     }
   };
+
+  // Hình học khối & dải giá trị (CT: HU; MR: cường độ tín hiệu, không có HU)
+  const isLoadingSlices = downloadProgress.loading;
+  const volumeInfo = useMemo(() => (!isLoadingSlices && numSlices > 1 ? describeVolume(validSlices) : null), [isLoadingSlices, numSlices, validSlices]);
+  const valueRange = useMemo(() => (!isLoadingSlices && numSlices > 1 ? getVolumeValueRange(validSlices) : null), [isLoadingSlices, numSlices, validSlices]);
+  const isCT = (valueRange?.modality || modality) === 'CT';
+  const thresholdRange = isCT ? [-1000, 2000] : valueRange ? [valueRange.min, valueRange.max] : [0, 1000];
+  const thresholdUnit = isCT ? 'HU' : 'giá trị';
+
+  const setColorMode3D = (mode) => {
+    setColorMode3DRaw(mode);
+    if (isCT) setThreshold3D(CT_THRESHOLDS[mode] ?? 300);
+    else if (valueRange) setThreshold3D(Math.round(valueRange.min + (valueRange.max - valueRange.min) * 0.25));
+  };
+
+  // MR: đặt ngưỡng ban đầu theo dải tín hiệu thực tế
+  useEffect(() => {
+    if (valueRange && !isCT) setThreshold3D(Math.round(valueRange.min + (valueRange.max - valueRange.min) * 0.25));
+  }, [valueRange, isCT]);
 
   return (
     <Modal
@@ -208,10 +239,38 @@ export default function PacsMprModal({
           setColorMode3D={setColorMode3D}
           threshold3D={threshold3D}
           setThreshold3D={setThreshold3D}
+          thresholdRange={thresholdRange}
+          thresholdUnit={thresholdUnit}
           onReset3D={handleReset3D}
           isControlsMinimized={isControlsMinimized}
           setIsControlsMinimized={setIsControlsMinimized}
         />
+
+        {volumeInfo && (
+          <div
+            style={{
+              backgroundColor: volumeInfo.irregular || volumeInfo.tilt || !volumeInfo.calibrated ? '#422006' : '#0b1220',
+              borderBottom: '1px solid #1e293b',
+              padding: '4px 16px',
+              fontSize: 11.5,
+              color: volumeInfo.irregular || volumeInfo.tilt || !volumeInfo.calibrated ? '#fde68a' : '#94a3b8',
+              fontFamily: 'monospace',
+              display: 'flex',
+              gap: 16,
+              flexWrap: 'wrap',
+            }}
+          >
+            <span>
+              Voxel {volumeInfo.sx.toFixed(3)} × {volumeInfo.sy.toFixed(3)} × {volumeInfo.sz.toFixed(3)} mm ({volumeInfo.spacingSource})
+            </span>
+            <span>
+              Kích thước khối {volumeInfo.extentMm.map((v) => v.toFixed(0)).join(' × ')} mm · {volumeInfo.n} lát
+            </span>
+            {!volumeInfo.calibrated && <span>⚠ Không có Pixel Spacing - tỉ lệ hình học không đảm bảo</span>}
+            {volumeInfo.irregular && <span>⚠ Khoảng cách lát không đều (thiếu lát?) - MPR nội suy theo vị trí thật</span>}
+            {volumeInfo.tilt && <span>⚠ Lát cắt nghiêng (gantry tilt) - MPR chưa hiệu chỉnh nghiêng</span>}
+          </div>
+        )}
 
         {numSlices > 0 && numSlices <= 4 && (
           <div

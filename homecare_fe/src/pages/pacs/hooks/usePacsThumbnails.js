@@ -7,14 +7,14 @@ import { useState, useEffect, useRef } from 'react';
  */
 const THUMB_CONCURRENCY = 6;
 
-export function usePacsThumbnails({ seriesList, activeSeries, rightSliceStripOpen, apiEndpoint, getAuthHeaders, currentIndex }) {
+export function usePacsThumbnails({ caseId, seriesList, activeSeries, rightSliceStripOpen, apiEndpoint, getAuthHeaders, currentIndex }) {
   const [seriesThumbnails, setSeriesThumbnails] = useState({});
   const [sliceThumbnails, setSliceThumbnails] = useState({});
   const requestedRef = useRef(new Set());
   const urlsRef = useRef([]);
 
   const fetchThumb = async (sop) => {
-    const res = await fetch(`${apiEndpoint}/api/pacs/instances/${encodeURIComponent(sop)}/thumbnail`, {
+    const res = await fetch(`${apiEndpoint}/api/pacs/instances/${encodeURIComponent(sop)}/thumbnail${caseId ? `?patientDiagnoseId=${encodeURIComponent(caseId)}` : ''}`, {
       headers: getAuthHeaders(),
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -30,6 +30,9 @@ export function usePacsThumbnails({ seriesList, activeSeries, rightSliceStripOpe
     if (lastSignature.current === signature) return;
     lastSignature.current = signature;
     requestedRef.current.clear();
+    // Chỉ thu hồi URL cũ khi đã thay bằng danh sách mới
+    urlsRef.current.forEach((u) => URL.revokeObjectURL(u));
+    urlsRef.current = [];
     setSeriesThumbnails({});
     setSliceThumbnails({});
   }, [signature]);
@@ -95,14 +98,8 @@ export function usePacsThumbnails({ seriesList, activeSeries, rightSliceStripOpe
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rightSliceStripOpen, activeSeries, apiEndpoint]);
 
-  // Giải phóng object URL khi rời trang
-  useEffect(
-    () => () => {
-      urlsRef.current.forEach((u) => URL.revokeObjectURL(u));
-      urlsRef.current = [];
-    },
-    []
-  );
+  // KHÔNG thu hồi object URL trong cleanup của effect: React Fast Refresh / StrictMode chạy lại cleanup
+  // nhưng giữ nguyên state -> ảnh trỏ tới URL đã thu hồi (ảnh hỏng). Thumbnail ~3KB, trình duyệt tự giải phóng khi đóng tab.
 
   return { seriesThumbnails, setSeriesThumbnails, sliceThumbnails, setSliceThumbnails };
 }

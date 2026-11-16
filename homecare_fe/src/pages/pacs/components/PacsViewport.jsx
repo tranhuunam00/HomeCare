@@ -227,7 +227,6 @@ export default function PacsViewport({
           transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom}) rotate(${rotation}deg) scaleX(${flipH ? -1 : 1}) scaleY(${flipV ? -1 : 1})`,
           transformOrigin: 'center center',
           transition: isInteracting?.current ? 'none' : 'transform 0.06s ease-out',
-          willChange: 'transform',
         }}
       >
         <canvas
