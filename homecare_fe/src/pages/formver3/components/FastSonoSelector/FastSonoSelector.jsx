@@ -40,6 +40,8 @@ const FastSonoSelector = ({
   isEdit = true,
   initialSelectedMap = null,
   initialGrade = '',
+  initialNarrativeText = '',
+  isManualEdited = false,
   onNarrativeChange,
   onConclusionChange,
   onSelectedMapChange,
@@ -150,9 +152,37 @@ const FastSonoSelector = ({
     );
   }, [activeTemplate?.organs, activeTemplate?.title, selectedMap, activeTemplate?.classificationType, selectedGrade, examPartName, serviceName]);
 
-  // Trạng thái chỉnh sửa thủ công văn bản mô tả của bác sĩ
-  const [userEditedNarrative, setUserEditedNarrative] = useState(null);
-  const [isManualEdit, setIsManualEdit] = useState(false);
+  // Trích xuất danh sách mã bệnh lý bất thường (để BE có thể index/query)
+  const abnormalCodes = useMemo(() => {
+    const codes = [];
+    if (activeTemplate?.organs) {
+      for (const organ of activeTemplate.organs) {
+        const selectedIds = selectedMap[organ.key] || ['NORMAL'];
+        for (const optId of selectedIds) {
+          const opt = organ.options?.find((o) => o.id === optId);
+          if (opt && !opt.isNormal) {
+            codes.push(`${organ.key}:${opt.id}`);
+          }
+        }
+      }
+    }
+    return codes;
+  }, [activeTemplate?.organs, selectedMap]);
+
+  // Hàm loại bỏ thẻ HTML để lấy plain text
+  const stripHtml = (html) => {
+    if (!html) return '';
+    return html.replace(/<[^>]*>?/gm, '').trim();
+  };
+
+  // Trạng thái chỉnh sửa thủ công văn bản mô tả của bác sĩ (Bảo vệ không bị chip đè)
+  const [userEditedNarrative, setUserEditedNarrative] = useState(() => {
+    if (initialNarrativeText && isManualEdited) {
+      return stripHtml(initialNarrativeText);
+    }
+    return null;
+  });
+  const [isManualEdit, setIsManualEdit] = useState(() => Boolean(isManualEdited));
 
   useEffect(() => {
     if (!isManualEdit) {
@@ -180,19 +210,19 @@ const FastSonoSelector = ({
       return;
     }
     if (!isManualEdit && onNarrativeChange) {
-      onNarrativeChange(liveNarrative, liveHTMLNarrative);
+      onNarrativeChange(liveNarrative, liveHTMLNarrative, false);
     }
     if (onSelectedMapChange) {
-      onSelectedMapChange(selectedMap, selectedGrade, currentTemplateCode);
+      onSelectedMapChange(selectedMap, selectedGrade, currentTemplateCode, abnormalCodes);
     }
-  }, [liveNarrative, liveHTMLNarrative, selectedMap, selectedGrade, currentTemplateCode, isManualEdit]);
+  }, [liveNarrative, liveHTMLNarrative, selectedMap, selectedGrade, currentTemplateCode, abnormalCodes, isManualEdit]);
 
   // Xử lý khi bác sĩ trực tiếp chỉnh sửa câu chữ trong ô mô tả
   const handleNarrativeUserEdit = (val) => {
     setUserEditedNarrative(val);
     setIsManualEdit(true);
     if (onNarrativeChange) {
-      onNarrativeChange(val, convertPlainTextToHTML(val));
+      onNarrativeChange(val, convertPlainTextToHTML(val), true);
     }
   };
 
@@ -201,7 +231,7 @@ const FastSonoSelector = ({
     setIsManualEdit(false);
     setUserEditedNarrative(liveNarrative);
     if (onNarrativeChange) {
-      onNarrativeChange(liveNarrative, liveHTMLNarrative);
+      onNarrativeChange(liveNarrative, liveHTMLNarrative, false);
     }
     message.info('Đã khôi phục văn bản mô tả tự sinh theo các chip đã chọn.');
   };
@@ -234,7 +264,7 @@ const FastSonoSelector = ({
   const handleApplyToDiagnosisSummary = () => {
     if (onConclusionChange) {
       onConclusionChange(liveConclusion);
-      message.success(`Đã áp dụng kết luận vào ô Kết luận chẩn đoán: "${liveConclusion}"`);
+      message.success(`Đã bắn kết luận [Alt+Enter]: "${liveConclusion}"`);
     }
   };
 
@@ -245,6 +275,80 @@ const FastSonoSelector = ({
       message.success('Đã sao chép văn bản mô tả!');
     }
   };
+
+  // Lắng nghe phím tắt điều khiển chip & tabs lâm sàng
+  useEffect(() => {
+    if (!isEdit) return;
+
+    const handleKeyDown = (e) => {
+      const targetTag = e.target?.tagName?.toLowerCase();
+      const isInputFocused =
+        targetTag === 'input' ||
+        targetTag === 'textarea' ||
+        e.target?.isContentEditable;
+
+      // Alt + Enter: Bắn vào Kết luận (hoạt động mọi nơi kể cả khi đang gõ textarea)
+      if (e.altKey && e.key === 'Enter') {
+        e.preventDefault();
+        handleApplyToDiagnosisSummary();
+        return;
+      }
+
+      // Alt + R: Đặt lại tất cả về bình thường
+      if (e.altKey && e.key.toLowerCase() === 'r') {
+        e.preventDefault();
+        handleResetAllNormal();
+        return;
+      }
+
+      // Alt + C: Sao chép văn bản mô tả
+      if (e.altKey && e.key.toLowerCase() === 'c') {
+        e.preventDefault();
+        handleCopyNarrative();
+        return;
+      }
+
+      // Nếu đang gõ trong input/textarea thì không bắt phím số 1..9 và phím mũi tên
+      if (isInputFocused) return;
+
+      // Phím số 1..9: Toggle chip bệnh lý của cơ quan đang chọn
+      if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key >= '1' && e.key <= '9') {
+        const index = parseInt(e.key, 10) - 1;
+        if (visibleOptions && index < visibleOptions.length) {
+          e.preventDefault();
+          handleToggleChip(visibleOptions[index].id);
+        }
+        return;
+      }
+
+      // Phím mũi tên Trái / Phải: Chuyển tab cơ quan
+      if (!e.ctrlKey && !e.metaKey && !e.altKey && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) {
+        if (activeTemplate?.organs?.length > 1) {
+          e.preventDefault();
+          const currentIdx = activeTemplate.organs.findIndex((o) => o.key === activeOrganKey);
+          if (currentIdx !== -1) {
+            let nextIdx = e.key === 'ArrowRight' ? currentIdx + 1 : currentIdx - 1;
+            if (nextIdx >= activeTemplate.organs.length) nextIdx = 0;
+            if (nextIdx < 0) nextIdx = activeTemplate.organs.length - 1;
+            setActiveOrganKey(activeTemplate.organs[nextIdx].key);
+          }
+        }
+        return;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [
+    isEdit,
+    visibleOptions,
+    activeTemplate,
+    activeOrganKey,
+    handleApplyToDiagnosisSummary,
+    handleResetAllNormal,
+    handleToggleChip,
+    handleCopyNarrative,
+  ]);
 
   if (loadingTemplate) {
     return (
@@ -346,7 +450,7 @@ const FastSonoSelector = ({
           </div>
 
           <div className={styles.chipsGrid}>
-            {visibleOptions.map((opt) => {
+            {visibleOptions.map((opt, idx) => {
               const isSelected = currentSelectedIds.includes(opt.id);
               let chipClass = '';
               if (opt.isNormal) {
@@ -358,6 +462,7 @@ const FastSonoSelector = ({
                   ? styles.chipAbnormalSelected
                   : styles.chipAbnormalUnselected;
               }
+              const hotkeyNum = idx < 9 ? idx + 1 : null;
 
               return (
                 <button
@@ -366,8 +471,12 @@ const FastSonoSelector = ({
                   disabled={!isEdit}
                   className={`${styles.findingChip} ${chipClass}`}
                   onClick={() => handleToggleChip(opt.id)}
+                  title={hotkeyNum ? `Phím tắt: [${hotkeyNum}]` : undefined}
                 >
-                  {opt.label}
+                  {hotkeyNum && (
+                    <span className={styles.chipHotkeyBadge}>{hotkeyNum}</span>
+                  )}
+                  <span>{opt.label}</span>
                 </button>
               );
             })}
@@ -452,14 +561,14 @@ const FastSonoSelector = ({
                 Sao chép
               </Button>
             </Tooltip>
-            <Tooltip title="Tự động trích xuất kết luận bệnh lý vào ô Kết luận chẩn đoán">
+            <Tooltip title="Tự động trích xuất kết luận bệnh lý vào ô Kết luận chẩn đoán [Alt + Enter]">
               <Button
                 size="small"
                 type="primary"
                 style={{ background: '#0b6b4f', borderColor: '#0b6b4f' }}
                 onClick={handleApplyToDiagnosisSummary}
               >
-                Bắn vào Kết luận
+                Bắn vào Kết luận [Alt+Enter]
               </Button>
             </Tooltip>
           </div>
@@ -484,19 +593,34 @@ const FastSonoSelector = ({
 
       {/* 6. Bottom Action Bar: Nút Reset */}
       <div className={styles.bottomActionBar}>
-        <Button
-          danger
-          size="small"
-          icon={<ReloadOutlined />}
-          disabled={!isEdit}
-          onClick={handleResetAllNormal}
-        >
-          Đặt lại tất cả về bình thường
-        </Button>
+        <Tooltip title="Đưa toàn bộ cơ quan về trạng thái bình thường [Alt + R]">
+          <Button
+            danger
+            size="small"
+            icon={<ReloadOutlined />}
+            disabled={!isEdit}
+            onClick={handleResetAllNormal}
+          >
+            Đặt lại tất cả về bình thường [Alt+R]
+          </Button>
+        </Tooltip>
         <span style={{ fontSize: 11, color: '#94a3b8' }}>
-          * Chạm vào các nút bệnh lý để tự sinh mô tả y khoa chuẩn.
+          * Chạm vào nút hoặc bấm phím số [1..9] để tự sinh mô tả y khoa chuẩn.
         </span>
       </div>
+
+      {/* 7. Quick Hotkeys Bar */}
+      {isEdit && (
+        <div className={styles.hotkeysHelpBar}>
+          <span style={{ fontWeight: 600, color: '#334155' }}>⌨ Phím tắt:</span>
+          <span className={styles.hotkeyItem}><kbd>1..9</kbd> Chọn nhanh chip</span>
+          <span className={styles.hotkeyItem}><kbd>←</kbd><kbd>→</kbd> Đổi cơ quan</span>
+          <span className={styles.hotkeyItem}><kbd>Alt+Enter</kbd> Bắn kết luận</span>
+          <span className={styles.hotkeyItem}><kbd>Alt+R</kbd> Về bình thường</span>
+          <span className={styles.hotkeyItem}><kbd>Ctrl+S</kbd> Lưu nháp</span>
+          <span className={styles.hotkeyItem}><kbd>Alt+D</kbd> Đọc xong</span>
+        </div>
+      )}
     </div>
   );
 };

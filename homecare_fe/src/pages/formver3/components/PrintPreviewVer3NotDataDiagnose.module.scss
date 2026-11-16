@@ -51,7 +51,7 @@
 }
 
 .mobileOnlyHeader {
-  display: none;
+  display: none !important;
 }
 
 .desktopPrintHeader {
@@ -60,10 +60,10 @@
 
 @media screen and (max-width: 768px) {
   .mobileOnlyHeader {
-    display: block;
-    margin-bottom: 12px;
+    display: none !important;
   }
 
+  /* Ẩn hoàn toàn header trên màn hình mobile */
   .desktopPrintHeader {
     display: none;
   }

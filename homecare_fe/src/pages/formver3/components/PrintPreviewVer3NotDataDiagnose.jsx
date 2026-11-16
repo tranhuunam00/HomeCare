@@ -223,27 +223,18 @@ const PrintPreviewVer3NotDataDiagnose = ({
           bodyPadding={0}
         >
           {!isOnLyContent && isUse && (
-            <>
-              {/* Trên mobile hiển thị responsive header, vừa vặn không phải kéo ngang */}
-              <div className={styles.mobileOnlyHeader}>
-                <LegacyPrintHeader
-                  printTemplate={printTemplate}
-                  languageTranslate={languageTranslate}
-                />
-              </div>
-              {/* Trên Desktop và khi In (@media print) hiển thị chuẩn Custom Canvas */}
-              <div className={styles.desktopPrintHeader}>
-                <PrintHeaderFromCustom
-                  printTemplate={printTemplate}
-                  fallback={
-                    <LegacyPrintHeader
-                      printTemplate={printTemplate}
-                      languageTranslate={languageTranslate}
-                    />
-                  }
-                />
-              </div>
-            </>
+            /* Trên Desktop và khi In (@media print) hiển thị Header chuẩn. Trên mobile màn hình ẩn để tinh gọn. */
+            <div className={styles.desktopPrintHeader}>
+              <PrintHeaderFromCustom
+                printTemplate={printTemplate}
+                fallback={
+                  <LegacyPrintHeader
+                    printTemplate={printTemplate}
+                    languageTranslate={languageTranslate}
+                  />
+                }
+              />
+            </div>
           )}
 
           {!isOnLyContent && (

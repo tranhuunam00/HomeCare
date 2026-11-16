@@ -92,7 +92,14 @@ export function parseImageDescriptionState(rawDescription) {
           mode: "FAST_SONO",
           isFreeText: true,
           content: parsed.text || "",
-          fastSonoData: parsed.fastSonoData || { selectedMap: null, grade: "", templateCode: "" },
+          fastSonoData: parsed.fastSonoData || {
+            selectedMap: null,
+            grade: "",
+            templateCode: "",
+            isManualEdited: false,
+            plainNarrative: "",
+            abnormalCodes: [],
+          },
           rows: DEFAULT_IMAGING_ROWS,
         };
       }
@@ -101,7 +108,7 @@ export function parseImageDescriptionState(rawDescription) {
           mode: "FREE_TEXT",
           isFreeText: true,
           content: parsed.text || "",
-          fastSonoData: { selectedMap: null, grade: "", templateCode: "" },
+          fastSonoData: { selectedMap: null, grade: "", templateCode: "", isManualEdited: false },
           rows: DEFAULT_IMAGING_ROWS,
         };
       }
@@ -110,7 +117,7 @@ export function parseImageDescriptionState(rawDescription) {
         mode: "STRUCTURED_TABLE",
         isFreeText: false,
         content: "",
-        fastSonoData: { selectedMap: null, grade: "", templateCode: "" },
+        fastSonoData: { selectedMap: null, grade: "", templateCode: "", isManualEdited: false },
         rows: parsed,
       };
     }
@@ -119,7 +126,7 @@ export function parseImageDescriptionState(rawDescription) {
     mode: "STRUCTURED_TABLE",
     isFreeText: false,
     content: "",
-    fastSonoData: { selectedMap: null, grade: "", templateCode: "" },
+    fastSonoData: { selectedMap: null, grade: "", templateCode: "", isManualEdited: false },
     rows: DEFAULT_IMAGING_ROWS,
   };
 }
@@ -187,7 +194,14 @@ export default function DoctorUseDFormVer3({
   const [imagingRows, setImagingRows] = useState(DEFAULT_IMAGING_ROWS);
   // imagingMode: 'STRUCTURED_TABLE' (Bảng cấu trúc) | 'FAST_SONO' (Chọn nhanh D-SONO 5 tầng) | 'FREE_TEXT' (Văn bản tự do)
   const [imagingMode, setImagingMode] = useState("STRUCTURED_TABLE");
-  const [fastSonoData, setFastSonoData] = useState({ selectedMap: null, grade: "", templateCode: "" });
+  const [fastSonoData, setFastSonoData] = useState({
+    selectedMap: null,
+    grade: "",
+    templateCode: "",
+    isManualEdited: false,
+    plainNarrative: "",
+    abnormalCodes: [],
+  });
   // isFreeText: chế độ văn bản tự do (SunEditor hoặc D-SONO text) thay cho bảng cấu trúc
   const [isFreeText, setIsFreeText] = useState(false);
   const [freeTextContent, setFreeTextContent] = useState("");
@@ -576,6 +590,65 @@ export default function DoctorUseDFormVer3({
     setIsEdit(initEditMode || !idEdit);
   }, [initEditMode, idEdit]);
 
+  // Xử lý xác nhận chuyển trạng thái ĐỌC XONG (dùng chung cho click nút và phím tắt Alt+D)
+  const handleDocXong = () => {
+    if (!patientDiagnose?.id) return;
+    openConfirm({
+      title: "Xác nhận đọc xong [Alt+D]",
+      message: "Bạn có chắc muốn chuyển sang trạng thái ĐỌC XONG? Lưu ý, nhớ lưu lại trước khi chuyển trạng thái!",
+      onConfirm: () =>
+        transitionStatus({
+          patientDiagnoseId: patientDiagnose.id,
+          newStatus: PATIENT_DIAGNOSE_STATUS_CODE.READ_DONE,
+          successMessage: "Đã chuyển sang trạng thái ĐỌC XONG",
+          localSetState: setPatientDiagnose,
+          onStatusChange,
+        }),
+    });
+  };
+
+  // Bộ lắng nghe phím tắt toàn cục cho màn hình đọc ca lâm sàng
+  useEffect(() => {
+    const handleGlobalKeyDown = (e) => {
+      // 1. Ctrl + S (hoặc Cmd + S trên Mac): Lưu đọc tức thì
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+        e.preventDefault();
+        if (!isEditRef.current) {
+          setIsEdit(true);
+          toast.info("Đã bật chế độ chỉnh sửa");
+          return;
+        }
+        pendingAction.current = KEY_ACTION_BUTTON.save;
+        form.submit();
+        return;
+      }
+
+      // 2. Alt + D: Đọc xong
+      if (e.altKey && e.key.toLowerCase() === "d") {
+        e.preventDefault();
+        handleDocXong();
+        return;
+      }
+
+      // 3. Alt + P: Mở / Đóng Preview
+      if (e.altKey && e.key.toLowerCase() === "p") {
+        e.preventDefault();
+        setPreviewOpen((prev) => !prev);
+        return;
+      }
+
+      // 4. Esc: Đóng popup xem trước
+      if (e.key === "Escape") {
+        if (previewOpen) {
+          setPreviewOpen(false);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleGlobalKeyDown);
+    return () => window.removeEventListener("keydown", handleGlobalKeyDown);
+  }, [form, previewOpen, patientDiagnose?.id]);
+
   const filteredExamParts = useMemo(() => {
     if (!selectedIDs.id_template_service) return [];
     return (examParts || []).filter(
@@ -594,7 +667,13 @@ export default function DoctorUseDFormVer3({
           isFreeText: true,
           isFastSono: true,
           text: freeTextContent,
-          fastSonoData,
+          fastSonoData: {
+            ...fastSonoData,
+            isManualEdited: Boolean(fastSonoData?.isManualEdited),
+            plainNarrative: fastSonoData?.plainNarrative || "",
+            abnormalCodes: fastSonoData?.abnormalCodes || [],
+            conclusionSummary: diagnosisSummary || form.getFieldValue("imagingDiagnosisSummary") || "",
+          },
         });
       } else if (imagingMode === "FREE_TEXT") {
         imageDescriptionJson = JSON.stringify({
@@ -1177,10 +1256,17 @@ export default function DoctorUseDFormVer3({
               }
               gender={patientDiagnose?.gender}
               isEdit={isEdit}
-              initialSelectedMap={fastSonoData.selectedMap}
-              initialGrade={fastSonoData.grade}
-              onNarrativeChange={(plainText, htmlText) => {
+              initialSelectedMap={fastSonoData?.selectedMap}
+              initialGrade={fastSonoData?.grade}
+              initialNarrativeText={fastSonoData?.plainNarrative || freeTextContent}
+              isManualEdited={fastSonoData?.isManualEdited}
+              onNarrativeChange={(plainText, htmlText, isManual) => {
                 setFreeTextContent(htmlText);
+                setFastSonoData((prev) => ({
+                  ...prev,
+                  isManualEdited: isManual,
+                  plainNarrative: plainText,
+                }));
               }}
               onConclusionChange={(conclusionText) => {
                 setDiagnosisSummary(conclusionText);
@@ -1188,8 +1274,14 @@ export default function DoctorUseDFormVer3({
                   imagingDiagnosisSummary: conclusionText,
                 });
               }}
-              onSelectedMapChange={(selectedMap, grade, templateCode) => {
-                setFastSonoData({ selectedMap, grade, templateCode });
+              onSelectedMapChange={(selectedMap, grade, templateCode, abnormalCodes) => {
+                setFastSonoData((prev) => ({
+                  ...prev,
+                  selectedMap,
+                  grade,
+                  templateCode,
+                  abnormalCodes: abnormalCodes || [],
+                }));
               }}
             />
           ) : imagingMode === "FREE_TEXT" ? (
@@ -1352,20 +1444,7 @@ export default function DoctorUseDFormVer3({
                 }
               }}
               editId={idEdit}
-              onDocXong={async () => {
-                openConfirm({
-                  title: "Xác nhận đọc xong",
-                  message: "Bạn có chắc muốn chuyển sang trạng thái ĐỌC XONG? Lưu ý, nhớ lưu lại trước khi chuyển trạng thái!",
-                  onConfirm: () =>
-                    transitionStatus({
-                      patientDiagnoseId: patientDiagnose.id,
-                      newStatus: PATIENT_DIAGNOSE_STATUS_CODE.READ_DONE,
-                      successMessage: "Đã chuyển sang trạng thái ĐỌC XONG",
-                      localSetState: setPatientDiagnose,
-                      onStatusChange,
-                    }),
-                });
-              }}
+              onDocXong={handleDocXong}
               onHuyDoc={async () => {
                 const newStatus = patientDiagnose.id_consulting_doctor
                   ? PATIENT_DIAGNOSE_STATUS_CODE.CONSULTATION

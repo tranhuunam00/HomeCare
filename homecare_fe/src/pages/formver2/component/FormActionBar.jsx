@@ -105,7 +105,7 @@ export default function FormActionBar({
     },
     {
       key: KEY_ACTION_BUTTON.save,
-      label: "LƯU (ĐỌC)",
+      label: "LƯU (ĐỌC) [Ctrl+S]",
       icon: <SaveOutlined />,
       color: "blue",
     },
@@ -118,7 +118,7 @@ export default function FormActionBar({
     },
     {
       key: KEY_ACTION_BUTTON.doc_xong,
-      label: `ĐỌC XONG`,
+      label: `ĐỌC XONG [Alt+D]`,
       icon: <FileDoneOutlined />,
       onClick: onDocXong,
       color: "blue",
@@ -198,7 +198,7 @@ export default function FormActionBar({
     },
     {
       key: KEY_ACTION_BUTTON.preview,
-      label: "XEM TRƯỚC",
+      label: "XEM TRƯỚC [Alt+P]",
       icon: <EyeOutlined />,
       onClick: onPreview ?? emptyF,
     },
