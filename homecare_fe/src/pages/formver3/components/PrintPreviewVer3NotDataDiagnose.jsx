@@ -60,26 +60,11 @@ const PrintPreviewVer3NotDataDiagnose = ({
   styleCustomParent = {},
   patientDiagnose,
 }) => {
-  const { doctor, selectedPatientDiagnose, setSelectedPatientDiagnose } =
-    useGlobalAuth();
+  const { doctor, selectedPatientDiagnose } = useGlobalAuth();
   const currentPatient = patientDiagnose || selectedPatientDiagnose;
 
   const [previewImageOpen, setPreviewImageOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
-
-  useEffect(() => {
-    const fetchDetail = async () => {
-      try {
-        const res = await API_CALL.get(
-          `/patient-diagnose/${selectedPatientDiagnose?.id}`,
-        );
-        setSelectedPatientDiagnose(res.data.data);
-      } catch (err) {
-        console.error("Không thể lấy dữ liệu bệnh nhân:", err);
-      }
-    };
-    fetchDetail();
-  }, [selectedPatientDiagnose?.id]);
 
   const Circle = ({ checked }) =>
     !checked ? null : (
@@ -198,22 +183,22 @@ const PrintPreviewVer3NotDataDiagnose = ({
     : false;
 
   useEffect(() => {
-    if (selectedPatientDiagnose?.province_code) {
+    if (currentPatient?.province_code) {
       setSelectedProvince((prev) =>
-        prev === selectedPatientDiagnose.province_code
+        prev === currentPatient.province_code
           ? prev
-          : selectedPatientDiagnose.province_code
+          : currentPatient.province_code
       );
     }
-  }, [selectedPatientDiagnose?.province_code]);
+  }, [currentPatient?.province_code]);
 
   const provinceName =
-    provinces.find((p) => p.code == selectedPatientDiagnose?.province_code)
-      ?.name || selectedPatientDiagnose?.province_code;
+    provinces.find((p) => p.code == currentPatient?.province_code)
+      ?.name || currentPatient?.province_code;
 
   const wardName =
-    wards.find((w) => w.code == selectedPatientDiagnose?.ward_code)?.name ||
-    selectedPatientDiagnose?.ward_code;
+    wards.find((w) => w.code == currentPatient?.ward_code)?.name ||
+    currentPatient?.ward_code;
 
   const abnormalRows = imagingRows?.filter((row) => row.status === "abnormal");
 
@@ -305,7 +290,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                     "fullName",
                     false,
                   ).toUpperCase()}
-                  value={selectedPatientDiagnose?.name}
+                  value={currentPatient?.name}
                 />
                 <PrintItem
                   label={translateLabel(
@@ -313,7 +298,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                     "gender",
                     false,
                   ).toUpperCase()}
-                  value={selectedPatientDiagnose?.gender}
+                  value={currentPatient?.gender}
                 />
                 <PrintItem
                   label={translateLabel(
@@ -322,8 +307,8 @@ const PrintPreviewVer3NotDataDiagnose = ({
                     false,
                   ).toUpperCase()}
                   value={
-                    selectedPatientDiagnose?.birth_year
-                      ? `${Math.max(0, new Date().getFullYear() - Number(selectedPatientDiagnose.birth_year))} (${selectedPatientDiagnose.birth_year})`
+                    currentPatient?.birth_year
+                      ? `${Math.max(0, new Date().getFullYear() - Number(currentPatient.birth_year))} (${currentPatient.birth_year})`
                       : ""
                   }
                 />
@@ -333,7 +318,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                     "nationality",
                     false,
                   ).toUpperCase()}
-                  value={selectedPatientDiagnose?.countryCode}
+                  value={currentPatient?.countryCode}
                 />
                 <div className={styles.adminFullRow}>
                   <PrintItem
@@ -343,7 +328,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                       false,
                     ).toUpperCase()}
                     value={[
-                      selectedPatientDiagnose?.address,
+                      currentPatient?.address,
                       wardName,
                       provinceName,
                     ]
@@ -357,7 +342,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                     "phone",
                     false,
                   ).toUpperCase()}
-                  value={selectedPatientDiagnose?.phoneNumber}
+                  value={currentPatient?.phoneNumber}
                 />
                 <PrintItem
                   label={translateLabel(
@@ -365,7 +350,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                     "patientId",
                     false,
                   ).toUpperCase()}
-                  value={selectedPatientDiagnose?.PID}
+                  value={currentPatient?.PID}
                 />
                 <PrintItem
                   label={translateLabel(
@@ -373,7 +358,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                     "email",
                     false,
                   ).toUpperCase()}
-                  value={selectedPatientDiagnose?.email}
+                  value={currentPatient?.email}
                 />
                 <PrintItem
                   label={translateLabel(
@@ -381,7 +366,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                     "sid",
                     false,
                   ).toUpperCase()}
-                  value={selectedPatientDiagnose?.SID}
+                  value={currentPatient?.SID}
                 />
                 <div className={styles.adminFullRow}>
                   <PrintItem
@@ -390,7 +375,7 @@ const PrintPreviewVer3NotDataDiagnose = ({
                       "clinical",
                       false,
                     ).toUpperCase()}
-                    value={selectedPatientDiagnose?.Indication}
+                    value={currentPatient?.Indication}
                   />
                 </div>
               </div>
