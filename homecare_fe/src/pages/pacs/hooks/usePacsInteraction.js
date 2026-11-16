@@ -9,17 +9,23 @@ import {
   formatMeasurement,
 } from '../utils/measurement.utils';
 import { renderAnnotationsToCanvas } from '../utils/annotation.renderer';
+import { computeRoiStats, getPixelValue, getPixelValueUnit } from '../services/dicomImageCore';
 
+/**
+ * Tương tác khung nhìn: đo đạc, WW/WL, zoom/pan, đầu dò giá trị pixel (HU).
+ * Mọi số đo gắn với khoá ổn định của lát (`SOP#frame`) và chỉ cho phép trên ẢNH GỐC.
+ */
 export function usePacsInteraction({
   dicomCache,
   currentIndex,
+  currentKey,
   windowCenter,
   setWindowCenter,
   windowWidth,
   setWindowWidth,
-  invert,
+  applyVoi,
+  resetVoi,
   setInvert,
-  colorLut,
   setColorLut,
   activeSeriesIndices,
   stepSeriesSlice,
@@ -34,84 +40,95 @@ export function usePacsInteraction({
   const [flipH, setFlipH] = useState(false);
   const [flipV, setFlipV] = useState(false);
 
-  // Annotations per slice: { [sliceIndex]: Array<Measurement> }
+  // Số đo theo lát: { [SOP#frame]: Array<Measurement> }
   const [annotations, setAnnotations] = useState({});
   const [currentDrawing, setCurrentDrawing] = useState(null);
+  // Đầu dò giá trị pixel dưới con trỏ
+  const [probe, setProbe] = useState(null);
+
+  const currentData = dicomCache[currentIndex];
+  const hasFullImage = !!(currentData?.rawPixels && currentData?.decodeInfo?.ok !== false);
+  const meta = currentData?.meta;
+  const pixelSpacing = meta?.pixelSpacing || null;
+  const calibrated = !!pixelSpacing;
+  const spacingForCalc = pixelSpacing || [1, 1];
 
   useEffect(() => {
     setCurrentDrawing(null);
-  }, [activeTool, currentIndex]);
+  }, [activeTool, currentKey]);
 
-  // Interaction tracking refs
   const isInteracting = useRef(false);
   const startPos = useRef({ x: 0, y: 0 });
   const startPan = useRef({ x: 0, y: 0 });
   const startWW = useRef({ ww: 255, wl: 128 });
 
-  // Redraw Vector Annotations on the dedicated transparent overlay canvas
+  /** Pixel ảnh trên 1 pixel màn hình (để nét/chữ chú thích luôn cùng cỡ) */
+  const getImageToScreenScale = useCallback(() => {
+    const canvas = imageCanvasRef.current;
+    if (!canvas || !canvas.offsetWidth) return 1;
+    return canvas.width / (canvas.offsetWidth * zoom);
+  }, [imageCanvasRef, zoom]);
+
+  // Vẽ lại chú thích
   useEffect(() => {
     const canvas = annotationCanvasRef.current;
-    const currentData = dicomCache[currentIndex];
-    if (!canvas || !currentData) return;
+    if (!canvas || !meta) return;
+    renderAnnotationsToCanvas(canvas, annotations[currentKey] || [], currentDrawing, meta, getImageToScreenScale());
+  }, [annotations, currentDrawing, currentKey, meta, annotationCanvasRef, getImageToScreenScale]);
 
-    const targetW = currentData.meta?.columns || 512;
-    const targetH = currentData.meta?.rows || 512;
-    if (canvas.width !== targetW) canvas.width = targetW;
-    if (canvas.height !== targetH) canvas.height = targetH;
-
-    renderAnnotationsToCanvas(
-      canvas,
-      annotations[currentIndex] || [],
-      currentDrawing,
-      currentData.meta
-    );
-  }, [annotations, currentDrawing, currentIndex, dicomCache, annotationCanvasRef]);
-
-  // Convert Viewport Mouse Coordinates to DICOM Canvas Space with inverse transform
+  /**
+   * Toạ độ chuột -> toạ độ pixel ảnh (không làm tròn, giữ độ chính xác dưới pixel).
+   * Dùng kích thước layout chưa biến đổi (offsetWidth/Height) nên đúng với mọi góc xoay & ảnh không vuông.
+   */
   const getCanvasCoordinates = useCallback(
     (e) => {
       const canvas = imageCanvasRef.current;
-      if (!canvas) return { x: 0, y: 0 };
-
+      if (!canvas || !canvas.offsetWidth) return { x: 0, y: 0, inside: false };
       const rect = canvas.getBoundingClientRect();
-      const W = canvas.width || 512;
-      const H = canvas.height || 512;
-
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
-
-      const dx = e.clientX - centerX;
-      const dy = e.clientY - centerY;
-
+      const W = canvas.width;
+      const H = canvas.height;
+      const dx = e.clientX - (rect.left + rect.width / 2);
+      const dy = e.clientY - (rect.top + rect.height / 2);
+      // Đảo xoay
       const rad = (-rotation * Math.PI) / 180;
-      const cosA = Math.cos(rad);
-      const sinA = Math.sin(rad);
-      let unrotX = dx * cosA - dy * sinA;
-      let unrotY = dx * sinA + dy * cosA;
-
-      if (flipH) unrotX = -unrotX;
-      if (flipV) unrotY = -unrotY;
-
-      const displayW = rect.width / zoom;
-      const displayH = rect.height / zoom;
-
-      const isRotated90or270 = Math.abs(rotation % 180) === 90;
-      const effDisplayW = isRotated90or270 ? displayH : displayW;
-      const effDisplayH = isRotated90or270 ? displayW : displayH;
-
-      const scaleFactorX = W / (effDisplayW * zoom);
-      const scaleFactorY = H / (effDisplayH * zoom);
-
-      const canvasX = Math.round(W / 2 + unrotX * scaleFactorX);
-      const canvasY = Math.round(H / 2 + unrotY * scaleFactorY);
-
-      return {
-        x: Math.max(0, Math.min(W, canvasX)),
-        y: Math.max(0, Math.min(H, canvasY)),
-      };
+      let ux = dx * Math.cos(rad) - dy * Math.sin(rad);
+      let uy = dx * Math.sin(rad) + dy * Math.cos(rad);
+      // Đảo lật
+      if (flipH) ux = -ux;
+      if (flipV) uy = -uy;
+      // Đảo zoom + tỉ lệ hiển thị
+      const sx = W / (canvas.offsetWidth * zoom);
+      const sy = H / (canvas.offsetHeight * zoom);
+      const x = W / 2 + ux * sx;
+      const y = H / 2 + uy * sy;
+      return { x: Math.max(0, Math.min(W, x)), y: Math.max(0, Math.min(H, y)), inside: x >= 0 && y >= 0 && x < W && y < H };
     },
     [imageCanvasRef, rotation, flipH, flipV, zoom]
   );
+
+  const valueUnit = getPixelValueUnit(meta);
+
+  /** withStats=false khi đang kéo (chỉ tính diện tích), true khi thả chuột (tính Mean/SD trên toàn ROI) */
+  const finalizeRoi = (drawing, withStats = true) => {
+    const [p1, p2] = drawing.points;
+    const shape = drawing.type === 'roi_ellipse' ? 'ellipse' : 'rect';
+    const area = shape === 'ellipse' ? calculateEllipseArea(p1, p2, spacingForCalc) : calculateRectArea(p1, p2, spacingForCalc);
+    const stats = withStats && hasFullImage ? computeRoiStats(currentData.rawPixels, meta, shape, p1, p2) : null;
+    return {
+      ...drawing,
+      valueText: `Diện tích ${formatMeasurement(drawing.type, area, calibrated)}`,
+      stats,
+      statsUnit: valueUnit,
+      calibrated,
+      spacingSource: meta?.pixelSpacingSource || null,
+    };
+  };
+
+  const ensureMeasurable = () => {
+    if (hasFullImage) return true;
+    message.warning({ content: 'Đang tải ảnh gốc - chưa thể đo trên ảnh xem trước', key: 'pacs-measure-guard' });
+    return false;
+  };
 
   const handleMouseDown = (e) => {
     if (e.button !== 0 && e.button !== 1 && e.button !== 2) return;
@@ -121,72 +138,70 @@ export function usePacsInteraction({
     startWW.current = { ww: windowWidth, wl: windowCenter };
 
     if (e.button === 1 || activeTool === PACS_TOOLS.PAN) return;
-    if (e.button === 2 || activeTool === PACS_TOOLS.WW_WL) return;
+    if (e.button === 2 || activeTool === PACS_TOOLS.WW_WL || activeTool === PACS_TOOLS.ZOOM) return;
+
+    const isMeasureTool = [PACS_TOOLS.LENGTH, PACS_TOOLS.ANGLE, PACS_TOOLS.ROI_ELLIPSE, PACS_TOOLS.ROI_RECT].includes(activeTool);
+    if (isMeasureTool && !ensureMeasurable()) {
+      isInteracting.current = false;
+      return;
+    }
 
     const coords = getCanvasCoordinates(e);
+    const base = { id: Date.now(), calibrated, spacingSource: meta?.pixelSpacingSource || null };
 
     if (activeTool === PACS_TOOLS.LENGTH) {
-      setCurrentDrawing({
-        id: Date.now(),
-        type: 'length',
-        points: [coords, coords],
-        valueText: '0.0 mm',
-      });
+      setCurrentDrawing({ ...base, type: 'length', points: [coords, coords], valueText: formatMeasurement('length', 0, calibrated) });
     } else if (activeTool === PACS_TOOLS.ANGLE) {
       if (!currentDrawing || currentDrawing.type !== 'angle') {
-        setCurrentDrawing({
-          id: Date.now(),
-          type: 'angle',
-          points: [coords, coords],
-          valueText: '',
-        });
+        setCurrentDrawing({ ...base, type: 'angle', points: [coords, coords], valueText: '' });
       } else if (currentDrawing.points.length === 2) {
         const [p1] = currentDrawing.points;
-        if (Math.hypot(coords.x - p1.x, coords.y - p1.y) >= 3) {
-          setCurrentDrawing({
-            ...currentDrawing,
-            points: [p1, coords, coords],
-            valueText: '0.0°',
-          });
+        if (Math.hypot(coords.x - p1.x, coords.y - p1.y) >= 1) {
+          setCurrentDrawing({ ...currentDrawing, points: [p1, coords, coords], valueText: '0.0°' });
         }
       } else if (currentDrawing.points.length === 3) {
         const [p1, p2] = currentDrawing.points;
-        if (Math.hypot(coords.x - p2.x, coords.y - p2.y) >= 3) {
-          const angleDeg = calculateAngle(p1, p2, coords);
+        if (Math.hypot(coords.x - p2.x, coords.y - p2.y) >= 1) {
+          const angleDeg = calculateAngle(p1, p2, coords, spacingForCalc);
           setAnnotations((prev) => ({
             ...prev,
-            [currentIndex]: [
-              ...(prev[currentIndex] || []),
-              {
-                ...currentDrawing,
-                points: [p1, p2, coords],
-                valueText: formatMeasurement('angle', angleDeg),
-              },
+            [currentKey]: [
+              ...(prev[currentKey] || []),
+              { ...currentDrawing, points: [p1, p2, coords], valueText: formatMeasurement('angle', angleDeg) },
             ],
           }));
           setCurrentDrawing(null);
         }
       }
-    } else if (activeTool === PACS_TOOLS.ROI_ELLIPSE) {
-      setCurrentDrawing({
-        id: Date.now(),
-        type: 'roi_ellipse',
-        points: [coords, coords],
-        valueText: '0.0 mm²',
-      });
-    } else if (activeTool === PACS_TOOLS.ROI_RECT) {
-      setCurrentDrawing({
-        id: Date.now(),
-        type: 'roi_rect',
-        points: [coords, coords],
-        valueText: '0.0 mm²',
-      });
+    } else if (activeTool === PACS_TOOLS.ROI_ELLIPSE || activeTool === PACS_TOOLS.ROI_RECT) {
+      setCurrentDrawing({ ...base, type: activeTool, points: [coords, coords], valueText: '' });
     }
   };
 
+  // Đầu dò HU: throttle theo khung hình
+  const probeFrame = useRef(null);
+  const updateProbe = (e) => {
+    if (!hasFullImage) {
+      if (probe) setProbe(null);
+      return;
+    }
+    const { clientX, clientY } = e;
+    if (probeFrame.current) return;
+    probeFrame.current = requestAnimationFrame(() => {
+      probeFrame.current = null;
+      const c = getCanvasCoordinates({ clientX, clientY });
+      if (!c.inside) {
+        setProbe(null);
+        return;
+      }
+      const v = getPixelValue(currentData.rawPixels, meta, c.x, c.y);
+      setProbe(v ? { x: Math.floor(c.x), y: Math.floor(c.y), ...v, unit: valueUnit } : null);
+    });
+  };
+
   const handleMouseMove = (e) => {
-    const isAnglePreview =
-      activeTool === PACS_TOOLS.ANGLE && currentDrawing?.type === 'angle';
+    updateProbe(e);
+    const isAnglePreview = activeTool === PACS_TOOLS.ANGLE && currentDrawing?.type === 'angle';
     if (!isInteracting.current && !isAnglePreview) return;
 
     if (isInteracting.current) {
@@ -199,63 +214,48 @@ export function usePacsInteraction({
       }
 
       if (e.buttons === 2 || activeTool === PACS_TOOLS.WW_WL) {
-        const sensitivity = 2.0;
-        setWindowWidth((prev) => Math.max(1, Math.round(startWW.current.ww + dx * sensitivity)));
-        setWindowCenter((prev) => Math.round(startWW.current.wl - dy * sensitivity));
+        // Độ nhạy theo dải giá trị ảnh: CT (~4000 HU) và X-quang 15-bit (~32000) đều kéo mượt
+        const range = meta && Number.isFinite(meta.maxPixelValue) ? meta.maxPixelValue - meta.minPixelValue : 1024;
+        const sensitivity = Math.max(1, range / 600);
+        setWindowWidth(Math.max(1, Math.round(startWW.current.ww + dx * sensitivity)));
+        setWindowCenter(Math.round(startWW.current.wl - dy * sensitivity));
         return;
       }
 
       if (activeTool === PACS_TOOLS.ZOOM) {
         const zoomFactor = 1 - dy * 0.01;
-        setZoom((prev) => Math.max(0.1, Math.min(10, prev * zoomFactor)));
+        setZoom((prev) => Math.max(0.1, Math.min(16, prev * zoomFactor)));
         startPos.current = { x: e.clientX, y: e.clientY };
         return;
       }
     }
 
     const coords = getCanvasCoordinates(e);
-    const currentData = dicomCache[currentIndex];
-    const pixelSpacing = currentData?.meta?.pixelSpacing || [1.0, 1.0];
 
     if (isAnglePreview) {
       if (currentDrawing.points.length === 2) {
-        setCurrentDrawing({
-          ...currentDrawing,
-          points: [currentDrawing.points[0], coords],
-        });
+        setCurrentDrawing({ ...currentDrawing, points: [currentDrawing.points[0], coords] });
       } else if (currentDrawing.points.length === 3) {
         const [p1, p2] = currentDrawing.points;
-        const angleDeg = calculateAngle(p1, p2, coords);
         setCurrentDrawing({
           ...currentDrawing,
           points: [p1, p2, coords],
-          valueText: formatMeasurement('angle', angleDeg),
+          valueText: formatMeasurement('angle', calculateAngle(p1, p2, coords, spacingForCalc)),
         });
       }
       return;
     }
 
-    if (activeTool === PACS_TOOLS.LENGTH && currentDrawing) {
-      const dist = calculateDistance(currentDrawing.points[0], coords, pixelSpacing);
+    if (!currentDrawing) return;
+    const p1 = currentDrawing.points[0];
+    if (activeTool === PACS_TOOLS.LENGTH) {
       setCurrentDrawing({
         ...currentDrawing,
-        points: [currentDrawing.points[0], coords],
-        valueText: formatMeasurement('length', dist),
+        points: [p1, coords],
+        valueText: formatMeasurement('length', calculateDistance(p1, coords, spacingForCalc), calibrated),
       });
-    } else if (activeTool === PACS_TOOLS.ROI_ELLIPSE && currentDrawing) {
-      const area = calculateEllipseArea(currentDrawing.points[0], coords, pixelSpacing);
-      setCurrentDrawing({
-        ...currentDrawing,
-        points: [currentDrawing.points[0], coords],
-        valueText: formatMeasurement('roi_ellipse', area),
-      });
-    } else if (activeTool === PACS_TOOLS.ROI_RECT && currentDrawing) {
-      const area = calculateRectArea(currentDrawing.points[0], coords, pixelSpacing);
-      setCurrentDrawing({
-        ...currentDrawing,
-        points: [currentDrawing.points[0], coords],
-        valueText: formatMeasurement('roi_rect', area),
-      });
+    } else if (activeTool === PACS_TOOLS.ROI_ELLIPSE || activeTool === PACS_TOOLS.ROI_RECT) {
+      setCurrentDrawing(finalizeRoi({ ...currentDrawing, points: [p1, coords] }, false));
     }
   };
 
@@ -263,52 +263,50 @@ export function usePacsInteraction({
     if (!isInteracting.current) return;
     isInteracting.current = false;
 
-    if (
-      activeTool === PACS_TOOLS.ANGLE &&
-      currentDrawing?.type === 'angle' &&
-      currentDrawing.points.length === 2
-    ) {
+    if (activeTool === PACS_TOOLS.ANGLE && currentDrawing?.type === 'angle' && currentDrawing.points.length === 2) {
       const [p1, p2] = currentDrawing.points;
-      if (Math.hypot((p2?.x || 0) - (p1?.x || 0), (p2?.y || 0) - (p1?.y || 0)) >= 6) {
-        setCurrentDrawing({
-          ...currentDrawing,
-          points: [p1, p2, p2],
-          valueText: '0.0°',
-        });
+      if (Math.hypot((p2?.x || 0) - (p1?.x || 0), (p2?.y || 0) - (p1?.y || 0)) >= 2) {
+        setCurrentDrawing({ ...currentDrawing, points: [p1, p2, p2], valueText: '0.0°' });
       }
       return;
     }
 
-    if (
-      currentDrawing &&
-      (activeTool === PACS_TOOLS.LENGTH ||
-        activeTool === PACS_TOOLS.ROI_ELLIPSE ||
-        activeTool === PACS_TOOLS.ROI_RECT)
-    ) {
+    if (currentDrawing && [PACS_TOOLS.LENGTH, PACS_TOOLS.ROI_ELLIPSE, PACS_TOOLS.ROI_RECT].includes(activeTool)) {
       const [p1, p2] = currentDrawing.points;
-      const dx = (p1?.x || 0) - (p2?.x || 0);
-      const dy = (p1?.y || 0) - (p2?.y || 0);
-      if (Math.hypot(dx, dy) >= 3) {
-        setAnnotations((prev) => ({
-          ...prev,
-          [currentIndex]: [...(prev[currentIndex] || []), currentDrawing],
-        }));
+      if (Math.hypot((p1?.x || 0) - (p2?.x || 0), (p1?.y || 0) - (p2?.y || 0)) >= 1) {
+        const finalItem = activeTool === PACS_TOOLS.LENGTH ? currentDrawing : finalizeRoi(currentDrawing);
+        setAnnotations((prev) => ({ ...prev, [currentKey]: [...(prev[currentKey] || []), finalItem] }));
       }
       setCurrentDrawing(null);
     }
   };
 
+  const handleMouseLeave = () => {
+    setProbe(null);
+    handleMouseUp();
+  };
+
   const handleWheel = (e) => {
-    e.preventDefault();
+    if (e.ctrlKey) {
+      e.preventDefault?.();
+      setZoom((prev) => Math.max(0.1, Math.min(16, prev * (e.deltaY > 0 ? 1 / 1.1 : 1.1))));
+      return;
+    }
     if (activeSeriesIndices.length <= 1) return;
     stepSeriesSlice(e.deltaY > 0 ? 1 : -1);
   };
 
-  const handleZoomIn = () => setZoom((prev) => Math.min(10, Number((prev * 1.25).toFixed(2))));
-  const handleZoomOut = () => setZoom((prev) => Math.max(0.2, Number((prev / 1.25).toFixed(2))));
+  const handleZoomIn = () => setZoom((prev) => Math.min(16, Number((prev * 1.25).toFixed(3))));
+  const handleZoomOut = () => setZoom((prev) => Math.max(0.1, Number((prev / 1.25).toFixed(3))));
   const handleResetZoom = () => {
     setZoom(1);
     setPan({ x: 0, y: 0 });
+  };
+  /** Zoom 1:1 - mỗi pixel ảnh = 1 pixel màn hình (đọc chi tiết X-quang) */
+  const handleZoomActualPixels = () => {
+    const canvas = imageCanvasRef.current;
+    if (!canvas?.offsetWidth) return;
+    setZoom(canvas.width / canvas.offsetWidth);
   };
   const handleDoubleClickZoom = () => {
     if (zoom > 1.05) {
@@ -327,40 +325,51 @@ export function usePacsInteraction({
     setFlipV(false);
     setInvert(false);
     setColorLut('default');
-    const currentData = dicomCache[currentIndex];
-    if (currentData) {
-      setWindowCenter(currentData.meta.windowCenter);
-      setWindowWidth(currentData.meta.windowWidth);
-    }
+    resetVoi?.();
   };
 
   const handleClearAnnotations = () => {
     setAnnotations((prev) => {
-      const next = { ...prev, [currentIndex]: [] };
+      const next = { ...prev, [currentKey]: [] };
       if (presentationStateKey) {
         try {
           const saved = JSON.parse(localStorage.getItem(presentationStateKey) || '{}');
           saved.annotations = next;
           localStorage.setItem(presentationStateKey, JSON.stringify(saved));
-        } catch (e) {}
+        } catch {
+          /* localStorage đầy / bị chặn - trạng thái vẫn lưu lên máy chủ */
+        }
       }
       return next;
     });
-    message.success('Đã xóa tất cả đo đạc trên lát cắt này');
+    message.success('Đã xoá các số đo trên lát cắt này');
   };
 
-  const handleApplyPreset = (preset) => {
-    if (preset.ww && preset.wl) {
-      setWindowWidth(preset.ww);
-      setWindowCenter(preset.wl);
-    } else {
-      const currentData = dicomCache[currentIndex];
-      if (currentData) {
-        setWindowWidth(currentData.meta.windowWidth);
-        setWindowCenter(currentData.meta.windowCenter);
-      }
-    }
+  const handleUndoAnnotation = () => {
+    setAnnotations((prev) => {
+      const list = prev[currentKey] || [];
+      if (!list.length) return prev;
+      return { ...prev, [currentKey]: list.slice(0, -1) };
+    });
   };
+
+  /** preset: { ww, wl } | { key: 'default' } | { center, width } */
+  const handleApplyPreset = (preset) => {
+    if (!preset || preset.key === 'default') {
+      resetVoi?.();
+      return;
+    }
+    const center = preset.wl ?? preset.center;
+    const width = preset.ww ?? preset.width;
+    if (Number.isFinite(center) && Number.isFinite(width)) applyVoi?.(center, width, 'preset');
+  };
+
+  useEffect(
+    () => () => {
+      if (probeFrame.current) cancelAnimationFrame(probeFrame.current);
+    },
+    []
+  );
 
   return {
     activeTool,
@@ -380,16 +389,21 @@ export function usePacsInteraction({
     currentDrawing,
     setCurrentDrawing,
     isInteracting,
+    probe,
+    hasFullImage,
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
+    handleMouseLeave,
     handleWheel,
     handleZoomIn,
     handleZoomOut,
     handleResetZoom,
+    handleZoomActualPixels,
     handleDoubleClickZoom,
     handleReset,
     handleClearAnnotations,
+    handleUndoAnnotation,
     handleApplyPreset,
   };
 }

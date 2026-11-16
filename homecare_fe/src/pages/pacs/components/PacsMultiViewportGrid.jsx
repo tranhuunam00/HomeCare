@@ -28,6 +28,9 @@ export default function PacsMultiViewportGrid({
   onMaximizeTo1x1,
   isSmooth = true,
   onToggleSmooth,
+  voiBySeries = {},
+  previewCache = {},
+  requestInstance,
 }) {
   // Number of viewports needed
   const cellCount = layout === '2x2' ? 4 : 2;
@@ -85,7 +88,7 @@ export default function PacsMultiViewportGrid({
     [seriesList, instances]
   );
 
-  // Redraw canvases
+  // Vẽ lại từng ô: mỗi ô dùng WW/WL của SERIES của ô đó (không áp cửa sổ phổi lên series trung thất)
   useEffect(() => {
     for (let i = 0; i < cellCount; i++) {
       const canvas = canvasRefs.current[i];
@@ -99,17 +102,27 @@ export default function PacsMultiViewportGrid({
       const globalIdx = targetInst?.globalIndex ?? safePos;
       const cached = dicomCache[globalIdx];
 
-      if (cached?.rawPixels && cached?.meta) {
+      if (cached?.rawPixels && cached?.meta && cached.decodeInfo?.ok !== false) {
+        const userVoi = voiBySeries[cell?.seriesUid];
         renderDicomToCanvas(canvas, cached.rawPixels, cached.meta, {
-          windowCenter,
-          windowWidth,
+          windowCenter: userVoi?.center ?? cached.meta.windowCenter,
+          windowWidth: userVoi?.width ?? cached.meta.windowWidth,
           invert,
           colorLut,
           isSmooth,
         });
+      } else {
+        requestInstance?.(globalIdx, 0);
+        const preview = previewCache[globalIdx];
+        if (preview && targetInst?.rows && targetInst?.columns) {
+          renderDicomToCanvas(canvas, preview, { rows: targetInst.rows, columns: targetInst.columns }, { invert, isSmooth });
+        } else {
+          const ctx = canvas.getContext('2d');
+          ctx?.clearRect(0, 0, canvas.width, canvas.height);
+        }
       }
     }
-  }, [cellsState, cellCount, dicomCache, getCellInstances, windowCenter, windowWidth, invert, colorLut, isSmooth]);
+  }, [cellsState, cellCount, dicomCache, previewCache, getCellInstances, voiBySeries, invert, colorLut, isSmooth, requestInstance]);
 
   // Handle Wheel on a viewport
   const handleCellWheel = (e, viewportIdx) => {
@@ -417,7 +430,7 @@ export default function PacsMultiViewportGrid({
                   pointerEvents: 'none',
                 }}
               >
-                WL: {windowCenter} WW: {windowWidth} | Zoom: {Math.round(cell.zoom * 100)}%
+                W {Math.round(voiBySeries[cell.seriesUid]?.width ?? currentMeta.windowWidth ?? 0)} / L {Math.round(voiBySeries[cell.seriesUid]?.center ?? currentMeta.windowCenter ?? 0)} | Zoom: {Math.round(cell.zoom * 100)}%
               </div>
 
               {/* Vertical Slice Scrub Slider on the right */}

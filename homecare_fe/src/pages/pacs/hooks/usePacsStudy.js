@@ -1,24 +1,51 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import axios from 'axios';
 import { message } from 'antd';
-import { parseDicomBuffer } from '../services/dicomDecoder';
+import { decodeDicom } from '../services/dicomImageCore';
+import {
+  createPacsImageLoader,
+  buildOrderedInstances,
+  buildLegacyOrderKeys,
+  orderByDistance,
+  makeInstanceKey,
+} from '../services/pacsImageLoader';
 import { calculateAge } from '../../formver3/formver3.constant';
 
+// Ngân sách bộ nhớ cho ảnh gốc đã giải mã (TypedArray). CT 735 lát ~ 385MB; X-quang 15MB/ảnh.
+const DECODED_CACHE_BUDGET = 1200 * 1024 * 1024;
+
+const pixelBytes = (decoded) => {
+  const px = decoded?.rawPixels;
+  if (!px) return 0;
+  if (typeof px.byteLength === 'number') return px.byteLength;
+  return (decoded.meta?.rows || 0) * (decoded.meta?.columns || 0) * 4;
+};
+
+/**
+ * Quản lý dữ liệu ca chụp PACS cho viewer:
+ *  - Danh sách lát đã sắp xếp theo giải phẫu (tách frame, khoá ổn định SOP#frame)
+ *  - Bộ tải ưu tiên: ảnh xem trước (JPG) -> ảnh gốc (DCM 16-bit)
+ *  - Cửa sổ WW/WL theo TỪNG SERIES (phổi / trung thất / xương không lẫn nhau)
+ */
 export function usePacsStudy(patientDiagnoseId, apiEndpoint) {
   const [loading, setLoading] = useState(true);
   const [study, setStudy] = useState(null);
   const [patientDiagnose, setPatientDiagnose] = useState(null);
   const [instances, setInstances] = useState([]);
+  const [legacyOrderKeys, setLegacyOrderKeys] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [authError, setAuthError] = useState(false);
 
-  // Decoded DICOM cache: index -> { meta, rawPixels }
+  // Ảnh gốc đã giải mã: index -> { meta, rawPixels, decodeInfo }
   const [dicomCache, setDicomCache] = useState({});
+  // Ảnh xem trước 8-bit: index -> ImageBitmap
+  const [previewCache, setPreviewCache] = useState({});
+  // Lỗi tải/giải mã: index -> message
+  const [loadErrors, setLoadErrors] = useState({});
 
-  // Windowing state initialized from active DICOM instance
-  const [windowCenter, setWindowCenter] = useState(128);
-  const [windowWidth, setWindowWidth] = useState(255);
+  // WW/WL theo series: seriesUid -> { center, width, source }
+  const [voiBySeries, setVoiBySeries] = useState({});
 
-  // Upload state for user feedback (placed at top with all states to preserve hook order)
   const [uploadState, setUploadState] = useState({
     status: 'idle', // 'idle' | 'uploading' | 'success' | 'error'
     fileName: '',
@@ -29,14 +56,7 @@ export function usePacsStudy(patientDiagnoseId, apiEndpoint) {
   });
 
   const resetUploadState = useCallback(() => {
-    setUploadState({
-      status: 'idle',
-      fileName: '',
-      fileSize: 0,
-      progress: 0,
-      message: '',
-      details: '',
-    });
+    setUploadState({ status: 'idle', fileName: '', fileSize: 0, progress: 0, message: '', details: '' });
   }, []);
 
   const getAuthHeaders = useCallback(() => {
@@ -44,19 +64,117 @@ export function usePacsStudy(patientDiagnoseId, apiEndpoint) {
     return token ? { Authorization: `Bearer ${token}` } : {};
   }, []);
 
-  // Fetch Study Metadata & HomeCare PatientDiagnose Record (DB is fallback ONLY for non-DICOM)
+  /* ---------------- Gom cập nhật cache theo khung hình (tránh render dồn dập) ---------------- */
+  const pendingFullRef = useRef({});
+  const pendingPreviewRef = useRef({});
+  const flushTimerRef = useRef(null);
+  const cacheBytesRef = useRef(new Map()); // index -> bytes
+  const currentIndexRef = useRef(0);
+  const instancesRef = useRef([]);
+  currentIndexRef.current = currentIndex;
+  instancesRef.current = instances;
+
+  const loaderRef = useRef(null);
+
+  const evictIfNeeded = useCallback((cacheDraft) => {
+    let total = 0;
+    for (const v of cacheBytesRef.current.values()) total += v;
+    if (total <= DECODED_CACHE_BUDGET) return cacheDraft;
+    const cur = currentIndexRef.current;
+    const curSeries = instancesRef.current[cur]?.seriesInstanceUid;
+    // Ưu tiên bỏ ảnh khác series, sau đó ảnh xa lát hiện tại nhất
+    const candidates = Object.keys(cacheDraft)
+      .map(Number)
+      .filter((i) => Math.abs(i - cur) > 8)
+      .sort((a, b) => {
+        const sa = instancesRef.current[a]?.seriesInstanceUid === curSeries ? 1 : 0;
+        const sb = instancesRef.current[b]?.seriesInstanceUid === curSeries ? 1 : 0;
+        if (sa !== sb) return sa - sb;
+        return Math.abs(b - cur) - Math.abs(a - cur);
+      });
+    const next = { ...cacheDraft };
+    for (const idx of candidates) {
+      if (total <= DECODED_CACHE_BUDGET * 0.85) break;
+      total -= cacheBytesRef.current.get(idx) || 0;
+      cacheBytesRef.current.delete(idx);
+      const inst = instancesRef.current[idx];
+      if (inst) loaderRef.current?.forget(makeInstanceKey(inst));
+      delete next[idx];
+    }
+    return next;
+  }, []);
+
+  const scheduleFlush = useCallback(() => {
+    if (flushTimerRef.current) return;
+    flushTimerRef.current = setTimeout(() => {
+      flushTimerRef.current = null;
+      const full = pendingFullRef.current;
+      const prev = pendingPreviewRef.current;
+      pendingFullRef.current = {};
+      pendingPreviewRef.current = {};
+      if (Object.keys(full).length) {
+        setDicomCache((c) => evictIfNeeded({ ...c, ...full }));
+        // Ảnh gốc đã có -> giải phóng ảnh xem trước tương ứng
+        setPreviewCache((p) => {
+          let changed = false;
+          const next = { ...p };
+          for (const idx of Object.keys(full)) {
+            if (next[idx]) {
+              next[idx].close?.();
+              delete next[idx];
+              changed = true;
+            }
+          }
+          return changed ? next : p;
+        });
+      }
+      if (Object.keys(prev).length) setPreviewCache((p) => ({ ...p, ...prev }));
+    }, 16);
+  }, [evictIfNeeded]);
+
+  /* ---------------- Bộ tải ảnh ---------------- */
+  useEffect(() => {
+    const loader = createPacsImageLoader({
+      apiEndpoint,
+      getAuthHeaders,
+      onFullLoaded: (index, decoded) => {
+        cacheBytesRef.current.set(index, pixelBytes(decoded));
+        pendingFullRef.current[index] = decoded;
+        if (!decoded?.decodeInfo?.ok) {
+          setLoadErrors((e) => ({ ...e, [index]: decoded?.decodeInfo?.reason || 'Không giải mã được ảnh' }));
+        }
+        scheduleFlush();
+      },
+      onPreviewLoaded: (index, bitmap) => {
+        pendingPreviewRef.current[index] = bitmap;
+        scheduleFlush();
+      },
+      onError: (index, err) => {
+        if (err?.status === 401) setAuthError(true);
+        setLoadErrors((e) => ({ ...e, [index]: err?.message || 'Lỗi tải ảnh' }));
+      },
+    });
+    loaderRef.current = loader;
+    return () => {
+      loader.dispose();
+      if (loaderRef.current === loader) loaderRef.current = null;
+    };
+  }, [apiEndpoint, getAuthHeaders, scheduleFlush]);
+
+  /* ---------------- Tải thông tin ca chụp ---------------- */
   const loadStudy = useCallback(async () => {
     if (!patientDiagnoseId) {
       setPatientDiagnose(null);
-      setStudy((prev) =>
-        prev || {
-          patientName: '',
-          patientId: '',
-          modality: '',
-          studyDate: '',
-          attachedFiles: [],
-          dbPatient: null,
-        }
+      setStudy(
+        (prev) =>
+          prev || {
+            patientName: '',
+            patientId: '',
+            modality: '',
+            studyDate: '',
+            attachedFiles: [],
+            dbPatient: null,
+          }
       );
       setLoading(false);
       return;
@@ -69,6 +187,14 @@ export function usePacsStudy(patientDiagnoseId, apiEndpoint) {
         axios.get(`${apiEndpoint}/api/patient-diagnose/${patientDiagnoseId}`, { headers }),
       ]);
 
+      const isUnauthorized = [studyResult, pdResult].some(
+        (r) => r.status === 'rejected' && r.reason?.response?.status === 401
+      );
+      if (isUnauthorized) {
+        setAuthError(true);
+        message.error('Phiên đăng nhập đã hết hạn hoặc chưa đăng nhập. Vui lòng đăng nhập lại để xem ảnh DICOM.');
+      }
+
       let pdData = null;
       if (pdResult.status === 'fulfilled') {
         const rawPd = pdResult.value?.data?.data;
@@ -77,9 +203,7 @@ export function usePacsStudy(patientDiagnoseId, apiEndpoint) {
       }
 
       const computedAge =
-        pdData && (pdData.dob || pdData.birth_year)
-          ? calculateAge(pdData.dob, pdData.birth_year)
-          : null;
+        pdData && (pdData.dob || pdData.birth_year) ? calculateAge(pdData.dob, pdData.birth_year) : null;
       const formattedCreatedAt = pdData?.createdAt
         ? new Date(pdData.createdAt).toLocaleString('vi-VN', {
             year: 'numeric',
@@ -95,9 +219,7 @@ export function usePacsStudy(patientDiagnoseId, apiEndpoint) {
             patientName: pdData.name || '',
             patientId: pdData.PID || '',
             patientAge:
-              computedAge !== null && computedAge !== undefined && computedAge !== ''
-                ? `${computedAge} tuổi`
-                : '',
+              computedAge !== null && computedAge !== undefined && computedAge !== '' ? `${computedAge} tuổi` : '',
             patientBirthYear: pdData.birth_year || '',
             patientGender: pdData.gender || '',
             patientSid: pdData.SID || '',
@@ -108,26 +230,19 @@ export function usePacsStudy(patientDiagnoseId, apiEndpoint) {
       if (studyResult.status === 'fulfilled' && studyResult.value?.data?.success && studyResult.value?.data?.data) {
         const raw = studyResult.value.data.data;
         const studyData = raw.data ? raw.data : raw;
+        setStudy({ ...studyData, dbPatient });
 
-        setStudy({
-          ...studyData,
-          dbPatient,
-        });
-
-        const sorted = (studyData.instances || []).sort(
-          (a, b) => (a.instanceNumber || 0) - (b.instanceNumber || 0)
-        );
-        setInstances(sorted);
+        // Reset cache khi tải lại ca
+        cacheBytesRef.current.clear();
+        loaderRef.current?.retryFailed();
+        setDicomCache({});
+        setPreviewCache({});
+        setLoadErrors({});
+        setLegacyOrderKeys(buildLegacyOrderKeys(studyData.instances));
+        setInstances(buildOrderedInstances(studyData.instances));
         setCurrentIndex(0);
       } else if (dbPatient) {
-        setStudy({
-          patientName: '',
-          patientId: '',
-          modality: '',
-          studyDate: '',
-          attachedFiles: [],
-          dbPatient,
-        });
+        setStudy({ patientName: '', patientId: '', modality: '', studyDate: '', attachedFiles: [], dbPatient });
       }
     } catch (err) {
       console.warn('Chưa có dữ liệu study cho ca này:', err);
@@ -140,90 +255,84 @@ export function usePacsStudy(patientDiagnoseId, apiEndpoint) {
     loadStudy();
   }, [loadStudy]);
 
-  // Load and decode active DICOM instance slice
-  const loadInstance = useCallback(
-    async (index) => {
-      if (!instances || instances.length === 0 || !instances[index]) return;
-      if (dicomCache[index]) {
-        const item = dicomCache[index];
-        setWindowCenter(item.meta.windowCenter);
-        setWindowWidth(item.meta.windowWidth);
-        return;
-      }
-
-      const instance = instances[index];
-      if (instance?.isLocal) return;
-
-      // Hỗ trợ Non-DICOM (NDCM): Tải ảnh nội soi / siêu âm / vết mổ trực tiếp
-      if (instance?.modality === 'NDCM' || instance?.isNonDicom) {
-        try {
-          const img = new Image();
-          img.crossOrigin = 'anonymous';
-          img.src = `${apiEndpoint}/api/pacs/instances/${instance.sopInstanceUid}/file`;
-          await new Promise((resolve, reject) => {
-            img.onload = resolve;
-            img.onerror = () => reject(new Error('Lỗi tải ảnh Non-DICOM'));
-          });
-          const item = {
-            meta: {
-              patientName: study?.patientName || '',
-              patientId: study?.patientId || '',
-              studyDate: study?.studyDate || '',
-              modality: 'NDCM',
-              seriesDescription: instance.fileName || 'Ảnh nội soi / Vết mổ (NDCM)',
-              sopInstanceUid: instance.sopInstanceUid,
-              seriesInstanceUid: instance.seriesInstanceUid,
-              rows: instance.rows || img.naturalHeight || 512,
-              columns: instance.columns || img.naturalWidth || 512,
-              windowCenter: 128,
-              windowWidth: 255,
-              pixelSpacing: [1.0, 1.0],
-              rescaleSlope: 1,
-              rescaleIntercept: 0,
-              isNonDicom: true,
-            },
-            rawPixels: img,
-          };
-          setDicomCache((prev) => ({ ...prev, [index]: item }));
-          setWindowCenter(128);
-          setWindowWidth(255);
-          return;
-        } catch (err) {
-          console.error('Lỗi tải ảnh Non-DICOM:', err);
-          message.error(`Không thể tải ảnh lát cắt #${index + 1}`);
-          return;
-        }
-      }
-
-      try {
-        const res = await axios.get(
-          `${apiEndpoint}/api/pacs/instances/${instance.sopInstanceUid}/file`,
-          {
-            responseType: 'arraybuffer',
-            headers: getAuthHeaders(),
-          }
-        );
-        const parsed = parseDicomBuffer(res.data);
-        setDicomCache((prev) => ({ ...prev, [index]: parsed }));
-        setWindowCenter(parsed.meta.windowCenter);
-        setWindowWidth(parsed.meta.windowWidth);
-      } catch (err) {
-        console.error('Lỗi tải file DICOM:', err);
-        message.error(`Không thể đọc file lát cắt #${index + 1}`);
-      }
-    },
-    [instances, dicomCache, apiEndpoint, getAuthHeaders]
-  );
+  /* ---------------- Lên lịch tải theo lát đang xem ---------------- */
+  const currentSeriesUid = instances[currentIndex]?.seriesInstanceUid || null;
+  const seriesIndexList = useMemo(() => {
+    if (!instances.length) return [];
+    return instances
+      .map((inst, index) => ({ index, inst }))
+      .filter((x) => x.inst.seriesInstanceUid === currentSeriesUid);
+  }, [instances, currentSeriesUid]);
 
   useEffect(() => {
-    if (instances.length > 0) {
-      loadInstance(currentIndex);
+    const loader = loaderRef.current;
+    if (!loader || !seriesIndexList.length) return;
+    const pos = Math.max(0, seriesIndexList.findIndex((x) => x.index === currentIndex));
+    // Debounce nhẹ khi cuộn nhanh để không xếp hàng hàng trăm request lỗi thời
+    const t = setTimeout(() => loader.focus(orderByDistance(seriesIndexList, pos)), 30);
+    return () => clearTimeout(t);
+  }, [seriesIndexList, currentIndex]);
+
+  /** Yêu cầu tải ngay 1 lát bất kỳ (lưới đa khung nhìn, MPR) */
+  const requestInstance = useCallback((index, priority = 0) => {
+    const inst = instancesRef.current[index];
+    if (inst) loaderRef.current?.request(index, inst, priority);
+  }, []);
+
+  /* ---------------- WW/WL theo series ---------------- */
+  const currentDecoded = dicomCache[currentIndex];
+  const defaultVoi = useMemo(() => {
+    const meta = currentDecoded?.meta;
+    if (meta && Number.isFinite(meta.windowCenter) && Number.isFinite(meta.windowWidth)) {
+      return { center: meta.windowCenter, width: meta.windowWidth, source: meta.windowSource || 'dicom' };
     }
-  }, [currentIndex, instances, loadInstance]);
+    const inst = instances[currentIndex];
+    if (inst && Number.isFinite(inst.windowCenter) && Number.isFinite(inst.windowWidth)) {
+      return { center: inst.windowCenter, width: inst.windowWidth, source: 'dicom' };
+    }
+    return { center: 127.5, width: 256, source: 'none' };
+  }, [currentDecoded, instances, currentIndex]);
+
+  const activeVoi = (currentSeriesUid && voiBySeries[currentSeriesUid]) || defaultVoi;
+  const windowCenter = activeVoi.center;
+  const windowWidth = activeVoi.width;
+  const activeVoiRef = useRef(activeVoi);
+  activeVoiRef.current = activeVoi;
+  const seriesUidRef = useRef(currentSeriesUid);
+  seriesUidRef.current = currentSeriesUid;
+
+  const updateVoi = useCallback((patch, source = 'user') => {
+    const uid = seriesUidRef.current || 'default_series';
+    setVoiBySeries((prev) => {
+      const base = prev[uid] || activeVoiRef.current;
+      const next = { ...base, ...patch, source };
+      if (next.width < 1) next.width = 1;
+      return { ...prev, [uid]: next };
+    });
+  }, []);
+
+  const setWindowCenter = useCallback(
+    (v) => updateVoi({ center: typeof v === 'function' ? v(activeVoiRef.current.center) : v }),
+    [updateVoi]
+  );
+  const setWindowWidth = useCallback(
+    (v) => updateVoi({ width: typeof v === 'function' ? v(activeVoiRef.current.width) : v }),
+    [updateVoi]
+  );
+  const applyVoi = useCallback((center, width, source = 'preset') => updateVoi({ center, width }, source), [updateVoi]);
+  /** Về cửa sổ mặc định của DICOM cho series hiện tại */
+  const resetVoi = useCallback(() => {
+    const uid = seriesUidRef.current || 'default_series';
+    setVoiBySeries((prev) => {
+      const next = { ...prev };
+      delete next[uid];
+      return next;
+    });
+  }, []);
 
   // Upload handler for new DICOM files (or local-only reading when no patientDiagnoseId)
   const uploadDicom = async (file) => {
-    // Standalone Local Mode: read & decode directly in browser without linking to any patient
+    // Chế độ đọc độc lập: giải mã trực tiếp trên trình duyệt, không liên kết bệnh nhân
     if (!patientDiagnoseId) {
       const lowerName = (file.name || '').toLowerCase();
       if (lowerName.endsWith('.zip')) {
@@ -253,39 +362,48 @@ export function usePacsStudy(patientDiagnoseId, apiEndpoint) {
 
       try {
         const buffer = await file.arrayBuffer();
-        const parsed = parseDicomBuffer(buffer);
-        if (!parsed?.rawPixels) {
-          message.error(`Không thể giải mã pixel DICOM từ tệp: ${file.name}`);
+        const first = await decodeDicom(buffer, 0);
+        if (!first.meta) {
+          message.error(`Tệp ${file.name} không phải DICOM hợp lệ`);
           return false;
         }
-
-        const localInst = {
-          sopInstanceUid: parsed.meta?.sopInstanceUid || `local_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-          seriesInstanceUid: parsed.meta?.seriesInstanceUid || 'local_series_1',
-          seriesDescription: parsed.meta?.seriesDescription || 'Local DICOM',
-          modality: parsed.meta?.modality || 'DICOM',
+        if (!first.decodeInfo?.ok) {
+          message.warning(`${file.name}: ${first.decodeInfo?.reason}`);
+        }
+        const sop = first.meta.sopInstanceUid || `local_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+        loaderRef.current?.registerLocalBuffer(sop, buffer);
+        const frames = Math.max(1, first.meta.numberOfFrames || 1);
+        const baseInst = {
+          sopInstanceUid: sop,
+          seriesInstanceUid: first.meta.seriesInstanceUid || 'local_series_1',
+          seriesDescription: first.meta.seriesDescription || 'DICOM cục bộ',
+          seriesNumber: first.meta.seriesNumber,
+          modality: first.meta.modality || 'OT',
           fileName: file.name,
+          instanceNumber: first.meta.instanceNumber,
+          numberOfFrames: frames,
           isLocal: true,
         };
+        const entries = Array.from({ length: frames }, (_, f) => {
+          const inst = { ...baseInst, frameIndex: f, frameCount: frames };
+          return { ...inst, key: makeInstanceKey(inst) };
+        });
 
         setInstances((prev) => {
-          const nextIdx = prev.length;
-          const nextList = [...prev, { ...localInst, instanceNumber: nextIdx + 1 }];
-          setDicomCache((cachePrev) => ({ ...cachePrev, [nextIdx]: parsed }));
-          if (nextIdx === 0) {
-            setCurrentIndex(0);
-            setWindowCenter(parsed.meta.windowCenter);
-            setWindowWidth(parsed.meta.windowWidth);
-          }
-          return nextList;
+          const startIdx = prev.length;
+          cacheBytesRef.current.set(startIdx, pixelBytes(first));
+          pendingFullRef.current[startIdx] = first;
+          scheduleFlush();
+          if (startIdx === 0) setCurrentIndex(0);
+          return [...prev, ...entries];
         });
 
         setStudy((prev) => ({
           ...(prev || {}),
-          patientName: parsed.meta?.patientName || prev?.patientName || '',
-          patientId: parsed.meta?.patientId || prev?.patientId || '',
-          modality: parsed.meta?.modality || prev?.modality || '',
-          studyDate: parsed.meta?.studyDate || prev?.studyDate || '',
+          patientName: first.meta.patientName || prev?.patientName || '',
+          patientId: first.meta.patientId || prev?.patientId || '',
+          modality: first.meta.modality || prev?.modality || '',
+          studyDate: first.meta.studyDate || prev?.studyDate || '',
         }));
       } catch (err) {
         console.error('Lỗi đọc DICOM cục bộ:', err);
@@ -380,14 +498,24 @@ export function usePacsStudy(patientDiagnoseId, apiEndpoint) {
     study,
     patientDiagnose,
     instances,
+    legacyOrderKeys,
     currentIndex,
     setCurrentIndex,
     dicomCache,
     setDicomCache,
+    previewCache,
+    loadErrors,
+    authError,
+    requestInstance,
     windowCenter,
     setWindowCenter,
     windowWidth,
     setWindowWidth,
+    voiSource: activeVoi.source,
+    voiBySeries,
+    setVoiBySeries,
+    applyVoi,
+    resetVoi,
     loadStudy,
     uploadDicom,
     uploadState,

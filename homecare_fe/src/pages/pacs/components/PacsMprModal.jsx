@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Modal, Progress } from 'antd';
 import { CloseOutlined, LoadingOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import axios from 'axios';
-import { parseDicomBuffer } from '../services/dicomDecoder';
+import { decodeDicomBuffer } from '../services/dicomDecoder';
 import PacsMprToolbar from './mpr/PacsMprToolbar';
 import PacsMpr1x2View from './mpr/PacsMpr1x2View';
 import PacsMpr2x2View from './mpr/PacsMpr2x2View';
@@ -39,7 +39,7 @@ export default function PacsMprModal({
   const validSlices = useMemo(() => {
     return instances
       .map((inst, idx) => localCache[inst?.globalIndex ?? idx])
-      .filter((item) => item && item.rawPixels && item.meta);
+      .filter((item) => item && item.rawPixels && item.meta && item.decodeInfo?.ok !== false && !item.meta.isColor);
   }, [instances, localCache]);
 
   const numSlices = validSlices.length;
@@ -98,8 +98,11 @@ export default function PacsMprModal({
                 `${apiEndpoint}/api/pacs/instances/${instance.sopInstanceUid}/file`,
                 { responseType: 'arraybuffer', headers: getAuthHeaders() }
               );
-              const parsed = parseDicomBuffer(res.data);
-              newSlices[cacheKey] = parsed;
+              const parsed = await decodeDicomBuffer(res.data, instance.frameIndex || 0);
+              // Lát không giải mã chính xác được -> không đưa vào khối dựng hình
+              if (parsed?.rawPixels && parsed.decodeInfo?.ok !== false && !parsed.meta?.isColor) {
+                newSlices[cacheKey] = parsed;
+              }
               completed++;
             } catch (err) {
               console.warn(`Lỗi tải lát cắt #${cacheKey}:`, err);

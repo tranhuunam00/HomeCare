@@ -28,11 +28,14 @@ export function calculateDistance(p1, p2, pixelSpacing = [1.0, 1.0]) {
  * @param {{x: number, y: number}} p3 Ray 2 endpoint
  * @returns {number} Angle in degrees [0, 180]
  */
-export function calculateAngle(p1, p2, p3) {
+export function calculateAngle(p1, p2, p3, pixelSpacing = [1.0, 1.0]) {
   if (!p1 || !p2 || !p3) return 0;
+  // Góc phải tính trong không gian vật lý (mm): ảnh siêu âm / X-quang có thể có pixel không vuông
+  const rowSpacing = pixelSpacing?.[0] || 1.0;
+  const colSpacing = pixelSpacing?.[1] || 1.0;
 
-  const v1 = { x: p1.x - p2.x, y: p1.y - p2.y };
-  const v2 = { x: p3.x - p2.x, y: p3.y - p2.y };
+  const v1 = { x: (p1.x - p2.x) * colSpacing, y: (p1.y - p2.y) * rowSpacing };
+  const v2 = { x: (p3.x - p2.x) * colSpacing, y: (p3.y - p2.y) * rowSpacing };
 
   const dot = v1.x * v2.x + v1.y * v2.y;
   const mag1 = Math.sqrt(v1.x * v1.x + v1.y * v1.y);
@@ -86,16 +89,18 @@ export function calculateRectArea(p1, p2, pixelSpacing = [1.0, 1.0]) {
  * @param {number} value
  * @returns {string}
  */
-export function formatMeasurement(type, value) {
+export function formatMeasurement(type, value, calibrated = true) {
   if (value === undefined || value === null || isNaN(value)) return '';
+  // Ảnh không có thông tin hiệu chuẩn -> hiển thị đơn vị pixel, KHÔNG giả làm mm
+  const unit = calibrated ? 'mm' : 'px';
   switch (type) {
     case 'length':
-      return `${value.toFixed(1)} mm`;
+      return `${value.toFixed(1)} ${unit}`;
     case 'angle':
       return `${value.toFixed(1)}°`;
     case 'roi_ellipse':
     case 'roi_rect':
-      return `${value.toFixed(1)} mm²`;
+      return `${value.toFixed(1)} ${unit}²`;
     default:
       return `${value.toFixed(1)}`;
   }

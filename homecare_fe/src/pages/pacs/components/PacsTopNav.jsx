@@ -110,11 +110,51 @@ export default function PacsTopNav({
         {/* Preset WW/WL */}
         <Dropdown
           menu={{
-            items: WW_WL_PRESETS.map((p) => ({
-              key: p.key,
-              label: p.label,
-              onClick: () => onApplyPreset(p),
-            })),
+            items: [
+              {
+                key: 'default',
+                label: 'Mặc định (theo DICOM)',
+                onClick: () => onApplyPreset({ key: 'default' }),
+              },
+              ...((currentMeta?.windowPresets || []).length > 1
+                ? [
+                    {
+                      type: 'group',
+                      key: 'dicom',
+                      label: 'Cửa sổ do máy chụp đề xuất',
+                      children: currentMeta.windowPresets.map((p, i) => ({
+                        key: `dicom_${i}`,
+                        label: `${p.explanation || `Cửa sổ ${i + 1}`}  ·  W ${Math.round(p.width)} / L ${Math.round(p.center)}`,
+                        onClick: () => onApplyPreset({ center: p.center, width: p.width }),
+                      })),
+                    },
+                  ]
+                : []),
+              ...(!currentMeta || currentMeta.modality === 'CT'
+                ? [
+                    {
+                      type: 'group',
+                      key: 'ct',
+                      label: 'Preset CT (HU)',
+                      children: WW_WL_PRESETS.filter((p) => p.modality === 'CT').map((p) => ({
+                        key: p.key,
+                        label: (
+                          <span style={{ display: 'flex', justifyContent: 'space-between', gap: 16, minWidth: 230 }}>
+                            <span>
+                              {p.hotkey && <kbd style={{ fontSize: 10, marginRight: 6, opacity: 0.7 }}>{p.hotkey}</kbd>}
+                              {p.label}
+                            </span>
+                            <span style={{ fontFamily: 'monospace', opacity: 0.65 }}>
+                              W {p.ww} / L {p.wl}
+                            </span>
+                          </span>
+                        ),
+                        onClick: () => onApplyPreset(p),
+                      })),
+                    },
+                  ]
+                : []),
+            ],
           }}
         >
           <Tooltip title="Cửa sổ tương phản (Presets)">

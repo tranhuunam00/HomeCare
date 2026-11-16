@@ -81,7 +81,7 @@ export default function PacsSidebarHistory({
               </span>
             )}
             <span style={{ fontSize: '10px', color: '#cbd5e1', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {currentMeta ? currentMeta.studyDate || '' : study?.dbPatient?.studyDate || study?.studyDate || ''}
+              {study?.dbPatient?.studyDate || currentMeta?.studyDate || study?.studyDate || ''}
             </span>
             <span
               style={{
@@ -99,31 +99,23 @@ export default function PacsSidebarHistory({
           </div>
 
           <div style={{ fontSize: '10px', color: '#94a3b8', lineHeight: '14px' }}>
-            {(currentMeta ? currentMeta.patientName : study?.dbPatient?.patientName || study?.patientName) && (
-              <div style={{ color: '#f8fafc', fontWeight: '600' }}>
-                {currentMeta ? currentMeta.patientName : study?.dbPatient?.patientName || study?.patientName}
-              </div>
-            )}
-            {(currentMeta
-              ? currentMeta.patientAge || currentMeta.patientSex
-              : study?.dbPatient?.patientAge || study?.dbPatient?.patientGender) && (
-              <div>
-                {(currentMeta
-                  ? [currentMeta.patientAge, currentMeta.patientSex]
-                  : [study?.dbPatient?.patientAge, study?.dbPatient?.patientGender]
-                )
-                  .filter(Boolean)
-                  .join(' • ')}
-              </div>
-            )}
-            {(currentMeta ? currentMeta.patientId : study?.dbPatient?.patientId || study?.patientId) && (
-              <div>
-                PID: {currentMeta ? currentMeta.patientId : study?.dbPatient?.patientId || study?.patientId}
-              </div>
-            )}
-            {!currentMeta && study?.dbPatient?.patientSid && (
-              <div>SID: {study.dbPatient.patientSid}</div>
-            )}
+            {/* Ưu tiên hồ sơ HomeCare: DICOM từ PACS nguồn có thể đã ẩn danh / mã hoá tên bệnh nhân */}
+            {(() => {
+              const db = study?.dbPatient;
+              const name = db?.patientName || study?.patientName || currentMeta?.patientName;
+              const ageSex = db
+                ? [db.patientAge, db.patientGender]
+                : [currentMeta?.patientAge, currentMeta?.patientSex];
+              const pid = db?.patientId || study?.patientId || currentMeta?.patientId;
+              return (
+                <>
+                  {name && <div style={{ color: '#f8fafc', fontWeight: '600' }}>{name}</div>}
+                  {ageSex.filter(Boolean).length > 0 && <div>{ageSex.filter(Boolean).join(' • ')}</div>}
+                  {pid && <div>PID: {pid}</div>}
+                  {db?.patientSid && <div>SID: {db.patientSid}</div>}
+                </>
+              );
+            })()}
             <div>File: DICOM ({displaySliceTotal} {displaySliceTotal === 1 ? 'slice' : 'slices'})</div>
           </div>
         </div>

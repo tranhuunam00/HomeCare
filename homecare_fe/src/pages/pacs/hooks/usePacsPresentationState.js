@@ -3,16 +3,35 @@ import axios from 'axios';
 import { message } from 'antd';
 import { generateKeyImageSnapshot, broadcastKeyImage } from '../utils/keyImage.utils';
 
+/**
+ * Chuyển số đo lưu theo vị trí cũ (index số) sang khoá ổn định `SOP#frame`.
+ * Thứ tự cũ được dựng lại chính xác (sắp theo InstanceNumber) nên số đo không bị lệch lát.
+ */
+export function migrateAnnotationKeys(annotations, legacyOrderKeys) {
+  if (!annotations || typeof annotations !== 'object') return {};
+  const out = {};
+  for (const [k, list] of Object.entries(annotations)) {
+    if (!Array.isArray(list) || !list.length) continue;
+    if (/^\d+$/.test(k)) {
+      const stableKey = legacyOrderKeys?.[Number(k)];
+      if (stableKey) out[stableKey] = [...(out[stableKey] || []), ...list];
+    } else {
+      out[k] = [...(out[k] || []), ...list];
+    }
+  }
+  return out;
+}
+
 export function usePacsPresentationState({
   patientDiagnoseId,
   apiEndpoint,
   getAuthHeaders,
   annotations,
   setAnnotations,
+  voiBySeries,
+  setVoiBySeries,
   windowCenter,
-  setWindowCenter,
   windowWidth,
-  setWindowWidth,
   colorLut,
   setColorLut,
   invert,
@@ -21,7 +40,9 @@ export function usePacsPresentationState({
   annotationCanvasRef,
   dicomCache,
   currentIndex,
+  currentKey,
   instances,
+  legacyOrderKeys,
   study,
 }) {
   const presentationStateKey = patientDiagnoseId ? `pacs_presentation_state_${patientDiagnoseId}` : null;
@@ -34,60 +55,68 @@ export function usePacsPresentationState({
     totalSlices: 1,
   });
 
-  // Restore presentation state on load
+  // Chỉ cho phép tự lưu SAU KHI đã khôi phục xong -> tránh ghi đè trạng thái cũ bằng dữ liệu rỗng
+  const restoredRef = useRef(false);
+  const legacyReady = (legacyOrderKeys?.length || 0) > 0 || (instances?.length || 0) > 0;
+
   useEffect(() => {
-    if (!patientDiagnoseId) return;
+    restoredRef.current = false;
+  }, [patientDiagnoseId]);
+
+  // Khôi phục trạng thái (server ưu tiên, fallback localStorage)
+  useEffect(() => {
+    if (!patientDiagnoseId || !legacyReady || restoredRef.current) return;
     let isMounted = true;
 
-    const fetchServerState = async () => {
-      try {
-        const token = localStorage.getItem('TOKEN');
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        const res = await axios.get(`${apiEndpoint}/api/pacs/presentation-state/${patientDiagnoseId}`, { headers });
-        const serverPS = res.data?.data?.data || res.data?.data;
+    const applyState = (ps) => {
+      if (!ps) return false;
+      const migrated = migrateAnnotationKeys(ps.annotations, legacyOrderKeys);
+      if (Object.keys(migrated).length) setAnnotations(migrated);
+      if (ps.windowBySeries && typeof ps.windowBySeries === 'object') setVoiBySeries(ps.windowBySeries);
+      // WW/WL toàn cục kiểu cũ KHÔNG áp cho mọi series (sai cửa sổ giữa phổi / trung thất / xương)
+      if (ps.colorLut) setColorLut(ps.colorLut);
+      if (ps.invert !== undefined) setInvert(ps.invert);
+      return true;
+    };
 
-        if (isMounted && serverPS) {
-          if (serverPS.annotations && Object.keys(serverPS.annotations).length > 0) {
-            setAnnotations(serverPS.annotations);
-          }
-          if (serverPS.windowCenter !== undefined) setWindowCenter(serverPS.windowCenter);
-          if (serverPS.windowWidth !== undefined) setWindowWidth(serverPS.windowWidth);
-          if (serverPS.colorLut) setColorLut(serverPS.colorLut);
-          if (serverPS.invert !== undefined) setInvert(serverPS.invert);
+    (async () => {
+      try {
+        const res = await axios.get(`${apiEndpoint}/api/pacs/presentation-state/${patientDiagnoseId}`, {
+          headers: getAuthHeaders(),
+        });
+        const serverPS = res.data?.data?.data || res.data?.data;
+        if (isMounted && applyState(serverPS)) {
+          restoredRef.current = true;
           return;
         }
       } catch (err) {
         console.warn('Lỗi tải Presentation State từ server:', err.message);
       }
-
-      if (isMounted && presentationStateKey) {
+      if (!isMounted) return;
+      if (presentationStateKey) {
         try {
           const saved = localStorage.getItem(presentationStateKey);
-          if (saved) {
-            const parsed = JSON.parse(saved);
-            if (parsed.annotations) setAnnotations(parsed.annotations);
-            if (parsed.windowCenter !== undefined) setWindowCenter(parsed.windowCenter);
-            if (parsed.windowWidth !== undefined) setWindowWidth(parsed.windowWidth);
-            if (parsed.colorLut) setColorLut(parsed.colorLut);
-            if (parsed.invert !== undefined) setInvert(parsed.invert);
-          }
-        } catch (e) {}
+          if (saved) applyState(JSON.parse(saved));
+        } catch {
+          /* localStorage không khả dụng - bỏ qua */
+        }
       }
-    };
+      restoredRef.current = true;
+    })();
 
-    fetchServerState();
     return () => {
       isMounted = false;
     };
-  }, [patientDiagnoseId, apiEndpoint, presentationStateKey, setWindowCenter, setWindowWidth, setColorLut, setInvert, setAnnotations]);
+  }, [patientDiagnoseId, legacyReady, legacyOrderKeys, apiEndpoint, presentationStateKey, getAuthHeaders, setAnnotations, setVoiBySeries, setColorLut, setInvert]);
 
-  // Debounced auto-save
+  // Tự lưu (debounce)
   const saveTimeoutRef = useRef(null);
   useEffect(() => {
-    if (!patientDiagnoseId) return;
+    if (!patientDiagnoseId || !restoredRef.current) return;
     const stateToSave = {
       patientDiagnoseId: Number(patientDiagnoseId),
       annotations,
+      windowBySeries: voiBySeries,
       windowCenter,
       windowWidth,
       colorLut,
@@ -98,15 +127,15 @@ export function usePacsPresentationState({
     if (presentationStateKey) {
       try {
         localStorage.setItem(presentationStateKey, JSON.stringify(stateToSave));
-      } catch (e) {}
+      } catch {
+          /* localStorage không khả dụng - bỏ qua */
+        }
     }
 
     if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
     saveTimeoutRef.current = setTimeout(async () => {
       try {
-        const token = localStorage.getItem('TOKEN');
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        await axios.post(`${apiEndpoint}/api/pacs/presentation-state`, stateToSave, { headers });
+        await axios.post(`${apiEndpoint}/api/pacs/presentation-state`, stateToSave, { headers: getAuthHeaders() });
       } catch (err) {
         console.warn('Lưu trạng thái lên PACS Server thất bại:', err.message);
       }
@@ -115,7 +144,7 @@ export function usePacsPresentationState({
     return () => {
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
     };
-  }, [patientDiagnoseId, presentationStateKey, annotations, windowCenter, windowWidth, colorLut, invert, apiEndpoint]);
+  }, [patientDiagnoseId, presentationStateKey, annotations, voiBySeries, windowCenter, windowWidth, colorLut, invert, apiEndpoint, getAuthHeaders]);
 
   // Key Image Capture Handler
   const handleCaptureKeyImage = async () => {
@@ -127,7 +156,7 @@ export function usePacsPresentationState({
           patientName: dicomCache[currentIndex]?.meta?.patientName || study?.dbPatient?.patientName || '',
           patientId: dicomCache[currentIndex]?.meta?.patientId || study?.dbPatient?.patientId || '',
         },
-        measurements: annotations[currentIndex] || [],
+        measurements: annotations[currentKey] || [],
         currentIndex,
         totalSlices: instances.length,
         windowCenter,
@@ -142,7 +171,7 @@ export function usePacsPresentationState({
           caption: captionText,
           sliceIndex: currentIndex,
           sopInstanceUid: instances[currentIndex]?.sopInstanceUid,
-          measurements: (annotations[currentIndex] || []).map((a) => ({ type: a.type, value: a.valueText })),
+          measurements: (annotations[currentKey] || []).map((a) => ({ type: a.type, value: a.valueText })),
         });
 
         await axios.post(
@@ -153,7 +182,7 @@ export function usePacsPresentationState({
             caption: captionText,
             sliceIndex: currentIndex,
             sopInstanceUid: instances[currentIndex]?.sopInstanceUid,
-            measurements: (annotations[currentIndex] || []).map((a) => ({ type: a.type, value: a.valueText })),
+            measurements: (annotations[currentKey] || []).map((a) => ({ type: a.type, value: a.valueText })),
           },
           { headers: getAuthHeaders() }
         );

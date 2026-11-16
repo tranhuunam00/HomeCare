@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { message } from 'antd';
+import { message, Alert, Button } from 'antd';
 import { renderDicomToCanvas } from './services/dicomDecoder';
 import { usePacsStudy } from './hooks/usePacsStudy';
 import { usePacsThumbnails } from './hooks/usePacsThumbnails';
@@ -16,6 +16,13 @@ import PacsCaptureAlert from './components/PacsCaptureAlert';
 import PacsUploadAlert from './components/PacsUploadAlert';
 import PacsAttachmentViewer from './components/PacsAttachmentViewer';
 import PacsMprModal from './components/PacsMprModal';
+import { PACS_TOOLS, WW_WL_PRESETS } from './constants/pacs.constants';
+
+const seriesTitle = (inst, idx) => {
+  if (inst.modality === 'NDCM' || inst.isNonDicom) return inst.seriesDescription || 'Ảnh nội soi / siêu âm (Non-DICOM)';
+  const num = Number.isFinite(inst.seriesNumber) ? `S${inst.seriesNumber}` : `S${idx}`;
+  return inst.seriesDescription ? `${num} · ${inst.seriesDescription}` : `${num} · ${inst.modality || 'DICOM'}`;
+};
 
 export default function PacsViewerPage() {
   const [searchParams] = useSearchParams();
@@ -35,14 +42,24 @@ export default function PacsViewerPage() {
     loading,
     study,
     instances,
+    legacyOrderKeys,
     currentIndex,
     setCurrentIndex,
     dicomCache,
     setDicomCache,
+    previewCache,
+    loadErrors,
+    authError,
+    requestInstance,
     windowCenter,
     setWindowCenter,
     windowWidth,
     setWindowWidth,
+    voiSource,
+    voiBySeries,
+    setVoiBySeries,
+    applyVoi,
+    resetVoi,
     loadStudy,
     uploadDicom,
     uploadState,
@@ -50,19 +67,18 @@ export default function PacsViewerPage() {
     getAuthHeaders,
   } = usePacsStudy(patientDiagnoseId, apiEndpoint);
 
+  /* ---------------- Series ---------------- */
   const seriesList = useMemo(() => {
     if (!instances || instances.length === 0) return [];
     const map = new Map();
     instances.forEach((inst, idx) => {
       const key = inst.seriesInstanceUid || 'default_series';
       if (!map.has(key)) {
-        const title = (inst.modality === 'NDCM' || inst.isNonDicom)
-          ? (inst.seriesDescription || 'Ảnh nội soi / Vết mổ (NDCM)')
-          : (inst.fileName?.replace(/\.dcm$/i, '') || inst.seriesDescription || `upload_${idx + 1}`);
         map.set(key, {
           seriesUid: key,
           seriesIndex: map.size + 1,
-          title,
+          title: seriesTitle(inst, map.size + 1),
+          modality: inst.modality,
           instances: [],
         });
       }
@@ -74,11 +90,11 @@ export default function PacsViewerPage() {
   const [activeSeriesUid, setActiveSeriesUid] = useState(null);
   const [isSmooth, setIsSmooth] = useState(true);
 
+  // Series đang xem luôn theo lát hiện tại
   useEffect(() => {
-    if (seriesList.length > 0 && (!activeSeriesUid || !seriesList.some((s) => s.seriesUid === activeSeriesUid))) {
-      setActiveSeriesUid(seriesList[0].seriesUid);
-    }
-  }, [seriesList, activeSeriesUid]);
+    const uid = instances[currentIndex]?.seriesInstanceUid || seriesList[0]?.seriesUid || null;
+    if (uid && uid !== activeSeriesUid) setActiveSeriesUid(uid);
+  }, [instances, currentIndex, seriesList, activeSeriesUid]);
 
   const activeSeries = useMemo(() => {
     if (!seriesList.length) return null;
@@ -86,14 +102,12 @@ export default function PacsViewerPage() {
   }, [seriesList, activeSeriesUid]);
 
   const activeSeriesIndices = useMemo(() => {
-    if (activeSeries?.instances?.length) {
-      return activeSeries.instances.map((inst) => inst.globalIndex);
-    }
+    if (activeSeries?.instances?.length) return activeSeries.instances.map((inst) => inst.globalIndex);
     return instances.map((_, idx) => idx);
   }, [activeSeries, instances]);
 
   const activeSeriesInstances = useMemo(() => activeSeries?.instances || [], [activeSeries]);
-  const canBuild3D = activeSeriesInstances.length > 20;
+  const canBuild3D = activeSeriesInstances.length > 20 && activeSeriesInstances.every((i) => (i.frameCount || 1) === 1);
 
   const activeSlicePos = useMemo(() => {
     const pos = activeSeriesIndices.indexOf(currentIndex);
@@ -117,31 +131,27 @@ export default function PacsViewerPage() {
   const [activeAttachedFile, setActiveAttachedFile] = useState(null);
   const [mprOpen, setMprOpen] = useState(false);
 
-  // Cine Loop Player
+  /* ---------------- Cine ---------------- */
   const [isPlayingCine, setIsPlayingCine] = useState(false);
   const [cineFps, setCineFps] = useState(10);
-
   useEffect(() => {
-    if (!isPlayingCine || activeSeriesIndices.length <= 1) return;
+    if (!isPlayingCine || activeSeriesIndices.length <= 1) return undefined;
     const interval = setInterval(() => {
       setCurrentIndex((prev) => {
         const curPos = activeSeriesIndices.indexOf(prev);
-        const nextPos = (curPos + 1) % activeSeriesIndices.length;
-        return activeSeriesIndices[nextPos];
+        return activeSeriesIndices[(curPos + 1) % activeSeriesIndices.length];
       });
     }, Math.round(1000 / cineFps));
     return () => clearInterval(interval);
   }, [isPlayingCine, cineFps, activeSeriesIndices, setCurrentIndex]);
 
   const handleOpenMpr = useCallback(() => {
-    if (activeSeriesInstances.length <= 20) {
-      message.warning(
-        `Nhóm đang chọn chỉ có ${activeSeriesInstances.length} ảnh. Cần trên 20 ảnh trong cùng 1 nhóm để dựng 3D / MPR.`
-      );
+    if (!canBuild3D) {
+      message.warning(`Series đang chọn có ${activeSeriesInstances.length} ảnh. Cần trên 20 lát cắt (1 frame/lát) trong cùng series để dựng MPR / 3D.`);
       return;
     }
     setMprOpen(true);
-  }, [activeSeriesInstances.length]);
+  }, [canBuild3D, activeSeriesInstances.length]);
 
   const [layout, setLayout] = useState('1x1');
   const [activeViewport, setActiveViewport] = useState(0);
@@ -150,23 +160,25 @@ export default function PacsViewerPage() {
   const imageCanvasRef = useRef(null);
   const annotationCanvasRef = useRef(null);
 
-  const { seriesThumbnails, setSeriesThumbnails, sliceThumbnails, setSliceThumbnails } = usePacsThumbnails({
+  const { seriesThumbnails, sliceThumbnails } = usePacsThumbnails({
     seriesList,
     activeSeries,
-    dicomCache,
-    setDicomCache,
     rightSliceStripOpen,
     apiEndpoint,
     getAuthHeaders,
+    currentIndex,
   });
+
+  const currentInstance = instances[currentIndex];
+  const currentKey = currentInstance?.key;
 
   const {
     activeTool,
     setActiveTool,
     zoom,
-    setZoom,
     pan,
     setPan,
+    setZoom,
     rotation,
     setRotation,
     flipH,
@@ -175,25 +187,33 @@ export default function PacsViewerPage() {
     setFlipV,
     annotations,
     setAnnotations,
+    setCurrentDrawing,
     isInteracting,
+    probe,
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
+    handleMouseLeave,
     handleWheel,
     handleZoomIn,
     handleZoomOut,
     handleResetZoom,
+    handleZoomActualPixels,
     handleDoubleClickZoom,
     handleReset,
     handleClearAnnotations,
+    handleUndoAnnotation,
     handleApplyPreset,
   } = usePacsInteraction({
     dicomCache,
     currentIndex,
+    currentKey,
     windowCenter,
     setWindowCenter,
     windowWidth,
     setWindowWidth,
+    applyVoi,
+    resetVoi,
     invert,
     setInvert,
     colorLut,
@@ -205,20 +225,16 @@ export default function PacsViewerPage() {
     presentationStateKey: patientDiagnoseId ? `pacs_presentation_state_${patientDiagnoseId}` : null,
   });
 
-  const {
-    captureAlert,
-    setCaptureAlert,
-    handleCaptureKeyImage,
-  } = usePacsPresentationState({
+  const { captureAlert, setCaptureAlert, handleCaptureKeyImage } = usePacsPresentationState({
     patientDiagnoseId,
     apiEndpoint,
     getAuthHeaders,
     annotations,
     setAnnotations,
+    voiBySeries,
+    setVoiBySeries,
     windowCenter,
-    setWindowCenter,
     windowWidth,
-    setWindowWidth,
     colorLut,
     setColorLut,
     invert,
@@ -227,63 +243,151 @@ export default function PacsViewerPage() {
     annotationCanvasRef,
     dicomCache,
     currentIndex,
+    currentKey,
     instances,
+    legacyOrderKeys,
     study,
   });
 
-  // Redraw DICOM Pixel Canvas
+  /* ---------------- Vẽ ảnh ---------------- */
+  const currentFull = dicomCache[currentIndex];
+  const hasFull = !!(currentFull?.rawPixels && currentFull.decodeInfo?.ok !== false);
+  const currentPreview = previewCache[currentIndex];
+  const hasPreview = !hasFull && !!currentPreview;
+  const currentMeta = currentFull?.meta;
+
   useEffect(() => {
-    const currentData = dicomCache[currentIndex];
     const canvas = imageCanvasRef.current;
-    if (!currentData || !canvas) return;
-
-    renderDicomToCanvas(canvas, currentData.rawPixels, currentData.meta, {
-      windowCenter,
-      windowWidth,
-      invert,
-      colorLut,
-      isSmooth,
-    });
-
-    const activeInst = instances[currentIndex];
-    const ownerSeriesUid = activeInst?.seriesInstanceUid || 'default_series';
-    if (!seriesThumbnails[ownerSeriesUid] || !sliceThumbnails[currentIndex]) {
-      try {
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.65);
-        if (!seriesThumbnails[ownerSeriesUid]) {
-          setSeriesThumbnails((prev) => (prev[ownerSeriesUid] ? prev : { ...prev, [ownerSeriesUid]: dataUrl }));
-        }
-        if (!sliceThumbnails[currentIndex]) {
-          setSliceThumbnails((prev) => (prev[currentIndex] ? prev : { ...prev, [currentIndex]: dataUrl }));
-        }
-      } catch (e) {}
+    if (!canvas) return;
+    if (hasFull) {
+      renderDicomToCanvas(canvas, currentFull.rawPixels, currentFull.meta, {
+        windowCenter,
+        windowWidth,
+        invert,
+        colorLut,
+        isSmooth,
+      });
+      return;
     }
-  }, [dicomCache, currentIndex, windowCenter, windowWidth, invert, colorLut, isSmooth, instances, seriesThumbnails, sliceThumbnails, setSeriesThumbnails, setSliceThumbnails]);
+    const inst = instances[currentIndex];
+    if (currentPreview && inst) {
+      // Xem trước: vẽ giãn về đúng ma trận ảnh gốc để toạ độ khớp khi ảnh gốc thay thế
+      renderDicomToCanvas(
+        canvas,
+        currentPreview,
+        { rows: inst.rows || currentPreview.height, columns: inst.columns || currentPreview.width },
+        { invert, isSmooth }
+      );
+      return;
+    }
+    // Chưa có dữ liệu cho lát này -> xoá trắng, KHÔNG để lại ảnh của lát trước dưới số lát mới
+    const ctx = canvas.getContext('2d');
+    ctx?.clearRect(0, 0, canvas.width, canvas.height);
+  }, [hasFull, currentFull, currentPreview, currentIndex, instances, windowCenter, windowWidth, invert, colorLut, isSmooth]);
 
-  // Keyboard Shortcuts: Space / Ctrl+S (Key Image), Arrows (Slices), 'I' (Invert), 'C' (Cine), 'B' (Smooth)
+  // Kích thước ma trận ảnh cho bố cục khung nhìn (có trước khi ảnh gốc về nhờ metadata máy chủ)
+  const imageDims = useMemo(() => {
+    if (currentMeta?.columns) {
+      return { columns: currentMeta.columns, rows: currentMeta.rows, pixelSpacing: currentMeta.pixelSpacing };
+    }
+    if (currentInstance?.columns) {
+      return { columns: currentInstance.columns, rows: currentInstance.rows, pixelSpacing: currentInstance.pixelSpacing || null };
+    }
+    if (currentPreview) return { columns: currentPreview.width, rows: currentPreview.height, pixelSpacing: null };
+    return null;
+  }, [currentMeta, currentInstance, currentPreview]);
+
+  /* ---------------- Phím tắt ---------------- */
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (['INPUT', 'TEXTAREA'].includes(e.target?.tagName)) return;
-      if (e.code === 'Space' || (e.ctrlKey && e.key.toLowerCase() === 's')) {
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target?.tagName) || e.target?.isContentEditable) return;
+      const key = e.key.toLowerCase();
+      if (e.code === 'Space' || (e.ctrlKey && key === 's')) {
         e.preventDefault();
         handleCaptureKeyImage();
+      } else if (e.ctrlKey && key === 'z') {
+        e.preventDefault();
+        handleUndoAnnotation();
       } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        e.preventDefault();
         stepSeriesSlice(1);
       } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
         stepSeriesSlice(-1);
-      } else if (e.key.toLowerCase() === 'i' && !e.ctrlKey && !e.altKey) {
+      } else if (e.key === 'PageDown') {
+        e.preventDefault();
+        stepSeriesSlice(10);
+      } else if (e.key === 'PageUp') {
+        e.preventDefault();
+        stepSeriesSlice(-10);
+      } else if (e.key === 'Home') {
+        stepSeriesSlice(-100000);
+      } else if (e.key === 'End') {
+        stepSeriesSlice(100000);
+      } else if (e.key === 'Escape') {
+        setCurrentDrawing(null);
+      } else if (e.ctrlKey || e.altKey || e.metaKey) {
+        return;
+      } else if (/^[1-9]$/.test(e.key) && currentMeta?.modality === 'CT') {
+        const preset = WW_WL_PRESETS.find((p) => p.hotkey === e.key);
+        if (preset) {
+          handleApplyPreset(preset);
+          message.info({ content: `Cửa sổ ${preset.label}: W ${preset.ww} / L ${preset.wl}`, key: 'pacs-preset', duration: 1.2 });
+        }
+      } else if (e.key === '0') {
+        handleApplyPreset({ key: 'default' });
+      } else if (key === 'i') {
         setInvert((prev) => !prev);
-      } else if (e.key.toLowerCase() === 'b' && !e.ctrlKey && !e.altKey) {
+      } else if (key === 'b') {
         setIsSmooth((prev) => !prev);
-      } else if (e.key.toLowerCase() === 'c' && !e.ctrlKey && !e.altKey) {
+      } else if (key === 'c') {
         setIsPlayingCine((prev) => !prev);
+      } else if (key === 'r') {
+        handleReset();
+      } else if (key === 'l') {
+        setActiveTool(PACS_TOOLS.LENGTH);
+      } else if (key === 'a') {
+        setActiveTool(PACS_TOOLS.ANGLE);
+      } else if (key === 'e') {
+        setActiveTool(PACS_TOOLS.ROI_ELLIPSE);
+      } else if (key === 'w') {
+        setActiveTool(PACS_TOOLS.WW_WL);
+      } else if (key === 'p') {
+        setActiveTool(PACS_TOOLS.PAN);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleCaptureKeyImage, stepSeriesSlice, setInvert]);
+  }, [handleCaptureKeyImage, handleUndoAnnotation, stepSeriesSlice, handleApplyPreset, handleReset, setActiveTool, setCurrentDrawing, currentMeta?.modality]);
 
-  const currentMeta = dicomCache[currentIndex]?.meta;
+  // Đổi series -> về khung nhìn chuẩn (giữ nguyên số đo và WW/WL riêng của từng series)
+  useEffect(() => {
+    setPan({ x: 0, y: 0 });
+    setZoom(1);
+  }, [activeSeriesUid, setPan, setZoom]);
+
+  const seriesLabel = activeSeries ? activeSeries.title : '';
+  const overlayProps = {
+    meta: currentMeta,
+    instance: currentInstance,
+    study,
+    hasFull,
+    hasPreview,
+    loadError: loadErrors[currentIndex] && !(currentFull?.decodeInfo?.ok === false) ? loadErrors[currentIndex] : null,
+    decodeInfo: currentFull?.decodeInfo?.ok === false ? currentFull.decodeInfo : null,
+    seriesLabel,
+    slicePos: activeSlicePos,
+    sliceTotal: activeSeriesIndices.length,
+    windowCenter,
+    windowWidth,
+    voiSource,
+    invert,
+    probe,
+    measurementCount: (annotations[currentKey] || []).length,
+  };
+
+  // Sidebar/TopNav: meta hiện tại (đủ để hiện preset DICOM, modality)
+  const navMeta = currentMeta || (currentInstance ? { modality: currentInstance.modality, windowPresets: currentInstance.windowPresets || [] } : null);
 
   return (
     <div
@@ -320,21 +424,48 @@ export default function PacsViewerPage() {
       />
 
       <PacsTopNav
-        activeTool={activeTool} setActiveTool={setActiveTool}
-        invert={invert} setInvert={setInvert}
-        rotation={rotation} setRotation={setRotation}
-        isSmooth={isSmooth} onToggleSmooth={() => setIsSmooth((p) => !p)}
-        onReset={handleReset} onCaptureKeyImage={handleCaptureKeyImage}
-        onApplyPreset={handleApplyPreset} currentMeta={currentMeta}
-        onOpenMpr={handleOpenMpr} canBuild3D={canBuild3D}
+        activeTool={activeTool}
+        setActiveTool={setActiveTool}
+        invert={invert}
+        setInvert={setInvert}
+        rotation={rotation}
+        setRotation={setRotation}
+        isSmooth={isSmooth}
+        onToggleSmooth={() => setIsSmooth((p) => !p)}
+        onReset={handleReset}
+        onCaptureKeyImage={handleCaptureKeyImage}
+        onApplyPreset={handleApplyPreset}
+        currentMeta={navMeta}
+        onOpenMpr={handleOpenMpr}
+        canBuild3D={canBuild3D}
         activeSeriesSliceCount={activeSeriesInstances.length}
         onUploadDicom={uploadDicom}
-        zoom={zoom} onZoomIn={handleZoomIn} onZoomOut={handleZoomOut} onResetZoom={handleResetZoom}
-        isExpanded={isExpanded} onToggleExpand={() => setIsExpanded((prev) => !prev)}
-        isPlayingCine={isPlayingCine} onToggleCine={() => setIsPlayingCine((prev) => !prev)}
-        cineFps={cineFps} onChangeCineFps={setCineFps}
+        zoom={zoom}
+        onZoomIn={handleZoomIn}
+        onZoomOut={handleZoomOut}
+        onResetZoom={handleResetZoom}
+        isExpanded={isExpanded}
+        onToggleExpand={() => setIsExpanded((prev) => !prev)}
+        isPlayingCine={isPlayingCine}
+        onToggleCine={() => setIsPlayingCine((prev) => !prev)}
+        cineFps={cineFps}
+        onChangeCineFps={setCineFps}
         totalSlices={activeSeriesIndices.length}
       />
+
+      {authError && (
+        <Alert
+          type="error"
+          showIcon
+          banner
+          message="Phiên đăng nhập đã hết hạn - không tải được ảnh từ máy chủ PACS."
+          action={
+            <Button size="small" danger onClick={() => (window.location.href = '/login')}>
+              Đăng nhập lại
+            </Button>
+          }
+        />
+      )}
 
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
         {!isExpanded && (
@@ -374,9 +505,12 @@ export default function PacsViewerPage() {
             activeSeriesUid={activeSeriesUid}
             onSelectSeries={(uid) => {
               setActiveAttachedFile(null);
-              setActiveSeriesUid(uid);
               const target = seriesList.find((s) => s.seriesUid === uid);
-              if (target?.instances?.length) setCurrentIndex(target.instances[0].globalIndex);
+              if (target?.instances?.length) {
+                // Mở series ở lát giữa (thường là vùng giải phẫu chính)
+                setCurrentIndex(target.instances[Math.floor((target.instances.length - 1) / 2)].globalIndex);
+              }
+              setActiveSeriesUid(uid);
             }}
             seriesThumbnails={seriesThumbnails}
             attachedFiles={study?.attachedFiles || []}
@@ -406,37 +540,33 @@ export default function PacsViewerPage() {
             flipH={flipH}
             flipV={flipV}
             isSmooth={isSmooth}
-            onToggleSmooth={() => setIsSmooth((p) => !p)}
             activeTool={activeTool}
             setActiveTool={setActiveTool}
             isInteracting={isInteracting}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseLeave}
             onWheel={handleWheel}
-            onReset={handleReset}
             onZoomIn={handleZoomIn}
             onZoomOut={handleZoomOut}
+            onZoomActualPixels={handleZoomActualPixels}
+            onUndo={handleUndoAnnotation}
             onDoubleClickZoom={handleDoubleClickZoom}
             isExpanded={isExpanded}
             onToggleExpand={() => setIsExpanded((prev) => !prev)}
             onCaptureKeyImage={handleCaptureKeyImage}
             onUploadDicom={uploadDicom}
-            currentMeta={currentMeta}
-            study={study}
             patientDiagnoseId={patientDiagnoseId}
-            seriesIndex={activeSeries?.seriesIndex || 1}
             currentIndex={activeSlicePos}
             setCurrentIndex={(nextPos) => {
               const targetGlobal = activeSeriesIndices[nextPos];
               if (targetGlobal !== undefined) setCurrentIndex(targetGlobal);
             }}
             totalSlices={activeSeriesIndices.length}
-            colorLut={colorLut}
-            setColorLut={setColorLut}
-            windowWidth={windowWidth}
-            windowCenter={windowCenter}
             instancesCount={instances.length}
+            imageDims={imageDims}
+            overlayProps={overlayProps}
           />
         ) : (
           <PacsMultiViewportGrid
@@ -444,6 +574,9 @@ export default function PacsViewerPage() {
             seriesList={seriesList}
             instances={instances}
             dicomCache={dicomCache}
+            previewCache={previewCache}
+            requestInstance={requestInstance}
+            voiBySeries={voiBySeries}
             activeViewport={activeViewport}
             setActiveViewport={setActiveViewport}
             activeTool={activeTool}
@@ -453,11 +586,12 @@ export default function PacsViewerPage() {
             colorLut={colorLut}
             isSmooth={isSmooth}
             onToggleSmooth={() => setIsSmooth((p) => !p)}
-            patientName={study?.patientName}
-            patientId={study?.patientId}
+            patientName={study?.dbPatient?.patientName || study?.patientName}
+            patientId={study?.dbPatient?.patientId || study?.patientId}
             study={study}
             onMaximizeTo1x1={(seriesUid) => {
-              if (seriesUid) setActiveSeriesUid(seriesUid);
+              const target = seriesList.find((s) => s.seriesUid === seriesUid);
+              if (target?.instances?.length) setCurrentIndex(target.instances[0].globalIndex);
               setLayout('1x1');
             }}
           />
@@ -484,7 +618,7 @@ export default function PacsViewerPage() {
         setDicomCache={setDicomCache}
         apiEndpoint={apiEndpoint}
         getAuthHeaders={getAuthHeaders}
-        patientName={currentMeta?.patientName || study?.dbPatient?.patientName || ''}
+        patientName={study?.dbPatient?.patientName || currentMeta?.patientName || ''}
         modality={currentMeta?.modality || activeSeries?.modality || study?.modality || ''}
       />
     </div>

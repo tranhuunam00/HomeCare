@@ -1,162 +1,108 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import { parseDicomBuffer, renderDicomToCanvas } from '../services/dicomDecoder';
+import { useState, useEffect, useRef } from 'react';
 
-export function usePacsThumbnails({
-  seriesList,
-  activeSeries,
-  dicomCache,
-  setDicomCache,
-  rightSliceStripOpen,
-  apiEndpoint,
-  getAuthHeaders,
-}) {
+/**
+ * Thumbnail cho dải series & dải lát cắt.
+ * Chỉ dùng thumbnail JPEG nhẹ (~3KB) do máy chủ sinh sẵn - KHÔNG tải file DCM gốc chỉ để làm ảnh nhỏ.
+ * Tải tuần tự với giới hạn song song, ưu tiên các lát gần lát đang xem.
+ */
+const THUMB_CONCURRENCY = 6;
+
+export function usePacsThumbnails({ seriesList, activeSeries, rightSliceStripOpen, apiEndpoint, getAuthHeaders, currentIndex }) {
   const [seriesThumbnails, setSeriesThumbnails] = useState({});
   const [sliceThumbnails, setSliceThumbnails] = useState({});
+  const requestedRef = useRef(new Set());
+  const urlsRef = useRef([]);
 
-  // Tầng 3: Tải nhanh Thumbnail (~1.4KB) cho các lát cắt trong active series
+  const fetchThumb = async (sop) => {
+    const res = await fetch(`${apiEndpoint}/api/pacs/instances/${encodeURIComponent(sop)}/thumbnail`, {
+      headers: getAuthHeaders(),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const url = URL.createObjectURL(await res.blob());
+    urlsRef.current.push(url);
+    return url;
+  };
+
+  // Danh sách lát thay đổi (tải thêm ảnh / tải lại ca) -> chỉ số lát đổi -> làm mới thumbnail
+  const signature = (seriesList || []).map((s) => `${s.seriesUid}:${s.instances?.length || 0}`).join('|');
+  const lastSignature = useRef(signature);
   useEffect(() => {
-    if (!rightSliceStripOpen || !activeSeries?.instances?.length) return;
-    let cancelled = false;
+    if (lastSignature.current === signature) return;
+    lastSignature.current = signature;
+    requestedRef.current.clear();
+    setSeriesThumbnails({});
+    setSliceThumbnails({});
+  }, [signature]);
 
-    const generateActiveSeriesSliceThumbs = async () => {
-      const headers = getAuthHeaders();
-      for (const inst of activeSeries.instances) {
-        if (cancelled) return;
-        if (sliceThumbnails[inst.globalIndex]) continue;
-
-        try {
-          // Ưu tiên 1: Tải trực tiếp Thumbnail Tầng 3 từ backend PACS (chỉ ~1.4KB)
-          try {
-            const thumbRes = await axios.get(
-              `${apiEndpoint}/api/pacs/instances/${inst.sopInstanceUid}/thumbnail`,
-              { responseType: 'blob', headers, timeout: 3000 }
-            );
-            if (thumbRes.status === 200 && thumbRes.data) {
-              const objectUrl = URL.createObjectURL(thumbRes.data);
-              if (!cancelled) {
-                setSliceThumbnails((prev) =>
-                  prev[inst.globalIndex] ? prev : { ...prev, [inst.globalIndex]: objectUrl }
-                );
-                continue;
-              }
-            }
-          } catch (e) {
-            // Fallback sang tự decode nếu instance cũ chưa có thumbnail sinh sẵn
-          }
-
-          // Ưu tiên 2: Giải mã cục bộ từ DCM cache / file gốc
-          let parsed = dicomCache[inst.globalIndex];
-          if (!parsed) {
-            const res = await axios.get(
-              `${apiEndpoint}/api/pacs/instances/${inst.sopInstanceUid}/file`,
-              { responseType: 'arraybuffer', headers }
-            );
-            if (cancelled) return;
-            parsed = parseDicomBuffer(res.data);
-            setDicomCache((prev) =>
-              prev[inst.globalIndex] ? prev : { ...prev, [inst.globalIndex]: parsed }
-            );
-          }
-
-          if (parsed?.rawPixels && !cancelled) {
-            const offscreen = document.createElement('canvas');
-            renderDicomToCanvas(offscreen, parsed.rawPixels, parsed.meta, {
-              windowCenter: parsed.meta.windowCenter,
-              windowWidth: parsed.meta.windowWidth,
-              invert: false,
-              colorLut: 'default',
-            });
-            const thumbUrl = offscreen.toDataURL('image/jpeg', 0.55);
-            setSliceThumbnails((prev) =>
-              prev[inst.globalIndex] ? prev : { ...prev, [inst.globalIndex]: thumbUrl }
-            );
-          }
-        } catch (err) {
-          console.warn('Không thể tạo thumbnail lát cắt:', inst.sopInstanceUid, err?.message);
-        }
-      }
-    };
-
-    generateActiveSeriesSliceThumbs();
-    return () => {
-      cancelled = true;
-    };
-  }, [rightSliceStripOpen, activeSeries, apiEndpoint, getAuthHeaders, dicomCache, setDicomCache, sliceThumbnails]);
-
-  // Tầng 3: Tải nhanh Thumbnail đại diện cho từng Series
+  // Thumbnail đại diện mỗi series = lát giữa series (thường thể hiện rõ giải phẫu hơn lát đầu)
   useEffect(() => {
-    if (!seriesList || seriesList.length === 0) return;
+    if (!seriesList?.length) return undefined;
     let cancelled = false;
-
-    const generateMissingSeriesThumbs = async () => {
-      const headers = getAuthHeaders();
+    (async () => {
       for (const series of seriesList) {
         if (cancelled) return;
-        const firstInst = series.instances?.[0];
-        if (!firstInst || seriesThumbnails[series.seriesUid]) continue;
-
+        if (seriesThumbnails[series.seriesUid]) continue;
+        const list = series.instances || [];
+        const rep = list[Math.floor(list.length / 2)] || list[0];
+        if (!rep || rep.isLocal || (rep.frameIndex || 0) > 0) continue;
+        const reqKey = `series:${series.seriesUid}`;
+        if (requestedRef.current.has(reqKey)) continue;
+        requestedRef.current.add(reqKey);
         try {
-          // Ưu tiên 1: Tải nhanh Thumbnail Tầng 3 (~1.4KB)
-          try {
-            const thumbRes = await axios.get(
-              `${apiEndpoint}/api/pacs/instances/${firstInst.sopInstanceUid}/thumbnail`,
-              { responseType: 'blob', headers, timeout: 3000 }
-            );
-            if (thumbRes.status === 200 && thumbRes.data) {
-              const objectUrl = URL.createObjectURL(thumbRes.data);
-              if (!cancelled) {
-                setSeriesThumbnails((prev) =>
-                  prev[series.seriesUid] ? prev : { ...prev, [series.seriesUid]: objectUrl }
-                );
-                continue;
-              }
-            }
-          } catch (e) {}
-
-          // Ưu tiên 2: Tải và decode file gốc
-          let parsed = dicomCache[firstInst.globalIndex];
-          if (!parsed) {
-            const res = await axios.get(
-              `${apiEndpoint}/api/pacs/instances/${firstInst.sopInstanceUid}/file`,
-              { responseType: 'arraybuffer', headers }
-            );
-            if (cancelled) return;
-            parsed = parseDicomBuffer(res.data);
-            setDicomCache((prev) =>
-              prev[firstInst.globalIndex] ? prev : { ...prev, [firstInst.globalIndex]: parsed }
-            );
-          }
-
-          if (parsed?.rawPixels && !cancelled) {
-            const offscreen = document.createElement('canvas');
-            renderDicomToCanvas(offscreen, parsed.rawPixels, parsed.meta, {
-              windowCenter: parsed.meta.windowCenter,
-              windowWidth: parsed.meta.windowWidth,
-              invert: false,
-              colorLut: 'default',
-            });
-            const thumbUrl = offscreen.toDataURL('image/jpeg', 0.65);
-            setSeriesThumbnails((prev) =>
-              prev[series.seriesUid] ? prev : { ...prev, [series.seriesUid]: thumbUrl }
-            );
-          }
-        } catch (err) {
-          console.warn('Không thể tạo thumbnail series:', series.seriesUid, err?.message);
+          const url = await fetchThumb(rep.sopInstanceUid);
+          if (!cancelled) setSeriesThumbnails((prev) => ({ ...prev, [series.seriesUid]: url }));
+        } catch {
+          requestedRef.current.delete(reqKey);
         }
       }
-    };
-
-    generateMissingSeriesThumbs();
+    })();
     return () => {
       cancelled = true;
     };
-  }, [seriesList, apiEndpoint, getAuthHeaders, dicomCache, setDicomCache, seriesThumbnails]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seriesList, apiEndpoint]);
 
-  return {
-    seriesThumbnails,
-    setSeriesThumbnails,
-    sliceThumbnails,
-    setSliceThumbnails,
-  };
+  // Thumbnail lát cắt của series đang mở (ưu tiên quanh lát hiện tại)
+  useEffect(() => {
+    if (!rightSliceStripOpen || !activeSeries?.instances?.length) return undefined;
+    let cancelled = false;
+    const list = activeSeries.instances;
+    const curPos = Math.max(0, list.findIndex((i) => i.globalIndex === currentIndex));
+    const ordered = [...list]
+      .map((inst, pos) => ({ inst, dist: Math.abs(pos - curPos) }))
+      .sort((a, b) => a.dist - b.dist)
+      .map((x) => x.inst)
+      .filter((inst) => !inst.isLocal && !(inst.frameIndex > 0) && !sliceThumbnails[inst.globalIndex] && !requestedRef.current.has(`slice:${inst.globalIndex}`));
+
+    let cursor = 0;
+    const worker = async () => {
+      while (!cancelled && cursor < ordered.length) {
+        const inst = ordered[cursor++];
+        const reqKey = `slice:${inst.globalIndex}`;
+        requestedRef.current.add(reqKey);
+        try {
+          const url = await fetchThumb(inst.sopInstanceUid);
+          if (!cancelled) setSliceThumbnails((prev) => ({ ...prev, [inst.globalIndex]: url }));
+        } catch {
+          requestedRef.current.delete(reqKey);
+        }
+      }
+    };
+    Array.from({ length: THUMB_CONCURRENCY }, worker);
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rightSliceStripOpen, activeSeries, apiEndpoint]);
+
+  // Giải phóng object URL khi rời trang
+  useEffect(
+    () => () => {
+      urlsRef.current.forEach((u) => URL.revokeObjectURL(u));
+      urlsRef.current = [];
+    },
+    []
+  );
+
+  return { seriesThumbnails, setSeriesThumbnails, sliceThumbnails, setSliceThumbnails };
 }

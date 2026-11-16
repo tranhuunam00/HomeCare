@@ -1,6 +1,6 @@
 import "./App.css";
 import Home from "./pages/home";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import TiradPage from "./pages/tirads";
 import LoginForm from "./pages/authentication/LoginForm";
 import { ToastContainer } from "react-toastify";
@@ -101,6 +101,17 @@ import ProstatecancerForm from "./pages/advance/cancer/Prostate/ProstatecancerFo
 import AuditLogsList from "./pages/audit-logs/AuditLogsList";
 import Admin5TierTemplate from "./pages/admin_5tier_template/Admin5TierTemplate";
 
+// Viewer mở theo ca bệnh (?patientDiagnoseId=) bắt buộc đăng nhập, vì mọi API /api/pacs/* đều cần token.
+// Không có patientDiagnoseId = chế độ đọc file DICOM cục bộ -> vẫn cho truy cập tự do.
+function PacsViewerRoute() {
+  const location = useLocation();
+  const hasCase = new URLSearchParams(location.search).get("patientDiagnoseId");
+  if (hasCase && !localStorage.getItem("TOKEN")) {
+    return <Navigate to="/login" replace state={{ from: location }} />;
+  }
+  return <PacsViewerPage />;
+}
+
 function App() {
   useAuthInitializer();
   const { user, doctor, printTemplateGlobal, userPackages } = useGlobalAuth();
@@ -167,7 +178,7 @@ function App() {
           element={<GuideMenuSubscriptionPage />}
         />
 
-        <Route path="/pacs/viewer" element={<PacsViewerPage />} />
+        <Route path="/pacs/viewer" element={<PacsViewerRoute />} />
 
         <Route
           path="/home"
