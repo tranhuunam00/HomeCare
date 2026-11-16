@@ -16,6 +16,8 @@ import {
   LineOutlined,
   SlidersOutlined,
   UploadOutlined,
+  CaretRightOutlined,
+  PauseOutlined,
 } from '@ant-design/icons';
 import { WW_WL_PRESETS, PACS_TOOLS } from '../constants/pacs.constants';
 
@@ -40,6 +42,11 @@ export default function PacsTopNav({
   onResetZoom,
   isExpanded = false,
   onToggleExpand,
+  isPlayingCine = false,
+  onToggleCine,
+  cineFps = 10,
+  onChangeCineFps,
+  totalSlices = 1,
 }) {
   const navigate = useNavigate();
 
@@ -230,7 +237,7 @@ export default function PacsTopNav({
           />
         </Tooltip>
 
-        <Tooltip title="Đảo âm / dương bản (Invert)">
+        <Tooltip title="Đảo âm / dương bản (Phím I)">
           <Button
             size="small"
             icon={<EyeOutlined />}
@@ -242,6 +249,53 @@ export default function PacsTopNav({
             }}
           />
         </Tooltip>
+
+        {/* Cine Loop Player for Ultrasound, DSA, and CT/MRI multi-slice series */}
+        {totalSlices > 1 && onToggleCine && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Tooltip title={isPlayingCine ? 'Tạm dừng Cine Loop (Phím C)' : 'Chạy Cine Loop tự động (Phím C)'}>
+              <Button
+                size="small"
+                type={isPlayingCine ? 'primary' : 'default'}
+                icon={isPlayingCine ? <PauseOutlined /> : <CaretRightOutlined />}
+                onClick={onToggleCine}
+                style={
+                  isPlayingCine
+                    ? { backgroundColor: '#10b981', borderColor: '#059669' }
+                    : { backgroundColor: '#131b2e', borderColor: '#1e293b', color: '#38bdf8' }
+                }
+              >
+                Cine
+              </Button>
+            </Tooltip>
+            {onChangeCineFps && (
+              <Dropdown
+                menu={{
+                  items: [
+                    { key: '5', label: '5 FPS (Chậm)', onClick: () => onChangeCineFps(5) },
+                    { key: '10', label: '10 FPS (Chuẩn)', onClick: () => onChangeCineFps(10) },
+                    { key: '15', label: '15 FPS (Nhanh)', onClick: () => onChangeCineFps(15) },
+                    { key: '25', label: '25 FPS (Rất nhanh)', onClick: () => onChangeCineFps(25) },
+                  ],
+                }}
+              >
+                <Button
+                  size="small"
+                  style={{
+                    backgroundColor: '#131b2e',
+                    borderColor: '#1e293b',
+                    color: '#94a3b8',
+                    fontSize: '10px',
+                    fontFamily: 'monospace',
+                    padding: '0 4px',
+                  }}
+                >
+                  {cineFps}fps
+                </Button>
+              </Dropdown>
+            )}
+          </div>
+        )}
 
         <Tooltip title="Xoay 90°">
           <Button

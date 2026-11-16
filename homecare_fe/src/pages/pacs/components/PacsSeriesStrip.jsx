@@ -1,8 +1,10 @@
 import React from 'react';
 import { Tooltip } from 'antd';
-import { FileWordOutlined, FilePdfOutlined } from '@ant-design/icons';
+import { FileWordOutlined, FilePdfOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons';
 
 export default function PacsSeriesStrip({
+  isOpen = true,
+  onToggleOpen,
   seriesList = [],
   activeSeriesUid,
   onSelectSeries,
@@ -12,11 +14,52 @@ export default function PacsSeriesStrip({
   activeAttachedFile,
   onSelectAttachedFile,
 }) {
+  if (!isOpen) {
+    return (
+      <div
+        style={{
+          width: 24,
+          minWidth: 24,
+          backgroundColor: '#0a0f1d',
+          borderRight: '1px solid #1e293b',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          paddingTop: 8,
+          userSelect: 'none',
+          zIndex: 10,
+        }}
+      >
+        <Tooltip title={`Mở danh sách Series (${seriesList.length} nhóm)`} placement="right">
+          <button
+            type="button"
+            onClick={onToggleOpen}
+            style={{
+              width: 20,
+              height: 36,
+              borderRadius: 4,
+              border: '1px solid #334155',
+              backgroundColor: '#111827',
+              color: '#38bdf8',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: 0,
+            }}
+          >
+            <RightOutlined style={{ fontSize: 11 }} />
+          </button>
+        </Tooltip>
+      </div>
+    );
+  }
+
   return (
     <div
       style={{
-        width: 82,
-        minWidth: 82,
+        width: 84,
+        minWidth: 84,
         backgroundColor: '#0a0f1d',
         borderRight: '1px solid #1e293b',
         display: 'flex',
@@ -29,6 +72,46 @@ export default function PacsSeriesStrip({
         zIndex: 10,
       }}
     >
+      {/* Minimize Toggle Header */}
+      {onToggleOpen && (
+        <div
+          style={{
+            width: '100%',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '2px 4px',
+            borderBottom: '1px solid #1e293b',
+            marginBottom: 2,
+          }}
+        >
+          <span style={{ fontSize: '9px', fontWeight: '700', color: '#94a3b8', textTransform: 'uppercase' }}>
+            Series ({seriesList.length})
+          </span>
+          <Tooltip title="Thu gọn bảng Series">
+            <button
+              type="button"
+              onClick={onToggleOpen}
+              style={{
+                width: 18,
+                height: 18,
+                borderRadius: 3,
+                border: '1px solid #334155',
+                backgroundColor: '#111827',
+                color: '#94a3b8',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: 0,
+              }}
+            >
+              <LeftOutlined style={{ fontSize: 9 }} />
+            </button>
+          </Tooltip>
+        </div>
+      )}
+
       {/* Series Cards */}
       {seriesList.map((series, idx) => {
         const isSelected = activeSeriesUid === series.seriesUid || (!activeSeriesUid && idx === 0);

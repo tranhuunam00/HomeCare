@@ -1,10 +1,16 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { Modal, Slider, Button, Tooltip, Progress, Select } from 'antd';
+import { Modal, Slider, Button, Tooltip, Progress, Select, Radio } from 'antd';
 import {
   CloseOutlined,
   ReloadOutlined,
   LoadingOutlined,
   InfoCircleOutlined,
+  AppstoreOutlined,
+  SplitCellsOutlined,
+  FullscreenOutlined,
+  FullscreenExitOutlined,
+  UpOutlined,
+  DownOutlined,
 } from '@ant-design/icons';
 import axios from 'axios';
 import { parseDicomBuffer } from '../services/dicomDecoder';
@@ -51,8 +57,13 @@ export default function PacsMprModal({
   const rows = sampleMeta.rows || 256;
   const cols = sampleMeta.columns || 256;
 
-  // Viewport display resolution for isotropic MPR
-  const RENDER_RES = 256;
+  // Viewport display resolution for isotropic MPR and 3D Volume
+  const RENDER_RES = 320;
+
+  // Layout mode: '1x2' (3D + 2D Slice side-by-side like OsiriX/Horos) | '2x2' (Axial, Coronal, Sagittal, 3D) | '3D_MAX' (Full 3D)
+  const [layoutMode, setLayoutMode] = useState('1x2');
+  const [active2DPlane, setActive2DPlane] = useState('AXIAL'); // 'AXIAL' | 'SAGITTAL' | 'CORONAL'
+  const [isControlsMinimized, setIsControlsMinimized] = useState(false);
 
   // Crosshair coordinates in 3D volume space [0..cols-1, 0..rows-1, 0..numSlices-1]
   const [crosshair, setCrosshair] = useState({
@@ -62,9 +73,10 @@ export default function PacsMprModal({
   });
 
   // 3D Rotation angles and Rendering Parameters
-  const [rot3D, setRot3D] = useState({ angleX: 15, angleY: 35 });
+  const [rot3D, setRot3D] = useState({ angleX: 18, angleY: 35 });
   const [threshold3D, setThreshold3D] = useState(modality === 'MR' ? 25 : 35);
-  const [colorMode3D, setColorMode3D] = useState('bone'); // 'bone' | 'grayscale' | 'rainbow'
+  // Color & Shading Preset: 'bone_shaded' | 'bone' | 'vascular' | 'soft_tissue' | 'grayscale' | 'rainbow'
+  const [colorMode3D, setColorMode3D] = useState('bone_shaded');
 
   // Canvas refs for the 4 viewports
   const axialCanvasRef = useRef(null);
@@ -326,7 +338,7 @@ export default function PacsMprModal({
     ctx.stroke();
   }, [crosshair, getVoxelValue, cols, rows, numSlices]);
 
-  // --- 4. Render 3D VOLUME RENDERING (MIP with Depth Shading & Color Palette) ---
+  // --- 4. Render 3D SHADED VOLUME RENDERING & MIP (Surface Depth, Normal Shading & Presets) ---
   useEffect(() => {
     const canvas = volumeCanvasRef.current;
     if (!canvas || numSlices === 0) return;
@@ -351,18 +363,39 @@ export default function PacsMprModal({
     const centerY = rows / 2;
     const centerZ = numSlices / 2;
 
-    const zStep = Math.max(1, Math.floor(numSlices / 48));
+    const zStep = Math.max(1, Math.floor(numSlices / 56));
+    const isShadedMode =
+      colorMode3D === 'bone_shaded' ||
+      colorMode3D === 'vascular' ||
+      colorMode3D === 'soft_tissue';
+
+    // Z-buffer để xác định độ sâu bề mặt 3D thực (First-hit surface occlusion)
+    const zBuffer = new Float32Array(RENDER_RES * RENDER_RES);
+    zBuffer.fill(-999999);
+
+    // Vector hướng ánh sáng (Light Direction: chiếu từ góc trên-phải-trước mặt)
+    const lightX = 0.45;
+    const lightY = -0.6;
+    const lightZ = 0.65;
+    const lightLen = Math.sqrt(lightX * lightX + lightY * lightY + lightZ * lightZ) || 1;
+    const lx = lightX / lightLen;
+    const ly = lightY / lightLen;
+    const lz = lightZ / lightLen;
 
     for (let z = 0; z < numSlices; z += zStep) {
       const slicePixels = validSlices[z]?.rawPixels;
       if (!slicePixels) continue;
 
       const zRel = (z - centerZ) * depthScale;
+      const prevSlice = validSlices[Math.max(0, z - zStep)]?.rawPixels;
+      const nextSlice = validSlices[Math.min(numSlices - 1, z + zStep)]?.rawPixels;
 
       for (let y = 0; y < rows; y += 2) {
         const yRel = y - centerY;
+        const yOffset = y * cols;
+
         for (let x = 0; x < cols; x += 2) {
-          const val = slicePixels[y * cols + x] || 0;
+          const val = slicePixels[yOffset + x] || 0;
           if (val < threshold3D) continue;
 
           const xRel = x - centerX;
@@ -374,33 +407,78 @@ export default function PacsMprModal({
           const rotY2 = yRel * cosX - rotZ1 * sinX;
           const rotZ2 = yRel * sinX + rotZ1 * cosX;
 
-          const projX = Math.round(RENDER_RES / 2 + (rotX1 * RENDER_RES) / (cols * 1.2));
-          const projY = Math.round(RENDER_RES / 2 + (rotY2 * RENDER_RES) / (rows * 1.2));
+          const projX = Math.round(RENDER_RES / 2 + (rotX1 * RENDER_RES) / (cols * 1.25));
+          const projY = Math.round(RENDER_RES / 2 + (rotY2 * RENDER_RES) / (rows * 1.25));
 
           if (projX >= 0 && projX < RENDER_RES && projY >= 0 && projY < RENDER_RES) {
-            const idx = (projY * RENDER_RES + projX) * 4;
-            const currentR = imgData.data[idx];
+            const pixelIdx = projY * RENDER_RES + projX;
+            const idx = pixelIdx * 4;
 
-            if (val > currentR) {
-              // Apply Color Mode
-              if (colorMode3D === 'bone') {
-                // VR Bone / Soft tissue anatomical palette (Amber / Warm Gold / Bone White)
-                imgData.data[idx] = Math.min(255, val * 1.15); // R
-                imgData.data[idx + 1] = Math.min(255, val * 0.88); // G
-                imgData.data[idx + 2] = Math.min(255, val * 0.58); // B
-              } else if (colorMode3D === 'rainbow') {
-                // Jet/Rainbow thermal density gradient
-                const norm = val / 255;
-                imgData.data[idx] = Math.min(255, Math.floor(Math.sin(norm * Math.PI) * 255));
-                imgData.data[idx + 1] = Math.min(255, Math.floor(Math.sin((norm + 0.33) * Math.PI) * 255));
-                imgData.data[idx + 2] = Math.min(255, Math.floor(Math.sin((norm + 0.66) * Math.PI) * 255));
-              } else {
-                // Standard Grayscale MIP
-                imgData.data[idx] = val;
-                imgData.data[idx + 1] = val;
-                imgData.data[idx + 2] = val;
+            if (isShadedMode) {
+              // 3D Surface Shaded Display (SSD / SVR): Điểm gần camera hơn (rotZ2 lớn hơn) sẽ đè điểm sau
+              if (rotZ2 > zBuffer[pixelIdx]) {
+                zBuffer[pixelIdx] = rotZ2;
+
+                // Tính Gradient Normal Vector (Pháp tuyến bề mặt 3D)
+                const gx = (slicePixels[yOffset + Math.min(cols - 1, x + 2)] || val) - (slicePixels[yOffset + Math.max(0, x - 2)] || val);
+                const gy = (slicePixels[Math.min(rows - 1, y + 2) * cols + x] || val) - (slicePixels[Math.max(0, y - 2) * cols + x] || val);
+                const gz = (nextSlice ? nextSlice[yOffset + x] || val : val) - (prevSlice ? prevSlice[yOffset + x] || val : val);
+
+                // Xoay pháp tuyến theo cùng ma trận camera
+                const nx1 = gx * cosY - gz * sinY;
+                const nz1 = gx * sinY + gz * cosY;
+                const ny2 = gy * cosX - nz1 * sinX;
+                const nz2 = gy * sinX + nz1 * cosX;
+
+                const nLen = Math.sqrt(nx1 * nx1 + ny2 * ny2 + nz2 * nz2) || 1;
+                const nx = nx1 / nLen;
+                const ny = ny2 / nLen;
+                const nz = Math.abs(nz2 / nLen);
+
+                // Phong Lighting Model: Ambient (0.35) + Diffuse (0.65 * N.L) + Specular
+                const dot = Math.max(0, nx * lx + ny * ly + nz * lz);
+                const diffuse = dot;
+                const specular = Math.pow(Math.max(0, nz), 18) * 0.45;
+                const shade = Math.min(1.5, 0.35 + 0.65 * diffuse + specular);
+
+                if (colorMode3D === 'bone_shaded') {
+                  // Medical Bone Shaded VR Palette: Ngà vàng ấm, bóng đổ nổi rõ từng đường nứt xương
+                  imgData.data[idx] = Math.min(255, Math.floor((val * 1.08 + 40) * shade));
+                  imgData.data[idx + 1] = Math.min(255, Math.floor((val * 0.94 + 28) * shade));
+                  imgData.data[idx + 2] = Math.min(255, Math.floor((val * 0.76 + 18) * shade));
+                } else if (colorMode3D === 'vascular') {
+                  // Vascular Angio 3D: Đỏ cam mạch máu cản quang
+                  imgData.data[idx] = Math.min(255, Math.floor((val * 1.35 + 40) * shade));
+                  imgData.data[idx + 1] = Math.min(255, Math.floor((val * 0.45) * shade));
+                  imgData.data[idx + 2] = Math.min(255, Math.floor((val * 0.25) * shade));
+                } else if (colorMode3D === 'soft_tissue') {
+                  // Soft Tissue / Skin: Tông màu da hồng hào
+                  imgData.data[idx] = Math.min(255, Math.floor((val * 1.1 + 45) * shade));
+                  imgData.data[idx + 1] = Math.min(255, Math.floor((val * 0.75 + 25) * shade));
+                  imgData.data[idx + 2] = Math.min(255, Math.floor((val * 0.65 + 15) * shade));
+                }
+                imgData.data[idx + 3] = 255;
               }
-              imgData.data[idx + 3] = 255;
+            } else {
+              // MIP Mode (Maximum Intensity Projection): Chiếu tia xuyên thấu
+              const currentR = imgData.data[idx];
+              if (val > currentR) {
+                if (colorMode3D === 'bone') {
+                  imgData.data[idx] = Math.min(255, val * 1.15);
+                  imgData.data[idx + 1] = Math.min(255, val * 0.88);
+                  imgData.data[idx + 2] = Math.min(255, val * 0.58);
+                } else if (colorMode3D === 'rainbow') {
+                  const norm = val / 255;
+                  imgData.data[idx] = Math.min(255, Math.floor(Math.sin(norm * Math.PI) * 255));
+                  imgData.data[idx + 1] = Math.min(255, Math.floor(Math.sin((norm + 0.33) * Math.PI) * 255));
+                  imgData.data[idx + 2] = Math.min(255, Math.floor(Math.sin((norm + 0.66) * Math.PI) * 255));
+                } else {
+                  imgData.data[idx] = val;
+                  imgData.data[idx + 1] = val;
+                  imgData.data[idx + 2] = val;
+                }
+                imgData.data[idx + 3] = 255;
+              }
             }
           }
         }
@@ -410,10 +488,18 @@ export default function PacsMprModal({
     ctx.putImageData(imgData, 0, 0);
 
     // Overlay Watermark
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
-    ctx.font = '10px monospace';
-    ctx.fillText(`3D MIP (${colorMode3D.toUpperCase()})`, 8, 16);
-    ctx.fillText(`Góc xoay: ${Math.round(rot3D.angleX)}°, ${Math.round(rot3D.angleY)}°`, 8, 28);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+    ctx.font = '11px monospace';
+    const modeLabel =
+      colorMode3D === 'bone_shaded'
+        ? '3D BONE SHADED VR'
+        : colorMode3D === 'vascular'
+        ? '3D VASCULAR ANGIO'
+        : colorMode3D === 'soft_tissue'
+        ? '3D SOFT TISSUE'
+        : `3D MIP (${colorMode3D.toUpperCase()})`;
+    ctx.fillText(modeLabel, 8, 16);
+    ctx.fillText(`Xoay: X=${Math.round(rot3D.angleX)}°, Y=${Math.round(rot3D.angleY)}°`, 8, 30);
   }, [validSlices, rot3D, threshold3D, colorMode3D, cols, rows, numSlices]);
 
   // Handle Dragging in 3D Volume Viewport to Rotate
@@ -469,21 +555,24 @@ export default function PacsMprModal({
       }}
       closeIcon={<CloseOutlined style={{ color: '#ffffff' }} />}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', height: '89vh' }}>
-        {/* Top Header */}
+      <div style={{ display: 'flex', flexDirection: 'column', height: '90vh' }}>
+        {/* Top Header & Viewport Controls */}
         <div
           style={{
-            height: 48,
+            minHeight: isControlsMinimized ? 32 : 48,
             backgroundColor: '#0f172a',
             borderBottom: '1px solid #1e293b',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '0 16px',
+            padding: isControlsMinimized ? '0 12px' : '0 16px',
             color: '#f8fafc',
+            flexWrap: 'wrap',
+            gap: 8,
+            transition: 'all 0.2s ease',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <span
               style={{
                 fontWeight: '800',
@@ -492,57 +581,99 @@ export default function PacsMprModal({
                 letterSpacing: '0.4px',
               }}
             >
-              D-PACS 3D VOLUME & MULTI-PLANAR RECONSTRUCTION (MPR)
+              D-PACS 3D VR & MPR
             </span>
-            <span style={{ fontSize: '12px', color: '#94a3b8' }}>
+            <span style={{ fontSize: '11px', color: '#94a3b8' }}>
               {patientName} ({modality} - {numSlices} lát cắt)
             </span>
           </div>
 
-          {/* Controls */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '11px', color: '#cbd5e1' }}>
-              <span>Bảng màu 3D:</span>
-              <Select
+          {!isControlsMinimized && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+              {/* Bố cục Viewport Switcher */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <span style={{ fontSize: '11px', color: '#94a3b8' }}>Bố cục:</span>
+                <Radio.Group
+                  size="small"
+                  value={layoutMode}
+                  onChange={(e) => setLayoutMode(e.target.value)}
+                  buttonStyle="solid"
+                >
+                  <Radio.Button value="1x2" title="Chế độ 1x2: 3D Dựng hình & Lát cắt 2D song song">
+                    <SplitCellsOutlined /> 1x2 (3D + 2D)
+                  </Radio.Button>
+                  <Radio.Button value="2x2" title="Chế độ 2x2: 4 mặt cắt đồng bộ MPR">
+                    <AppstoreOutlined /> 2x2 MPR
+                  </Radio.Button>
+                  <Radio.Button value="3D_MAX" title="Phóng to riêng Viewport 3D toàn màn hình">
+                    <FullscreenOutlined /> 3D Max
+                  </Radio.Button>
+                </Radio.Group>
+              </div>
+
+              {/* Bảng màu 3D Presets */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '11px', color: '#cbd5e1' }}>
+                <span style={{ color: '#94a3b8' }}>Preset 3D:</span>
+                <Select
+                  size="small"
+                  value={colorMode3D}
+                  onChange={setColorMode3D}
+                  style={{ width: 155 }}
+                  options={[
+                    { value: 'bone_shaded', label: '🦴 Xương 3D Nổi khối' },
+                    { value: 'vascular', label: '🫀 Mạch máu CTA 3D' },
+                    { value: 'soft_tissue', label: '👤 Mô mềm / Da mặt' },
+                    { value: 'bone', label: 'Xương MIP xuyên thấu' },
+                    { value: 'grayscale', label: 'Trắng đen MIP' },
+                    { value: 'rainbow', label: 'Phân tầng nhiệt' },
+                  ]}
+                />
+              </div>
+
+              {/* Ngưỡng tỷ trọng 3D */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '11px', color: '#cbd5e1' }}>
+                <span style={{ color: '#94a3b8' }}>Ngưỡng HU:</span>
+                <Slider
+                  min={5}
+                  max={150}
+                  value={threshold3D}
+                  onChange={setThreshold3D}
+                  style={{ width: 80 }}
+                />
+                <span style={{ fontFamily: 'monospace', color: '#38bdf8', minWidth: 22 }}>
+                  {threshold3D}
+                </span>
+              </div>
+
+              <Button
                 size="small"
-                value={colorMode3D}
-                onChange={setColorMode3D}
-                style={{ width: 110 }}
-                options={[
-                  { value: 'bone', label: 'Mô & Xương VR' },
-                  { value: 'grayscale', label: 'Trắng đen MIP' },
-                  { value: 'rainbow', label: 'Phân tầng nhiệt' },
-                ]}
-              />
+                icon={<ReloadOutlined />}
+                onClick={handleReset3D}
+                style={{
+                  backgroundColor: '#1e293b',
+                  color: '#cbd5e1',
+                  border: '1px solid #334155',
+                  fontWeight: '600',
+                }}
+              >
+                Reset
+              </Button>
             </div>
+          )}
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '11px', color: '#cbd5e1' }}>
-              <span>Ngưỡng 3D:</span>
-              <Slider
-                min={5}
-                max={150}
-                value={threshold3D}
-                onChange={setThreshold3D}
-                style={{ width: 90 }}
-              />
-              <span style={{ fontFamily: 'monospace', color: '#38bdf8', width: 22 }}>
-                {threshold3D}
-              </span>
-            </div>
-
-            <Button
-              size="small"
-              icon={<ReloadOutlined />}
-              onClick={handleReset3D}
-              style={{
-                backgroundColor: '#1e293b',
-                color: '#cbd5e1',
-                border: '1px solid #334155',
-                fontWeight: '600',
-              }}
-            >
-              Reset 3D
-            </Button>
+          {/* Nút Thu gọn / Mở rộng Controls */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Tooltip title={isControlsMinimized ? 'Mở rộng bảng công cụ' : 'Thu gọn thanh công cụ để mở rộng ảnh'}>
+              <Button
+                size="small"
+                type="text"
+                icon={isControlsMinimized ? <DownOutlined style={{ color: '#38bdf8' }} /> : <UpOutlined style={{ color: '#94a3b8' }} />}
+                onClick={() => setIsControlsMinimized((prev) => !prev)}
+                style={{ backgroundColor: isControlsMinimized ? '#1e293b' : 'transparent' }}
+              >
+                {isControlsMinimized ? 'Hiện công cụ' : ''}
+              </Button>
+            </Tooltip>
           </div>
         </div>
 
@@ -569,7 +700,7 @@ export default function PacsMprModal({
           </div>
         )}
 
-        {/* Main Stage: Either 3D Loading Screen or 2x2 Grid */}
+        {/* Main Stage: Either 3D Loading Screen or Multi-Viewport Grid */}
         {downloadProgress.loading ? (
           <div
             style={{
@@ -628,8 +759,283 @@ export default function PacsMprModal({
               </div>
             </div>
           </div>
+        ) : layoutMode === '1x2' ? (
+          /* BỐ CỤC 1x2 SONG SONG (3D DỰNG HÌNH BÊN TRÁI ⟷ LÁT CẮT 2D BÊN PHẢI - NHƯ OSIRIX / RADIANT) */
+          <div
+            style={{
+              flex: 1,
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gridTemplateRows: '1fr',
+              gap: 4,
+              padding: 4,
+              backgroundColor: '#000000',
+            }}
+          >
+            {/* VIEWPORT 3D VOLUME RENDERING (Bên trái) */}
+            <div
+              style={{
+                backgroundColor: '#05070e',
+                border: '1.5px solid #a855f7',
+                position: 'relative',
+                display: 'flex',
+                flexDirection: 'column',
+                cursor: 'grab',
+                overflow: 'hidden',
+              }}
+              onMouseDown={handleMouseDown3D}
+              onMouseMove={handleMouseMove3D}
+              onMouseUp={handleMouseUp3D}
+            >
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 8,
+                  left: 10,
+                  zIndex: 10,
+                  fontSize: '11px',
+                  color: '#c084fc',
+                  fontWeight: '700',
+                  backgroundColor: 'rgba(10, 15, 29, 0.85)',
+                  padding: '3px 8px',
+                  borderRadius: 4,
+                  border: '1px solid rgba(168, 85, 247, 0.4)',
+                }}
+              >
+                3D VOLUME RENDERING (Kéo chuột xoay 360°)
+              </div>
+
+              <div
+                style={{
+                  flex: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  overflow: 'hidden',
+                }}
+              >
+                <canvas
+                  ref={volumeCanvasRef}
+                  style={{
+                    width: '96%',
+                    height: '96%',
+                    objectFit: 'contain',
+                  }}
+                />
+              </div>
+
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: 8,
+                  right: 10,
+                  fontSize: '11px',
+                  color: '#94a3b8',
+                  fontFamily: 'monospace',
+                  backgroundColor: 'rgba(10, 15, 29, 0.75)',
+                  padding: '2px 6px',
+                  borderRadius: 3,
+                }}
+              >
+                Xoay: X={Math.round(rot3D.angleX)}° | Y={Math.round(rot3D.angleY)}°
+              </div>
+            </div>
+
+            {/* VIEWPORT 2D LÁT CẮT TƯƠNG ỨNG (Bên phải) */}
+            <div
+              style={{
+                backgroundColor: '#0a0f1d',
+                border: '1.5px solid #38bdf8',
+                position: 'relative',
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+              }}
+            >
+              {/* Header của Viewport 2D: Cho phép đổi mặt cắt */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 8,
+                  left: 10,
+                  zIndex: 10,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  backgroundColor: 'rgba(10, 15, 29, 0.85)',
+                  padding: '3px 8px',
+                  borderRadius: 4,
+                  border: '1px solid rgba(56, 189, 248, 0.4)',
+                }}
+              >
+                <span style={{ fontSize: '11px', color: '#38bdf8', fontWeight: '700' }}>
+                  LÁT CẮT 2D:
+                </span>
+                <Radio.Group
+                  size="small"
+                  value={active2DPlane}
+                  onChange={(e) => setActive2DPlane(e.target.value)}
+                >
+                  <Radio.Button value="AXIAL" style={{ fontSize: '10px' }}>Axial</Radio.Button>
+                  <Radio.Button value="CORONAL" style={{ fontSize: '10px' }}>Coronal</Radio.Button>
+                  <Radio.Button value="SAGITTAL" style={{ fontSize: '10px' }}>Sagittal</Radio.Button>
+                </Radio.Group>
+                <span style={{ fontSize: '11px', color: '#cbd5e1', fontFamily: 'monospace' }}>
+                  {active2DPlane === 'AXIAL'
+                    ? `#${crosshair.z + 1}/${numSlices}`
+                    : active2DPlane === 'CORONAL'
+                    ? `#${crosshair.y + 1}/${rows}`
+                    : `#${crosshair.x + 1}/${cols}`}
+                </span>
+              </div>
+
+              <div
+                style={{
+                  flex: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  overflow: 'hidden',
+                  cursor: 'crosshair',
+                }}
+              >
+                <canvas
+                  ref={
+                    active2DPlane === 'AXIAL'
+                      ? axialCanvasRef
+                      : active2DPlane === 'CORONAL'
+                      ? coronalCanvasRef
+                      : sagittalCanvasRef
+                  }
+                  style={{
+                    width: '96%',
+                    height: '96%',
+                    objectFit: 'contain',
+                  }}
+                  onClick={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    if (active2DPlane === 'AXIAL') {
+                      const x = Math.round(((e.clientX - rect.left) / rect.width) * cols);
+                      const y = Math.round(((e.clientY - rect.top) / rect.height) * rows);
+                      setCrosshair((prev) => ({ ...prev, x, y }));
+                    } else if (active2DPlane === 'CORONAL') {
+                      const x = Math.round(((e.clientX - rect.left) / rect.width) * cols);
+                      const z = Math.round(((e.clientY - rect.top) / rect.height) * Math.max(1, numSlices - 1));
+                      setCrosshair((prev) => ({ ...prev, x, z }));
+                    } else {
+                      const y = Math.round(((e.clientX - rect.left) / rect.width) * rows);
+                      const z = Math.round(((e.clientY - rect.top) / rect.height) * Math.max(1, numSlices - 1));
+                      setCrosshair((prev) => ({ ...prev, y, z }));
+                    }
+                  }}
+                />
+              </div>
+
+              {/* Slider cuộn lát cắt */}
+              <div style={{ padding: '4px 16px 8px', backgroundColor: '#0a0f1d', borderTop: '1px solid #1e293b' }}>
+                <Slider
+                  min={0}
+                  max={
+                    active2DPlane === 'AXIAL'
+                      ? Math.max(0, numSlices - 1)
+                      : active2DPlane === 'CORONAL'
+                      ? Math.max(0, rows - 1)
+                      : Math.max(0, cols - 1)
+                  }
+                  value={
+                    active2DPlane === 'AXIAL'
+                      ? crosshair.z
+                      : active2DPlane === 'CORONAL'
+                      ? crosshair.y
+                      : crosshair.x
+                  }
+                  onChange={(v) => {
+                    if (active2DPlane === 'AXIAL') setCrosshair((p) => ({ ...p, z: v }));
+                    else if (active2DPlane === 'CORONAL') setCrosshair((p) => ({ ...p, y: v }));
+                    else setCrosshair((p) => ({ ...p, x: v }));
+                  }}
+                  tooltip={{
+                    formatter: (v) =>
+                      active2DPlane === 'AXIAL'
+                        ? `Lát cắt Axial Z: ${v + 1}`
+                        : active2DPlane === 'CORONAL'
+                        ? `Vị trí Coronal Y: ${v + 1}`
+                        : `Vị trí Sagittal X: ${v + 1}`,
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        ) : layoutMode === '3D_MAX' ? (
+          /* BỐ CỤC TOÀN MÀN HÌNH 3D VIEWPORT */
+          <div
+            style={{
+              flex: 1,
+              backgroundColor: '#05070e',
+              border: '2px solid #a855f7',
+              position: 'relative',
+              display: 'flex',
+              flexDirection: 'column',
+              cursor: 'grab',
+              overflow: 'hidden',
+            }}
+            onMouseDown={handleMouseDown3D}
+            onMouseMove={handleMouseMove3D}
+            onMouseUp={handleMouseUp3D}
+          >
+            <div
+              style={{
+                position: 'absolute',
+                top: 10,
+                left: 12,
+                zIndex: 10,
+                fontSize: '12px',
+                color: '#c084fc',
+                fontWeight: '700',
+                backgroundColor: 'rgba(10, 15, 29, 0.85)',
+                padding: '4px 10px',
+                borderRadius: 4,
+                border: '1px solid rgba(168, 85, 247, 0.4)',
+              }}
+            >
+              3D VOLUME RENDERING (Toàn màn hình - Kéo chuột xoay 360°)
+            </div>
+            <div
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                overflow: 'hidden',
+              }}
+            >
+              <canvas
+                ref={volumeCanvasRef}
+                style={{
+                  width: '98%',
+                  height: '98%',
+                  objectFit: 'contain',
+                }}
+              />
+            </div>
+            <div
+              style={{
+                position: 'absolute',
+                bottom: 10,
+                right: 12,
+                fontSize: '11px',
+                color: '#94a3b8',
+                fontFamily: 'monospace',
+                backgroundColor: 'rgba(10, 15, 29, 0.75)',
+                padding: '3px 8px',
+                borderRadius: 4,
+              }}
+            >
+              Xoay: X={Math.round(rot3D.angleX)}° | Y={Math.round(rot3D.angleY)}°
+            </div>
+          </div>
         ) : (
-          /* 2x2 Grid Viewports */
+          /* BỐ CỤC 2x2 TRUYỀN THỐNG (4 MẶT CẮT MPR) */
           <div
             style={{
               flex: 1,
@@ -834,7 +1240,7 @@ export default function PacsMprModal({
             <div
               style={{
                 backgroundColor: '#05070e',
-                border: '1px solid #1e293b',
+                border: '1px solid #a855f7',
                 position: 'relative',
                 display: 'flex',
                 flexDirection: 'column',

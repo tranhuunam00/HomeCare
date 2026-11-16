@@ -127,6 +127,7 @@ export default function PacsViewerPage() {
   const [seriesThumbnails, setSeriesThumbnails] = useState({});
   // Per-slice thumbnail map: { [globalIndex]: dataUrl }
   const [sliceThumbnails, setSliceThumbnails] = useState({});
+  const [leftSeriesStripOpen, setLeftSeriesStripOpen] = useState(true);
   const [rightSliceStripOpen, setRightSliceStripOpen] = useState(true);
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -144,6 +145,22 @@ export default function PacsViewerPage() {
 
   // 3D Volume Rendering & Multi-Planar Reconstruction (MPR) modal state
   const [mprOpen, setMprOpen] = useState(false);
+
+  // Cine Loop Player (Auto-playback for Ultrasound, DSA Angiography, CT/MRI multi-slice series)
+  const [isPlayingCine, setIsPlayingCine] = useState(false);
+  const [cineFps, setCineFps] = useState(10);
+
+  useEffect(() => {
+    if (!isPlayingCine || activeSeriesIndices.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => {
+        const curPos = activeSeriesIndices.indexOf(prev);
+        const nextPos = (curPos + 1) % activeSeriesIndices.length;
+        return activeSeriesIndices[nextPos];
+      });
+    }, Math.round(1000 / cineFps));
+    return () => clearInterval(interval);
+  }, [isPlayingCine, cineFps, activeSeriesIndices, setCurrentIndex]);
 
   const handleOpenMpr = useCallback(() => {
     if (activeSeriesInstances.length <= 20) {
@@ -840,9 +857,12 @@ export default function PacsViewerPage() {
     }
   };
 
-  // Keyboard Shortcuts: Space / Ctrl+S for Key Image Capture, Arrows for Cine (scoped to active series)
+  // Keyboard Shortcuts: Space / Ctrl+S (Key Image), Arrows (Slice Navigation), 'I' (Invert), 'C' (Cine Loop)
   useEffect(() => {
     const handleKeyDown = (e) => {
+      // Ignore when user is typing in input or textarea
+      if (['INPUT', 'TEXTAREA'].includes(e.target?.tagName)) return;
+
       if (e.code === 'Space' || (e.ctrlKey && e.key.toLowerCase() === 's')) {
         e.preventDefault();
         handleCaptureKeyImage();
@@ -850,6 +870,10 @@ export default function PacsViewerPage() {
         stepSeriesSlice(1);
       } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
         stepSeriesSlice(-1);
+      } else if (e.key.toLowerCase() === 'i' && !e.ctrlKey && !e.altKey) {
+        setInvert((prev) => !prev);
+      } else if (e.key.toLowerCase() === 'c' && !e.ctrlKey && !e.altKey) {
+        setIsPlayingCine((prev) => !prev);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -915,6 +939,11 @@ export default function PacsViewerPage() {
         onResetZoom={handleResetZoom}
         isExpanded={isExpanded}
         onToggleExpand={() => setIsExpanded((prev) => !prev)}
+        isPlayingCine={isPlayingCine}
+        onToggleCine={() => setIsPlayingCine((prev) => !prev)}
+        cineFps={cineFps}
+        onChangeCineFps={setCineFps}
+        totalSlices={activeSeriesIndices.length}
       />
 
       {/* Main Body */}
@@ -949,9 +978,11 @@ export default function PacsViewerPage() {
           />
         )}
 
-        {/* Column 2: Series & Files Strip (As in Image 2 - Supports Multiple Files/Series) */}
+        {/* Column 2: Series & Files Strip (Supports Multiple Files/Series & Collapsible) */}
         {!isExpanded && (
           <PacsSeriesStrip
+            isOpen={leftSeriesStripOpen}
+            onToggleOpen={() => setLeftSeriesStripOpen((prev) => !prev)}
             seriesList={seriesList}
             activeSeriesUid={activeSeriesUid}
             onSelectSeries={(uid) => {
