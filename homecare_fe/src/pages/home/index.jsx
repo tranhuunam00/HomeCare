@@ -569,11 +569,13 @@ const Home = () => {
 
           <Content
             style={{
-              padding: deviceIsMobile ? 6 : 8,
+              padding: deviceIsMobile ? 4 : 8,
               background: "#fff",
               flex: 1,
               minWidth: 0,
-              overflowX: "clip",
+              maxWidth: "100%",
+              boxSizing: "border-box",
+              overflowX: "hidden",
             }}
           >
             {deviceIsMobile && !isWorkListRoute && (
@@ -583,8 +585,10 @@ const Home = () => {
                   alignItems: "center",
                   justifyContent: "space-between",
                   marginBottom: 8,
-                  paddingBottom: 6,
+                  padding: "4px 8px 6px",
                   borderBottom: "1px solid #f1f5f9",
+                  width: "100%",
+                  boxSizing: "border-box",
                 }}
               >
                 <Button
@@ -605,7 +609,7 @@ const Home = () => {
                   size="small"
                   type="link"
                   onClick={() => navigate("/home/patients-diagnose")}
-                  style={{ fontSize: 12, padding: 0, color: "#0b6b4f", fontWeight: 600 }}
+                  style={{ fontSize: 12, padding: "0 4px", color: "#0b6b4f", fontWeight: 600 }}
                 >
                   Worklist
                 </Button>

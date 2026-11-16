@@ -17,16 +17,18 @@ const ApplicationsPage = () => {
       <HomeCareHeader />
 
       <div className={styles.container}>
-        <Title level={3}>ỨNG DỤNG Y KHOA</Title>
-        {!user?.id && (
-          <Button
-            type="link"
-            onClick={() => navigate("/login")}
-            style={{ padding: 0, marginBottom: 8, marginLeft: 10 }}
-          >
-            Đăng nhập để sử dụng đầy đủ tính năng
-          </Button>
-        )}
+        <div className={styles.headerBlock}>
+          <Title level={3} className={styles.pageTitle}>ỨNG DỤNG Y KHOA</Title>
+          {!user?.id && (
+            <Button
+              type="link"
+              onClick={() => navigate("/login")}
+              className={styles.loginHintBtn}
+            >
+              Đăng nhập để sử dụng đầy đủ tính năng
+            </Button>
+          )}
+        </div>
         {medicalCategories.map((cat) => (
           <div key={cat.key} className={styles.categorySection}>
             {/* ===== CATEGORY HEADER ===== */}

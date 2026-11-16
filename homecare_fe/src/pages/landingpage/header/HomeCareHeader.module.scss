@@ -223,6 +223,23 @@ $bg-light: rgba(11, 107, 79, 0.08);
   .mobileMenuButton {
     display: flex;
     align-items: center;
+    margin-left: 8px;
+
+    button {
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #334155;
+
+      &:hover {
+        color: $primary-color;
+      }
+    }
+  }
+
+  .authWrapper {
+    gap: 4px;
   }
 
   .authButtons {
@@ -231,7 +248,7 @@ $bg-light: rgba(11, 107, 79, 0.08);
     button {
       height: 32px;
       font-size: 12px;
-      padding: 0 10px;
+      padding: 0 8px;
     }
   }
 }

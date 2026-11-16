@@ -7,9 +7,17 @@
   padding: 40px;
   background-color: #f0f2f5;
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    padding: 12px 8px;
+    min-height: auto;
+  }
 
   @media (max-width: 575px) {
-    padding: 16px;
+    padding: 8px 4px;
+    min-height: auto;
   }
 }
 
@@ -22,15 +30,18 @@
   min-width: 700px;
   max-width: 1000px;
   width: 100%;
+  box-sizing: border-box;
 
   @media (max-width: 768px) {
-    min-width: 100%;
-    padding: 24px;
+    min-width: 0;
+    width: 100%;
+    padding: 18px 14px;
   }
 
   @media (max-width: 575px) {
-    min-width: 100%;
-    padding: 16px;
+    min-width: 0;
+    width: 100%;
+    padding: 14px 10px;
   }
 }
 

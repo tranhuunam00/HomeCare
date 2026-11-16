@@ -27,7 +27,7 @@ const HomeCareHeader = () => {
       <div className={styles.homecareHeader}>
         <div className={styles.headerContainer}>
           {/* LEFT: LOGO */}
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ display: "flex", alignItems: "center" }}>
             <Tooltip title="Truy cập trang chủ HomeCare" placement="bottom">
               <img
                 src="/logo_home_care.png"
@@ -36,14 +36,6 @@ const HomeCareHeader = () => {
                 onClick={() => (window.location.href = "https://home-care.vn/")}
               />
             </Tooltip>
-
-            <div className={styles.mobileMenuButton}>
-              <Button
-                type="text"
-                icon={<MenuOutlined />}
-                onClick={() => setMobileMenuOpen(true)}
-              />
-            </div>
           </div>
 
           {/* CENTER: MENU */}
@@ -97,7 +89,7 @@ const HomeCareHeader = () => {
             </Menu>
           </header>
 
-          {/* RIGHT: AUTH */}
+          {/* RIGHT: AUTH & MOBILE HAMBURGER */}
           <div className={styles.authWrapper}>
             {isLoggedIn ? (
               <Dropdown
@@ -144,51 +136,136 @@ const HomeCareHeader = () => {
                 </Button>
               </div>
             )}
+
+            <div className={styles.mobileMenuButton}>
+              <Button
+                type="text"
+                icon={<MenuOutlined style={{ fontSize: 18 }} />}
+                onClick={() => setMobileMenuOpen(true)}
+              />
+            </div>
           </div>
         </div>
       </div>
 
       {/* MOBILE MENU */}
       <Drawer
-        title="Menu"
+        title="Danh mục menu"
         placement="right"
         onClose={() => setMobileMenuOpen(false)}
         open={mobileMenuOpen}
       >
         <Menu mode="vertical">
           <Menu.Item
-            key="packages"
-            onClick={() =>
-              isLoggedIn ? navigate("/home/subscription") : navigate("/pricing")
-            }
+            key="home"
+            onClick={() => {
+              setMobileMenuOpen(false);
+              navigate("/home");
+            }}
           >
-            CÁC GÓI DỊCH VỤ
+            TRANG CHỦ
+          </Menu.Item>
+
+          <Menu.Item
+            key="worklist"
+            onClick={() => {
+              setMobileMenuOpen(false);
+              isLoggedIn ? navigate("/home") : navigate("/login");
+            }}
+          >
+            ĐỌC KẾT QUẢ
           </Menu.Item>
 
           <Menu.Item
             key="applications"
-            onClick={() => navigate("/applications")}
+            onClick={() => {
+              setMobileMenuOpen(false);
+              navigate("/applications");
+            }}
           >
             ỨNG DỤNG Y KHOA
           </Menu.Item>
 
           <Menu.Item
-            key="worklist"
-            onClick={() =>
-              isLoggedIn ? navigate("/home") : navigate("/login")
-            }
+            key="packages"
+            onClick={() => {
+              setMobileMenuOpen(false);
+              isLoggedIn ? navigate("/home/subscription") : navigate("/pricing");
+            }}
           >
-            ĐỌC KẾT QUẢ
+            CÁC GÓI DỊCH VỤ
           </Menu.Item>
 
-          <Menu.Item key="contact" onClick={() => navigate("/contact")}>
+          <Menu.Item
+            key="contact"
+            onClick={() => {
+              setMobileMenuOpen(false);
+              navigate("/contact");
+            }}
+          >
             HỖ TRỢ KỸ THUẬT
           </Menu.Item>
 
-          <Menu.Item key="guild" onClick={() => navigate("/guild")}>
+          <Menu.Item
+            key="guild"
+            onClick={() => {
+              setMobileMenuOpen(false);
+              navigate("/guild");
+            }}
+          >
             HƯỚNG DẪN SỬ DỤNG
           </Menu.Item>
         </Menu>
+
+        <div style={{ marginTop: 24, padding: "0 16px" }}>
+          {isLoggedIn ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <Button
+                type="default"
+                block
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  navigate("/home/profile");
+                }}
+              >
+                Trang cá nhân
+              </Button>
+              <Button
+                danger
+                block
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  handleLogoutGlobal();
+                }}
+              >
+                Đăng xuất
+              </Button>
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <Button
+                type="primary"
+                block
+                style={{ background: "#0b6b4f", borderColor: "#0b6b4f" }}
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  navigate("/login");
+                }}
+              >
+                Đăng nhập
+              </Button>
+              <Button
+                block
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  navigate("/register");
+                }}
+              >
+                Đăng ký tài khoản
+              </Button>
+            </div>
+          )}
+        </div>
       </Drawer>
     </>
   );

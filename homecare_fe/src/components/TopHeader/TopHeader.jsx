@@ -119,10 +119,10 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
           />
         </Tooltip>
       </div>
-      <div className={styles.topHeader__mobileBreak0} />
+      {isOnWorkList && <div className={styles.topHeader__mobileBreak0} />}
       <Tooltip title="Quy trình">
         <Button
-          className={styles.topHeader__workflowBtn}
+          className={isOnWorkList ? styles.topHeader__workflowBtn : styles.topHeader__workflowBtnStandalone}
           size="small"
           icon={<ApartmentOutlined />}
           style={{
@@ -257,57 +257,61 @@ const TopHeader = ({ collapsed, toggleSidebar }) => {
         </Select>
       )}
       {isOnWorkList && <div className={styles.topHeader__mobileBreak2} />}
-      <Button
-        className={styles.topHeader__addBtn}
-        type="primary"
-        size="small"
-        style={{
-          height: 28,
-          fontSize: "12px",
-          background: "linear-gradient(135deg, #0b6b4f 0%, #04580f 100%)",
-          borderColor: "transparent",
-          transition: "all 0.2s ease",
-          cursor: "pointer",
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.background =
-            "linear-gradient(135deg, #095a42 0%, #10b981 100%)";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.background =
-            "linear-gradient(135deg, #0b6b4f 0%, #04580f 100%)";
-        }}
-        icon={<UserAddOutlined />}
-        onClick={() => navigate("/home/patients-diagnose/create")}
-      >
-        Thêm
-      </Button>
-      <Button
-        className={styles.topHeader__importBtn}
-        type="primary"
-        size="small"
-        style={{
-          height: 28,
-          fontSize: "12px",
-          background: "linear-gradient(135deg, #0b6b4f 0%, #04580f 100%)",
-          borderColor: "transparent",
-          transition: "all 0.2s ease",
-          cursor: "pointer",
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.background =
-            "linear-gradient(135deg, #095a42 0%, #10b981 100%)";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.background =
-            "linear-gradient(135deg, #0b6b4f 0%, #04580f 100%)";
-        }}
-        icon={<UploadOutlined />}
-        onClick={() => setOpenImportModal(true)}
-      >
-        Import
-      </Button>
-      <div className={styles.topHeader__mobileBreak1} />
+      {isOnWorkList && (
+        <Button
+          className={styles.topHeader__addBtn}
+          type="primary"
+          size="small"
+          style={{
+            height: 28,
+            fontSize: "12px",
+            background: "linear-gradient(135deg, #0b6b4f 0%, #04580f 100%)",
+            borderColor: "transparent",
+            transition: "all 0.2s ease",
+            cursor: "pointer",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background =
+              "linear-gradient(135deg, #095a42 0%, #10b981 100%)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background =
+              "linear-gradient(135deg, #0b6b4f 0%, #04580f 100%)";
+          }}
+          icon={<UserAddOutlined />}
+          onClick={() => navigate("/home/patients-diagnose/create")}
+        >
+          Thêm
+        </Button>
+      )}
+      {isOnWorkList && (
+        <Button
+          className={styles.topHeader__importBtn}
+          type="primary"
+          size="small"
+          style={{
+            height: 28,
+            fontSize: "12px",
+            background: "linear-gradient(135deg, #0b6b4f 0%, #04580f 100%)",
+            borderColor: "transparent",
+            transition: "all 0.2s ease",
+            cursor: "pointer",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background =
+              "linear-gradient(135deg, #095a42 0%, #10b981 100%)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background =
+              "linear-gradient(135deg, #0b6b4f 0%, #04580f 100%)";
+          }}
+          icon={<UploadOutlined />}
+          onClick={() => setOpenImportModal(true)}
+        >
+          Import
+        </Button>
+      )}
+      {isOnWorkList && <div className={styles.topHeader__mobileBreak1} />}
 
       {/* --- Right side --- */}
       <div className={styles.topHeader__right}>

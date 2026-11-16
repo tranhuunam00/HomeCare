@@ -211,7 +211,7 @@ const NotificationBell = () => {
       arrow={false}
       overlayClassName={styles.notificationDropdownOverlay}
     >
-      <Badge count={unreadCount} overflowCount={99} size="small">
+      <Badge count={unreadCount} overflowCount={99} size="small" offset={[-2, 4]}>
         <div className={styles.bellWrap}>
           <BellOutlined className={styles.bellIcon} />
         </div>

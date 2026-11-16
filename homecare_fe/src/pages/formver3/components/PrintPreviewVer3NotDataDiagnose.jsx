@@ -58,9 +58,11 @@ const PrintPreviewVer3NotDataDiagnose = ({
   isOnLyContent = false,
   setPreviewOpen,
   styleCustomParent = {},
+  patientDiagnose,
 }) => {
   const { doctor, selectedPatientDiagnose, setSelectedPatientDiagnose } =
     useGlobalAuth();
+  const currentPatient = patientDiagnose || selectedPatientDiagnose;
 
   const [previewImageOpen, setPreviewImageOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
@@ -940,21 +942,16 @@ const PrintPreviewVer3NotDataDiagnose = ({
             languageTranslate={languageTranslate}
             translateLabel={translateLabel}
             consultingDoctor={
-              selectedPatientDiagnose?.id_consulting_doctor_doctor ||
-              patientDiagnose?.id_consulting_doctor_doctor
+              currentPatient?.id_consulting_doctor_doctor
             }
             readingDoctor={{
               ...doctor,
-              ...(selectedPatientDiagnose?.id_receive_doctor_doctor ||
-                patientDiagnose?.id_receive_doctor_doctor ||
-                {}),
+              ...(currentPatient?.id_receive_doctor_doctor || {}),
               avatar_url:
-                selectedPatientDiagnose?.id_receive_doctor_doctor?.avatar_url ||
-                patientDiagnose?.id_receive_doctor_doctor?.avatar_url ||
+                currentPatient?.id_receive_doctor_doctor?.avatar_url ||
                 doctor?.avatar_url,
               signature_url:
-                selectedPatientDiagnose?.id_receive_doctor_doctor?.signature_url ||
-                patientDiagnose?.id_receive_doctor_doctor?.signature_url ||
+                currentPatient?.id_receive_doctor_doctor?.signature_url ||
                 doctor?.signature_url,
             }}
             createdAt={formSnapshot?.createdAt}
