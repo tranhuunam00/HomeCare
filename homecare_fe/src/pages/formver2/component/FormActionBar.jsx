@@ -295,12 +295,16 @@ export default function FormActionBar({
     } = patientDiagnose || {};
 
     let keys = [];
+    const isAdmin = user?.id_role == USER_ROLE.ADMIN;
 
     if (
-      patientDiagnose?.id_doctor_in_processing !== doctor.id &&
-      patientDiagnose?.id_receive_doctor !== doctor.id &&
-      patientDiagnose?.id_verify_doctor !== doctor.id &&
-      patientDiagnose?.id_consulting_doctor !== doctor.id
+      !isAdmin &&
+      doctor?.id &&
+      patientDiagnose?.id_doctor_in_processing &&
+      patientDiagnose?.id_doctor_in_processing != doctor.id &&
+      patientDiagnose?.id_receive_doctor != doctor.id &&
+      patientDiagnose?.id_verify_doctor != doctor.id &&
+      patientDiagnose?.id_consulting_doctor != doctor.id
     ) {
       keys = [KEY_ACTION_BUTTON.exit];
       setVisionItemKeys(keys);
@@ -314,9 +318,9 @@ export default function FormActionBar({
         break;
 
       case PATIENT_DIAGNOSE_STATUS_CODE.CONSULTATION:
-        if (patientDiagnose.id_receive_doctor == doctor.id) {
+        if (isAdmin || patientDiagnose?.id_receive_doctor == doctor?.id) {
           keys = [KEY_ACTION_BUTTON.exit, KEY_ACTION_BUTTON.huy_consultation];
-        } else if (patientDiagnose.id_consulting_doctor == doctor.id) {
+        } else if (patientDiagnose?.id_consulting_doctor == doctor?.id) {
           keys = [
             KEY_ACTION_BUTTON.exit,
             KEY_ACTION_BUTTON.tu_choi_consultation,
@@ -327,40 +331,38 @@ export default function FormActionBar({
         break;
 
       case PATIENT_DIAGNOSE_STATUS_CODE.IN_PROCESSING:
-        if (
-          id_doctor_in_processing != doctor.id &&
-          id_receive_doctor != doctor.id
-        ) {
+        const canEditProcessing =
+          isAdmin ||
+          !doctor?.id ||
+          !id_doctor_in_processing ||
+          id_doctor_in_processing == doctor?.id ||
+          id_receive_doctor == doctor?.id;
+
+        if (!canEditProcessing) {
           keys = [KEY_ACTION_BUTTON.exit];
         } else {
           keys = [
-            id_doctor_in_processing == doctor.id
-              ? KEY_ACTION_BUTTON.reset
-              : null,
-            id_doctor_in_processing == doctor.id
-              ? editId && !isEdit
-                ? KEY_ACTION_BUTTON.edit
-                : KEY_ACTION_BUTTON.save
-              : null,
-            id_doctor_in_processing == doctor.id
-              ? KEY_ACTION_BUTTON.doc_xong
-              : null,
+            KEY_ACTION_BUTTON.reset,
+            editId && !isEdit
+              ? KEY_ACTION_BUTTON.edit
+              : KEY_ACTION_BUTTON.save,
+            KEY_ACTION_BUTTON.doc_xong,
             KEY_ACTION_BUTTON.exit,
-            id_doctor_in_processing == doctor.id
-              ? KEY_ACTION_BUTTON.huy_doc
-              : null,
-            id_doctor_in_processing == doctor.id
-              ? KEY_ACTION_BUTTON.consultation
-              : null,
+            KEY_ACTION_BUTTON.huy_doc,
+            KEY_ACTION_BUTTON.consultation,
           ].filter(Boolean);
         }
         break;
 
       case PATIENT_DIAGNOSE_STATUS_CODE.READ_DONE:
-        if (
-          id_doctor_in_processing != doctor.id &&
-          id_receive_doctor != doctor.id
-        ) {
+        const canActReadDone =
+          isAdmin ||
+          !doctor?.id ||
+          !id_doctor_in_processing ||
+          id_doctor_in_processing == doctor?.id ||
+          id_receive_doctor == doctor?.id;
+
+        if (!canActReadDone) {
           keys = [KEY_ACTION_BUTTON.exit];
         } else {
           keys = [
@@ -376,40 +378,37 @@ export default function FormActionBar({
         break;
 
       case PATIENT_DIAGNOSE_STATUS_CODE.WAIT_VERIFY:
-        if (id_receive_doctor != doctor.id && id_verify_doctor != doctor.id) {
+        const canActWaitVerify =
+          isAdmin ||
+          !doctor?.id ||
+          id_receive_doctor == doctor?.id ||
+          id_verify_doctor == doctor?.id;
+
+        if (!canActWaitVerify) {
           keys = [KEY_ACTION_BUTTON.exit];
         } else {
           keys = [
-            patientDiagnose.id_verify_doctor == doctor.id ||
-            patientDiagnose.id_receive_doctor == doctor.id
-              ? KEY_ACTION_BUTTON.reset
-              : null,
+            KEY_ACTION_BUTTON.reset,
             KEY_ACTION_BUTTON.exit,
-            patientDiagnose.id_verify_doctor == doctor.id ||
-            patientDiagnose.id_receive_doctor == doctor.id
-              ? KEY_ACTION_BUTTON.huy_duyet
-              : null,
-            patientDiagnose.id_verify_doctor == doctor.id ||
-            patientDiagnose.id_receive_doctor == doctor.id
-              ? KEY_ACTION_BUTTON.tra_ca
-              : null,
-            patientDiagnose.id_verify_doctor == doctor.id ||
-            patientDiagnose.id_receive_doctor == doctor.id
-              ? editId && !isEdit
-                ? KEY_ACTION_BUTTON.edit_duyet
-                : KEY_ACTION_BUTTON.save_duyet
-              : null,
-            patientDiagnose.id_verify_doctor == doctor.id ||
-            patientDiagnose.id_receive_doctor == doctor.id
-              ? KEY_ACTION_BUTTON.duyet
-              : null,
+            KEY_ACTION_BUTTON.huy_duyet,
+            KEY_ACTION_BUTTON.tra_ca,
+            editId && !isEdit
+              ? KEY_ACTION_BUTTON.edit_duyet
+              : KEY_ACTION_BUTTON.save_duyet,
+            KEY_ACTION_BUTTON.duyet,
             KEY_ACTION_BUTTON.translate_en,
           ].filter(Boolean);
         }
         break;
 
       case PATIENT_DIAGNOSE_STATUS_CODE.VERIFIED:
-        if (id_verify_doctor != doctor.id && id_receive_doctor != doctor.id) {
+        const canActVerified =
+          isAdmin ||
+          !doctor?.id ||
+          id_verify_doctor == doctor?.id ||
+          id_receive_doctor == doctor?.id;
+
+        if (!canActVerified) {
           keys = [KEY_ACTION_BUTTON.exit];
         } else {
           keys = [

@@ -791,257 +791,274 @@ export default function DoctorUseDFormVer3({
           )}
           <Divider /> */}
 
-          <Title level={4} style={{ color: "#2f6db8", margin: isMobile ? "6px 0" : "6px 0 8px", fontSize: 15 }}>
-            {translateLabel(languageTranslate, "Kỹ thuật thực hiện", true)}
-          </Title>
-
-          <Row gutter={[8, 0]}>
-            <Col xs={12} md={8}>
-              <Form.Item
-                label={translateLabel(languageTranslate, "Chỉ định", false)}
-                name="id_template_service"
-                rules={[{ required: true, message: "Chọn kỹ thuật" }]}
-              >
-                <Select
-                  placeholder="Chọn chỉ định"
-                  disabled={!isEdit || patientDiagnose?.id}
-                  allowClear
-                  onChange={(value) => {
-                    form.setFieldsValue({
-                      id_exam_part: undefined,
-                      id_formver3_name: undefined,
-                    });
-                    setSelectedIDs((prev) => ({
-                      ...prev,
-                      id_template_service: value,
-                      id_exam_part: null,
-                      id_formver3_name: null,
-                    }));
-                    setFilteredFormVer3Names([]);
+          <div
+            style={{
+              background: "#f8fafc",
+              border: "1px solid #e2e8f0",
+              borderRadius: 8,
+              padding: isMobile ? "10px 12px 6px" : "14px 16px 8px",
+              marginBottom: 16,
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 10,
+              }}
+            >
+              <Title level={4} style={{ color: "#2f6db8", margin: 0, fontSize: 15, fontWeight: 700 }}>
+                {translateLabel(languageTranslate, "Kỹ thuật thực hiện", true)}
+              </Title>
+              <Tooltip title="Làm mới danh mục (Phân hệ, Bộ phận, Mẫu)">
+                <Button
+                  size="small"
+                  type="text"
+                  icon={<ReloadOutlined style={{ color: "#2563eb" }} />}
+                  loading={reloading}
+                  onClick={() => {
+                    reloadTemplateAndExamPart();
+                    if (selectedIDs.id_template_service && selectedIDs.id_exam_part) {
+                      fetchDataFormver3Names();
+                    }
                   }}
+                  style={{ color: "#2563eb", fontWeight: 500, fontSize: 12 }}
                 >
-                  {sortTemplateServices(templateServices).map((s) => (
-                    <Option key={s.id} value={s.id}>
-                      {getServiceLabel(s, languageTranslate)}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
+                  Làm mới danh mục
+                </Button>
+              </Tooltip>
+            </div>
 
-            <Col xs={12} md={8}>
-              <Form.Item
-                label={translateLabel(languageTranslate, "bodyPart", false)}
-                name="id_exam_part"
-                rules={[{ required: true, message: "Chọn bộ phận" }]}
-              >
-                <Select
-                  placeholder="Chọn bộ phận thăm khám"
-                  disabled={
-                    !isEdit ||
-                    !selectedIDs.id_template_service ||
-                    patientDiagnose?.id
-                  }
-                  allowClear
-                  onChange={(value) => {
-                    form.setFieldsValue({ id_formver3_name: undefined });
-                    setSelectedIDs((prev) => ({
-                      ...prev,
-                      id_exam_part: value,
-                      id_formver3_name: null,
-                    }));
-                    setFilteredFormVer3Names([]);
-                  }}
-                  notFoundContent={
-                    selectedIDs.id_template_service
-                      ? "Không có bộ phận cho phân hệ này"
-                      : "Chọn Phân hệ trước"
-                  }
+            <Row gutter={[12, 4]}>
+              <Col xs={24} sm={12} md={8}>
+                <Form.Item
+                  label={<span style={{ fontWeight: 600, fontSize: 13 }}>{translateLabel(languageTranslate, "Chỉ định", false)} <span style={{ color: "red" }}>*</span></span>}
+                  name="id_template_service"
+                  rules={[{ required: true, message: "Chọn kỹ thuật" }]}
+                  style={{ marginBottom: 12 }}
                 >
-                  {filteredExamParts
-                    .sort((a, b) => (a.name > b.name ? 1 : -1))
-                    .map((s) => (
+                  <Select
+                    size="middle"
+                    placeholder="Chọn chỉ định"
+                    disabled={!isEdit || patientDiagnose?.id}
+                    allowClear
+                    style={{ width: "100%", fontSize: 13 }}
+                    onChange={(value) => {
+                      form.setFieldsValue({
+                        id_exam_part: undefined,
+                        id_formver3_name: undefined,
+                      });
+                      setSelectedIDs((prev) => ({
+                        ...prev,
+                        id_template_service: value,
+                        id_exam_part: null,
+                        id_formver3_name: null,
+                      }));
+                      setFilteredFormVer3Names([]);
+                    }}
+                  >
+                    {sortTemplateServices(templateServices).map((s) => (
                       <Option key={s.id} value={s.id}>
                         {getServiceLabel(s, languageTranslate)}
                       </Option>
                     ))}
-                </Select>
-              </Form.Item>
-            </Col>
+                  </Select>
+                </Form.Item>
+              </Col>
 
-            <Col xs={20} md={7}>
-              <Form.Item
-                label={translateLabel(languageTranslate, "language", false)}
-                name="language"
-                rules={[{ required: true }]}
-              >
-                <Select disabled={!isEdit} placeholder="VI / EN">
-                  {LANGUAGE_OPTIONS.map((opt) => (
-                    <Option
-                      key={opt.value}
-                      value={opt.value}
-                      disabled={
-                        idEdit || (!idEdit && !["vi", "en"].includes(opt.value))
-                      }
-                    >
-                      {opt.label}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-            <Col xs={4} md={1} style={{ display: "flex", alignItems: "flex-start", paddingTop: 22 }}>
-              <Tooltip title="Tải lại phân hệ & bộ phận">
-                <Button
-                  size="small"
-                  icon={<ReloadOutlined />}
-                  loading={reloading}
-                  onClick={reloadTemplateAndExamPart}
-                />
-              </Tooltip>
-            </Col>
-          </Row>
-
-          <Row gutter={[8, 0]}>
-            <Col xs={20} md={11}>
-              <Form.Item
-                label={translateLabel(
-                  languageTranslate,
-                  "resultTemplate",
-                  false,
-                )}
-                name="id_formver3_name"
-                rules={
-                  imagingMode === "FAST_SONO" || imagingMode === "FREE_TEXT"
-                    ? []
-                    : [{ required: true, message: "Chọn tên mẫu" }]
-                }
-              >
-                <Select
-                  allowClear
-                  disabled={
-                    !isEdit ||
-                    !selectedIDs.id_template_service ||
-                    !selectedIDs.id_exam_part
-                  }
-                  placeholder={
-                    !selectedIDs.id_template_service ||
-                    !selectedIDs.id_exam_part
-                      ? "Chọn Phân hệ & Bộ phận trước"
-                      : imagingMode === "FAST_SONO" || imagingMode === "FREE_TEXT"
-                      ? "Không bắt buộc (đã có đọc nhanh / tự do)"
-                      : "Chọn tên mẫu"
-                  }
-                  showSearch
-                  optionFilterProp="children"
-                  notFoundContent={
-                    selectedIDs.id_template_service && selectedIDs.id_exam_part
-                      ? "Không có tên mẫu phù hợp"
-                      : "Chưa đủ điều kiện để chọn"
-                  }
-                  onChange={async (id_formver3_name) => {
-                    try {
-                      setLoading(true);
-                      const res = await API_CALL.get(
-                        `/formVer3?id_formver3_name=${id_formver3_name}`,
-                      );
-                      const templateData = res.data?.data?.items?.[0] || res.data?.data?.[0];
-                      if (templateData) {
-                        setFormVer3(templateData);
-                        setSelectedIDs((prev) => ({
-                          ...prev,
-                          id_formver3_name: id_formver3_name,
-                        }));
-
-                        // Điền các trường thông tin từ template mới
-                        form.setFieldsValue(buildFormVer3Values(templateData));
-
-                        // Phân tích trạng thái tự do (free text) của template mới
-                        const parsedState = parseImageDescriptionState(
-                          templateData.imageDescription,
-                        );
-                        setImagingMode(parsedState.mode);
-                        setIsFreeText(parsedState.isFreeText);
-                        setFreeTextContent(parsedState.content);
-                        setFastSonoData(parsedState.fastSonoData);
-                        setImagingRows(parsedState.rows);
-                      }
-                    } catch (e) {
-                      toast.error("Không tải được dữ liệu. Vui lòng thử lại.");
-                    } finally {
-                      setLoading(false);
-                    }
-                  }}
+              <Col xs={24} sm={12} md={8}>
+                <Form.Item
+                  label={<span style={{ fontWeight: 600, fontSize: 13 }}>{translateLabel(languageTranslate, "bodyPart", false)} <span style={{ color: "red" }}>*</span></span>}
+                  name="id_exam_part"
+                  rules={[{ required: true, message: "Chọn bộ phận" }]}
+                  style={{ marginBottom: 12 }}
                 >
-                  {filteredFormVer3Names.map((item) => (
-                    <Option key={item.id} value={item.id}>
-                      {item.name}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-            <Col xs={4} md={1} style={{ display: "flex", alignItems: "flex-start", paddingTop: 22 }}>
-              <Tooltip title="Tải lại danh sách tên mẫu">
-                <Button
-                  size="small"
-                  icon={<ReloadOutlined />}
-                  disabled={
-                    !selectedIDs.id_template_service ||
-                    !selectedIDs.id_exam_part
+                  <Select
+                    size="middle"
+                    placeholder="Chọn bộ phận thăm khám"
+                    disabled={
+                      !isEdit ||
+                      !selectedIDs.id_template_service ||
+                      patientDiagnose?.id
+                    }
+                    allowClear
+                    style={{ width: "100%", fontSize: 13 }}
+                    onChange={(value) => {
+                      form.setFieldsValue({ id_formver3_name: undefined });
+                      setSelectedIDs((prev) => ({
+                        ...prev,
+                        id_exam_part: value,
+                        id_formver3_name: null,
+                      }));
+                      setFilteredFormVer3Names([]);
+                    }}
+                    notFoundContent={
+                      selectedIDs.id_template_service
+                        ? "Không có bộ phận cho phân hệ này"
+                        : "Chọn Phân hệ trước"
+                    }
+                  >
+                    {filteredExamParts
+                      .sort((a, b) => (a.name > b.name ? 1 : -1))
+                      .map((s) => (
+                        <Option key={s.id} value={s.id}>
+                          {getServiceLabel(s, languageTranslate)}
+                        </Option>
+                      ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+
+              <Col xs={24} sm={12} md={8}>
+                <Form.Item
+                  label={<span style={{ fontWeight: 600, fontSize: 13 }}>{translateLabel(languageTranslate, "language", false)} <span style={{ color: "red" }}>*</span></span>}
+                  name="language"
+                  rules={[{ required: true }]}
+                  style={{ marginBottom: 12 }}
+                >
+                  <Select size="middle" disabled={!isEdit} placeholder="VI / EN" style={{ width: "100%", fontSize: 13 }}>
+                    {LANGUAGE_OPTIONS.map((opt) => (
+                      <Option
+                        key={opt.value}
+                        value={opt.value}
+                        disabled={
+                          idEdit || (!idEdit && !["vi", "en"].includes(opt.value))
+                        }
+                      >
+                        {opt.label}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+            </Row>
+
+            <Row gutter={[12, 4]}>
+              <Col xs={24} sm={12} md={12}>
+                <Form.Item
+                  label={<span style={{ fontWeight: 600, fontSize: 13 }}>{translateLabel(languageTranslate, "resultTemplate", false)}</span>}
+                  name="id_formver3_name"
+                  rules={
+                    imagingMode === "FAST_SONO" || imagingMode === "FREE_TEXT"
+                      ? []
+                      : [{ required: true, message: "Chọn tên mẫu" }]
                   }
-                  onClick={() => {
-                    if (
+                  style={{ marginBottom: 12 }}
+                >
+                  <Select
+                    size="middle"
+                    allowClear
+                    disabled={
+                      !isEdit ||
                       !selectedIDs.id_template_service ||
                       !selectedIDs.id_exam_part
-                    ) {
-                      toast.warning("Vui lòng chọn đủ Phân hệ và Bộ phận");
-                      return;
                     }
-                    fetchDataFormver3Names();
-                  }}
-                />
-              </Tooltip>
-            </Col>
-            <Col xs={24} md={12}>
-              <Form.Item
-                label={translateLabel(languageTranslate, "resultPrint", false)}
-                name="id_print_template"
-                rules={[{ required: true, message: "Chọn mẫu in" }]}
-              >
-                <Select
-                  disabled={!isEdit}
-                  showSearch
-                  allowClear
-                  style={{ width: "100%" }}
-                  placeholder="Chọn mẫu in"
-                  optionFilterProp="children"
-                  onChange={(val) => {
-                    const printT = printTemplateList.find((t) => t.id == val);
-                    setPrintTemplate(printT);
-                    form.setFieldsValue({ id_print_template: printT?.id });
-                  }}
-                  filterOption={(input, option) =>
-                    option?.children?.toLowerCase()?.includes(input.toLowerCase())
-                  }
-                >
-                  {printTemplateList.map((tpl) => (
-                    <Option key={tpl.id} value={tpl.id}>
-                      {tpl.name}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-          </Row>
+                    style={{ width: "100%", fontSize: 13 }}
+                    placeholder={
+                      !selectedIDs.id_template_service ||
+                      !selectedIDs.id_exam_part
+                        ? "Chọn Phân hệ & Bộ phận trước"
+                        : imagingMode === "FAST_SONO" || imagingMode === "FREE_TEXT"
+                        ? "Không bắt buộc (đã có đọc nhanh / tự do)"
+                        : "Chọn tên mẫu"
+                    }
+                    showSearch
+                    optionFilterProp="children"
+                    notFoundContent={
+                      selectedIDs.id_template_service && selectedIDs.id_exam_part
+                        ? "Không có tên mẫu phù hợp"
+                        : "Chưa đủ điều kiện để chọn"
+                    }
+                    onChange={async (id_formver3_name) => {
+                      try {
+                        setLoading(true);
+                        const res = await API_CALL.get(
+                          `/formVer3?id_formver3_name=${id_formver3_name}`,
+                        );
+                        const templateData = res.data?.data?.items?.[0] || res.data?.data?.[0];
+                        if (templateData) {
+                          setFormVer3(templateData);
+                          setSelectedIDs((prev) => ({
+                            ...prev,
+                            id_formver3_name: id_formver3_name,
+                          }));
 
-          <Form.Item name="implementMethod" label="" tooltip="Short text">
-            <TextArea
-              disabled={!isEdit}
-              autoSize={{ minRows: 1, maxRows: 10 }}
-              placeholder="Nhập mô tả quy trình kỹ thuật..."
-            />
-          </Form.Item>
+                          form.setFieldsValue(buildFormVer3Values(templateData));
+
+                          const parsedState = parseImageDescriptionState(
+                            templateData.imageDescription,
+                          );
+                          setImagingMode(parsedState.mode);
+                          setIsFreeText(parsedState.isFreeText);
+                          setFreeTextContent(parsedState.content);
+                          setFastSonoData(parsedState.fastSonoData);
+                          setImagingRows(parsedState.rows);
+                        }
+                      } catch (e) {
+                        toast.error("Không tải được dữ liệu. Vui lòng thử lại.");
+                      } finally {
+                        setLoading(false);
+                      }
+                    }}
+                  >
+                    {filteredFormVer3Names.map((item) => (
+                      <Option key={item.id} value={item.id}>
+                        {item.name}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+
+              <Col xs={24} sm={12} md={12}>
+                <Form.Item
+                  label={<span style={{ fontWeight: 600, fontSize: 13 }}>{translateLabel(languageTranslate, "resultPrint", false)} <span style={{ color: "red" }}>*</span></span>}
+                  name="id_print_template"
+                  rules={[{ required: true, message: "Chọn mẫu in" }]}
+                  style={{ marginBottom: 12 }}
+                >
+                  <Select
+                    size="middle"
+                    disabled={!isEdit}
+                    showSearch
+                    allowClear
+                    style={{ width: "100%", fontSize: 13 }}
+                    placeholder="Chọn mẫu in"
+                    optionFilterProp="children"
+                    onChange={(val) => {
+                      const printT = printTemplateList.find((t) => t.id == val);
+                      setPrintTemplate(printT);
+                      form.setFieldsValue({ id_print_template: printT?.id });
+                    }}
+                    filterOption={(input, option) =>
+                      option?.children?.toLowerCase()?.includes(input.toLowerCase())
+                    }
+                  >
+                    {printTemplateList.map((tpl) => (
+                      <Option key={tpl.id} value={tpl.id}>
+                        {tpl.name}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+            </Row>
+
+            <Form.Item
+              name="implementMethod"
+              label={<span style={{ fontWeight: 600, fontSize: 13 }}>{translateLabel(languageTranslate, "procedureDesc", false) || "Quy trình kỹ thuật thực hiện"}</span>}
+              tooltip="Mô tả kỹ thuật chụp / chiếu / can thiệp (tùy chọn)"
+              style={{ marginBottom: 6 }}
+            >
+              <TextArea
+                disabled={!isEdit}
+                autoSize={{ minRows: 2, maxRows: 6 }}
+                style={{ fontSize: 13, borderRadius: 6 }}
+                placeholder="Nhập mô tả quy trình kỹ thuật..."
+              />
+            </Form.Item>
+          </div>
           <AdvancedSampleSection
             isEdit={isEdit}
             isAdvanceSample={false}

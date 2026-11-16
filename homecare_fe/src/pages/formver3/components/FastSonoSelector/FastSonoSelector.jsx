@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Button, Empty, Spin, Tooltip, message } from 'antd';
+import { Button, Empty, Spin, Tooltip, message, Input, Tag } from 'antd';
 import {
   CheckCircleOutlined,
   WarningOutlined,
   ReloadOutlined,
   CopyOutlined,
   ThunderboltOutlined,
+  EditOutlined,
 } from '@ant-design/icons';
 import styles from './FastSonoSelector.module.scss';
 import {
@@ -149,6 +150,23 @@ const FastSonoSelector = ({
     );
   }, [activeTemplate?.organs, activeTemplate?.title, selectedMap, activeTemplate?.classificationType, selectedGrade, examPartName, serviceName]);
 
+  // Trạng thái chỉnh sửa thủ công văn bản mô tả của bác sĩ
+  const [userEditedNarrative, setUserEditedNarrative] = useState(null);
+  const [isManualEdit, setIsManualEdit] = useState(false);
+
+  useEffect(() => {
+    if (!isManualEdit) {
+      setUserEditedNarrative(liveNarrative);
+    }
+  }, [liveNarrative, isManualEdit]);
+
+  // Hàm chuyển text xuống dòng sang HTML paragraphs
+  const convertPlainTextToHTML = (text) => {
+    if (!text) return '';
+    const lines = text.split('\n').filter((line) => line.trim().length > 0);
+    return lines.map((line) => `<p>${line.trim()}</p>`).join('');
+  };
+
   // Đồng bộ ra ngoài cha mỗi khi lựa chọn thay đổi
   const currentTemplateCode =
     activeTemplate?.templateCode ||
@@ -161,17 +179,37 @@ const FastSonoSelector = ({
       isFirstMount.current = false;
       return;
     }
-    if (onNarrativeChange) {
+    if (!isManualEdit && onNarrativeChange) {
       onNarrativeChange(liveNarrative, liveHTMLNarrative);
     }
     if (onSelectedMapChange) {
       onSelectedMapChange(selectedMap, selectedGrade, currentTemplateCode);
     }
-  }, [liveNarrative, liveHTMLNarrative, selectedMap, selectedGrade, currentTemplateCode]);
+  }, [liveNarrative, liveHTMLNarrative, selectedMap, selectedGrade, currentTemplateCode, isManualEdit]);
+
+  // Xử lý khi bác sĩ trực tiếp chỉnh sửa câu chữ trong ô mô tả
+  const handleNarrativeUserEdit = (val) => {
+    setUserEditedNarrative(val);
+    setIsManualEdit(true);
+    if (onNarrativeChange) {
+      onNarrativeChange(val, convertPlainTextToHTML(val));
+    }
+  };
+
+  // Khôi phục lại văn bản tự sinh theo đúng các chip đã chọn
+  const handleRestoreAutoNarrative = () => {
+    setIsManualEdit(false);
+    setUserEditedNarrative(liveNarrative);
+    if (onNarrativeChange) {
+      onNarrativeChange(liveNarrative, liveHTMLNarrative);
+    }
+    message.info('Đã khôi phục văn bản mô tả tự sinh theo các chip đã chọn.');
+  };
 
   // Xử lý khi bấm nút chip
   const handleToggleChip = (optionId) => {
     if (!isEdit || !currentOrgan) return;
+    setIsManualEdit(false);
     const nextSelected = toggleFindingOption(currentSelectedIds, currentOrgan, optionId);
     setSelectedMap((prev) => ({
       ...prev,
@@ -182,6 +220,7 @@ const FastSonoSelector = ({
   // Đặt lại tất cả các cơ quan về Bình thường
   const handleResetAllNormal = () => {
     if (!isEdit) return;
+    setIsManualEdit(false);
     const resetMap = initDefaultSelectedMap(activeTemplate);
     setSelectedMap(resetMap);
     if (activeTemplate?.classificationType === CLASSIFICATION_TYPES.TIRADS) {
@@ -195,13 +234,14 @@ const FastSonoSelector = ({
   const handleApplyToDiagnosisSummary = () => {
     if (onConclusionChange) {
       onConclusionChange(liveConclusion);
-      message.success('Đã áp dụng kết luận tự sinh vào ô Kết luận chẩn đoán!');
+      message.success(`Đã áp dụng kết luận vào ô Kết luận chẩn đoán: "${liveConclusion}"`);
     }
   };
 
   const handleCopyNarrative = () => {
+    const textToCopy = isManualEdit && userEditedNarrative !== null ? userEditedNarrative : liveNarrative;
     if (navigator?.clipboard) {
-      navigator.clipboard.writeText(liveNarrative);
+      navigator.clipboard.writeText(textToCopy);
       message.success('Đã sao chép văn bản mô tả!');
     }
   };
@@ -381,10 +421,31 @@ const FastSonoSelector = ({
       {/* 5. Câu mô tả & Kết luận tự sinh (Tầng 5 - Live-injection) */}
       <div className={styles.narrativePreviewBox}>
         <div className={styles.previewHeader}>
-          <span className={styles.previewTitle}>
-            Văn bản mô tả y khoa tự sinh
-          </span>
-          <div style={{ display: 'flex', gap: 6 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span className={styles.previewTitle}>
+              Văn bản mô tả y khoa tự sinh
+            </span>
+            {isManualEdit && (
+              <Tooltip title="Văn bản đã được bác sĩ trực tiếp chỉnh sửa">
+                <Tag color="orange" style={{ fontSize: 11, margin: 0, padding: '0 6px', lineHeight: '20px' }}>
+                  <EditOutlined style={{ marginRight: 4 }} />
+                  Đã sửa tay
+                </Tag>
+              </Tooltip>
+            )}
+          </div>
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+            {isManualEdit && (
+              <Tooltip title="Khôi phục lại văn bản tự sinh chuẩn theo các chip đã chọn">
+                <Button
+                  size="small"
+                  icon={<ReloadOutlined />}
+                  onClick={handleRestoreAutoNarrative}
+                >
+                  Sinh lại từ chip
+                </Button>
+              </Tooltip>
+            )}
             <Tooltip title="Sao chép văn bản mô tả">
               <Button
                 size="small"
@@ -394,7 +455,7 @@ const FastSonoSelector = ({
                 Sao chép
               </Button>
             </Tooltip>
-            <Tooltip title="Tự động bắn kết luận vào ô Kết luận chẩn đoán">
+            <Tooltip title="Tự động trích xuất kết luận bệnh lý vào ô Kết luận chẩn đoán">
               <Button
                 size="small"
                 type="primary"
@@ -407,7 +468,21 @@ const FastSonoSelector = ({
           </div>
         </div>
 
-        <div className={styles.previewBody}>{liveNarrative}</div>
+        <Input.TextArea
+          value={userEditedNarrative !== null ? userEditedNarrative : liveNarrative}
+          onChange={(e) => handleNarrativeUserEdit(e.target.value)}
+          disabled={!isEdit}
+          autoSize={{ minRows: 4, maxRows: 14 }}
+          style={{
+            fontSize: 14,
+            lineHeight: 1.6,
+            borderRadius: 8,
+            color: '#1e293b',
+            background: '#ffffff',
+            padding: '10px 12px',
+          }}
+          placeholder="Văn bản mô tả y khoa tự sinh sẽ xuất hiện tại đây..."
+        />
       </div>
 
       {/* 6. Bottom Action Bar: Nút Reset */}
