@@ -76,7 +76,7 @@ export default function ProcedureSection({
             <Select
               size="middle"
               placeholder="Chọn chỉ định"
-              disabled={!isEdit || !!patientDiagnose?.id}
+              disabled={true}
               allowClear
               style={{ width: "100%", fontSize: 13 }}
               onChange={(value) => {
@@ -112,11 +112,7 @@ export default function ProcedureSection({
             <Select
               size="middle"
               placeholder="Chọn bộ phận thăm khám"
-              disabled={
-                !isEdit ||
-                !selectedIDs?.id_template_service ||
-                !!patientDiagnose?.id
-              }
+              disabled={true}
               allowClear
               style={{ width: "100%", fontSize: 13 }}
               onChange={(value) => {

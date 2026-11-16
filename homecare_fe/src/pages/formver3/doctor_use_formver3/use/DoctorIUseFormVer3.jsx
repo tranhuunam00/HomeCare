@@ -382,6 +382,7 @@ export default function DoctorUseDFormVer3({
           <ProcedureSection
             form={form}
             isEdit={isEdit}
+            patientDiagnose={selectedPatientDiagnose}
             templateServices={templateServices}
             filteredExamParts={filteredExamParts}
             filteredFormVer3Names={filteredFormVer3Names}
