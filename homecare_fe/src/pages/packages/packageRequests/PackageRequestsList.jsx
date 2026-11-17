@@ -28,6 +28,7 @@ import { useGlobalAuth } from "../../../contexts/AuthContext";
 import { USER_ROLE } from "../../../constant/app";
 import useConfirmAction from "../../../hooks/useConfirmAction";
 import ConfirmActionModal from "../../../components/ConfirmActionModal/ConfirmActionModal";
+import { getPackageName } from "../../../constant/permission";
 
 const { Option } = Select;
 const { RangePicker } = DatePicker;
@@ -165,7 +166,7 @@ const PackageRequestsList = () => {
                   marginBottom: 4,
                 }}
               >
-                <strong>{pkg.package_code}</strong>{" "}
+                <strong>{getPackageName(pkg.package_code)}</strong>{" "}
                 <Tag
                   color={
                     pkg.status === "active"
@@ -188,7 +189,7 @@ const PackageRequestsList = () => {
       },
     },
 
-    { title: "Mã gói", dataIndex: "package_code", key: "package_code" },
+    { title: "Gói", dataIndex: "package_code", key: "package_code", render: (v) => getPackageName(v) },
     {
       title: "Dùng thử",
       dataIndex: "is_trial",
@@ -324,12 +325,12 @@ const PackageRequestsList = () => {
               onChange={(value) =>
                 setUiFilters({ ...uiFilters, package_code: value })
               }
-              placeholder="Chọn mã gói"
+              placeholder="Chọn gói"
               style={{ width: "100%" }}
             >
               {PACKAGE_CODES.map((pkg) => (
                 <Option key={pkg} value={pkg}>
-                  {pkg}
+                  {getPackageName(pkg)}
                 </Option>
               ))}
             </Select>
@@ -414,7 +415,7 @@ const PackageRequestsList = () => {
                 {selectedRequest.id_user_user?.email || "—"}
               </p>
               <p>
-                <strong>Mã gói:</strong> {selectedRequest.package_code}
+                <strong>Gói:</strong> {getPackageName(selectedRequest.package_code)}
               </p>
               <p>
                 <strong>Thời hạn:</strong> {selectedRequest.duration_months}{" "}
@@ -445,7 +446,7 @@ const PackageRequestsList = () => {
                       style={{ marginBottom: 10, background: "#fafafa" }}
                     >
                       <p>
-                        <strong>Tên gói:</strong> {pkg.package_code}
+                        <strong>Tên gói:</strong> {getPackageName(pkg.package_code)}
                       </p>
                       <p>
                         <strong>Trạng thái:</strong>{" "}

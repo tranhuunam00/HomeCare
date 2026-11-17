@@ -29,7 +29,6 @@ export default function PacsTopNav({
   setActiveTool,
   invert,
   setInvert,
-  rotation,
   setRotation,
   onReset,
   onCaptureKeyImage,
@@ -90,7 +89,7 @@ export default function PacsTopNav({
       }}
     >
       {/* Brand Title & Navigation */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0, whiteSpace: 'nowrap' }}>
         <Tooltip title="Quay về danh sách ca (Worklist)">
           <Button
             size="small"
@@ -126,14 +125,17 @@ export default function PacsTopNav({
           </Tooltip>
         )}
 
-        <div
+        <img
+          src="/logo_home_care.png"
+          alt="D-RADS"
+          title="D-RADS"
           style={{
-            width: 10,
-            height: 10,
-            borderRadius: 3,
-            backgroundColor: '#38bdf8',
-            boxShadow: '0 0 8px #38bdf8',
+            width: 30,
+            height: 30,
+            borderRadius: '50%',
+            objectFit: 'cover',
             marginLeft: 4,
+            flexShrink: 0,
           }}
         />
         <span
@@ -142,9 +144,11 @@ export default function PacsTopNav({
             fontSize: '14px',
             letterSpacing: '0.5px',
             color: '#f8fafc',
+            whiteSpace: 'nowrap',
           }}
+          className="pacs-topnav-title"
         >
-          D-PACS VIEWER
+          D-RADS PACS VIEWER
         </span>
       </div>
 

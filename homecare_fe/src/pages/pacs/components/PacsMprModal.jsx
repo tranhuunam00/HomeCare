@@ -7,6 +7,10 @@ import PacsMprToolbar from './mpr/PacsMprToolbar';
 import PacsMpr1x2View from './mpr/PacsMpr1x2View';
 import PacsMpr2x2View from './mpr/PacsMpr2x2View';
 import PacsMpr3DMaxView from './mpr/PacsMpr3DMaxView';
+import PacsMprSinglePlaneView from './mpr/PacsMprSinglePlaneView';
+
+const SINGLE_PLANES = ['AXIAL', 'CORONAL', 'SAGITTAL'];
+const HOTKEY_LAYOUTS = { a: 'AXIAL', c: 'CORONAL', s: 'SAGITTAL', v: '3D_MAX' };
 import { describeVolume, getVolumeValueRange } from '../services/pacsVolumeEngine';
 
 // Ngưỡng bề mặt mặc định (HU) theo preset 3D cho CT
@@ -28,7 +32,13 @@ export default function PacsMprModal({
   caseId,
   patientName = 'Bệnh nhân',
   modality = 'MR',
+  // inline=true: render MPR thẳng vào viewport chính (không bọc Modal popup)
+  inline = false,
+  // Bố cục mở đầu: 'AXIAL' | 'CORONAL' | 'SAGITTAL' | '1x2' | '2x2' | '3D_MAX'
+  initialLayout = null,
 }) {
+  // "Đang hoạt động": với modal là khi mở; với inline là luôn (chỉ mount khi cần)
+  const isActive = inline || open;
   const [downloadProgress, setDownloadProgress] = useState({
     loading: false,
     loaded: 0,
@@ -59,7 +69,12 @@ export default function PacsMprModal({
   const rows = sampleMeta.rows || 256;
   const cols = sampleMeta.columns || 256;
 
-  const [layoutMode, setLayoutMode] = useState('1x2');
+  const [layoutMode, setLayoutMode] = useState(initialLayout || '1x2');
+
+  // Sidebar chọn mặt cắt khác -> đổi bố cục MPR đang hiển thị
+  useEffect(() => {
+    if (initialLayout) setLayoutMode(initialLayout);
+  }, [initialLayout]);
 
   const [active2DPlane, setActive2DPlane] = useState('AXIAL');
   const [isControlsMinimized, setIsControlsMinimized] = useState(false);
@@ -70,9 +85,26 @@ export default function PacsMprModal({
   const [colorMode3D, setColorMode3DRaw] = useState('bone_shaded');
   const [isDragging3D, setIsDragging3D] = useState(false);
 
+  // Phím tắt A / C / S / V: chuyển nhanh sang Axial / Coronal / Sagittal / 3D Volume
+  useEffect(() => {
+    if (!isActive) return undefined;
+    const onKey = (e) => {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      const tag = e.target?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || e.target?.isContentEditable) return;
+      const next = HOTKEY_LAYOUTS[e.key?.toLowerCase()];
+      if (next) {
+        e.preventDefault();
+        setLayoutMode(next);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isActive]);
+
   // Background fetch missing slices
   useEffect(() => {
-    if (!open || instances.length <= 20) return;
+    if (!isActive || instances.length <= 20) return;
     let isCancelled = false;
 
     const fetchAllSlices = async () => {
@@ -152,7 +184,7 @@ export default function PacsMprModal({
     return () => {
       isCancelled = true;
     };
-  }, [open, instances, apiEndpoint, caseId, getAuthHeaders, setDicomCache]); // eslint-disable-line react-hooks/exhaustive-deps -- localCache chỉ đọc lúc mở
+  }, [isActive, instances, apiEndpoint, caseId, getAuthHeaders, setDicomCache]); // eslint-disable-line react-hooks/exhaustive-deps -- localCache chỉ đọc lúc mở
 
   // Synchronize crosshairs to center on slices loaded
   useEffect(() => {
@@ -220,22 +252,11 @@ export default function PacsMprModal({
     if (valueRange && !isCT) setThreshold3D(Math.round(valueRange.min + (valueRange.max - valueRange.min) * 0.25));
   }, [valueRange, isCT]);
 
-  return (
-    <Modal
-      open={open}
-      onCancel={onClose}
-      footer={null}
-      width="96vw"
-      style={{ top: '2vh', padding: 0 }}
-      styles={{ body: { padding: 0, height: '94vh', display: 'flex', flexDirection: 'column', backgroundColor: '#000' } }}
-      closable={false}
-      rootClassName="pacs-root pacs-mpr-modal"
-      destroyOnClose
+  const content = (
+    <div
+      style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}
+      onMouseUp={handleMouseUp3D}
     >
-      <div
-        style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}
-        onMouseUp={handleMouseUp3D}
-      >
         <PacsMprToolbar
           patientName={patientName}
           modality={modality}
@@ -374,6 +395,16 @@ export default function PacsMprModal({
             onMouseUp3D={handleMouseUp3D}
             isDragging3D={isDragging3D}
           />
+        ) : SINGLE_PLANES.includes(layoutMode) ? (
+          <PacsMprSinglePlaneView
+            plane={layoutMode}
+            validSlices={validSlices}
+            crosshair={crosshair}
+            setCrosshair={setCrosshair}
+            cols={cols}
+            rows={rows}
+            numSlices={numSlices}
+          />
         ) : layoutMode === '3D_MAX' ? (
           <PacsMpr3DMaxView
             validSlices={validSlices}
@@ -405,7 +436,34 @@ export default function PacsMprModal({
             isDragging3D={isDragging3D}
           />
         )}
+    </div>
+  );
+
+  // Inline: hiển thị MPR thẳng trong viewport chính (không popup)
+  if (inline) {
+    return (
+      <div
+        className="pacs-root pacs-mpr-inline"
+        style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: '#000', overflow: 'hidden' }}
+      >
+        {content}
       </div>
+    );
+  }
+
+  return (
+    <Modal
+      open={open}
+      onCancel={onClose}
+      footer={null}
+      width="96vw"
+      style={{ top: '2vh', padding: 0 }}
+      styles={{ body: { padding: 0, height: '94vh', display: 'flex', flexDirection: 'column', backgroundColor: '#000' } }}
+      closable={false}
+      rootClassName="pacs-root pacs-mpr-modal"
+      destroyOnClose
+    >
+      {content}
     </Modal>
   );
 }

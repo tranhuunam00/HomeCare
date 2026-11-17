@@ -73,10 +73,20 @@ export const FEATURE_KEYS_PACKAGE = {
   },
 };
 
+// Tên hiển thị các gói - đồng bộ với app (Basic / Business / Enterprise).
+// Mã gói (package_code) lưu trong DB giữ nguyên: BASIC / PRO / HOSPITAL.
+export const PACKAGE_DISPLAY_NAMES = {
+  BASIC: "Basic",
+  PRO: "Business",
+  HOSPITAL: "Enterprise",
+};
+
+export const getPackageName = (code) => PACKAGE_DISPLAY_NAMES[code] || code;
+
 export const PACKAGE_FEATURES = {
   BASIC: {
     code: "BASIC",
-    name: "BASIC",
+    name: PACKAGE_DISPLAY_NAMES.BASIC,
     isFree: true,
     description: "Dành cho Bác sĩ có nhu cầu tối ưu hóa công việc chuyên môn",
     permissions: [
@@ -94,7 +104,7 @@ export const PACKAGE_FEATURES = {
 
   PRO: {
     code: "PRO",
-    name: "PRO",
+    name: PACKAGE_DISPLAY_NAMES.PRO,
     description:
       "Ngoài tối ưu hóa chuyên môn, Bác sĩ còn được tham gia đọc kết quả CĐHA từ xa để tối ưu hóa thu nhập",
     permissions: [
@@ -117,7 +127,7 @@ export const PACKAGE_FEATURES = {
 
   HOSPITAL: {
     code: "HOSPITAL",
-    name: "HOSPITAL",
+    name: PACKAGE_DISPLAY_NAMES.HOSPITAL,
     description:
       "Bệnh viện, Phòng khám có nhu cầu ưu hóa hiệu suất và yêu cầu chuyên môn",
     permissions: [

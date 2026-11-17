@@ -58,14 +58,21 @@ export default function useDoctorFormData({
     const fetchTemplates = async () => {
       try {
         const clinicId = doctor?.id_clinic;
-        const res = await API_CALL.get("/print-template", {
+        let res = await API_CALL.get("/print-template", {
           params: {
             page: 1,
             limit: 1000,
             ...(clinicId ? { id_clinic: clinicId } : {}),
           },
         });
-        const list = res.data?.data?.data || res.data?.data || [];
+        let list = res.data?.data?.data || res.data?.data || [];
+        // Nếu phòng khám chưa cấu hình mẫu riêng, tải danh sách mẫu chung toàn hệ thống
+        if (!Array.isArray(list) || list.length === 0) {
+          const fallbackRes = await API_CALL.get("/print-template", {
+            params: { page: 1, limit: 1000 },
+          });
+          list = fallbackRes.data?.data?.data || fallbackRes.data?.data || [];
+        }
         if (Array.isArray(list) && list.length > 0) {
           setPrintTemplateList(list);
         }

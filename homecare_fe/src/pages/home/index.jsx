@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import API_CALL from "../../services/axiosClient";
 import { Avatar, Badge, Button, Checkbox, Col, Drawer, Layout, Menu, Space, Tooltip } from "antd";
@@ -159,16 +159,14 @@ const Sidebar = ({ collapsed, onNavigate }) => {
       icon: <Avatar src={"/icons/tienich.png"} size={avatarSize} />,
       label: "Ứng dụng",
       children: [
-        // {
-        //   key: "/home/intergrate",
-        //   icon: <Avatar src="/icons/sono.png" size={avatarSize} />,
-        //   label: "D-SONO",
-        //   children: [
-        //     { key: "/home/sono/bung", label: "Đọc ngay" },
-        //     { key: "/home/sono/list", label: "Danh sách đã đọc" },
-        //   ],
-        // },
-        // { key: "/tirads_nn", label: "Phần mềm D-TIRADS" },
+        {
+          key: "D-SONO-APP",
+          label: "Phần mềm D-SONO",
+          onClick: () => {
+            const dsonoUrl = import.meta.env.VITE_DSONO_URL || 'http://localhost:3000';
+            window.open(dsonoUrl, '_blank');
+          },
+        },
         { key: "/home/birad", label: "Ứng dụng D-BIRADS" },
         { key: "/home/tirad", label: "Ứng dụng D-TIRADS" },
         { key: "/home/lungrad", label: "Ứng dụng D-LUNG" },
@@ -203,7 +201,7 @@ const Sidebar = ({ collapsed, onNavigate }) => {
 
   const handleClick = (e, isReadingForm) => {
     const key = e.key;
-    if (e.key === "Pacs") return;
+    if (e.key === "Pacs" || e.key === "D-SONO-APP") return;
     const isAppFeature =
       key.startsWith("/home/recist_nn") ||
       key.startsWith("/home/tirad") ||
@@ -225,7 +223,7 @@ const Sidebar = ({ collapsed, onNavigate }) => {
       !hasProOrBusiness(userPackages) &&
       user.id_role != USER_ROLE.ADMIN
     ) {
-      toast.error("Bạn cần gói PRO hoặc HOSPITAL để sử dụng tính năng này!");
+      toast.error("Bạn cần gói Business hoặc Enterprise để sử dụng tính năng này!");
       return;
     }
 
@@ -289,7 +287,7 @@ const Home = () => {
     setFilterPatient: setPendingFilters,
     counts,
   } = useGlobalAuth();
-  const [logo, setLogo] = useState("/logo_home_care.png");
+  const [logo] = useState("/logo_home_care.png");
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -492,7 +490,7 @@ const Home = () => {
         placement="left"
         open={deviceIsMobile && mobileDrawerOpen}
         onClose={() => setMobileDrawerOpen(false)}
-        width={272}
+        width={236}
         styles={{ body: { padding: "12px 0" } }}
       >
         <div
@@ -528,7 +526,7 @@ const Home = () => {
             collapsible
             collapsed={collapsed}
             onCollapse={(value) => setCollapsed(value)}
-            width={240}
+            width={200}
             style={{
               background: "rgba(202, 196, 250, 0.1)",
               paddingTop: 0,

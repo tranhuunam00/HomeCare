@@ -118,6 +118,27 @@ export default function PatientDiagnoseRightPanel({
         <Button
           style={{
             borderRadius: '4px',
+            borderColor: '#059669',
+            backgroundColor: '#ecfdf5',
+            color: '#047857',
+            fontSize: '11px',
+            height: '22px',
+            padding: '0 8px',
+            display: 'flex',
+            alignItems: 'center',
+            fontWeight: '600',
+          }}
+          onClick={() => {
+            const dsonoBaseUrl = import.meta.env.VITE_DSONO_URL || 'http://localhost:3000';
+            const targetUrl = `${dsonoBaseUrl}?accessionNo=${selectedPatientDiagnose?.id}&pid=${selectedPatientDiagnose?.PID || ''}&patientName=${encodeURIComponent(selectedPatientDiagnose?.name || '')}&gender=${encodeURIComponent(selectedPatientDiagnose?.gender || '')}&source=HOMECARE`;
+            window.open(targetUrl, '_blank');
+          }}
+        >
+          Mở D-SONO
+        </Button>
+        <Button
+          style={{
+            borderRadius: '4px',
             borderColor: '#64748b',
             color: '#475569',
             fontSize: '11px',

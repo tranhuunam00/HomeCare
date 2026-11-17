@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { message, Alert, Button, Drawer } from 'antd';
-import { CloseOutlined, ArrowLeftOutlined } from '@ant-design/icons';
+import { message, Alert, Button, Drawer, Modal, Tooltip } from 'antd';
+import { CloseOutlined, ArrowLeftOutlined, IdcardOutlined, UserOutlined } from '@ant-design/icons';
 import DoctorUseDFormVer3 from '../formver3/doctor_use_formver3/use/DoctorIUseFormVer3';
 import { renderDicomToCanvas } from './services/dicomDecoder';
 import { usePacsStudy } from './hooks/usePacsStudy';
@@ -132,6 +132,32 @@ export default function PacsViewerPage() {
 
   const navigate = useNavigate();
   const [reportingOpen, setReportingOpen] = useState(false);
+  const [patientInfoOpen, setPatientInfoOpen] = useState(false);
+  const [showOverlay, setShowOverlay] = useState(true);
+  // Tỉ lệ bề rộng bảng báo cáo khi chia màn hình (kéo thanh ngăn để đổi)
+  const [reportWidthPct, setReportWidthPct] = useState(44);
+  const splitContainerRef = useRef(null);
+
+  const onSplitMouseDown = useCallback((e) => {
+    e.preventDefault();
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    const onMove = (ev) => {
+      const el = splitContainerRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const pct = ((rect.right - ev.clientX) / rect.width) * 100;
+      setReportWidthPct(Math.max(25, Math.min(72, pct)));
+    };
+    const onUp = () => {
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  }, []);
   const [leftNavDrawerOpen, setLeftNavDrawerOpen] = useState(false);
 
   const handleToggleReporting = useCallback(() => {
@@ -153,6 +179,9 @@ export default function PacsViewerPage() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeAttachedFile, setActiveAttachedFile] = useState(null);
   const [mprOpen, setMprOpen] = useState(false);
+  // MPR dựng thẳng trong viewport chính (tri-planar Axial/Coronal/Sagittal), khác với modal 3D
+  const [mprInline, setMprInline] = useState(false);
+  const [mprInitialLayout, setMprInitialLayout] = useState('2x2');
 
   /* ---------------- Cine ---------------- */
   const [isPlayingCine, setIsPlayingCine] = useState(false);
@@ -176,6 +205,40 @@ export default function PacsViewerPage() {
     setMprOpen(true);
   }, [canBuild3D, activeSeriesInstances.length]);
 
+  // Dựng MPR tri-planar ngay trong viewport chính (không mở popup)
+  const handleReconstructMpr = useCallback(() => {
+    if (!canBuild3D) {
+      message.warning(`Series đang chọn có ${activeSeriesInstances.length} ảnh. Cần trên 20 lát cắt (1 frame/lát) trong cùng series để dựng MPR.`);
+      return;
+    }
+    setActiveAttachedFile(null);
+    setMprInline((prev) => !prev);
+  }, [canBuild3D, activeSeriesInstances.length]);
+
+  // Mở MPR inline tại một mặt cắt cụ thể (nút Axial/Coronal/Sagittal/2x2/3D ở sidebar)
+  const handleMprPlane = useCallback(
+    (plane) => {
+      if (!canBuild3D) {
+        message.warning(`Series đang chọn có ${activeSeriesInstances.length} ảnh. Cần trên 20 lát cắt (1 frame/lát) trong cùng series để dựng MPR.`);
+        return;
+      }
+      setActiveAttachedFile(null);
+      // Bấm lại đúng mặt đang mở -> thoát MPR
+      if (mprInline && mprInitialLayout === plane) {
+        setMprInline(false);
+        return;
+      }
+      setMprInitialLayout(plane);
+      setMprInline(true);
+    },
+    [canBuild3D, activeSeriesInstances.length, mprInline, mprInitialLayout]
+  );
+
+  // Series hiện tại không đủ lát để dựng -> tự thoát chế độ MPR inline
+  useEffect(() => {
+    if (mprInline && !canBuild3D) setMprInline(false);
+  }, [mprInline, canBuild3D]);
+
   const [layout, setLayout] = useState('1x1');
   const [sync, setSync] = useState({ scroll: true, refLines: true, window: false, zoomPan: false });
   const changeSync = useCallback((patch) => setSync((prev) => ({ ...prev, ...patch })), []);
@@ -184,6 +247,49 @@ export default function PacsViewerPage() {
   const [colorLut, setColorLut] = useState('default');
   const imageCanvasRef = useRef(null);
   const annotationCanvasRef = useRef(null);
+
+  // Tải lát cắt hiện tại ra PNG
+  const handleDownloadImage = useCallback(() => {
+    const canvas = imageCanvasRef.current;
+    if (!canvas) {
+      message.warning('Chưa có ảnh để tải');
+      return;
+    }
+    try {
+      const link = document.createElement('a');
+      link.download = `pacs_slice_${activeSlicePos + 1}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      message.success('Đã tải ảnh lát cắt');
+    } catch {
+      message.error('Không tải được ảnh');
+    }
+  }, [activeSlicePos]);
+
+  // In lát cắt hiện tại
+  const handlePrintImage = useCallback(() => {
+    const canvas = imageCanvasRef.current;
+    if (!canvas) {
+      message.warning('Chưa có ảnh để in');
+      return;
+    }
+    let url;
+    try {
+      url = canvas.toDataURL('image/png');
+    } catch {
+      message.error('Không in được ảnh');
+      return;
+    }
+    const w = window.open('', '_blank');
+    if (!w) {
+      message.warning('Trình duyệt chặn cửa sổ in');
+      return;
+    }
+    w.document.write(
+      `<html><head><title>In ảnh PACS</title></head><body style="margin:0;display:flex;align-items:center;justify-content:center;background:#000"><img src="${url}" style="max-width:100%;max-height:100vh" onload="window.focus();window.print();" /></body></html>`
+    );
+    w.document.close();
+  }, []);
 
   const { seriesThumbnails, sliceThumbnails } = usePacsThumbnails({
     caseId: patientDiagnoseId,
@@ -345,6 +451,8 @@ export default function PacsViewerPage() {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target?.tagName) || e.target?.isContentEditable) return;
+      // MPR đang mở (popup hoặc inline) -> phím tắt (A/C/S/V...) thuộc về MPR, không tác động viewer phía sau
+      if (mprOpen || mprInline) return;
       const key = e.key.toLowerCase();
       if (e.code === 'Space' || (e.ctrlKey && key === 's')) {
         e.preventDefault();
@@ -404,7 +512,7 @@ export default function PacsViewerPage() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleCaptureKeyImage, handleUndoAnnotation, stepSeriesSlice, handleApplyPreset, handleReset, setActiveTool, setCurrentDrawing, currentMeta?.modality]);
+  }, [mprOpen, mprInline, handleCaptureKeyImage, handleUndoAnnotation, stepSeriesSlice, handleApplyPreset, handleReset, setActiveTool, setCurrentDrawing, currentMeta?.modality]);
 
   // Đổi series -> về khung nhìn chuẩn (giữ nguyên số đo và WW/WL riêng của từng series)
   // (Lưới nhiều ô tự quản khung nhìn từng ô -> không reset ở đây)
@@ -448,10 +556,40 @@ export default function PacsViewerPage() {
     probe,
     measurementCount: (annotations[currentKey] || []).length,
     saveStatus,
+    showOverlay,
   };
 
   // Sidebar/TopNav: meta hiện tại (đủ để hiện preset DICOM, modality)
   const navMeta = currentMeta || (currentInstance ? { modality: currentInstance.modality, windowPresets: currentInstance.windowPresets || [] } : null);
+
+  // Thông tin BN theo 2 nguồn riêng: hệ thống HomeCare (DB) và ảnh DICOM
+  const patientInfo = useMemo(() => {
+    const db = study?.dbPatient || {};
+    const m = currentMeta || {};
+    // Một số tag DICOM (vd Cơ sở) có thể là chuỗi mã hóa -> chỉ hiện nếu là văn bản sạch
+    const cleanText = (v) => (v && /^[\p{L}\p{N}\s.,\-()]+$/u.test(v) ? v : null);
+    const dash = (v) => (v || v === 0 ? v : '—');
+    const homecare = [
+      { label: 'Họ tên', value: dash(db.patientName) },
+      { label: 'Mã BN (PID)', value: dash(db.patientId) },
+      { label: 'Giới tính / Tuổi', value: [db.patientGender, db.patientAge].filter(Boolean).join(' · ') || '—' },
+      { label: 'Năm sinh', value: dash(db.patientBirthYear) },
+      { label: 'Ngày tạo ca', value: dash(db.studyDate || study?.studyDate) },
+    ];
+    const dicom = [
+      { label: 'Họ tên', value: dash(m.patientName) },
+      { label: 'Mã BN (PID)', value: dash(m.patientId) },
+      { label: 'Giới tính / Tuổi', value: [m.patientSex, m.patientAge].filter(Boolean).join(' · ') || '—' },
+      { label: 'Ngày sinh', value: dash(m.patientBirthDate) },
+      { label: 'Ngày chụp', value: [m.studyDate, m.studyTime].filter(Boolean).join(' ') || '—' },
+      { label: 'Modality', value: dash(m.modality || activeSeries?.modality) },
+      { label: 'Mô tả ca chụp', value: dash(m.studyDescription) },
+      { label: 'Accession', value: dash(m.accessionNumber) },
+      { label: 'Cơ sở chụp', value: dash(cleanText(m.institutionName)) },
+      { label: 'Số series / ảnh', value: `${seriesList.length} series · ${instances.length} ảnh` },
+    ];
+    return { homecare, dicom };
+  }, [study, currentMeta, activeSeries, seriesList.length, instances.length]);
 
   const mainViewportElement = (
     <PacsViewport
@@ -585,11 +723,11 @@ export default function PacsViewerPage() {
         />
       )}
 
-      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+      <div ref={splitContainerRef} style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
         <div
           style={{
             display: 'flex',
-            flex: reportingOpen ? '1 1 52%' : '1 1 100%',
+            flex: reportingOpen && patientDiagnoseId ? '1 1 0%' : '1 1 100%',
             minWidth: 0,
             overflow: 'hidden',
           }}
@@ -621,10 +759,29 @@ export default function PacsViewerPage() {
               setRotation={setRotation}
               onReset={handleReset}
               onOpenMpr={handleOpenMpr}
+              onReconstructMpr={handleReconstructMpr}
+              onMprPlane={handleMprPlane}
+              mprInline={mprInline}
+              mprInitialLayout={mprInitialLayout}
               canBuild3D={canBuild3D}
               activeSeriesSliceCount={activeSeriesInstances.length}
               sync={sync}
               onChangeSync={changeSync}
+              invert={invert}
+              setInvert={setInvert}
+              colorLut={colorLut}
+              setColorLut={setColorLut}
+              isSmooth={isSmooth}
+              onToggleSmooth={() => setIsSmooth((p) => !p)}
+              onZoomIn={handleZoomIn}
+              onZoomOut={handleZoomOut}
+              onCaptureKeyImage={handleCaptureKeyImage}
+              isPlayingCine={isPlayingCine}
+              onToggleCine={() => setIsPlayingCine((p) => !p)}
+              onDownloadImage={handleDownloadImage}
+              onPrintImage={handlePrintImage}
+              showOverlay={showOverlay}
+              onToggleOverlay={() => setShowOverlay((v) => !v)}
             />
           )}
 
@@ -648,6 +805,20 @@ export default function PacsViewerPage() {
               onClose={() => setActiveAttachedFile(null)}
               apiEndpoint={apiEndpoint}
               token={localStorage.getItem('TOKEN') || ''}
+            />
+          ) : mprInline && canBuild3D ? (
+            <PacsMprModal
+              inline
+              initialLayout={mprInitialLayout}
+              onClose={() => setMprInline(false)}
+              instances={activeSeriesInstances}
+              dicomCache={dicomCache}
+              setDicomCache={setDicomCache}
+              apiEndpoint={apiEndpoint}
+              getAuthHeaders={getAuthHeaders}
+              caseId={patientDiagnoseId}
+              patientName={study?.dbPatient?.patientName || currentMeta?.patientName || ''}
+              modality={currentMeta?.modality || activeSeries?.modality || study?.modality || ''}
             />
           ) : layout === '1x1' ? (
             mainViewportElement
@@ -694,13 +865,33 @@ export default function PacsViewerPage() {
           )}
         </div>
 
+        {/* Thanh kéo đổi tỉ lệ chia màn hình */}
+        {reportingOpen && patientDiagnoseId && (
+          <div
+            onMouseDown={onSplitMouseDown}
+            title="Kéo để đổi tỉ lệ chia màn hình"
+            className="pacs-split-handle"
+            style={{
+              flex: '0 0 6px',
+              cursor: 'col-resize',
+              background: '#1e293b',
+              zIndex: 11,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <div style={{ width: 2, height: 36, borderRadius: 2, background: '#475569' }} />
+          </div>
+        )}
+
         {/* Bảng đọc kết quả chia đôi màn hình */}
         {reportingOpen && patientDiagnoseId && (
           <div
             style={{
-              flex: '0 0 48%',
-              minWidth: 420,
-              maxWidth: '55%',
+              flex: `0 0 ${reportWidthPct}%`,
+              minWidth: 340,
+              maxWidth: '72%',
               display: 'flex',
               flexDirection: 'column',
               background: '#ffffff',
@@ -730,6 +921,16 @@ export default function PacsViewerPage() {
                     · {study.dbPatient.patientName}
                   </span>
                 )}
+                <Tooltip title="Xem thông tin bệnh nhân & ca chụp">
+                  <Button
+                    size="small"
+                    icon={<IdcardOutlined />}
+                    onClick={() => setPatientInfoOpen(true)}
+                    style={{ backgroundColor: '#131b2e', borderColor: '#334155', color: '#38bdf8', fontWeight: 600 }}
+                  >
+                    Thông tin BN
+                  </Button>
+                </Tooltip>
               </div>
               <Button
                 size="small"
@@ -821,6 +1022,48 @@ export default function PacsViewerPage() {
         patientName={study?.dbPatient?.patientName || currentMeta?.patientName || ''}
         modality={currentMeta?.modality || activeSeries?.modality || study?.modality || ''}
       />
+
+      <Modal
+        open={patientInfoOpen}
+        onCancel={() => setPatientInfoOpen(false)}
+        footer={null}
+        width={460}
+        title={
+          <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <UserOutlined style={{ color: '#2563eb' }} />
+            Thông tin bệnh nhân &amp; ca chụp
+          </span>
+        }
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {[
+            { key: 'hc', title: 'Theo hệ thống HomeCare (ca bệnh)', color: '#0b6b4f', rows: patientInfo.homecare },
+            { key: 'dc', title: 'Theo dữ liệu DICOM (ảnh chụp)', color: '#2563eb', rows: patientInfo.dicom },
+          ].map((grp) => (
+            <div key={grp.key}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: grp.color, textTransform: 'uppercase', letterSpacing: 0.3, marginBottom: 4 }}>
+                {grp.title}
+              </div>
+              {grp.rows.map((row) => (
+                <div
+                  key={row.label}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    gap: 16,
+                    padding: '6px 2px',
+                    borderBottom: '1px solid #f1f5f9',
+                    fontSize: 13,
+                  }}
+                >
+                  <span style={{ color: '#64748b', flexShrink: 0 }}>{row.label}</span>
+                  <span style={{ color: '#0f172a', fontWeight: 600, textAlign: 'right', wordBreak: 'break-word' }}>{row.value}</span>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      </Modal>
     </div>
   );
 }

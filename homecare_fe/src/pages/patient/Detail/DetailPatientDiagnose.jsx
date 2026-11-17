@@ -218,6 +218,26 @@ const PatientDiagnoiseDetailPage = ({
                 </>
               )}
 
+              <Tooltip title="Mở phần mềm Siêu âm chuyên sâu (D-SONO)">
+                <Button
+                  size="small"
+                  onClick={() => {
+                    const dsonoBaseUrl = import.meta.env.VITE_DSONO_URL || 'http://localhost:3000';
+                    const targetUrl = `${dsonoBaseUrl}?accessionNo=${selectedPatientDiagnose?.id}&pid=${selectedPatientDiagnose?.PID || ''}&patientName=${encodeURIComponent(selectedPatientDiagnose?.name || '')}&gender=${encodeURIComponent(selectedPatientDiagnose?.gender || '')}&source=HOMECARE`;
+                    window.open(targetUrl, '_blank');
+                  }}
+                  style={{
+                    backgroundColor: '#059669',
+                    borderColor: '#047857',
+                    color: '#ffffff',
+                    fontWeight: 600,
+                    fontSize: 11,
+                  }}
+                >
+                  D-SONO
+                </Button>
+              </Tooltip>
+
               <Button
                 size="small"
                 type="text"

@@ -20,6 +20,7 @@ import API_CALL from "../../../services/axiosClient";
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
 import styles from "./userPackagesList.module.scss";
+import { getPackageName } from "../../../constant/permission";
 
 const { Option } = Select;
 
@@ -95,10 +96,10 @@ const UserPackagesList = () => {
   const columns = [
     { title: "ID", dataIndex: "id", key: "id", width: 70 },
     {
-      title: "Mã gói",
+      title: "Gói",
       dataIndex: "package_code",
       key: "package_code",
-      render: (val) => <strong>{val}</strong>,
+      render: (val) => <strong>{getPackageName(val)}</strong>,
     },
     {
       title: "Bắt đầu",
