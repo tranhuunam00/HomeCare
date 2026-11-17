@@ -36,7 +36,7 @@ const GuideMenuSubscriptionPage = () => {
 
         <ul>
           <li>
-            Xem danh sách các gói dịch vụ của D-RADS (BASIC, PRO, HOSPITAL)
+            Xem danh sách các gói dịch vụ của D-RADS (Basic, Business, Enterprise)
           </li>
           <li>So sánh quyền hạn giữa các gói</li>
           <li>Đăng ký / nâng cấp gói</li>
@@ -53,13 +53,13 @@ const GuideMenuSubscriptionPage = () => {
 
         <ul>
           <li>
-            <strong>BASIC</strong> – Gói miễn phí, quyền hạn cơ bản
+            <strong>Basic</strong> – Gói miễn phí, quyền hạn cơ bản
           </li>
           <li>
-            <strong>PRO</strong> – Gói nâng cao, đầy đủ công cụ chuyên sâu
+            <strong>Business</strong> – Gói nâng cao, đầy đủ công cụ chuyên sâu
           </li>
           <li>
-            <strong>HOSPITAL</strong> – Dành cho phòng khám / bệnh viện với đầy
+            <strong>Enterprise</strong> – Dành cho phòng khám / bệnh viện với đầy
             đủ quyền quản lý và phân quyền
           </li>
         </ul>

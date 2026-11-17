@@ -13,7 +13,7 @@ export const Header = () => {
   const [title, setTitle] = useState("PHÒNG KHÁM BÁC SĨ GIA ĐÌNH HOMECARE");
   const [logo, setLogo] = useState("/logo_home_care.png");
   const [contact, setContact] = useState({
-    phone: "0969268000",
+    phone: "0889089911",
     website: "www.home-care.vn",
     email: "daogroupltd@gmail.com",
   });

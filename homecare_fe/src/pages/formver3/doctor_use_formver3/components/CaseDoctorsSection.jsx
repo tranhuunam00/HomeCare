@@ -10,14 +10,28 @@ export default function CaseDoctorsSection({
   readingDoctor,
   consultingDoctor,
   verifyDoctor,
+  currentDoctor,
+  patientDiagnose,
   isMobile = false,
 }) {
-  const activeDoctors = [readingDoctor, consultingDoctor, verifyDoctor].filter(Boolean);
-  const activeCount = activeDoctors.length;
+  const effectiveReadingDoctor =
+    readingDoctor ||
+    (currentDoctor
+      ? {
+          full_name: currentDoctor.full_name || currentDoctor.username || "Bác sĩ đọc",
+          avatar_url: currentDoctor.avatar_url,
+          phone_number: currentDoctor.phone_number,
+        }
+      : null);
 
-  if (activeCount === 0) return null;
-
-  const doctorColSpan = activeCount === 1 ? 24 : activeCount === 2 ? 12 : 8;
+  const effectiveVerifyDoctor =
+    verifyDoctor ||
+    (patientDiagnose?.technician
+      ? {
+          full_name: patientDiagnose.technician,
+          role_label: "Kỹ thuật viên",
+        }
+      : null);
 
   return (
     <div
@@ -51,160 +65,142 @@ export default function CaseDoctorsSection({
           }}
         >
           <UserOutlined style={{ color: "#2563eb" }} />
-          Bác sĩ phụ trách ca bệnh
+          Nhân sự phụ trách ca bệnh
         </span>
         <span style={{ fontSize: 11, color: "#94a3b8" }}>
-          ({activeCount} bác sĩ tham gia)
+          (3 vị trí chuyên môn)
         </span>
       </div>
 
       <Row gutter={[10, 10]}>
         {/* 1. Bác sĩ đọc ca */}
-        {readingDoctor && (
-          <Col xs={24} sm={doctorColSpan}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                padding: "6px 10px",
-                background: "#f0f9ff",
-                border: "1px solid #bae6fd",
-                borderRadius: 6,
-              }}
-            >
-              <Avatar
-                size={36}
-                src={readingDoctor.avatar_url}
-                icon={<UserOutlined />}
-                style={{ backgroundColor: "#0284c7" }}
-              />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                  <Tag color="blue" style={{ fontSize: 10, margin: 0, padding: "0 4px", lineHeight: "16px" }}>
-                    Bác sĩ đọc ca
-                  </Tag>
-                </div>
-                <div
-                  style={{
-                    fontWeight: 600,
-                    fontSize: 13,
-                    color: "#0369a1",
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  }}
-                  title={readingDoctor.full_name}
-                >
-                  {readingDoctor.full_name || "BS. Đang đọc"}
-                </div>
-                {readingDoctor.phone_number && (
-                  <div style={{ fontSize: 11, color: "#64748b" }}>
-                    SĐT: {readingDoctor.phone_number}
-                  </div>
-                )}
+        <Col xs={24} sm={8}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              padding: "6px 10px",
+              background: effectiveReadingDoctor ? "#f0f9ff" : "#f8fafc",
+              border: `1px solid ${effectiveReadingDoctor ? "#bae6fd" : "#e2e8f0"}`,
+              borderRadius: 6,
+              minHeight: 52,
+            }}
+          >
+            <Avatar
+              size={34}
+              src={effectiveReadingDoctor?.avatar_url}
+              icon={<UserOutlined />}
+              style={{ backgroundColor: effectiveReadingDoctor ? "#0284c7" : "#cbd5e1" }}
+            />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <Tag color="blue" style={{ fontSize: 10, margin: 0, padding: "0 4px", lineHeight: "16px" }}>
+                  Bác sĩ đọc
+                </Tag>
+              </div>
+              <div
+                style={{
+                  fontWeight: 600,
+                  fontSize: 13,
+                  color: effectiveReadingDoctor ? "#0369a1" : "#94a3b8",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+                title={effectiveReadingDoctor?.full_name}
+              >
+                {effectiveReadingDoctor?.full_name || "Chưa phân công"}
               </div>
             </div>
-          </Col>
-        )}
+          </div>
+        </Col>
 
-        {/* 2. Bác sĩ hội chẩn */}
-        {consultingDoctor && (
-          <Col xs={24} sm={doctorColSpan}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                padding: "6px 10px",
-                background: "#fff7ed",
-                border: "1px solid #fed7aa",
-                borderRadius: 6,
-              }}
-            >
-              <Avatar
-                size={36}
-                src={consultingDoctor.avatar_url}
-                icon={<TeamOutlined />}
-                style={{ backgroundColor: "#ea580c" }}
-              />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                  <Tag color="orange" style={{ fontSize: 10, margin: 0, padding: "0 4px", lineHeight: "16px" }}>
-                    Bác sĩ hội chẩn
-                  </Tag>
-                </div>
-                <div
-                  style={{
-                    fontWeight: 600,
-                    fontSize: 13,
-                    color: "#c2410c",
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  }}
-                  title={consultingDoctor.full_name}
-                >
-                  {consultingDoctor.full_name || "Chưa có tên"}
-                </div>
-                {consultingDoctor.phone_number && (
-                  <div style={{ fontSize: 11, color: "#64748b" }}>
-                    SĐT: {consultingDoctor.phone_number}
-                  </div>
-                )}
+        {/* 2. Bác sĩ đọc cùng / hội chẩn */}
+        <Col xs={24} sm={8}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              padding: "6px 10px",
+              background: consultingDoctor ? "#fff7ed" : "#f8fafc",
+              border: `1px solid ${consultingDoctor ? "#fed7aa" : "#e2e8f0"}`,
+              borderRadius: 6,
+              minHeight: 52,
+            }}
+          >
+            <Avatar
+              size={34}
+              src={consultingDoctor?.avatar_url}
+              icon={<TeamOutlined />}
+              style={{ backgroundColor: consultingDoctor ? "#ea580c" : "#cbd5e1" }}
+            />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <Tag color="orange" style={{ fontSize: 10, margin: 0, padding: "0 4px", lineHeight: "16px" }}>
+                  Bác sĩ đọc cùng
+                </Tag>
+              </div>
+              <div
+                style={{
+                  fontWeight: 600,
+                  fontSize: 13,
+                  color: consultingDoctor ? "#c2410c" : "#94a3b8",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+                title={consultingDoctor?.full_name}
+              >
+                {consultingDoctor?.full_name || "Chưa có bác sĩ đọc cùng"}
               </div>
             </div>
-          </Col>
-        )}
+          </div>
+        </Col>
 
-        {/* 3. Bác sĩ duyệt */}
-        {verifyDoctor && (
-          <Col xs={24} sm={doctorColSpan}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                padding: "6px 10px",
-                background: "#f0fdf4",
-                border: "1px solid #bbf7d0",
-                borderRadius: 6,
-              }}
-            >
-              <Avatar
-                size={36}
-                src={verifyDoctor.avatar_url}
-                icon={<SafetyCertificateOutlined />}
-                style={{ backgroundColor: "#16a34a" }}
-              />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                  <Tag color="green" style={{ fontSize: 10, margin: 0, padding: "0 4px", lineHeight: "16px" }}>
-                    Bác sĩ duyệt
-                  </Tag>
-                </div>
-                <div
-                  style={{
-                    fontWeight: 600,
-                    fontSize: 13,
-                    color: "#15803d",
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  }}
-                  title={verifyDoctor.full_name}
-                >
-                  {verifyDoctor.full_name || "Chưa có tên"}
-                </div>
-                {verifyDoctor.phone_number && (
-                  <div style={{ fontSize: 11, color: "#64748b" }}>
-                    SĐT: {verifyDoctor.phone_number}
-                  </div>
-                )}
+        {/* 3. Bác sĩ duyệt / Kỹ thuật viên */}
+        <Col xs={24} sm={8}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              padding: "6px 10px",
+              background: effectiveVerifyDoctor ? "#f0fdf4" : "#f8fafc",
+              border: `1px solid ${effectiveVerifyDoctor ? "#bbf7d0" : "#e2e8f0"}`,
+              borderRadius: 6,
+              minHeight: 52,
+            }}
+          >
+            <Avatar
+              size={34}
+              src={effectiveVerifyDoctor?.avatar_url}
+              icon={<SafetyCertificateOutlined />}
+              style={{ backgroundColor: effectiveVerifyDoctor ? "#16a34a" : "#cbd5e1" }}
+            />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <Tag color="green" style={{ fontSize: 10, margin: 0, padding: "0 4px", lineHeight: "16px" }}>
+                  {effectiveVerifyDoctor?.role_label || "Bác sĩ duyệt"}
+                </Tag>
+              </div>
+              <div
+                style={{
+                  fontWeight: 600,
+                  fontSize: 13,
+                  color: effectiveVerifyDoctor ? "#15803d" : "#94a3b8",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+                title={effectiveVerifyDoctor?.full_name}
+              >
+                {effectiveVerifyDoctor?.full_name || "Chưa có bác sĩ duyệt"}
               </div>
             </div>
-          </Col>
-        )}
+          </div>
+        </Col>
       </Row>
     </div>
   );

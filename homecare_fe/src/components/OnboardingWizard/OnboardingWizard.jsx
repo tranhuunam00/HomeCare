@@ -25,6 +25,7 @@ import {
   DURATION_OPTIONS,
   getUsablePackageCodes,
   PACKAGE_FEES,
+  getPackageName,
 } from "../../constant/permission";
 import { useGlobalAuth } from "../../contexts/AuthContext";
 import STORAGE from "../../services/storage";
@@ -581,7 +582,7 @@ const OnboardingWizard = ({ open, onClose, doctorId, is_use_onboard }) => {
               pagination={false}
               bordered
               columns={[
-                { title: "Mã gói", dataIndex: "package_code" },
+                { title: "Gói", dataIndex: "package_code", render: (v) => getPackageName(v) },
                 {
                   title: "Trạng thái",
                   dataIndex: "status",

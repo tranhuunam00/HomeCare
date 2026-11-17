@@ -1,6 +1,7 @@
 import React from "react";
 import { FaPhoneAlt, FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
 import styles from "./HomeCareFooter.module.scss";
+import { COMPANY_INFO } from "../../../constant/company";
 
 const HomeCareFooter = () => {
   return (
@@ -26,19 +27,19 @@ const HomeCareFooter = () => {
         {/* RIGHT */}
         <div className={styles.col}>
           <h3>Thông tin đơn vị vận hành:</h3>
-          <p>Công ty TNHH ĐẦU TƯ & CÔNG NGHỆ DAOGROUP</p>
+          <p>{COMPANY_INFO.nameUpper}</p>
 
           <p>
-            <FaMapMarkerAlt /> Số 22, đường 3.7/10, KĐT Gamuda Gardens, Hoàng
-            Mai, Hà Nội
+            <FaMapMarkerAlt /> {COMPANY_INFO.address}
           </p>
 
           <p>
-            <FaPhoneAlt /> 0969 268 000
+            <FaPhoneAlt />{" "}
+            <a href={`tel:${COMPANY_INFO.phone}`} style={{ color: "inherit" }}>{COMPANY_INFO.phoneDisplay}</a>
           </p>
 
           <p>
-            <FaEnvelope /> daogroupltd@gmail.com
+            <FaEnvelope /> {COMPANY_INFO.email}
           </p>
         </div>
       </div>

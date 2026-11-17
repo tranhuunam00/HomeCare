@@ -159,16 +159,14 @@ const Sidebar = ({ collapsed, onNavigate }) => {
       icon: <Avatar src={"/icons/tienich.png"} size={avatarSize} />,
       label: "Ứng dụng",
       children: [
-        // {
-        //   key: "/home/intergrate",
-        //   icon: <Avatar src="/icons/sono.png" size={avatarSize} />,
-        //   label: "D-SONO",
-        //   children: [
-        //     { key: "/home/sono/bung", label: "Đọc ngay" },
-        //     { key: "/home/sono/list", label: "Danh sách đã đọc" },
-        //   ],
-        // },
-        // { key: "/tirads_nn", label: "Phần mềm D-TIRADS" },
+        {
+          key: "D-SONO-APP",
+          label: "Phần mềm D-SONO",
+          onClick: () => {
+            const dsonoUrl = import.meta.env.VITE_DSONO_URL || 'http://localhost:3000';
+            window.open(dsonoUrl, '_blank');
+          },
+        },
         { key: "/home/birad", label: "Ứng dụng D-BIRADS" },
         { key: "/home/tirad", label: "Ứng dụng D-TIRADS" },
         { key: "/home/lungrad", label: "Ứng dụng D-LUNG" },
@@ -203,7 +201,7 @@ const Sidebar = ({ collapsed, onNavigate }) => {
 
   const handleClick = (e, isReadingForm) => {
     const key = e.key;
-    if (e.key === "Pacs") return;
+    if (e.key === "Pacs" || e.key === "D-SONO-APP") return;
     const isAppFeature =
       key.startsWith("/home/recist_nn") ||
       key.startsWith("/home/tirad") ||
@@ -225,7 +223,7 @@ const Sidebar = ({ collapsed, onNavigate }) => {
       !hasProOrBusiness(userPackages) &&
       user.id_role != USER_ROLE.ADMIN
     ) {
-      toast.error("Bạn cần gói PRO hoặc HOSPITAL để sử dụng tính năng này!");
+      toast.error("Bạn cần gói Business hoặc Enterprise để sử dụng tính năng này!");
       return;
     }
 

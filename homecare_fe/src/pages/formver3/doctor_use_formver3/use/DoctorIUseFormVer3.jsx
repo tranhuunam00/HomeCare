@@ -494,6 +494,8 @@ export default function DoctorUseDFormVer3({
             readingDoctor={readingDoctor}
             consultingDoctor={consultingDoctor}
             verifyDoctor={verifyDoctor}
+            currentDoctor={doctor}
+            patientDiagnose={patientDiagnose || selectedPatientDiagnose}
           />
 
           <ProcedureSection
@@ -552,6 +554,7 @@ export default function DoctorUseDFormVer3({
             form={form}
             isEdit={isEdit}
             languageTranslate={languageTranslate}
+            translateLabel={translateLabel}
             diagnosisSummary={diagnosisSummary}
             setDiagnosisSummary={setDiagnosisSummary}
           />

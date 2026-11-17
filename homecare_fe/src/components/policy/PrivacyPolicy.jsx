@@ -1,6 +1,7 @@
 import React from "react";
 import { Typography, Divider, Card } from "antd";
 import styles from "./PrivacyPolicy.module.scss";
+import { COMPANY_INFO } from "../../constant/company";
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -185,7 +186,10 @@ const PrivacyPolicy = () => {
             Email:{" "}
             <a href="mailto:daogroupltd@gmail.com">daogroupltd@gmail.com</a>
             <br />
-            Điện thoại: <a href="tel:0969268000">0969 268 000</a>
+            Địa chỉ: {COMPANY_INFO.address}
+            <br />
+            Điện thoại:{" "}
+            <a href={`tel:${COMPANY_INFO.phone}`}>{COMPANY_INFO.phoneDisplay}</a>
             <br />
             Website: <a href="https://www.daogroup.vn">www.daogroup.vn</a>
             <br />

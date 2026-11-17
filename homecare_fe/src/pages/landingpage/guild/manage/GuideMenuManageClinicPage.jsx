@@ -104,8 +104,8 @@ const GuideMenuManagerClinicPage = () => {
 
         <Panel header="Có giới hạn số lượng phòng khám không?" key="3">
           <p>
-            Số lượng phòng khám phụ thuộc vào gói đăng ký của người dùng (BASIC
-            / PRO / HOSPITAL).
+            Số lượng phòng khám phụ thuộc vào gói đăng ký của người dùng (Basic
+            / Business / Enterprise).
           </p>
         </Panel>
       </Collapse>

@@ -3,12 +3,48 @@ import { Button, Card, Divider, Image } from "antd";
 
 import { translateLabel } from "../../../constant/translate.report";
 
+const VI_FALLBACK_LABELS = {
+  Result_Report: "Phiếu kết quả",
+  administrativeInfo: "THÔNG TIN HÀNH CHÍNH",
+  fullName: "Họ và tên",
+  gender: "Giới tính",
+  age: "Tuổi",
+  nationality: "Quốc tịch",
+  address: "Địa chỉ",
+  phone: "Điện thoại",
+  email: "Email",
+  patientId: "Mã bệnh nhân (PID)",
+  sid: "Mã chỉ định (SID)",
+  technicalProtocol: "QUY TRÌNH KỸ THUẬT",
+  imagingFindings: "MÔ TẢ HÌNH ẢNH",
+  impression: "KẾT LUẬN & CHẨN ĐOÁN",
+  "Tiêm thuốc đối quang": "Tiêm thuốc đối quang",
+  "Chất lượng hình ảnh": "Chất lượng hình ảnh",
+  "Thực hiện bổ sung": "Thực hiện bổ sung",
+  "Kỹ thuật thực hiện": "Kỹ thuật thực hiện",
+  "Chỉ định": "Chỉ định",
+  doctor: "BÁC SĨ THỰC HIỆN",
+  time: "Thời gian",
+  no: "Không",
+  yes: "Có",
+};
+
 const safeTranslate = (lang = "vi", key = "", uppercase = true) => {
+  const effectiveLang =
+    typeof lang === "string" && ["vi", "en"].includes(lang.toLowerCase())
+      ? lang.toLowerCase()
+      : "vi";
   try {
     if (typeof translateLabel === "function") {
-      return translateLabel(lang, key, uppercase);
+      const res = translateLabel(effectiveLang, key, uppercase);
+      if (res && res !== key) return res;
     }
   } catch (err) {}
+  if (effectiveLang === "vi" && VI_FALLBACK_LABELS[key]) {
+    return uppercase
+      ? String(VI_FALLBACK_LABELS[key]).toUpperCase()
+      : String(VI_FALLBACK_LABELS[key]);
+  }
   return uppercase ? String(key || "").toUpperCase() : String(key || "");
 };
 
@@ -251,28 +287,33 @@ const PrintPreviewVer3NotDataDiagnose = ({
               ).toUpperCase()}
             </h1>
           )}
-          {!isOnLyContent && (
-            <h2
-              style={{
-                textAlign: "center",
-                color: "#2f6db8",
-                margin: 0,
-                padding: 0,
-                fontSize: 25,
-              }}
-            >{`${
-              examPartName(
-                selectedTemplateService,
-                languageTranslate,
-              )?.toUpperCase() ||
+          {!isOnLyContent && (() => {
+            const subTitle =
+              examPartName(selectedTemplateService, languageTranslate) ||
               examPartName(
                 templateServices?.find(
-                  (t) => t.id == formSnapshot.id_template_service,
+                  (t) => t.id == formSnapshot?.id_template_service,
                 ),
                 languageTranslate,
-              )?.toUpperCase()
-            }`}</h2>
-          )}
+              ) ||
+              currentPatient?.service_name ||
+              currentPatient?.name_body_part ||
+              "";
+            return subTitle ? (
+              <h2
+                style={{
+                  textAlign: "center",
+                  color: "#2f6db8",
+                  margin: "4px 0 12px",
+                  padding: 0,
+                  fontSize: 22,
+                  fontWeight: 700,
+                }}
+              >
+                {String(subTitle).toUpperCase()}
+              </h2>
+            ) : null;
+          })()}
           {!isOnLyContent && isUse && (
             <>
               <h3
@@ -408,14 +449,20 @@ const PrintPreviewVer3NotDataDiagnose = ({
             <PrintItem
               minWidth={160}
               label={safeTranslate(languageTranslate, "Chỉ định", false)}
-              value={
-                examPartName(
-                  selectedTemplateService,
-                  languageTranslate,
-                )?.toUpperCase() +
-                " - " +
-                examPartName(selectedExamPart, languageTranslate)?.toUpperCase()
-              }
+              value={(() => {
+                const sName =
+                  examPartName(selectedTemplateService, languageTranslate) ||
+                  currentPatient?.service_name ||
+                  "";
+                const pName =
+                  examPartName(selectedExamPart, languageTranslate) ||
+                  currentPatient?.name_body_part ||
+                  "";
+                const combined = [sName, pName].filter(Boolean).join(" - ");
+                return combined
+                  ? combined.toUpperCase()
+                  : currentPatient?.diagnose_name || "Chưa có chỉ định";
+              })()}
             />
           )}
 
