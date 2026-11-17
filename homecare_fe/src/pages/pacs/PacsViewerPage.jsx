@@ -21,6 +21,8 @@ import PacsAttachmentViewer from './components/PacsAttachmentViewer';
 import PacsMprModal from './components/PacsMprModal';
 import PacsHistogramModal from './components/PacsHistogramModal';
 import PacsThresholdModal from './components/PacsThresholdModal';
+import PacsKeyImageGalleryModal from './components/PacsKeyImageGalleryModal';
+import PacsCropModal from './components/PacsCropModal';
 import { PACS_TOOLS, WW_WL_PRESETS } from './constants/pacs.constants';
 
 const EMPTY_LIST = Object.freeze([]);
@@ -250,6 +252,8 @@ export default function PacsViewerPage() {
   const [histogramOpen, setHistogramOpen] = useState(false);
   const [thresholdOpen, setThresholdOpen] = useState(false);
   const [activeThreshold, setActiveThreshold] = useState(null);
+  const [keyImageGalleryOpen, setKeyImageGalleryOpen] = useState(false);
+  const [cropOpen, setCropOpen] = useState(false);
   const imageCanvasRef = useRef(null);
   const annotationCanvasRef = useRef(null);
 
@@ -363,7 +367,17 @@ export default function PacsViewerPage() {
     redrawKey: layout,
   });
 
-  const { captureAlert, setCaptureAlert, handleCaptureKeyImage, saveStatus } = usePacsPresentationState({
+  const {
+    captureAlert,
+    setCaptureAlert,
+    handleCaptureKeyImage,
+    keyImages,
+    handleDeleteKeyImage,
+    handleClearAllKeyImages,
+    handleToggleStarKeyImage,
+    handleInsertToReport,
+    saveStatus,
+  } = usePacsPresentationState({
     patientDiagnoseId,
     apiEndpoint,
     getAuthHeaders,
@@ -388,6 +402,21 @@ export default function PacsViewerPage() {
   });
 
   /* ---------------- Callback ổn định cho các dải ảnh (memo) ---------------- */
+  const handleCopyMeasurements = useCallback(() => {
+    const list = annotations[currentKey] || [];
+    if (!list.length) {
+      message.info('Lát cắt hiện tại chưa có số đo hoặc chú thích nào để sao chép');
+      return;
+    }
+    const text = list
+      .map((m, idx) => `${idx + 1}. ${m.type || 'Đo đạc'}: ${m.valueText || ''}`)
+      .join('\n');
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(text);
+    }
+    message.success(`Đã sao chép ${list.length} số đo vào bộ nhớ tạm!`);
+  }, [annotations, currentKey]);
+
   const toggleLeftStrip = useCallback(() => setLeftSeriesStripOpen((prev) => !prev), []);
   const toggleRightStrip = useCallback(() => setRightSliceStripOpen((prev) => !prev), []);
   const handleSelectSeries = useCallback(
@@ -628,6 +657,7 @@ export default function PacsViewerPage() {
       compact={layout !== '1x1'}
         onToggleExpand={() => setIsExpanded((prev) => !prev)}
         onCaptureKeyImage={handleCaptureKeyImage}
+        onOpenCrop={() => setCropOpen(true)}
         onUploadDicom={uploadDicom}
         patientDiagnoseId={patientDiagnoseId}
         currentIndex={activeSlicePos}
@@ -664,6 +694,8 @@ export default function PacsViewerPage() {
         caption={captureAlert.caption}
         sliceIndex={captureAlert.sliceIndex}
         totalSlices={captureAlert.totalSlices}
+        isStarred={captureAlert.isStarred}
+        isCrop={captureAlert.isCrop}
         patientDiagnoseId={patientDiagnoseId}
       />
 
@@ -709,6 +741,8 @@ export default function PacsViewerPage() {
         reportingOpen={reportingOpen}
         onToggleReporting={handleToggleReporting}
         onToggleLeftNav={() => setLeftNavDrawerOpen(true)}
+        onOpenKeyImageGallery={() => setKeyImageGalleryOpen(true)}
+        keyImageCount={keyImages?.length || 0}
       />
 
       {(saveStatus?.state === 'error' || saveStatus?.state === 'offline-restore') && (
@@ -755,6 +789,7 @@ export default function PacsViewerPage() {
               activeTool={activeTool}
               setActiveTool={setActiveTool}
               onClearAnnotations={handleClearAnnotations}
+              onCopyMeasurements={handleCopyMeasurements}
               onUploadDicom={uploadDicom}
               onReloadStudy={loadStudy}
               flipH={flipH}
@@ -786,6 +821,9 @@ export default function PacsViewerPage() {
               onZoomIn={handleZoomIn}
               onZoomOut={handleZoomOut}
               onCaptureKeyImage={handleCaptureKeyImage}
+              onCaptureStarKeyImage={() => handleCaptureKeyImage({ isStarred: true })}
+              onOpenCrop={() => setCropOpen(true)}
+              onOpenKeyImageGallery={() => setKeyImageGalleryOpen(true)}
               isPlayingCine={isPlayingCine}
               onToggleCine={() => setIsPlayingCine((p) => !p)}
               onDownloadImage={handleDownloadImage}
@@ -1099,6 +1137,40 @@ export default function PacsViewerPage() {
         onClose={() => setThresholdOpen(false)}
         activeThreshold={activeThreshold}
         onSelectThreshold={(t) => setActiveThreshold(t)}
+      />
+
+      <PacsKeyImageGalleryModal
+        open={keyImageGalleryOpen}
+        onClose={() => setKeyImageGalleryOpen(false)}
+        keyImages={keyImages}
+        onDeleteKeyImage={handleDeleteKeyImage}
+        onClearAllKeyImages={handleClearAllKeyImages}
+        onToggleStarKeyImage={handleToggleStarKeyImage}
+        onInsertToReport={handleInsertToReport}
+        onCaptureCurrentSlice={handleCaptureKeyImage}
+        onOpenCrop={() => {
+          setKeyImageGalleryOpen(false);
+          setCropOpen(true);
+        }}
+        currentSliceIndex={currentIndex + 1}
+        totalSlices={instances.length}
+      />
+
+      <PacsCropModal
+        open={cropOpen}
+        onClose={() => setCropOpen(false)}
+        imageCanvas={imageCanvasRef.current}
+        annotationCanvas={annotationCanvasRef.current}
+        metadata={{
+          patientName: dicomCache[currentIndex]?.meta?.patientName || study?.dbPatient?.patientName || '',
+          patientId: dicomCache[currentIndex]?.meta?.patientId || study?.dbPatient?.patientId || '',
+        }}
+        currentIndex={currentIndex}
+        totalSlices={instances.length}
+        windowCenter={windowCenter}
+        windowWidth={windowWidth}
+        pixelSpacing={currentMeta?.pixelSpacing || currentInstance?.pixelSpacing || null}
+        onSaveCrop={(cropData) => handleCaptureKeyImage(cropData)}
       />
     </div>
   );

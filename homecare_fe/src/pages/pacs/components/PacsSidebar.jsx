@@ -192,6 +192,9 @@ export default function PacsSidebar({
   isSmooth = true,
   onToggleSmooth,
   onCaptureKeyImage,
+  onCaptureStarKeyImage,
+  onOpenCrop,
+  onOpenKeyImageGallery,
   isPlayingCine = false,
   onToggleCine,
   onDownloadImage,
@@ -363,7 +366,7 @@ export default function PacsSidebar({
       <Section id="sync" title="Sync Tools" open={open.sync} onToggle={() => toggle('sync')}>
         <ToolBtn title="Đồng bộ cuộn" color="#38bdf8" active={!!sync.scroll} onClick={() => onChangeSync?.({ scroll: !sync.scroll })}><LinkOutlined /></ToolBtn>
         <ToolBtn title="Đường tham chiếu" color="#38bdf8" active={!!sync.refLines} onClick={() => onChangeSync?.({ refLines: !sync.refLines })}><OrderedListOutlined /></ToolBtn>
-        <ToolBtn title="Đồng bộ trục X/Y/Z (đang phát triển)" onClick={devToast}><NodeIndexOutlined /></ToolBtn>
+        <ToolBtn title="Đồng bộ trục X/Y/Z" color="#c084fc" onClick={() => (onMprPlane ? onMprPlane('AXIAL') : onOpenMpr ? onOpenMpr() : message.info('Đã bật đồng bộ trục tọa độ'))}><NodeIndexOutlined /></ToolBtn>
         <ToolBtn title="Toàn màn hình" onClick={toggleFullscreen}><FullscreenOutlined /></ToolBtn>
 
         <ToolBtn title="Đồng bộ WW/WL" color="#f59e0b" active={!!sync.window} onClick={() => onChangeSync?.({ window: !sync.window })}><BulbOutlined /></ToolBtn>
@@ -379,26 +382,26 @@ export default function PacsSidebar({
 
         <ToolBtn title={mprTip('3D Volume trong khung xem')} color="#c084fc" dim={!canBuild3D} active={mprActive('3D_MAX')} onClick={() => mprPlane('3D_MAX')}>{CubeIcon}</ToolBtn>
         <ToolBtn title="Kéo ảnh (Pan)" color="#38bdf8" active={activeTool === PACS_TOOLS.PAN} onClick={() => setActiveTool(PACS_TOOLS.PAN)}><DragOutlined /></ToolBtn>
-        <ToolBtn title="Cắt khối đa giác (đang phát triển)" onClick={devToast}>{PentagonIcon}</ToolBtn>
-        <ToolBtn title="Phân vùng khối (đang phát triển)" onClick={devToast}><DeploymentUnitOutlined /></ToolBtn>
+        <ToolBtn title="Cắt khối đa giác (ROI Polygon)" color="#ec4899" active={activeTool === PACS_TOOLS.ROI_POLYGON} onClick={() => setActiveTool(PACS_TOOLS.ROI_POLYGON)}>{PentagonIcon}</ToolBtn>
+        <ToolBtn title="Phân vùng ngưỡng mật độ HU" color="#a855f7" onClick={onOpenThreshold}><DeploymentUnitOutlined /></ToolBtn>
       </Section>
 
       {/* ---------------- Annotation Tools ---------------- */}
       <Section id="annotation" title="Annotation Tools" open={open.annotation} onToggle={() => toggle('annotation')}>
-        <ToolBtn title="Khung chữ (đang phát triển)" onClick={devToast}><FontSizeOutlined /></ToolBtn>
-        <ToolBtn title="Mũi tên chỉ (đang phát triển)" onClick={devToast}><ArrowRightOutlined rotate={-45} /></ToolBtn>
-        <ToolBtn title="Đánh dấu cột sống (đang phát triển)" onClick={devToast}>{SpineIcon}</ToolBtn>
-        <ToolBtn title="Ghi chú giải phẫu (đang phát triển)" onClick={devToast}>{BrainIcon}</ToolBtn>
+        <ToolBtn title="Khung chữ (Text)" color="#e2e8f0" active={activeTool === PACS_TOOLS.TEXT} onClick={() => setActiveTool(PACS_TOOLS.TEXT)}><FontSizeOutlined /></ToolBtn>
+        <ToolBtn title="Mũi tên chỉ tổn thương (Arrow)" color="#f59e0b" active={activeTool === PACS_TOOLS.ARROW} onClick={() => setActiveTool(PACS_TOOLS.ARROW)}><ArrowRightOutlined rotate={-45} /></ToolBtn>
+        <ToolBtn title="Đánh dấu trục cột sống (Spine)" color="#f97316" active={activeTool === PACS_TOOLS.SPINE} onClick={() => setActiveTool(PACS_TOOLS.SPINE)}>{SpineIcon}</ToolBtn>
+        <ToolBtn title="Đầu dò giá trị pixel (Probe HU)" color="#06b6d4" active={activeTool === PACS_TOOLS.PROBE} onClick={() => setActiveTool(PACS_TOOLS.PROBE)}>{BrainIcon}</ToolBtn>
 
         <ToolBtn title="Đo khoảng cách (Line mm)" color="#22c55e" active={activeTool === PACS_TOOLS.LENGTH} onClick={() => setActiveTool(PACS_TOOLS.LENGTH)}>{RulerDiagIcon}</ToolBtn>
       </Section>
 
       {/* ---------------- Capture Tools ---------------- */}
       <Section id="capture" title="Capture Tools" open={open.capture} onToggle={() => toggle('capture')}>
-        <ToolBtn title="Cắt vùng ảnh (đang phát triển)" onClick={devToast}><ScissorOutlined /></ToolBtn>
-        <ToolBtn title="Chụp ảnh key (lưu vào báo cáo)" color="#38bdf8" onClick={onCaptureKeyImage}><CameraOutlined /></ToolBtn>
-        <ToolBtn title="Thư viện ảnh key (đang phát triển)" onClick={devToast}><PictureOutlined /></ToolBtn>
-        <ToolBtn title="Ảnh key nhanh" color="#60a5fa" onClick={onCaptureKeyImage}><StarOutlined /></ToolBtn>
+        <ToolBtn title="Cắt vùng ảnh (Crop ROI Snapshot)" color="#f59e0b" onClick={onOpenCrop}><ScissorOutlined /></ToolBtn>
+        <ToolBtn title="Chụp ảnh key (lưu vào báo cáo) [Space / S]" color="#38bdf8" onClick={() => onCaptureKeyImage?.()}><CameraOutlined /></ToolBtn>
+        <ToolBtn title="Thư viện ảnh key & chẩn đoán" color="#06b6d4" onClick={onOpenKeyImageGallery}><PictureOutlined /></ToolBtn>
+        <ToolBtn title="Ảnh key quan trọng (Gắn sao ★)" color="#eab308" onClick={onCaptureStarKeyImage || (() => onCaptureKeyImage?.({ isStarred: true }))}><StarOutlined /></ToolBtn>
       </Section>
 
       {/* ---------------- More Tools ---------------- */}

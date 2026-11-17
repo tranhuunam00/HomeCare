@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircleFilled, CloseOutlined } from '@ant-design/icons';
+import { CheckCircleFilled, CloseOutlined, StarFilled, ScissorOutlined } from '@ant-design/icons';
 
 export default function PacsCaptureAlert({
   open,
@@ -8,8 +8,13 @@ export default function PacsCaptureAlert({
   caption,
   sliceIndex = 1,
   totalSlices = 1,
+  isStarred = false,
+  isCrop = false,
 }) {
   if (!open) return null;
+
+  const borderColor = isStarred ? '#eab308' : isCrop ? '#f59e0b' : '#22c55e';
+  const glowColor = isStarred ? 'rgba(234, 179, 8, 0.4)' : isCrop ? 'rgba(245, 158, 11, 0.4)' : 'rgba(34, 197, 94, 0.4)';
 
   return (
     <>
@@ -49,9 +54,9 @@ export default function PacsCaptureAlert({
           left: '50%',
           transform: 'translateX(-50%)',
           backgroundColor: '#0f172a',
-          border: '1.5px solid #22c55e',
+          border: `1.5px solid ${borderColor}`,
           borderRadius: 8,
-          boxShadow: '0 8px 30px rgba(0, 0, 0, 0.8), 0 0 15px rgba(34, 197, 94, 0.4)',
+          boxShadow: `0 8px 30px rgba(0, 0, 0, 0.8), 0 0 15px ${glowColor}`,
           zIndex: 9998,
           display: 'flex',
           alignItems: 'center',
@@ -73,7 +78,7 @@ export default function PacsCaptureAlert({
               height: 58,
               borderRadius: 4,
               objectFit: 'cover',
-              border: '1px solid #334155',
+              border: `1px solid ${borderColor}`,
               backgroundColor: '#000',
               flexShrink: 0,
             }}
@@ -83,13 +88,23 @@ export default function PacsCaptureAlert({
         {/* Content */}
         <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-            <CheckCircleFilled style={{ color: '#22c55e', fontSize: 16 }} />
+            {isStarred ? (
+              <StarFilled style={{ color: '#eab308', fontSize: 16 }} />
+            ) : isCrop ? (
+              <ScissorOutlined style={{ color: '#f59e0b', fontSize: 16 }} />
+            ) : (
+              <CheckCircleFilled style={{ color: '#22c55e', fontSize: 16 }} />
+            )}
             <span style={{ fontWeight: '800', color: '#f8fafc', fontSize: '13px' }}>
-              ĐÃ CHỤP ẢNH KEY THÀNH CÔNG!
+              {isStarred
+                ? 'ĐÃ LƯU ẢNH KEY QUAN TRỌNG (GẮN SAO)!'
+                : isCrop
+                ? 'ĐÃ CẮT & LƯU ẢNH ROI THÀNH CÔNG!'
+                : 'ĐÃ CHỤP ẢNH KEY THÀNH CÔNG!'}
             </span>
           </div>
           <div style={{ fontSize: '12px', color: '#94a3b8', lineHeight: '16px' }}>
-            Lát cắt <strong>#{sliceIndex}/{totalSlices}</strong> đã được đồng bộ trực tiếp sang mục{' '}
+            {isCrop ? 'Vùng ROI' : `Lát cắt #${sliceIndex}/${totalSlices}`} đã được đồng bộ trực tiếp sang mục{' '}
             <span style={{ color: '#38bdf8', fontWeight: '600' }}>"HÌNH ẢNH MINH HỌA"</span> của bệnh án.
           </div>
           {caption && (
