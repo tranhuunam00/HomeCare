@@ -549,6 +549,19 @@ const Profile = () => {
                 </Select>
               </Form.Item>
 
+              <Form.Item
+                label="Mã Bác sĩ D-SONO"
+                name="dsono_doctor_code"
+                style={{ marginBottom: 12 }}
+                tooltip="Mã định danh bác sĩ trên ứng dụng D-SONO (vd: BS_VINH). Khi bác sĩ ký kết quả siêu âm trên D-SONO, hệ thống sẽ tự động liên thông kết quả với hồ sơ bác sĩ này."
+              >
+                <Input
+                  placeholder="VD: BS_VINH hoặc DOC_1793261504124"
+                  disabled={!isEditing}
+                  style={{ fontWeight: "bold", fontFamily: "monospace" }}
+                />
+              </Form.Item>
+
               {authorizedClinics.length > 0 && (
                 <div style={{ marginTop: 8, marginBottom: 12 }}>
                   <span style={{ color: "#1e3a8a", fontSize: "13px", display: "block", marginBottom: 8, fontWeight: "600" }}>
