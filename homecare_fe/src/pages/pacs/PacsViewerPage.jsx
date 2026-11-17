@@ -133,6 +133,7 @@ export default function PacsViewerPage() {
   const navigate = useNavigate();
   const [reportingOpen, setReportingOpen] = useState(false);
   const [patientInfoOpen, setPatientInfoOpen] = useState(false);
+  const [showOverlay, setShowOverlay] = useState(true);
   // Tỉ lệ bề rộng bảng báo cáo khi chia màn hình (kéo thanh ngăn để đổi)
   const [reportWidthPct, setReportWidthPct] = useState(44);
   const splitContainerRef = useRef(null);
@@ -555,6 +556,7 @@ export default function PacsViewerPage() {
     probe,
     measurementCount: (annotations[currentKey] || []).length,
     saveStatus,
+    showOverlay,
   };
 
   // Sidebar/TopNav: meta hiện tại (đủ để hiện preset DICOM, modality)
@@ -778,6 +780,8 @@ export default function PacsViewerPage() {
               onToggleCine={() => setIsPlayingCine((p) => !p)}
               onDownloadImage={handleDownloadImage}
               onPrintImage={handlePrintImage}
+              showOverlay={showOverlay}
+              onToggleOverlay={() => setShowOverlay((v) => !v)}
             />
           )}
 

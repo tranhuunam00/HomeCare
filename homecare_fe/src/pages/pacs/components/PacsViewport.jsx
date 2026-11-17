@@ -335,7 +335,7 @@ export default function PacsViewport({
         }}
       />
 
-      {overlayProps && instancesCount > 0 && (
+      {overlayProps && instancesCount > 0 && overlayProps.showOverlay !== false && (
         <PacsViewportOverlay
           {...overlayProps}
           zoom={zoom}

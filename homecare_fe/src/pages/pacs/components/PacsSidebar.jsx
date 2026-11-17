@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Tooltip, Switch, message } from 'antd';
+import { Tooltip, Switch, message, Modal } from 'antd';
 import {
   DownOutlined,
   RightOutlined,
@@ -166,7 +166,10 @@ export default function PacsSidebar({
   onToggleCine,
   onDownloadImage,
   onPrintImage,
+  showOverlay = true,
+  onToggleOverlay,
 }) {
+  const [helpOpen, setHelpOpen] = useState(false);
   const [open, setOpen] = useState({
     layout: true,
     measure: true,
@@ -201,6 +204,15 @@ export default function PacsSidebar({
     const order = ['default', 'rainbow', 'hot_iron', 'inverted'];
     const i = order.indexOf(colorLut);
     return setColorLut(order[(i + 1) % order.length]);
+  };
+
+  const toggleFullscreen = () => {
+    try {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+      else document.exitFullscreen?.();
+    } catch {
+      devToast();
+    }
   };
 
   return (
@@ -298,7 +310,7 @@ export default function PacsSidebar({
         <ToolBtn title={`Làm mượt ảnh: ${isSmooth ? 'Bật' : 'Tắt'}`} active={isSmooth} onClick={onToggleSmooth}><DotChartOutlined /></ToolBtn>
 
         <ToolBtn title="Bảng màu (Color LUT)" active={colorLut !== 'default'} onClick={nextLut}><BgColorsOutlined /></ToolBtn>
-        <ToolBtn title="Trộn màu (đang phát triển)" onClick={devToast}>{emoji('🎨')}</ToolBtn>
+        <ToolBtn title="Đổi bảng màu (Color LUT)" active={colorLut !== 'default'} onClick={nextLut}>{emoji('🎨')}</ToolBtn>
         <ToolBtn title={`Đảo màu (Invert): ${invert ? 'Bật' : 'Tắt'}`} active={invert} onClick={() => setInvert?.((v) => !v)}>{InvertGlyph}</ToolBtn>
       </Section>
 
@@ -307,7 +319,7 @@ export default function PacsSidebar({
         <ToolBtn title="Đồng bộ cuộn" color="#38bdf8" active={!!sync.scroll} onClick={() => onChangeSync?.({ scroll: !sync.scroll })}><LinkOutlined /></ToolBtn>
         <ToolBtn title="Đường tham chiếu" color="#38bdf8" active={!!sync.refLines} onClick={() => onChangeSync?.({ refLines: !sync.refLines })}><OrderedListOutlined /></ToolBtn>
         <ToolBtn title="Đồng bộ trục X/Y/Z (đang phát triển)" onClick={devToast}><NodeIndexOutlined /></ToolBtn>
-        <ToolBtn title="Toàn màn hình (đang phát triển)" onClick={devToast}><FullscreenOutlined /></ToolBtn>
+        <ToolBtn title="Toàn màn hình" onClick={toggleFullscreen}><FullscreenOutlined /></ToolBtn>
 
         <ToolBtn title="Đồng bộ WW/WL" color="#f59e0b" active={!!sync.window} onClick={() => onChangeSync?.({ window: !sync.window })}><BulbOutlined /></ToolBtn>
         <ToolBtn title="Đồng bộ zoom / kéo" color="#38bdf8" active={!!sync.zoomPan} onClick={() => onChangeSync?.({ zoomPan: !sync.zoomPan })}><LinkOutlined rotate={45} /></ToolBtn>
@@ -348,7 +360,7 @@ export default function PacsSidebar({
       <Section id="more" title="More Tools" open={open.more} onToggle={() => toggle('more')}>
         <ToolBtn title="Danh sách lát (đang phát triển)" onClick={devToast}><CheckSquareOutlined /></ToolBtn>
         <ToolBtn title={`Cine (phát/dừng): ${isPlayingCine ? 'Đang chạy' : 'Dừng'}`} color="#f59e0b" active={isPlayingCine} onClick={onToggleCine}><UnorderedListOutlined /></ToolBtn>
-        <ToolBtn title="Ẩn/hiện overlay (đang phát triển)" onClick={devToast}><EyeOutlined /></ToolBtn>
+        <ToolBtn title={showOverlay ? 'Ẩn thông tin overlay' : 'Hiện thông tin overlay'} active={!showOverlay} onClick={onToggleOverlay || devToast}><EyeOutlined /></ToolBtn>
         <ToolBtn title="Ghi chú / bình luận (đang phát triển)" onClick={devToast}><MessageOutlined /></ToolBtn>
 
         <ToolBtn title="Tải lát cắt hiện tại (PNG)" color="#38bdf8" onClick={onDownloadImage || devToast}><DownloadOutlined /></ToolBtn>
@@ -357,7 +369,7 @@ export default function PacsSidebar({
         <ToolBtn title="In lát cắt hiện tại" color="#38bdf8" onClick={onPrintImage || devToast}><PrinterOutlined /></ToolBtn>
 
         <ToolBtn title="Cài đặt (đang phát triển)" onClick={devToast}><SettingOutlined /></ToolBtn>
-        <ToolBtn title="Trợ giúp phím tắt (đang phát triển)" color="#38bdf8" onClick={devToast}><QuestionCircleOutlined /></ToolBtn>
+        <ToolBtn title="Trợ giúp phím tắt" color="#38bdf8" onClick={() => setHelpOpen(true)}><QuestionCircleOutlined /></ToolBtn>
       </Section>
 
       {/* Sync chi tiết (công tắc) - giữ lựa chọn rõ ràng cho đồng bộ nhiều ô */}
@@ -375,9 +387,40 @@ export default function PacsSidebar({
           </label>
         ))}
       </div>
+
+      <Modal open={helpOpen} onCancel={() => setHelpOpen(false)} footer={null} width={460} title="Phím tắt D-RADS PACS">
+        <div style={{ display: 'flex', flexDirection: 'column', fontSize: 13 }}>
+          {SHORTCUTS.map((s) => (
+            <div key={s.k} style={{ display: 'flex', justifyContent: 'space-between', gap: 16, padding: '6px 2px', borderBottom: '1px solid #f1f5f9' }}>
+              <kbd style={{ fontFamily: 'monospace', background: '#f1f5f9', padding: '1px 7px', borderRadius: 4, color: '#0f172a' }}>{s.k}</kbd>
+              <span style={{ color: '#334155', textAlign: 'right' }}>{s.d}</span>
+            </div>
+          ))}
+        </div>
+      </Modal>
     </div>
   );
 }
+
+const SHORTCUTS = [
+  { k: '← → ↑ ↓', d: 'Chuyển lát trước/sau' },
+  { k: 'PageUp / PageDown', d: 'Nhảy 10 lát' },
+  { k: 'Home / End', d: 'Lát đầu / lát cuối' },
+  { k: '1 – 9', d: 'Preset cửa sổ CT (Não, Phổi, Xương…)' },
+  { k: '0', d: 'Cửa sổ mặc định (theo DICOM)' },
+  { k: 'A / C / S / V', d: 'MPR Axial / Coronal / Sagittal / 3D (khi mở MPR)' },
+  { k: 'W', d: 'Công cụ chỉnh sáng/tương phản (WW/WL)' },
+  { k: 'L', d: 'Đo chiều dài' },
+  { k: 'E', d: 'Đo diện tích elip' },
+  { k: 'P', d: 'Kéo ảnh (Pan)' },
+  { k: 'M', d: 'Kính lúp (Magnify)' },
+  { k: 'I', d: 'Đảo âm/dương bản' },
+  { k: 'B', d: 'Bật/tắt làm mịn ảnh' },
+  { k: 'C', d: 'Chạy/dừng Cine' },
+  { k: 'R', d: 'Đặt lại hiển thị' },
+  { k: 'Space / Ctrl+S', d: 'Chụp ảnh key' },
+  { k: 'Ctrl+Z', d: 'Hoàn tác số đo' },
+];
 
 /* ============================ Helpers ============================ */
 
