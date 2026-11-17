@@ -490,7 +490,7 @@ const Home = () => {
         placement="left"
         open={deviceIsMobile && mobileDrawerOpen}
         onClose={() => setMobileDrawerOpen(false)}
-        width={272}
+        width={236}
         styles={{ body: { padding: "12px 0" } }}
       >
         <div
@@ -526,7 +526,7 @@ const Home = () => {
             collapsible
             collapsed={collapsed}
             onCollapse={(value) => setCollapsed(value)}
-            width={240}
+            width={200}
             style={{
               background: "rgba(202, 196, 250, 0.1)",
               paddingTop: 0,

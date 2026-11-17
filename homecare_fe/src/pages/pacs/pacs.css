@@ -60,6 +60,29 @@
   opacity: 0.9;
 }
 
+/* TopNav: ẩn chữ tiêu đề khi khung hẹp để thanh công cụ không bị tràn/vỡ dòng */
+@media (max-width: 1280px) {
+  .pacs-topnav-title { display: none; }
+}
+
+/* Thanh kéo chia màn hình viewer / báo cáo */
+.pacs-split-handle:hover {
+  background: #2563eb !important;
+}
+.pacs-split-handle:hover > div {
+  background: #bfdbfe !important;
+}
+
+/* Nút lưới công cụ trong sidebar (Measurement / Image / MPR ...) */
+.pacs-tool-grid-btn:hover {
+  border-color: #3b82f6 !important;
+  color: #e2e8f0;
+  background-color: #152138 !important;
+}
+.pacs-tool-grid-btn[aria-pressed='true']:hover {
+  filter: brightness(1.08);
+}
+
 /* Công tắc đồng bộ trong sidebar */
 .pacs-switch-row {
   display: flex;

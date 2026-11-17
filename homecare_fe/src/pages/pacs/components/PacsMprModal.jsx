@@ -34,6 +34,8 @@ export default function PacsMprModal({
   modality = 'MR',
   // inline=true: render MPR thẳng vào viewport chính (không bọc Modal popup)
   inline = false,
+  // Bố cục mở đầu: 'AXIAL' | 'CORONAL' | 'SAGITTAL' | '1x2' | '2x2' | '3D_MAX'
+  initialLayout = null,
 }) {
   // "Đang hoạt động": với modal là khi mở; với inline là luôn (chỉ mount khi cần)
   const isActive = inline || open;
@@ -67,7 +69,12 @@ export default function PacsMprModal({
   const rows = sampleMeta.rows || 256;
   const cols = sampleMeta.columns || 256;
 
-  const [layoutMode, setLayoutMode] = useState('1x2');
+  const [layoutMode, setLayoutMode] = useState(initialLayout || '1x2');
+
+  // Sidebar chọn mặt cắt khác -> đổi bố cục MPR đang hiển thị
+  useEffect(() => {
+    if (initialLayout) setLayoutMode(initialLayout);
+  }, [initialLayout]);
 
   const [active2DPlane, setActive2DPlane] = useState('AXIAL');
   const [isControlsMinimized, setIsControlsMinimized] = useState(false);

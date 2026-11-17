@@ -90,7 +90,7 @@ export default function PacsTopNav({
       }}
     >
       {/* Brand Title & Navigation */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0, whiteSpace: 'nowrap' }}>
         <Tooltip title="Quay về danh sách ca (Worklist)">
           <Button
             size="small"
@@ -145,7 +145,9 @@ export default function PacsTopNav({
             fontSize: '14px',
             letterSpacing: '0.5px',
             color: '#f8fafc',
+            whiteSpace: 'nowrap',
           }}
+          className="pacs-topnav-title"
         >
           D-RADS PACS VIEWER
         </span>
