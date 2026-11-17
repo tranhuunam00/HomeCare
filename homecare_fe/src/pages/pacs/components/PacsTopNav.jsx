@@ -29,7 +29,6 @@ export default function PacsTopNav({
   setActiveTool,
   invert,
   setInvert,
-  rotation,
   setRotation,
   onReset,
   onCaptureKeyImage,

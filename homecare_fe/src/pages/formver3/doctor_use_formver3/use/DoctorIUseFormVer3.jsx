@@ -312,7 +312,12 @@ export default function DoctorUseDFormVer3({
         }
       }
     } catch (error) {
-      toast.error(error.message || error);
+      // Lỗi API đã được axiosClient (withErrorToast) hiện thông báo thân thiện của backend
+      // (vd "Chỉ được xử lý ở trạng thái Đang Đọc hoặc Đang Duyệt"). Không toast trùng chuỗi
+      // kỹ thuật "Request failed with status code 400". Chỉ báo khi là lỗi phía client (không có response).
+      if (!error?.response) {
+        toast.error(error?.message || 'Lưu kết quả thất bại');
+      }
     } finally {
       setLoading(false);
       pendingAction.current = null;

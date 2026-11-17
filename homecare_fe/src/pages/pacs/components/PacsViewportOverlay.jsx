@@ -107,11 +107,11 @@ export default function PacsViewportOverlay({
   const calibration = describeCalibration(meta || (inst.pixelSpacing ? inst : null));
   const plane = getImagePlane(meta || inst);
 
-  // Thông tin bệnh nhân: ưu tiên hồ sơ HomeCare (DICOM có thể đã bị ẩn danh / mã hoá bởi PACS nguồn)
-  const patientName = db?.patientName || m.patientName || '';
-  const patientId = db?.patientId || m.patientId || '';
-  const sexAge = [db?.patientGender || m.patientSex, db?.patientAge || m.patientAge].filter(Boolean).join(' · ');
-  const dob = db?.patientBirthYear ? `NS ${db.patientBirthYear}` : m.patientBirthDate ? `NS ${m.patientBirthDate}` : '';
+  // Màn hình DICOM: ưu tiên thông tin BN ĐỌC TỪ CHÍNH FILE DICOM (fallback hồ sơ HomeCare nếu tag trống)
+  const patientName = m.patientName || db?.patientName || '';
+  const patientId = m.patientId || db?.patientId || '';
+  const sexAge = [m.patientSex || db?.patientGender, m.patientAge || db?.patientAge].filter(Boolean).join(' · ');
+  const dob = m.patientBirthDate ? `NS ${m.patientBirthDate}` : db?.patientBirthYear ? `NS ${db.patientBirthYear}` : '';
 
   const modality = m.modality || inst.modality || '';
   const frameText = (inst.frameCount || 1) > 1 ? ` · Frame ${(inst.frameIndex || 0) + 1}/${inst.frameCount}` : '';

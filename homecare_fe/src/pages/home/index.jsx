@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import API_CALL from "../../services/axiosClient";
 import { Avatar, Badge, Button, Checkbox, Col, Drawer, Layout, Menu, Space, Tooltip } from "antd";
@@ -287,7 +287,7 @@ const Home = () => {
     setFilterPatient: setPendingFilters,
     counts,
   } = useGlobalAuth();
-  const [logo, setLogo] = useState("/logo_home_care.png");
+  const [logo] = useState("/logo_home_care.png");
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();

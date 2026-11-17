@@ -560,23 +560,33 @@ export default function PacsViewerPage() {
   // Sidebar/TopNav: meta hiện tại (đủ để hiện preset DICOM, modality)
   const navMeta = currentMeta || (currentInstance ? { modality: currentInstance.modality, windowPresets: currentInstance.windowPresets || [] } : null);
 
-  // Thông tin bệnh nhân & ca chụp (ưu tiên dữ liệu DB, bổ sung từ DICOM)
+  // Thông tin BN theo 2 nguồn riêng: hệ thống HomeCare (DB) và ảnh DICOM
   const patientInfo = useMemo(() => {
     const db = study?.dbPatient || {};
     const m = currentMeta || {};
-    const sexAge = [db.patientGender || m.patientSex, db.patientAge || m.patientAge].filter(Boolean).join(' · ');
-    return [
-      { label: 'Họ tên', value: db.patientName || m.patientName || '—' },
-      { label: 'Mã BN (PID)', value: db.patientId || m.patientId || '—' },
-      { label: 'Giới tính / Tuổi', value: sexAge || '—' },
-      { label: 'Năm sinh', value: db.patientBirthYear || m.patientBirthDate || '—' },
-      { label: 'Ngày chụp', value: [m.studyDate || db.studyDate || study?.studyDate, m.studyTime].filter(Boolean).join(' ') || '—' },
-      { label: 'Modality', value: currentMeta?.modality || activeSeries?.modality || study?.modality || '—' },
-      { label: 'Mô tả ca chụp', value: m.studyDescription || study?.studyDescription || '—' },
-      { label: 'Accession', value: m.accessionNumber || '—' },
-      { label: 'Cơ sở chụp', value: m.institutionName || '—' },
+    // Một số tag DICOM (vd Cơ sở) có thể là chuỗi mã hóa -> chỉ hiện nếu là văn bản sạch
+    const cleanText = (v) => (v && /^[\p{L}\p{N}\s.,\-()]+$/u.test(v) ? v : null);
+    const dash = (v) => (v || v === 0 ? v : '—');
+    const homecare = [
+      { label: 'Họ tên', value: dash(db.patientName) },
+      { label: 'Mã BN (PID)', value: dash(db.patientId) },
+      { label: 'Giới tính / Tuổi', value: [db.patientGender, db.patientAge].filter(Boolean).join(' · ') || '—' },
+      { label: 'Năm sinh', value: dash(db.patientBirthYear) },
+      { label: 'Ngày tạo ca', value: dash(db.studyDate || study?.studyDate) },
+    ];
+    const dicom = [
+      { label: 'Họ tên', value: dash(m.patientName) },
+      { label: 'Mã BN (PID)', value: dash(m.patientId) },
+      { label: 'Giới tính / Tuổi', value: [m.patientSex, m.patientAge].filter(Boolean).join(' · ') || '—' },
+      { label: 'Ngày sinh', value: dash(m.patientBirthDate) },
+      { label: 'Ngày chụp', value: [m.studyDate, m.studyTime].filter(Boolean).join(' ') || '—' },
+      { label: 'Modality', value: dash(m.modality || activeSeries?.modality) },
+      { label: 'Mô tả ca chụp', value: dash(m.studyDescription) },
+      { label: 'Accession', value: dash(m.accessionNumber) },
+      { label: 'Cơ sở chụp', value: dash(cleanText(m.institutionName)) },
       { label: 'Số series / ảnh', value: `${seriesList.length} series · ${instances.length} ảnh` },
     ];
+    return { homecare, dicom };
   }, [study, currentMeta, activeSeries, seriesList.length, instances.length]);
 
   const mainViewportElement = (
@@ -1021,21 +1031,31 @@ export default function PacsViewerPage() {
           </span>
         }
       >
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          {patientInfo.map((row) => (
-            <div
-              key={row.label}
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                gap: 16,
-                padding: '7px 2px',
-                borderBottom: '1px solid #f1f5f9',
-                fontSize: 13,
-              }}
-            >
-              <span style={{ color: '#64748b', flexShrink: 0 }}>{row.label}</span>
-              <span style={{ color: '#0f172a', fontWeight: 600, textAlign: 'right', wordBreak: 'break-word' }}>{row.value}</span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {[
+            { key: 'hc', title: 'Theo hệ thống HomeCare (ca bệnh)', color: '#0b6b4f', rows: patientInfo.homecare },
+            { key: 'dc', title: 'Theo dữ liệu DICOM (ảnh chụp)', color: '#2563eb', rows: patientInfo.dicom },
+          ].map((grp) => (
+            <div key={grp.key}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: grp.color, textTransform: 'uppercase', letterSpacing: 0.3, marginBottom: 4 }}>
+                {grp.title}
+              </div>
+              {grp.rows.map((row) => (
+                <div
+                  key={row.label}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    gap: 16,
+                    padding: '6px 2px',
+                    borderBottom: '1px solid #f1f5f9',
+                    fontSize: 13,
+                  }}
+                >
+                  <span style={{ color: '#64748b', flexShrink: 0 }}>{row.label}</span>
+                  <span style={{ color: '#0f172a', fontWeight: 600, textAlign: 'right', wordBreak: 'break-word' }}>{row.value}</span>
+                </div>
+              ))}
             </div>
           ))}
         </div>
