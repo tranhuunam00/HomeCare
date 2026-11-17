@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { message, Alert, Button } from 'antd';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { message, Alert, Button, Drawer } from 'antd';
+import { CloseOutlined, ArrowLeftOutlined } from '@ant-design/icons';
+import DoctorUseDFormVer3 from '../formver3/doctor_use_formver3/use/DoctorIUseFormVer3';
 import { renderDicomToCanvas } from './services/dicomDecoder';
 import { usePacsStudy } from './hooks/usePacsStudy';
 import { usePacsThumbnails } from './hooks/usePacsThumbnails';
@@ -127,6 +129,24 @@ export default function PacsViewerPage() {
     },
     [activeSeriesIndices, currentIndex, setCurrentIndex]
   );
+
+  const navigate = useNavigate();
+  const [reportingOpen, setReportingOpen] = useState(false);
+  const [leftNavDrawerOpen, setLeftNavDrawerOpen] = useState(false);
+
+  const handleToggleReporting = useCallback(() => {
+    if (!patientDiagnoseId) {
+      message.info('Vui lòng mở ca từ Worklist để sử dụng chức năng đọc kết quả (reporting).');
+      return;
+    }
+    setReportingOpen((prev) => {
+      const next = !prev;
+      if (next && window.innerWidth < 1600) {
+        setRightSliceStripOpen(false);
+      }
+      return next;
+    });
+  }, [patientDiagnoseId]);
 
   const [leftSeriesStripOpen, setLeftSeriesStripOpen] = useState(true);
   const [rightSliceStripOpen, setRightSliceStripOpen] = useState(true);
@@ -541,6 +561,10 @@ export default function PacsViewerPage() {
         cineFps={cineFps}
         onChangeCineFps={setCineFps}
         totalSlices={activeSeriesIndices.length}
+        onBackWorklist={() => navigate('/home')}
+        reportingOpen={reportingOpen}
+        onToggleReporting={handleToggleReporting}
+        onToggleLeftNav={() => setLeftNavDrawerOpen(true)}
       />
 
       {(saveStatus?.state === 'error' || saveStatus?.state === 'offline-restore') && (
@@ -562,105 +586,228 @@ export default function PacsViewerPage() {
       )}
 
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-        {!isExpanded && (
-          <PacsSidebar
-            study={study}
-            currentMeta={activeAttachedFile ? null : currentMeta}
-            instances={instances}
-            currentIndex={currentIndex}
-            activeSliceIndex={activeSlicePos}
-            activeSeriesTotal={activeSeriesIndices.length}
-            patientDiagnoseId={patientDiagnoseId}
-            layout={layout}
-            setLayout={(k) => {
-              setLayout(k);
-              if (k === '1x1') setActiveViewport(0);
+        <div
+          style={{
+            display: 'flex',
+            flex: reportingOpen ? '1 1 52%' : '1 1 100%',
+            minWidth: 0,
+            overflow: 'hidden',
+          }}
+        >
+          {!isExpanded && (
+            <PacsSidebar
+              study={study}
+              currentMeta={activeAttachedFile ? null : currentMeta}
+              instances={instances}
+              currentIndex={currentIndex}
+              activeSliceIndex={activeSlicePos}
+              activeSeriesTotal={activeSeriesIndices.length}
+              patientDiagnoseId={patientDiagnoseId}
+              layout={layout}
+              setLayout={(k) => {
+                setLayout(k);
+                if (k === '1x1') setActiveViewport(0);
+              }}
+              activeTool={activeTool}
+              setActiveTool={setActiveTool}
+              onClearAnnotations={handleClearAnnotations}
+              onUploadDicom={uploadDicom}
+              onReloadStudy={loadStudy}
+              flipH={flipH}
+              setFlipH={setFlipH}
+              flipV={flipV}
+              setFlipV={setFlipV}
+              rotation={rotation}
+              setRotation={setRotation}
+              onReset={handleReset}
+              onOpenMpr={handleOpenMpr}
+              canBuild3D={canBuild3D}
+              activeSeriesSliceCount={activeSeriesInstances.length}
+              sync={sync}
+              onChangeSync={changeSync}
+            />
+          )}
+
+          {!isExpanded && (
+            <PacsSeriesStrip
+              isOpen={leftSeriesStripOpen}
+              onToggleOpen={toggleLeftStrip}
+              seriesList={seriesList}
+              activeSeriesUid={activeSeriesUid}
+              onSelectSeries={handleSelectSeries}
+              seriesThumbnails={seriesThumbnails}
+              attachedFiles={study?.attachedFiles || EMPTY_LIST}
+              activeAttachedFile={activeAttachedFile}
+              onSelectAttachedFile={setActiveAttachedFile}
+            />
+          )}
+
+          {activeAttachedFile ? (
+            <PacsAttachmentViewer
+              file={activeAttachedFile}
+              onClose={() => setActiveAttachedFile(null)}
+              apiEndpoint={apiEndpoint}
+              token={localStorage.getItem('TOKEN') || ''}
+            />
+          ) : layout === '1x1' ? (
+            mainViewportElement
+          ) : (
+            <PacsMultiViewportGrid
+              layout={layout}
+              seriesList={seriesList}
+              dicomCache={dicomCache}
+              previewCache={previewCache}
+              requestInstance={requestInstance}
+              voiBySeries={voiBySeries}
+              setVoiBySeries={setVoiBySeries}
+              activeViewport={activeViewport}
+              setActiveViewport={setActiveViewport}
+              invert={invert}
+              colorLut={colorLut}
+              isSmooth={isSmooth}
+              currentIndex={currentIndex}
+              onActiveSliceChange={setCurrentIndex}
+              sync={sync}
+              annotations={annotations}
+              activeView={activeView}
+              onActiveViewChange={applyActiveView}
+              activeViewportElement={mainViewportElement}
+              onMaximize={(globalIdx, view) => {
+                setCurrentIndex(globalIdx);
+                setActiveViewport(0);
+                setLayout('1x1');
+                if (view) applyActiveView(view);
+              }}
+            />
+          )}
+
+          {!activeAttachedFile && (
+            <PacsSliceStrip
+              isOpen={rightSliceStripOpen}
+              onToggleOpen={toggleRightStrip}
+              activeSeries={activeSeries}
+              currentIndex={currentIndex}
+              activeSlicePos={activeSlicePos}
+              sliceThumbnails={sliceThumbnails}
+              onSelectSlice={setCurrentIndex}
+            />
+          )}
+        </div>
+
+        {/* Bảng đọc kết quả chia đôi màn hình */}
+        {reportingOpen && patientDiagnoseId && (
+          <div
+            style={{
+              flex: '0 0 48%',
+              minWidth: 420,
+              maxWidth: '55%',
+              display: 'flex',
+              flexDirection: 'column',
+              background: '#ffffff',
+              borderLeft: '2px solid #1e293b',
+              boxShadow: '-4px 0 16px rgba(0,0,0,0.25)',
+              zIndex: 10,
+              overflow: 'hidden',
             }}
-            activeTool={activeTool}
-            setActiveTool={setActiveTool}
-            onClearAnnotations={handleClearAnnotations}
-            onUploadDicom={uploadDicom}
-            onReloadStudy={loadStudy}
-            flipH={flipH}
-            setFlipH={setFlipH}
-            flipV={flipV}
-            setFlipV={setFlipV}
-            rotation={rotation}
-            setRotation={setRotation}
-            onReset={handleReset}
-            onOpenMpr={handleOpenMpr}
-            canBuild3D={canBuild3D}
-            activeSeriesSliceCount={activeSeriesInstances.length}
-            sync={sync}
-            onChangeSync={changeSync}
-          />
-        )}
-
-        {!isExpanded && (
-          <PacsSeriesStrip
-            isOpen={leftSeriesStripOpen}
-            onToggleOpen={toggleLeftStrip}
-            seriesList={seriesList}
-            activeSeriesUid={activeSeriesUid}
-            onSelectSeries={handleSelectSeries}
-            seriesThumbnails={seriesThumbnails}
-            attachedFiles={study?.attachedFiles || EMPTY_LIST}
-            activeAttachedFile={activeAttachedFile}
-            onSelectAttachedFile={setActiveAttachedFile}
-          />
-        )}
-
-        {activeAttachedFile ? (
-          <PacsAttachmentViewer
-            file={activeAttachedFile}
-            onClose={() => setActiveAttachedFile(null)}
-            apiEndpoint={apiEndpoint}
-            token={localStorage.getItem('TOKEN') || ''}
-          />
-        ) : layout === '1x1' ? (
-          mainViewportElement
-        ) : (
-          <PacsMultiViewportGrid
-            layout={layout}
-            seriesList={seriesList}
-            dicomCache={dicomCache}
-            previewCache={previewCache}
-            requestInstance={requestInstance}
-            voiBySeries={voiBySeries}
-            setVoiBySeries={setVoiBySeries}
-            activeViewport={activeViewport}
-            setActiveViewport={setActiveViewport}
-            invert={invert}
-            colorLut={colorLut}
-            isSmooth={isSmooth}
-            currentIndex={currentIndex}
-            onActiveSliceChange={setCurrentIndex}
-            sync={sync}
-            annotations={annotations}
-            activeView={activeView}
-            onActiveViewChange={applyActiveView}
-            activeViewportElement={mainViewportElement}
-            onMaximize={(globalIdx, view) => {
-              setCurrentIndex(globalIdx);
-              setActiveViewport(0);
-              setLayout('1x1');
-              if (view) applyActiveView(view);
-            }}
-          />
-        )}
-
-        {!activeAttachedFile && (
-          <PacsSliceStrip
-            isOpen={rightSliceStripOpen}
-            onToggleOpen={toggleRightStrip}
-            activeSeries={activeSeries}
-            currentIndex={currentIndex}
-            activeSlicePos={activeSlicePos}
-            sliceThumbnails={sliceThumbnails}
-            onSelectSlice={setCurrentIndex}
-          />
+          >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '8px 14px',
+                background: '#0b101b',
+                borderBottom: '1px solid #1e293b',
+                color: '#f8fafc',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontWeight: 700, fontSize: '13px', color: '#38bdf8' }}>
+                  BÁO CÁO KẾT QUẢ CHẨN ĐOÁN (D-RADS)
+                </span>
+                {study?.dbPatient?.patientName && (
+                  <span style={{ fontSize: '12px', color: '#94a3b8' }}>
+                    · {study.dbPatient.patientName}
+                  </span>
+                )}
+              </div>
+              <Button
+                size="small"
+                type="text"
+                icon={<CloseOutlined />}
+                onClick={() => setReportingOpen(false)}
+                style={{ color: '#94a3b8' }}
+              >
+                Thu gọn
+              </Button>
+            </div>
+            <div style={{ flex: 1, overflowY: 'auto', padding: '12px 14px' }}>
+              <DoctorUseDFormVer3
+                patient_diagnose_id={patientDiagnoseId}
+                isUse={true}
+                initEditMode={true}
+                isSplitScreen={true}
+              />
+            </div>
+          </div>
         )}
       </div>
+
+      <Drawer
+        placement="left"
+        open={leftNavDrawerOpen}
+        onClose={() => setLeftNavDrawerOpen(false)}
+        width={260}
+        styles={{ body: { padding: '12px 16px', background: '#f8fafc' } }}
+        title={
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <img src="/logo_home_care.png" alt="Logo" style={{ width: 28, height: 28, borderRadius: 6 }} />
+            <span style={{ fontWeight: 700, fontSize: 14, color: '#0b6b4f' }}>RADIOLOGY · D-RADS</span>
+          </div>
+        }
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <Button
+            type="primary"
+            icon={<ArrowLeftOutlined />}
+            onClick={() => navigate('/home')}
+            style={{ width: '100%', backgroundColor: '#0b6b4f', borderColor: '#0b6b4f', fontWeight: 600 }}
+          >
+            Quay về Worklist
+          </Button>
+          <div style={{ height: 1, background: '#e2e8f0', margin: '8px 0' }} />
+          <Button
+            type="default"
+            onClick={() => {
+              navigate('/home');
+              setLeftNavDrawerOpen(false);
+            }}
+            style={{ textAlign: 'left', width: '100%' }}
+          >
+            Danh sách ca bệnh (Worklist)
+          </Button>
+          <Button
+            type="default"
+            onClick={() => {
+              navigate('/home/clinics');
+              setLeftNavDrawerOpen(false);
+            }}
+            style={{ textAlign: 'left', width: '100%' }}
+          >
+            Quản lý phòng khám
+          </Button>
+          <Button
+            type="default"
+            onClick={() => {
+              navigate('/home/templates-print');
+              setLeftNavDrawerOpen(false);
+            }}
+            style={{ textAlign: 'left', width: '100%' }}
+          >
+            Mẫu in kết quả
+          </Button>
+        </div>
+      </Drawer>
 
       <PacsMprModal
         open={mprOpen}

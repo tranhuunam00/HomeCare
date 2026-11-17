@@ -112,7 +112,6 @@ const PatientTablePage = ({ PID = null }) => {
 
   useEffect(() => {
     setIsOnWorkList(true);
-    setCollapsed(true);
     fetchTSAndExamParts();
     return () => setIsOnWorkList(false);
   }, []);
@@ -231,9 +230,6 @@ const PatientTablePage = ({ PID = null }) => {
   useEffect(() => {
     if (selectedPatientDiagnose?.id) {
       fetchPatientsByChosen();
-      setCollapsed(true);
-    } else {
-      setCollapsed(false);
     }
   }, [selectedPatientDiagnose?.id, selectedPatientDiagnose?.CCCD, selectedPatientDiagnose?.PID]);
 
@@ -386,6 +382,10 @@ const PatientTablePage = ({ PID = null }) => {
                 onClick: () => {
                   setRightPanelMode("detail");
                   setSelectedPatientDiagnose(record);
+                },
+                onDoubleClick: () => {
+                  setSelectedPatientDiagnose(record);
+                  navigate(`/pacs/viewer?patientDiagnoseId=${record.id}`);
                 },
                 style: { cursor: "pointer" },
               })}

@@ -12,6 +12,7 @@ import { parseImageDescriptionState } from "../doctorUseFormVer3.utils";
 export default function useDoctorFormData({
   form,
   selectedPatientDiagnose,
+  patientDiagnoseId: propPatientDiagnoseId,
   doctorUseFormVer3Id,
   languageTranslate,
   setLanguageTransslate,
@@ -110,14 +111,38 @@ export default function useDoctorFormData({
 
   // Main data loader
   useEffect(() => {
+    const activePatientDiagnoseId = propPatientDiagnoseId || selectedPatientDiagnose?.id;
+    if (!activePatientDiagnoseId) return;
+
     const fetchDataFromServerWhenHaveIDs = async () => {
       try {
         setLoading(true);
         const apiCalls = [
-          API_CALL.get("/patient-diagnose/" + selectedPatientDiagnose?.id),
+          API_CALL.get("/patient-diagnose/" + activePatientDiagnoseId),
         ];
         if (idEdit) {
           apiCalls.push(API_CALL.get("/doctorUseFormVer3/detail/" + idEdit));
+        } else {
+          apiCalls.push(
+            API_CALL.get("/doctorUseFormVer3", {
+              params: {
+                id_patient_diagnose: activePatientDiagnoseId,
+                orderBy: "id",
+                orderDir: "DESC",
+                page: 1,
+                limit: 1,
+              },
+            })
+              .then((res) => {
+                const latest = res.data?.data?.data?.[0] || res.data?.data?.[0];
+                if (latest?.id) {
+                  setIdEdit(latest.id);
+                  return API_CALL.get("/doctorUseFormVer3/detail/" + latest.id);
+                }
+                return null;
+              })
+              .catch(() => null)
+          );
         }
 
         const [diagnoseRes, dradsRes] = await Promise.all(apiCalls);
@@ -143,7 +168,7 @@ export default function useDoctorFormData({
           id_formver3_name: doctorUseFormVer3Server?.id_formver3_formver3?.id_formver3_name,
         });
 
-        if (!idEdit) {
+        if (!idEdit && !doctorUseFormVer3Server) {
           setInitialSnap({ patientDiagnose: patientDiagnoseData });
         } else {
           formValues.id_formver3_name = doctorUseFormVer3Server?.id_formver3_formver3?.id_formver3_name;
@@ -160,8 +185,8 @@ export default function useDoctorFormData({
           setImageList(descImages);
 
           const parsedState = parseImageDescriptionState(doctorUseFormVer3Server?.imageDescription);
-          setImagingMode(parsedState.mode);
-          setIsFreeText(parsedState.isFreeText);
+          setImagingMode("STRUCTURED_TABLE");
+          setIsFreeText(false);
           setFreeTextContent(parsedState.content);
           setFastSonoData(parsedState.fastSonoData);
           setImagingRows(parsedState.rows);
@@ -186,10 +211,8 @@ export default function useDoctorFormData({
       }
     };
 
-    if (selectedPatientDiagnose?.id) {
-      fetchDataFromServerWhenHaveIDs();
-    }
-  }, [selectedPatientDiagnose?.id, idEdit]);
+    fetchDataFromServerWhenHaveIDs();
+  }, [propPatientDiagnoseId, selectedPatientDiagnose?.id, idEdit]);
 
   // Tự fill mẫu in nếu chưa chọn (lần đọc đầu): ưu tiên mẫu khớp phân hệ của ca → mẫu active → mẫu đầu tiên
   useEffect(() => {

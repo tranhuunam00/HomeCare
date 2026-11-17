@@ -18,6 +18,9 @@ import {
   UploadOutlined,
   CaretRightOutlined,
   PauseOutlined,
+  ArrowLeftOutlined,
+  FileTextOutlined,
+  MenuOutlined,
 } from '@ant-design/icons';
 import { WW_WL_PRESETS, PACS_TOOLS } from '../constants/pacs.constants';
 
@@ -49,6 +52,10 @@ export default function PacsTopNav({
   totalSlices = 1,
   isSmooth = true,
   onToggleSmooth,
+  onBackWorklist,
+  reportingOpen = false,
+  onToggleReporting,
+  onToggleLeftNav,
 }) {
   const navigate = useNavigate();
 
@@ -82,15 +89,51 @@ export default function PacsTopNav({
         userSelect: 'none',
       }}
     >
-      {/* Brand Title */}
+      {/* Brand Title & Navigation */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <Tooltip title="Quay về danh sách ca (Worklist)">
+          <Button
+            size="small"
+            icon={<ArrowLeftOutlined />}
+            onClick={onBackWorklist || (() => navigate('/home'))}
+            style={{
+              backgroundColor: '#1e293b',
+              borderColor: '#334155',
+              color: '#38bdf8',
+              fontWeight: '600',
+              fontSize: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4,
+            }}
+          >
+            Worklist
+          </Button>
+        </Tooltip>
+
+        {onToggleLeftNav && (
+          <Tooltip title="Menu chức năng & Lọc trạng thái ca">
+            <Button
+              size="small"
+              icon={<MenuOutlined />}
+              onClick={onToggleLeftNav}
+              style={{
+                backgroundColor: '#131b2e',
+                borderColor: '#1e293b',
+                color: '#94a3b8',
+              }}
+            />
+          </Tooltip>
+        )}
+
         <div
           style={{
-            width: 12,
-            height: 12,
+            width: 10,
+            height: 10,
             borderRadius: 3,
             backgroundColor: '#38bdf8',
             boxShadow: '0 0 8px #38bdf8',
+            marginLeft: 4,
           }}
         />
         <span
@@ -447,6 +490,27 @@ export default function PacsTopNav({
               </Button>
             </Tooltip>
           </Upload>
+        )}
+
+        {onToggleReporting && (
+          <Tooltip title={reportingOpen ? "Thu gọn bảng đọc kết quả" : "Mở bảng đọc kết quả (Chia đôi màn hình)"}>
+            <Button
+              type={reportingOpen ? "primary" : "default"}
+              size="small"
+              icon={<FileTextOutlined />}
+              onClick={onToggleReporting}
+              style={{
+                backgroundColor: reportingOpen ? '#2563eb' : '#131b2e',
+                borderColor: reportingOpen ? '#1d4ed8' : '#3b82f6',
+                color: reportingOpen ? '#ffffff' : '#60a5fa',
+                fontWeight: '600',
+                fontSize: '12px',
+                boxShadow: reportingOpen ? '0 0 10px rgba(37, 99, 235, 0.5)' : 'none',
+              }}
+            >
+              {reportingOpen ? "Thu gọn báo cáo" : "Báo cáo kết quả"}
+            </Button>
+          </Tooltip>
         )}
 
         <Button

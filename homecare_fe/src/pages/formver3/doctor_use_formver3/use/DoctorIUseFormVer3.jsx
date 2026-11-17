@@ -48,9 +48,12 @@ export default function DoctorUseDFormVer3({
   onFormChange,
   isUse = false,
   doctorUseFormVer3Id,
+  patient_diagnose_id: propPatientDiagnoseId,
+  patientDiagnoseId: propPatientDiagnoseIdAlt,
   onStatusChange,
   onOpenConsultation,
   initEditMode = false,
+  isSplitScreen = false,
 }) {
   const [form] = Form.useForm();
   const {
@@ -78,7 +81,8 @@ export default function DoctorUseDFormVer3({
   const [reloading, setReloading] = useState(false);
   const [signModalOpen, setSignModalOpen] = useState(false);
   const { setSelectedProvince } = useVietnamAddress();
-  const { is_print } = useParams();
+  const { is_print, patient_diagnose_id: paramPatientDiagnoseId } = useParams();
+  const effectivePatientDiagnoseId = propPatientDiagnoseId || propPatientDiagnoseIdAlt || paramPatientDiagnoseId || selectedPatientDiagnose?.id;
 
   const {
     loading,
@@ -114,6 +118,7 @@ export default function DoctorUseDFormVer3({
   } = useDoctorFormData({
     form,
     selectedPatientDiagnose,
+    patientDiagnoseId: effectivePatientDiagnoseId,
     doctorUseFormVer3Id,
     languageTranslate,
     setLanguageTransslate,
@@ -535,18 +540,12 @@ export default function DoctorUseDFormVer3({
 
           <ImagingFindingsSection
             isEdit={isEdit}
-            imagingMode={imagingMode}
-            setImagingMode={setImagingMode}
-            fastSonoData={fastSonoData}
-            setFastSonoData={setFastSonoData}
-            isFreeText={isFreeText}
-            setIsFreeText={setIsFreeText}
-            freeTextContent={freeTextContent}
-            setFreeTextContent={setFreeTextContent}
             imagingRows={imagingRows}
             setImagingRows={setImagingRows}
             form={form}
             setDiagnosisSummary={setDiagnosisSummary}
+            languageTranslate={languageTranslate}
+            translateLabel={translateLabel}
           />
 
           <ImagingDiagnosisSection
