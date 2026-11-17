@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { message, Alert, Button, Drawer, Modal, Tooltip } from 'antd';
-import { CloseOutlined, ArrowLeftOutlined, IdcardOutlined, UserOutlined } from '@ant-design/icons';
-import DoctorUseDFormVer3 from '../formver3/doctor_use_formver3/use/DoctorIUseFormVer3';
+import { message, Alert, Button, Drawer, Modal } from 'antd';
+import { ArrowLeftOutlined, UserOutlined } from '@ant-design/icons';
 import { renderDicomToCanvas } from './services/dicomDecoder';
 import { usePacsStudy } from './hooks/usePacsStudy';
 import { usePacsThumbnails } from './hooks/usePacsThumbnails';
 import { usePacsInteraction } from './hooks/usePacsInteraction';
 import { usePacsPresentationState } from './hooks/usePacsPresentationState';
+import { useStableHandler } from './hooks/useStableHandler';
 import PacsTopNav from './components/PacsTopNav';
 import PacsSidebar from './components/PacsSidebar';
 import './pacs.css';
@@ -23,6 +23,7 @@ import PacsHistogramModal from './components/PacsHistogramModal';
 import PacsThresholdModal from './components/PacsThresholdModal';
 import PacsKeyImageGalleryModal from './components/PacsKeyImageGalleryModal';
 import PacsCropModal from './components/PacsCropModal';
+import PacsReportingPanel from './components/PacsReportingPanel';
 import { PACS_TOOLS, WW_WL_PRESETS } from './constants/pacs.constants';
 
 const EMPTY_LIST = Object.freeze([]);
@@ -177,6 +178,10 @@ export default function PacsViewerPage() {
       return next;
     });
   }, [patientDiagnoseId]);
+
+  // Callback ổn định cho bảng báo cáo memo hoá (không tạo mới mỗi lần re-render viewer)
+  const handleCloseReporting = useCallback(() => setReportingOpen(false), []);
+  const handleOpenPatientInfo = useCallback(() => setPatientInfoOpen(true), []);
 
   const [leftSeriesStripOpen, setLeftSeriesStripOpen] = useState(true);
   const [rightSliceStripOpen, setRightSliceStripOpen] = useState(true);
@@ -432,6 +437,35 @@ export default function PacsViewerPage() {
     [seriesList, setCurrentIndex]
   );
 
+  /* ---------------- Handler ổn định cho TopNav & Sidebar (đã memo hoá) ----------------
+   * Giữ IDENTITY cố định để 2 panel không re-render khi kéo WW/WL, pan, probe, cuộn lát.
+   * useStableHandler đọc giá trị mới nhất qua ref -> không stale, không phá memo.
+   */
+  const stableReset = useStableHandler(handleReset);
+  const stableApplyPreset = useStableHandler(handleApplyPreset);
+  const stableZoomIn = useStableHandler(handleZoomIn);
+  const stableZoomOut = useStableHandler(handleZoomOut);
+  const stableResetZoom = useStableHandler(handleResetZoom);
+  const stableClearAnnotations = useStableHandler(handleClearAnnotations);
+  const stableCaptureKeyImage = useStableHandler(handleCaptureKeyImage);
+  const stableUploadDicom = useStableHandler(uploadDicom);
+  const stableCaptureStar = useCallback(() => stableCaptureKeyImage({ isStarred: true }), [stableCaptureKeyImage]);
+  const toggleSmooth = useCallback(() => setIsSmooth((p) => !p), []);
+  const toggleExpand = useCallback(() => setIsExpanded((prev) => !prev), []);
+  const toggleCine = useCallback(() => setIsPlayingCine((prev) => !prev), []);
+  const toggleOverlay = useCallback(() => setShowOverlay((v) => !v), []);
+  const toggleReportingSidebar = useCallback(() => setReportingOpen((prev) => !prev), []);
+  const openLeftNav = useCallback(() => setLeftNavDrawerOpen(true), []);
+  const openKeyGallery = useCallback(() => setKeyImageGalleryOpen(true), []);
+  const openHistogram = useCallback(() => setHistogramOpen(true), []);
+  const openThreshold = useCallback(() => setThresholdOpen(true), []);
+  const openCrop = useCallback(() => setCropOpen(true), []);
+  const backWorklist = useCallback(() => navigate('/home'), [navigate]);
+  const changeLayout = useCallback((k) => {
+    setLayout(k);
+    if (k === '1x1') setActiveViewport(0);
+  }, []);
+
   /* ---------------- Vẽ ảnh ---------------- */
   const currentFull = dicomCache[currentIndex];
   const hasFull = !!(currentFull?.rawPixels && currentFull.decodeInfo?.ok !== false);
@@ -594,8 +628,12 @@ export default function PacsViewerPage() {
     showOverlay,
   };
 
-  // Sidebar/TopNav: meta hiện tại (đủ để hiện preset DICOM, modality)
-  const navMeta = currentMeta || (currentInstance ? { modality: currentInstance.modality, windowPresets: currentInstance.windowPresets || [] } : null);
+  // Sidebar/TopNav: meta hiện tại (đủ để hiện preset DICOM, modality). Memo hoá -> giữ identity
+  // ổn định khi kéo WW/WL / pan (currentMeta không đổi) để TopNav memo không re-render.
+  const navMeta = useMemo(
+    () => currentMeta || (currentInstance ? { modality: currentInstance.modality, windowPresets: currentInstance.windowPresets || [] } : null),
+    [currentMeta, currentInstance]
+  );
 
   // Thông tin BN theo 2 nguồn riêng: hệ thống HomeCare (DB) và ảnh DICOM
   const patientInfo = useMemo(() => {
@@ -717,31 +755,31 @@ export default function PacsViewerPage() {
         rotation={rotation}
         setRotation={setRotation}
         isSmooth={isSmooth}
-        onToggleSmooth={() => setIsSmooth((p) => !p)}
-        onReset={handleReset}
-        onCaptureKeyImage={handleCaptureKeyImage}
-        onApplyPreset={handleApplyPreset}
+        onToggleSmooth={toggleSmooth}
+        onReset={stableReset}
+        onCaptureKeyImage={stableCaptureKeyImage}
+        onApplyPreset={stableApplyPreset}
         currentMeta={navMeta}
         onOpenMpr={handleOpenMpr}
         canBuild3D={canBuild3D}
         activeSeriesSliceCount={activeSeriesInstances.length}
-        onUploadDicom={uploadDicom}
+        onUploadDicom={stableUploadDicom}
         zoom={zoom}
-        onZoomIn={handleZoomIn}
-        onZoomOut={handleZoomOut}
-        onResetZoom={handleResetZoom}
+        onZoomIn={stableZoomIn}
+        onZoomOut={stableZoomOut}
+        onResetZoom={stableResetZoom}
         isExpanded={isExpanded}
-        onToggleExpand={() => setIsExpanded((prev) => !prev)}
+        onToggleExpand={toggleExpand}
         isPlayingCine={isPlayingCine}
-        onToggleCine={() => setIsPlayingCine((prev) => !prev)}
+        onToggleCine={toggleCine}
         cineFps={cineFps}
         onChangeCineFps={setCineFps}
         totalSlices={activeSeriesIndices.length}
-        onBackWorklist={() => navigate('/home')}
+        onBackWorklist={backWorklist}
         reportingOpen={reportingOpen}
         onToggleReporting={handleToggleReporting}
-        onToggleLeftNav={() => setLeftNavDrawerOpen(true)}
-        onOpenKeyImageGallery={() => setKeyImageGalleryOpen(true)}
+        onToggleLeftNav={openLeftNav}
+        onOpenKeyImageGallery={openKeyGallery}
         keyImageCount={keyImages?.length || 0}
       />
 
@@ -782,15 +820,12 @@ export default function PacsViewerPage() {
               activeSeriesTotal={activeSeriesIndices.length}
               patientDiagnoseId={patientDiagnoseId}
               layout={layout}
-              setLayout={(k) => {
-                setLayout(k);
-                if (k === '1x1') setActiveViewport(0);
-              }}
+              setLayout={changeLayout}
               activeTool={activeTool}
               setActiveTool={setActiveTool}
-              onClearAnnotations={handleClearAnnotations}
+              onClearAnnotations={stableClearAnnotations}
               onCopyMeasurements={handleCopyMeasurements}
-              onUploadDicom={uploadDicom}
+              onUploadDicom={stableUploadDicom}
               onReloadStudy={loadStudy}
               flipH={flipH}
               setFlipH={setFlipH}
@@ -798,8 +833,8 @@ export default function PacsViewerPage() {
               setFlipV={setFlipV}
               rotation={rotation}
               setRotation={setRotation}
-              onReset={handleReset}
-              onApplyPreset={handleApplyPreset}
+              onReset={stableReset}
+              onApplyPreset={stableApplyPreset}
               onOpenMpr={handleOpenMpr}
               onReconstructMpr={handleReconstructMpr}
               onMprPlane={handleMprPlane}
@@ -813,27 +848,25 @@ export default function PacsViewerPage() {
               setInvert={setInvert}
               colorLut={colorLut}
               setColorLut={setColorLut}
-              onOpenHistogram={() => setHistogramOpen(true)}
-              onOpenThreshold={() => setThresholdOpen(true)}
+              onOpenHistogram={openHistogram}
+              onOpenThreshold={openThreshold}
               activeThreshold={activeThreshold}
               isSmooth={isSmooth}
-              onToggleSmooth={() => setIsSmooth((p) => !p)}
-              onZoomIn={handleZoomIn}
-              onZoomOut={handleZoomOut}
-              onCaptureKeyImage={handleCaptureKeyImage}
-              onCaptureStarKeyImage={() => handleCaptureKeyImage({ isStarred: true })}
-              onOpenCrop={() => setCropOpen(true)}
-              onOpenKeyImageGallery={() => setKeyImageGalleryOpen(true)}
-              isPlayingCine={isPlayingCine}
-              onToggleCine={() => setIsPlayingCine((p) => !p)}
+              onToggleSmooth={toggleSmooth}
+              onZoomIn={stableZoomIn}
+              onZoomOut={stableZoomOut}
+              onCaptureKeyImage={stableCaptureKeyImage}
+              onCaptureStarKeyImage={stableCaptureStar}
+              onOpenCrop={openCrop}
+              onOpenKeyImageGallery={openKeyGallery}
               onDownloadImage={handleDownloadImage}
               onPrintImage={handlePrintImage}
               showOverlay={showOverlay}
-              onToggleOverlay={() => setShowOverlay((v) => !v)}
-              onOpenWorklist={() => setLeftNavDrawerOpen(true)}
-              onOpenPatientInfo={() => setPatientInfoOpen(true)}
+              onToggleOverlay={toggleOverlay}
+              onOpenWorklist={openLeftNav}
+              onOpenPatientInfo={handleOpenPatientInfo}
               reportingOpen={reportingOpen}
-              onToggleReporting={() => setReportingOpen((prev) => !prev)}
+              onToggleReporting={toggleReportingSidebar}
               rightSliceStripOpen={rightSliceStripOpen}
               onToggleSliceStrip={toggleRightStrip}
             />
@@ -939,7 +972,7 @@ export default function PacsViewerPage() {
           </div>
         )}
 
-        {/* Bảng đọc kết quả chia đôi màn hình */}
+        {/* Bảng đọc kết quả chia đôi màn hình (memo hoá -> không re-render khi thao tác ảnh) */}
         {reportingOpen && patientDiagnoseId && (
           <div
             style={{
@@ -948,62 +981,18 @@ export default function PacsViewerPage() {
               maxWidth: '72%',
               display: 'flex',
               flexDirection: 'column',
-              background: '#ffffff',
               borderLeft: '2px solid #1e293b',
               boxShadow: '-4px 0 16px rgba(0,0,0,0.25)',
               zIndex: 10,
               overflow: 'hidden',
             }}
           >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '8px 14px',
-                background: '#0b101b',
-                borderBottom: '1px solid #1e293b',
-                color: '#f8fafc',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontWeight: 700, fontSize: '13px', color: '#38bdf8' }}>
-                  BÁO CÁO KẾT QUẢ CHẨN ĐOÁN (D-RADS)
-                </span>
-                {study?.dbPatient?.patientName && (
-                  <span style={{ fontSize: '12px', color: '#94a3b8' }}>
-                    · {study.dbPatient.patientName}
-                  </span>
-                )}
-                <Tooltip title="Xem thông tin bệnh nhân & ca chụp">
-                  <Button
-                    size="small"
-                    icon={<IdcardOutlined />}
-                    onClick={() => setPatientInfoOpen(true)}
-                    style={{ backgroundColor: '#131b2e', borderColor: '#334155', color: '#38bdf8', fontWeight: 600 }}
-                  >
-                    Thông tin BN
-                  </Button>
-                </Tooltip>
-              </div>
-              <Button
-                size="small"
-                type="text"
-                icon={<CloseOutlined />}
-                onClick={() => setReportingOpen(false)}
-                style={{ color: '#94a3b8' }}
-              >
-                Thu gọn
-              </Button>
-            </div>
-            <div style={{ flex: 1, overflowY: 'auto', padding: '12px 14px' }}>
-              <DoctorUseDFormVer3
-                patient_diagnose_id={patientDiagnoseId}
-                isUse={true}
-                initEditMode={true}
-                isSplitScreen={true}
-              />
-            </div>
+            <PacsReportingPanel
+              patientDiagnoseId={patientDiagnoseId}
+              patientName={study?.dbPatient?.patientName || ''}
+              onClose={handleCloseReporting}
+              onOpenPatientInfo={handleOpenPatientInfo}
+            />
           </div>
         )}
       </div>

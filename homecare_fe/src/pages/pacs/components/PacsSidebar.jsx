@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, memo } from 'react';
 import { Tooltip, Switch, message, Modal, Button, Select } from 'antd';
 import {
   DownOutlined,
@@ -151,7 +151,7 @@ const PaletteIcon = (
   </svg>
 );
 
-export default function PacsSidebar({
+function PacsSidebar({
   study,
   currentMeta,
   instances = [],
@@ -195,8 +195,6 @@ export default function PacsSidebar({
   onCaptureStarKeyImage,
   onOpenCrop,
   onOpenKeyImageGallery,
-  isPlayingCine = false,
-  onToggleCine,
   onDownloadImage,
   onPrintImage,
   showOverlay = true,
@@ -623,3 +621,5 @@ function ToolBtn({ title, active = false, onClick, color = '#38bdf8', dim = fals
     </Tooltip>
   );
 }
+
+export default memo(PacsSidebar);

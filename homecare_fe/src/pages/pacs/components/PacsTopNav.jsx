@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Tooltip, Dropdown, Upload } from 'antd';
 import {
@@ -25,7 +25,7 @@ import {
 } from '@ant-design/icons';
 import { WW_WL_PRESETS, PACS_TOOLS } from '../constants/pacs.constants';
 
-export default function PacsTopNav({
+function PacsTopNav({
   activeTool,
   setActiveTool,
   invert,
@@ -576,3 +576,5 @@ export default function PacsTopNav({
     </div>
   );
 }
+
+export default memo(PacsTopNav);
