@@ -35,6 +35,8 @@ export default function PacsSidebar({
   setRotation,
   onReset,
   onOpenMpr,
+  onReconstructMpr,
+  mprInline = false,
   canBuild3D = false,
   activeSeriesSliceCount = 0,
   sync = {},
@@ -42,7 +44,7 @@ export default function PacsSidebar({
 }) {
   const [expandedSections, setExpandedSections] = useState({
     measure: true,
-    advance: false,
+    advance: true,
     image: true,
     sync: true,
   });
@@ -159,19 +161,20 @@ export default function PacsSidebar({
             <Tooltip
               title={
                 canBuild3D
-                  ? 'Dựng hình đa mặt phẳng theo nhóm đang chọn'
+                  ? 'Dựng Axial / Coronal / Sagittal ngay trong khung xem (bấm lại để thoát)'
                   : `Cần trên 20 ảnh trong nhóm đang chọn (hiện có ${activeSeriesSliceCount})`
               }
               placement="right"
             >
               <button
-                onClick={onOpenMpr}
+                onClick={onReconstructMpr || onOpenMpr}
+                aria-pressed={mprInline}
                 style={{
                   padding: '6px 8px',
                   textAlign: 'left',
                   borderRadius: 3,
-                  border: '1px solid #334155',
-                  backgroundColor: canBuild3D ? '#1e293b' : '#0f172a',
+                  border: `1px solid ${mprInline ? '#4ade80' : '#334155'}`,
+                  backgroundColor: !canBuild3D ? '#0f172a' : mprInline ? '#064e3b' : '#1e293b',
                   color: canBuild3D ? '#4ade80' : '#64748b',
                   cursor: canBuild3D ? 'pointer' : 'not-allowed',
                   fontSize: '11px',
@@ -179,7 +182,7 @@ export default function PacsSidebar({
                   opacity: canBuild3D ? 1 : 0.65,
                 }}
               >
-                MPR Reconstruct
+                MPR Reconstruct {mprInline ? '●' : ''}
               </button>
             </Tooltip>
           </div>

@@ -4,11 +4,55 @@ import {
   ReloadOutlined,
   AppstoreOutlined,
   SplitCellsOutlined,
-  FullscreenOutlined,
   UpOutlined,
   DownOutlined,
   CloseOutlined,
 } from '@ant-design/icons';
+
+// Nút chuyển nhanh 1 mặt cắt: A = Axial, C = Coronal, S = Sagittal, V = 3D Volume
+const QUICK_VIEWS = [
+  { value: 'AXIAL', letter: 'A', rest: 'xial', color: '#38bdf8', tip: 'Axial - Mặt cắt ngang (phím A)' },
+  { value: 'CORONAL', letter: 'C', rest: 'oronal', color: '#10b981', tip: 'Coronal - Mặt cắt trán (phím C)' },
+  { value: 'SAGITTAL', letter: 'S', rest: 'agittal', color: '#f59e0b', tip: 'Sagittal - Mặt cắt dọc (phím S)' },
+  { value: '3D_MAX', letter: 'V', rest: 'olume 3D', color: '#c084fc', tip: '3D Volume Rendering (phím V)' },
+];
+
+function QuickViewButtons({ layoutMode, setLayoutMode }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+      {QUICK_VIEWS.map((v) => {
+        const active = layoutMode === v.value;
+        return (
+          <Tooltip key={v.value} title={v.tip}>
+            <button
+              type="button"
+              onClick={() => setLayoutMode(v.value)}
+              aria-pressed={active}
+              style={{
+                display: 'flex',
+                alignItems: 'baseline',
+                gap: 0,
+                height: 26,
+                padding: '0 8px',
+                borderRadius: 4,
+                cursor: 'pointer',
+                backgroundColor: active ? v.color : '#1e293b',
+                border: `1px solid ${active ? v.color : '#334155'}`,
+                color: active ? '#0b101b' : '#e2e8f0',
+                fontWeight: 700,
+                lineHeight: '24px',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              <span style={{ fontSize: 15, color: active ? '#0b101b' : v.color }}>{v.letter}</span>
+              <span style={{ fontSize: 10 }}>{v.rest}</span>
+            </button>
+          </Tooltip>
+        );
+      })}
+    </div>
+  );
+}
 
 export default function PacsMprToolbar({
   patientName = 'Bệnh nhân',
@@ -43,7 +87,12 @@ export default function PacsMprToolbar({
         transition: 'all 0.2s ease',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+        <img
+          src="/logo_home_care.png"
+          alt="D-RADS"
+          style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover' }}
+        />
         <span
           style={{
             fontWeight: '800',
@@ -57,6 +106,7 @@ export default function PacsMprToolbar({
         <span style={{ fontSize: '11px', color: '#94a3b8' }}>
           {patientName} ({modality} - {numSlices} lát cắt)
         </span>
+        <QuickViewButtons layoutMode={layoutMode} setLayoutMode={setLayoutMode} />
       </div>
 
       {!isControlsMinimized && (
@@ -75,9 +125,6 @@ export default function PacsMprToolbar({
               </Radio.Button>
               <Radio.Button value="2x2" title="Chế độ 2x2: 4 mặt cắt đồng bộ MPR">
                 <AppstoreOutlined /> 2x2 MPR
-              </Radio.Button>
-              <Radio.Button value="3D_MAX" title="Phóng to riêng Viewport 3D toàn màn hình">
-                <FullscreenOutlined /> 3D Max
               </Radio.Button>
             </Radio.Group>
           </div>

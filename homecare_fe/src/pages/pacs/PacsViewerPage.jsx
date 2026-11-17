@@ -153,6 +153,8 @@ export default function PacsViewerPage() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeAttachedFile, setActiveAttachedFile] = useState(null);
   const [mprOpen, setMprOpen] = useState(false);
+  // MPR dựng thẳng trong viewport chính (tri-planar Axial/Coronal/Sagittal), khác với modal 3D
+  const [mprInline, setMprInline] = useState(false);
 
   /* ---------------- Cine ---------------- */
   const [isPlayingCine, setIsPlayingCine] = useState(false);
@@ -175,6 +177,21 @@ export default function PacsViewerPage() {
     }
     setMprOpen(true);
   }, [canBuild3D, activeSeriesInstances.length]);
+
+  // Dựng MPR tri-planar ngay trong viewport chính (không mở popup)
+  const handleReconstructMpr = useCallback(() => {
+    if (!canBuild3D) {
+      message.warning(`Series đang chọn có ${activeSeriesInstances.length} ảnh. Cần trên 20 lát cắt (1 frame/lát) trong cùng series để dựng MPR.`);
+      return;
+    }
+    setActiveAttachedFile(null);
+    setMprInline((prev) => !prev);
+  }, [canBuild3D, activeSeriesInstances.length]);
+
+  // Series hiện tại không đủ lát để dựng -> tự thoát chế độ MPR inline
+  useEffect(() => {
+    if (mprInline && !canBuild3D) setMprInline(false);
+  }, [mprInline, canBuild3D]);
 
   const [layout, setLayout] = useState('1x1');
   const [sync, setSync] = useState({ scroll: true, refLines: true, window: false, zoomPan: false });
@@ -345,6 +362,8 @@ export default function PacsViewerPage() {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target?.tagName) || e.target?.isContentEditable) return;
+      // MPR đang mở (popup hoặc inline) -> phím tắt (A/C/S/V...) thuộc về MPR, không tác động viewer phía sau
+      if (mprOpen || mprInline) return;
       const key = e.key.toLowerCase();
       if (e.code === 'Space' || (e.ctrlKey && key === 's')) {
         e.preventDefault();
@@ -404,7 +423,7 @@ export default function PacsViewerPage() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleCaptureKeyImage, handleUndoAnnotation, stepSeriesSlice, handleApplyPreset, handleReset, setActiveTool, setCurrentDrawing, currentMeta?.modality]);
+  }, [mprOpen, mprInline, handleCaptureKeyImage, handleUndoAnnotation, stepSeriesSlice, handleApplyPreset, handleReset, setActiveTool, setCurrentDrawing, currentMeta?.modality]);
 
   // Đổi series -> về khung nhìn chuẩn (giữ nguyên số đo và WW/WL riêng của từng series)
   // (Lưới nhiều ô tự quản khung nhìn từng ô -> không reset ở đây)
@@ -621,6 +640,8 @@ export default function PacsViewerPage() {
               setRotation={setRotation}
               onReset={handleReset}
               onOpenMpr={handleOpenMpr}
+              onReconstructMpr={handleReconstructMpr}
+              mprInline={mprInline}
               canBuild3D={canBuild3D}
               activeSeriesSliceCount={activeSeriesInstances.length}
               sync={sync}
@@ -648,6 +669,19 @@ export default function PacsViewerPage() {
               onClose={() => setActiveAttachedFile(null)}
               apiEndpoint={apiEndpoint}
               token={localStorage.getItem('TOKEN') || ''}
+            />
+          ) : mprInline && canBuild3D ? (
+            <PacsMprModal
+              inline
+              onClose={() => setMprInline(false)}
+              instances={activeSeriesInstances}
+              dicomCache={dicomCache}
+              setDicomCache={setDicomCache}
+              apiEndpoint={apiEndpoint}
+              getAuthHeaders={getAuthHeaders}
+              caseId={patientDiagnoseId}
+              patientName={study?.dbPatient?.patientName || currentMeta?.patientName || ''}
+              modality={currentMeta?.modality || activeSeries?.modality || study?.modality || ''}
             />
           ) : layout === '1x1' ? (
             mainViewportElement
