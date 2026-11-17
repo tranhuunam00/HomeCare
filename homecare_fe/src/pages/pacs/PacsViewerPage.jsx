@@ -792,6 +792,12 @@ export default function PacsViewerPage() {
               onPrintImage={handlePrintImage}
               showOverlay={showOverlay}
               onToggleOverlay={() => setShowOverlay((v) => !v)}
+              onOpenWorklist={() => setLeftNavDrawerOpen(true)}
+              onOpenPatientInfo={() => setPatientInfoOpen(true)}
+              reportingOpen={reportingOpen}
+              onToggleReporting={() => setReportingOpen((prev) => !prev)}
+              rightSliceStripOpen={rightSliceStripOpen}
+              onToggleSliceStrip={toggleRightStrip}
             />
           )}
 

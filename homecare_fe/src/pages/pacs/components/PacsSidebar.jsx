@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Tooltip, Switch, message, Modal } from 'antd';
+import { Tooltip, Switch, message, Modal, Button, Select } from 'antd';
 import {
   DownOutlined,
   RightOutlined,
@@ -198,8 +198,15 @@ export default function PacsSidebar({
   onPrintImage,
   showOverlay = true,
   onToggleOverlay,
+  onOpenWorklist,
+  onOpenPatientInfo,
+  reportingOpen = false,
+  onToggleReporting,
+  rightSliceStripOpen = false,
+  onToggleSliceStrip,
 }) {
   const [helpOpen, setHelpOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [open, setOpen] = useState({
     layout: true,
     measure: true,
@@ -396,18 +403,18 @@ export default function PacsSidebar({
 
       {/* ---------------- More Tools ---------------- */}
       <Section id="more" title="More Tools" open={open.more} onToggle={() => toggle('more')}>
-        <ToolBtn title="Danh sách lát (đang phát triển)" onClick={devToast}><CheckSquareOutlined /></ToolBtn>
-        <ToolBtn title={`Cine (phát/dừng): ${isPlayingCine ? 'Đang chạy' : 'Dừng'}`} color="#f59e0b" active={isPlayingCine} onClick={onToggleCine}><UnorderedListOutlined /></ToolBtn>
+        <ToolBtn title="Lưu ảnh chẩn đoán (Key Image) [Phím S]" color="#38bdf8" onClick={onCaptureKeyImage}><CheckSquareOutlined /></ToolBtn>
+        <ToolBtn title="Danh sách lát cắt (Thumbnails)" active={rightSliceStripOpen} onClick={onToggleSliceStrip || devToast}><UnorderedListOutlined /></ToolBtn>
         <ToolBtn title={showOverlay ? 'Ẩn thông tin overlay' : 'Hiện thông tin overlay'} active={!showOverlay} onClick={onToggleOverlay || devToast}><EyeOutlined /></ToolBtn>
-        <ToolBtn title="Ghi chú / bình luận (đang phát triển)" onClick={devToast}><MessageOutlined /></ToolBtn>
+        <ToolBtn title={reportingOpen ? 'Thu gọn bảng đọc báo cáo' : 'Mở bảng đọc báo cáo [Alt+D]'} color="#10b981" active={reportingOpen} onClick={onToggleReporting || devToast}><MessageOutlined /></ToolBtn>
 
         <ToolBtn title="Tải lát cắt hiện tại (PNG)" color="#38bdf8" onClick={onDownloadImage || devToast}><DownloadOutlined /></ToolBtn>
-        <ToolBtn title="Mở thư mục (đang phát triển)" onClick={devToast}><FolderOpenOutlined /></ToolBtn>
-        <ToolBtn title="Tra cứu báo cáo (đang phát triển)" onClick={devToast}><FileSearchOutlined /></ToolBtn>
+        <ToolBtn title="Danh sách ca chụp (Worklist)" color="#f59e0b" onClick={onOpenWorklist || devToast}><FolderOpenOutlined /></ToolBtn>
+        <ToolBtn title="Xem chi tiết thẻ DICOM Tags" color="#38bdf8" onClick={onOpenPatientInfo || devToast}><FileSearchOutlined /></ToolBtn>
         <ToolBtn title="In lát cắt hiện tại" color="#38bdf8" onClick={onPrintImage || devToast}><PrinterOutlined /></ToolBtn>
 
-        <ToolBtn title="Cài đặt (đang phát triển)" onClick={devToast}><SettingOutlined /></ToolBtn>
-        <ToolBtn title="Trợ giúp phím tắt" color="#38bdf8" onClick={() => setHelpOpen(true)}><QuestionCircleOutlined /></ToolBtn>
+        <ToolBtn title="Cài đặt hiển thị & Phím tắt" color="#94a3b8" onClick={() => setSettingsOpen(true)}><SettingOutlined /></ToolBtn>
+        <ToolBtn title="Trợ giúp phím tắt [Phím ?]" color="#38bdf8" onClick={() => setHelpOpen(true)}><QuestionCircleOutlined /></ToolBtn>
       </Section>
 
       {/* Sync chi tiết (công tắc) - giữ lựa chọn rõ ràng cho đồng bộ nhiều ô */}
@@ -434,6 +441,67 @@ export default function PacsSidebar({
               <span style={{ color: '#334155', textAlign: 'right' }}>{s.d}</span>
             </div>
           ))}
+        </div>
+      </Modal>
+
+      <Modal
+        open={settingsOpen}
+        onCancel={() => setSettingsOpen(false)}
+        footer={null}
+        width={480}
+        title={
+          <span style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#0284c7' }}>
+            <SettingOutlined /> Cài đặt hiển thị PACS Viewer
+          </span>
+        }
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #f1f5f9' }}>
+            <div>
+              <div style={{ fontWeight: 600, fontSize: 13, color: '#0f172a' }}>Làm mượt ảnh (Bilinear Smoothing)</div>
+              <div style={{ fontSize: 11, color: '#64748b' }}>Khử răng cưa điểm ảnh khi phóng to (Phím B)</div>
+            </div>
+            <Switch checked={isSmooth} onChange={onToggleSmooth} />
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #f1f5f9' }}>
+            <div>
+              <div style={{ fontWeight: 600, fontSize: 13, color: '#0f172a' }}>Thông số trên màn hình (HUD Overlay)</div>
+              <div style={{ fontSize: 11, color: '#64748b' }}>Hiển thị tên BN, PID, ngày chụp, WW/WL, Zoom</div>
+            </div>
+            <Switch checked={showOverlay} onChange={onToggleOverlay} />
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #f1f5f9' }}>
+            <div>
+              <div style={{ fontWeight: 600, fontSize: 13, color: '#0f172a' }}>Đảo âm / dương bản (Invert)</div>
+              <div style={{ fontSize: 11, color: '#64748b' }}>Xương đen trên nền sáng (Phím I)</div>
+            </div>
+            <Switch checked={invert} onChange={(v) => setInvert?.(v)} />
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #f1f5f9' }}>
+            <div>
+              <div style={{ fontWeight: 600, fontSize: 13, color: '#0f172a' }}>Bảng màu giả (Color LUT)</div>
+              <div style={{ fontSize: 11, color: '#64748b' }}>Thang màu nhiệt, cầu vồng chẩn đoán</div>
+            </div>
+            <Select
+              size="small"
+              value={colorLut}
+              onChange={setColorLut}
+              style={{ width: 140 }}
+              options={[
+                { value: 'default', label: 'Mặc định (Grayscale)' },
+                { value: 'rainbow', label: 'Cầu vồng (Rainbow)' },
+                { value: 'hot_iron', label: 'Sắt nung đỏ (Hot Iron)' },
+                { value: 'inverted', label: 'Đảo âm bản' },
+              ]}
+            />
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
+            <Button type="primary" onClick={() => setSettingsOpen(false)}>Đã xong</Button>
+          </div>
         </div>
       </Modal>
     </div>
