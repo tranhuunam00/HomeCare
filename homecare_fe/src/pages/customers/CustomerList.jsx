@@ -10,8 +10,9 @@ import {
   Button,
   Spin,
   Modal,
+  Tag,
 } from "antd";
-import { FilterOutlined, SearchOutlined } from "@ant-design/icons";
+import { FilterOutlined, SearchOutlined, EditOutlined } from "@ant-design/icons";
 import API_CALL from "../../services/axiosClient";
 import styles from "./CustomerList.module.scss";
 import { useNavigate } from "react-router-dom";
@@ -52,6 +53,41 @@ const CustomerList = () => {
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [selectedClinics, setSelectedClinics] = useState([]);
   const [permissionModalOpen, setPermissionModalOpen] = useState(false);
+
+  // Quản lý gán Mã D-SONO (Siêu âm)
+  const [dsonoModalOpen, setDsonoModalOpen] = useState(false);
+  const [dsonoEditingDoctor, setDsonoEditingDoctor] = useState(null);
+  const [dsonoCodeInput, setDsonoCodeInput] = useState("");
+  const [savingDsono, setSavingDsono] = useState(false);
+
+  const openDsonoModal = (doc) => {
+    setDsonoEditingDoctor(doc);
+    setDsonoCodeInput(doc.dsono_doctor_code || "");
+    setDsonoModalOpen(true);
+  };
+
+  const closeDsonoModal = () => {
+    setDsonoModalOpen(false);
+    setDsonoEditingDoctor(null);
+    setDsonoCodeInput("");
+  };
+
+  const handleSaveDsonoCode = async () => {
+    if (!dsonoEditingDoctor) return;
+    setSavingDsono(true);
+    try {
+      await API_CALL.patch(`/doctor/${dsonoEditingDoctor.id}/dsono-code`, {
+        dsono_doctor_code: dsonoCodeInput?.trim() || null,
+      });
+      toast.success("Cập nhật Mã D-SONO thành công!");
+      closeDsonoModal();
+      fetchDoctors();
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Lỗi khi cập nhật Mã D-SONO");
+    } finally {
+      setSavingDsono(false);
+    }
+  };
 
   // Lấy tên phòng khám
   const getClinicName = (clinicId) => {
@@ -203,6 +239,30 @@ const CustomerList = () => {
       title: "Phòng khám",
       key: "id_clinic",
       render: (_, record) => getClinicName(record.id_clinic),
+    },
+    {
+      title: "Mã D-SONO",
+      dataIndex: "dsono_doctor_code",
+      key: "dsono_doctor_code",
+      align: "center",
+      render: (val, record) => (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+          {val ? (
+            <Tag color="cyan" style={{ fontWeight: 700, fontSize: 12, margin: 0, padding: "2px 8px" }}>
+              {val}
+            </Tag>
+          ) : (
+            <span style={{ color: "#999", fontSize: 12, fontStyle: "italic" }}>Chưa gán</span>
+          )}
+          <Button
+            type="text"
+            size="small"
+            icon={<EditOutlined style={{ color: "#0A6B86" }} />}
+            onClick={() => openDsonoModal(record)}
+            title="Gán / đổi mã D-SONO"
+          />
+        </div>
+      ),
     },
     {
       title: "Trạng thái",
@@ -411,6 +471,34 @@ const CustomerList = () => {
           </ul>
         </div>
       </Modal>
+      {/* Modal gán Mã D-SONO */}
+      <Modal
+        title={`Liên kết Mã D-SONO: ${dsonoEditingDoctor?.full_name}`}
+        open={dsonoModalOpen}
+        onCancel={closeDsonoModal}
+        onOk={handleSaveDsonoCode}
+        confirmLoading={savingDsono}
+        okText="Lưu mã D-SONO"
+        cancelText="Đóng"
+      >
+        <div style={{ padding: "12px 0" }}>
+          <p style={{ fontSize: 13, color: "#555", marginBottom: 14, lineHeight: 1.6 }}>
+            Nhập <strong>Mã Bác sĩ trên ứng dụng D-SONO</strong> (ví dụ: <code style={{ color: "#0A6B86", fontWeight: "bold" }}>BS_VINH</code>, <code style={{ color: "#0A6B86", fontWeight: "bold" }}>BS_NAM</code>) để liên thông 2 chiều: khi bác sĩ đọc &amp; ký kết quả siêu âm trên D-SONO, hệ thống sẽ tự động hiển thị đúng Tên, Avatar và Chữ ký số của bác sĩ này trên HomeCare.
+          </p>
+          <label style={{ display: "block", fontWeight: 600, marginBottom: 6, fontSize: 13 }}>
+            Mã Bác sĩ D-SONO:
+          </label>
+          <Input
+            value={dsonoCodeInput}
+            onChange={(e) => setDsonoCodeInput(e.target.value)}
+            placeholder="VD: BS_VINH hoặc DOC_..."
+            allowClear
+            style={{ fontWeight: "bold", fontFamily: "monospace", fontSize: 14 }}
+            onPressEnter={handleSaveDsonoCode}
+          />
+        </div>
+      </Modal>
+
       <ConfirmActionModal {...confirmState} />
     </div>
   );

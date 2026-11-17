@@ -57,6 +57,7 @@ export function usePacsPresentationState({
   study,
 }) {
   const presentationStateKey = patientDiagnoseId ? `pacs_presentation_state_${patientDiagnoseId}` : null;
+  const keyImagesStorageKey = patientDiagnoseId ? `pacs_key_images_${patientDiagnoseId}` : 'pacs_key_images_default';
 
   const [captureAlert, setCaptureAlert] = useState({
     open: false,
@@ -64,7 +65,41 @@ export function usePacsPresentationState({
     caption: '',
     sliceIndex: 1,
     totalSlices: 1,
+    isStarred: false,
+    isCrop: false,
   });
+
+  // Danh sách ảnh key đã chụp
+  const [keyImages, setKeyImages] = useState(() => {
+    try {
+      const stored = localStorage.getItem(keyImagesStorageKey);
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const saveKeyImages = useCallback(
+    (newList) => {
+      setKeyImages(newList);
+      try {
+        localStorage.setItem(keyImagesStorageKey, JSON.stringify(newList));
+      } catch (e) {
+        console.warn('Cannot persist keyImages:', e);
+      }
+    },
+    [keyImagesStorageKey]
+  );
+
+  // Cập nhật keyImages khi đổi ca bệnh
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(keyImagesStorageKey);
+      setKeyImages(stored ? JSON.parse(stored) : []);
+    } catch {
+      setKeyImages([]);
+    }
+  }, [keyImagesStorageKey]);
 
   // Chỉ cho phép tự lưu SAU KHI đã khôi phục xong từ MÁY CHỦ -> không bao giờ ghi đè số đo trên máy chủ bằng bản trống / bản cũ
   const restoredRef = useRef(false);
@@ -245,21 +280,55 @@ export function usePacsPresentationState({
     };
   }, []);
 
-  // Key Image Capture Handler
-  const handleCaptureKeyImage = async () => {
+  // Key Image Capture Handler (hỗ trợ chụp chuẩn, chụp gắn sao và chụp cắt ROI)
+  const handleCaptureKeyImage = async (options = {}) => {
     try {
-      const { dataUrl, captionText } = generateKeyImageSnapshot({
-        imgCanvas: imageCanvasRef.current,
-        annCanvas: annotationCanvasRef.current,
-        metadata: {
-          patientName: dicomCache[currentIndex]?.meta?.patientName || study?.dbPatient?.patientName || '',
-          patientId: dicomCache[currentIndex]?.meta?.patientId || study?.dbPatient?.patientId || '',
-        },
-        measurements: annotations[currentKey] || [],
-        currentIndex,
+      const isStarred = Boolean(options.isStarred);
+      const isCrop = Boolean(options.isCrop);
+      let dataUrl = options.customDataUrl;
+      let captionText = options.customCaption;
+
+      if (!dataUrl) {
+        const snapshot = generateKeyImageSnapshot({
+          imgCanvas: imageCanvasRef.current,
+          annCanvas: annotationCanvasRef.current,
+          metadata: {
+            patientName: dicomCache[currentIndex]?.meta?.patientName || study?.dbPatient?.patientName || '',
+            patientId: dicomCache[currentIndex]?.meta?.patientId || study?.dbPatient?.patientId || '',
+          },
+          measurements: annotations[currentKey] || [],
+          currentIndex,
+          totalSlices: instances.length,
+          windowCenter,
+          windowWidth,
+        });
+        dataUrl = snapshot.dataUrl;
+        captionText = captionText || snapshot.captionText;
+      }
+
+      const newKeyImage = {
+        id: `key_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+        dataUrl,
+        caption: captionText || `Ảnh PACS lát cắt #${currentIndex + 1}`,
+        sliceIndex: currentIndex + 1,
         totalSlices: instances.length,
-        windowCenter,
-        windowWidth,
+        sopInstanceUid: instances[currentIndex]?.sopInstanceUid,
+        measurements: (annotations[currentKey] || []).map((a) => ({ type: a.type, value: a.valueText })),
+        windowCenter: Math.round(windowCenter),
+        windowWidth: Math.round(windowWidth),
+        isStarred,
+        isCrop,
+        createdAt: new Date().toISOString(),
+      };
+
+      setKeyImages((prev) => {
+        const next = [newKeyImage, ...prev.filter((item) => item.id !== newKeyImage.id)];
+        try {
+          localStorage.setItem(keyImagesStorageKey, JSON.stringify(next));
+        } catch (e) {
+          console.warn('Cannot persist keyImages:', e);
+        }
+        return next;
       });
 
       if (patientDiagnoseId) {
@@ -271,20 +340,26 @@ export function usePacsPresentationState({
           sliceIndex: currentIndex,
           sopInstanceUid: instances[currentIndex]?.sopInstanceUid,
           measurements: (annotations[currentKey] || []).map((a) => ({ type: a.type, value: a.valueText })),
+          isStarred,
+          isCrop,
         });
 
-        await axios.post(
-          `${apiEndpoint}/api/pacs/key-image`,
-          {
-            patientDiagnoseId: Number(patientDiagnoseId),
-            imageBase64: dataUrl,
-            caption: captionText,
-            sliceIndex: currentIndex,
-            sopInstanceUid: instances[currentIndex]?.sopInstanceUid,
-            measurements: (annotations[currentKey] || []).map((a) => ({ type: a.type, value: a.valueText })),
-          },
-          { headers: getAuthHeaders() }
-        );
+        axios
+          .post(
+            `${apiEndpoint}/api/pacs/key-image`,
+            {
+              patientDiagnoseId: Number(patientDiagnoseId),
+              imageBase64: dataUrl,
+              caption: captionText,
+              sliceIndex: currentIndex,
+              sopInstanceUid: instances[currentIndex]?.sopInstanceUid,
+              measurements: (annotations[currentKey] || []).map((a) => ({ type: a.type, value: a.valueText })),
+              isStarred,
+              isCrop,
+            },
+            { headers: getAuthHeaders() }
+          )
+          .catch((e) => console.warn('Key image backend upload error:', e));
       }
 
       setCaptureAlert({
@@ -293,14 +368,70 @@ export function usePacsPresentationState({
         caption: captionText,
         sliceIndex: currentIndex + 1,
         totalSlices: instances.length,
+        isStarred,
+        isCrop,
       });
 
       setTimeout(() => {
         setCaptureAlert((prev) => ({ ...prev, open: false }));
       }, 4000);
+
+      return newKeyImage;
     } catch (err) {
       console.error('Lỗi chụp ảnh Key:', err);
       message.error('Không thể chụp ảnh Key: ' + (err.message || 'Lỗi không xác định'));
+    }
+  };
+
+  const handleDeleteKeyImage = (id) => {
+    setKeyImages((prev) => {
+      const next = prev.filter((item) => item.id !== id);
+      try {
+        localStorage.setItem(keyImagesStorageKey, JSON.stringify(next));
+      } catch (e) {
+        console.warn('Cannot persist keyImages:', e);
+      }
+      return next;
+    });
+    message.info('Đã xóa ảnh key khỏi thư viện');
+  };
+
+  const handleClearAllKeyImages = () => {
+    setKeyImages([]);
+    try {
+      localStorage.removeItem(keyImagesStorageKey);
+    } catch (e) {
+      console.warn('Cannot remove keyImages:', e);
+    }
+    message.info('Đã xóa toàn bộ ảnh trong thư viện key');
+  };
+
+  const handleToggleStarKeyImage = (id) => {
+    setKeyImages((prev) => {
+      const next = prev.map((img) => (img.id === id ? { ...img, isStarred: !img.isStarred } : img));
+      try {
+        localStorage.setItem(keyImagesStorageKey, JSON.stringify(next));
+      } catch (e) {
+        console.warn('Cannot persist keyImages:', e);
+      }
+      return next;
+    });
+  };
+
+  const handleInsertToReport = (keyItem) => {
+    if (!keyItem) return;
+    if (patientDiagnoseId) {
+      broadcastKeyImage({
+        patientDiagnoseId: Number(patientDiagnoseId),
+        patient_diagnose_id: Number(patientDiagnoseId),
+        dataUrl: keyItem.dataUrl,
+        caption: keyItem.caption,
+        sliceIndex: (keyItem.sliceIndex || 1) - 1,
+        sopInstanceUid: keyItem.sopInstanceUid,
+        measurements: keyItem.measurements || [],
+        isStarred: keyItem.isStarred,
+        isCrop: keyItem.isCrop,
+      });
     }
   };
 
@@ -309,6 +440,11 @@ export function usePacsPresentationState({
     captureAlert,
     setCaptureAlert,
     handleCaptureKeyImage,
+    keyImages,
+    handleDeleteKeyImage,
+    handleClearAllKeyImages,
+    handleToggleStarKeyImage,
+    handleInsertToReport,
     saveStatus,
   };
 }

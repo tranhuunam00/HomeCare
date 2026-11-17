@@ -15,6 +15,7 @@ import {
   ColumnWidthOutlined,
   ApartmentOutlined,
   SearchOutlined,
+  ScissorOutlined,
 } from '@ant-design/icons';
 import PacsViewportOverlay from './PacsViewportOverlay';
 import { PACS_TOOLS } from '../constants/pacs.constants';
@@ -84,6 +85,7 @@ export default function PacsViewport({
   isExpanded = false,
   onToggleExpand,
   onCaptureKeyImage,
+  onOpenCrop,
   onUploadDicom,
   patientDiagnoseId,
   currentIndex,
@@ -418,6 +420,13 @@ export default function PacsViewport({
             </button>
           </Tooltip>
           <div style={divider} />
+          {onOpenCrop && (
+            <Tooltip title="Cắt vùng ảnh (Crop ROI)" placement="left">
+              <button onClick={stop(onOpenCrop)} style={{ ...toolBtn(false), color: '#f59e0b' }}>
+                <ScissorOutlined />
+              </button>
+            </Tooltip>
+          )}
           <Tooltip title="Chụp ảnh Key (Space)" placement="left">
             <button onClick={stop(onCaptureKeyImage)} style={{ ...toolBtn(false), color: '#4ade80' }}>
               <CameraOutlined />

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Tooltip, Dropdown, Upload } from 'antd';
 import {
@@ -21,10 +21,11 @@ import {
   ArrowLeftOutlined,
   FileTextOutlined,
   MenuOutlined,
+  PictureOutlined,
 } from '@ant-design/icons';
 import { WW_WL_PRESETS, PACS_TOOLS } from '../constants/pacs.constants';
 
-export default function PacsTopNav({
+function PacsTopNav({
   activeTool,
   setActiveTool,
   invert,
@@ -55,6 +56,8 @@ export default function PacsTopNav({
   reportingOpen = false,
   onToggleReporting,
   onToggleLeftNav,
+  onOpenKeyImageGallery,
+  keyImageCount = 0,
 }) {
   const navigate = useNavigate();
 
@@ -352,7 +355,7 @@ export default function PacsTopNav({
                 fontWeight: '600',
               }}
             >
-              {isSmooth ? '✨ Mịn' : '🔲 Gốc'}
+              {isSmooth ? 'Mịn' : 'Gốc'}
             </Button>
           </Tooltip>
         )}
@@ -517,6 +520,25 @@ export default function PacsTopNav({
           </Tooltip>
         )}
 
+        {onOpenKeyImageGallery && (
+          <Tooltip title="Mở thư viện ảnh Key & chẩn đoán">
+            <Button
+              size="small"
+              icon={<PictureOutlined />}
+              onClick={onOpenKeyImageGallery}
+              style={{
+                backgroundColor: '#131b2e',
+                borderColor: '#38bdf8',
+                color: '#38bdf8',
+                fontWeight: '600',
+                fontSize: '12px',
+              }}
+            >
+              Thư viện ảnh {keyImageCount > 0 ? `(${keyImageCount})` : ''}
+            </Button>
+          </Tooltip>
+        )}
+
         <Button
           type="primary"
           size="small"
@@ -554,3 +576,5 @@ export default function PacsTopNav({
     </div>
   );
 }
+
+export default memo(PacsTopNav);

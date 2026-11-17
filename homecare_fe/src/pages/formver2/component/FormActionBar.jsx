@@ -84,6 +84,7 @@ export default function FormActionBar({
   onTraCa = () => {},
   onConsultation = () => {},
   onTuChoiConsultation = () => {},
+  isSplitScreen = false,
 }) {
   const navigate = useNavigate();
   const { userPackages, user, doctor } = useGlobalAuth();
@@ -437,7 +438,25 @@ export default function FormActionBar({
 
   return (
     <div className="no-print">
-      <div className={styles.actionBar}>
+      <div
+        className={styles.actionBar}
+        style={
+          isSplitScreen
+            ? {
+                position: 'sticky',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                width: '100%',
+                zIndex: 100,
+                boxShadow: '0 -2px 10px rgba(0,0,0,0.08)',
+                margin: '12px -14px -100px -14px',
+                padding: '8px 14px',
+                maxWidth: 'calc(100% + 28px)',
+              }
+            : undefined
+        }
+      >
         <div className={styles.actionGrid}>
           {!actionKeys?.length
             ? items

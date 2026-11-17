@@ -619,7 +619,7 @@ const PSEUDO_COLOR = {
  * Bảng tra cứu (LUT) giá trị lưu trữ -> RGBA đóng gói Uint32, tính 1 lần cho mỗi WW/WL.
  * Ảnh X-quang 3072x2492 kéo WW/WL vẫn mượt vì vòng lặp chỉ còn 1 phép tra mảng/pixel.
  */
-function buildMonoLut(meta, windowCenter, windowWidth, invert, colorLut) {
+function buildMonoLut(meta, windowCenter, windowWidth, invert, colorLut, threshold = null) {
   const minS = meta.minStoredValue ?? -32768;
   const maxS = meta.maxStoredValue ?? 65535;
   const size = maxS - minS + 1;
@@ -631,8 +631,18 @@ function buildMonoLut(meta, windowCenter, windowWidth, invert, colorLut) {
   const doInvert = invert || colorLut === 'inverted';
   const pseudo = PSEUDO_COLOR[colorLut];
   const littleEndian = new Uint8Array(new Uint32Array([1]).buffer)[0] === 1;
+  const hasThreshold = threshold && Array.isArray(threshold.color);
+
   for (let s = 0; s < size; s++) {
-    let v = Math.round(voiTransform((s + minS) * slope + intercept, windowCenter, windowWidth, meta.voiLutFunction));
+    const hu = (s + minS) * slope + intercept;
+    if (hasThreshold && hu >= threshold.min && hu <= threshold.max) {
+      const tr = threshold.color[0];
+      const tg = threshold.color[1];
+      const tb = threshold.color[2];
+      lut[s] = littleEndian ? (255 << 24) | (tb << 16) | (tg << 8) | tr : (tr << 24) | (tg << 16) | (tb << 8) | 255;
+      continue;
+    }
+    let v = Math.round(voiTransform(hu, windowCenter, windowWidth, meta.voiLutFunction));
     if (v < 0) v = 0;
     else if (v > 255) v = 255;
     if (mono1) v = 255 - v;
@@ -665,7 +675,7 @@ function getReusableImageData(canvas, ctx, columns, rows) {
  */
 const LUT_CACHE_MAX = 24;
 const lutCache = new Map();
-function getCachedMonoLut(meta, windowCenter, windowWidth, invert, colorLut) {
+function getCachedMonoLut(meta, windowCenter, windowWidth, invert, colorLut, threshold = null) {
   const key = [
     meta.minStoredValue,
     meta.maxStoredValue,
@@ -677,6 +687,7 @@ function getCachedMonoLut(meta, windowCenter, windowWidth, invert, colorLut) {
     windowWidth,
     invert ? 1 : 0,
     colorLut,
+    threshold ? `${threshold.key || threshold.min}_${threshold.max}` : 'none',
   ].join('|');
   const hit = lutCache.get(key);
   if (hit !== undefined) {
@@ -684,7 +695,7 @@ function getCachedMonoLut(meta, windowCenter, windowWidth, invert, colorLut) {
     lutCache.set(key, hit); // LRU
     return hit;
   }
-  const built = buildMonoLut(meta, windowCenter, windowWidth, invert, colorLut);
+  const built = buildMonoLut(meta, windowCenter, windowWidth, invert, colorLut, threshold);
   lutCache.set(key, built);
   if (lutCache.size > LUT_CACHE_MAX) lutCache.delete(lutCache.keys().next().value);
   return built;
@@ -750,7 +761,7 @@ export function renderImageToCanvas(canvas, rawPixels, meta, options = {}) {
     return;
   }
 
-  const lutInfo = getCachedMonoLut(meta, windowCenter, windowWidth, invert, colorLut);
+  const lutInfo = getCachedMonoLut(meta, windowCenter, windowWidth, invert, colorLut, options.threshold);
   const out32 = new Uint32Array(imageData.data.buffer);
   if (lutInfo) {
     const { lut, minS } = lutInfo;

@@ -6,6 +6,8 @@ import {
   calculateAngle,
   calculateEllipseArea,
   calculateRectArea,
+  calculatePolygonArea,
+  calculateCobbAngle,
   formatMeasurement,
 } from '../utils/measurement.utils';
 import { renderAnnotationsToCanvas } from '../utils/annotation.renderer';
@@ -140,7 +142,26 @@ export function usePacsInteraction({
     if (e.button === 1 || activeTool === PACS_TOOLS.PAN) return;
     if (e.button === 2 || activeTool === PACS_TOOLS.WW_WL || activeTool === PACS_TOOLS.ZOOM) return;
 
-    const isMeasureTool = [PACS_TOOLS.LENGTH, PACS_TOOLS.ANGLE, PACS_TOOLS.ROI_ELLIPSE, PACS_TOOLS.ROI_RECT].includes(activeTool);
+    const isMeasureTool = [
+      PACS_TOOLS.LENGTH,
+      PACS_TOOLS.LENGTH_H,
+      PACS_TOOLS.LENGTH_V,
+      PACS_TOOLS.ANGLE,
+      PACS_TOOLS.ANGLE_45,
+      PACS_TOOLS.COBB,
+      PACS_TOOLS.SPINE,
+      PACS_TOOLS.ROI_ELLIPSE,
+      PACS_TOOLS.ROI_RECT,
+      PACS_TOOLS.ROI_ROTATED_RECT,
+      PACS_TOOLS.ROI_POLYGON,
+      PACS_TOOLS.ROI_FREEHAND,
+      PACS_TOOLS.PEN,
+      PACS_TOOLS.ARROW,
+      PACS_TOOLS.TEXT,
+      PACS_TOOLS.PROBE,
+      PACS_TOOLS.BONE,
+      PACS_TOOLS.ARC,
+    ].includes(activeTool);
     if (isMeasureTool && !ensureMeasurable()) {
       isInteracting.current = false;
       return;
@@ -149,11 +170,89 @@ export function usePacsInteraction({
     const coords = getCanvasCoordinates(e);
     const base = { id: Date.now(), calibrated, spacingSource: meta?.pixelSpacingSource || null };
 
-    if (activeTool === PACS_TOOLS.LENGTH) {
-      setCurrentDrawing({ ...base, type: 'length', points: [coords, coords], valueText: formatMeasurement('length', 0, calibrated) });
-    } else if (activeTool === PACS_TOOLS.ANGLE) {
-      if (!currentDrawing || currentDrawing.type !== 'angle') {
-        setCurrentDrawing({ ...base, type: 'angle', points: [coords, coords], valueText: '' });
+    // Điểm đo tức thì (Probe)
+    if (activeTool === PACS_TOOLS.PROBE) {
+      const v = getPixelValue(currentData.rawPixels, meta, coords.x, coords.y);
+      const valStr = v ? (v.rgb ? `RGB ${v.rgb.join(',')}` : `${Number.isInteger(v.value) ? v.value : v.value.toFixed(1)} ${valueUnit}`) : '';
+      setAnnotations((prev) => ({
+        ...prev,
+        [currentKey]: [
+          ...(prev[currentKey] || []),
+          { ...base, type: 'probe', points: [coords], valueText: `(${Math.round(coords.x)}, ${Math.round(coords.y)}) ${valStr}`.trim() },
+        ],
+      }));
+      isInteracting.current = false;
+      return;
+    }
+
+    // Nhãn chữ tức thì (Text)
+    if (activeTool === PACS_TOOLS.TEXT) {
+      const textInput = window.prompt('Nhập nội dung ghi chú:', '') || 'Ghi chú';
+      if (textInput.trim()) {
+        setAnnotations((prev) => ({
+          ...prev,
+          [currentKey]: [
+            ...(prev[currentKey] || []),
+            { ...base, type: 'text', points: [coords], text: textInput, valueText: textInput },
+          ],
+        }));
+      }
+      isInteracting.current = false;
+      return;
+    }
+
+    // Đa giác (Polygon ROI): click từng đỉnh, click gần điểm bắt đầu để đóng
+    if (activeTool === PACS_TOOLS.ROI_POLYGON) {
+      if (!currentDrawing || currentDrawing.type !== 'roi_polygon') {
+        setCurrentDrawing({ ...base, type: 'roi_polygon', points: [coords, coords], valueText: '' });
+      } else {
+        const pts = currentDrawing.points;
+        const p0 = pts[0];
+        // Nếu click gần điểm xuất phát và đã có >= 3 đỉnh -> đóng đa giác
+        if (pts.length >= 4 && Math.hypot(coords.x - p0.x, coords.y - p0.y) <= 12) {
+          const cleanPts = pts.slice(0, pts.length - 1);
+          const area = calculatePolygonArea(cleanPts, spacingForCalc);
+          setAnnotations((prev) => ({
+            ...prev,
+            [currentKey]: [
+              ...(prev[currentKey] || []),
+              { ...currentDrawing, points: cleanPts, closed: true, valueText: `Diện tích ${formatMeasurement('roi_polygon', area, calibrated)}` },
+            ],
+          }));
+          setCurrentDrawing(null);
+        } else {
+          setCurrentDrawing({ ...currentDrawing, points: [...pts, coords] });
+        }
+      }
+      return;
+    }
+
+    // Trục / Góc Cobb (Cobb Angle): 2 đoạn thẳng (4 điểm)
+    if (activeTool === PACS_TOOLS.COBB || activeTool === PACS_TOOLS.SPINE) {
+      if (!currentDrawing || (currentDrawing.type !== 'cobb' && currentDrawing.type !== 'spine')) {
+        setCurrentDrawing({ ...base, type: activeTool, points: [coords, coords], valueText: 'Vẽ đoạn 1' });
+      } else if (currentDrawing.points.length === 2) {
+        // Đã có đoạn 1, bắt đầu đoạn 2
+        setCurrentDrawing({ ...currentDrawing, points: [...currentDrawing.points, coords, coords], valueText: 'Vẽ đoạn 2' });
+      }
+      return;
+    }
+
+    // Nét vẽ tự do / Bút đánh dấu
+    if (activeTool === PACS_TOOLS.PEN || activeTool === PACS_TOOLS.ROI_FREEHAND) {
+      setCurrentDrawing({ ...base, type: activeTool, points: [coords], valueText: activeTool === PACS_TOOLS.PEN ? 'Bút vẽ' : '' });
+      return;
+    }
+
+    if (activeTool === PACS_TOOLS.LENGTH || activeTool === PACS_TOOLS.LENGTH_H || activeTool === PACS_TOOLS.LENGTH_V) {
+      setCurrentDrawing({ ...base, type: activeTool, points: [coords, coords], valueText: formatMeasurement('length', 0, calibrated) });
+    } else if (activeTool === PACS_TOOLS.ARROW) {
+      setCurrentDrawing({ ...base, type: 'arrow', points: [coords, coords], valueText: 'Chỉ điểm' });
+    } else if (activeTool === PACS_TOOLS.BONE) {
+      setCurrentDrawing({ ...base, type: 'bone', points: [coords, coords], valueText: 'Chỉ số xương' });
+    } else if (activeTool === PACS_TOOLS.ANGLE || activeTool === PACS_TOOLS.ANGLE_45 || activeTool === PACS_TOOLS.ARC) {
+      if (!currentDrawing || currentDrawing.type !== activeTool) {
+        setCurrentDrawing({ ...base, type: activeTool, points: [coords, coords], valueText: '' });
       } else if (currentDrawing.points.length === 2) {
         const [p1] = currentDrawing.points;
         if (Math.hypot(coords.x - p1.x, coords.y - p1.y) >= 1) {
@@ -173,7 +272,7 @@ export function usePacsInteraction({
           setCurrentDrawing(null);
         }
       }
-    } else if (activeTool === PACS_TOOLS.ROI_ELLIPSE || activeTool === PACS_TOOLS.ROI_RECT) {
+    } else if (activeTool === PACS_TOOLS.ROI_ELLIPSE || activeTool === PACS_TOOLS.ROI_RECT || activeTool === PACS_TOOLS.ROI_ROTATED_RECT) {
       setCurrentDrawing({ ...base, type: activeTool, points: [coords, coords], valueText: '' });
     }
   };
@@ -268,13 +367,88 @@ export function usePacsInteraction({
 
     if (!currentDrawing) return;
     const p1 = currentDrawing.points[0];
+
+    if (activeTool === PACS_TOOLS.PEN) {
+      const lastPt = currentDrawing.points[currentDrawing.points.length - 1];
+      if (!lastPt || Math.hypot(coords.x - lastPt.x, coords.y - lastPt.y) >= 2) {
+        setCurrentDrawing({ ...currentDrawing, points: [...currentDrawing.points, coords] });
+      }
+      return;
+    }
+
+    if (activeTool === PACS_TOOLS.ROI_FREEHAND) {
+      const lastPt = currentDrawing.points[currentDrawing.points.length - 1];
+      if (!lastPt || Math.hypot(coords.x - lastPt.x, coords.y - lastPt.y) >= 2) {
+        const nextPts = [...currentDrawing.points, coords];
+        const area = calculatePolygonArea(nextPts, spacingForCalc);
+        setCurrentDrawing({
+          ...currentDrawing,
+          points: nextPts,
+          valueText: `Diện tích ${formatMeasurement('roi_freehand', area, calibrated)}`,
+        });
+      }
+      return;
+    }
+
+    if (activeTool === PACS_TOOLS.ROI_POLYGON) {
+      const pts = [...currentDrawing.points];
+      pts[pts.length - 1] = coords;
+      setCurrentDrawing({ ...currentDrawing, points: pts });
+      return;
+    }
+
+    if (activeTool === PACS_TOOLS.COBB || activeTool === PACS_TOOLS.SPINE) {
+      if (currentDrawing.points.length === 2) {
+        setCurrentDrawing({ ...currentDrawing, points: [currentDrawing.points[0], coords], valueText: 'Đoạn 1' });
+      } else if (currentDrawing.points.length === 4) {
+        const [pt1, pt2, pt3] = currentDrawing.points;
+        const cobbAng = calculateCobbAngle([pt1, pt2], [pt3, coords], spacingForCalc);
+        setCurrentDrawing({
+          ...currentDrawing,
+          points: [pt1, pt2, pt3, coords],
+          valueText: `Góc Cobb ${cobbAng.toFixed(1)}°`,
+        });
+      }
+      return;
+    }
+
     if (activeTool === PACS_TOOLS.LENGTH) {
       setCurrentDrawing({
         ...currentDrawing,
         points: [p1, coords],
         valueText: formatMeasurement('length', calculateDistance(p1, coords, spacingForCalc), calibrated),
       });
-    } else if (activeTool === PACS_TOOLS.ROI_ELLIPSE || activeTool === PACS_TOOLS.ROI_RECT) {
+    } else if (activeTool === PACS_TOOLS.LENGTH_H) {
+      const constrained = { x: coords.x, y: p1.y };
+      const dist = Math.abs(coords.x - p1.x) * (spacingForCalc[1] || 1);
+      setCurrentDrawing({
+        ...currentDrawing,
+        points: [p1, constrained],
+        valueText: `Ngang ${formatMeasurement('length', dist, calibrated)}`,
+      });
+    } else if (activeTool === PACS_TOOLS.LENGTH_V) {
+      const constrained = { x: p1.x, y: coords.y };
+      const dist = Math.abs(coords.y - p1.y) * (spacingForCalc[0] || 1);
+      setCurrentDrawing({
+        ...currentDrawing,
+        points: [p1, constrained],
+        valueText: `Dọc ${formatMeasurement('length', dist, calibrated)}`,
+      });
+    } else if (activeTool === PACS_TOOLS.ARROW) {
+      setCurrentDrawing({
+        ...currentDrawing,
+        points: [p1, coords],
+        valueText: 'Chỉ điểm',
+      });
+    } else if (activeTool === PACS_TOOLS.BONE) {
+      const dist = calculateDistance(p1, coords, spacingForCalc);
+      const deg = Math.abs((Math.atan2(coords.y - p1.y, coords.x - p1.x) * 180) / Math.PI);
+      setCurrentDrawing({
+        ...currentDrawing,
+        points: [p1, coords],
+        valueText: `Khung chậu: ${dist.toFixed(1)} mm · ${deg.toFixed(1)}°`,
+      });
+    } else if (activeTool === PACS_TOOLS.ROI_ELLIPSE || activeTool === PACS_TOOLS.ROI_RECT || activeTool === PACS_TOOLS.ROI_ROTATED_RECT) {
       setCurrentDrawing(finalizeRoi({ ...currentDrawing, points: [p1, coords] }, false));
     }
   };
@@ -287,7 +461,11 @@ export function usePacsInteraction({
       flushDrag();
     }
 
-    if (activeTool === PACS_TOOLS.ANGLE && currentDrawing?.type === 'angle' && currentDrawing.points.length === 2) {
+    if (
+      (activeTool === PACS_TOOLS.ANGLE || activeTool === PACS_TOOLS.ANGLE_45 || activeTool === PACS_TOOLS.ARC) &&
+      currentDrawing &&
+      currentDrawing.points.length === 2
+    ) {
       const [p1, p2] = currentDrawing.points;
       if (Math.hypot((p2?.x || 0) - (p1?.x || 0), (p2?.y || 0) - (p1?.y || 0)) >= 2) {
         setCurrentDrawing({ ...currentDrawing, points: [p1, p2, p2], valueText: '0.0°' });
@@ -295,13 +473,61 @@ export function usePacsInteraction({
       return;
     }
 
-    if (currentDrawing && [PACS_TOOLS.LENGTH, PACS_TOOLS.ROI_ELLIPSE, PACS_TOOLS.ROI_RECT].includes(activeTool)) {
-      const [p1, p2] = currentDrawing.points;
-      if (Math.hypot((p1?.x || 0) - (p2?.x || 0), (p1?.y || 0) - (p2?.y || 0)) >= 1) {
-        const finalItem = activeTool === PACS_TOOLS.LENGTH ? currentDrawing : finalizeRoi(currentDrawing);
-        setAnnotations((prev) => ({ ...prev, [currentKey]: [...(prev[currentKey] || []), finalItem] }));
+    if (currentDrawing) {
+      if (activeTool === PACS_TOOLS.PEN) {
+        if (currentDrawing.points.length >= 2) {
+          setAnnotations((prev) => ({ ...prev, [currentKey]: [...(prev[currentKey] || []), currentDrawing] }));
+        }
+        setCurrentDrawing(null);
+        return;
       }
-      setCurrentDrawing(null);
+      if (activeTool === PACS_TOOLS.ROI_FREEHAND) {
+        if (currentDrawing.points.length >= 3) {
+          const area = calculatePolygonArea(currentDrawing.points, spacingForCalc);
+          const finalItem = {
+            ...currentDrawing,
+            closed: true,
+            valueText: `Diện tích ${formatMeasurement('roi_freehand', area, calibrated)}`,
+          };
+          setAnnotations((prev) => ({ ...prev, [currentKey]: [...(prev[currentKey] || []), finalItem] }));
+        }
+        setCurrentDrawing(null);
+        return;
+      }
+      if (activeTool === PACS_TOOLS.ROI_POLYGON) {
+        return;
+      }
+      if (activeTool === PACS_TOOLS.COBB || activeTool === PACS_TOOLS.SPINE) {
+        if (currentDrawing.points.length === 2) {
+          return;
+        }
+        if (currentDrawing.points.length === 4) {
+          setAnnotations((prev) => ({ ...prev, [currentKey]: [...(prev[currentKey] || []), currentDrawing] }));
+          setCurrentDrawing(null);
+          return;
+        }
+      }
+      if (
+        [
+          PACS_TOOLS.LENGTH,
+          PACS_TOOLS.LENGTH_H,
+          PACS_TOOLS.LENGTH_V,
+          PACS_TOOLS.ARROW,
+          PACS_TOOLS.BONE,
+          PACS_TOOLS.ROI_ELLIPSE,
+          PACS_TOOLS.ROI_RECT,
+          PACS_TOOLS.ROI_ROTATED_RECT,
+        ].includes(activeTool)
+      ) {
+        const [p1, p2] = currentDrawing.points;
+        if (Math.hypot((p1?.x || 0) - (p2?.x || 0), (p1?.y || 0) - (p2?.y || 0)) >= 1) {
+          const finalItem = [PACS_TOOLS.ROI_ELLIPSE, PACS_TOOLS.ROI_RECT, PACS_TOOLS.ROI_ROTATED_RECT].includes(activeTool)
+            ? finalizeRoi(currentDrawing)
+            : currentDrawing;
+          setAnnotations((prev) => ({ ...prev, [currentKey]: [...(prev[currentKey] || []), finalItem] }));
+        }
+        setCurrentDrawing(null);
+      }
     }
   };
 
@@ -407,6 +633,45 @@ export function usePacsInteraction({
     []
   );
 
+  const copyMeasurements = useCallback(() => {
+    const currentList = annotations[currentKey] || [];
+    if (!currentList.length) {
+      message.info('Chưa có số đo nào trên lát cắt hiện tại');
+      return;
+    }
+    const lines = currentList.map((ann, idx) => {
+      const typeLabel =
+        {
+          length: 'Khoảng cách',
+          length_h: 'Khoảng cách ngang',
+          length_v: 'Chiều cao (dọc)',
+          angle: 'Góc',
+          angle_45: 'Góc 45°',
+          cobb: 'Góc Cobb',
+          spine: 'Trục cột sống',
+          roi_ellipse: 'ROI Elip',
+          roi_rect: 'ROI Chữ nhật',
+          roi_rotated_rect: 'ROI Chữ nhật nghiêng',
+          roi_polygon: 'ROI Đa giác',
+          roi_freehand: 'ROI Tự do',
+          probe: 'Điểm đo (Probe)',
+          arrow: 'Chỉ điểm',
+          text: 'Ghi chú',
+          bone: 'Khung chậu/Xương',
+          pen: 'Bút vẽ',
+        }[ann.type] || 'Số đo';
+      return `${idx + 1}. [${typeLabel}]: ${ann.valueText || ann.text || ''}`;
+    });
+    const text = `DANH SÁCH SỐ ĐO PACS (${currentKey}):\n${lines.join('\n')}`;
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        message.success(`Đã sao chép ${currentList.length} số đo vào bộ nhớ tạm!`);
+      });
+    } else {
+      message.success(`Đã sao chép ${currentList.length} số đo!`);
+    }
+  }, [annotations, currentKey]);
+
   return {
     activeTool,
     setActiveTool,
@@ -441,5 +706,6 @@ export function usePacsInteraction({
     handleClearAnnotations,
     handleUndoAnnotation,
     handleApplyPreset,
+    copyMeasurements,
   };
 }

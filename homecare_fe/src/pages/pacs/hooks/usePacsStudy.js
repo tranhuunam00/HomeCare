@@ -142,7 +142,7 @@ export function usePacsStudy(patientDiagnoseId, apiEndpoint) {
         });
       }
       if (Object.keys(prev).length) setPreviewCache((p) => ({ ...p, ...prev }));
-    }, 16);
+    }, delay);
   }, [evictIfNeeded]);
 
   /* ---------------- Bộ tải ảnh ---------------- */
