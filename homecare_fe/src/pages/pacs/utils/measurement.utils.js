@@ -84,8 +84,49 @@ export function calculateRectArea(p1, p2, pixelSpacing = [1.0, 1.0]) {
 }
 
 /**
+ * Diện tích đa giác (đơn vị mm²) theo công thức Shoelace, có hiệu chuẩn pixel spacing.
+ * @param {Array<{x:number,y:number}>} points Đỉnh đa giác (pixel ảnh)
+ * @param {[number, number]} pixelSpacing [rowSpacing, colSpacing] mm/pixel
+ * @returns {number} Diện tích mm²
+ */
+export function calculatePolygonArea(points, pixelSpacing = [1.0, 1.0]) {
+  if (!points || points.length < 3) return 0;
+  const rowSpacing = pixelSpacing[0] || 1.0;
+  const colSpacing = pixelSpacing[1] || 1.0;
+  let acc = 0;
+  for (let i = 0; i < points.length; i++) {
+    const a = points[i];
+    const b = points[(i + 1) % points.length];
+    acc += a.x * colSpacing * (b.y * rowSpacing) - b.x * colSpacing * (a.y * rowSpacing);
+  }
+  return Math.abs(acc) / 2;
+}
+
+/**
+ * Góc Cobb: góc (nhọn) giữa hướng của 2 đoạn thẳng (dùng cho cột sống / khớp).
+ * @param {[{x,y},{x,y}]} lineA Đoạn 1
+ * @param {[{x,y},{x,y}]} lineB Đoạn 2
+ * @returns {number} Góc độ [0, 90]
+ */
+export function calculateCobbAngle(lineA, lineB, pixelSpacing = [1.0, 1.0]) {
+  if (!lineA?.[0] || !lineA?.[1] || !lineB?.[0] || !lineB?.[1]) return 0;
+  const rowSpacing = pixelSpacing[0] || 1.0;
+  const colSpacing = pixelSpacing[1] || 1.0;
+  const dir = (p, q) => ({ x: (q.x - p.x) * colSpacing, y: (q.y - p.y) * rowSpacing });
+  const u = dir(lineA[0], lineA[1]);
+  const v = dir(lineB[0], lineB[1]);
+  const m1 = Math.hypot(u.x, u.y);
+  const m2 = Math.hypot(v.x, v.y);
+  if (!m1 || !m2) return 0;
+  const cos = Math.max(-1, Math.min(1, (u.x * v.x + u.y * v.y) / (m1 * m2)));
+  let ang = (Math.acos(cos) * 180) / Math.PI;
+  if (ang > 90) ang = 180 - ang;
+  return ang;
+}
+
+/**
  * Formats measurement value and unit string.
- * @param {'length'|'angle'|'roi_ellipse'|'roi_rect'} type
+ * @param {'length'|'angle'|'roi_ellipse'|'roi_rect'|'roi_polygon'|'roi_freehand'|'arrow'|'cobb'} type
  * @param {number} value
  * @returns {string}
  */
@@ -95,11 +136,15 @@ export function formatMeasurement(type, value, calibrated = true) {
   const unit = calibrated ? 'mm' : 'px';
   switch (type) {
     case 'length':
+    case 'arrow':
       return `${value.toFixed(1)} ${unit}`;
     case 'angle':
+    case 'cobb':
       return `${value.toFixed(1)}°`;
     case 'roi_ellipse':
     case 'roi_rect':
+    case 'roi_polygon':
+    case 'roi_freehand':
       return `${value.toFixed(1)} ${unit}²`;
     default:
       return `${value.toFixed(1)}`;

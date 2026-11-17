@@ -19,6 +19,8 @@ import PacsCaptureAlert from './components/PacsCaptureAlert';
 import PacsUploadAlert from './components/PacsUploadAlert';
 import PacsAttachmentViewer from './components/PacsAttachmentViewer';
 import PacsMprModal from './components/PacsMprModal';
+import PacsHistogramModal from './components/PacsHistogramModal';
+import PacsThresholdModal from './components/PacsThresholdModal';
 import { PACS_TOOLS, WW_WL_PRESETS } from './constants/pacs.constants';
 
 const EMPTY_LIST = Object.freeze([]);
@@ -245,6 +247,9 @@ export default function PacsViewerPage() {
   const [activeViewport, setActiveViewport] = useState(0);
   const [invert, setInvert] = useState(false);
   const [colorLut, setColorLut] = useState('default');
+  const [histogramOpen, setHistogramOpen] = useState(false);
+  const [thresholdOpen, setThresholdOpen] = useState(false);
+  const [activeThreshold, setActiveThreshold] = useState(null);
   const imageCanvasRef = useRef(null);
   const annotationCanvasRef = useRef(null);
 
@@ -415,6 +420,7 @@ export default function PacsViewerPage() {
         invert,
         colorLut,
         isSmooth,
+        threshold: activeThreshold,
       });
       return;
     }
@@ -433,7 +439,7 @@ export default function PacsViewerPage() {
     const ctx = canvas.getContext('2d');
     ctx?.clearRect(0, 0, canvas.width, canvas.height);
     // layout: chuyển 1x1 <-> lưới làm canvas được tạo mới -> vẽ lại
-  }, [hasFull, currentFull, currentPreview, currentIndex, instances, windowCenter, windowWidth, invert, colorLut, isSmooth, layout]);
+  }, [hasFull, currentFull, currentPreview, currentIndex, instances, windowCenter, windowWidth, invert, colorLut, isSmooth, activeThreshold, layout]);
 
   // Kích thước ma trận ảnh cho bố cục khung nhìn (có trước khi ảnh gốc về nhờ metadata máy chủ)
   const imageDims = useMemo(() => {
@@ -758,6 +764,7 @@ export default function PacsViewerPage() {
               rotation={rotation}
               setRotation={setRotation}
               onReset={handleReset}
+              onApplyPreset={handleApplyPreset}
               onOpenMpr={handleOpenMpr}
               onReconstructMpr={handleReconstructMpr}
               onMprPlane={handleMprPlane}
@@ -771,6 +778,9 @@ export default function PacsViewerPage() {
               setInvert={setInvert}
               colorLut={colorLut}
               setColorLut={setColorLut}
+              onOpenHistogram={() => setHistogramOpen(true)}
+              onOpenThreshold={() => setThresholdOpen(true)}
+              activeThreshold={activeThreshold}
               isSmooth={isSmooth}
               onToggleSmooth={() => setIsSmooth((p) => !p)}
               onZoomIn={handleZoomIn}
@@ -1064,6 +1074,26 @@ export default function PacsViewerPage() {
           ))}
         </div>
       </Modal>
+
+      <PacsHistogramModal
+        open={histogramOpen}
+        onClose={() => setHistogramOpen(false)}
+        rawPixels={currentFull?.rawPixels}
+        meta={currentFull?.meta || currentMeta}
+        windowCenter={windowCenter}
+        windowWidth={windowWidth}
+        onApplyWwWl={({ width, center }) => {
+          setWindowWidth(width);
+          setWindowCenter(center);
+        }}
+      />
+
+      <PacsThresholdModal
+        open={thresholdOpen}
+        onClose={() => setThresholdOpen(false)}
+        activeThreshold={activeThreshold}
+        onSelectThreshold={(t) => setActiveThreshold(t)}
+      />
     </div>
   );
 }

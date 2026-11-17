@@ -167,7 +167,7 @@ export default function PacsViewportOverlay({
       </div>
 
       {/* ===== Góc dưới trái: Hiển thị & đầu dò ===== */}
-      <div style={{ ...hudText, position: 'absolute', bottom: 8, left: 52, zIndex: 12 }}>
+      <div style={{ ...hudText, position: 'absolute', bottom: 32, left: 52, zIndex: 12 }}>
         {probe && (
           <div style={{ color: '#a5f3fc' }}>
             ({probe.x}, {probe.y}){' '}

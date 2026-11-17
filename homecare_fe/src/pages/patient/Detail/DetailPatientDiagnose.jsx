@@ -222,9 +222,15 @@ const PatientDiagnoiseDetailPage = ({
                 <Button
                   size="small"
                   onClick={() => {
-                    const dsonoBaseUrl = import.meta.env.VITE_DSONO_URL || 'http://localhost:3000';
-                    const targetUrl = `${dsonoBaseUrl}?accessionNo=${selectedPatientDiagnose?.id}&pid=${selectedPatientDiagnose?.PID || ''}&patientName=${encodeURIComponent(selectedPatientDiagnose?.name || '')}&gender=${encodeURIComponent(selectedPatientDiagnose?.gender || '')}&source=HOMECARE`;
-                    window.open(targetUrl, '_blank');
+                    const dsonoBaseUrl = import.meta.env.VITE_DSONO_URL || 'http://103.90.227.173:6002';
+                    const query = `accessionNo=${selectedPatientDiagnose?.id || ''}&pid=${selectedPatientDiagnose?.PID || ''}&patientName=${encodeURIComponent(selectedPatientDiagnose?.name || '')}&gender=${encodeURIComponent(selectedPatientDiagnose?.gender || '')}&source=HOMECARE`;
+                    const targetUrl = `${dsonoBaseUrl}?${query}`;
+                    if (/android/i.test(navigator.userAgent)) {
+                      const appIntent = `intent://open?${query}#Intent;scheme=dsono;package=com.dsono.myapp;S.browser_fallback_url=${encodeURIComponent(targetUrl)};end`;
+                      window.location.href = appIntent;
+                    } else {
+                      window.open(targetUrl, '_blank');
+                    }
                   }}
                   style={{
                     backgroundColor: '#059669',

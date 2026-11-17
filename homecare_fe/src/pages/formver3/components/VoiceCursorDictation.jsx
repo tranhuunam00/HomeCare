@@ -11,7 +11,7 @@ import {
  * Nhận diện giọng nói tiếng Việt và tự động chèn văn bản nối tiếp
  * ngay sau vị trí con trỏ chuột trong ô input / textarea đang focus.
  */
-const VoiceCursorDictation = ({ form, isMobile }) => {
+const VoiceCursorDictation = ({ form, isMobile, isSplitScreen = false }) => {
   const [isListening, setIsListening] = useState(false);
   const [interimText, setInterimText] = useState("");
   const [lastTargetName, setLastTargetName] = useState("");
@@ -263,7 +263,7 @@ const VoiceCursorDictation = ({ form, isMobile }) => {
       style={{
         position: "fixed",
         right: isMobile ? 12 : 24,
-        bottom: isMobile ? 70 : 80,
+        bottom: isSplitScreen ? (isMobile ? 120 : 130) : (isMobile ? 70 : 80),
         zIndex: 9999,
         display: "flex",
         flexDirection: "column",

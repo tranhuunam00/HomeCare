@@ -45,6 +45,8 @@ import {
   ArrowRightOutlined,
   DeploymentUnitOutlined,
   CheckSquareOutlined,
+  HeartOutlined,
+  CompassOutlined,
 } from '@ant-design/icons';
 import { VIEWER_LAYOUTS, PACS_TOOLS } from '../constants/pacs.constants';
 import LayoutIcon from './LayoutIcon';
@@ -124,7 +126,30 @@ const SpineIcon = (
   </svg>
 );
 
-const emoji = (ch) => <span style={{ fontSize: 15, lineHeight: 1 }}>{ch}</span>;
+const BoneIcon = (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17 3a2.83 2.83 0 0 0-4 0l-6 6a2.83 2.83 0 1 0 4 4l6-6a2.83 2.83 0 0 0 0-4z" />
+    <circle cx="5" cy="19" r="2" />
+    <circle cx="19" cy="5" r="2" />
+  </svg>
+);
+
+const BrainIcon = (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+    <path d="M12 4a4 4 0 0 0-4 4c0 1 .4 2 1 2.7A4 4 0 0 0 6 15a4 4 0 0 0 4 4h2" />
+    <path d="M12 4a4 4 0 0 1 4 4c0 1-.4 2-1 2.7A4 4 0 0 1 18 15a4 4 0 0 1-4 4h-2" />
+  </svg>
+);
+
+const PaletteIcon = (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="13.5" cy="6.5" r=".5" fill="currentColor" />
+    <circle cx="17.5" cy="10.5" r=".5" fill="currentColor" />
+    <circle cx="8.5" cy="7.5" r=".5" fill="currentColor" />
+    <circle cx="6.5" cy="12.5" r=".5" fill="currentColor" />
+    <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.5-.7 1.5-1.5 0-.4-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1 0-.8.7-1.5 1.5-1.5H16c3.3 0 6-2.7 6-6 0-5.5-4.5-9.8-10-9.8z" />
+  </svg>
+);
 
 export default function PacsSidebar({
   study,
@@ -138,6 +163,7 @@ export default function PacsSidebar({
   activeTool,
   setActiveTool,
   onClearAnnotations,
+  onCopyMeasurements,
   onUploadDicom,
   onReloadStudy,
   flipH,
@@ -146,6 +172,7 @@ export default function PacsSidebar({
   setFlipV,
   setRotation,
   onReset,
+  onApplyPreset,
   onOpenMpr,
   onReconstructMpr,
   onMprPlane,
@@ -159,6 +186,9 @@ export default function PacsSidebar({
   setInvert,
   colorLut = 'default',
   setColorLut,
+  onOpenHistogram,
+  onOpenThreshold,
+  activeThreshold,
   isSmooth = true,
   onToggleSmooth,
   onCaptureKeyImage,
@@ -202,8 +232,16 @@ export default function PacsSidebar({
   const nextLut = () => {
     if (!setColorLut) return devToast();
     const order = ['default', 'rainbow', 'hot_iron', 'inverted'];
+    const names = {
+      default: 'Mặc định (Grayscale)',
+      rainbow: 'Cầu vồng nhiệt (Rainbow)',
+      hot_iron: 'Sắt nung đỏ (Hot Iron)',
+      inverted: 'Đảo âm bản (Inverted)',
+    };
     const i = order.indexOf(colorLut);
-    return setColorLut(order[(i + 1) % order.length]);
+    const next = order[(i + 1) % order.length];
+    setColorLut(next);
+    message.success(`Đã đổi bảng màu: ${names[next] || next}`);
   };
 
   const toggleFullscreen = () => {
@@ -249,37 +287,37 @@ export default function PacsSidebar({
       {/* ---------------- Measurement Tools ---------------- */}
       <Section id="measure" title="Measurement Tools" open={open.measure} onToggle={() => toggle('measure')}>
         <ToolBtn title="Đo khoảng cách (Line mm)" color="#22c55e" active={activeTool === PACS_TOOLS.LENGTH} onClick={() => setActiveTool(PACS_TOOLS.LENGTH)}>{RulerDiagIcon}</ToolBtn>
-        <ToolBtn title="ROI đa giác (đang phát triển)" onClick={devToast}>{PentagonIcon}</ToolBtn>
-        <ToolBtn title="Bút đánh dấu (đang phát triển)" color="#facc15" onClick={devToast}><HighlightOutlined /></ToolBtn>
-        <ToolBtn title="Cột sống / trục (đang phát triển)" onClick={devToast}>{SpineIcon}</ToolBtn>
+        <ToolBtn title="ROI đa giác" color="#ec4899" active={activeTool === PACS_TOOLS.ROI_POLYGON} onClick={() => setActiveTool(PACS_TOOLS.ROI_POLYGON)}>{PentagonIcon}</ToolBtn>
+        <ToolBtn title="Bút đánh dấu (Pen)" color="#facc15" active={activeTool === PACS_TOOLS.PEN} onClick={() => setActiveTool(PACS_TOOLS.PEN)}><HighlightOutlined /></ToolBtn>
+        <ToolBtn title="Trục cột sống (Spine)" color="#f97316" active={activeTool === PACS_TOOLS.SPINE} onClick={() => setActiveTool(PACS_TOOLS.SPINE)}>{SpineIcon}</ToolBtn>
 
-        <ToolBtn title="Giá trị điểm (Probe)" onClick={devToast}><AimOutlined /></ToolBtn>
+        <ToolBtn title="Giá trị điểm (Probe HU)" color="#06b6d4" active={activeTool === PACS_TOOLS.PROBE} onClick={() => setActiveTool(PACS_TOOLS.PROBE)}><AimOutlined /></ToolBtn>
         <ToolBtn title="Đo góc (Angle °)" color="#f59e0b" active={activeTool === PACS_TOOLS.ANGLE} onClick={() => setActiveTool(PACS_TOOLS.ANGLE)}><RadiusSettingOutlined /></ToolBtn>
-        <ToolBtn title="Góc Cobb (đang phát triển)" onClick={devToast}>{CobbIcon}</ToolBtn>
+        <ToolBtn title="Góc Cobb" color="#f97316" active={activeTool === PACS_TOOLS.COBB} onClick={() => setActiveTool(PACS_TOOLS.COBB)}>{CobbIcon}</ToolBtn>
         <ToolBtn title="Đo diện tích Chữ nhật (ROI mm²)" color="#c084fc" active={activeTool === PACS_TOOLS.ROI_RECT} onClick={() => setActiveTool(PACS_TOOLS.ROI_RECT)}><BorderOutlined /></ToolBtn>
 
         <ToolBtn title="Đo diện tích Elip (ROI mm²)" color="#38bdf8" active={activeTool === PACS_TOOLS.ROI_ELLIPSE} onClick={() => setActiveTool(PACS_TOOLS.ROI_ELLIPSE)}>{EllipseIcon}</ToolBtn>
-        <ToolBtn title="ROI tự do (đang phát triển)" onClick={devToast}>{FreehandIcon}</ToolBtn>
-        <ToolBtn title="Sao chép số đo (đang phát triển)" onClick={devToast}><CopyOutlined /></ToolBtn>
-        <ToolBtn title="Đo chiều cao (đang phát triển)" onClick={devToast}><ColumnHeightOutlined /></ToolBtn>
+        <ToolBtn title="ROI tự do (Freehand)" color="#10b981" active={activeTool === PACS_TOOLS.ROI_FREEHAND} onClick={() => setActiveTool(PACS_TOOLS.ROI_FREEHAND)}>{FreehandIcon}</ToolBtn>
+        <ToolBtn title="Sao chép số đo" color="#38bdf8" onClick={onCopyMeasurements || devToast}><CopyOutlined /></ToolBtn>
+        <ToolBtn title="Đo chiều cao (dọc mm)" color="#22c55e" active={activeTool === PACS_TOOLS.LENGTH_V} onClick={() => setActiveTool(PACS_TOOLS.LENGTH_V)}><ColumnHeightOutlined /></ToolBtn>
 
-        <ToolBtn title="Nhãn chữ (đang phát triển)" onClick={devToast}><FontSizeOutlined /></ToolBtn>
-        <ToolBtn title="Đo khoảng (đang phát triển)" onClick={devToast}><ColumnWidthOutlined /></ToolBtn>
-        <ToolBtn title="Đo đường kính (đang phát triển)" onClick={devToast}><LineOutlined /></ToolBtn>
-        <ToolBtn title="Góc 45° (đang phát triển)" onClick={devToast}><RadiusSettingOutlined rotate={180} /></ToolBtn>
+        <ToolBtn title="Nhãn chữ (Text)" color="#e2e8f0" active={activeTool === PACS_TOOLS.TEXT} onClick={() => setActiveTool(PACS_TOOLS.TEXT)}><FontSizeOutlined /></ToolBtn>
+        <ToolBtn title="Đo khoảng cách ngang (mm)" color="#22c55e" active={activeTool === PACS_TOOLS.LENGTH_H} onClick={() => setActiveTool(PACS_TOOLS.LENGTH_H)}><ColumnWidthOutlined /></ToolBtn>
+        <ToolBtn title="Đo đường kính (Line)" color="#22c55e" active={activeTool === PACS_TOOLS.LENGTH} onClick={() => setActiveTool(PACS_TOOLS.LENGTH)}><LineOutlined /></ToolBtn>
+        <ToolBtn title="Góc 45°" color="#f59e0b" active={activeTool === PACS_TOOLS.ANGLE_45} onClick={() => setActiveTool(PACS_TOOLS.ANGLE_45)}><RadiusSettingOutlined rotate={180} /></ToolBtn>
 
-        <ToolBtn title="Chỉ số khung chậu (đang phát triển)" onClick={devToast}>{emoji('🦴')}</ToolBtn>
-        <ToolBtn title="ROI nghiêng (đang phát triển)" onClick={devToast}><GatewayOutlined /></ToolBtn>
-        <ToolBtn title="Khoảng cách ngang (đang phát triển)" onClick={devToast}><ArrowRightOutlined /></ToolBtn>
-        <ToolBtn title="Cung tròn (đang phát triển)" onClick={devToast}>{CobbIcon}</ToolBtn>
+        <ToolBtn title="Chỉ số khung chậu / Xương" color="#e879f9" active={activeTool === PACS_TOOLS.BONE} onClick={() => setActiveTool(PACS_TOOLS.BONE)}>{BoneIcon}</ToolBtn>
+        <ToolBtn title="ROI chữ nhật nghiêng" color="#c084fc" active={activeTool === PACS_TOOLS.ROI_ROTATED_RECT} onClick={() => setActiveTool(PACS_TOOLS.ROI_ROTATED_RECT)}><GatewayOutlined /></ToolBtn>
+        <ToolBtn title="Mũi tên chỉ điểm (Arrow)" color="#38bdf8" active={activeTool === PACS_TOOLS.ARROW} onClick={() => setActiveTool(PACS_TOOLS.ARROW)}><ArrowRightOutlined /></ToolBtn>
+        <ToolBtn title="Cung tròn (Arc)" color="#f59e0b" active={activeTool === PACS_TOOLS.ARC} onClick={() => setActiveTool(PACS_TOOLS.ARC)}>{CobbIcon}</ToolBtn>
 
         <button onClick={onClearAnnotations} style={CLEAR_BTN_STYLE}>Xóa đo đạc lát này</button>
       </Section>
 
       {/* ---------------- Advance Tools ---------------- */}
       <Section id="advance" title="Advance Tools" open={open.advance} onToggle={() => toggle('advance')}>
-        <ToolBtn title="Biểu đồ phân bố (đang phát triển)" onClick={devToast}><DotChartOutlined /></ToolBtn>
-        <ToolBtn title="Dựng mạch máu (đang phát triển)" onClick={devToast}><BranchesOutlined /></ToolBtn>
+        <ToolBtn title="Biểu đồ phân bố (Histogram HU)" color="#0284c7" onClick={onOpenHistogram}><DotChartOutlined /></ToolBtn>
+        <ToolBtn title="Dựng mạch máu (MIP)" color="#38bdf8" onClick={() => { onOpenMpr?.(); message.info('Mở chế độ dựng hình mạch máu 3D / MIP'); }}><BranchesOutlined /></ToolBtn>
         <ToolBtn
           title={canBuild3D ? 'Dựng hình 3D Volume (popup)' : `Cần trên 20 ảnh (hiện có ${activeSeriesSliceCount})`}
           color="#38bdf8"
@@ -287,12 +325,12 @@ export default function PacsSidebar({
         >
           <DatabaseOutlined />
         </ToolBtn>
-        <ToolBtn title="Phân vùng não (đang phát triển)" onClick={devToast}>{emoji('🧠')}</ToolBtn>
+        <ToolBtn title="Cửa sổ CT Não (Brain)" color="#ec4899" onClick={() => { onApplyPreset?.({ key: 'brain', ww: 80, wl: 40 }); message.success('Cửa sổ Não: W 80 / L 40'); }}>{BrainIcon}</ToolBtn>
 
-        <ToolBtn title="Dựng bề mặt (đang phát triển)" onClick={devToast}>{PentagonIcon}</ToolBtn>
-        <ToolBtn title="Phân tích tim (đang phát triển)" onClick={devToast}>{emoji('❤️')}</ToolBtn>
-        <ToolBtn title="Khối 3D (đang phát triển)" color="#34d399" onClick={onOpenMpr}>{CubeIcon}</ToolBtn>
-        <ToolBtn title="Phân vùng AI (đang phát triển)" onClick={devToast}><DeploymentUnitOutlined /></ToolBtn>
+        <ToolBtn title="Dựng bề mặt 3D" color="#38bdf8" onClick={onOpenMpr}>{PentagonIcon}</ToolBtn>
+        <ToolBtn title="Cửa sổ Tim / Trung thất" color="#f43f5e" onClick={() => { onApplyPreset?.({ key: 'mediastinum', ww: 350, wl: 50 }); message.success('Cửa sổ Trung thất: W 350 / L 50'); }}><HeartOutlined /></ToolBtn>
+        <ToolBtn title="Khối 3D đa mặt cắt (MPR)" color="#34d399" onClick={onOpenMpr}>{CubeIcon}</ToolBtn>
+        <ToolBtn title="Phân vùng tổn thương" color="#a855f7" onClick={onOpenThreshold}><DeploymentUnitOutlined /></ToolBtn>
 
         <ToolBtn title="Tải ảnh DICOM lên" color="#38bdf8" onClick={openUpload}><UploadOutlined /></ToolBtn>
       </Section>
@@ -306,12 +344,12 @@ export default function PacsSidebar({
 
         <ToolBtn title="Đặt lại hiển thị" onClick={onReset}><RetweetOutlined /></ToolBtn>
         <ToolBtn title="Chỉnh sáng / tương phản (WW/WL)" color="#f59e0b" active={activeTool === PACS_TOOLS.WW_WL} onClick={() => setActiveTool(PACS_TOOLS.WW_WL)}><BulbOutlined /></ToolBtn>
-        <ToolBtn title="Kính lúp / Zoom" color="#38bdf8" active={activeTool === PACS_TOOLS.MAGNIFY} onClick={() => setActiveTool(PACS_TOOLS.MAGNIFY)}><ZoomInOutlined /></ToolBtn>
-        <ToolBtn title={`Làm mượt ảnh: ${isSmooth ? 'Bật' : 'Tắt'}`} active={isSmooth} onClick={onToggleSmooth}><DotChartOutlined /></ToolBtn>
+        <ToolBtn title="Kính lúp chi tiết (Magnify Lens)" color="#38bdf8" active={activeTool === PACS_TOOLS.MAGNIFY} onClick={() => setActiveTool(PACS_TOOLS.MAGNIFY)}><ZoomInOutlined /></ToolBtn>
+        <ToolBtn title="Biểu đồ phân bố tần số (Histogram HU)" color="#0284c7" onClick={onOpenHistogram}><DotChartOutlined /></ToolBtn>
 
-        <ToolBtn title="Bảng màu (Color LUT)" active={colorLut !== 'default'} onClick={nextLut}><BgColorsOutlined /></ToolBtn>
-        <ToolBtn title="Đổi bảng màu (Color LUT)" active={colorLut !== 'default'} onClick={nextLut}>{emoji('🎨')}</ToolBtn>
-        <ToolBtn title={`Đảo màu (Invert): ${invert ? 'Bật' : 'Tắt'}`} active={invert} onClick={() => setInvert?.((v) => !v)}>{InvertGlyph}</ToolBtn>
+        <ToolBtn title="Cắt ngưỡng / Tô màu tổn thương (Threshold Tint)" color="#eab308" active={!!activeThreshold} onClick={onOpenThreshold}><BgColorsOutlined /></ToolBtn>
+        <ToolBtn title={`Bảng màu (LUT): ${colorLut !== 'default' ? colorLut : 'Mặc định'}`} active={colorLut !== 'default'} onClick={nextLut}>{PaletteIcon}</ToolBtn>
+        <ToolBtn title={`Đảo màu (Invert): ${invert ? 'Bật' : 'Tắt'}`} active={invert} onClick={() => { setInvert?.((v) => !v); message.info(invert ? 'Chuyển về ảnh gốc' : 'Đã bật đảo màu âm bản'); }}>{InvertGlyph}</ToolBtn>
       </Section>
 
       {/* ---------------- Sync Tools ---------------- */}
@@ -343,7 +381,7 @@ export default function PacsSidebar({
         <ToolBtn title="Khung chữ (đang phát triển)" onClick={devToast}><FontSizeOutlined /></ToolBtn>
         <ToolBtn title="Mũi tên chỉ (đang phát triển)" onClick={devToast}><ArrowRightOutlined rotate={-45} /></ToolBtn>
         <ToolBtn title="Đánh dấu cột sống (đang phát triển)" onClick={devToast}>{SpineIcon}</ToolBtn>
-        <ToolBtn title="Ghi chú giải phẫu (đang phát triển)" onClick={devToast}>{emoji('🧠')}</ToolBtn>
+        <ToolBtn title="Ghi chú giải phẫu (đang phát triển)" onClick={devToast}>{BrainIcon}</ToolBtn>
 
         <ToolBtn title="Đo khoảng cách (Line mm)" color="#22c55e" active={activeTool === PACS_TOOLS.LENGTH} onClick={() => setActiveTool(PACS_TOOLS.LENGTH)}>{RulerDiagIcon}</ToolBtn>
       </Section>
@@ -487,7 +525,7 @@ function Section({ title, open, onToggle, children }) {
 
 function ToolBtn({ title, active = false, onClick, color = '#38bdf8', dim = false, children }) {
   return (
-    <Tooltip title={title} placement="bottom" mouseEnterDelay={0.35}>
+    <Tooltip title={title} placement="right" mouseEnterDelay={0.4}>
       <button
         type="button"
         onClick={onClick}

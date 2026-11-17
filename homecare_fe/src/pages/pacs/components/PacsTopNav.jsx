@@ -352,7 +352,7 @@ export default function PacsTopNav({
                 fontWeight: '600',
               }}
             >
-              {isSmooth ? '✨ Mịn' : '🔲 Gốc'}
+              {isSmooth ? 'Mịn' : 'Gốc'}
             </Button>
           </Tooltip>
         )}

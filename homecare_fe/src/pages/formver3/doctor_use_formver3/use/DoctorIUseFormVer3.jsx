@@ -581,6 +581,7 @@ export default function DoctorUseDFormVer3({
             languageTranslate={languageTranslate}
             editId={idEdit}
             isEdit={isEdit}
+            isSplitScreen={isSplitScreen}
             onSign={() => setSignModalOpen(true)}
             onConsultation={onOpenConsultation}
             onTuChoiConsultation={() => {
@@ -705,7 +706,7 @@ export default function DoctorUseDFormVer3({
             }}
             onTranslate={handleTranslateEn}
           />
-          <VoiceCursorDictation form={form} isMobile={isMobile} />
+          <VoiceCursorDictation form={form} isMobile={isMobile} isSplitScreen={isSplitScreen} />
         </Form>
       )}
 

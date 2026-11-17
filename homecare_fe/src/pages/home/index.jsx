@@ -163,7 +163,7 @@ const Sidebar = ({ collapsed, onNavigate }) => {
           key: "D-SONO-APP",
           label: "Phần mềm D-SONO",
           onClick: () => {
-            const dsonoUrl = import.meta.env.VITE_DSONO_URL || 'http://localhost:3000';
+            const dsonoUrl = import.meta.env.VITE_DSONO_URL || 'http://103.90.227.173:6002';
             window.open(dsonoUrl, '_blank');
           },
         },
