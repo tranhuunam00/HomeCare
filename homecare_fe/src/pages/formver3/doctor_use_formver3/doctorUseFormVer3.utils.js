@@ -61,3 +61,38 @@ export function parseImageDescriptionState(rawDescription) {
     rows: DEFAULT_IMAGING_ROWS,
   };
 }
+
+/**
+ * Chuyển mô tả dạng VĂN BẢN TỰ DO (vd kết quả từ D-SONO: "<p>Gan: ...<br/>Túi mật: ...</p>")
+ * thành các dòng của bảng mô tả có cấu trúc để bác sĩ HomeCare SỬA TIẾP theo dạng structured.
+ * - Mỗi dòng "Cơ quan: mô tả" -> { name: Cơ quan, description: mô tả }
+ * - Dòng không có "Cơ quan:" -> gộp vào dòng trước (hoặc dòng "Mô tả" nếu là dòng đầu)
+ * - status để TRỐNG: không tự kết luận bình thường/bất thường thay bác sĩ.
+ */
+export function freeTextToImagingRows(htmlOrText) {
+  const text = String(htmlOrText || "")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/(p|div|li|h[1-6])>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">");
+  const lines = text
+    .split("\n")
+    .map((l) => l.replace(/^[\s•\-–*+]+/, "").trim())
+    .filter(Boolean);
+  const rows = [];
+  for (const line of lines) {
+    const m = line.match(/^([^:：]{1,60})[:：]\s*(.*)$/);
+    if (m) {
+      rows.push({ id: rows.length + 1, name: m[1].trim(), status: "", description: m[2].trim() });
+    } else if (rows.length) {
+      const last = rows[rows.length - 1];
+      last.description = last.description ? `${last.description}\n${line}` : line;
+    } else {
+      rows.push({ id: 1, name: "Mô tả", status: "", description: line });
+    }
+  }
+  return rows;
+}

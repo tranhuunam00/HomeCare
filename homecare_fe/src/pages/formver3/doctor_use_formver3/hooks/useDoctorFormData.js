@@ -7,7 +7,7 @@ import {
   buildDradv3FormValues,
   buildFormVer3Values,
 } from "../../formver3.constant";
-import { parseImageDescriptionState } from "../doctorUseFormVer3.utils";
+import { parseImageDescriptionState, freeTextToImagingRows } from "../doctorUseFormVer3.utils";
 
 export default function useDoctorFormData({
   form,
@@ -196,7 +196,13 @@ export default function useDoctorFormData({
           setIsFreeText(false);
           setFreeTextContent(parsedState.content);
           setFastSonoData(parsedState.fastSonoData);
-          setImagingRows(parsedState.rows);
+          // Phiếu dạng văn bản tự do (vd kết quả D-SONO): đổ nội dung vào bảng cấu trúc để bác sĩ
+          // sửa tiếp dạng structured. Trước đây nạp bảng MẶC ĐỊNH (Phổi/Màng phổi...) rỗng -> mất mô tả khi lưu.
+          const freeRows =
+            parsedState.isFreeText && parsedState.content
+              ? freeTextToImagingRows(parsedState.content)
+              : [];
+          setImagingRows(freeRows.length ? freeRows : parsedState.rows);
           setFormVer3(doctorUseFormVer3Server?.id_formver3_formver3);
           setInitialSnap({
             formValues: form.getFieldsValue(),
