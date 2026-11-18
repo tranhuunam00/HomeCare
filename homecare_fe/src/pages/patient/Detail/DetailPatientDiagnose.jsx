@@ -38,6 +38,7 @@ import {
 import SignedFilesBox from "../../doctor_use_form_ver2/SmartCASignModal/SignedFilesBox";
 import DoctorUseFormVer3Viewer from "../../formver3/components/DoctorUseFormVer3Viewer";
 import useLatestDoctorUseFormVer3 from "../../formver3/useLatestDoctorUseFormVer3";
+import usePatientDiagnoseStatus from "../../../hooks/usePatientDiagnoseStatus";
 import { calculateAge } from "../../formver3/formver3.constant";
 
 const { Title, Text } = Typography;
@@ -71,6 +72,7 @@ const PatientDiagnoiseDetailPage = ({
     user,
   } = useGlobalAuth();
 
+  const { reopenForEditing } = usePatientDiagnoseStatus();
   const isAdmin = user?.id_role == USER_ROLE.ADMIN;
   const inProcessingDoctorId =
     selectedPatientDiagnose?.id_doctor_in_processing ||
@@ -172,7 +174,13 @@ const PatientDiagnoiseDetailPage = ({
                     <Button
                       type="primary"
                       size="small"
-                      onClick={() => {
+                      onClick={async () => {
+                        // Ca ĐỌC XONG -> kéo về ĐANG ĐỌC trước khi mở form sửa
+                        const ok = await reopenForEditing({
+                          patientDiagnoseId: selectedPatientDiagnose.id,
+                          currentStatus: selectedPatientDiagnose.status,
+                        });
+                        if (!ok) return;
                         if (onOpenReading) {
                           onOpenReading(true);
                         } else {

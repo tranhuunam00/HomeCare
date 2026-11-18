@@ -2,6 +2,17 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 import API_CALL from "../services/axiosClient";
 import { useGlobalAuth } from "../contexts/AuthContext";
+import { PATIENT_DIAGNOSE_STATUS_CODE } from "../constant/app";
+
+/**
+ * "Sửa đọc" trên ca ĐỌC XONG phải kéo ca về ĐANG ĐỌC (sơ đồ trạng thái D-RADS),
+ * ca đang đọc thì chỉ mở form. Trả về trạng thái đích cần chuyển, hoặc null nếu không cần.
+ */
+export function getReopenTargetStatus(currentStatus) {
+  return Number(currentStatus) === PATIENT_DIAGNOSE_STATUS_CODE.READ_DONE
+    ? PATIENT_DIAGNOSE_STATUS_CODE.IN_PROCESSING
+    : null;
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Module-level singleton guard – shared across ALL component instances.
@@ -104,8 +115,22 @@ export default function usePatientDiagnoseStatus() {
     }
   };
 
+  /** Sửa đọc: Đọc xong -> Đang đọc (nếu cần). Trả về true nếu được phép mở form sửa. */
+  const reopenForEditing = async ({ patientDiagnoseId, currentStatus, localSetState = null, onStatusChange = null }) => {
+    const target = getReopenTargetStatus(currentStatus);
+    if (!target) return true;
+    return transitionStatus({
+      patientDiagnoseId,
+      newStatus: target,
+      successMessage: "Đã chuyển ca về Đang đọc để sửa",
+      localSetState,
+      onStatusChange,
+    });
+  };
+
   return {
     transitionStatus,
+    reopenForEditing,
     transitioning,
   };
 }

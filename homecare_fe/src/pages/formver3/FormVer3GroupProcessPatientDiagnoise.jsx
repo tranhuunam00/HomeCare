@@ -38,7 +38,7 @@ const FormVer3GroupProcessPatientDiagnoise = ({
   } = patientDiagnose;
 
   const { doctor, setPreviewOpen } = useGlobalAuth();
-  const { transitionStatus } = usePatientDiagnoseStatus();
+  const { transitionStatus, reopenForEditing } = usePatientDiagnoseStatus();
   const { confirmState, openConfirm } = useConfirmAction();
   const screens = Grid.useBreakpoint();
   const isMobile = !screens.md;
@@ -314,7 +314,16 @@ const FormVer3GroupProcessPatientDiagnoise = ({
             <ActionButton
               color="blue"
               icon={<ReadOutlined />}
-              onClick={() => onOpenReading(true)}
+              onClick={async () => {
+                // Ca ĐỌC XONG -> kéo về ĐANG ĐỌC trước khi mở form sửa
+                const ok = await reopenForEditing({
+                  patientDiagnoseId: id,
+                  currentStatus: status,
+                  localSetState: setPatientDiagnose,
+                  onStatusChange,
+                });
+                if (ok) onOpenReading(true);
+              }}
             >
               Sửa đọc
             </ActionButton>
