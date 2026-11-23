@@ -8,6 +8,7 @@ import FormVer3GroupProcessPatientDiagnoise from '../../formver3/FormVer3GroupPr
 import PatientDiagnoiseDetailPage from '../Detail/DetailPatientDiagnose';
 import DoctorUseDFormVer3 from '../../formver3/doctor_use_formver3/use/DoctorIUseFormVer3';
 import PatientMiniInfo from './PatientMiniInfo';
+import { openDsonoForCase } from "../../../services/dsonoLink";
 
 export default function PatientDiagnoseRightPanel({
   selectedPatientDiagnose,
@@ -128,18 +129,7 @@ export default function PatientDiagnoseRightPanel({
             alignItems: 'center',
             fontWeight: '600',
           }}
-          onClick={() => {
-            const dsonoBaseUrl = import.meta.env.VITE_DSONO_URL || 'http://103.90.227.173:6002';
-            const query = `accessionNo=${selectedPatientDiagnose?.id || ''}&pid=${selectedPatientDiagnose?.PID || ''}&patientName=${encodeURIComponent(selectedPatientDiagnose?.name || '')}&gender=${encodeURIComponent(selectedPatientDiagnose?.gender || '')}&source=HOMECARE`;
-            const targetUrl = `${dsonoBaseUrl}?${query}`;
-            // If on mobile device, try launching app intent / custom scheme first with fallback
-            if (/android/i.test(navigator.userAgent)) {
-              const appIntent = `intent://open?${query}#Intent;scheme=dsono;package=com.dsono.myapp;S.browser_fallback_url=${encodeURIComponent(targetUrl)};end`;
-              window.location.href = appIntent;
-            } else {
-              window.open(targetUrl, '_blank');
-            }
-          }}
+          onClick={() => openDsonoForCase(selectedPatientDiagnose)}
         >
           Mở D-SONO
         </Button>

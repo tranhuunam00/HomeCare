@@ -19,6 +19,7 @@ import { toast } from "react-toastify";
 import { hasProOrBusiness } from "../../constant/permission";
 import { Grid } from "antd";
 import { PATIENT_DIAGNOSE_STATUS_FILTER } from "../patient/constant.patient";
+import { getDsonoBaseUrl } from "../../services/dsonoLink";
 
 const { useBreakpoint } = Grid;
 
@@ -163,8 +164,8 @@ const Sidebar = ({ collapsed, onNavigate }) => {
           key: "D-SONO-APP",
           label: "Phần mềm D-SONO",
           onClick: () => {
-            const dsonoUrl = import.meta.env.VITE_DSONO_URL || 'http://103.90.227.173:6002';
-            window.open(dsonoUrl, '_blank');
+            // Luôn HTTPS: bác sĩ gõ email + mật khẩu HomeCare trên trang D-SONO
+            window.open(getDsonoBaseUrl(), '_blank', 'noopener,noreferrer');
           },
         },
         { key: "/home/birad", label: "Ứng dụng D-BIRADS" },
@@ -199,24 +200,18 @@ const Sidebar = ({ collapsed, onNavigate }) => {
     },
   ].filter(Boolean); // loại bỏ các mục false nếu user không phải admin
 
+  const APP_FEATURE_KEYS = new Set(
+    (menuItems.find((i) => i.key === "Ứng dụng")?.children || [])
+      .map((c) => c.key)
+      .filter((k) => typeof k === "string" && k.startsWith("/home/")),
+  );
+
   const handleClick = (e, isReadingForm) => {
     const key = e.key;
     if (e.key === "Pacs" || e.key === "D-SONO-APP") return;
-    const isAppFeature =
-      key.startsWith("/home/recist_nn") ||
-      key.startsWith("/home/tirad") ||
-      key.startsWith("/home/lungrad") ||
-      key.startsWith("/home/birad") ||
-      key.startsWith("/home/boneage") ||
-      key.startsWith("/home/dipss") ||
-      key.startsWith("/home/D-COR") ||
-      key.startsWith("/home/D-CPS") ||
-      key.startsWith("/home/D-BALTHAZA") ||
-      key.startsWith("/home/D-VOTHAN") ||
-      key.startsWith("/home/D-VOGAN") ||
-      key.startsWith("/home/D-BOSNIAK") ||
-      key.startsWith("/home/D-LIRADS") ||
-      key.startsWith("/home/D-ORADS");
+    // Mọi ứng dụng trong menu "Ứng dụng" đều cần gói Business/Enterprise.
+    // (Danh sách viết tay cũ thiếu D-Pirads, D-Pan, D-Spleen -> 3 app này lọt qua kiểm tra gói.)
+    const isAppFeature = APP_FEATURE_KEYS.has(key);
 
     if (
       isAppFeature &&

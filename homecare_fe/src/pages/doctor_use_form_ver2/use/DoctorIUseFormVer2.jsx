@@ -1119,7 +1119,7 @@ export default function DoctorUseDFormVer2({
           </Form.Item>
 
           {/* Action bar */}
-          {(initialSnap.apiData?.id_doctor == doctor.id ||
+          {(initialSnap.apiData?.id_doctor == doctor?.id ||
             user.id_role == USER_ROLE.ADMIN ||
             !idEdit) && (
             <FormActionBar
@@ -1127,7 +1127,7 @@ export default function DoctorUseDFormVer2({
               approvalStatus={status}
               actionKeys={
                 patientDiagnose?.id_doctor_in_processing &&
-                patientDiagnose?.id_doctor_in_processing != doctor.id
+                patientDiagnose?.id_doctor_in_processing != doctor?.id
                   ? [KEY_ACTION_BUTTON.preview, KEY_ACTION_BUTTON.sign]
                   : [
                       KEY_ACTION_BUTTON.reset,
@@ -1196,7 +1196,7 @@ export default function DoctorUseDFormVer2({
                   setIsEdit(false);
                 } else {
                   setIsEdit(
-                    initialSnap.apiData?.id_doctor == doctor.id ||
+                    initialSnap.apiData?.id_doctor == doctor?.id ||
                       user.id_role == USER_ROLE.ADMIN ||
                       !idEdit,
                   );

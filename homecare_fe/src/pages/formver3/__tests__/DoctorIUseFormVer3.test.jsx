@@ -33,7 +33,13 @@ vi.mock("../components/AdvancedSampleSection", () => ({
 }));
 
 vi.mock("../components/ImagingStructureTable3.jsx", () => ({
-  default: () => <div data-testid="imaging-structure-table">Mock ImagingStructureTable</div>,
+  default: ({ rows = [] }) => (
+    <div data-testid="imaging-structure-table">
+      {rows.map((r, i) => (
+        <div key={i} data-testid="imaging-row">{`${r.name}: ${r.description || ""}`}</div>
+      ))}
+    </div>
+  ),
 }));
 
 vi.mock("../components/ImagingStructureTextTable.jsx", () => ({
@@ -167,57 +173,34 @@ describe("DoctorIUseFormVer3 component", () => {
     useLatestDoctorUseFormVer3.mockReturnValue({ record: null });
   });
 
-  it("phải render đúng chế độ bảng cấu trúc mặc định", async () => {
+  it("phải render bảng mô tả có cấu trúc (mặc định duy nhất)", async () => {
     render(<DoctorIUseFormVer3 doctorUseFormVer3Id={null} />);
 
-    // Chờ Switch hiển thị (sau khi kết thúc loading state)
-    const switchElement = await screen.findByRole("switch");
-    expect(switchElement).toBeDefined();
-
-    const switchLabel = screen.getByText("Văn bản tự do");
-    expect(switchLabel).toBeDefined();
-
-    // Mặc định không ở chế độ free text, nên render ImagingStructureTable
-    expect(screen.getByTestId("imaging-structure-table")).toBeDefined();
+    expect(await screen.findByTestId("imaging-structure-table")).toBeDefined();
     expect(screen.queryByTestId("custom-sun-editor")).toBeNull();
   });
 
-  it("phải hiển thị CustomSunEditor khi toggle Switch văn bản tự do", async () => {
+  it("không còn công tắc 'Văn bản tự do' (D-RADS chỉ dùng báo cáo cấu trúc)", async () => {
     render(<DoctorIUseFormVer3 doctorUseFormVer3Id={null} />);
 
-    const switchElement = await screen.findByRole("switch");
-    expect(switchElement).toBeDefined();
-    expect(switchElement.getAttribute("aria-checked")).toBe("false");
-
-    // Click toggle Switch
-    await act(async () => {
-      fireEvent.click(switchElement);
-    });
-
-    expect(switchElement.getAttribute("aria-checked")).toBe("true");
-    // Chế độ free text: render CustomSunEditor và ẩn ImagingStructureTable
-    expect(screen.getByTestId("custom-sun-editor")).toBeDefined();
-    expect(screen.queryByTestId("imaging-structure-table")).toBeNull();
+    await screen.findByTestId("imaging-structure-table");
+    expect(screen.queryByText("Văn bản tự do")).toBeNull();
   });
 
-  it("phải tự động bật chế độ văn bản tự do nếu record load từ server ở dạng free text", async () => {
-    // Mock record lấy từ useLatestDoctorUseFormVer3 ở chế độ free text
+  it("phiếu free-text từ máy chủ (vd D-SONO) được tách thành các dòng của bảng cấu trúc để sửa tiếp", async () => {
     const mockRecord = {
       id: 99,
-      imageDescription: JSON.stringify({ isFreeText: true, text: "<p>Nội dung mẫu tự do</p>" }),
+      imageDescription: JSON.stringify({
+        isFreeText: true,
+        text: "<p>Gan: nhu mô đồng nhất<br/>Túi mật: không sỏi</p>",
+      }),
       id_patient_diagnose_patient_diagnose: mockSelectedPatientDiagnose,
     };
     useLatestDoctorUseFormVer3.mockReturnValue({ record: mockRecord });
 
     render(<DoctorIUseFormVer3 doctorUseFormVer3Id={99} />);
 
-    // Chờ CustomSunEditor hiển thị
-    const editor = await screen.findByTestId("custom-sun-editor");
-    expect(editor).toBeDefined();
-
-    // Editor textarea phải hiển thị đúng nội dung từ server và bị disabled
-    const textarea = screen.getByTestId("sun-editor-textarea");
-    expect(textarea.value).toBe("<p>Nội dung mẫu tự do</p>");
-    expect(textarea.disabled).toBe(true);
+    expect(await screen.findByTestId("imaging-structure-table")).toBeDefined();
+    expect(screen.queryByTestId("custom-sun-editor")).toBeNull();
   });
 });

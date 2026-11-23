@@ -28,7 +28,7 @@ const ConsultationSelectModal = ({ open, onClose, onGoReading, onStatusChange })
       });
 
       setClinicDoctors(
-        (res.data.data.data || []).filter((d) => d.id !== doctor.id),
+        (res.data.data.data || []).filter((d) => d.id !== doctor?.id),
       );
     } catch (err) {
       message.error("Không tải được danh sách bác sĩ");
@@ -54,7 +54,7 @@ const ConsultationSelectModal = ({ open, onClose, onGoReading, onStatusChange })
         if (!prev || prev.id !== selectedPatientDiagnose.id) return prev;
         return {
           ...prev,
-          id_doctor_in_processing: doctor.id,
+          id_doctor_in_processing: doctor?.id,
         };
       });
       onClose();
@@ -70,7 +70,7 @@ const ConsultationSelectModal = ({ open, onClose, onGoReading, onStatusChange })
       newStatus: PATIENT_DIAGNOSE_STATUS_NAME.CONSULTATION,
       additionalPayload: {
         id_consulting_doctor: consultDoctorId,
-        id_receive_doctor: doctor.id,
+        id_receive_doctor: doctor?.id,
       },
       successMessage: "Đã chuyển hội chẩn thành công",
       onStatusChange,
@@ -82,7 +82,7 @@ const ConsultationSelectModal = ({ open, onClose, onGoReading, onStatusChange })
         return {
           ...prev,
           id_consulting_doctor: consultDoctorId,
-          id_receive_doctor: doctor.id,
+          id_receive_doctor: doctor?.id,
         };
       });
       onClose?.();

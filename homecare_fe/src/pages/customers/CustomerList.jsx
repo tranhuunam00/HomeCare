@@ -136,7 +136,7 @@ const CustomerList = () => {
   const openPermissionModal = async (doctor) => {
     setSelectedDoctor(doctor);
     try {
-      const res = await API_CALL.get(`/doctor/clinics/${doctor.id}`);
+      const res = await API_CALL.get(`/doctor/clinics/${doctor?.id}`);
       const clinicItems = res.data.data.map((item) => {
         const clinic = clinics.find((c) => c.id == item.id_clinic);
         return {
@@ -194,7 +194,7 @@ const CustomerList = () => {
       message: confirmMsg,
       onConfirm: async () => {
         try {
-          await API_CALL.put(`/doctor/${doctor.id}/advisor`, {
+          await API_CALL.put(`/doctor/${doctor?.id}/advisor`, {
             is_advisor: newStatus,
           });
           toast.success(

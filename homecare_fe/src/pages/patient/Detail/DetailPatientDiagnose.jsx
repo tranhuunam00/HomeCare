@@ -40,6 +40,7 @@ import DoctorUseFormVer3Viewer from "../../formver3/components/DoctorUseFormVer3
 import useLatestDoctorUseFormVer3 from "../../formver3/useLatestDoctorUseFormVer3";
 import usePatientDiagnoseStatus from "../../../hooks/usePatientDiagnoseStatus";
 import { calculateAge } from "../../formver3/formver3.constant";
+import { openDsonoForCase } from "../../../services/dsonoLink";
 
 const { Title, Text } = Typography;
 
@@ -229,17 +230,7 @@ const PatientDiagnoiseDetailPage = ({
               <Tooltip title="Mở phần mềm Siêu âm chuyên sâu (D-SONO)">
                 <Button
                   size="small"
-                  onClick={() => {
-                    const dsonoBaseUrl = import.meta.env.VITE_DSONO_URL || 'http://103.90.227.173:6002';
-                    const query = `accessionNo=${selectedPatientDiagnose?.id || ''}&pid=${selectedPatientDiagnose?.PID || ''}&patientName=${encodeURIComponent(selectedPatientDiagnose?.name || '')}&gender=${encodeURIComponent(selectedPatientDiagnose?.gender || '')}&source=HOMECARE`;
-                    const targetUrl = `${dsonoBaseUrl}?${query}`;
-                    if (/android/i.test(navigator.userAgent)) {
-                      const appIntent = `intent://open?${query}#Intent;scheme=dsono;package=com.dsono.myapp;S.browser_fallback_url=${encodeURIComponent(targetUrl)};end`;
-                      window.location.href = appIntent;
-                    } else {
-                      window.open(targetUrl, '_blank');
-                    }
-                  }}
+                  onClick={() => openDsonoForCase(selectedPatientDiagnose)}
                   style={{
                     backgroundColor: '#059669',
                     borderColor: '#047857',

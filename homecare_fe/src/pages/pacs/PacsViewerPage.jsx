@@ -262,6 +262,33 @@ export default function PacsViewerPage() {
   const imageCanvasRef = useRef(null);
   const annotationCanvasRef = useRef(null);
 
+  // Ref để callback ghi nhật ký giữ identity ổn định (không re-render thanh công cụ mỗi lần cuộn lát)
+  const instancesRef = useRef(instances);
+  instancesRef.current = instances;
+  const currentIndexRef = useRef(currentIndex);
+  currentIndexRef.current = currentIndex;
+  const activeSlicePosRef = useRef(activeSlicePos);
+  activeSlicePosRef.current = activeSlicePos;
+
+  // Ảnh bệnh nhân rời hệ thống (tải / in) -> ghi nhật ký thao tác trên máy chủ (không chặn thao tác)
+  const logImageExport = useCallback(
+    (kind) => {
+      if (!patientDiagnoseId) return;
+      const inst = instancesRef.current?.[currentIndexRef.current];
+      fetch(`${apiEndpoint}/api/pacs/export-log`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+        body: JSON.stringify({
+          patientDiagnoseId: Number(patientDiagnoseId),
+          kind,
+          sopInstanceUid: inst?.sopInstanceUid,
+          sliceIndex: activeSlicePosRef.current + 1,
+        }),
+      }).catch(() => {});
+    },
+    [apiEndpoint, getAuthHeaders, patientDiagnoseId]
+  );
+
   // Tải lát cắt hiện tại ra PNG
   const handleDownloadImage = useCallback(() => {
     const canvas = imageCanvasRef.current;
@@ -274,11 +301,12 @@ export default function PacsViewerPage() {
       link.download = `pacs_slice_${activeSlicePos + 1}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
+      logImageExport('download');
       message.success('Đã tải ảnh lát cắt');
     } catch {
       message.error('Không tải được ảnh');
     }
-  }, [activeSlicePos]);
+  }, [activeSlicePos, logImageExport]);
 
   // In lát cắt hiện tại
   const handlePrintImage = useCallback(() => {
@@ -303,7 +331,8 @@ export default function PacsViewerPage() {
       `<html><head><title>In ảnh PACS</title></head><body style="margin:0;display:flex;align-items:center;justify-content:center;background:#000"><img src="${url}" style="max-width:100%;max-height:100vh" onload="window.focus();window.print();" /></body></html>`
     );
     w.document.close();
-  }, []);
+    logImageExport('print');
+  }, [logImageExport]);
 
   const { seriesThumbnails, sliceThumbnails } = usePacsThumbnails({
     caseId: patientDiagnoseId,
@@ -891,7 +920,6 @@ export default function PacsViewerPage() {
               file={activeAttachedFile}
               onClose={() => setActiveAttachedFile(null)}
               apiEndpoint={apiEndpoint}
-              token={localStorage.getItem('TOKEN') || ''}
             />
           ) : mprInline && canBuild3D ? (
             <PacsMprModal

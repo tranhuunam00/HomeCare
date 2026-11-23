@@ -235,7 +235,7 @@ export const GlobalAuthProvider = ({ children }) => {
   // Luôn đồng bộ profile bác sĩ mới nhất từ database (avatar_url, signature_url, chức danh)
   useEffect(() => {
     if (!token || !doctor?.id) return;
-    API_CALL.get(`/doctor/${doctor.id}`, { silent: true })
+    API_CALL.get(`/doctor/${doctor?.id}`, { silent: true })
       .then((res) => {
         const fresh = res?.data?.data;
         if (fresh && (fresh.avatar_url !== doctor.avatar_url || fresh.signature_url !== doctor.signature_url || fresh.full_name !== doctor.full_name)) {

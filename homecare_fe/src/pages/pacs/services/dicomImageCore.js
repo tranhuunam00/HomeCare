@@ -70,22 +70,69 @@ function resolvePixelSpacing(ds, frameIndex) {
   if (ips && ips.length >= 2 && ips[0] > 0 && ips[1] > 0) {
     return { pixelSpacing: [ips[0], ips[1]], source: 'ImagerPixelSpacing' };
   }
-  // 4. Siêu âm: Sequence of Ultrasound Regions, đơn vị cm (3)
-  const region = seqItem(ds, 'x00186011');
-  if (region) {
-    try {
-      const unitsX = region.uint16('x00186024');
-      const unitsY = region.uint16('x00186026');
-      const dx = region.double('x0018602c');
-      const dy = region.double('x0018602e');
-      if (unitsX === 3 && unitsY === 3 && dx > 0 && dy > 0) {
-        return { pixelSpacing: [dy * 10, dx * 10], source: 'UltrasoundRegion' };
-      }
-    } catch {
-      /* ignore */
-    }
+  // 4. Siêu âm: Sequence of Ultrasound Regions - MỖI vùng có hiệu chuẩn riêng
+  //    (ảnh 2 vùng B-mode, hoặc B-mode + phổ Doppler đơn vị giây / cm/s).
+  const usRegions = parseUltrasoundRegions(ds);
+  const firstCm = usRegions.find((r) => r.spacing);
+  if (firstCm) {
+    return {
+      pixelSpacing: firstCm.spacing,
+      source: 'UltrasoundRegion',
+      // >1 vùng: phải lấy hiệu chuẩn theo vùng chứa điểm đo (xem calibrationAt)
+      usRegions: usRegions.length > 1 ? usRegions : undefined,
+    };
   }
   return { pixelSpacing: null, source: null };
+}
+
+/**
+ * Đọc toàn bộ Sequence of Ultrasound Regions (0018,6011).
+ * spacing [hàng, cột] mm/px chỉ có khi cả 2 trục đơn vị cm (3); vùng khác (Doppler...) spacing = null.
+ */
+export function parseUltrasoundRegions(ds) {
+  const items = ds?.elements?.x00186011?.items || [];
+  const out = [];
+  for (const it of items) {
+    const r = it?.dataSet;
+    if (!r) continue;
+    try {
+      const x0 = r.uint32('x00186018');
+      const y0 = r.uint32('x0018601a');
+      const x1 = r.uint32('x0018601c');
+      const y1 = r.uint32('x0018601e');
+      const unitsX = r.uint16('x00186024');
+      const unitsY = r.uint16('x00186026');
+      const dx = r.double('x0018602c');
+      const dy = r.double('x0018602e');
+      const isCm = unitsX === 3 && unitsY === 3 && dx > 0 && dy > 0;
+      out.push({
+        x0: x0 ?? 0,
+        y0: y0 ?? 0,
+        x1: x1 ?? Number.MAX_SAFE_INTEGER,
+        y1: y1 ?? Number.MAX_SAFE_INTEGER,
+        spacing: isCm ? [dy * 10, dx * 10] : null,
+      });
+    } catch {
+      /* vùng hỏng -> bỏ qua */
+    }
+  }
+  return out;
+}
+
+/**
+ * Hiệu chuẩn cho 1 số đo bắt đầu tại điểm `pt` (toạ độ pixel ảnh).
+ * Ảnh siêu âm nhiều vùng: dùng vùng chứa điểm; ngoài mọi vùng cm (vd vùng phổ Doppler) -> px.
+ * Ảnh khác / 1 vùng: hiệu chuẩn chung của ảnh như trước.
+ */
+export function calibrationAt(meta, pt) {
+  const regions = meta?.usRegions;
+  if (Array.isArray(regions) && regions.length > 1 && pt) {
+    const hit = regions.find((r) => pt.x >= r.x0 && pt.x <= r.x1 && pt.y >= r.y0 && pt.y <= r.y1);
+    if (hit?.spacing) return { spacing: hit.spacing, calibrated: true, source: 'UltrasoundRegion' };
+    return { spacing: null, calibrated: false, source: null };
+  }
+  const ps = meta?.pixelSpacing || null;
+  return { spacing: ps, calibrated: !!ps, source: meta?.pixelSpacingSource || null };
 }
 
 function resolvePlaneGeometry(ds, frameIndex) {
@@ -196,6 +243,7 @@ export function extractMeta(ds, frameIndex = 0) {
     // Hiệu chuẩn đo đạc
     pixelSpacing: spacing.pixelSpacing,
     pixelSpacingSource: spacing.source,
+    usRegions: spacing.usRegions,
     // Hình học mặt phẳng
     ...geometry,
     // VOI
@@ -952,6 +1000,9 @@ export function describeCalibration(meta) {
     return { calibrated: true, label: `${base} · tại detector (chưa trừ phóng đại)`, warning: true };
   }
   if (meta.pixelSpacingSource === 'UltrasoundRegion') {
+    if (Array.isArray(meta.usRegions) && meta.usRegions.length > 1) {
+      return { calibrated: true, label: `${meta.usRegions.length} vùng siêu âm · hiệu chuẩn theo vùng đặt điểm đo` };
+    }
     return { calibrated: true, label: `${base} · vùng siêu âm` };
   }
   return { calibrated: true, label: base };

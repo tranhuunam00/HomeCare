@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { freeTextToImagingRows } from "../doctor_use_formver3/doctorUseFormVer3.utils";
+import { freeTextToImagingRows, parseImageDescriptionState, toEditableImagingState } from "../doctor_use_formver3/doctorUseFormVer3.utils";
 
 describe("freeTextToImagingRows (phiếu free-text D-SONO -> bảng cấu trúc HomeCare)", () => {
   it("tách 'Cơ quan: mô tả' thành từng dòng, không tự tick trạng thái", () => {
@@ -23,5 +23,33 @@ describe("freeTextToImagingRows (phiếu free-text D-SONO -> bảng cấu trúc 
   it("rỗng -> []", () => {
     expect(freeTextToImagingRows("")).toEqual([]);
     expect(freeTextToImagingRows(null)).toEqual([]);
+  });
+});
+
+describe("toEditableImagingState (nạp phiếu & Hoàn tác dùng chung)", () => {
+  it("phiếu free-text -> bảng cấu trúc với các dòng tách từ văn bản, KHÔNG bật isFreeText", () => {
+    const state = toEditableImagingState(
+      parseImageDescriptionState(JSON.stringify({ isFreeText: true, text: "<p>Gan: bình thường<br/>Lách: không to</p>" }))
+    );
+    expect(state.mode).toBe("STRUCTURED_TABLE");
+    expect(state.isFreeText).toBe(false);
+    expect(state.rows.map((r) => r.name)).toEqual(["Gan", "Lách"]);
+    expect(state.content).toContain("Gan: bình thường");
+  });
+
+  it("phiếu free-text rỗng -> dòng mặc định", () => {
+    const parsed = parseImageDescriptionState(JSON.stringify({ isFreeText: true, text: "" }));
+    expect(toEditableImagingState(parsed).rows).toBe(parsed.rows);
+  });
+
+  it("phiếu đã có cấu trúc -> giữ nguyên các dòng", () => {
+    const rows = [{ id: 1, name: "Gan", status: "normal", description: "x" }];
+    const state = toEditableImagingState(parseImageDescriptionState(JSON.stringify(rows)));
+    expect(state.rows).toEqual(rows);
+    expect(state.isFreeText).toBe(false);
+  });
+
+  it("đầu vào null không lỗi", () => {
+    expect(toEditableImagingState(null).mode).toBe("STRUCTURED_TABLE");
   });
 });

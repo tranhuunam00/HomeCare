@@ -27,7 +27,7 @@ import {
   DEFAULT_IMAGING_ROWS,
   LANGUAGE_OPTIONS,
 } from "../../formver3.constant";
-import { parseImageDescriptionState } from "../doctorUseFormVer3.utils";
+import { parseImageDescriptionState, toEditableImagingState } from "../doctorUseFormVer3.utils";
 import { translateLabel } from "../../../../constant/translate.report";
 import AdvancedSampleSection from "../../components/AdvancedSampleSection";
 import ImagingDiagnosisSection from "../../components/ImagingDiagnosisSection";
@@ -353,7 +353,8 @@ export default function DoctorUseDFormVer3({
         });
         formValues.id_formver3_name = apiData.id_formver3_formver3?.id_formver3_name;
         form.setFieldsValue(formValues);
-        const parsed = parseImageDescriptionState(apiData.imageDescription);
+        // Cùng cách nạp như lúc mở phiếu (bảng cấu trúc, tách văn bản tự do thành dòng)
+        const parsed = toEditableImagingState(parseImageDescriptionState(apiData.imageDescription));
         setImagingMode(parsed.mode);
         setIsFreeText(parsed.isFreeText);
         setFreeTextContent(parsed.content);

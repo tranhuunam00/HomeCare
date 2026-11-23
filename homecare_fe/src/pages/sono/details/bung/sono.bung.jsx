@@ -1230,7 +1230,7 @@ const UltrasoundBungForm = () => {
           }}
           actionKeys={
             patientDiagnose?.id_doctor_in_processing &&
-            patientDiagnose?.id_doctor_in_processing != doctor.id
+            patientDiagnose?.id_doctor_in_processing != doctor?.id
               ? [KEY_ACTION_BUTTON.preview]
               : [
                   KEY_ACTION_BUTTON.reset,

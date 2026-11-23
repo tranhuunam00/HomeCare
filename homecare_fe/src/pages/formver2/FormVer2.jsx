@@ -615,7 +615,7 @@ export default function DFormVer2({
           </Form.Item>
 
           {/* Action bar */}
-          {(initialSnap.apiData?.id_doctor == doctor.id ||
+          {(initialSnap.apiData?.id_doctor == doctor?.id ||
             user.id_role == USER_ROLE.ADMIN ||
             !editId) && (
             <FormActionBar
@@ -641,7 +641,7 @@ export default function DFormVer2({
                   setIsEdit(false);
                 } else {
                   setIsEdit(
-                    initialSnap.apiData?.id_doctor == doctor.id ||
+                    initialSnap.apiData?.id_doctor == doctor?.id ||
                       user.id_role == USER_ROLE.ADMIN ||
                       !editId
                   );

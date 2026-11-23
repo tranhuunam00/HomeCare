@@ -12,7 +12,7 @@ import {
 } from '../utils/measurement.utils';
 import { renderAnnotationsToCanvas } from '../utils/annotation.renderer';
 import { screenToImage } from '../utils/viewportMapping';
-import { computeRoiStats, getPixelValue, getPixelValueUnit } from '../services/dicomImageCore';
+import { calibrationAt, computeRoiStats, getPixelValue, getPixelValueUnit } from '../services/dicomImageCore';
 
 /**
  * Tương tác khung nhìn: đo đạc, WW/WL, zoom/pan, đầu dò giá trị pixel (HU).
@@ -54,8 +54,10 @@ export function usePacsInteraction({
   const hasFullImage = !!(currentData?.rawPixels && currentData?.decodeInfo?.ok !== false);
   const meta = currentData?.meta;
   const pixelSpacing = meta?.pixelSpacing || null;
-  const calibrated = !!pixelSpacing;
-  const spacingForCalc = pixelSpacing || [1, 1];
+  // Số đo đang vẽ giữ hiệu chuẩn chốt lúc bắt đầu (ảnh siêu âm nhiều vùng: theo vùng chứa điểm đầu)
+  const drawingCalib = currentDrawing?.calib;
+  const calibrated = drawingCalib ? !!drawingCalib.calibrated : !!pixelSpacing;
+  const spacingForCalc = (drawingCalib ? drawingCalib.spacing : pixelSpacing) || [1, 1];
 
   useEffect(() => {
     setCurrentDrawing(null);
@@ -168,7 +170,8 @@ export function usePacsInteraction({
     }
 
     const coords = getCanvasCoordinates(e);
-    const base = { id: Date.now(), calibrated, spacingSource: meta?.pixelSpacingSource || null };
+    const calib = calibrationAt(meta, coords);
+    const base = { id: Date.now(), calibrated: calib.calibrated, spacingSource: calib.source, calib };
 
     // Điểm đo tức thì (Probe)
     if (activeTool === PACS_TOOLS.PROBE) {
@@ -245,7 +248,7 @@ export function usePacsInteraction({
     }
 
     if (activeTool === PACS_TOOLS.LENGTH || activeTool === PACS_TOOLS.LENGTH_H || activeTool === PACS_TOOLS.LENGTH_V) {
-      setCurrentDrawing({ ...base, type: activeTool, points: [coords, coords], valueText: formatMeasurement('length', 0, calibrated) });
+      setCurrentDrawing({ ...base, type: activeTool, points: [coords, coords], valueText: formatMeasurement('length', 0, base.calibrated) });
     } else if (activeTool === PACS_TOOLS.ARROW) {
       setCurrentDrawing({ ...base, type: 'arrow', points: [coords, coords], valueText: 'Chỉ điểm' });
     } else if (activeTool === PACS_TOOLS.BONE) {

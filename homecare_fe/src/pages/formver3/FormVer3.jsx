@@ -633,8 +633,8 @@ export default function DFormVer3({ id_formVer3 }) {
             diagnosisSummary={diagnosisSummary}
           />
 
-          {(initialSnap.apiData?.id_doctor == doctor.id ||
-            user.id_role == USER_ROLE.ADMIN ||
+          {(initialSnap.apiData?.id_doctor == doctor?.id ||
+            user?.id_role == USER_ROLE.ADMIN ||
             !editId) && (
             <FormActionBar
               actionKeys={[
@@ -660,8 +660,8 @@ export default function DFormVer3({ id_formVer3 }) {
                   setIsEdit(false);
                 } else {
                   setIsEdit(
-                    initialSnap.apiData?.id_doctor == doctor.id ||
-                      user.id_role == USER_ROLE.ADMIN ||
+                    initialSnap.apiData?.id_doctor == doctor?.id ||
+                      user?.id_role == USER_ROLE.ADMIN ||
                       !editId,
                   );
                 }

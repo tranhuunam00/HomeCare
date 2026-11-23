@@ -22,6 +22,7 @@ import API_CALL from "../../services/axiosClient";
 import useToast from "../../hooks/useToast";
 import dayjs from "dayjs";
 import storage from "../../services/storage";
+import { USER_ROLE } from "../../constant/app";
 import { useGlobalAuth } from "../../contexts/AuthContext";
 import { ACADEMIC_TITLES, DEGREES } from "../../constant/app";
 
@@ -56,7 +57,9 @@ const Profile = () => {
   const [authorizedClinics, setAuthorizedClinics] = useState([]);
   const [loading, setLoading] = useState(false);
   const { user, doctor, setDoctor } = useGlobalAuth();
-  const { showSuccess, showError } = useToast();
+  // Mã D-SONO quyết định danh tính bác sĩ khi đăng nhập / ký trên D-SONO -> chỉ Quản trị viên được đặt
+  const canEditDsonoCode = Number(user?.id_role) === USER_ROLE.ADMIN;
+  const { showSuccess, showError, showWarning } = useToast();
   const eSignatureType = Form.useWatch("e_signature_url", form);
 
   const [credentialOptions, setCredentialOptions] = useState([]);
@@ -553,11 +556,15 @@ const Profile = () => {
                 label="Mã Bác sĩ D-SONO"
                 name="dsono_doctor_code"
                 style={{ marginBottom: 12 }}
-                tooltip="Mã định danh bác sĩ trên ứng dụng D-SONO (vd: BS_VINH). Khi bác sĩ ký kết quả siêu âm trên D-SONO, hệ thống sẽ tự động liên thông kết quả với hồ sơ bác sĩ này."
+                tooltip={
+                  canEditDsonoCode
+                    ? "Mã định danh bác sĩ trên ứng dụng D-SONO (vd: BS_VINH). Khi bác sĩ ký kết quả siêu âm trên D-SONO, hệ thống sẽ tự động liên thông kết quả với hồ sơ bác sĩ này."
+                    : "Mã liên thông D-SONO do Quản trị viên HomeCare cấp. Liên hệ quản trị viên nếu cần đổi."
+                }
               >
                 <Input
-                  placeholder="VD: BS_VINH hoặc DOC_1793261504124"
-                  disabled={!isEditing}
+                  placeholder={canEditDsonoCode ? "VD: BS_VINH hoặc DOC_1793261504124" : "Chưa được cấp - liên hệ Quản trị viên"}
+                  disabled={!isEditing || !canEditDsonoCode}
                   style={{ fontWeight: "bold", fontFamily: "monospace" }}
                 />
               </Form.Item>

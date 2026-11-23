@@ -40,7 +40,7 @@ const GroupProcessPatientDiagnoiseFormVer2 = ({
         const sonoResult = await API_CALL.get(`/sono`, {
           params: {
             id_patient_diagnose: id,
-            // id_doctor: doctor.id,
+            // id_doctor: doctor?.id,
           },
         });
 
@@ -53,7 +53,7 @@ const GroupProcessPatientDiagnoiseFormVer2 = ({
         const doctorUseDFormVer2 = await API_CALL.get(`/doctor-use-form-ver2`, {
           params: {
             id_patient_diagnose: id,
-            // id_doctor: doctor.id,
+            // id_doctor: doctor?.id,
             orderBy: "id",
             orderDir: "DESC",
           },
@@ -152,7 +152,7 @@ const GroupProcessPatientDiagnoiseFormVer2 = ({
       <CustomSteps steps={steps} current={status} />
       {(status === PATIENT_DIAGNOSE_STATUS_NAME.IN_PROCESS ||
         status === PATIENT_DIAGNOSE_STATUS_NAME.WAITING) &&
-        id_doctor_in_processing === doctor.id && (
+        id_doctor_in_processing === doctor?.id && (
           <div style={{ marginTop: 16 }}>
             <Button
               danger
@@ -173,7 +173,7 @@ const GroupProcessPatientDiagnoiseFormVer2 = ({
         )}
 
       {status === PATIENT_DIAGNOSE_STATUS_NAME.VERIFIED &&
-        id_doctor_in_processing === doctor.id && (
+        id_doctor_in_processing === doctor?.id && (
           <div style={{ marginTop: 16 }}>
             <Button
               danger

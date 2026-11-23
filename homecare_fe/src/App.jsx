@@ -19,7 +19,7 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import ClinicList from "./pages/clinics/ClinicList";
 import useAuthInitializer from "./hooks/useAuthInitializer";
-import ProtectedRoute from "./ProtectedRoute";
+import ProtectedRoute, { AdminRoute } from "./ProtectedRoute";
 import TemplateList from "./pages/products/TemplatesList/TemplateList";
 import AddOrEditTemplateProduct from "./pages/products/TemplateProduct/AddTemplateProduct";
 import TemplatePrintList from "./pages/products/TemplatePrint/TemplatePrintList/TemplatePrintList";
@@ -268,19 +268,19 @@ function App() {
             element={<DoctorUseFormVer2List />}
           />
 
-          <Route path="form-drad/detail/:id" element={<DFormVer2 />} />
-          <Route path="form-drad-v3/detail/:id" element={<DFormVer3 />} />
+          <Route path="form-drad/detail/:id" element={<AdminRoute><DFormVer2 /></AdminRoute>} />
+          <Route path="form-drad-v3/detail/:id" element={<AdminRoute><DFormVer3 /></AdminRoute>} />
 
-          <Route path="form-drad" element={<DFormVer2 />} />
-          <Route path="form-drad-v3" element={<DFormVer3 />} />
+          <Route path="form-drad" element={<AdminRoute><DFormVer2 /></AdminRoute>} />
+          <Route path="form-drad-v3" element={<AdminRoute><DFormVer3 /></AdminRoute>} />
 
-          <Route path="form-drad-list" element={<FormVer2List />} />
-          <Route path="form-drad-list-v3" element={<FormVer3List />} />
+          <Route path="form-drad-list" element={<AdminRoute><FormVer2List /></AdminRoute>} />
+          <Route path="form-drad-list-v3" element={<AdminRoute><FormVer3List /></AdminRoute>} />
 
-          <Route path="form-ver2-names" element={<FormVer2NameList />} />
+          <Route path="form-ver2-names" element={<AdminRoute><FormVer2NameList /></AdminRoute>} />
           <Route
             path="form-ver3-names"
-            element={<FormVer2NameList version="v.3" />}
+            element={<AdminRoute><FormVer2NameList version="v.3" /></AdminRoute>}
           />
 
           <Route path="form-choose-form/:id" element={<DoctorChooseForm />} />
@@ -293,9 +293,9 @@ function App() {
             path="/home/templates/edit/:id"
             element={<AddOrEditTemplateProduct />}
           />
-          <Route path="template_services" element={<TemplateServiceList />} />
-          <Route path="exam-parts" element={<ExamPartList />} />
-          <Route path="clinical-templates" element={<Admin5TierTemplate />} />
+          <Route path="template_services" element={<AdminRoute><TemplateServiceList /></AdminRoute>} />
+          <Route path="exam-parts" element={<AdminRoute><ExamPartList /></AdminRoute>} />
+          <Route path="clinical-templates" element={<AdminRoute><Admin5TierTemplate /></AdminRoute>} />
 
           <Route
             path="/home/templates/view/:id"
@@ -321,11 +321,11 @@ function App() {
           <Route path="account" element={<AccountPage />} />
           <Route path="wallet" element={<MyWallet />} />
           <Route path="payments" element={<PaymentScreen />} />
-          <Route path="customers" element={<CustomerList />} />
+          <Route path="customers" element={<AdminRoute><CustomerList /></AdminRoute>} />
           <Route path="orders" element={<OrderList />} />
           <Route path="staffs" element={<StaffPage />} />
           <Route path="clinics" element={<ClinicList />} />
-          <Route path="contacts-admin" element={<ContactAdminList />} />
+          <Route path="contacts-admin" element={<AdminRoute><ContactAdminList /></AdminRoute>} />
 
           <Route path="patients-diagnose" element={<PatientTablePage />} />
           <Route

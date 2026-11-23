@@ -7,7 +7,7 @@ import {
   buildDradv3FormValues,
   buildFormVer3Values,
 } from "../../formver3.constant";
-import { parseImageDescriptionState, freeTextToImagingRows } from "../doctorUseFormVer3.utils";
+import { parseImageDescriptionState, toEditableImagingState } from "../doctorUseFormVer3.utils";
 
 export default function useDoctorFormData({
   form,
@@ -191,18 +191,14 @@ export default function useDoctorFormData({
 
           setImageList(descImages);
 
-          const parsedState = parseImageDescriptionState(doctorUseFormVer3Server?.imageDescription);
-          setImagingMode("STRUCTURED_TABLE");
-          setIsFreeText(false);
-          setFreeTextContent(parsedState.content);
-          setFastSonoData(parsedState.fastSonoData);
           // Phiếu dạng văn bản tự do (vd kết quả D-SONO): đổ nội dung vào bảng cấu trúc để bác sĩ
           // sửa tiếp dạng structured. Trước đây nạp bảng MẶC ĐỊNH (Phổi/Màng phổi...) rỗng -> mất mô tả khi lưu.
-          const freeRows =
-            parsedState.isFreeText && parsedState.content
-              ? freeTextToImagingRows(parsedState.content)
-              : [];
-          setImagingRows(freeRows.length ? freeRows : parsedState.rows);
+          const editable = toEditableImagingState(parseImageDescriptionState(doctorUseFormVer3Server?.imageDescription));
+          setImagingMode(editable.mode);
+          setIsFreeText(editable.isFreeText);
+          setFreeTextContent(editable.content);
+          setFastSonoData(editable.fastSonoData);
+          setImagingRows(editable.rows);
           setFormVer3(doctorUseFormVer3Server?.id_formver3_formver3);
           setInitialSnap({
             formValues: form.getFieldsValue(),

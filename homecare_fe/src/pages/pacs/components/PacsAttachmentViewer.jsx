@@ -17,7 +17,6 @@ export default function PacsAttachmentViewer({
   file,
   onClose,
   apiEndpoint = 'http://localhost:3001',
-  token = '',
 }) {
   if (!file) return null;
 
@@ -26,9 +25,9 @@ export default function PacsAttachmentViewer({
   const isVideo = file.fileType === 'video' || file.fileName?.toLowerCase().endsWith('.mp4');
   const isImage = file.fileType === 'image' || /\.(png|jpe?g|webp)$/i.test(file.fileName);
 
-  const fullFileUrl = file.fileUrl?.startsWith('http')
-    ? file.fileUrl
-    : `${apiEndpoint}${file.fileUrl}${token ? `?token=${token}` : ''}`;
+  // fileUrl do máy chủ trả về đã kèm chữ ký ngắn hạn (exp/sig) cho riêng file này.
+  // KHÔNG gắn JWT lên URL (?token=) nữa: token đăng nhập lọt vào log máy chủ / lịch sử trình duyệt.
+  const fullFileUrl = file.fileUrl?.startsWith('http') ? file.fileUrl : `${apiEndpoint}${file.fileUrl}`;
 
   return (
     <div

@@ -302,10 +302,10 @@ export default function FormActionBar({
       !isAdmin &&
       doctor?.id &&
       patientDiagnose?.id_doctor_in_processing &&
-      patientDiagnose?.id_doctor_in_processing != doctor.id &&
-      patientDiagnose?.id_receive_doctor != doctor.id &&
-      patientDiagnose?.id_verify_doctor != doctor.id &&
-      patientDiagnose?.id_consulting_doctor != doctor.id
+      patientDiagnose?.id_doctor_in_processing != doctor?.id &&
+      patientDiagnose?.id_receive_doctor != doctor?.id &&
+      patientDiagnose?.id_verify_doctor != doctor?.id &&
+      patientDiagnose?.id_consulting_doctor != doctor?.id
     ) {
       keys = [KEY_ACTION_BUTTON.exit];
       setVisionItemKeys(keys);
@@ -336,7 +336,7 @@ export default function FormActionBar({
         const canEditProcessing =
           isAdmin ||
           !hasAssignedProcessingDoctor ||
-          (doctor?.id && (id_doctor_in_processing == doctor.id || id_receive_doctor == doctor.id));
+          (doctor?.id && (id_doctor_in_processing == doctor?.id || id_receive_doctor == doctor?.id));
 
         if (!canEditProcessing) {
           keys = [KEY_ACTION_BUTTON.exit];
@@ -359,7 +359,7 @@ export default function FormActionBar({
         const canActReadDone =
           isAdmin ||
           !hasAssignedReadDoctor ||
-          (doctor?.id && (id_doctor_in_processing == doctor.id || id_receive_doctor == doctor.id));
+          (doctor?.id && (id_doctor_in_processing == doctor?.id || id_receive_doctor == doctor?.id));
 
         if (!canActReadDone) {
           keys = [KEY_ACTION_BUTTON.exit];

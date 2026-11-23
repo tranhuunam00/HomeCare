@@ -121,7 +121,8 @@ describe("formver3.constant.js helpers", () => {
       expect(fd.get("imageDescription")).toBe(extra.imageDescriptionJson);
       expect(fd.get("id_patient_diagnose")).toBe("99");
       expect(fd.get("benh_nhan_ho_ten")).toBe("Nguyễn Văn A");
-      expect(fd.get("language")).toBe("vi");
+      // `language` KHÔNG gửi lên: DTO tạo phiếu không có trường này -> 400 (commit 63fc7c0)
+      expect(fd.has("language")).toBe(false);
     });
 
     it("phải serialize imagingRows thành JSON khi không có imageDescriptionJson", () => {

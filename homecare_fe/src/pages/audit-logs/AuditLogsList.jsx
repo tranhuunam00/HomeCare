@@ -32,6 +32,7 @@ const ACTION_COLORS = {
   STATUS_CHANGE: "purple",
   LOGIN: "orange",
   LOGOUT: "gray",
+  EXPORT: "magenta",
 };
 
 const ENTITY_LABELS = {
@@ -42,6 +43,7 @@ const ENTITY_LABELS = {
   doctor_use_form_ver3: "Form v3",
   print_template: "Mẫu in kết quả",
   package: "Gói dịch vụ",
+  pacs_image: "Ảnh PACS (tải / in)",
 };
 
 const AuditLogsList = () => {

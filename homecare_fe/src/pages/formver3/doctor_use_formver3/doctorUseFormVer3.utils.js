@@ -96,3 +96,20 @@ export function freeTextToImagingRows(htmlOrText) {
   }
   return rows;
 }
+
+/**
+ * Trạng thái phần MÔ TẢ HÌNH ẢNH để bác sĩ sửa trên màn đọc ca: luôn là bảng cấu trúc.
+ * Phiếu văn bản tự do (vd kết quả D-SONO) -> tách thành các dòng; không tách được -> dòng mặc định.
+ * Dùng CHUNG cho lúc nạp phiếu và lúc "Hoàn tác về dữ liệu gốc" để 2 đường không lệch nhau
+ * (trước đây hoàn tác nạp bảng mặc định rỗng + bật isFreeText -> sửa bảng xong lưu bị bỏ qua).
+ */
+export function toEditableImagingState(parsed) {
+  const freeRows = parsed?.isFreeText && parsed?.content ? freeTextToImagingRows(parsed.content) : [];
+  return {
+    mode: "STRUCTURED_TABLE",
+    isFreeText: false,
+    content: parsed?.content || "",
+    fastSonoData: parsed?.fastSonoData || { ...DEFAULT_FAST_SONO_DATA },
+    rows: freeRows.length ? freeRows : parsed?.rows || DEFAULT_IMAGING_ROWS,
+  };
+}
